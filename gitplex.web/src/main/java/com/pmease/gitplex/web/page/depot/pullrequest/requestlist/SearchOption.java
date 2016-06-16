@@ -11,7 +11,7 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.annotation.BranchChoice;
-import com.pmease.gitplex.core.annotation.UserChoice;
+import com.pmease.gitplex.core.annotation.AccountChoice;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 
@@ -60,7 +60,7 @@ public class SearchOption implements Serializable {
 	}
 
 	@Editable(order=200, name="Assigned To")
-	@UserChoice
+	@AccountChoice
 	public String getAssigneeName() {
 		return assigneeName;
 	}
@@ -70,7 +70,7 @@ public class SearchOption implements Serializable {
 	}
 
 	@Editable(order=300, name="Submitted By")
-	@UserChoice
+	@AccountChoice
 	public String getSubmitterName() {
 		return submitterName;
 	}

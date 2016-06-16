@@ -81,6 +81,7 @@ import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.CodeCommentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
@@ -259,6 +260,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
 		tabs.add(new RequestTab("File Changes", RequestChangesPage.class));
+		tabs.add(new RequestTab("Code Comments", CodeCommentsPage.class));
 		tabs.add(new RequestTab("Integration Preview", IntegrationPreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));

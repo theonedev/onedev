@@ -24,8 +24,12 @@ public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private AccountMultiChoice input;
 	
-	public AccountMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
+	private final boolean organization;
+	
+	public AccountMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
+			IModel<List<String>> propertyModel, boolean organization) {
 		super(id, propertyDescriptor, propertyModel);
+		this.organization = organization;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -43,7 +47,7 @@ public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 		} 
 		
-		input = new AccountMultiChoice("input", new Model((Serializable)accounts), new AccountChoiceProvider());
+		input = new AccountMultiChoice("input", new Model((Serializable)accounts), new AccountChoiceProvider(organization));
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);

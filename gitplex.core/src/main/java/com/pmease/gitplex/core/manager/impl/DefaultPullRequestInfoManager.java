@@ -105,8 +105,7 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 		if (env == null) {
 			EnvironmentConfig config = new EnvironmentConfig();
 			config.setLogCacheShared(false);
-			config.setMemoryUsage(1024*1024*64);
-			config.setLogFileSize(64*1024);
+			config.setMemoryUsage(1024*1024*16);
 			env = Environments.newInstance(getInfoDir(depot), config);
 			envs.put(depot.getId(), env);
 		}

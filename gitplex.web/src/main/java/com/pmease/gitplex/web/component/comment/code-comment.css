@@ -1,3 +1,7 @@
+.code-comment .md-preview {
+	font-size: inherit;
+    line-height: inherit;
+}
 .code-comment>.post {
 	border-bottom: 1px solid #EEE;
 	position: relative;
@@ -17,7 +21,6 @@
 	padding-left: 40px;
 }
 .code-comment>.post>.detail>.head .author-name {
-	font-size: 14px;
 	color: #999;
 }
 .code-comment>.post>.detail>.head .author-name:hover {

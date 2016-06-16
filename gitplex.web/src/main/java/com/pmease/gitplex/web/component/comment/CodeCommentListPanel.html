@@ -1,0 +1,45 @@
+<wicket:panel>
+	<table class="code-comments">
+		<tr>
+			<td class="filter">
+				<div class="head">Filter options</div>
+				<div class="body">
+					<div class="btn-group shortcuts">
+						<a wicket:id="myComments" class="btn btn-sm btn-default">My</a>
+						<a wicket:id="myUnresolvedComments" class="btn btn-sm btn-default">My unresolved</a>
+						<a wicket:id="unresolvedComments" class="btn btn-sm btn-default">Unresolved</a>
+						<a wicket:id="allComments" class="btn btn-sm btn-default">All</a>
+					</div>
+					<form wicket:id="filterForm">
+						<div wicket:id="editor"></div>
+						<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
+					</form>
+				</div>
+			</td>
+			<td class="spacing">&nbsp;</td>
+			<td class="result">
+				<table wicket:id="comments"></table>
+			</td>
+		</tr>
+	</table>
+	<wicket:fragment wicket:id="commentFrag">
+		<a wicket:id="link">
+			<div class="first-line">
+				<span wicket:id="title" class="title"></span> 
+				<span wicket:id="resolved" class="resolved fa fa-tick"></span>
+			</div>
+			<div class="second-line">
+				Commented by 
+				<span wicket:id="user" class="user"></span>
+				on 
+				<span wicket:id="what" class="what"></span>
+				<span wicket:id="age" class="age"></span>
+			</div>
+			<div wicket:id="lastReply" class="third-line">
+				Last replied by 
+				<span wicket:id="user" class="user"></span>	
+				<span wicket:id="age" class="age"></span>
+			</div>
+		</a>
+	</wicket:fragment>
+</wicket:panel>

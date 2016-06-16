@@ -84,44 +84,56 @@
 .revision-diff>.body>.detail>.comment {
 	border: 1px solid #DDD;
 	margin-right: 12px;
-	padding-right: 4px;	
+	padding-right: 3px;	
 	background: white;
 	position: absolute;
 	left: 0;
 	z-index: 1;
 }
 .revision-diff>.body>.detail>.comment>.content>.head .locate {
-	margin-right: 8px;
 	font-size: 20px;
 }
 .revision-diff>.body>.detail>.comment>.content>.head .permanent {
 	margin-top: 2px;
-	margin-right: 8px;
 	font-size: 18px;
 }
 .revision-diff>.body>.detail>.comment>.content>.head .context {
-	margin-right: 8px;
 	margin-top: -2px;
 }
 .revision-diff>.body>.detail>.comment>.content>.head .context .fa-ext {
 	font-size: 16px;
+}
+.revision-diff>.body>.detail>.comment>.content>.head .resolve {
+	margin-right: 0;
+	margin-top: -2px;
+	font-size: 20px;
+}
+.revision-diff>.body>.detail>.comment>.content>.head .resolve.resolved {
+	color: #24BE10;
+}
+.revision-diff>.body>.detail>.comment>.content>.head .resolve.unresolved {
+	color: #BBB;
 }
 
 .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
 	position: absolute;
     background: #EEE url("vgrabber.png") no-repeat scroll right center;
     cursor: e-resize;
-    width: 4px;
+    width: 3px;
     right: 0;
     top: 0;
 }
 .revision-diff>.body>.detail>.comment>.content>.head {
-	font-size: 16px;
-	padding: 4px 8px;
+	font-weight: bold;
+	padding: 8px 12px;
 	background: #F2F2F2;
 }
+.revision-diff>.body>.detail>.comment>.content>.head .title {
+	margin-bottom: 8px;
+}
 .revision-diff>.body>.detail>.comment>.content>.body {
-	font-size: 13px;
 	padding: 12px;
 	overflow: auto; 
+	border-left: 3px solid #F2F2F2;
+	border-bottom: 3px solid #F2F2F2;
 }

@@ -335,7 +335,6 @@ public class RequestListPage extends PullRequestPage {
 		};
 		DataTable<PullRequest, Void> dataTable = new DataTable<>("pullRequests", columns, 
 				dataProvider, Constants.DEFAULT_PAGE_SIZE);
-		dataTable.addTopToolbar(new NavigationToolbar(dataTable));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		dataTable.addBottomToolbar(new NavigationToolbar(dataTable));
 		add(dataTable);		

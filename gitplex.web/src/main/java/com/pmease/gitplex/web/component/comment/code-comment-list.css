@@ -1,0 +1,47 @@
+.code-comments td.filter {
+	width: 25%;
+	border: 1px solid #DDD;
+}
+.code-comments td.filter>.head {
+	font-size: 16px;
+	border-bottom: 1px solid #DDD;
+	padding: 8px 12px;
+	background: #F2F2F2;
+}
+.code-comments td.filter>.body>.shortcuts {
+	margin-bottom: 12px;
+}
+.code-comments td.filter>.body {
+	padding: 12px;
+}
+.code-comments td.spacing {
+	width: 20px;
+}
+.code-comments td.result {
+	border: 1px solid #DDD;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.code-comments td.result a {
+	display: block;
+	text-decoration: none;
+	color: #999;
+	font-size: 12px;
+	padding: 8px;
+}
+.code-comments td.result a:hover {
+	background: #F2F2F2;
+}
+.code-comments td.result a .title {
+	font-weight: bold;
+	font-size: 14px;
+	color: #444;
+	text-overflow: ellipsis;
+}
+.code-comments td.result a .user, .code-comments td.result a .what {
+	font-weight: bold;
+	color: #666;
+}
+.code-comments td.result .second-line, .code-comments td.result .third-line {
+	margin-top: 2px;
+}

@@ -48,6 +48,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
+import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
@@ -263,6 +264,8 @@ public class PullRequest extends AbstractEntity {
 	private transient List<Review> reviews;
 	
 	private transient IntegrationPreview integrationPreview;
+	
+	private transient List<CodeComment> codeComments;
 	
 	/**
 	 * Get title of this merge request.
@@ -937,4 +940,11 @@ public class PullRequest extends AbstractEntity {
 		numberStr = String.valueOf(number);
 	}
 
+	public List<CodeComment> getCodeComments() {
+		if (codeComments == null) {
+			codeComments = GitPlex.getInstance(CodeCommentRelationManager.class).queryCodeComments(this);
+		}
+		return codeComments;
+	}
+	
 }

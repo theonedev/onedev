@@ -28,6 +28,7 @@ public class NonMemberChoiceProvider extends AccountChoiceProvider {
 	private final IModel<Account> organizationModel;
 	
 	public NonMemberChoiceProvider(IModel<Account> organizationModel) {
+		super(false);
 		this.organizationModel = organizationModel;
 	}
 	

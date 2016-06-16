@@ -40,6 +40,7 @@ import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.CodeCommentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
@@ -173,6 +174,8 @@ public class UrlMapper extends CompoundRequestMapper {
 				"${account}/${depot}/pulls/${request}/overview", RequestOverviewPage.class));
 		add(new DepotMapper(
 				"${account}/${depot}/pulls/${request}/updates", RequestUpdatesPage.class));
+		add(new DepotMapper(
+				"${account}/${depot}/pulls/${request}/code-comments", CodeCommentsPage.class));
 		add(new DepotMapper(
 				"${account}/${depot}/pulls/${request}/changes", RequestChangesPage.class));
 		add(new DepotMapper(

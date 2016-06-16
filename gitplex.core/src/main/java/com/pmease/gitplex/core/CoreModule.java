@@ -18,10 +18,12 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
+import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.EntityLocator;
 import com.pmease.gitplex.core.entity.persistlistener.ListenerLocator;
 import com.pmease.gitplex.core.listener.CodeCommentListener;
+import com.pmease.gitplex.core.listener.CodeCommentReplyListener;
 import com.pmease.gitplex.core.listener.ConfigListener;
 import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
@@ -235,6 +237,18 @@ public class CoreModule extends AbstractPluginModule {
 			}
 			
 		});
+		contribute(CodeCommentReplyListener.class, new CodeCommentReplyListener() {
+			
+			@Override
+			public void onSaveReply(CodeCommentReply reply) {
+			}
+			
+			@Override
+			public void onDeleteReply(CodeCommentReply reply) {
+			}
+			
+		});
+		
 		contributeFromPackage(PersistListener.class, ListenerLocator.class);
 	}
 	

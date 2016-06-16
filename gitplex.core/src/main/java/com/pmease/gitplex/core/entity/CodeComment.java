@@ -51,6 +51,9 @@ public class CodeComment extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Account user;
 
+	@Column(nullable=false)
+	private String title;
+	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private String content;
@@ -60,6 +63,8 @@ public class CodeComment extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Date updateDate = new Date();
+	
+	private String lastReplyUser;
 	
 	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
@@ -107,6 +112,15 @@ public class CodeComment extends AbstractEntity {
 		return version;
 	}
 
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	@Nullable
 	public String getContent() {
 		return content;
 	}
@@ -201,6 +215,14 @@ public class CodeComment extends AbstractEntity {
 
 	public void setResolved(boolean resolved) {
 		this.resolved = resolved;
+	}
+
+	public String getLastReplyUser() {
+		return lastReplyUser;
+	}
+
+	public void setLastReplyUser(String lastReplyUser) {
+		this.lastReplyUser = lastReplyUser;
 	}
 
 }

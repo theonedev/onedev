@@ -39,12 +39,11 @@ form>.actions {
 	margin-top: 20px;
 }
 form>.actions>.btn {
-	margin-right: 20px;
+	margin-right: 12px;
 }
 .actions>a {
 	margin-right: 8px;
 }
-
 .nav-tabs>li>a {
 	color: #777;
 }

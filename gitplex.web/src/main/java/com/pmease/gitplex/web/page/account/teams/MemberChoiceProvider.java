@@ -18,6 +18,7 @@ public class MemberChoiceProvider extends AccountChoiceProvider {
 	private final IModel<Account> organizationModel;
 	
 	public MemberChoiceProvider(IModel<Account> organizationModel) {
+		super(false);
 		this.organizationModel = organizationModel;
 	}
 	

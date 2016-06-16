@@ -19,8 +19,12 @@ public class AccountSingleChoiceEditor extends PropertyEditor<String> {
 
 	private AccountSingleChoice input;
 	
-	public AccountSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	private boolean organization;
+	
+	public AccountSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
+			IModel<String> propertyModel, boolean organization) {
 		super(id, propertyDescriptor, propertyModel);
+		this.organization = organization;
 	}
 
 	@Override
@@ -33,7 +37,7 @@ public class AccountSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			account = null;
 		
-    	input = new AccountSingleChoice("input", Model.of(account), new AccountChoiceProvider());
+    	input = new AccountSingleChoice("input", Model.of(account), new AccountChoiceProvider(organization));
         input.setConvertEmptyInputStringToNull(true);
         
         // add this to control allowClear flag of select2

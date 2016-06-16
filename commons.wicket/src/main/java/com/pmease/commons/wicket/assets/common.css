@@ -8,11 +8,6 @@
 	cursor: pointer;
 }
 
-/* TEXT AREA */
-textarea {
-	max-height: 600px;
-}
-
 /* TOOLTIPS */
 .tooltip-inner {
 	max-width: 400px;

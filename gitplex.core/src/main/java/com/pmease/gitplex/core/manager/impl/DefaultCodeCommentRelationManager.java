@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.manager.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -111,6 +112,8 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityDao<CodeCom
 		for (CodeCommentRelation relation: request.getCodeCommentRelations()) {
 			comments.add(relation.getComment());
 		}
+		comments.sort(CodeComment::compareTo);
+		Collections.reverse(comments);
 		
 		return comments;
 	}

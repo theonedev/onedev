@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.annotation.UserChoice;
+import com.pmease.gitplex.core.annotation.AccountChoice;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
@@ -25,7 +25,7 @@ public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
     private String userName;
 
     @Editable(name="Select User Below")
-    @UserChoice
+    @AccountChoice
     @NotEmpty
     public String getUserName() {
         return userName;

@@ -23,12 +23,15 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -261,7 +264,30 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		};
+		commentContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				CodeComment comment = context.getOpenComment();
+				return comment!=null?comment.getTitle():"";
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(context.getOpenComment() != null);
+			}
+			
+		});
 		commentContainer.add(new DropdownLink("context") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(context.getOpenComment() != null);
+			}
 
 			@Override
 			protected Component newContent(String id) {
@@ -297,11 +323,14 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				CodeComment comment = context.getOpenComment();
-				if (comment != null)
-					mark(target, comment.getMark(), true);
-				else
-					mark(target, (Mark) commentContainer.getDefaultModelObject(), true);
-				context.onMark(target, context.getOpenComment().getMark());
+				Mark mark;
+				if (comment != null) {
+					mark = comment.getMark();
+				} else {
+					mark = (Mark) commentContainer.getDefaultModelObject();
+				}
+				mark(target, mark, true);
+				context.onMark(target, mark);
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
 
@@ -360,6 +389,52 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 		});
 		
+		commentContainer.add(new AjaxLink<Void>("resolve") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				CodeComment comment = context.getOpenComment();
+				setVisible(comment != null);
+				setEnabled(comment != null && SecurityUtils.canModify(comment));
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				CodeComment comment = context.getOpenComment();
+				if (comment != null) {
+					if (SecurityUtils.canModify(comment)) {
+						if (comment.isResolved()) {
+							tag.put("title", "Comment is currently resolved, click to mark as unresolved");
+							tag.put("class", "pull-right resolve resolved");
+						} else {
+							tag.put("title", "Comment is currently unresolved, click to mark as resolved");
+							tag.put("class", "pull-right resolve unresolved");
+						}
+					} else {
+						if (comment.isResolved()) {
+							tag.put("title", "Comment is currently resolved, contact comment owner or repository manager to change status of the comment");
+							tag.put("class", "pull-right resolve resolved");
+						} else {
+							tag.put("title", "Comment is currently unresolved, contact comment owner or repository manager to change status of the comment");
+							tag.put("class", "pull-right resolve unresolved");
+						}
+					}
+				} 
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				CodeComment comment = context.getOpenComment();
+				comment.setResolved(!comment.isResolved());
+				GitPlex.getInstance(CodeCommentManager.class).save(comment);
+				target.add(commentContainer);
+				target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
+			}
+			
+		});
+		
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		if (context.getOpenComment() != null) {
 			IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
@@ -381,6 +456,12 @@ public class SourceViewPanel extends BlobViewPanel {
 				@Override
 				protected CompareContext getCompareContext() {
 					return SourceViewPanel.this.getCompareContext();
+				}
+
+				@Override
+				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+					target.add(commentContainer);
+					target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
 				}
 				
 			};
@@ -425,8 +506,13 @@ public class SourceViewPanel extends BlobViewPanel {
 					Form<?> form = new Form<Void>("form");
 					
 					String uuid = UUID.randomUUID().toString();
-					CommentInput input;
-					form.add(input = new CommentInput("input", Model.of("")) {
+					
+					TextField<String> titleInput = new TextField<String>("title", Model.of(""));
+					titleInput.setRequired(true);
+					form.add(titleInput);
+					
+					CommentInput contentInput;
+					form.add(contentInput = new CommentInput("content", Model.of("")) {
 
 						@Override
 						protected DepotAttachmentSupport getAttachmentSupport() {
@@ -439,9 +525,9 @@ public class SourceViewPanel extends BlobViewPanel {
 						}
 						
 					});
-					input.setRequired(true);
+					contentInput.setRequired(true);
 					
-					NotificationPanel feedback = new NotificationPanel("feedback", input); 
+					NotificationPanel feedback = new NotificationPanel("feedback", form); 
 					feedback.setOutputMarkupPlaceholderTag(true);
 					form.add(feedback);
 					
@@ -477,7 +563,8 @@ public class SourceViewPanel extends BlobViewPanel {
 							comment.setUUID(uuid);
 							comment.setCommit(context.getCommit().name());
 							comment.setPath(context.getBlobIdent().path);
-							comment.setContent(input.getModelObject());
+							comment.setTitle(titleInput.getModelObject());
+							comment.setContent(contentInput.getModelObject());
 							comment.setDepot(context.getDepot());
 							comment.setUser(SecurityUtils.getAccount());
 							comment.setMark(mark);
@@ -505,6 +592,12 @@ public class SourceViewPanel extends BlobViewPanel {
 								@Override
 								protected CompareContext getCompareContext() {
 									return SourceViewPanel.this.getCompareContext();
+								}
+
+								@Override
+								protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+									target.add(commentContainer);
+									target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
 								}
 								
 							};
@@ -546,6 +639,12 @@ public class SourceViewPanel extends BlobViewPanel {
 						@Override
 						protected CompareContext getCompareContext() {
 							return SourceViewPanel.this.getCompareContext();
+						}
+
+						@Override
+						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+							target.add(commentContainer);
+							target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
 						}
 						
 					};

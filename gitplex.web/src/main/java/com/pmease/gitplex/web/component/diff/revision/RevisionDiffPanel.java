@@ -25,6 +25,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -740,6 +741,12 @@ public class RevisionDiffPanel extends Panel {
 								protected CompareContext getCompareContext() {
 									return RevisionDiffPanel.this.getCompareContext(commentModel.getObject().getCommit());
 								}
+
+								@Override
+								protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+									target.add(commentContainer);
+									target.appendJavaScript("gitplex.revisionDiff.reposition();");
+								}
 								
 							};
 							
@@ -775,8 +782,12 @@ public class RevisionDiffPanel extends Panel {
 							Form<?> form = new Form<Void>("form");
 							
 							String uuid = UUID.randomUUID().toString();
-							CommentInput input;
-							form.add(input = new CommentInput("input", Model.of("")) {
+							
+							TextField<String> titleInput = new TextField<String>("title", Model.of(""));
+							titleInput.setRequired(true);
+							form.add(titleInput);
+							CommentInput contentInput;
+							form.add(contentInput = new CommentInput("content", Model.of("")) {
 
 								@Override
 								protected DepotAttachmentSupport getAttachmentSupport() {
@@ -789,9 +800,9 @@ public class RevisionDiffPanel extends Panel {
 								}
 								
 							});
-							input.setRequired(true);
+							contentInput.setRequired(true);
 							
-							NotificationPanel feedback = new NotificationPanel("feedback", input); 
+							NotificationPanel feedback = new NotificationPanel("feedback", form); 
 							feedback.setOutputMarkupPlaceholderTag(true);
 							form.add(feedback);
 							
@@ -832,7 +843,8 @@ public class RevisionDiffPanel extends Panel {
 									comment.setMark(new Mark(mark.getBeginLine(), mark.getBeginChar(), 
 											mark.getEndLine(), mark.getEndChar()));
 									comment.setCompareContext(getCompareContext(comment.getCommit()));
-									comment.setContent(input.getModelObject());
+									comment.setTitle(titleInput.getModelObject());
+									comment.setContent(contentInput.getModelObject());
 									GitPlex.getInstance(CodeCommentManager.class).save(comment);
 									
 									Long commentId = comment.getId();
@@ -855,6 +867,12 @@ public class RevisionDiffPanel extends Panel {
 										@Override
 										protected CompareContext getCompareContext() {
 											return RevisionDiffPanel.this.getCompareContext(commentModel.getObject().getCommit());
+										}
+
+										@Override
+										protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+											target.add(commentContainer);
+											target.appendJavaScript("gitplex.revisionDiff.reposition();");
 										}
 										
 									};
@@ -960,7 +978,31 @@ public class RevisionDiffPanel extends Panel {
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
+		commentContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				CodeComment comment = getOpenComment();
+				return comment!=null?comment.getTitle():"";
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getOpenComment() != null);
+			}
+			
+		});
+		
 		commentContainer.add(new DropdownLink("context") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getOpenComment() != null);
+			}
 
 			@Override
 			protected Component newContent(String id) {
@@ -1074,6 +1116,52 @@ public class RevisionDiffPanel extends Panel {
 			
 		});
 
+		commentContainer.add(new AjaxLink<Void>("resolve") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				CodeComment comment = getOpenComment();
+				setVisible(comment != null);
+				setEnabled(comment != null && SecurityUtils.canModify(comment));
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				CodeComment comment = getOpenComment();
+				if (comment != null) {
+					if (SecurityUtils.canModify(comment)) {
+						if (comment.isResolved()) {
+							tag.put("title", "Comment is currently resolved, click to mark as unresolved");
+							tag.put("class", "pull-right resolve resolved");
+						} else {
+							tag.put("title", "Comment is currently unresolved, click to mark as resolved");
+							tag.put("class", "pull-right resolve unresolved");
+						}
+					} else {
+						if (comment.isResolved()) {
+							tag.put("title", "Comment is currently resolved, contact comment owner or repository manager to change status of the comment");
+							tag.put("class", "pull-right resolve resolved");
+						} else {
+							tag.put("title", "Comment is currently unresolved, contact comment owner or repository manager to change status of the comment");
+							tag.put("class", "pull-right resolve unresolved");
+						}
+					}
+				} 
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				CodeComment comment = getOpenComment();
+				comment.setResolved(!comment.isResolved());
+				GitPlex.getInstance(CodeCommentManager.class).save(comment);
+				target.add(commentContainer);
+				target.appendJavaScript("gitplex.revisionDiff.reposition();");
+			}
+			
+		});
+		
 		boolean locatable = false;
 		CodeComment comment = getOpenComment();
 		if (comment != null) {
@@ -1105,6 +1193,12 @@ public class RevisionDiffPanel extends Panel {
 				@Override
 				protected CompareContext getCompareContext() {
 					return RevisionDiffPanel.this.getCompareContext(commentModel.getObject().getCommit());
+				}
+
+				@Override
+				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+					target.add(commentContainer);
+					target.appendJavaScript("gitplex.revisionDiff.reposition();");
 				}
 				
 			};

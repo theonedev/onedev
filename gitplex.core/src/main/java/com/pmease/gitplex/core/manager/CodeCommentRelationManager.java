@@ -9,6 +9,9 @@ import com.pmease.gitplex.core.entity.PullRequest;
 
 public interface CodeCommentRelationManager extends EntityDao<CodeCommentRelation> {
 	
+	/**
+	 * Get code comments related to specified pull request, ordered by id descendantly
+	 */
 	List<CodeComment> queryCodeComments(PullRequest request);
 	
 }

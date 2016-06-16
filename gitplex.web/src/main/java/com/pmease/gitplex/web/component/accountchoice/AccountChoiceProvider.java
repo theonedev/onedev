@@ -18,6 +18,12 @@ public class AccountChoiceProvider extends AbstractAccountChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 	
+	private final boolean organization;
+	
+	public AccountChoiceProvider(boolean organization) {
+		this.organization = organization;
+	}
+	
 	@Override
 	public void query(String term, int page, Response<Account> response) {
 		Dao dao = GitPlex.getInstance(Dao.class);
@@ -25,8 +31,11 @@ public class AccountChoiceProvider extends AbstractAccountChoiceProvider {
 		Criterion criterion = Restrictions.and(Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.ANYWHERE),
 				Restrictions.ilike("fullName", term, MatchMode.ANYWHERE)));
-		List<Account> accounts = dao.query(EntityCriteria.of(Account.class)
-				.add(criterion).addOrder(Order.asc("name")), first, Constants.DEFAULT_PAGE_SIZE + 1);
+		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
+		criteria.add(criterion);
+		criteria.add(Restrictions.eq("organization", organization));
+		criteria.addOrder(Order.asc("name"));
+		List<Account> accounts = dao.query(criteria, first, Constants.DEFAULT_PAGE_SIZE + 1);
 
 		if (accounts.size() <= Constants.DEFAULT_PAGE_SIZE) {
 			response.addAll(accounts);

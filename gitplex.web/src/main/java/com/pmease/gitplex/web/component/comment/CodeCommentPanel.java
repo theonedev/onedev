@@ -14,6 +14,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -143,10 +144,14 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment(commentContainer.getId(), "editFrag", CodeCommentPanel.this);
+				Fragment fragment = new Fragment(commentContainer.getId(), "commentEditFrag", CodeCommentPanel.this);
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
-				CommentInput input = new CommentInput("input", Model.of(getComment().getContent())) {
+				
+				TextField<String> titleInput = new TextField<String>("title", Model.of(getComment().getTitle()));
+				titleInput.setRequired(true);
+				form.add(titleInput);
+				CommentInput contentInput = new CommentInput("content", Model.of(getComment().getContent())) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -159,8 +164,8 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					}
 					
 				};
-				form.add(input);
-				input.setRequired(true);
+				form.add(contentInput);
+				contentInput.setRequired(true);
 				
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
@@ -200,11 +205,13 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 							CodeComment comment = getComment();
 							if (comment.getVersion() != lastVersion)
 								throw new StaleObjectStateException(CodeComment.class.getName(), comment.getId());
-							comment.setContent(input.getModelObject());
+							comment.setTitle(titleInput.getModelObject());
+							comment.setContent(contentInput.getModelObject());
 							GitPlex.getInstance(CodeCommentManager.class).save(comment);
 							WebMarkupContainer commentContainer = newCommentContainer();
 							fragment.replaceWith(commentContainer);
 							target.add(commentContainer);
+							onSaveComment(target, comment);
 						} catch (StaleObjectStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
@@ -342,9 +349,9 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment(replyContainer.getId(), "editFrag", CodeCommentPanel.this);
+				Fragment fragment = new Fragment(replyContainer.getId(), "replyEditFrag", CodeCommentPanel.this);
 				Form<?> form = new Form<Void>("form");
-				CommentInput input = new CommentInput("input", Model.of(getReply(replyId).getContent())) {
+				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent())) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -357,8 +364,8 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					}
 					
 				};
-				form.add(input);
-				input.setRequired(true);
+				form.add(contentInput);
+				contentInput.setRequired(true);
 				
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
@@ -398,7 +405,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 							CodeCommentReply reply = getReply(replyId);
 							if (reply.getVersion() != lastVersion)
 								throw new StaleObjectStateException(CodeComment.class.getName(), reply.getId());
-							reply.setContent(input.getModelObject());
+							reply.setContent(contentInput.getModelObject());
 							GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
 							WebMarkupContainer replyContainer = newReplyContainer(componentId, replyId);
 							fragment.replaceWith(replyContainer);
@@ -460,9 +467,9 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment(addReplyContainer.getId(), "editFrag", CodeCommentPanel.this);
+				Fragment fragment = new Fragment(addReplyContainer.getId(), "replyEditFrag", CodeCommentPanel.this);
 				Form<?> form = new Form<Void>("form");
-				CommentInput input = new CommentInput("input", Model.of("")) {
+				CommentInput contentInput = new CommentInput("content", Model.of("")) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -475,10 +482,10 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					}
 					
 				};
-				form.add(input);
-				input.setRequired(true);
+				form.add(contentInput);
+				contentInput.setRequired(true);
 				
-				NotificationPanel feedback = new NotificationPanel("feedback", input); 
+				NotificationPanel feedback = new NotificationPanel("feedback", contentInput); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
@@ -514,7 +521,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 						CodeCommentReply reply = new CodeCommentReply();
 						reply.setComment(getComment());
 						reply.setUser(SecurityUtils.getAccount());
-						reply.setContent(input.getModelObject());
+						reply.setContent(contentInput.getModelObject());
 						reply.setCompareContext(getCompareContext());
 						GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
 						
@@ -577,6 +584,8 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 	}
 	
 	protected abstract void onCommentDeleted(AjaxRequestTarget target);
+	
+	protected abstract void onSaveComment(AjaxRequestTarget target, CodeComment comment);
 	
 	protected abstract CompareContext getCompareContext();
 }
