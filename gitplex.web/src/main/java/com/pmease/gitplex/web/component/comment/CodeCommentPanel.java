@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -211,7 +213,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 							WebMarkupContainer commentContainer = newCommentContainer();
 							fragment.replaceWith(commentContainer);
 							target.add(commentContainer);
-							onSaveComment(target, comment);
+							onSaveComment(target);
 						} catch (StaleObjectStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
@@ -416,7 +418,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 						}
 					}
 
-				});
+				}.add(new Label("label", "Save")));
 				
 				fragment.add(form);
 				fragment.setOutputMarkupId(true);
@@ -467,83 +469,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment(addReplyContainer.getId(), "replyEditFrag", CodeCommentPanel.this);
-				Form<?> form = new Form<Void>("form");
-				CommentInput contentInput = new CommentInput("content", Model.of("")) {
-
-					@Override
-					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getUUID());
-					}
-
-					@Override
-					protected Depot getDepot() {
-						return getComment().getDepot();
-					}
-					
-				};
-				form.add(contentInput);
-				contentInput.setRequired(true);
-				
-				NotificationPanel feedback = new NotificationPanel("feedback", contentInput); 
-				feedback.setOutputMarkupPlaceholderTag(true);
-				form.add(feedback);
-				
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
-					}
-					
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						WebMarkupContainer addReplyContainer = newAddReplyContainer();
-						fragment.replaceWith(addReplyContainer);
-						target.add(addReplyContainer);
-					}
-					
-				});
-				
-				form.add(new AjaxButton("save") {
-
-					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
-						target.add(feedback);
-					}
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-
-						CodeCommentReply reply = new CodeCommentReply();
-						reply.setComment(getComment());
-						reply.setUser(SecurityUtils.getAccount());
-						reply.setContent(contentInput.getModelObject());
-						reply.setCompareContext(getCompareContext());
-						GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
-						
-						WebMarkupContainer replyContainer = newReplyContainer(repliesView.newChildId(), reply.getId());
-						repliesView.add(replyContainer);
-
-						String script = String.format("$('#%s .add-reply').before('<div id=\"%s\"></div>');", 
-								CodeCommentPanel.this.getMarkupId(), replyContainer.getMarkupId());
-						target.prependJavaScript(script);
-						target.add(replyContainer);
-						
-						WebMarkupContainer addReplyContainer = newAddReplyContainer();
-						fragment.replaceWith(addReplyContainer);
-						target.add(addReplyContainer);
-					}
-
-				});
-				
-				fragment.add(form);
-				fragment.setOutputMarkupId(true);
-				addReplyContainer.replaceWith(fragment);
-				target.add(fragment);				
+				onAddReply(target, false);
 			}
 			
 		});
@@ -583,9 +509,120 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		return GitPlex.getInstance(CodeCommentReplyManager.class).load(replyId);
 	}
 	
+	private void onAddReply(AjaxRequestTarget target, boolean toggleResolve) {
+		Fragment fragment = new Fragment("addReply", "replyEditFrag", CodeCommentPanel.this);
+		Form<?> form = new Form<Void>("form");
+		CommentInput contentInput = new CommentInput("content", Model.of("")) {
+
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new DepotAttachmentSupport(getComment().getDepot(), getComment().getUUID());
+			}
+
+			@Override
+			protected Depot getDepot() {
+				return getComment().getDepot();
+			}
+			
+		};
+		contentInput.setRequired(!toggleResolve);
+		form.add(contentInput);
+		
+		NotificationPanel feedback = new NotificationPanel("feedback", form); 
+		feedback.setOutputMarkupPlaceholderTag(true);
+		form.add(feedback);
+		
+		form.add(new AjaxLink<Void>("cancel") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				WebMarkupContainer addReplyContainer = newAddReplyContainer();
+				fragment.replaceWith(addReplyContainer);
+				target.add(addReplyContainer);
+			}
+			
+		});
+		
+		AjaxButton saveButton = new AjaxButton("save") {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+
+				if (toggleResolve) {
+					String replyContent = contentInput.getModelObject();
+					CodeCommentManager manager = GitPlex.getInstance(CodeCommentManager.class);				
+					if (replyContent != null) {
+						CodeCommentReply reply = newReply(replyContent);
+						getComment().setResolved(!getComment().isResolved());
+						manager.save(getComment(), reply);
+						onReplyAdded(target, fragment, reply);
+					} else {
+						getComment().setResolved(!getComment().isResolved());
+						manager.save(getComment());
+						onReplyAdded(target, fragment, null);
+					}
+					onSaveComment(target);
+				} else {
+					CodeCommentReply reply = newReply(contentInput.getModelObject());
+					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
+					onReplyAdded(target, fragment, reply);
+				}
+			}
+
+		};
+		if (toggleResolve) {
+			saveButton.add(new Label("label", getComment().isResolved()?"Confirm unresolve":"Confirm resolve"));
+		} else {
+			saveButton.add(new Label("label", "Save"));
+			saveButton.add(AttributeAppender.append("class", "dirty-aware"));
+		}
+		form.add(saveButton);
+		
+		fragment.add(form);
+		fragment.setOutputMarkupId(true);
+		get("addReply").replaceWith(fragment);
+		target.add(fragment);				
+	}
+	
+	public void onToggleResolve(AjaxRequestTarget target) {
+		onAddReply(target, true);
+	}
+	
+	private void onReplyAdded(AjaxRequestTarget target, Fragment fragment, @Nullable CodeCommentReply reply) {
+		if (reply != null) {
+			WebMarkupContainer replyContainer = newReplyContainer(repliesView.newChildId(), reply.getId());
+			repliesView.add(replyContainer);
+	
+			String script = String.format("$('#%s .add-reply').before('<div id=\"%s\"></div>');", 
+					CodeCommentPanel.this.getMarkupId(), replyContainer.getMarkupId());
+			target.prependJavaScript(script);
+			target.add(replyContainer);
+		}
+		
+		WebMarkupContainer addReplyContainer = newAddReplyContainer();
+		fragment.replaceWith(addReplyContainer);
+		target.add(addReplyContainer);
+	}
+	
+	private CodeCommentReply newReply(String content) {
+		CodeCommentReply reply = new CodeCommentReply();
+		reply.setComment(getComment());
+		reply.setUser(SecurityUtils.getAccount());
+		reply.setContent(content);
+		reply.setCompareContext(getCompareContext());
+		return reply;
+	}
+	
 	protected abstract void onCommentDeleted(AjaxRequestTarget target);
 	
-	protected abstract void onSaveComment(AjaxRequestTarget target, CodeComment comment);
+	protected abstract void onSaveComment(AjaxRequestTarget target);
 	
 	protected abstract CompareContext getCompareContext();
 }

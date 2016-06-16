@@ -2,8 +2,7 @@
 	<div class="code-comment">
 		<div wicket:id="comment" class="comment post"></div>
 		<div wicket:id="replies" class="reply post"></div>
-		<div wicket:id="addReply" class="add-reply">
-		</div>
+		<div wicket:id="addReply" class="add-reply"></div>
 	</div>
 	<wicket:fragment wicket:id="viewFrag">
 		<div class="author-avatar"><a wicket:id="authorAvatar"></a></div>
@@ -46,7 +45,7 @@
 			<div wicket:id="feedback" class="feedback"></div>
 			<textarea wicket:id="content" rows="10" class="form-control focusable"></textarea>
 			<div class="actions">
-				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
+				<button wicket:id="save" class="btn btn-sm btn-primary"><span wicket:id="label"></span></button>
 				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
 			</div>
 		</form>

@@ -9,7 +9,7 @@ public class AutoSizeResourceReference extends JavaScriptResourceReference {
 	public static final AutoSizeResourceReference INSTANCE = new AutoSizeResourceReference();
 	
 	private AutoSizeResourceReference() {
-		super(AutoSizeResourceReference.class, "autosize.js");
+		super(AutoSizeResourceReference.class, "autosize-patched.js");
 	}
 
 }

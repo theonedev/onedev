@@ -523,5 +523,9 @@ gitplex.sourceview = {
 	onBlame: function(blameInfos) {
 		gitplex.sourceview.blame(blameInfos);
 		gitplex.sourceview.onLayoutChange();
+	},
+	scrollToCommentBottom: function() {
+		var $body = $(".source-view>.comment>.content>.body");
+		$body.scrollTop($body[0].scrollHeight);
 	}
 }

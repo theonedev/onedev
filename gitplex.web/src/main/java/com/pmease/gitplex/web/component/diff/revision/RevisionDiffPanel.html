@@ -44,17 +44,17 @@
 				<div wicket:id="comment" class="comment">
 					<div class="ui-resizable-handle ui-resizable-e"></div>
 					<div class="content">
-						<div class="head">
+						<div wicket:id="head" class="head">
 							<div wicket:id="title" class="title"></div>
 							<div class="actions clearfix">
 								<a wicket:id="context" class="pull-left context close" title="Show this comment by comparing with specified revision"><i class="fa fa-ext fa-file-diff"></i></a>
 								<a wicket:id="permanent" class="pull-left permanent close" title="Permanent link of this comment"><i class="fa fa-link"></i></a>
 								<a wicket:id="locate" class="pull-left locate close" title="Locate marked text of this comment"><i class="fa fa-hand-o-right"></i></a>
 								<a wicket:id="close" class="pull-left close" title="Hide comment"><i class="fa fa-times"></i></a>
-								<a wicket:id="resolve" class="pull-right resolve"><i class="fa fa-check-circle"></i></a>
+								<a wicket:id="toggleResolve" class="pull-right resolve"><i class="fa fa-check-circle"></i></a>
 							</div>
 						</div>
-						<div wicket:id="body" class="body"></div>
+						<div wicket:id="body" class="body scrollable"></div>
 					</div>
 				</div>
 				<ul class="diffs list-unstyled">

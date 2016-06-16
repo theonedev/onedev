@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -264,7 +265,11 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		};
-		commentContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
+		WebMarkupContainer head = new WebMarkupContainer("head");
+		head.setOutputMarkupId(true);
+		commentContainer.add(head);
+		
+		head.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -281,7 +286,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		});
-		commentContainer.add(new DropdownLink("context") {
+		head.add(new DropdownLink("context") {
 
 			@Override
 			protected void onConfigure() {
@@ -318,7 +323,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		});
-		commentContainer.add(new AjaxLink<Void>("locate") {
+		head.add(new AjaxLink<Void>("locate") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -361,7 +366,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		});
-		commentContainer.add(new WebMarkupContainer("permanent") {
+		head.add(new WebMarkupContainer("permanent") {
 
 			@Override
 			protected void onConfigure() {
@@ -371,7 +376,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 		}.add(appender));
 		
-		commentContainer.add(new AjaxLink<Void>("close") {
+		head.add(new AjaxLink<Void>("close") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -389,14 +394,18 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 		});
 		
-		commentContainer.add(new AjaxLink<Void>("resolve") {
+		head.add(new AjaxLink<Void>("toggleResolve") {
 
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(commentContainer));
+			}
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				CodeComment comment = context.getOpenComment();
-				setVisible(comment != null);
-				setEnabled(comment != null && SecurityUtils.canModify(comment));
+				setVisible(context.getOpenComment() != null);
 			}
 
 			@Override
@@ -406,10 +415,10 @@ public class SourceViewPanel extends BlobViewPanel {
 				if (comment != null) {
 					if (SecurityUtils.canModify(comment)) {
 						if (comment.isResolved()) {
-							tag.put("title", "Comment is currently resolved, click to mark as unresolved");
+							tag.put("title", "Comment is currently resolved, click to unresolve");
 							tag.put("class", "pull-right resolve resolved");
 						} else {
-							tag.put("title", "Comment is currently unresolved, click to mark as resolved");
+							tag.put("title", "Comment is currently unresolved, click to resolve");
 							tag.put("class", "pull-right resolve unresolved");
 						}
 					} else {
@@ -426,14 +435,15 @@ public class SourceViewPanel extends BlobViewPanel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				CodeComment comment = context.getOpenComment();
-				comment.setResolved(!comment.isResolved());
-				GitPlex.getInstance(CodeCommentManager.class).save(comment);
-				target.add(commentContainer);
-				target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
+				if (SecurityUtils.canModify(context.getOpenComment())) {
+					((CodeCommentPanel)commentContainer.get("body")).onToggleResolve(target);
+					target.appendJavaScript("gitplex.sourceview.scrollToCommentBottom();");
+				} else {
+					Session.get().warn("Only repository manager and comment creator can change status");
+				}
 			}
 			
-		});
+		}.setOutputMarkupId(true));
 		
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		if (context.getOpenComment() != null) {
@@ -459,9 +469,8 @@ public class SourceViewPanel extends BlobViewPanel {
 				}
 
 				@Override
-				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-					target.add(commentContainer);
-					target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
+				protected void onSaveComment(AjaxRequestTarget target) {
+					target.add(commentContainer.get("head"));
 				}
 				
 			};
@@ -595,9 +604,8 @@ public class SourceViewPanel extends BlobViewPanel {
 								}
 
 								@Override
-								protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-									target.add(commentContainer);
-									target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
+								protected void onSaveComment(AjaxRequestTarget target) {
+									target.add(commentContainer.get("head"));
 								}
 								
 							};
@@ -642,9 +650,8 @@ public class SourceViewPanel extends BlobViewPanel {
 						}
 
 						@Override
-						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-							target.add(commentContainer);
-							target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
+						protected void onSaveComment(AjaxRequestTarget target) {
+							target.add(commentContainer.get("head"));
 						}
 						
 					};

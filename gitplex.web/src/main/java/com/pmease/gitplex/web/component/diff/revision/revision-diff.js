@@ -81,6 +81,15 @@ gitplex.revisionDiff = {
 				}
 			});
 		}
+	},
+	scrollToCommentBottom: function() {
+		var $comment = $(".revision-diff>.body>.detail>.comment");
+		if ($(window).scrollTop() < $comment.offset().top)
+			$(window).scrollTop($comment.offset().top);
+		setTimeout(function() {
+			var $body = $comment.find(">.content>.body");
+			$body.scrollTop($body[0].scrollHeight);
+		}, 0);
 	}
 }
 $(function() {

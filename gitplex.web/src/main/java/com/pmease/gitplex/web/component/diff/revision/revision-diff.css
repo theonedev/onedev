@@ -132,8 +132,10 @@
 	margin-bottom: 8px;
 }
 .revision-diff>.body>.detail>.comment>.content>.body {
-	padding: 12px;
 	overflow: auto; 
 	border-left: 3px solid #F2F2F2;
 	border-bottom: 3px solid #F2F2F2;
+}
+.revision-diff>.body>.detail>.comment>.content>.body>div {
+	margin: 12px;
 }

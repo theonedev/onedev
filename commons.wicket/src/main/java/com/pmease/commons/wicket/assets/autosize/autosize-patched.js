@@ -97,6 +97,7 @@
 		function resize() {
 			var htmlTop = window.pageYOffset;
 			var bodyTop = document.body.scrollTop;
+			var scrollableTop = $(ta).closest(".scrollable").scrollTop();
 			var originalHeight = ta.style.height;
 
 			ta.style.height = 'auto';
@@ -117,6 +118,7 @@
 			// prevents scroll-position jumping
 			document.documentElement.scrollTop = htmlTop;
 			document.body.scrollTop = bodyTop;
+			$(ta).closest(".scrollable").scrollTop(scrollableTop);
 		}
 
 		function update() {

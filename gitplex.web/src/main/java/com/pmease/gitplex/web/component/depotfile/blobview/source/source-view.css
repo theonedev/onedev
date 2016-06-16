@@ -52,8 +52,10 @@
 	background: #F2F2F2;
 }
 .source-view>.comment>.content>.body {
-	padding: 12px;
 	overflow: auto; 
+}
+.source-view>.comment>.content>.body>div {
+	margin: 12px;
 }
 
 .source-view>.outline {

@@ -20,6 +20,7 @@ import javax.servlet.http.Cookie;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -743,9 +744,8 @@ public class RevisionDiffPanel extends Panel {
 								}
 
 								@Override
-								protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-									target.add(commentContainer);
-									target.appendJavaScript("gitplex.revisionDiff.reposition();");
+								protected void onSaveComment(AjaxRequestTarget target) {
+									target.add(commentContainer.get("head"));
 								}
 								
 							};
@@ -870,9 +870,8 @@ public class RevisionDiffPanel extends Panel {
 										}
 
 										@Override
-										protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-											target.add(commentContainer);
-											target.appendJavaScript("gitplex.revisionDiff.reposition();");
+										protected void onSaveComment(AjaxRequestTarget target) {
+											target.add(commentContainer.get("head"));
 										}
 										
 									};
@@ -978,7 +977,11 @@ public class RevisionDiffPanel extends Panel {
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
-		commentContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
+		WebMarkupContainer head = new WebMarkupContainer("head");
+		head.setOutputMarkupId(true);
+		commentContainer.add(head);
+		
+		head.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -996,7 +999,7 @@ public class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		commentContainer.add(new DropdownLink("context") {
+		head.add(new DropdownLink("context") {
 
 			@Override
 			protected void onConfigure() {
@@ -1034,7 +1037,7 @@ public class RevisionDiffPanel extends Panel {
 			
 		});
 
-		commentContainer.add(new AjaxLink<Void>("locate") {
+		head.add(new AjaxLink<Void>("locate") {
 
 			@Override
 			protected void onInitialize() {
@@ -1075,7 +1078,7 @@ public class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		commentContainer.add(new WebMarkupContainer("permanent") {
+		head.add(new WebMarkupContainer("permanent") {
 
 			@Override
 			protected void onConfigure() {
@@ -1085,7 +1088,7 @@ public class RevisionDiffPanel extends Panel {
 			
 		}.add(appender));
 		
-		commentContainer.add(new AjaxLink<Void>("close") {
+		head.add(new AjaxLink<Void>("close") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -1116,14 +1119,18 @@ public class RevisionDiffPanel extends Panel {
 			
 		});
 
-		commentContainer.add(new AjaxLink<Void>("resolve") {
+		head.add(new AjaxLink<Void>("toggleResolve") {
 
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(commentContainer));
+			}
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				CodeComment comment = getOpenComment();
-				setVisible(comment != null);
-				setEnabled(comment != null && SecurityUtils.canModify(comment));
+				setVisible(getOpenComment() != null);
 			}
 
 			@Override
@@ -1133,18 +1140,18 @@ public class RevisionDiffPanel extends Panel {
 				if (comment != null) {
 					if (SecurityUtils.canModify(comment)) {
 						if (comment.isResolved()) {
-							tag.put("title", "Comment is currently resolved, click to mark as unresolved");
+							tag.put("title", "Comment is currently resolved, click to unresolve");
 							tag.put("class", "pull-right resolve resolved");
 						} else {
-							tag.put("title", "Comment is currently unresolved, click to mark as resolved");
+							tag.put("title", "Comment is currently unresolved, click to resolve");
 							tag.put("class", "pull-right resolve unresolved");
 						}
 					} else {
 						if (comment.isResolved()) {
-							tag.put("title", "Comment is currently resolved, contact comment owner or repository manager to change status of the comment");
+							tag.put("title", "Comment is currently resolved");
 							tag.put("class", "pull-right resolve resolved");
 						} else {
-							tag.put("title", "Comment is currently unresolved, contact comment owner or repository manager to change status of the comment");
+							tag.put("title", "Comment is currently unresolved");
 							tag.put("class", "pull-right resolve unresolved");
 						}
 					}
@@ -1153,14 +1160,15 @@ public class RevisionDiffPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				CodeComment comment = getOpenComment();
-				comment.setResolved(!comment.isResolved());
-				GitPlex.getInstance(CodeCommentManager.class).save(comment);
-				target.add(commentContainer);
-				target.appendJavaScript("gitplex.revisionDiff.reposition();");
+				if (SecurityUtils.canModify(getOpenComment())) {
+					((CodeCommentPanel)commentContainer.get("body")).onToggleResolve(target);
+					target.appendJavaScript("gitplex.revisionDiff.scrollToCommentBottom();");
+				} else {
+					Session.get().warn("Only repository owner or comment creator can change status");
+				}
 			}
 			
-		});
+		}.setOutputMarkupId(true));
 		
 		boolean locatable = false;
 		CodeComment comment = getOpenComment();
@@ -1196,9 +1204,8 @@ public class RevisionDiffPanel extends Panel {
 				}
 
 				@Override
-				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-					target.add(commentContainer);
-					target.appendJavaScript("gitplex.revisionDiff.reposition();");
+				protected void onSaveComment(AjaxRequestTarget target) {
+					target.add(commentContainer.get("head"));
 				}
 				
 			};

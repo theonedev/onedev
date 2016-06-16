@@ -21,19 +21,25 @@ import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.listener.CodeCommentListener;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
+import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
 
 @Singleton
 public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> implements CodeCommentManager {
 
 	private final Provider<Set<CodeCommentListener>> listenersProvider;
 	
+	private final CodeCommentReplyManager codeCommentReplyManager;
+	
 	@Inject
-	public DefaultCodeCommentManager(Dao dao, Provider<Set<CodeCommentListener>> listenersProvider) {
+	public DefaultCodeCommentManager(Dao dao, Provider<Set<CodeCommentListener>> listenersProvider, 
+			CodeCommentReplyManager codeCommentReplyManager) {
 		super(dao);
 		this.listenersProvider = listenersProvider;
+		this.codeCommentReplyManager = codeCommentReplyManager;
 	}
 
 	@Sessional
@@ -99,6 +105,12 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> im
 			}
 		}
 		return query(criteria);
+	}
+
+	@Override
+	public void save(CodeComment comment, CodeCommentReply reply) {
+		save(comment);
+		codeCommentReplyManager.save(reply);
 	}
 
 }
