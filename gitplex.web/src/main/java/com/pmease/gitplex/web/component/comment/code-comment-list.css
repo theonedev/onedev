@@ -19,29 +19,50 @@
 }
 .code-comments td.result {
 	border: 1px solid #DDD;
-	white-space: nowrap;
 	overflow: hidden;
 }
-.code-comments td.result a {
+.code-comments td.comment>div>a {
 	display: block;
 	text-decoration: none;
 	color: #999;
 	font-size: 12px;
 	padding: 8px;
 }
-.code-comments td.result a:hover {
+.code-comments td.comment {
+	border-left: 4px solid white;
+}
+.code-comments td.comment:hover {
+	border-left: 4px solid #F2F2F2;
+}
+.code-comments td.comment.new {
+	border-left: 4px solid #4667EE;
+}
+.code-comments td.comment>div>a:hover {
 	background: #F2F2F2;
 }
-.code-comments td.result a .title {
+.code-comments td.comment>div>a .title {
 	font-weight: bold;
-	font-size: 14px;
+	font-size: 16px;
 	color: #444;
-	text-overflow: ellipsis;
 }
-.code-comments td.result a .user, .code-comments td.result a .what {
+.code-comments td.comment>div>a .resolved {
+	font-size: 16px;
+	color: #24BE10;
+	margin-left: 4px;
+}
+.code-comments td.comment>div>a .user, .code-comments td.comment>div>a .what {
 	font-weight: bold;
-	color: #666;
+	color: #777;
 }
-.code-comments td.result .second-line, .code-comments td.result .third-line {
+.code-comments td.comment .second-line, .code-comments td.comment .third-line {
 	margin-top: 2px;
+}
+.code-comments td.result .norecords-td {
+	padding: 20px;
+	font-size: 20px;
+	text-align: center;
+	font-style: italic;
+}
+.code-comments .alert {
+	border-radius: 0;
 }

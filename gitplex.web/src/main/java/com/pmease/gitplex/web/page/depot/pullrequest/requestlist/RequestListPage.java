@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
@@ -49,6 +50,8 @@ import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
 import com.pmease.gitplex.web.util.DateUtils;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
 public class RequestListPage extends PullRequestPage {
@@ -336,7 +339,14 @@ public class RequestListPage extends PullRequestPage {
 		DataTable<PullRequest, Void> dataTable = new DataTable<>("pullRequests", columns, 
 				dataProvider, Constants.DEFAULT_PAGE_SIZE);
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
-		dataTable.addBottomToolbar(new NavigationToolbar(dataTable));
+		dataTable.addBottomToolbar(new NavigationToolbar(dataTable) {
+			
+			@Override
+			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
+				return new BootstrapPagingNavigator(navigatorId, dataTable);
+			}
+			
+		});
 		add(dataTable);		
 	}
 

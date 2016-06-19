@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.component.comment;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
@@ -22,6 +20,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -34,6 +33,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
@@ -41,6 +41,7 @@ import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
@@ -59,9 +60,26 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		super(id, commentModel);
 	}
 
+	@Override
+	protected void onAfterRender() {
+		super.onAfterRender();
+		Account user = SecurityUtils.getAccount();
+		if (user != null) 
+			GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());
+	}
+
 	private WebMarkupContainer newCommentContainer() {
 		WebMarkupContainer commentContainer = new Fragment("comment", "viewFrag", this);
 		commentContainer.setOutputMarkupId(true);
+		
+		commentContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return getComment().isVisited(false)?"": "new";
+			}
+			
+		}));
 		
 		commentContainer.add(new AvatarLink("authorAvatar", getComment().getUser()));
 		commentContainer.add(new AccountLink("authorName", getComment().getUser()));
@@ -265,6 +283,15 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 	private WebMarkupContainer newReplyContainer(String componentId, Long replyId) {
 		Fragment replyContainer = new Fragment(componentId, "viewFrag", this);
 		replyContainer.setOutputMarkupId(true);
+		
+		replyContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return getReply(replyId).isVisited()?"":"new";
+			}
+			
+		}));
 		
 		replyContainer.add(new AvatarLink("authorAvatar", getReply(replyId).getUser()));
 		replyContainer.add(new AccountLink("authorName", getReply(replyId).getUser()));
@@ -483,9 +510,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		add(newCommentContainer());
 		
 		repliesView = new RepeatingView("replies");
-		List<CodeCommentReply> replies = new ArrayList<>(getComment().getReplies());
-		replies.sort((reply1, reply2)->(int)(reply1.getId()-reply2.getId()));
-		for (CodeCommentReply reply: replies) {
+		for (CodeCommentReply reply: getComment().getSortedReplies()) {
 			repliesView.add(newReplyContainer(repliesView.newChildId(), reply.getId()));
 		}
 		add(repliesView);
@@ -550,6 +575,12 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		});
 		
 		AjaxButton saveButton = new AjaxButton("save") {
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
+				target.add(feedback);
+			}
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

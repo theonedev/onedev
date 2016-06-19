@@ -2,7 +2,9 @@ package com.pmease.gitplex.core.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -27,6 +29,8 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -90,6 +94,8 @@ public class CodeComment extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
+	
+	private transient List<CodeCommentReply> sortedReplies;
 	
 	public Depot getDepot() {
 		return depot;
@@ -225,4 +231,21 @@ public class CodeComment extends AbstractEntity {
 		this.lastReplyUser = lastReplyUser;
 	}
 
+	public boolean isVisited(boolean includingReplies) {
+		Account user = SecurityUtils.getAccount();
+		if (user != null) {
+			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
+			return visitDate != null && visitDate.after(includingReplies?getUpdateDate():getCreateDate());
+		} else {
+			return true;
+		}
+	}
+
+	public List<CodeCommentReply> getSortedReplies() {
+		if (sortedReplies == null) {
+			sortedReplies = new ArrayList<>(getReplies());
+			sortedReplies.sort(Comparator.comparing(CodeCommentReply::getId));
+		}
+		return sortedReplies;
+	}
 }

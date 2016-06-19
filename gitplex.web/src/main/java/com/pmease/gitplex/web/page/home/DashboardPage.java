@@ -27,7 +27,6 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
@@ -162,7 +161,7 @@ public class DashboardPage extends LayoutPage {
 						depots.add(depot);
 					}
 				}
-				Collections.sort(depots, WebSession.get().getDepotVisits().getComparator());
+				depots.sort(Depot::compareLastVisit);
 				return depots;
 			}
 			

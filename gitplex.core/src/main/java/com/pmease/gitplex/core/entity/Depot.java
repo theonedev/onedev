@@ -89,6 +89,8 @@ import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.protectedobject.AccountBelonging;
 import com.pmease.gitplex.core.security.protectedobject.ProtectedObject;
 import com.pmease.gitplex.core.util.validation.DepotName;
@@ -725,7 +727,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			path = "";
 		
 		final File cacheDir = new File(
-				GitPlex.getInstance(StorageManager.class).getCacheDir(this), 
+				GitPlex.getInstance(StorageManager.class).getInfoDir(this), 
 				"last_commits/" + path + "/gitplex_last_commits");
 		
 		final ReadWriteLock lock;
@@ -1021,4 +1023,24 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		}
 	}
 
+	public static int compareLastVisit(Depot depot1, Depot depot2) {
+		Account user = SecurityUtils.getAccount();
+		if (user != null) {
+			Date date1 = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, depot1);
+			Date date2 = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, depot2);
+			if (date1 != null) {
+				if (date2 != null)
+					return date2.compareTo(date1);
+				else
+					return -1;
+			} else {
+				if (date2 != null)
+					return 1;
+				else
+					return depot1.compareTo(depot2);
+			}
+		} else {
+			return depot1.compareTo(depot2);
+		}
+	}
 }

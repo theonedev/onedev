@@ -65,6 +65,22 @@ public class EditableUtils {
 	}
 
 	/**
+	 * Get autocomplete attribute of specified element from autocomplete parameter of {@link Editable} annotation.
+	 *
+	 * @param element
+	 * 			annotated element to get autocomplete from
+	 * @return
+	 * 			autocomplete attribute of specified element, or <tt>null</tt> if not defined
+	 */
+	public static @Nullable String getAutocomplete(AnnotatedElement element) {
+		Editable editable = element.getAnnotation(Editable.class);
+		if (editable != null && editable.autocomplete().trim().length() != 0)
+			return editable.autocomplete();
+		else
+			return null;
+	}
+	
+	/**
 	 * Get icon of specified element from icon parameter of {@link Editable} annotation.
 	 *
 	 * @param element

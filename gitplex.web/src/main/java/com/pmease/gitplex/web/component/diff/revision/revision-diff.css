@@ -136,6 +136,6 @@
 	border-left: 3px solid #F2F2F2;
 	border-bottom: 3px solid #F2F2F2;
 }
-.revision-diff>.body>.detail>.comment>.content>.body>div {
+.revision-diff>.body>.detail>.comment>.content>.body>* {
 	margin: 12px;
 }

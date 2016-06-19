@@ -1,11 +1,11 @@
-.hash-and-code .commit-hash {
-	border: 1px solid #CCC;
-	font-size: 13px;
-	height: 22px;
-	border-radius: 3px 0 0 3px;
-	margin-right: -5px;
+.hash-and-code {
+	line-height: normal;
 }
-.hash-and-code .browse-code {
+.hash-and-code input.commit-hash {
+	font-size: 13px;
+	border-radius: 3px 0 0 3px;
+	margin-right: -1px;
+}
+.hash-and-code>.browse-code>a {
 	border-radius: 0 3px 3px 0 !important;
-	margin-top: -1px;
 }

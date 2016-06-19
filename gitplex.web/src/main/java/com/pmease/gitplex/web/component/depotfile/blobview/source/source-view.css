@@ -54,7 +54,7 @@
 .source-view>.comment>.content>.body {
 	overflow: auto; 
 }
-.source-view>.comment>.content>.body>div {
+.source-view>.comment>.content>.body>* {
 	margin: 12px;
 }
 

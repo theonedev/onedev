@@ -19,4 +19,6 @@ public @interface Editable {
 	String description() default "";
 	
 	String descriptionProvider() default "";
+	
+	String autocomplete() default "";
 }

@@ -124,6 +124,9 @@
 #request-detail .activities .activity>.detail>.update td {
 	padding: 4px 0;
 }
+#request-detail .activities .activity>.detail>.update td.status {
+	width: 120px;
+}
 #request-detail .activities>table>tbody>tr.update+tr.update>td.detail>div {
 	margin-top: -16px;
 }

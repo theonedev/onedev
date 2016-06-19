@@ -3,14 +3,22 @@
     line-height: inherit;
 }
 .code-comment>.post {
-	border-bottom: 1px solid #EEE;
 	position: relative;
+	margin-left: -12px;
+	padding-left: 12px;
+	border-left: 4px solid white;
+}
+.code-comment>.post>.detail {
 	padding-bottom: 8px;
 	margin-bottom: 8px;
+	border-bottom: 1px solid #EEE;
+}
+.code-comment>.post.new {
+	border-left: 4px solid #4667EE;
 }
 .code-comment>.post>.author-avatar {
 	position: absolute;
-	left: 0;
+	left: 12px;
 	top: 0;
 }
 .code-comment>.post>.author-avatar img {

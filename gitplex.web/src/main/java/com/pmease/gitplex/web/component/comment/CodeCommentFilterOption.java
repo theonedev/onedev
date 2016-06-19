@@ -29,7 +29,7 @@ public class CodeCommentFilterOption implements Serializable {
 	
 	private static final String PARAM_PATH = "path";
 	
-	private static final String PARAM_CONTENT = "content";
+	private static final String PARAM_TITLE = "title";
 	
 	private static final String PARAM_BEFORE = "before";
 	
@@ -41,7 +41,7 @@ public class CodeCommentFilterOption implements Serializable {
 	
 	private String path;
 	
-	private String content;
+	private String title;
 	
 	private Date before;
 	
@@ -66,13 +66,13 @@ public class CodeCommentFilterOption implements Serializable {
 		this.unresolved = unresolved;
 	}
 
-	@Editable(order=400, name="Content containing", description="Show comments with content containing specified string")
+	@Editable(order=400, name="Title containing", description="Show comments with title containing specified string")
 	public String getContent() {
-		return content;
+		return title;
 	}
 
 	public void setContent(String content) {
-		this.content = content;
+		this.title = content;
 	}
 
 	@Editable(order=500, name="Commented path", description="Show comments on specified path")
@@ -110,7 +110,7 @@ public class CodeCommentFilterOption implements Serializable {
 		userName = params.get(PARAM_USER).toString();
 		unresolved = "yes".equals(params.get(PARAM_UNRESOLVED).toString());
 		path = params.get(PARAM_PATH).toString();
-		content = params.get(PARAM_CONTENT).toString();
+		title = params.get(PARAM_TITLE).toString();
 		
 		String value = params.get(PARAM_BEFORE).toString();
 		if (value != null)
@@ -132,8 +132,8 @@ public class CodeCommentFilterOption implements Serializable {
 				pathQuery += "%";
 			criteria.add(Restrictions.ilike("path", pathQuery));
 		}
-		if (content != null)
-			criteria.add(Restrictions.ilike("content", "%" + content + "%"));
+		if (title != null)
+			criteria.add(Restrictions.ilike("title", "%" + title + "%"));
 			
 		if (before != null)
 			criteria.add(Restrictions.le("createDate", before));
@@ -168,7 +168,7 @@ public class CodeCommentFilterOption implements Serializable {
 					}
 				}
 			}
-			if (content != null && !comment.getContent().contains(content)) {
+			if (title != null && !comment.getTitle().contains(title)) {
 				it.remove();
 				continue;
 			}
@@ -188,8 +188,8 @@ public class CodeCommentFilterOption implements Serializable {
 			params.add(PARAM_USER, userName);
 		if (unresolved)
 			params.add(PARAM_UNRESOLVED, "yes");
-		if (content != null)
-			params.add(PARAM_CONTENT, content);
+		if (title != null)
+			params.add(PARAM_TITLE, title);
 		if (path != null)
 			params.add(PARAM_PATH, path);
 		if (before != null)

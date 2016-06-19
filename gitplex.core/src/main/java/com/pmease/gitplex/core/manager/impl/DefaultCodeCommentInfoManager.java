@@ -2,14 +2,18 @@ package com.pmease.gitplex.core.manager.impl;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -55,11 +59,13 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCodeCommentInfoManager.class);
 	
-	private static final String INFO_DIR = "codeCommentInfo";
+	private static final String INFO_DIR = "codeComment";
 	
 	private static final String DEFAULT_STORE = "default";
 	
 	private static final ByteIterable LAST_COMMENT_KEY = new StringByteIterable("lastComment");
+	
+	private static final ByteIterable FILES_KEY = new StringByteIterable("files");
 
 	private static final int PRIORITY = 100;
 	
@@ -78,6 +84,8 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	private final Dao dao;
 	
 	private final Map<Long, Environment> envs = new HashMap<>();
+	
+	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
 	@Inject
 	public DefaultCodeCommentInfoManager(Dao dao, DepotManager depotManager, StorageManager storageManager, 
@@ -109,7 +117,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	}
 	
 	private File getInfoDir(Depot depot) {
-		File infoDir = new File(storageManager.getCacheDir(depot), INFO_DIR);
+		File infoDir = new File(storageManager.getInfoDir(depot), INFO_DIR);
 		if (!infoDir.exists()) 
 			FileUtils.createDir(infoDir);
 		return infoDir;
@@ -130,6 +138,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 		Environment env = envs.remove(depot.getId());
 		if (env != null)
 			env.close();
+		filesCache.remove(depot.getId());
 		FileUtils.deleteDir(getInfoDir(depot));
 	}
 	
@@ -144,12 +153,6 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 			return null;
 	}
 	
-	static class StringByteIterable extends ArrayByteIterable {
-		StringByteIterable(String value) {
-			super(value.getBytes());
-		}
-	}
-
 	@Override
 	public void systemStarting() {
 	}
@@ -194,18 +197,17 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 		Environment env = getEnv(depot);
 		Store store = getStore(env, DEFAULT_STORE);
 
-		AtomicReference<String> lastComment = new AtomicReference<>();
-		env.executeInTransaction(new TransactionalExecutable() {
+		String lastComment = env.computeInTransaction(new TransactionalComputable<String>() {
 			
 			@Override
-			public void execute(final Transaction txn) {
+			public String compute(final Transaction txn) {
 				byte[] value = getBytes(store.get(txn, LAST_COMMENT_KEY));
-				lastComment.set(value!=null?new String(value):null);									
+				return value!=null?new String(value):null;									
 			}
 			
 		});
 		
-		for (CodeComment comment: codeCommentManager.queryAfter(depot, lastComment.get())) {
+		for (CodeComment comment: codeCommentManager.queryAfter(depot, lastComment)) {
 			env.executeInTransaction(new TransactionalExecutable() {
 
 				@SuppressWarnings("unchecked")
@@ -226,8 +228,22 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 						comments.put(comment.getUUID(), comment.getCompareContext().getCompareCommit());
 					else
 						comments.put(comment.getUUID(), null);
-					store.add(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
-					store.add(txn, LAST_COMMENT_KEY, key);
+					store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
+					
+					if (comment.getPath() != null) {
+						Set<String> files;
+						valueBytes = getBytes(store.get(txn, FILES_KEY));
+						if (valueBytes != null)
+							files = (Set<String>) SerializationUtils.deserialize(valueBytes);
+						else
+							files = new HashSet<String>();
+						files.add(comment.getPath());
+						store.put(txn, FILES_KEY, new ArrayByteIterable(SerializationUtils.serialize((Serializable) files)));
+						
+						filesCache.remove(depot.getId());
+					}
+					
+					store.put(txn, LAST_COMMENT_KEY, key);
 				}
 				
 			});
@@ -311,10 +327,43 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 				else
 					storedComments = new HashSet<>();
 				storedComments.remove(comment);
-				store.add(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) storedComments)));
+				store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) storedComments)));
 			}
 			
 		});
+	}
+
+	@Override
+	public List<String> getCommentedFiles(Depot depot) {
+		List<String> files = filesCache.get(depot.getId());
+		if (files == null) {
+			Environment env = getEnv(depot);
+			final Store store = getStore(env, DEFAULT_STORE);
+
+			files = env.computeInReadonlyTransaction(new TransactionalComputable<List<String>>() {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public List<String> compute(Transaction txn) {
+					byte[] bytes = getBytes(store.get(txn, FILES_KEY));
+					if (bytes != null) {
+						List<String> files = new ArrayList<>((Set<String>)SerializationUtils.deserialize(bytes));
+						files.sort((file1, file2)->Paths.get(file1).compareTo(Paths.get(file2)));
+						return files;
+					} else {
+						return new ArrayList<>();
+					}
+				}
+			});
+			filesCache.put(depot.getId(), files);
+		}
+		return files;
+	}
+
+	static class StringByteIterable extends ArrayByteIterable {
+		StringByteIterable(String value) {
+			super(value.getBytes());
+		}
 	}
 
 }

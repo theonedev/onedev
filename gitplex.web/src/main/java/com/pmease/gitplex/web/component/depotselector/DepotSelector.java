@@ -37,7 +37,6 @@ import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 
 @SuppressWarnings("serial")
@@ -127,7 +126,7 @@ public abstract class DepotSelector extends Panel {
 						depots.add(depot);
 					}
 				}
-				depots.sort(WebSession.get().getDepotVisits().getComparator());
+				depots.sort(Depot::compareLastVisit);
 				return depots;
 			}
 			

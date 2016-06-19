@@ -25,12 +25,12 @@ public interface StorageManager {
     File getIndexDir(Depot depot);
 
     /**
-     * Get directory to store cache data of specified depot
+     * Get directory to store additional info of specified depot
      * 
      * @return
-     * 			directory to store cache data, the directory will be exist after calling this method
+     * 			directory to store additional info, the directory will be exist after calling this method
      */
-    File getCacheDir(Depot depot);
+    File getInfoDir(Depot depot);
     
     /**
      * Get directory to store cache data of specified pull request

@@ -18,6 +18,7 @@
 			</td>
 			<td class="spacing">&nbsp;</td>
 			<td class="result">
+				<div wicket:id="alert" class="alert alert-warning"></div>
 				<table wicket:id="comments"></table>
 			</td>
 		</tr>
@@ -26,7 +27,7 @@
 		<a wicket:id="link">
 			<div class="first-line">
 				<span wicket:id="title" class="title"></span> 
-				<span wicket:id="resolved" class="resolved fa fa-tick"></span>
+				<span wicket:id="resolved" title="This comment is resolved" class="resolved fa fa-check-circle"></span>
 			</div>
 			<div class="second-line">
 				Commented by 

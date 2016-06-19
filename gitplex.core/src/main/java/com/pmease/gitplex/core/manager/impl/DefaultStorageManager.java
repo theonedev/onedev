@@ -43,8 +43,8 @@ public class DefaultStorageManager implements StorageManager {
     }
 
 	@Override
-	public File getCacheDir(Depot depot) {
-        File cacheDir = new File(getDepotDir(depot), "cache");
+	public File getInfoDir(Depot depot) {
+        File cacheDir = new File(getDepotDir(depot), "info");
         FileUtils.createDir(cacheDir);
         return cacheDir;
 	}

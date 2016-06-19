@@ -77,7 +77,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 			}
 			
 			@Override
-			public File getCacheDir(Depot depot) {
+			public File getInfoDir(Depot depot) {
 				throw new UnsupportedOperationException();
 			}
 

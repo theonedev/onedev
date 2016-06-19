@@ -3,7 +3,6 @@ package com.pmease.gitplex.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,9 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -76,7 +72,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final String INFO_DIR = "commitInfo";
+	private static final String INFO_DIR = "commit";
 	
 	private static final String DEFAULT_STORE = "default";
 	
@@ -131,60 +127,50 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 	}
 	
 	private void doCollect(Depot depot, ObjectId commit) {
-		logger.info("Collecting commits information (repository: {}, until commit: {})", 
+		logger.info("Collecting commit information (repository: {}, until commit: {})", 
 				depot.getFQN(), commit.name());
 		Environment env = getEnv(depot);
-		final Store defaultStore = getStore(env, DEFAULT_STORE);
-		final Store commitsStore = getStore(env, COMMITS_STORE);
-		final Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE);
+		Store defaultStore = getStore(env, DEFAULT_STORE);
+		Store commitsStore = getStore(env, COMMITS_STORE);
+		Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE);
 
-		final AtomicReference<String> lastCommit = new AtomicReference<>();
-		env.executeInTransaction(new TransactionalExecutable() {
-			
-			@Override
-			public void execute(final Transaction txn) {
-				byte[] value = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
-				lastCommit.set(value!=null?new String(value):null);									
-			}
-		});
-		
 		env.executeInTransaction(new TransactionalExecutable() {
 			
 			@SuppressWarnings("unchecked")
 			@Override
 			public void execute(final Transaction txn) {
 				byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
-				AtomicReference<String> lastCommit;
+				String lastCommit;
 				if (bytes != null)
-					lastCommit = new AtomicReference<>(new String(bytes));
+					lastCommit = new String(bytes);
 				else
-					lastCommit = new AtomicReference<>(null);
+					lastCommit = null;
 				
 				bytes = getBytes(defaultStore.get(txn, COMMIT_COUNT_KEY));
-				AtomicInteger commitCount;
+				int commitCount;
 				if (bytes != null)
-					commitCount = new AtomicInteger((int) SerializationUtils.deserialize(bytes));
+					commitCount = (int) SerializationUtils.deserialize(bytes);
 				else
-					commitCount = new AtomicInteger(0);
+					commitCount = 0;
 
-				AtomicBoolean commitCountChanged = new AtomicBoolean(false);
+				boolean commitCountChanged = false;
 				
 				Git git = depot.git();
 
 				LogCommand log = new LogCommand(git.depotDir());
 				List<String> revisions = new ArrayList<>();
-				if (lastCommit.get() != null) {
-					revisions.add(lastCommit.get() + ".." + commit.name());
-					lastCommit.set(null);
+				if (lastCommit != null) {
+					revisions.add(lastCommit + ".." + commit.name());
+					lastCommit = null;
 				} else { 
 					revisions.add(commit.name());
 				}
 				
-				AtomicReference<Set<NameAndEmail>> contributors = new AtomicReference<>(null);
-				AtomicBoolean contributorsChanged = new AtomicBoolean(false);
+				Set<NameAndEmail> contributors = null;
+				boolean contributorsChanged = false;
 				
-				AtomicReference<Set<String>> files = new AtomicReference<>(null);
-				AtomicBoolean filesChanged = new AtomicBoolean(false);
+				Set<String> files = null;
+				boolean filesChanged = false;
 				
 				/*
 				 * Use a synchronous queue to achieve below purpose:
@@ -254,8 +240,8 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 							}
 							commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
 							
-							commitCount.incrementAndGet();
-							commitCountChanged.set(true);
+							commitCount++;
+							commitCountChanged = true;
 							
 							for (String parentHash: commit.getParentHashes()) {
 								keyBytes = new byte[20];
@@ -271,28 +257,28 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 								commitId.copyRawTo(newValueBytes, newValueBytes.length-20);
 								commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
 							}
-							if (contributors.get() == null) {
+							if (contributors == null) {
 								bytes = getBytes(defaultStore.get(txn, CONTRIBUTORS_KEY));
 								if (bytes != null)
-									contributors.set((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
+									contributors = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
 								else
-									contributors.set(new HashSet<NameAndEmail>());
+									contributors = new HashSet<NameAndEmail>();
 							}
 							if (StringUtils.isNotBlank(commit.getAuthor().getName()) 
 									|| StringUtils.isNotBlank(commit.getAuthor().getEmailAddress())) {
 								NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
-								if (!contributors.get().contains(contributor)) {
-									contributors.get().add(contributor);
-									contributorsChanged.set(true);
+								if (!contributors.contains(contributor)) {
+									contributors.add(contributor);
+									contributorsChanged = true;
 								}
 							}
 	
-							if (files.get() == null) {
+							if (files == null) {
 								bytes = getBytes(defaultStore.get(txn, FILES_KEY));
 								if (bytes != null)
-									files.set((Set<String>) SerializationUtils.deserialize(bytes));
+									files = (Set<String>) SerializationUtils.deserialize(bytes);
 								else
-									files.set(new HashSet<String>());
+									files = new HashSet<String>();
 							}
 							
 							for (String file: commit.getChangedFiles()) {
@@ -315,38 +301,38 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 								bytes = SerializationUtils.serialize((Serializable) fileContributions);
 								contributionsStore.put(txn, fileKey, new ArrayByteIterable(bytes));
 								
-								if (!files.get().contains(file)) {
-									files.get().add(file);
-									filesChanged.set(true);
+								if (!files.contains(file)) {
+									files.add(file);
+									filesChanged = true;
 								}
 							}
 							
-							if (lastCommit.get() == null)
-								lastCommit.set(commit.getHash());
+							if (lastCommit == null)
+								lastCommit = commit.getHash();
 						}		
 					} catch (Exception e) {
 						logger.error("Error processing commit " + commit.getHash(), e);
 					}
 				}
 				
-				if (contributorsChanged.get()) {
-					bytes = SerializationUtils.serialize((Serializable) contributors.get());
+				if (contributorsChanged) {
+					bytes = SerializationUtils.serialize((Serializable) contributors);
 					defaultStore.put(txn, CONTRIBUTORS_KEY, new ArrayByteIterable(bytes));
 					contributorsCache.remove(depot.getId());
 				}
-				if (filesChanged.get()) {
-					bytes = SerializationUtils.serialize((Serializable) files.get());
+				if (filesChanged) {
+					bytes = SerializationUtils.serialize((Serializable) files);
 					defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
 					filesCache.remove(depot.getId());
 				}
-				if (lastCommit.get() != null) {
-					bytes = lastCommit.get().getBytes();
+				if (lastCommit != null) {
+					bytes = lastCommit.getBytes();
 					defaultStore.put(txn, LAST_COMMIT_KEY, new ArrayByteIterable(bytes));
 				}
-				if (commitCountChanged.get()) {
-					bytes = SerializationUtils.serialize(commitCount.get());
+				if (commitCountChanged) {
+					bytes = SerializationUtils.serialize(commitCount);
 					defaultStore.put(txn, COMMIT_COUNT_KEY, new ArrayByteIterable(bytes));
-					commitCountCache.put(depot.getId(), commitCount.get());
+					commitCountCache.put(depot.getId(), commitCount);
 				}
 			}
 		});
@@ -400,7 +386,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 	}
 	
 	private File getInfoDir(Depot depot) {
-		File infoDir = new File(storageManager.getCacheDir(depot), INFO_DIR);
+		File infoDir = new File(storageManager.getInfoDir(depot), INFO_DIR);
 		if (!infoDir.exists()) 
 			FileUtils.createDir(infoDir);
 		return infoDir;
@@ -457,13 +443,8 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 				public List<String> compute(Transaction txn) {
 					byte[] bytes = getBytes(store.get(txn, FILES_KEY));
 					if (bytes != null) {
-						List<Path> paths = new ArrayList<>();
-						for (String file: (Set<String>)SerializationUtils.deserialize(bytes))
-							paths.add(Paths.get(file));
-						paths.sort(Path::compareTo);
-						List<String> files = new ArrayList<>();
-						for (Path path: paths)
-							files.add(path.toString().replace('\\', '/'));
+						List<String> files = new ArrayList<>((Set<String>)SerializationUtils.deserialize(bytes));
+						files.sort((file1, file2)->Paths.get(file1).compareTo(Paths.get(file2)));
 						return files;
 					} else {
 						return new ArrayList<>();
@@ -614,6 +595,8 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 		if (env != null)
 			env.close();
 		filesCache.remove(depot.getId());
+		commitCountCache.remove(depot.getId());
+		contributorsCache.remove(depot.getId());
 		FileUtils.deleteDir(getInfoDir(depot));
 	}
 	
@@ -628,12 +611,6 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 			return null;
 	}
 	
-	static class StringByteIterable extends ArrayByteIterable {
-		StringByteIterable(String value) {
-			super(value.getBytes());
-		}
-	}
-
 	@Override
 	public void systemStarting() {
 	}
@@ -722,6 +699,12 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 
 	@Override
 	public void onSaveDepot(Depot depot) {
+	}
+
+	static class StringByteIterable extends ArrayByteIterable {
+		StringByteIterable(String value) {
+			super(value.getBytes());
+		}
 	}
 
 }

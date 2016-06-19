@@ -56,7 +56,11 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		Method propertyGetter = getPropertyDescriptor().getPropertyGetter();
 		if (propertyGetter.getAnnotation(OmitName.class) != null)
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getName(propertyGetter)));
-
+		
+		String autocomplete = EditableUtils.getAutocomplete(getter);
+		if (autocomplete != null)
+			input.add(AttributeAppender.append("autocomplete", autocomplete));
+		
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
 
 			@Override

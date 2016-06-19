@@ -4,7 +4,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigation;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationIncrementLink;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationLink;
-import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -14,6 +13,8 @@ import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 
 import com.pmease.commons.wicket.ajaxlistener.AjaxLoadingOverlay;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class AjaxNavigationToolbar extends org.apache.wicket.extensions.ajax.markup.html.repeater.data.table.AjaxNavigationToolbar {
@@ -25,7 +26,7 @@ public class AjaxNavigationToolbar extends org.apache.wicket.extensions.ajax.mar
 	@Override
 	protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
 		
-		return new AjaxPagingNavigator(navigatorId, table) {
+		return new BootstrapAjaxPagingNavigator(navigatorId, table) {
 
 			@Override
 			protected AbstractLink newPagingNavigationLink(String id, IPageable pageable, int increment) {

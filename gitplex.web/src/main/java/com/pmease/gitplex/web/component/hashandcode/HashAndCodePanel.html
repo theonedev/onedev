@@ -1,6 +1,8 @@
 <wicket:panel>
-	<span class="hash-and-code">
-		<span wicket:id="hash"></span>
-		<a wicket:id="code" title="Browse code at this point" class="browse-code btn btn-xs btn-default"><span class="fa fa-code"></span></a>
-	</span>
+	<div class="hash-and-code clearfix">
+		<div wicket:id="hash" class="commit-hash pull-left"></div>
+		<div class="pull-left browse-code">
+			<a wicket:id="code" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
+		</div>
+	</div>
 </wicket:panel>

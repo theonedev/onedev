@@ -17,6 +17,8 @@ import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.listener.CodeCommentReplyListener;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Singleton
 public class DefaultCodeCommentReplyManager extends AbstractEntityDao<CodeCommentReply> 
@@ -24,13 +26,16 @@ public class DefaultCodeCommentReplyManager extends AbstractEntityDao<CodeCommen
 
 	private final CodeCommentManager codeCommentManager;
 	
+	private final VisitInfoManager visitInfoManager;
+	
 	private final Provider<Set<CodeCommentReplyListener>> listenersProvider;
 	
 	@Inject
 	public DefaultCodeCommentReplyManager(Dao dao, CodeCommentManager codeCommentManager, 
-			Provider<Set<CodeCommentReplyListener>> listenersProvider) {
+			VisitInfoManager visitInfoManager, Provider<Set<CodeCommentReplyListener>> listenersProvider) {
 		super(dao);
 		this.codeCommentManager = codeCommentManager;
+		this.visitInfoManager = visitInfoManager;
 		this.listenersProvider = listenersProvider;
 	}
 
@@ -43,6 +48,7 @@ public class DefaultCodeCommentReplyManager extends AbstractEntityDao<CodeCommen
 		reply.getComment().setUpdateDate(reply.getDate());
 		reply.getComment().setLastReplyUser(reply.getUser().getDisplayName());
 		codeCommentManager.save(reply.getComment());
+		visitInfoManager.visit(SecurityUtils.getAccount(), reply.getComment());
 	}
 
 	@Transactional

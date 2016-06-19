@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -59,7 +58,7 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestInfoManager.class);
 	
-	private static final String INFO_DIR = "pullRequestInfo";
+	private static final String INFO_DIR = "pullRequest";
 	
 	private static final String DEFAULT_STORE = "default";
 	
@@ -113,7 +112,7 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 	}
 	
 	private File getInfoDir(Depot depot) {
-		File infoDir = new File(storageManager.getCacheDir(depot), INFO_DIR);
+		File infoDir = new File(storageManager.getInfoDir(depot), INFO_DIR);
 		if (!infoDir.exists()) 
 			FileUtils.createDir(infoDir);
 		return infoDir;
@@ -148,12 +147,6 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 			return null;
 	}
 	
-	static class StringByteIterable extends ArrayByteIterable {
-		StringByteIterable(String value) {
-			super(value.getBytes());
-		}
-	}
-
 	@Override
 	public void systemStarting() {
 	}
@@ -196,20 +189,19 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 	
 	private void doCollect(Depot depot) {
 		Environment env = getEnv(depot);
-		Store defaultStore = getStore(env, DEFAULT_STORE);
+		Store store = getStore(env, DEFAULT_STORE);
 
-		AtomicReference<String> lastUpdate = new AtomicReference<>();
-		env.executeInTransaction(new TransactionalExecutable() {
+		String lastUpdate = env.computeInTransaction(new TransactionalComputable<String>() {
 			
 			@Override
-			public void execute(final Transaction txn) {
-				byte[] value = getBytes(defaultStore.get(txn, LAST_UPDATE_KEY));
-				lastUpdate.set(value!=null?new String(value):null);									
+			public String compute(Transaction txn) {
+				byte[] value = getBytes(store.get(txn, LAST_UPDATE_KEY));
+				return value!=null?new String(value):null;									
 			}
 			
 		});
 		
-		for (PullRequestUpdate update: pullRequestUpdateManager.queryAfter(depot, lastUpdate.get())) {
+		for (PullRequestUpdate update: pullRequestUpdateManager.queryAfter(depot, lastUpdate)) {
 			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
 				List<ObjectId> commits = new ArrayList<>();
 				revWalk.markStart(revWalk.lookupCommit(ObjectId.fromString(update.getHeadCommitHash())));
@@ -225,16 +217,16 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 							byte[] keyBytes = new byte[20];
 							commit.copyRawTo(keyBytes, 0);
 							ByteIterable commitKey = new ArrayByteIterable(keyBytes);
-							byte[] valueBytes = getBytes(defaultStore.get(txn, commitKey));
+							byte[] valueBytes = getBytes(store.get(txn, commitKey));
 							Collection<String> requests;
 							if (valueBytes != null)
 								requests = (Collection<String>) SerializationUtils.deserialize(valueBytes);
 							else
 								requests = new HashSet<>();
 							requests.add(update.getRequest().getUUID());
-							defaultStore.add(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) requests)));
+							store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) requests)));
 						}
-						defaultStore.add(txn, LAST_UPDATE_KEY, key);
+						store.put(txn, LAST_UPDATE_KEY, key);
 					}
 					
 				});
@@ -318,11 +310,17 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 					else
 						storedRequests = new HashSet<>();
 					storedRequests.remove(request);
-					store.add(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) storedRequests)));
+					store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) storedRequests)));
 				}
 			}
 			
 		});
 	}
 	
+	static class StringByteIterable extends ArrayByteIterable {
+		StringByteIterable(String value) {
+			super(value.getBytes());
+		}
+	}
+
 }

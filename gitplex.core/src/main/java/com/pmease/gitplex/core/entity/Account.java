@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
-import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -20,7 +20,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -34,7 +33,6 @@ import com.pmease.commons.wicket.editable.annotation.ExcludeValues;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.component.DepotVisits;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.manager.UserAuthorizationManager;
@@ -78,10 +76,9 @@ public class Account extends AbstractUser implements ProtectedObject {
 	private String noSpaceFullName;
 	
 	private Date avatarUploadDate;
-	
-	@Lob
-	@OptimisticLock(excluded=true)
-	private DepotVisits depotVisits = new DepotVisits();
+
+	@Column(nullable=false)
+	private String uuid = UUID.randomUUID().toString();
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
@@ -147,7 +144,7 @@ public class Account extends AbstractUser implements ProtectedObject {
     
     private transient Map<Account, OrganizationMembership> organizationMembersMap;
     
-    @Editable(name="Name", order=100)
+    @Editable(name="Login Name", order=100)
 	@AccountName
 	@NotEmpty
 	@Override
@@ -161,6 +158,14 @@ public class Account extends AbstractUser implements ProtectedObject {
     	noSpaceName = StringUtils.deleteWhitespace(name);
     }
     
+	@Editable(order=150, autocomplete="new-password")
+	@Password(confirmative=true)
+	@NotEmpty
+	@Length(min=5, message="Password length should not less than 5")
+	public String getPassword() {
+		return super.getPassword();
+	}
+
 	@Editable(order=200)
 	public String getFullName() {
 		return fullName;
@@ -216,14 +221,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	public void setDefaultPrivilege(DepotPrivilege defaultPrivilege) {
 		this.defaultPrivilege = defaultPrivilege;
-	}
-
-	@Editable(order=400)
-	@Password(confirmative=true)
-	@NotEmpty
-	@Length(min=5, message="Password length should not less than 5")
-	public String getPassword() {
-		return super.getPassword();
 	}
 
 	public Date getAvatarUploadDate() {
@@ -433,12 +430,12 @@ public class Account extends AbstractUser implements ProtectedObject {
 		return organizationMembersMap;
 	}
 
-	public DepotVisits getDepotVisits() {
-		return depotVisits;
+	public String getUUID() {
+		return uuid;
 	}
 
-	public void setDepotVisits(DepotVisits depotVisits) {
-		this.depotVisits = depotVisits;
+	public void setUUID(String uuid) {
+		this.uuid = uuid;
 	}
 
 	@Override

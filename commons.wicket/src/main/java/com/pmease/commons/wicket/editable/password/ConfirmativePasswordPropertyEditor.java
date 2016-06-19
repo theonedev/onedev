@@ -7,6 +7,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
@@ -36,6 +37,12 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		inputAgain.setResetPassword(true);
 		inputAgain.setRequired(false);
 		add(inputAgain);
+		
+		String autocomplete = EditableUtils.getAutocomplete(getPropertyDescriptor().getPropertyGetter());
+		if (autocomplete != null) {
+			input.add(AttributeAppender.append("autocomplete", autocomplete));
+			inputAgain.add(AttributeAppender.append("autocomplete", autocomplete));
+		}
 		
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
 
