@@ -32,6 +32,7 @@ import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.listener.CodeCommentListener;
 import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
@@ -219,15 +220,12 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 					ObjectId.fromString(comment.getCommit()).copyRawTo(keyBytes, 0);
 					ByteIterable commitKey = new ArrayByteIterable(keyBytes);
 					byte[] valueBytes = getBytes(store.get(txn, commitKey));
-					Map<String, String> comments;
+					Map<String, CompareContext> comments;
 					if (valueBytes != null)
-						comments = (Map<String, String>) SerializationUtils.deserialize(valueBytes);
+						comments = (Map<String, CompareContext>) SerializationUtils.deserialize(valueBytes);
 					else
 						comments = new HashMap<>();
-					if (comment.getCompareContext() != null)
-						comments.put(comment.getUUID(), comment.getCompareContext().getCompareCommit());
-					else
-						comments.put(comment.getUUID(), null);
+					comments.put(comment.getUUID(), comment.getCompareContext());
 					store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
 					
 					if (comment.getPath() != null) {
@@ -269,21 +267,21 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	}
 
 	@Override
-	public Map<String, String> getComments(Depot depot, ObjectId commit) {
+	public Map<String, CompareContext> getComments(Depot depot, ObjectId commit) {
 		Environment env = getEnv(depot);
 		Store store = getStore(env, DEFAULT_STORE);
 
-		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<String, String>>() {
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<String, CompareContext>>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public Map<String, String> compute(Transaction txn) {
+			public Map<String, CompareContext> compute(Transaction txn) {
 				byte[] keyBytes = new byte[20];
 				commit.copyRawTo(keyBytes, 0);
 				ByteIterable commitKey = new ArrayByteIterable(keyBytes);
 				byte[] valueBytes = getBytes(store.get(txn, commitKey));
 				if (valueBytes != null) {
-					return (Map<String, String>) SerializationUtils.deserialize(valueBytes);
+					return (Map<String, CompareContext>) SerializationUtils.deserialize(valueBytes);
 				} else {
 					return new HashMap<>();
 				}

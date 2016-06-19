@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -34,14 +36,17 @@ import org.hibernate.criterion.Restrictions;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.jackson.ExternalView;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
+import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
@@ -947,4 +952,80 @@ public class PullRequest extends AbstractEntity {
 		return codeComments;
 	}
 	
+	@Nullable
+	public ComparingInfo getRequestComparingInfo(CodeComment.ComparingInfo commentComparingInfo) {
+		List<String> commits = new ArrayList<>();
+		commits.add(getBaseCommitHash());
+		for (PullRequestUpdate update: getSortedUpdates()) {
+			commits.addAll(update.getCommits().stream().map(BriefCommit::getHash).collect(Collectors.toList()));
+		}
+		String commit = commentComparingInfo.getCommit();
+		CompareContext compareContext = commentComparingInfo.getCompareContext();
+		if (commit.equals(compareContext.getCompareCommit())) {
+			int index = commits.indexOf(commit);
+			if (index == 0) {
+				return null;
+			} else {
+				return new ComparingInfo(commits.get(index-1), commit, 
+						compareContext.getWhitespaceOption(), compareContext.getPathFilter());
+			}
+		} else {
+			int commitIndex = commits.indexOf(commit);
+			int compareCommitIndex = commits.indexOf(compareContext.getCompareCommit());
+			if (commitIndex == -1 || compareCommitIndex == -1) {
+				return null;
+			} else if (compareContext.isLeftSide()) {
+				if (compareCommitIndex < commitIndex) {
+					return new ComparingInfo(compareContext.getCompareCommit(), commit, 
+							compareContext.getWhitespaceOption(), compareContext.getPathFilter());
+				} else {
+					return null;
+				}
+			} else {
+				if (commitIndex < compareCommitIndex) {
+					return new ComparingInfo(commit, compareContext.getCompareCommit(), 
+							compareContext.getWhitespaceOption(), compareContext.getPathFilter());
+				} else {
+					return null;
+				}
+			}
+		} 
+	}
+	
+	public static class ComparingInfo implements Serializable {
+		
+		private static final long serialVersionUID = 1L;
+
+		private final String oldCommit; 
+		
+		private final String newCommit;
+		
+		private final String pathFilter;
+		
+		private final WhitespaceOption whitespaceOption;
+		
+		public ComparingInfo(String oldCommit, String newCommit, WhitespaceOption whitespaceOption, @Nullable String pathFilter) {
+			this.oldCommit = oldCommit;
+			this.newCommit = newCommit;
+			this.whitespaceOption = whitespaceOption;
+			this.pathFilter = pathFilter;
+		}
+
+		public String getOldCommit() {
+			return oldCommit;
+		}
+
+		public String getNewCommit() {
+			return newCommit;
+		}
+
+		public String getPathFilter() {
+			return pathFilter;
+		}
+
+		public WhitespaceOption getWhitespaceOption() {
+			return whitespaceOption;
+		}
+
+	}
 }

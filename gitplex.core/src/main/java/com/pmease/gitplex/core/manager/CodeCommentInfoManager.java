@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.component.CompareContext;
 
 public interface CodeCommentInfoManager {
 	
@@ -15,9 +16,9 @@ public interface CodeCommentInfoManager {
 	 * Get comments over specified depot and commit
 	 * 
 	 * @return
-	 * 			map of comment uuid to compare commit hash 
+	 * 			map of comment uuid to compare context 
 	 */
-	Map<String, String> getComments(Depot depot, ObjectId commit);
+	Map<String, CompareContext> getComments(Depot depot, ObjectId commit);
 	
 	List<String> getCommentedFiles(Depot depot);
 	

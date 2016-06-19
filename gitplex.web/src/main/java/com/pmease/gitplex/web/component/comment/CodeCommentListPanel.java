@@ -32,6 +32,7 @@ import org.eclipse.jgit.lib.FileMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -49,6 +50,7 @@ import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -144,12 +146,29 @@ public abstract class CodeCommentListPanel extends Panel {
 					public void onClick() {
 						Depot depot = ((DepotPage) getPage()).getDepot();
 						
+						CodeComment comment = rowModel.getObject();
 						PullRequest request = getPullRequest();
+						List<CodeCommentReply> replies = comment.getSortedReplies();
 						if (request != null) {
-							
+							PullRequest.ComparingInfo comparingInfo = null;
+							for (int i=replies.size()-1; i>=0; i--) {
+								CodeCommentReply reply = replies.get(i);
+								comparingInfo = request.getRequestComparingInfo(reply.getComparingInfo());
+								if (comparingInfo != null)
+									break;
+							}
+							if (comparingInfo == null) {
+								comparingInfo = Preconditions.checkNotNull(request.getRequestComparingInfo(comment.getComparingInfo()));
+							}
+							RequestChangesPage.State state = new RequestChangesPage.State();
+							state.commentId = comment.getId();
+							state.mark = new DiffMark(comment);
+							state.oldCommit = comparingInfo.getOldCommit();
+							state.newCommit = comparingInfo.getNewCommit();
+							state.pathFilter = comparingInfo.getPathFilter();
+							state.whitespaceOption = comparingInfo.getWhitespaceOption();
+							setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
 						} else {
-							CodeComment comment = rowModel.getObject();
-							List<CodeCommentReply> replies = comment.getSortedReplies();
 							CompareContext compareContext;
 							if (!replies.isEmpty()) {
 								CodeCommentReply lastReply = replies.get(replies.size()-1);

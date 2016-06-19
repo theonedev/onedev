@@ -234,6 +234,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 			State newState = new State();
 			newState.revision = parent.name();
 			newState.whitespaceOption = state.whitespaceOption;
+			newState.pathFilter = state.pathFilter;
 			Link<Void> link = new BookmarkablePageLink<Void>("parent", CommitDetailPage.class, 
 					paramsOf(depotModel.getObject(), newState));
 			link.add(new Label("label", GitUtils.abbreviateSHA(parent.name())));
@@ -258,6 +259,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 					State newState = new State();
 					newState.revision = parent.name();
 					newState.whitespaceOption = state.whitespaceOption;
+					newState.pathFilter = state.pathFilter;
 					
 					Link<Void> link = new BookmarkablePageLink<Void>("link", CommitDetailPage.class, 
 							paramsOf(depotModel.getObject(), newState));

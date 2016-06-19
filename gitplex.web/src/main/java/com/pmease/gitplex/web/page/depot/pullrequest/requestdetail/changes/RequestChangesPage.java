@@ -164,6 +164,7 @@ public class RequestChangesPage extends RequestDetailPage implements MarkSupport
 					newRevisionDiff(target);
 				}
 				target.add(head);
+				pushState(target);
 			}
 			
 		});
@@ -204,6 +205,7 @@ public class RequestChangesPage extends RequestDetailPage implements MarkSupport
 					newRevisionDiff(target);
 				} 
 				target.add(head);
+				pushState(target);
 			}
 			
 		});

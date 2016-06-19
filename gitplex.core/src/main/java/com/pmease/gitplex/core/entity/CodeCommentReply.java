@@ -16,6 +16,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment.ComparingInfo;
 import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -108,6 +109,10 @@ public class CodeCommentReply extends AbstractEntity {
 		} else {
 			return true;
 		}
+	}
+	
+	public ComparingInfo getComparingInfo() {
+		return new ComparingInfo(comment.getCommit(), compareContext);
 	}
 	
 }

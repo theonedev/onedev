@@ -60,6 +60,7 @@ import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
@@ -887,6 +888,8 @@ public class SourceViewPanel extends BlobViewPanel {
 	private CompareContext getCompareContext() {
 		CompareContext compareContext = new CompareContext();
 		compareContext.setCompareCommit(context.getCommit().name());
+		compareContext.setPathFilter(context.getBlobIdent().path);
+		compareContext.setWhitespaceOption(WhitespaceOption.DO_NOT_IGNORE);
 		return compareContext;
 	}
 	

@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -248,4 +249,32 @@ public class CodeComment extends AbstractEntity {
 		}
 		return sortedReplies;
 	}
+	
+	public ComparingInfo getComparingInfo() {
+		return new ComparingInfo(commit, compareContext);
+	}
+	
+	public static class ComparingInfo implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final String commit;
+		
+		private final CompareContext compareContext;
+		
+		public ComparingInfo(String commit, CompareContext compareContext) {
+			this.commit = commit;
+			this.compareContext = compareContext;
+		}
+		
+		public String getCommit() {
+			return commit;
+		}
+
+		public CompareContext getCompareContext() {
+			return compareContext;
+		}
+		
+	}
+	
 }

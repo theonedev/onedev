@@ -21,6 +21,7 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentRelation;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
@@ -66,36 +67,26 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityDao<CodeCom
 			}
 			involvedCommits.add(request.getBaseCommitHash());
 
-			Map<String, CommitInfo> commitInfos = new HashMap<>();
+			Map<String, CodeComment.ComparingInfo> comparingInfos = new HashMap<>();
 			for (String commit: involvedCommits) {
-				Map<String, String> commentsOfCommit = codeCommentInfoManager.getComments(
+				Map<String, CompareContext> commentsOfCommit = codeCommentInfoManager.getComments(
 						request.getTargetDepot(), ObjectId.fromString(commit));
-				for (Map.Entry<String, String> entry: commentsOfCommit.entrySet()) {
-					CommitInfo commitInfo = new CommitInfo();
-					commitInfo.commit = commit;
-					commitInfo.compareCommit = entry.getValue();
-					commitInfos.put(entry.getKey(), commitInfo);
+				for (Map.Entry<String, CompareContext> entry: commentsOfCommit.entrySet()) {
+					CodeComment.ComparingInfo comparingInfo = new CodeComment.ComparingInfo(commit, entry.getValue());
+					comparingInfos.put(entry.getKey(), comparingInfo);
 				}
 			}
 
-			commitInfos.keySet().removeAll(relatedComments);
+			comparingInfos.keySet().removeAll(relatedComments);
 			
-			String baseCommit = request.getBaseCommitHash();
-			for (Map.Entry<String, CommitInfo> entry: commitInfos.entrySet()) {
+			for (Map.Entry<String, CodeComment.ComparingInfo> entry: comparingInfos.entrySet()) {
 				String uuid = entry.getKey();
-				String commit = entry.getValue().commit;
-				String compareCommit = entry.getValue().compareCommit;
+				CodeComment.ComparingInfo comparingInfo = entry.getValue();
 				
-				/*
-				 * Comment is relevant if both commit and compare commit relates to pull request, 
-				 * and also they are not equals to the base commit in the same time 
-				 */
-				if (involvedCommits.contains(commit) 
-						&& involvedCommits.contains(compareCommit)
-						&& !(commit.equals(baseCommit) && compareCommit.equals(baseCommit))) {
+				if (request.getRequestComparingInfo(comparingInfo) != null) {
 					CodeComment comment = codeCommentManager.find(uuid);
 					if (comment == null) {
-						codeCommentInfoManager.removeComment(request.getTargetDepot(), ObjectId.fromString(commit), uuid);
+						codeCommentInfoManager.removeComment(request.getTargetDepot(), ObjectId.fromString(comparingInfo.getCommit()), uuid);
 					} else if (request.getCodeCommentRelations().size() < PullRequest.MAX_CODE_COMMENTS) {
 						CodeCommentRelation relation = new CodeCommentRelation();
 						relation.setComment(comment);
@@ -118,10 +109,4 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityDao<CodeCom
 		return comments;
 	}
 
-	private static class CommitInfo {
-		String commit;
-		
-		String compareCommit;
-	}
-	
 }
