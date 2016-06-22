@@ -992,6 +992,12 @@ public class PullRequest extends AbstractEntity {
 		} 
 	}
 	
+	public List<BriefCommit> getCommits() {
+		List<BriefCommit> commits = new ArrayList<>();
+		getSortedUpdates().forEach(update->commits.addAll(update.getCommits()));
+		return commits;
+	}
+	
 	public static class ComparingInfo implements Serializable {
 		
 		private static final long serialVersionUID = 1L;

@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -319,11 +318,11 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 				commit.copyRawTo(keyBytes, 0);
 				ByteIterable commitKey = new ArrayByteIterable(keyBytes);
 				byte[] valueBytes = getBytes(store.get(txn, commitKey));
-				Collection<String> storedComments;
+				Map<String, CompareContext> storedComments;
 				if (valueBytes != null)
-					storedComments = (Collection<String>) SerializationUtils.deserialize(valueBytes);
+					storedComments = (Map<String, CompareContext>) SerializationUtils.deserialize(valueBytes);
 				else
-					storedComments = new HashSet<>();
+					storedComments = new HashMap<>();
 				storedComments.remove(comment);
 				store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) storedComments)));
 			}

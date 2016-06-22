@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -65,6 +66,8 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.BriefCommit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.Range;
@@ -95,6 +98,7 @@ import com.pmease.gitplex.web.component.diff.blob.SourceAware;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionSelector;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -747,6 +751,11 @@ public class RevisionDiffPanel extends Panel {
 								protected void onSaveComment(AjaxRequestTarget target) {
 									target.add(commentContainer.get("head"));
 								}
+
+								@Override
+								protected PullRequest getPullRequest() {
+									return requestModel.getObject();
+								}
 								
 							};
 							
@@ -872,6 +881,11 @@ public class RevisionDiffPanel extends Panel {
 										@Override
 										protected void onSaveComment(AjaxRequestTarget target) {
 											target.add(commentContainer.get("head"));
+										}
+
+										@Override
+										protected PullRequest getPullRequest() {
+											return requestModel.getObject();
 										}
 										
 									};
@@ -1009,30 +1023,88 @@ public class RevisionDiffPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id) {
-				return new RevisionSelector(id, new AbstractReadOnlyModel<Depot>() {
+				if (requestModel.getObject() != null) {
+					Fragment fragment = new Fragment(id, "requestCommitSelectorFrag", RevisionDiffPanel.this);
+					IModel<List<BriefCommit>> commitsModel = new LoadableDetachableModel<List<BriefCommit>>() {
 
-					@Override
-					public Depot getObject() {
-						return getOpenComment().getDepot();
-					}
-					
-				}) {
-					
-					@Override
-					protected void onSelect(AjaxRequestTarget target, String revision) {
-						RevisionComparePage.State state = new RevisionComparePage.State();
-						CodeComment comment = getOpenComment();
-						state.commentId = comment.getId();
-						state.mark = new DiffMark(comment);
-						state.compareWithMergeBase = false;
-						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
-						state.rightSide = new DepotAndRevision(comment.getDepot(), revision);
-						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-						PageParameters params = RevisionComparePage.paramsOf(comment.getDepot(), state);
-						setResponsePage(RevisionComparePage.class, params);
-					}
-					
-				};
+						@Override
+						protected List<BriefCommit> load() {
+							List<BriefCommit> commits = new ArrayList<>();
+							PullRequest request = requestModel.getObject();
+							commits.add(request.getBaseCommit());
+							commits.addAll(request.getCommits());
+							return commits;
+						}
+						
+					};
+					fragment.add(new ListView<BriefCommit>("commits", commitsModel) {
+
+						@Override
+						protected void populateItem(ListItem<BriefCommit> item) {
+							BriefCommit commit = item.getModelObject();
+							AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									RequestChangesPage.State state = new RequestChangesPage.State();
+									CodeComment comment = getOpenComment();
+									state.commentId = comment.getId();
+									state.mark = new DiffMark(comment);
+									int index = commitsModel.getObject().stream().map(BriefCommit::getHash).collect(Collectors.toList())
+											.indexOf(comment.getCommit());
+									int compareIndex = commitsModel.getObject().indexOf(commit);
+									if (index < compareIndex) {
+										state.oldCommit = comment.getCommit();
+										state.newCommit = commit.getHash();
+									} else {
+										state.oldCommit = commit.getHash();
+										state.newCommit = comment.getCommit();
+									}
+									PageParameters params = RequestChangesPage.paramsOf(requestModel.getObject(), state);
+									setResponsePage(RequestChangesPage.class, params);
+								}
+								
+							};
+							link.add(new Label("hash", GitUtils.abbreviateSHA(commit.getHash())));
+							link.add(new Label("subject", commit.getSubject()));
+							if (commit.getHash().equals(getOpenComment().getCommit())) {
+								link.setEnabled(false);
+								link.add(AttributeAppender.append("class", "commented"));
+								link.add(new WebMarkupContainer("commented"));
+							} else {
+								link.add(new WebMarkupContainer("commented").setVisible(false));
+							}
+							item.add(link);
+						}
+						
+					});
+					return fragment;
+				} else {
+					return new RevisionSelector(id, new AbstractReadOnlyModel<Depot>() {
+
+						@Override
+						public Depot getObject() {
+							return getOpenComment().getDepot();
+						}
+						
+					}) {
+						
+						@Override
+						protected void onSelect(AjaxRequestTarget target, String revision) {
+							RevisionComparePage.State state = new RevisionComparePage.State();
+							CodeComment comment = getOpenComment();
+							state.commentId = comment.getId();
+							state.mark = new DiffMark(comment);
+							state.compareWithMergeBase = false;
+							state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+							state.rightSide = new DepotAndRevision(comment.getDepot(), revision);
+							state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+							PageParameters params = RevisionComparePage.paramsOf(comment.getDepot(), state);
+							setResponsePage(RevisionComparePage.class, params);
+						}
+						
+					};
+				}
 			}
 			
 		});
@@ -1206,6 +1278,11 @@ public class RevisionDiffPanel extends Panel {
 				@Override
 				protected void onSaveComment(AjaxRequestTarget target) {
 					target.add(commentContainer.get("head"));
+				}
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return requestModel.getObject();
 				}
 				
 			};

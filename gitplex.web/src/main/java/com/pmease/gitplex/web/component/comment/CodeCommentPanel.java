@@ -37,6 +37,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
@@ -47,6 +48,7 @@ import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -96,22 +98,40 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			public void onClick() {
 				CodeComment comment = getComment();
 				CompareContext compareContext = comment.getCompareContext();
-				RevisionComparePage.State state = new RevisionComparePage.State();
-				state.commentId = comment.getId();
-				state.compareWithMergeBase = false;
-				if (compareContext.isLeftSide()) {
-					state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
-					state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+				PullRequest request = getPullRequest();
+				if (request != null) {
+					RequestChangesPage.State state = new RequestChangesPage.State();
+					state.commentId = comment.getId();
+					if (compareContext.isLeftSide()) {
+						state.oldCommit = compareContext.getCompareCommit();
+						state.newCommit = comment.getCommit();
+					} else {
+						state.oldCommit = comment.getCommit();
+						state.newCommit = compareContext.getCompareCommit();
+					}
+					state.mark = new DiffMark(comment);
+					state.pathFilter = compareContext.getPathFilter();
+					state.whitespaceOption = compareContext.getWhitespaceOption();
+					PageParameters params  = RequestChangesPage.paramsOf(request, state);
+					setResponsePage(RequestChangesPage.class, params);
 				} else {
-					state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
-					state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+					RevisionComparePage.State state = new RevisionComparePage.State();
+					state.commentId = comment.getId();
+					state.compareWithMergeBase = false;
+					if (compareContext.isLeftSide()) {
+						state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+						state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+					} else {
+						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+						state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+					}
+					state.mark = new DiffMark(comment);
+					state.pathFilter = compareContext.getPathFilter();
+					state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+					state.whitespaceOption = compareContext.getWhitespaceOption();
+					PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
+					setResponsePage(RevisionComparePage.class, params);
 				}
-				state.mark = new DiffMark(comment);
-				state.pathFilter = compareContext.getPathFilter();
-				state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-				state.whitespaceOption = compareContext.getWhitespaceOption();
-				PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
-				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		}.add(AttributeAppender.append("title", "This comment is added in a different compare context, click to show")));
@@ -308,23 +328,41 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			public void onClick() {
 				CodeCommentReply reply = getReply(replyId);
 				CompareContext compareContext = reply.getCompareContext();
-				RevisionComparePage.State state = new RevisionComparePage.State();
-				CodeComment comment = reply.getComment();
-				state.commentId = comment.getId();
-				state.compareWithMergeBase = false;
-				if (compareContext.isLeftSide()) {
-					state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
-					state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+				PullRequest request = getPullRequest();
+				if (request != null) {
+					RequestChangesPage.State state = new RequestChangesPage.State();
+					state.commentId = reply.getComment().getId();
+					if (compareContext.isLeftSide()) {
+						state.oldCommit = compareContext.getCompareCommit();
+						state.newCommit = reply.getComment().getCommit();
+					} else {
+						state.oldCommit = reply.getComment().getCommit();
+						state.newCommit = compareContext.getCompareCommit();
+					}
+					state.mark = new DiffMark(reply.getComment());
+					state.pathFilter = compareContext.getPathFilter();
+					state.whitespaceOption = compareContext.getWhitespaceOption();
+					PageParameters params  = RequestChangesPage.paramsOf(request, state);
+					setResponsePage(RequestChangesPage.class, params);
 				} else {
-					state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
-					state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+					RevisionComparePage.State state = new RevisionComparePage.State();
+					CodeComment comment = reply.getComment();
+					state.commentId = comment.getId();
+					state.compareWithMergeBase = false;
+					if (compareContext.isLeftSide()) {
+						state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+						state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+					} else {
+						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+						state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+					}
+					state.mark = new DiffMark(comment);
+					state.pathFilter = compareContext.getPathFilter();
+					state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+					state.whitespaceOption = compareContext.getWhitespaceOption();
+					PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
+					setResponsePage(RevisionComparePage.class, params);
 				}
-				state.mark = new DiffMark(comment);
-				state.pathFilter = compareContext.getPathFilter();
-				state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-				state.whitespaceOption = compareContext.getWhitespaceOption();
-				PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
-				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		}.add(AttributeAppender.append("title", "This reply is added in a different compare context, click to show")));		
@@ -510,8 +548,11 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		add(newCommentContainer());
 		
 		repliesView = new RepeatingView("replies");
+		PullRequest request = getPullRequest();
 		for (CodeCommentReply reply: getComment().getSortedReplies()) {
-			repliesView.add(newReplyContainer(repliesView.newChildId(), reply.getId()));
+			if (request == null || request.getRequestComparingInfo(reply.getComparingInfo()) != null) {
+				repliesView.add(newReplyContainer(repliesView.newChildId(), reply.getId()));
+			}
 		}
 		add(repliesView);
 		add(newAddReplyContainer());
@@ -656,4 +697,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 	protected abstract void onSaveComment(AjaxRequestTarget target);
 	
 	protected abstract CompareContext getCompareContext();
+	
+	@Nullable
+	protected abstract PullRequest getPullRequest();
 }
