@@ -755,7 +755,7 @@ gitplex.textdiff = {
 			for (var i in comments) {
 				var comment = comments[i];
 				var index = parseInt(i) + 1;
-				content += "<a class='comment-trigger' title='Click to show comment of marked text'>#" + index + "</a>";
+				content += "<a class='comment-trigger' title='Click to show comment of marked text'>" + comment.title + "</a>";
 			}
 			$indicator.popover({
 				html: true, 

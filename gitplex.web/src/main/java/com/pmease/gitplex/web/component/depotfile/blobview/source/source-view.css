@@ -104,6 +104,7 @@
 	display: block;
 	color: #999;
 	text-decoration: none;
+	white-space: nowrap;
 }
 .comment-popover a:hover {
 	color: #333;

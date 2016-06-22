@@ -411,6 +411,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					List<CommentInfo> commentInfosAtLine;
 					CommentInfo commentInfo = new CommentInfo();
 					commentInfo.id = comment.getId();
+					commentInfo.title = comment.getTitle();
 					commentInfo.mark = new MarkInfo(comment, oldCommitHash);
 					if (commentInfo.mark.leftSide) {
 						commentInfosAtLine = oldCommentInfos.get(line);
@@ -992,6 +993,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		CommentInfo commentInfo = new CommentInfo();
 		commentInfo.id = comment.getId();
 		commentInfo.mark = new MarkInfo(comment, getOldCommit().name());
+		commentInfo.title = comment.getTitle();
 
 		String jsonOfCommentInfo;
 		try {
@@ -1048,8 +1050,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		target.add(this);
 	}
 	
+	@SuppressWarnings("unused")
 	private static class CommentInfo {
 		long id;
+		
+		String title;
 		
 		MarkInfo mark;
 	}

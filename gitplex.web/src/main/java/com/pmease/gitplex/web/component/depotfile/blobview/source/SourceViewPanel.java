@@ -834,6 +834,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		CommentInfo commentInfo = new CommentInfo();
 		commentInfo.id = comment.getId();
 		commentInfo.mark = comment.getMark();
+		commentInfo.title = comment.getTitle();
 
 		String jsonOfCommentInfo;
 		try {
@@ -937,6 +938,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				CommentInfo commentInfo = new CommentInfo();
 				commentInfo.id = comment.getId();
 				commentInfo.mark = comment.getMark();
+				commentInfo.title = comment.getTitle();
 				commentInfosAtLine.add(commentInfo);
 			}
 		}
@@ -992,10 +994,12 @@ public class SourceViewPanel extends BlobViewPanel {
 		List<Range> ranges;
 	}
 	
+	@SuppressWarnings("unused")
 	private static class CommentInfo {
 		long id;
 		
-		@SuppressWarnings("unused")
+		String title;
+		
 		Mark mark;
 	}
 	
