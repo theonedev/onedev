@@ -33,7 +33,6 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -413,7 +412,6 @@ public abstract class SearchResultPanel extends Panel {
 						DepotFilePage.State state = new DepotFilePage.State();
 						state.blobIdent.revision = context.getBlobIdent().revision;
 						state.blobIdent.path = blobPath;
-						state.requestId = PullRequest.idOf(context.getPullRequest());
 						PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
 						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
 						add(AttributeAppender.replace("href", url.toString()));
@@ -470,7 +468,6 @@ public abstract class SearchResultPanel extends Panel {
 									add(AttributeAppender.append("class", " active"));
 
 								DepotFilePage.State state = new DepotFilePage.State();
-								state.requestId = PullRequest.idOf(context.getPullRequest());
 								state.mark = TextRange.of(hit.getTokenPos());
 								state.blobIdent.revision = context.getBlobIdent().revision;
 								state.blobIdent.path = hit.getBlobPath();

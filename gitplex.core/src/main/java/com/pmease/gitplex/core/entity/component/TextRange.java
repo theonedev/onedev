@@ -27,14 +27,10 @@ public class TextRange implements Serializable {
 	}
 	
 	public TextRange(TextRange range) {
-		if (range != null) {
-			beginLine = range.beginLine;
-			beginChar = range.beginChar;
-			endLine = range.endLine;
-			endChar = range.endChar;
-		} else {
-			beginLine = endLine = beginChar = endChar = -1;
-		}
+		beginLine = range.beginLine;
+		beginChar = range.beginChar;
+		endLine = range.endLine;
+		endChar = range.endChar;
 	}
 	
 	public TextRange(TokenPosition tokenPos) {

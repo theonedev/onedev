@@ -23,7 +23,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -34,6 +33,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
@@ -190,39 +190,35 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			
 		})).setOutputMarkupId(true));
 		
+		DepotFilePage.State viewState = new DepotFilePage.State();
+		viewState.blobIdent = change.getBlobIdent();
+		PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), viewState);
+		add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
+		
 		PullRequest request = requestModel.getObject();
-		if (request != null) {
-			DepotFilePage.State state = new DepotFilePage.State();
-			state.requestId = request.getId();
-			state.blobIdent = change.getBlobIdent();
-			PageParameters params = DepotFilePage.paramsOf(request.getTargetDepot(), state);
-			add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
-			state = new DepotFilePage.State();
-			state.blobIdent.revision = request.getSourceBranch();
-			state.blobIdent.path = change.getPath();
-			state.mode = Mode.EDIT;
-			params = DepotFilePage.paramsOf(request.getSourceDepot(), state);
-			Link<Void> editFileLink = new BookmarkablePageLink<Void>("editFile", DepotFilePage.class, params) {
-	
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					PullRequest request = requestModel.getObject();
-					setVisible(request.getSourceDepot() != null 
-							&& change.getBlobIdent().revision.equals(request.getSource().getObjectName(false)));
-				}
-				
-			};
-			editFileLink.add(AttributeAppender.append("target", "_blank"));
-			add(editFileLink);
+		if (change.getType() != ChangeType.DELETE 
+				&& request != null 
+				&& request.getSourceDepot() != null 
+				&& change.getBlobIdent().revision.equals(request.getSource().getObjectName(false))) { 
+			// we are on pull request head and pull request source branch exists, so we edit source branch instead
+			DepotFilePage.State editState = new DepotFilePage.State();
+			editState.blobIdent.revision = request.getSourceBranch();
+			editState.blobIdent.path = change.getPath();
+			editState.mode = Mode.EDIT;
+			params = DepotFilePage.paramsOf(request.getSourceDepot(), editState);
+			add(new BookmarkablePageLink<Void>("editFile", DepotFilePage.class, params));
+		} else if (change.getType() != ChangeType.DELETE 
+				&& depotModel.getObject().getRefs(org.eclipse.jgit.lib.Constants.R_HEADS).containsKey(change.getBlobIdent().revision)) {
+			// we are on a branch 
+			DepotFilePage.State editState = new DepotFilePage.State();
+			editState.blobIdent = change.getBlobIdent();
+			editState.mode = Mode.EDIT;
+			params = DepotFilePage.paramsOf(depotModel.getObject(), editState);
+			add(new BookmarkablePageLink<Void>("editFile", DepotFilePage.class, params));
 		} else {
-			DepotFilePage.State state = new DepotFilePage.State();
-			state.blobIdent = change.getBlobIdent();
-			PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
-			add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
 			add(new WebMarkupContainer("editFile").setVisible(false));
 		}
-		
+
 		add(new Label("diffLines", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -297,7 +293,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 		});
 		
-		symbolTooltip = new SymbolTooltipPanel("symbolTooltip", depotModel, requestModel) {
+		symbolTooltip = new SymbolTooltipPanel("symbolTooltip", depotModel) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {

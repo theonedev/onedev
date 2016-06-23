@@ -46,7 +46,6 @@ import com.pmease.commons.wicket.component.floating.ComponentTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -64,8 +63,6 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	final IModel<Depot> depotModel;
 	
-	private final IModel<PullRequest> requestModel;
-	
 	final IModel<String> revisionModel;
 	
 	private TextField<String> searchField;
@@ -80,12 +77,10 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	private int activeHitIndex;
 	
-	public InstantSearchPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			IModel<String> revisionModel) {
+	public InstantSearchPanel(String id, IModel<Depot> depotModel, IModel<String> revisionModel) {
 		super(id);
 		
 		this.depotModel = depotModel;
-		this.requestModel = requestModel;
 		this.revisionModel = revisionModel;
 	}
 	
@@ -276,7 +271,6 @@ public abstract class InstantSearchPanel extends Panel {
 						state.blobIdent.revision = revisionModel.getObject();
 						state.blobIdent.path = hit.getBlobPath();
 						state.mark = TextRange.of(hit.getTokenPos());
-						state.requestId = PullRequest.idOf(requestModel.getObject());
 						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
 						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
 						link.add(AttributeAppender.replace("href", url.toString()));
@@ -367,7 +361,6 @@ public abstract class InstantSearchPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		depotModel.detach();
-		requestModel.detach();
 		revisionModel.detach();
 		
 		super.onDetach();

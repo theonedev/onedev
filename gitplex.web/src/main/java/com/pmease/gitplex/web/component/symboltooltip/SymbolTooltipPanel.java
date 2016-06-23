@@ -37,7 +37,6 @@ import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -54,19 +53,16 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	private final IModel<Depot> depotModel;
 	
-	private final IModel<PullRequest> requestModel;
-	
 	private String revision = "";
 	
 	private String symbol = "";
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
-	public SymbolTooltipPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel) {
+	public SymbolTooltipPanel(String id, IModel<Depot> depotModel) {
 		super(id);
 		
 		this.depotModel = depotModel;
-		this.requestModel = requestModel;
 	}
 
 	@Override
@@ -240,7 +236,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = hit.getBlobPath();
 		state.mark = TextRange.of(hit.getTokenPos());
-		state.requestId = PullRequest.idOf(requestModel.getObject());
 		return DepotFilePage.paramsOf(depotModel.getObject(), state);
 	}
 	
@@ -248,7 +243,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 		DepotFilePage.State state = new DepotFilePage.State();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = getBlobPath();
-		state.requestId = PullRequest.idOf(requestModel.getObject());
 		state.query = symbol;
 		return DepotFilePage.paramsOf(depotModel.getObject(), state);
 	}
@@ -264,7 +258,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		depotModel.detach();
-		requestModel.detach();
 		super.onDetach();
 	}
 

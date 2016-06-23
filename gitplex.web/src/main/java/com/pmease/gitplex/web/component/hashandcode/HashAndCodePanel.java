@@ -18,8 +18,6 @@ public class HashAndCodePanel extends Panel {
 
 	private final IModel<Depot> depotModel;
 	
-	private final Long requestId;
-	
 	private final String hash;
 	
 	private final String path;
@@ -30,15 +28,9 @@ public class HashAndCodePanel extends Panel {
 	
 	public HashAndCodePanel(String id, IModel<Depot> depotModel, String hash, 
 			@Nullable String path) {
-		this(id, depotModel, hash, path, null);
-	}
-
-	public HashAndCodePanel(String id, IModel<Depot> depotModel, String hash, 
-			@Nullable String path, @Nullable Long requestId) {
 		super(id);
 		
 		this.depotModel = depotModel;
-		this.requestId = requestId;
 		this.hash = hash;
 		this.path = path;
 	}
@@ -50,7 +42,6 @@ public class HashAndCodePanel extends Panel {
 		add(new CommitHashPanel("hash", hash));
 		
 		DepotFilePage.State state = new DepotFilePage.State();
-		state.requestId = requestId;
 		state.blobIdent.revision = hash;
 		state.blobIdent.path = path;
 		add(new BookmarkablePageLink<Void>("code", DepotFilePage.class, 

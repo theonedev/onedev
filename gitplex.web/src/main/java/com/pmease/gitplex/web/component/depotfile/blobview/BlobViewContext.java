@@ -14,7 +14,6 @@ import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.search.hit.QueryHit;
 
@@ -24,9 +23,6 @@ public interface BlobViewContext extends Serializable {
 	
 	Depot getDepot();
 
-	@Nullable
-	PullRequest getPullRequest();
-	
 	BlobIdent getBlobIdent();
 	
 	@Nullable
@@ -39,8 +35,6 @@ public interface BlobViewContext extends Serializable {
 	Mode getMode();
 
 	boolean isOnBranch();
-	
-	boolean isAtSourceBranchHead();
 	
 	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos);
 	

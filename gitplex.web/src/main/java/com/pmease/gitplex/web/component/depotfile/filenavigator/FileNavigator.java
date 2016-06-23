@@ -25,7 +25,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -58,7 +57,6 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobNameChangeCallback;
@@ -138,7 +136,6 @@ public abstract class FileNavigator extends Panel {
 						super.onComponentTag(tag);
 						DepotFilePage.State state = new DepotFilePage.State();
 						state.blobIdent = blobIdent;
-						state.requestId = PullRequest.idOf(context.getPullRequest());
 						PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
 						tag.put("href", urlFor(DepotFilePage.class, params));
 					}
@@ -257,7 +254,6 @@ public abstract class FileNavigator extends Panel {
 										
 										DepotFilePage.State state = new DepotFilePage.State();
 										state.blobIdent = model.getObject();
-										state.requestId = PullRequest.idOf(context.getPullRequest());
 										PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
 										tag.put("href", urlFor(DepotFilePage.class, params));
 									}
@@ -423,49 +419,6 @@ public abstract class FileNavigator extends Panel {
 						});
 					}
 
-					PullRequest request = context.getPullRequest();
-					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
-							&& context.isAtSourceBranchHead() 
-							&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), path)) {
-						changeItems.add(new MenuItem() {
-		
-							@Override
-							public String getIconClass() {
-								return "fa-pencil";
-							}
-		
-							@Override
-							public String getLabel() {
-								return "Edit";
-							}
-		
-							@Override
-							public AbstractLink newLink(String id) {
-								DepotFilePage.State state = new DepotFilePage.State();
-								state.blobIdent.revision = context.getPullRequest().getSourceBranch();
-								state.blobIdent.path = context.getBlobIdent().path;
-								state.mode = Mode.EDIT;
-								state.mark = context.getMark();
-								PageParameters params = DepotFilePage.paramsOf(context.getPullRequest().getSourceDepot(), state);
-								
-								AbstractLink link = new BookmarkablePageLink<Void>(id, DepotFilePage.class, params) {
-
-									@Override
-									protected CharSequence getOnClickScript(CharSequence url) {
-										return closeBeforeClick(super.getOnClickScript(url));
-									}
-									
-								};
-								link.add(new ViewStateAwareBehavior());
-								// open in a new tab by default to make sure user can continue to add reply to 
-								// comments on current page after committing code
-								link.add(AttributeAppender.append("target", "_blank"));
-								
-								return link;
-							}
-							
-						});
-					}
 					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
 							&& context.isOnBranch() 
 							&& SecurityUtils.canModify(context.getDepot(), file.revision, path)) {
@@ -514,41 +467,6 @@ public abstract class FileNavigator extends Panel {
 						});
 					}
 
-					if (file.isFile() && context.isAtSourceBranchHead()
-							&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), path)) {
-						changeItems.add(new MenuItem() {
-
-							@Override
-							public String getIconClass() {
-								return "fa-trash";
-							}
-
-							@Override
-							public String getLabel() {
-								return "Delete";
-							}
-
-							@Override
-							public AbstractLink newLink(String id) {
-								DepotFilePage.State state = new DepotFilePage.State();
-								state.blobIdent.revision = context.getPullRequest().getSourceBranch();
-								state.blobIdent.path = context.getBlobIdent().path;
-								state.mode = Mode.DELETE;
-								PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
-								AbstractLink link = new BookmarkablePageLink<Void>(id, DepotFilePage.class, params) {
-
-									@Override
-									protected CharSequence getOnClickScript(CharSequence url) {
-										return closeBeforeClick(super.getOnClickScript(url));
-									}
-									
-								};
-								link.add(AttributeAppender.append("target", "_blank"));
-								return link;
-							}
-							
-						});
-					} 
 					if (file.isFile() && context.isOnBranch() 
 							&& SecurityUtils.canModify(context.getDepot(), file.revision, path)) {
 						changeItems.add(new MenuItem() {

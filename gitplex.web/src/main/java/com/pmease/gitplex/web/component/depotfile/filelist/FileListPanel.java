@@ -38,7 +38,6 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
@@ -47,8 +46,6 @@ public abstract class FileListPanel extends Panel {
 	public static final String README_NAME = "readme";
 	
 	private final IModel<Depot> depotModel;
-	
-	private final IModel<PullRequest> requestModel;
 	
 	private final BlobIdent directory;
 	
@@ -113,11 +110,10 @@ public abstract class FileListPanel extends Panel {
 		
 	};
 	
-	public FileListPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, BlobIdent directory) {
+	public FileListPanel(String id, IModel<Depot> depotModel, BlobIdent directory) {
 		super(id);
 
 		this.depotModel = depotModel;
-		this.requestModel = requestModel;
 		this.directory = directory;
 	}
 
@@ -159,7 +155,6 @@ public abstract class FileListPanel extends Panel {
 				
 				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent = parentIdent;
-				state.requestId = PullRequest.idOf(requestModel.getObject());
 				PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state); 
 				tag.put("href", urlFor(DepotFilePage.class, params));
 			}
@@ -195,7 +190,6 @@ public abstract class FileListPanel extends Panel {
 						
 						DepotFilePage.State state = new DepotFilePage.State();
 						state.blobIdent = blobIdent;
-						state.requestId = PullRequest.idOf(requestModel.getObject());
 						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state); 
 						tag.put("href", urlFor(DepotFilePage.class, params));
 					}
@@ -286,7 +280,6 @@ public abstract class FileListPanel extends Panel {
 		childrenModel.detach();
 		readmeModel.detach();		
 		depotModel.detach();
-		requestModel.detach();
 		
 		super.onDetach();
 	}

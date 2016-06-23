@@ -755,7 +755,6 @@ public class SourceViewPanel extends BlobViewPanel {
 				state.blobIdent = context.getBlobIdent();
 				state.commentId = CodeComment.idOf(context.getOpenComment());
 				state.mark = TextRange.of(symbol.getPos());
-				state.requestId = PullRequest.idOf(context.getPullRequest());
 				PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
 				link.add(AttributeAppender.replace("href", urlFor(DepotFilePage.class, params).toString()));
 				link.add(symbol.render("label", null));
@@ -786,13 +785,6 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public Depot getObject() {
 				return context.getDepot();
-			}
-			
-		}, new AbstractReadOnlyModel<PullRequest>() {
-
-			@Override
-			public PullRequest getObject() {
-				return context.getPullRequest();
 			}
 			
 		}) {

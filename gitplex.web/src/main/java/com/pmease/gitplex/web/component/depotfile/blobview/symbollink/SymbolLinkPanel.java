@@ -19,7 +19,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.commons.git.Blob;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -69,7 +68,6 @@ public class SymbolLinkPanel extends BlobViewPanel {
 			DepotFilePage.State state = new DepotFilePage.State();
 			state.blobIdent.revision = context.getBlobIdent().revision;
 			state.blobIdent.path = targetPath;
-			state.requestId = PullRequest.idOf(context.getPullRequest());
 			link = new BookmarkablePageLink<Void>("link", DepotFilePage.class, 
 					DepotFilePage.paramsOf(context.getDepot(), state));
 		} 

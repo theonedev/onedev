@@ -26,8 +26,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -48,7 +46,6 @@ import com.google.common.base.Objects;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
@@ -60,7 +57,6 @@ import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
@@ -89,7 +85,6 @@ import com.pmease.gitplex.web.component.depotfile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
-import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 
 @SuppressWarnings("serial")
 public class DepotFilePage extends DepotPage implements BlobViewContext {
@@ -107,8 +102,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private static final String PARAM_REVISION = "revision";
 	
 	private static final String PARAM_PATH = "path";
-	
-	private static final String PARAM_REQUEST = "request";
 	
 	private static final String PARAM_COMMENT = "comment";
 	
@@ -130,19 +123,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private static final String SEARCH_RESULD_ID = "searchResult";
 
-	private Long requestId;
-	
-	private final IModel<PullRequest> requestModel = new LoadableDetachableModel<PullRequest>() {
-
-		@Override
-		protected PullRequest load() {
-			if (requestId != null)
-				return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
-			else
-				return null;
-		}
-	};
-	
 	private BlobIdent blobIdent = new BlobIdent();
 	
 	private ObjectId resolvedRevision;
@@ -174,16 +154,11 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		blobIdent.revision = params.get(PARAM_REVISION).toString();
 		blobIdent.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
 		
-		requestId = params.get(PARAM_REQUEST).toOptionalLong();
-		
 		blobIdent.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
 		if (blobIdent.revision == null)
 			blobIdent.revision = getDepot().getDefaultBranch();
 
 		resolvedRevision = getDepot().getObjectId(blobIdent.revision);
-		
-		if (requestId != null && !GitUtils.isHash(blobIdent.revision))
-			throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
 		
 		RevCommit commit = getDepot().getRevCommit(blobIdent.revision);
 		trait.commitId = commit.copy();
@@ -248,7 +223,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new InstantSearchPanel("instantSearch", depotModel, requestModel, new AbstractReadOnlyModel<String>() {
+		add(new InstantSearchPanel("instantSearch", depotModel, new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -365,9 +340,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			}
 			
 		});
-		if (getPullRequest() != null) {
-			add(new PullRequestChangeRenderer(getPullRequest().getId()));
-		}
 	}
 
 	/*
@@ -385,11 +357,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		return objectIdCache;
 	}
 
-	@Override
-	public PullRequest getPullRequest() {
-		return requestModel.getObject();
-	}
-	
 	@Override
 	public CodeComment getOpenComment() {
 		if (commentId != null)
@@ -589,7 +556,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				
 			};
 		} else if (blobIdent.path == null || blobIdent.isTree()) {
-			fileViewer = new FileListPanel(FILE_VIEWER_ID, depotModel, requestModel, blobIdent) {
+			fileViewer = new FileListPanel(FILE_VIEWER_ID, depotModel, blobIdent) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
@@ -619,7 +586,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		state.blobIdent = new BlobIdent(blobIdent);
 		state.mark = mark;
 		state.mode = mode;
-		state.requestId = requestId;
 		state.commentId = commentId;
 		return state;
 	}
@@ -640,13 +606,11 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		mark = state.mark;
 		mode = state.mode;
 		commentId = state.commentId;
-		requestId = state.requestId;
 	}
 	
 	private void onSelect(AjaxRequestTarget target, String revision) {
 		State state = getState();
 		state.blobIdent.revision = revision;
-		state.requestId = null;
 		state.commentId = null;
 		state.mode = null;
 		state.mark = null;
@@ -736,8 +700,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			params.set(PARAM_MARK, state.mark.toString());
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
-		if (state.requestId != null)
-			params.set(PARAM_REQUEST, state.requestId);
 		if (state.mode != null)
 			params.set(PARAM_MODE, state.mode.name().toLowerCase());
 		if (state.query != null)
@@ -812,13 +774,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 	}
 	
-	@Override
-	protected void onDetach() {
-		requestModel.detach();
-		
-		super.onDetach();
-	}
-
 	@Override
 	public BlobIdent getBlobIdent() {
 		return blobIdent;
@@ -949,13 +904,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 	
 	@Override
-	public boolean isAtSourceBranchHead() {
-		PullRequest request = getPullRequest();
-		return request != null && request.getSourceDepot() != null 
-				&& blobIdent.revision.equals(request.getSource().getObjectName(false)); 
-	}
-
-	@Override
 	protected boolean isFootVisible() {
 		return false;
 	}
@@ -992,8 +940,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		private static final long serialVersionUID = 1L;
 
-		public Long requestId;
-		
 		public Long commentId;
 		
 		public BlobIdent blobIdent = new BlobIdent();

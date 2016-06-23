@@ -199,7 +199,12 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			public void onClick(AjaxRequestTarget target) {
 				int index = getCommitIndex(state.newCommit);
 				if (index != -1 && index != commitsModel.getObject().size()-1) {
-					state.oldCommit = commitsModel.getObject().get(index).getHash();
+					CodeComment comment = getOpenComment();
+					
+					// we will not move old commit if an opened comment points to it
+					if (comment == null || comment.getCommentPos().getCommit().equals(state.newCommit)) {
+						state.oldCommit = state.newCommit;
+					}
 					index++;
 					state.newCommit = commitsModel.getObject().get(index).getHash();
 					newRevisionDiff(target);
