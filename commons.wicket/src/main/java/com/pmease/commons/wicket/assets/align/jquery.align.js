@@ -90,6 +90,7 @@
         			exceeded += top+height-borderBottom;
         		
         		// flip  to see if situation is better
+        		var topBeforeFlip = top;
         		anchor = targetHeight*(100-alignment.placement.targetY)/100.0 + targetTop;
         		top = anchor - (100 - alignment.placement.y) * height / 100.0;
 
@@ -107,12 +108,7 @@
 
             		if (exceededAfterFlip > exceeded) {
     	    			// situation is even worse after flip, so we revert back
-    	    			anchor = targetHeight*alignment.placement.targetY/100.0 + targetTop;
-    	    			top = anchor - alignment.placement.y*height/100.0;
-    	    	    	if (alignment.placement.targetY == 0 && alignment.placement.y == 100)
-    	    	    		top -= offset;
-    	    	    	else if (alignment.placement.targetY == 100 && alignment.placement.y == 0)
-    	    	    		top += offset;
+            			top = topBeforeFlip;
             		}
         		}
         		
@@ -128,8 +124,8 @@
         		if (top + height > borderBottom) 
         			height = borderBottom - top;
         		if (top < borderTop) {
-        			top = borderTop;
         			height -= borderTop - top;
+        			top = borderTop;
         		}
         	}
 
@@ -148,6 +144,7 @@
         			exceeded += left+width-borderRight;
         		
         		// flip to see if situation is better
+        		var leftBeforeFlip = left;
         		anchor = targetWidth*(100-alignment.placement.targetX)/100.0 + targetLeft;
         		left = anchor - (100 - alignment.placement.x) * width / 100.0;
 
@@ -165,12 +162,7 @@
             		
         			// situation is even worse after flip, so we revert back
             		if (exceededAfterFlip > exceeded) {
-            			anchor = targetWidth*alignment.placement.targetX/100.0 + targetLeft;
-            			left = anchor - alignment.placement.x*width/100.0;
-            	    	if (alignment.placement.targetX == 0 && alignment.placement.x == 100)
-            	    		left -= offset;
-            	    	else if (alignment.placement.targetX == 100 && alignment.placement.x == 0)
-            	    		left += offset;
+            			left = leftBeforeFlip;
             		}
         		}
         		
@@ -186,8 +178,8 @@
         		if (left + width > borderRight) 
         			width = borderRight - left;
         		if (left < borderLeft) {
-        			left = borderLeft;
         			width -= borderLeft - left;
+        			left = borderLeft;
         		}
         	}
         	
