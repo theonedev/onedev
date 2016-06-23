@@ -216,7 +216,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 					ByteIterable key = new StringByteIterable(comment.getUUID());
 					
 					byte[] keyBytes = new byte[20];
-					ObjectId.fromString(comment.getCommit()).copyRawTo(keyBytes, 0);
+					ObjectId.fromString(comment.getCommentPos().getCommit()).copyRawTo(keyBytes, 0);
 					ByteIterable commitKey = new ArrayByteIterable(keyBytes);
 					byte[] valueBytes = getBytes(store.get(txn, commitKey));
 					Map<String, CompareContext> comments;
@@ -227,14 +227,14 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 					comments.put(comment.getUUID(), comment.getCompareContext());
 					store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
 					
-					if (comment.getPath() != null) {
+					if (comment.getCommentPos().getPath() != null) {
 						Set<String> files;
 						valueBytes = getBytes(store.get(txn, FILES_KEY));
 						if (valueBytes != null)
 							files = (Set<String>) SerializationUtils.deserialize(valueBytes);
 						else
 							files = new HashSet<String>();
-						files.add(comment.getPath());
+						files.add(comment.getCommentPos().getPath());
 						store.put(txn, FILES_KEY, new ArrayByteIterable(SerializationUtils.serialize((Serializable) files)));
 						
 						filesCache.remove(depot.getId());

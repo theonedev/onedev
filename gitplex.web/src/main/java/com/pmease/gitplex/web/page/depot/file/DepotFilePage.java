@@ -61,7 +61,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -147,7 +147,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private ObjectId resolvedRevision;
 	
-	private Mark mark;
+	private TextRange mark;
 	
 	private Mode mode;
 	
@@ -207,7 +207,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		String modeStr = params.get(PARAM_MODE).toString();
 		if (modeStr != null)
 			mode = Mode.valueOf(modeStr.toUpperCase());
-		mark = Mark.of(params.get(PARAM_MARK).toString());
+		mark = TextRange.of(params.get(PARAM_MARK).toString());
 		
 		String commentIdStr = params.get(PARAM_COMMENT).toString();
 		if (commentIdStr != null)
@@ -825,18 +825,18 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public Mark getMark() {
+	public TextRange getMark() {
 		return mark;
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, Mark mark) {
+	public void onMark(AjaxRequestTarget target, TextRange mark) {
 		this.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public String getMarkUrl(Mark mark) {
+	public String getMarkUrl(TextRange mark) {
 		State state = getState();
 		state.blobIdent.revision = resolvedRevision.name();
 		state.commentId = null;
@@ -852,7 +852,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	@Override
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
-		mark = Mark.of(tokenPos);
+		mark = TextRange.of(tokenPos);
 		if (Objects.equal(DepotFilePage.this.blobIdent.path, blobIdent.path)) {
 			if (mark != null) {
 				Component fileViewer = get(FILE_VIEWER_ID);
@@ -924,7 +924,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			commentId = comment.getId();
-			mark = comment.getMark();
+			mark = comment.getCommentPos().getRange();
 		} else {
 			commentId = null;
 		}
@@ -932,7 +932,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, Mark mark) {
+	public void onAddComment(AjaxRequestTarget target, TextRange mark) {
 		commentId = null;
 		this.mark = mark;
 		pushState(target);
@@ -998,7 +998,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		public BlobIdent blobIdent = new BlobIdent();
 		
-		public Mark mark;
+		public TextRange mark;
 		
 		public Mode mode;
 		

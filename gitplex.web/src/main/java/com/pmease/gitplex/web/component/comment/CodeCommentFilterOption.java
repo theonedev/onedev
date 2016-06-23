@@ -155,14 +155,14 @@ public class CodeCommentFilterOption implements Serializable {
 				continue;
 			}
 			if (path != null) {
-				if (comment.getPath() == null) {
+				if (comment.getCommentPos().getPath() == null) {
 					it.remove();
 					continue;
 				} else {
 					String matchWith = path;
 					if (matchWith.endsWith("/"))
 						matchWith += "*";
-					if (!WildcardUtils.matchString(matchWith, comment.getPath())) {
+					if (!WildcardUtils.matchString(matchWith, comment.getCommentPos().getPath())) {
 						it.remove();
 						continue;
 					}

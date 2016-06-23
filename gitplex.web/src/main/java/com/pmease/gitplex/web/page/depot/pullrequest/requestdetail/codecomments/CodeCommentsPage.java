@@ -27,8 +27,8 @@ public class CodeCommentsPage extends RequestDetailPage implements CodeCommentAw
 		filterOption = new CodeCommentFilterOption(params);
 		
 		for (CodeComment comment: getPullRequest().getCodeComments()) {
-			if (comment.getPath() != null) 
-				commentedFiles.add(comment.getPath());
+			if (comment.getCommentPos().getPath() != null) 
+				commentedFiles.add(comment.getCommentPos().getPath());
 		}
 		commentedFiles.sort((file1, file2)->Paths.get(file1).compareTo(Paths.get(file2)));
 	}

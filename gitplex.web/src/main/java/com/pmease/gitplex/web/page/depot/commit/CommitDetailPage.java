@@ -44,14 +44,14 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
 import com.pmease.gitplex.web.component.createtag.CreateTagLink;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
-import com.pmease.gitplex.web.component.diff.revision.MarkSupport;
+import com.pmease.gitplex.web.component.diff.revision.CommentSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -60,7 +60,7 @@ import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 
 @SuppressWarnings("serial")
-public class CommitDetailPage extends DepotPage implements MarkSupport {
+public class CommitDetailPage extends DepotPage implements CommentSupport {
 
 	private static final String PARAM_REVISION = "revision";
 	
@@ -453,7 +453,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 		public String blameFile;
 		
 		@Nullable
-		public DiffMark mark;
+		public CommentPos mark;
 		
 		public State() {
 		}
@@ -465,18 +465,18 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 			pathFilter = params.get(PARAM_PATH_FILTER).toString();
 			blameFile = params.get(PARAM_BLAME_FILE).toString();
 			commentId = params.get(PARAM_COMMENT).toOptionalLong();
-			mark = DiffMark.of(params.get(PARAM_MARK).toString());
+			mark = CommentPos.of(params.get(PARAM_MARK).toString());
 		}
 		
 	}
 
 	@Override
-	public DiffMark getMark() {
+	public CommentPos getMark() {
 		return state.mark;
 	}
 
 	@Override
-	public String getMarkUrl(DiffMark mark) {
+	public String getMarkUrl(CommentPos mark) {
 		State markState = new State();
 		markState.mark = mark;
 		markState.whitespaceOption = state.whitespaceOption;
@@ -490,7 +490,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 	public String getCommentUrl(CodeComment comment) {
 		State commentState = new State();
 		String compareWith = getCompareWith().name();
-		commentState.mark = new DiffMark(comment);
+		commentState.mark = comment.getCommentPos();
 		commentState.commentId = comment.getId();
 		commentState.whitespaceOption = state.whitespaceOption;
 		commentState.compareWith = compareWith;
@@ -511,7 +511,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			state.commentId = comment.getId();
-			state.mark = new DiffMark(comment);
+			state.mark = comment.getCommentPos();
 		} else {
 			state.commentId = null;
 		}
@@ -519,13 +519,13 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 	}
 	
 	@Override
-	public void onMark(AjaxRequestTarget target, DiffMark mark) {
+	public void onMark(AjaxRequestTarget target, CommentPos mark) {
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, DiffMark mark) {
+	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);

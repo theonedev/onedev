@@ -112,7 +112,7 @@ public class CodeCommentReply extends AbstractEntity {
 	}
 	
 	public ComparingInfo getComparingInfo() {
-		return new ComparingInfo(comment.getCommit(), compareContext);
+		return new ComparingInfo(comment.getCommentPos().getCommit(), compareContext);
 	}
 	
 }

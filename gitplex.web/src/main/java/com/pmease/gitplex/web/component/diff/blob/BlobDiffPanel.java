@@ -22,12 +22,12 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.DiffRenderer;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
-import com.pmease.gitplex.web.component.diff.revision.BlobMarkSupport;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
+import com.pmease.gitplex.web.component.diff.revision.BlobCommentSupport;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 
 @SuppressWarnings("serial")
@@ -45,11 +45,11 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 	
 	private final DiffViewMode diffMode;
 	
-	private final BlobMarkSupport markSupport;
+	private final BlobCommentSupport markSupport;
 	
 	public BlobDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
-			@Nullable BlobMarkSupport markSupport) {
+			@Nullable BlobCommentSupport markSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -184,7 +184,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 	}
 
 	@Override
-	public void mark(AjaxRequestTarget target, DiffMark mark) {
+	public void mark(AjaxRequestTarget target, CommentPos mark) {
 		Component content = get(CONTENT_ID);
 		if (content instanceof SourceAware) {
 			SourceAware sourceAware = (SourceAware) content;

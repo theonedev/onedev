@@ -23,13 +23,11 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OptimisticLock;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
@@ -71,17 +69,9 @@ public class CodeComment extends AbstractEntity {
 	
 	private String lastReplyUser;
 	
-	@OptimisticLock(excluded=true)
-	@Column(nullable=false)
-	private String commit;
-	
-	@OptimisticLock(excluded=true)
-	private String path;
-	
-	@OptimisticLock(excluded=true)
 	@Embedded
-	private Mark mark;
-
+	private CommentPos commentPos;
+	
 	@Embedded
 	private CompareContext compareContext;
 	
@@ -152,36 +142,12 @@ public class CodeComment extends AbstractEntity {
 		this.createDate = createDate;
 	}
 
-	public void delete() {
-		GitPlex.getInstance(Dao.class).remove(this);
+	public CommentPos getCommentPos() {
+		return commentPos;
 	}
 
-	public String getCommit() {
-		return commit;
-	}
-
-	public void setCommit(String commit) {
-		this.commit = commit;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
-	}
-
-	public void setDate(Date date) {
-		this.createDate = date;
-	}
-
-	public Mark getMark() {
-		return mark;
-	}
-
-	public void setMark(Mark mark) {
-		this.mark = mark;
+	public void setCommentPos(CommentPos commentPos) {
+		this.commentPos = commentPos;
 	}
 
 	public CompareContext getCompareContext() {
@@ -251,7 +217,7 @@ public class CodeComment extends AbstractEntity {
 	}
 	
 	public ComparingInfo getComparingInfo() {
-		return new ComparingInfo(commit, compareContext);
+		return new ComparingInfo(commentPos.getCommit(), compareContext);
 	}
 	
 	public static class ComparingInfo implements Serializable {

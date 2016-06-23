@@ -46,7 +46,6 @@ import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -162,7 +161,7 @@ public abstract class CodeCommentListPanel extends Panel {
 							}
 							RequestChangesPage.State state = new RequestChangesPage.State();
 							state.commentId = comment.getId();
-							state.mark = new DiffMark(comment);
+							state.mark = comment.getCommentPos();
 							state.oldCommit = comparingInfo.getOldCommit();
 							state.newCommit = comparingInfo.getNewCommit();
 							state.pathFilter = comparingInfo.getPathFilter();
@@ -176,16 +175,16 @@ public abstract class CodeCommentListPanel extends Panel {
 							} else {
 								compareContext = comment.getCompareContext();
 							}
-							if (!compareContext.getCompareCommit().equals(comment.getCommit())) {
+							if (!compareContext.getCompareCommit().equals(comment.getCommentPos().getCommit())) {
 								RevisionComparePage.State state = new RevisionComparePage.State();
 								state.commentId = comment.getId();
-								state.mark = new DiffMark(comment);
+								state.mark = comment.getCommentPos();
 								state.compareWithMergeBase = false;
 								if (compareContext.isLeftSide()) {
 									state.leftSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
-									state.rightSide = new DepotAndRevision(depot, comment.getCommit());
+									state.rightSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
 								} else {
-									state.leftSide = new DepotAndRevision(depot, comment.getCommit());
+									state.leftSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
 									state.rightSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
 								}
 								state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
@@ -194,11 +193,11 @@ public abstract class CodeCommentListPanel extends Panel {
 								setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, state));
 							} else {
 								DepotFilePage.State state = new DepotFilePage.State();
-								state.blobIdent.revision = comment.getCommit();
-								state.blobIdent.path = comment.getPath();
+								state.blobIdent.revision = comment.getCommentPos().getCommit();
+								state.blobIdent.path = comment.getCommentPos().getPath();
 								state.blobIdent.mode = FileMode.TYPE_FILE;
 								state.commentId = comment.getId();
-								state.mark = comment.getMark();
+								state.mark = comment.getCommentPos().getRange();
 								setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot, state));
 							}
 						}
@@ -208,10 +207,10 @@ public abstract class CodeCommentListPanel extends Panel {
 				link.add(new Label("title", comment.getTitle()));
 				link.add(new WebMarkupContainer("resolved").setVisible(comment.isResolved()));
 				link.add(new Label("user", comment.getUser().getDisplayName()));
-				if (comment.getPath() != null)
-					link.add(new Label("what", comment.getPath()));
+				if (comment.getCommentPos().getPath() != null)
+					link.add(new Label("what", comment.getCommentPos().getPath()));
 				else
-					link.add(new Label("what", comment.getCommit()));
+					link.add(new Label("what", comment.getCommentPos().getCommit()));
 				link.add(new Label("age", DateUtils.formatAge(comment.getCreateDate())));
 				
 				WebMarkupContainer lastReply = new WebMarkupContainer("lastReply");

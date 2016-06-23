@@ -10,35 +10,35 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.pmease.commons.lang.extractors.TokenPosition;
 
-public class Mark implements Serializable {
+public class TextRange implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public int beginLine, beginChar, endLine, endChar;
 	
-	public Mark() {
+	public TextRange() {
 	}
 	
-	public Mark(int beginLine, int beginChar, int endLine, int endChar) {
+	public TextRange(int beginLine, int beginChar, int endLine, int endChar) {
 		this.beginLine = beginLine;
 		this.beginChar = beginChar;
 		this.endLine = endLine;
 		this.endChar = endChar;
 	}
 	
-	public Mark(Mark mark) {
-		this.beginLine = mark.beginLine;
-		this.beginChar = mark.beginChar;
-		this.endLine = mark.endLine;
-		this.endChar = mark.endChar;
+	public TextRange(TextRange range) {
+		this.beginLine = range.beginLine;
+		this.beginChar = range.beginChar;
+		this.endLine = range.endLine;
+		this.endChar = range.endChar;
 	}
 	
-	public Mark(TokenPosition tokenPos) {
+	public TextRange(TokenPosition tokenPos) {
 		this(tokenPos.getLine(), tokenPos.getRange().getFrom(), 
 				tokenPos.getLine(), tokenPos.getRange().getTo());
 	}
 
-	public Mark(String markStr) {
+	public TextRange(String markStr) {
 		String begin = StringUtils.substringBefore(markStr, "-");
 		String end = StringUtils.substringAfter(markStr, "-");
 		beginLine = Integer.parseInt(StringUtils.substringBefore(begin, "."))-1;
@@ -70,16 +70,16 @@ public class Mark implements Serializable {
 	
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof Mark))
+		if (!(other instanceof TextRange))
 			return false;
 		if (this == other)
 			return true;
-		Mark otherMark = (Mark) other;
+		TextRange otherRange = (TextRange) other;
 		return new EqualsBuilder()
-				.append(beginLine, otherMark.beginLine)
-				.append(beginChar, otherMark.beginChar)
-				.append(endLine, otherMark.endLine)
-				.append(endChar, otherMark.endChar)
+				.append(beginLine, otherRange.beginLine)
+				.append(beginChar, otherRange.beginChar)
+				.append(endLine, otherRange.endLine)
+				.append(endChar, otherRange.endChar)
 				.isEquals();
 	}
 
@@ -93,16 +93,16 @@ public class Mark implements Serializable {
 				.toHashCode();
 	}
 	
-	public static @Nullable Mark of(@Nullable TokenPosition tokenPos) {
+	public static @Nullable TextRange of(@Nullable TokenPosition tokenPos) {
 		if (tokenPos != null)
-			return new Mark(tokenPos);
+			return new TextRange(tokenPos);
 		else
 			return null;
 	}
 	
-	public static @Nullable Mark of(@Nullable String markStr) {
-		if (markStr != null)
-			return new Mark(markStr);
+	public static @Nullable TextRange of(@Nullable String str) {
+		if (str != null)
+			return new TextRange(str);
 		else
 			return null;
 	}

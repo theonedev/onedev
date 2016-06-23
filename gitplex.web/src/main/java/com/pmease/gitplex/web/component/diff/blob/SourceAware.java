@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.gitplex.core.entity.CodeComment;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 
 public interface SourceAware {
 	
@@ -15,7 +15,7 @@ public interface SourceAware {
 
 	void onCommentAdded(AjaxRequestTarget target, CodeComment comment);
 	
-	void mark(AjaxRequestTarget target, @Nullable DiffMark mark);
+	void mark(AjaxRequestTarget target, @Nullable CommentPos mark);
 
 	void onUnblame(AjaxRequestTarget target);
 }

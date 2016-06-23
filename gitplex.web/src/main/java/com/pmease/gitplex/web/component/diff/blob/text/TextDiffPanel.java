@@ -60,7 +60,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.entity.component.CommentPos;
+import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -70,8 +71,7 @@ import com.pmease.gitplex.web.component.diff.blob.SourceAware;
 import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
-import com.pmease.gitplex.web.component.diff.revision.BlobMarkSupport;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
+import com.pmease.gitplex.web.component.diff.revision.BlobCommentSupport;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
@@ -95,7 +95,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 	private final IModel<Boolean> blameModel;
 	
-	private final BlobMarkSupport markSupport;
+	private final BlobCommentSupport markSupport;
 	
 	private Component symbolTooltip;
 	
@@ -107,7 +107,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
-			@Nullable BlobMarkSupport markSupport) {
+			@Nullable BlobCommentSupport markSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -122,7 +122,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		}
 	}
 
-	private String getJson(DiffMark mark) {
+	private String getJson(CommentPos mark) {
 		try {
 			MarkInfo markInfo = new MarkInfo(mark, getOldCommit().name());
 			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(markInfo);
@@ -269,7 +269,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					String jsonOfPosition = String.format("{left: %d, top: %d}", 
 							params.getParameterValue("param1").toInt(), 
 							params.getParameterValue("param2").toInt());
-					DiffMark mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
+					CommentPos mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
 					script = String.format("gitplex.textdiff.openSelectionPopover('%s', %s, %s, '%s', %s);", 
 							getMarkupId(), jsonOfPosition, getJson(mark), markSupport.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
@@ -324,7 +324,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		setOutputMarkupId(true);
 	}
 	
-	private DiffMark getMark(IRequestParameters params, String leftSideParam, 
+	private CommentPos getMark(IRequestParameters params, String leftSideParam, 
 			String beginLineParam, String beginCharParam, 
 			String endLineParam, String endCharParam) {
 		boolean leftSide = params.getParameterValue(leftSideParam).toBoolean();
@@ -333,7 +333,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
 		String commit = leftSide?getOldCommit().name():getNewCommit().name();
-		return new DiffMark(commit, change.getPath(), beginLine, beginChar, endLine, endChar);
+		return new CommentPos(commit, change.getPath(), new TextRange(beginLine, beginChar, endLine, endChar));
 	}
 	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
@@ -406,8 +406,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			Map<Integer, List<CommentInfo>> oldCommentInfos = new HashMap<>(); 
 			Map<Integer, List<CommentInfo>> newCommentInfos = new HashMap<>(); 
 			for (CodeComment comment: markSupport.getComments()) {
-				if (comment.getMark() != null) {
-					int line = comment.getMark().getBeginLine();
+				if (comment.getCommentPos().getRange() != null) {
+					int line = comment.getCommentPos().getRange().getBeginLine();
 					List<CommentInfo> commentInfosAtLine;
 					CommentInfo commentInfo = new CommentInfo();
 					commentInfo.id = comment.getId();
@@ -444,7 +444,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				throw new RuntimeException(e);
 			}
 			
-			DiffMark mark = markSupport.getMark();
+			CommentPos mark = markSupport.getMark();
 			if (mark != null) {
 				jsonOfMark = getJson(mark);
 			} else {
@@ -907,18 +907,18 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			List<Range> oldRanges = new ArrayList<>();
 			List<Range> newRanges = new ArrayList<>();
 			if (markSupport != null) {
-				List<DiffMark> marks = new ArrayList<>();
-				DiffMark mark = markSupport.getMark();
+				List<CommentPos> marks = new ArrayList<>();
+				CommentPos mark = markSupport.getMark();
 				if (mark != null) {
 					marks.add(mark);
 				}
 				String oldCommitHash = getOldCommit().name();
 				for (CodeComment comment: markSupport.getComments()) {
-					mark = new DiffMark(comment);
+					mark = comment.getCommentPos();
 					marks.add(mark);
 				}
-				for (DiffMark each: marks) {
-					Range range = new Range(each.beginLine, each.endLine+1);
+				for (CommentPos each: marks) {
+					Range range = new Range(each.getRange().beginLine, each.getRange().endLine+1);
 					if (each.getCommit().equals(oldCommitHash)) {
 						oldRanges.add(range);
 					} else {
@@ -1025,7 +1025,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	}
 
 	@Override
-	public void mark(AjaxRequestTarget target, DiffMark mark) {
+	public void mark(AjaxRequestTarget target, CommentPos mark) {
 		String script;
 		if (mark != null) {
 			script = String.format(""
@@ -1060,7 +1060,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	}
 
 	@SuppressWarnings("unused")
-	private static class MarkInfo extends Mark {
+	private static class MarkInfo extends TextRange {
 		
 		String path;
 		
@@ -1071,13 +1071,13 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		}
 		
 		public MarkInfo(CodeComment comment, String oldCommitHash) {
-			super(comment.getMark());
-			path = comment.getPath();
-			leftSide = comment.getCommit().equals(oldCommitHash);
+			super(comment.getCommentPos().getRange());
+			path = comment.getCommentPos().getPath();
+			leftSide = comment.getCommentPos().getCommit().equals(oldCommitHash);
 		}
 		
-		public MarkInfo(DiffMark mark, String oldCommitHash) {
-			super(mark);
+		public MarkInfo(CommentPos mark, String oldCommitHash) {
+			super(mark.getRange());
 			path = mark.getPath();
 			leftSide = mark.getCommit().equals(oldCommitHash);
 		}

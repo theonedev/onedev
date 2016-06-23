@@ -15,7 +15,7 @@ import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.search.hit.QueryHit;
 
 public interface BlobViewContext extends Serializable {
@@ -30,11 +30,11 @@ public interface BlobViewContext extends Serializable {
 	BlobIdent getBlobIdent();
 	
 	@Nullable
-	Mark getMark();
+	TextRange getMark();
 	
-	void onMark(AjaxRequestTarget target, Mark mark);
+	void onMark(AjaxRequestTarget target, TextRange mark);
 	
-	String getMarkUrl(Mark mark);
+	String getMarkUrl(TextRange mark);
 	
 	Mode getMode();
 
@@ -54,7 +54,7 @@ public interface BlobViewContext extends Serializable {
 	
 	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 
-	void onAddComment(AjaxRequestTarget target, Mark mark);
+	void onAddComment(AjaxRequestTarget target, TextRange mark);
 	
 	@Nullable
 	CodeComment getOpenComment();

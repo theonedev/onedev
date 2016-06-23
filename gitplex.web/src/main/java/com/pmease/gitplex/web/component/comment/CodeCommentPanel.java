@@ -46,7 +46,6 @@ import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.DateUtils;
@@ -104,12 +103,12 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					state.commentId = comment.getId();
 					if (compareContext.isLeftSide()) {
 						state.oldCommit = compareContext.getCompareCommit();
-						state.newCommit = comment.getCommit();
+						state.newCommit = comment.getCommentPos().getCommit();
 					} else {
-						state.oldCommit = comment.getCommit();
+						state.oldCommit = comment.getCommentPos().getCommit();
 						state.newCommit = compareContext.getCompareCommit();
 					}
-					state.mark = new DiffMark(comment);
+					state.mark = comment.getCommentPos();
 					state.pathFilter = compareContext.getPathFilter();
 					state.whitespaceOption = compareContext.getWhitespaceOption();
 					PageParameters params  = RequestChangesPage.paramsOf(request, state);
@@ -120,12 +119,12 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					state.compareWithMergeBase = false;
 					if (compareContext.isLeftSide()) {
 						state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
-						state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+						state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
 					} else {
-						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
 						state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
 					}
-					state.mark = new DiffMark(comment);
+					state.mark = comment.getCommentPos();
 					state.pathFilter = compareContext.getPathFilter();
 					state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 					state.whitespaceOption = compareContext.getWhitespaceOption();
@@ -334,12 +333,12 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					state.commentId = reply.getComment().getId();
 					if (compareContext.isLeftSide()) {
 						state.oldCommit = compareContext.getCompareCommit();
-						state.newCommit = reply.getComment().getCommit();
+						state.newCommit = reply.getComment().getCommentPos().getCommit();
 					} else {
-						state.oldCommit = reply.getComment().getCommit();
+						state.oldCommit = reply.getComment().getCommentPos().getCommit();
 						state.newCommit = compareContext.getCompareCommit();
 					}
-					state.mark = new DiffMark(reply.getComment());
+					state.mark = reply.getComment().getCommentPos();
 					state.pathFilter = compareContext.getPathFilter();
 					state.whitespaceOption = compareContext.getWhitespaceOption();
 					PageParameters params  = RequestChangesPage.paramsOf(request, state);
@@ -351,12 +350,12 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					state.compareWithMergeBase = false;
 					if (compareContext.isLeftSide()) {
 						state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
-						state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+						state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
 					} else {
-						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
 						state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
 					}
-					state.mark = new DiffMark(comment);
+					state.mark = comment.getCommentPos();
 					state.pathFilter = compareContext.getPathFilter();
 					state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 					state.whitespaceOption = compareContext.getWhitespaceOption();

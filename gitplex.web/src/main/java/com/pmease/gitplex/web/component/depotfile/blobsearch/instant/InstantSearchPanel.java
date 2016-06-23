@@ -47,7 +47,7 @@ import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
@@ -275,7 +275,7 @@ public abstract class InstantSearchPanel extends Panel {
 						DepotFilePage.State state = new DepotFilePage.State();
 						state.blobIdent.revision = revisionModel.getObject();
 						state.blobIdent.path = hit.getBlobPath();
-						state.mark = Mark.of(hit.getTokenPos());
+						state.mark = TextRange.of(hit.getTokenPos());
 						state.requestId = PullRequest.idOf(requestModel.getObject());
 						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
 						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);

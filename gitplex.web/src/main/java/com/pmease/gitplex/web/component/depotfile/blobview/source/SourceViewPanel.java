@@ -80,9 +80,10 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
-import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -92,7 +93,6 @@ import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionSelector;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
@@ -238,13 +238,13 @@ public class SourceViewPanel extends BlobViewPanel {
 		target.appendJavaScript("gitplex.sourceview.onToggleOutline();");
 	}
 
-	public void mark(AjaxRequestTarget target, Mark mark, boolean scroll) {
+	public void mark(AjaxRequestTarget target, TextRange mark, boolean scroll) {
 		String script = String.format("gitplex.sourceview.mark(%s, %s);", 
 				getJson(mark), scroll);
 		target.appendJavaScript(script);
 	}
 	
-	private String getJson(Mark mark) {
+	private String getJson(TextRange mark) {
 		try {
 			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(mark);
 		} catch (JsonProcessingException e) {
@@ -256,7 +256,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		commentContainer = new WebMarkupContainer("comment", Model.of((Mark)null)) {
+		commentContainer = new WebMarkupContainer("comment", Model.of((TextRange)null)) {
 			
 			@Override
 			public void renderHead(IHeaderResponse response) {
@@ -310,9 +310,9 @@ public class SourceViewPanel extends BlobViewPanel {
 						RevisionComparePage.State state = new RevisionComparePage.State();
 						CodeComment comment = context.getOpenComment();
 						state.commentId = comment.getId();
-						state.mark = new DiffMark(comment);
+						state.mark = comment.getCommentPos();
 						state.compareWithMergeBase = false;
-						state.leftSide = new DepotAndRevision(context.getDepot(), comment.getCommit());
+						state.leftSide = new DepotAndRevision(context.getDepot(), comment.getCommentPos().getCommit());
 						state.rightSide = new DepotAndRevision(context.getDepot(), revision);
 						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 						PageParameters params = RevisionComparePage.paramsOf(context.getDepot(), state);
@@ -328,11 +328,11 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				CodeComment comment = context.getOpenComment();
-				Mark mark;
+				TextRange mark;
 				if (comment != null) {
-					mark = comment.getMark();
+					mark = comment.getCommentPos().getRange();
 				} else {
-					mark = (Mark) commentContainer.getDefaultModelObject();
+					mark = (TextRange) commentContainer.getDefaultModelObject();
 				}
 				mark(target, mark, true);
 				context.onMark(target, mark);
@@ -358,7 +358,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					state.blobIdent = new BlobIdent(context.getBlobIdent());
 					state.blobIdent.revision = context.getCommit().name();
 					state.commentId = context.getOpenComment().getId();
-					state.mark = context.getOpenComment().getMark();
+					state.mark = context.getOpenComment().getCommentPos().getRange();
 					return urlFor(DepotFilePage.class, DepotFilePage.paramsOf(context.getDepot(), state)).toString();
 				} else {
 					return "";
@@ -502,7 +502,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					target.appendJavaScript(script);
 					break;
 				case "openSelectionPopover": 
-					Mark mark = getMark(params, "param1", "param2", "param3", "param4");
+					TextRange mark = getMark(params, "param1", "param2", "param3", "param4");
 					script = String.format("gitplex.sourceview.openSelectionPopover(%s, '%s', %s);", 
 							getJson(mark), context.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
@@ -575,13 +575,14 @@ public class SourceViewPanel extends BlobViewPanel {
 							
 							CodeComment comment = new CodeComment();
 							comment.setUUID(uuid);
-							comment.setCommit(context.getCommit().name());
-							comment.setPath(context.getBlobIdent().path);
+							comment.setCommentPos(new CommentPos());
+							comment.getCommentPos().setCommit(context.getCommit().name());
+							comment.getCommentPos().setPath(context.getBlobIdent().path);
 							comment.setTitle(titleInput.getModelObject());
 							comment.setContent(contentInput.getModelObject());
 							comment.setDepot(context.getDepot());
 							comment.setUser(SecurityUtils.getAccount());
-							comment.setMark(mark);
+							comment.getCommentPos().setRange(mark);
 							comment.setCompareContext(getCompareContext());
 							
 							GitPlex.getInstance(CodeCommentManager.class).save(comment);
@@ -753,7 +754,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent = context.getBlobIdent();
 				state.commentId = CodeComment.idOf(context.getOpenComment());
-				state.mark = Mark.of(symbol.getPos());
+				state.mark = TextRange.of(symbol.getPos());
 				state.requestId = PullRequest.idOf(context.getPullRequest());
 				PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
 				link.add(AttributeAppender.replace("href", urlFor(DepotFilePage.class, params).toString()));
@@ -816,13 +817,13 @@ public class SourceViewPanel extends BlobViewPanel {
 		});
 	}
 	
-	private Mark getMark(IRequestParameters params, String beginLineParam, String beginCharParam, 
+	private TextRange getMark(IRequestParameters params, String beginLineParam, String beginCharParam, 
 			String endLineParam, String endCharParam) {
 		int beginLine = params.getParameterValue(beginLineParam).toInt();
 		int beginChar = params.getParameterValue(beginCharParam).toInt();
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
-		Mark mark = new Mark();
+		TextRange mark = new TextRange();
 		mark.beginLine = beginLine;
 		mark.beginChar = beginChar;
 		mark.endLine = endLine;
@@ -833,7 +834,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	private String getJsonOfComment(CodeComment comment) {
 		CommentInfo commentInfo = new CommentInfo();
 		commentInfo.id = comment.getId();
-		commentInfo.mark = comment.getMark();
+		commentInfo.mark = comment.getCommentPos().getRange();
 		commentInfo.title = comment.getTitle();
 
 		String jsonOfCommentInfo;
@@ -928,8 +929,8 @@ public class SourceViewPanel extends BlobViewPanel {
 		String jsonOfBlameInfos = getJsonOfBlameInfos(context.getMode() == Mode.BLAME);
 		Map<Integer, List<CommentInfo>> commentInfos = new HashMap<>(); 
 		for (CodeComment comment: commentsModel.getObject()) {
-			if (comment.getMark() != null) {
-				int line = comment.getMark().getBeginLine();
+			if (comment.getCommentPos().getRange() != null) {
+				int line = comment.getCommentPos().getRange().getBeginLine();
 				List<CommentInfo> commentInfosAtLine = commentInfos.get(line);
 				if (commentInfosAtLine == null) {
 					commentInfosAtLine = new ArrayList<>();
@@ -937,7 +938,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				}
 				CommentInfo commentInfo = new CommentInfo();
 				commentInfo.id = comment.getId();
-				commentInfo.mark = comment.getMark();
+				commentInfo.mark = comment.getCommentPos().getRange();
 				commentInfo.title = comment.getTitle();
 				commentInfosAtLine.add(commentInfo);
 			}
@@ -1000,7 +1001,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		String title;
 		
-		Mark mark;
+		TextRange mark;
 	}
 	
 }

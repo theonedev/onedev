@@ -40,7 +40,7 @@ import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.web.component.depotfile.editsave.EditSavePanel;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
@@ -63,7 +63,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	private final ObjectId prevCommitId;
 	
-	private final Mark mark;
+	private final TextRange mark;
 	
 	private AbstractDefaultAjaxBehavior previewBehavior;
 	
@@ -73,7 +73,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	public FileEditPanel(String id, IModel<Depot> depotModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId, 
-			@Nullable Mark mark) {
+			@Nullable TextRange mark) {
 		super(id);
 		this.depotModel = depotModel;
 		this.refName = refName;
@@ -250,7 +250,7 @@ public abstract class FileEditPanel extends Panel {
 				getMarkupId(), getNewPathParam()));
 	}
 	
-	private String getJson(Mark mark) {
+	private String getJson(TextRange mark) {
 		try {
 			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(mark);
 		} catch (JsonProcessingException e) {
@@ -258,7 +258,7 @@ public abstract class FileEditPanel extends Panel {
 		}
 	}
 	
-	public void mark(AjaxRequestTarget target, Mark mark) {
+	public void mark(AjaxRequestTarget target, TextRange mark) {
 		String script = String.format("gitplex.fileedit.mark('%s', %s);", 
 				getMarkupId(), getJson(mark));
 		target.appendJavaScript(script);

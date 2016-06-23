@@ -52,9 +52,9 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> im
 	public Collection<CodeComment> query(Depot depot, ObjectId commitId, String path) {
 		EntityCriteria<CodeComment> criteria = newCriteria();
 		criteria.add(Restrictions.eq("depot", depot));
-		criteria.add(Restrictions.eq("commit", commitId.name()));
+		criteria.add(Restrictions.eq("commentPos.commit", commitId.name()));
 		if (path != null)
-			criteria.add(Restrictions.eq("path", path));
+			criteria.add(Restrictions.eq("commentPos.path", path));
 		return query(criteria);
 	}
 
@@ -67,7 +67,7 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> im
 		criteria.add(Restrictions.eq("depot", depot));
 		List<Criterion> criterions = new ArrayList<>();
 		for (ObjectId commitId: commitIds) {
-			criterions.add(Restrictions.eq("commit", commitId.name()));
+			criterions.add(Restrictions.eq("commentPos.commit", commitId.name()));
 		}
 		criteria.add(Restrictions.or(criterions.toArray(new Criterion[criterions.size()])));
 		return query(criteria);

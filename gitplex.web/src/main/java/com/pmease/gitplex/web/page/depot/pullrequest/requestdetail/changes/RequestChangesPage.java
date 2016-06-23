@@ -43,16 +43,16 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
-import com.pmease.gitplex.web.component.diff.revision.MarkSupport;
+import com.pmease.gitplex.web.component.diff.revision.CommentSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
-public class RequestChangesPage extends RequestDetailPage implements MarkSupport {
+public class RequestChangesPage extends RequestDetailPage implements CommentSupport {
 
 	private static final String PARAM_OLD_COMMIT = "old-commit";
 	
@@ -98,7 +98,7 @@ public class RequestChangesPage extends RequestDetailPage implements MarkSupport
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = DiffMark.of(params.get(PARAM_MARK).toString());
+		state.mark = CommentPos.of(params.get(PARAM_MARK).toString());
 	}
 	
 	private int getCommitIndex(String commitHash) {
@@ -443,12 +443,12 @@ public class RequestChangesPage extends RequestDetailPage implements MarkSupport
 	}
 
 	@Override
-	public DiffMark getMark() {
+	public CommentPos getMark() {
 		return state.mark;
 	}
 
 	@Override
-	public String getMarkUrl(DiffMark mark) {
+	public String getMarkUrl(CommentPos mark) {
 		State markState = new State();
 		markState.mark = mark;
 		markState.oldCommit = state.oldCommit;
@@ -461,7 +461,7 @@ public class RequestChangesPage extends RequestDetailPage implements MarkSupport
 	@Override
 	public String getCommentUrl(CodeComment comment) {
 		State commentState = new State();
-		commentState.mark = new DiffMark(comment);
+		commentState.mark = comment.getCommentPos();
 		commentState.commentId = comment.getId();
 		commentState.oldCommit = state.oldCommit;
 		commentState.newCommit = state.newCommit;
@@ -482,7 +482,7 @@ public class RequestChangesPage extends RequestDetailPage implements MarkSupport
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			state.commentId = comment.getId();
-			state.mark = new DiffMark(comment);
+			state.mark = comment.getCommentPos();
 		} else {
 			state.commentId = null;
 		}
@@ -490,13 +490,13 @@ public class RequestChangesPage extends RequestDetailPage implements MarkSupport
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, DiffMark mark) {
+	public void onMark(AjaxRequestTarget target, CommentPos mark) {
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, DiffMark mark) {
+	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
@@ -522,7 +522,7 @@ public class RequestChangesPage extends RequestDetailPage implements MarkSupport
 		public Long commentId;
 		
 		@Nullable
-		public DiffMark mark;
+		public CommentPos mark;
 		
 	}
 

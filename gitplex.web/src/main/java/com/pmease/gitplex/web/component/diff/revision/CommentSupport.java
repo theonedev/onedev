@@ -7,14 +7,15 @@ import javax.annotation.Nullable;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 
-public interface MarkSupport extends Serializable {
+public interface CommentSupport extends Serializable {
 	
-	@Nullable DiffMark getMark();
+	@Nullable CommentPos getMark();
 	
-	void onMark(AjaxRequestTarget target, DiffMark mark);
+	void onMark(AjaxRequestTarget target, CommentPos mark);
 	
-	String getMarkUrl(DiffMark mark);
+	String getMarkUrl(CommentPos mark);
 	
 	String getCommentUrl(CodeComment comment);
 	
@@ -22,6 +23,6 @@ public interface MarkSupport extends Serializable {
 
 	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 	
-	void onAddComment(AjaxRequestTarget target, DiffMark mark);
+	void onAddComment(AjaxRequestTarget target, CommentPos commentPos);
 
 }

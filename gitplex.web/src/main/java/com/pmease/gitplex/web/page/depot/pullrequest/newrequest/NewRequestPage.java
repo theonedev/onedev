@@ -55,6 +55,7 @@ import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -64,8 +65,7 @@ import com.pmease.gitplex.web.component.branchpicker.AffinalBranchPicker;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
-import com.pmease.gitplex.web.component.diff.revision.MarkSupport;
+import com.pmease.gitplex.web.component.diff.revision.CommentSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
@@ -82,7 +82,7 @@ import com.pmease.gitplex.web.page.security.LoginPage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends PullRequestPage implements MarkSupport {
+public class NewRequestPage extends PullRequestPage implements CommentSupport {
 
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
@@ -96,7 +96,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	
 	private Long commentId;
 	
-	private DiffMark mark;
+	private CommentPos mark;
 	
 	private String pathFilter;
 	
@@ -692,12 +692,12 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	}
 
 	@Override
-	public DiffMark getMark() {
+	public CommentPos getMark() {
 		return mark;
 	}
 
 	@Override
-	public String getMarkUrl(DiffMark mark) {
+	public String getMarkUrl(CommentPos mark) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.mark = mark;
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
@@ -721,7 +721,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			commentId = comment.getId();
-			mark = new DiffMark(comment);
+			mark = comment.getCommentPos();
 		} else {
 			commentId = null;
 		}
@@ -730,7 +730,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	@Override
 	public String getCommentUrl(CodeComment comment) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
-		mark = new DiffMark(comment);
+		mark = comment.getCommentPos();
 		state.commentId = comment.getId();
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
@@ -742,12 +742,12 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, DiffMark mark) {
+	public void onMark(AjaxRequestTarget target, CommentPos mark) {
 		this.mark = mark;
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, DiffMark mark) {
+	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
 		this.commentId = null;
 		this.mark = mark;
 	}

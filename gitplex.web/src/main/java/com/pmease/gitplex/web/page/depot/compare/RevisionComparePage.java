@@ -42,13 +42,13 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
-import com.pmease.gitplex.web.component.diff.revision.DiffMark;
-import com.pmease.gitplex.web.component.diff.revision.MarkSupport;
+import com.pmease.gitplex.web.component.diff.revision.CommentSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.revisionpicker.AffinalRevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -59,7 +59,7 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetail
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 
 @SuppressWarnings("serial")
-public class RevisionComparePage extends DepotPage implements MarkSupport {
+public class RevisionComparePage extends DepotPage implements CommentSupport {
 
 	public enum TabPanel {
 		COMMITS, 
@@ -169,7 +169,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = DiffMark.of(params.get(PARAM_MARK).toString());
+		state.mark = CommentPos.of(params.get(PARAM_MARK).toString());
 		
 		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
 		
@@ -396,8 +396,9 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 					@Override
 					public String getObject() {
-						return requestModel.getObject().getId().toString();
+						return String.valueOf(requestModel.getObject().getNumber());
 					}
+					
 				}));
 				add(new Link<Void>("link") {
 
@@ -621,7 +622,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		public Long commentId;
 
 		@Nullable
-		public DiffMark mark;
+		public CommentPos mark;
 		
 		public State() {
 		}
@@ -641,12 +642,12 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	}
 
 	@Override
-	public DiffMark getMark() {
+	public CommentPos getMark() {
 		return state.mark;
 	}
 
 	@Override
-	public String getMarkUrl(DiffMark mark) {
+	public String getMarkUrl(CommentPos mark) {
 		State markState = new State();
 		markState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
 				state.compareWithMergeBase?mergeBaseModel.getObject():leftCommitId.name());
@@ -665,7 +666,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		commentState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
 				state.compareWithMergeBase?mergeBaseModel.getObject():leftCommitId.name());
 		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
-		commentState.mark = new DiffMark(comment);
+		commentState.mark = comment.getCommentPos();
 		commentState.commentId = comment.getId();
 		commentState.tabPanel = TabPanel.CHANGES;
 		commentState.pathFilter = state.pathFilter;
@@ -685,7 +686,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
-			state.mark = new DiffMark(comment);
+			state.mark = comment.getCommentPos();
 			state.commentId = comment.getId();
 		} else {
 			state.commentId = null;
@@ -694,13 +695,13 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, DiffMark mark) {
+	public void onMark(AjaxRequestTarget target, CommentPos mark) {
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, DiffMark mark) {
+	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);

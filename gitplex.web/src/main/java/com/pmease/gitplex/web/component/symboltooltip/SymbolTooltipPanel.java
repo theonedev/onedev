@@ -38,7 +38,7 @@ import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.entity.component.TextRange;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
@@ -239,7 +239,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 		DepotFilePage.State state = new DepotFilePage.State();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = hit.getBlobPath();
-		state.mark = Mark.of(hit.getTokenPos());
+		state.mark = TextRange.of(hit.getTokenPos());
 		state.requestId = PullRequest.idOf(requestModel.getObject());
 		return DepotFilePage.paramsOf(depotModel.getObject(), state);
 	}

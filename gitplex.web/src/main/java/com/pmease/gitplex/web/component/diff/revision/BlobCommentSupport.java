@@ -9,20 +9,21 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.component.CommentPos;
 
-public interface BlobMarkSupport extends Serializable {
+public interface BlobCommentSupport extends Serializable {
 	
 	Collection<CodeComment> getComments();
 	
-	@Nullable DiffMark getMark();
+	@Nullable CommentPos getMark();
 	
-	String getMarkUrl(DiffMark mark);
+	String getMarkUrl(CommentPos mark);
 	
 	@Nullable CodeComment getOpenComment();
 
 	void onOpenComment(AjaxRequestTarget target, CodeComment comment);
 	
-	void onAddComment(AjaxRequestTarget target, DiffMark mark);
+	void onAddComment(AjaxRequestTarget target, CommentPos commentPos);
 	
 	Component getDirtyContainer();
 	
