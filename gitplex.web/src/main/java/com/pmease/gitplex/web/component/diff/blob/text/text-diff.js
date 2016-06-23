@@ -583,23 +583,30 @@ gitplex.textdiff = {
 	scroll: function($container, mark) {
 		// use a timer to scroll after possible view port resize 
 		setTimeout(function() {
-			var markInfo = gitplex.textdiff.getMarkInfo($container, mark);
-			var $startTd = markInfo.startTd;
-			var $endTd = markInfo.endTd;
-			if ($startTd && $endTd) {
-				var top = $startTd.offset().top;
-				var bottom = $endTd.offset().top + $endTd.outerHeight();
-				var markHeight = bottom - top;
-				var windowHeight = $(window).height();
-				if (windowHeight <= markHeight) {
-					$(window).scrollTop(top-50);
-				} else {
-					$(window).scrollTop((top+bottom-windowHeight)/2);
+			if (mark.beginLine != -1) {
+				var markInfo = gitplex.textdiff.getMarkInfo($container, mark);
+				var $startTd = markInfo.startTd;
+				var $endTd = markInfo.endTd;
+				if ($startTd && $endTd) {
+					var top = $startTd.offset().top;
+					var bottom = $endTd.offset().top + $endTd.outerHeight();
+					var markHeight = bottom - top;
+					var windowHeight = $(window).height();
+					if (windowHeight <= markHeight) {
+						$(window).scrollTop(top-50);
+					} else {
+						$(window).scrollTop((top+bottom-windowHeight)/2);
+					}
 				}
+			} else {
+				$(window).scrollTop($container.offset().top);
 			}
 		}, 0);
 	},
 	mark: function($container, mark) {
+		if (mark.beginLine == -1)
+			return;
+		
 		gitplex.textdiff.clearMark($container);
 		
 		var markInfo = gitplex.textdiff.getMarkInfo($container, mark);
