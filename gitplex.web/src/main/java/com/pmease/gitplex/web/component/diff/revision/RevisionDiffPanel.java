@@ -168,26 +168,24 @@ public class RevisionDiffPanel extends Panel {
 
 			Set<String> markedPaths = new HashSet<>();
 			for (CodeComment comment: commentsModel.getObject()) {
-				if (comment.getCommentPos().getPath() != null) {
-					if (!changedPaths.contains(comment.getCommentPos().getPath()) 
-							&& !markedPaths.contains(comment.getCommentPos().getPath())) {
-						BlobIdent oldBlobIdent = new BlobIdent(oldRev, comment.getCommentPos().getPath(), FileMode.TYPE_FILE);
-						BlobIdent newBlobIdent = new BlobIdent(newRev, comment.getCommentPos().getPath(), FileMode.TYPE_FILE);
-						allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
-	
-							@Override
-							public Blob getBlob(BlobIdent blobIdent) {
-								return depotModel.getObject().getBlob(blobIdent);
-							}
-							
-						});
-					}
-					markedPaths.add(comment.getCommentPos().getPath());
+				if (!changedPaths.contains(comment.getCommentPos().getPath()) 
+						&& !markedPaths.contains(comment.getCommentPos().getPath())) {
+					BlobIdent oldBlobIdent = new BlobIdent(oldRev, comment.getCommentPos().getPath(), FileMode.TYPE_FILE);
+					BlobIdent newBlobIdent = new BlobIdent(newRev, comment.getCommentPos().getPath(), FileMode.TYPE_FILE);
+					allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
+
+						@Override
+						public Blob getBlob(BlobIdent blobIdent) {
+							return depotModel.getObject().getBlob(blobIdent);
+						}
+						
+					});
 				}
+				markedPaths.add(comment.getCommentPos().getPath());
 			}
 			
 			CommentPos mark = getMark();
-			if (mark != null && mark.getPath() != null && !changedPaths.contains(mark.getPath()) && !markedPaths.contains(mark.getPath())) {
+			if (mark != null && !changedPaths.contains(mark.getPath()) && !markedPaths.contains(mark.getPath())) {
 				BlobIdent oldBlobIdent = new BlobIdent(oldRev, mark.getPath(), FileMode.TYPE_FILE);
 				BlobIdent newBlobIdent = new BlobIdent(newRev, mark.getPath(), FileMode.TYPE_FILE);
 				allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
@@ -376,8 +374,6 @@ public class RevisionDiffPanel extends Panel {
 	
 	private WebMarkupContainer commentContainer;
 
-	private WebMarkupContainer commitCommentsContainer;
-	
 	private ListView<BlobChange> diffsView;
 	
 	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
@@ -544,8 +540,7 @@ public class RevisionDiffPanel extends Panel {
 			}
 		}
 		for (CodeComment comment: commentsModel.getObject()) {
-			if (comment.getCommentPos().getPath() != null)
-				setOfInvolvedPaths.add(comment.getCommentPos().getPath());
+			setOfInvolvedPaths.add(comment.getCommentPos().getPath());
 		}
 		
 		List<String> listOfInvolvedPaths = new ArrayList<>(setOfInvolvedPaths);
@@ -620,86 +615,6 @@ public class RevisionDiffPanel extends Panel {
 			
 		}));
 		
-		body.add(commitCommentsContainer = new WebMarkupContainer("commitComments"));
-		commitCommentsContainer.setOutputMarkupId(true);
-		
-		commitCommentsContainer.add(new MenuLink("existing") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(!commitCommentsModel.getObject().isEmpty());
-			}
-
-			@Override
-			protected List<MenuItem> getMenuItems() {
-				List<MenuItem> menuItems = new ArrayList<>();
-				for (CodeComment comment: commitCommentsModel.getObject()) {
-					Long commentId = comment.getId();
-					String title = comment.getTitle();
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getIconClass() {
-							return null;
-						}
-
-						@Override
-						public String getLabel() {
-							return title;
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new AjaxLink<Void>(id) {
-
-								@Override
-								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-									super.updateAjaxAttributes(attributes);
-									attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
-								}
-								
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-									onOpenComment(target, comment);
-									close();
-								}
-								
-							};
-						}
-						
-					});
-				}
-				return menuItems;
-			}
-			
-		});
-		
-		commitCommentsContainer.add(new AjaxLink<Void>("add") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.getAccount() != null);
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				CommentPos commentPos = new CommentPos();
-				commentPos.setCommit(depotModel.getObject().getRevCommit(newRev).name());
-				onAddComment(target, commentPos);
-			}
-			
-		});
-
 		body.add(new WebMarkupContainer("tooManyFiles") {
 
 			@Override
@@ -819,7 +734,142 @@ public class RevisionDiffPanel extends Panel {
 	
 						@Override
 						public void onAddComment(AjaxRequestTarget target, CommentPos commentPos) {
-							RevisionDiffPanel.this.onAddComment(target, commentPos);
+							commentContainer.setDefaultModelObject(commentPos);
+							
+							Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", RevisionDiffPanel.this);
+							fragment.setOutputMarkupId(true);
+							
+							Form<?> form = new Form<Void>("form");
+							
+							String uuid = UUID.randomUUID().toString();
+							
+							TextField<String> titleInput = new TextField<String>("title", Model.of(""));
+							titleInput.setRequired(true);
+							form.add(titleInput);
+							CommentInput contentInput;
+							form.add(contentInput = new CommentInput("content", Model.of("")) {
+
+								@Override
+								protected DepotAttachmentSupport getAttachmentSupport() {
+									return new DepotAttachmentSupport(depotModel.getObject(), uuid);
+								}
+
+								@Override
+								protected Depot getDepot() {
+									return depotModel.getObject();
+								}
+								
+							});
+							contentInput.setRequired(true);
+							
+							NotificationPanel feedback = new NotificationPanel("feedback", form); 
+							feedback.setOutputMarkupPlaceholderTag(true);
+							form.add(feedback);
+							
+							form.add(new AjaxLink<Void>("cancel") {
+
+								@Override
+								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+									super.updateAjaxAttributes(attributes);
+									attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+								}
+								
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									clearComment(target);
+									target.appendJavaScript("gitplex.revisionDiff.reposition();");
+								}
+								
+							});
+							
+							form.add(new AjaxButton("save") {
+
+								@Override
+								protected void onError(AjaxRequestTarget target, Form<?> form) {
+									super.onError(target, form);
+									target.add(feedback);
+								}
+
+								@Override
+								protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+									super.onSubmit(target, form);
+									
+									CodeComment comment = new CodeComment();
+									comment.setUUID(uuid);
+									comment.setDepot(depotModel.getObject());
+									comment.setUser(SecurityUtils.getAccount());
+									comment.setCommentPos(commentPos);
+									comment.setCompareContext(getCompareContext(comment.getCommentPos().getCommit()));
+									comment.setTitle(titleInput.getModelObject());
+									comment.setContent(contentInput.getModelObject());
+									GitPlex.getInstance(CodeCommentManager.class).save(comment);
+									
+									Long commentId = comment.getId();
+									IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+
+										@Override
+										protected CodeComment load() {
+											return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+										}
+										
+									};
+									CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), commentModel) {
+
+										@Override
+										protected void onCommentDeleted(AjaxRequestTarget target) {
+											CodeComment comment = commentModel.getObject();
+											RevisionDiffPanel.this.onCommentDeleted(target, comment);
+										}
+										
+										@Override
+										protected CompareContext getCompareContext() {
+											return RevisionDiffPanel.this.getCompareContext(commentModel.getObject().getCommentPos().getCommit());
+										}
+
+										@Override
+										protected void onSaveComment(AjaxRequestTarget target) {
+											target.add(commentContainer.get("head"));
+										}
+
+										@Override
+										protected PullRequest getPullRequest() {
+											return requestModel.getObject();
+										}
+										
+									};
+									commentContainer.replace(commentPanel);
+									target.add(commentContainer);
+									
+									SourceAware sourceAware = getSourceAware(comment.getCommentPos().getPath());
+									if (sourceAware != null) 
+										sourceAware.onCommentAdded(target, comment);
+
+									commentSupport.onCommentOpened(target, comment);
+									target.appendJavaScript("gitplex.revisionDiff.reposition();");
+								}
+
+							});
+							fragment.add(form);
+							
+							commentContainer.replace(fragment);
+							commentContainer.setVisible(true);
+							target.add(commentContainer);
+							
+							CommentPos prevMark = RevisionDiffPanel.this.getMark();
+							if (prevMark != null) {
+								SourceAware sourceAware = getSourceAware(prevMark.getPath());
+								if (sourceAware != null) 
+									sourceAware.mark(target, null);
+							}
+							
+							CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
+							if (prevComment != null) {
+								SourceAware sourceAware = getSourceAware(prevComment.getCommentPos().getPath());
+								if (sourceAware != null) 
+									sourceAware.onCommentClosed(target, prevComment);
+							}  
+							commentSupport.onAddComment(target, commentPos);
+							target.appendJavaScript("gitplex.revisionDiff.reposition();");		
 						}
 
 						@Override
@@ -906,148 +956,6 @@ public class RevisionDiffPanel extends Panel {
 		
 		commentSupport.onCommentOpened(target, comment);
 		target.appendJavaScript("gitplex.revisionDiff.reposition();");
-	}
-	
-	private void onAddComment(AjaxRequestTarget target, CommentPos commentPos) {
-		commentContainer.setDefaultModelObject(commentPos);
-		
-		Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", RevisionDiffPanel.this);
-		fragment.setOutputMarkupId(true);
-		
-		Form<?> form = new Form<Void>("form");
-		
-		String uuid = UUID.randomUUID().toString();
-		
-		TextField<String> titleInput = new TextField<String>("title", Model.of(""));
-		titleInput.setRequired(true);
-		form.add(titleInput);
-		CommentInput contentInput;
-		form.add(contentInput = new CommentInput("content", Model.of("")) {
-
-			@Override
-			protected DepotAttachmentSupport getAttachmentSupport() {
-				return new DepotAttachmentSupport(depotModel.getObject(), uuid);
-			}
-
-			@Override
-			protected Depot getDepot() {
-				return depotModel.getObject();
-			}
-			
-		});
-		contentInput.setRequired(true);
-		
-		NotificationPanel feedback = new NotificationPanel("feedback", form); 
-		feedback.setOutputMarkupPlaceholderTag(true);
-		form.add(feedback);
-		
-		form.add(new AjaxLink<Void>("cancel") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
-			}
-			
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				clearComment(target);
-				target.appendJavaScript("gitplex.revisionDiff.reposition();");
-			}
-			
-		});
-		
-		form.add(new AjaxButton("save") {
-
-			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
-				target.add(feedback);
-			}
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				
-				CodeComment comment = new CodeComment();
-				comment.setUUID(uuid);
-				comment.setDepot(depotModel.getObject());
-				comment.setUser(SecurityUtils.getAccount());
-				comment.setCommentPos(commentPos);
-				comment.setCompareContext(getCompareContext(comment.getCommentPos().getCommit()));
-				comment.setTitle(titleInput.getModelObject());
-				comment.setContent(contentInput.getModelObject());
-				GitPlex.getInstance(CodeCommentManager.class).save(comment);
-				
-				Long commentId = comment.getId();
-				IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
-
-					@Override
-					protected CodeComment load() {
-						return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-					}
-					
-				};
-				CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), commentModel) {
-
-					@Override
-					protected void onCommentDeleted(AjaxRequestTarget target) {
-						CodeComment comment = commentModel.getObject();
-						RevisionDiffPanel.this.onCommentDeleted(target, comment);
-					}
-					
-					@Override
-					protected CompareContext getCompareContext() {
-						return RevisionDiffPanel.this.getCompareContext(commentModel.getObject().getCommentPos().getCommit());
-					}
-
-					@Override
-					protected void onSaveComment(AjaxRequestTarget target) {
-						target.add(commentContainer.get("head"));
-					}
-
-					@Override
-					protected PullRequest getPullRequest() {
-						return requestModel.getObject();
-					}
-					
-				};
-				commentContainer.replace(commentPanel);
-				target.add(commentContainer);
-				
-				if (comment.getCommentPos().getPath() == null)
-					target.add(commitCommentsContainer);
-				
-				SourceAware sourceAware = getSourceAware(comment.getCommentPos().getPath());
-				if (sourceAware != null) 
-					sourceAware.onCommentAdded(target, comment);
-
-				commentSupport.onCommentOpened(target, comment);
-				target.appendJavaScript("gitplex.revisionDiff.reposition();");
-			}
-
-		});
-		fragment.add(form);
-		
-		commentContainer.replace(fragment);
-		commentContainer.setVisible(true);
-		target.add(commentContainer);
-		
-		CommentPos prevMark = RevisionDiffPanel.this.getMark();
-		if (prevMark != null) {
-			SourceAware sourceAware = getSourceAware(prevMark.getPath());
-			if (sourceAware != null) 
-				sourceAware.mark(target, null);
-		}
-		
-		CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
-		if (prevComment != null) {
-			SourceAware sourceAware = getSourceAware(prevComment.getCommentPos().getPath());
-			if (sourceAware != null) 
-				sourceAware.onCommentClosed(target, prevComment);
-		}  
-		commentSupport.onAddComment(target, commentPos);
-		target.appendJavaScript("gitplex.revisionDiff.reposition();");		
 	}
 	
 	private @Nullable IModel<Boolean> getBlobBlameModel(BlobChange change) {
@@ -1238,12 +1146,6 @@ public class RevisionDiffPanel extends Panel {
 			}
 			
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getCommentPos().getPath() != null);
-			}
-
-			@Override
 			public void onClick(AjaxRequestTarget target) {
 				CommentPos commentPos = getCommentPos();
 				SourceAware sourceAware = getSourceAware(commentPos.getPath());
@@ -1365,15 +1267,11 @@ public class RevisionDiffPanel extends Panel {
 		boolean locatable = false;
 		CodeComment comment = getOpenComment();
 		if (comment != null) {
-			if (comment.getCommentPos().getPath() != null) {
-				for (BlobChange change: changesAndCountModel.getObject().getChanges()) {
-					if (change.getPaths().contains(comment.getCommentPos().getPath())) {
-						locatable = true;
-						break;
-					}
+			for (BlobChange change: changesAndCountModel.getObject().getChanges()) {
+				if (change.getPaths().contains(comment.getCommentPos().getPath())) {
+					locatable = true;
+					break;
 				}
-			} else {
-				locatable = true;
 			}
 		}
 		
@@ -1483,8 +1381,6 @@ public class RevisionDiffPanel extends Panel {
 		if (sourceAware != null)
 			sourceAware.onCommentDeleted(target, comment);
 		commentSupport.onCommentOpened(target, null);
-		if (comment.getCommentPos().getPath() == null)
-			target.add(commitCommentsContainer);
 		target.appendJavaScript("gitplex.revisionDiff.reposition();");
 		CommentPos mark = getMark();
 		if (mark != null) {

@@ -21,9 +21,11 @@ public class CommentPos implements Serializable {
 	private String commit;
 
 	@OptimisticLock(excluded=true)
+	@Column(nullable=false)
 	private String path;
 	
 	@OptimisticLock(excluded=true)
+	@Column(nullable=false)
 	private TextRange range;
 
 	public String getCommit() {

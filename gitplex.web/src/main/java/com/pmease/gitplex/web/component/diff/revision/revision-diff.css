@@ -7,22 +7,19 @@
 .revision-diff>.head td.whitespace-option {
 	width: 140px;
 }
-.revision-diff>.body>.info {
-	margin-bottom: 16px;	
-}
-.revision-diff>.body>.info>.title {
+.revision-diff>.body>.title {
 	font-size: 16px;
-	margin-right: 16px;
+	margin-bottom: 16px;	
 }
 .revision-diff>.body>.alert {
 	margin-bottom: 16px;
 }
-.revision-diff>.body>.info>.title>a:after {
+.revision-diff>.body>.title>a:after {
     font-family: FontAwesome; 
     font-weight: bold;
     content: "\f107";
 }
-.revision-diff>.body>.info>.title>a.expanded:after {
+.revision-diff>.body>.title>a.expanded:after {
     content: "\f106";
 }
 .revision-diff>.body>.diff-stats>.diff-stat {

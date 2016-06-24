@@ -24,14 +24,8 @@
 			</tr>
 		</table>
 		<div wicket:id="body" class="body">
-			<div class="info clearfix">
-				<span class="title pull-left">
-					Total <a wicket:id="totalFiles" class="total-files"></a>
-				</span>
-				<span wicket:id="commitComments" class="btn-group pull-right">
-					<a wicket:id="existing" class="btn btn-default btn-sm"><i class="fa fa-commenting"></i> Commit comments <i class="fa fa-caret-down"></i></a>
-					<a wicket:id="add" class="btn btn-default btn-sm"><i class="fa fa-plus"></i> Add commit comment</a>
-				</span>
+			<div class="title">
+				Total <a wicket:id="totalFiles" class="total-files"></a>
 			</div>
 			<div wicket:id="tooManyFiles" class="alert alert-warning">Sorry we are unable to display all files as there are too many</div>
 			<ul wicket:id="diffStats" class="diff-stats list-unstyled">

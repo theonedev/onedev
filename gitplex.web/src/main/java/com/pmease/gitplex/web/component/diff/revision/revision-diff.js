@@ -3,7 +3,7 @@ gitplex.revisionDiff = {
 		var cookieName = "revisionDiff.showDiffStats";
 		var $body = $(".revision-diff>.body");
 		var $diffStats = $body.children(".diff-stats");
-		var $diffStatsToggle = $body.find(">.info>.title a");
+		var $diffStatsToggle = $body.find(">.title a");
 		$diffStatsToggle.click(function() {
 			if ($diffStats.is(":visible")) {
 				$diffStats.hide();
