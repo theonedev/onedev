@@ -27,13 +27,17 @@ public class DefaultPullRequestCommentManager extends AbstractEntityDao<PullRequ
 
 	@Transactional
 	@Override
-	public void save(PullRequestComment comment, boolean notify) {
+	public void save(PullRequestComment comment) {
 		persist(comment);
 		
-		if (notify) {
-			for (PullRequestListener listener: pullRequestListeners)
-				listener.onCommentRequest(comment);
-		}
+		for (PullRequestListener listener: pullRequestListeners)
+			listener.onCommentRequest(comment);
+	}
+
+	@Transactional
+	@Override
+	public void delete(PullRequestComment comment) {
+		remove(comment);
 	}
 
 }

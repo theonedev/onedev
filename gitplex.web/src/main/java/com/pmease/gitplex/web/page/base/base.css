@@ -80,28 +80,6 @@ li.selectable.active a, a.selectable.active {
 	border-color: #8BC8F9;
 }
 
-.activity-summary, .activity-summary a {
-	color: #999; 
-}
-.activity-summary .operations {
-	margin-left: 8px;
-}
-.activity-summary .operations>a, .activity-summary .operations>span {
-	margin-right: 6px; 
-	color: #DDD;
-}
-.activity-summary .operations a, .activity-summary .operations span {
-	color: #DDD;
-}
-.activity-summary:hover .operations a, .activity-summary:hover .operations span {
-	color: #999;
-}
-.activity-summary .user a, .activity-summary em {
-	color: #666; 
-	font-weight: bold; 
-	font-style: normal;
-}
-
 .ellipsis-expander {
 	display: inline-block;
 	background: #DDD; 

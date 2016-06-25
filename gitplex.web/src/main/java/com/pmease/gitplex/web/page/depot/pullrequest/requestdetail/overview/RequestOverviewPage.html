@@ -6,9 +6,18 @@
 					<tr wicket:id="requestActivities" class="activity">
 						<td wicket:id="avatar" class="avatar"><div wicket:id="avatar"></div></td>
 						<td class="spacer"></td>
-						<td wicket:id="detail" class="detail"></td>
+						<td wicket:id="content" class="content"></td>
 					</tr>
 				</table>
+				<div wicket:id="addComment" class="add-comment">
+					<form wicket:id="form" class="leave-confirm">
+						<div wicket:id="feedback"></div>
+						<textarea wicket:id="input" class="form-control" rows="5" placeholder="Leave a comment"></textarea>
+						<div class="actions">
+							<button wicket:id="comment" class="dirty-aware btn btn-primary">Comment</button>
+						</div>
+					</form>
+				</div>
 			</td>
 			<td class="info">
 				<div class="well">

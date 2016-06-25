@@ -10,6 +10,7 @@ import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
@@ -19,6 +20,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -33,13 +35,17 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
+import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequestActivity;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReference;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestVisit;
@@ -47,11 +53,14 @@ import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
@@ -60,9 +69,22 @@ import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoi
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ApprovePullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentPullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DeleteSourceBranch;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DisapprovePullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DiscardPullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.IntegratePullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.OpenPullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReferencePullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReopenPullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.RestoreSourceBranch;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.UndoReviewPullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.UpdatePullRequest;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
@@ -73,8 +95,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 	};
 	
 	private static final ActivityRendered RENDERED_ACTIVITY = new ActivityRendered();		
-	
-	private static final String DETAIL_ID = "detail";
 	
 	private static final String ASSIGNEE_HELP = "Assignee has write permission to the "
 			+ "repository and is resonsible for integrating the pull request into "
@@ -126,10 +146,10 @@ public class RequestOverviewPage extends RequestDetailPage {
 		avatarColumn.add(new AvatarLink("avatar", activity.getUser(), null));
 		row.add(avatarColumn);
 		
-		if (row.get(DETAIL_ID) == null) 
-			row.add(activity.render(DETAIL_ID));
+		if (row.get("content") == null) 
+			row.add(activity.render("content"));
 		
-		if (activity instanceof OpenPullRequest)
+		if (activity instanceof OpenPullRequest || activity instanceof CommentPullRequest)
 			row.add(AttributeAppender.append("class", " discussion"));
 		else
 			row.add(AttributeAppender.append("class", " non-discussion"));
@@ -148,6 +168,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 		for (PullRequestUpdate update: request.getUpdates())
 			renderableActivities.add(new UpdatePullRequest(update));
+		
+		for (PullRequestComment comment: request.getComments()) 
+			renderableActivities.add(new CommentPullRequest(comment));
 		
 		for (PullRequestReference reference: request.getReferencedBy()) {
 			renderableActivities.add(new ReferencePullRequest(request, reference.getUser(), 
@@ -273,6 +296,77 @@ public class RequestOverviewPage extends RequestDetailPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		final WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(GitPlex.getInstance(AccountManager.class).getCurrent() != null);
+			}
+			
+		};
+		addComment.setOutputMarkupId(true);
+		add(addComment);
+		
+		Form<?> form = new Form<Void>("form");
+		addComment.add(form);
+		
+		CommentInput input = new CommentInput("input", Model.of("")) {
+
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new DepotAttachmentSupport(getDepot(), getPullRequest().getUUID());
+			}
+
+			@Override
+			protected Depot getDepot() {
+				return RequestOverviewPage.this.getDepot();
+			}
+			
+		};
+		input.setRequired(true);
+		form.add(input);
+		
+		form.add(new NotificationPanel("feedback", input));
+		
+		form.add(new AjaxSubmitLink("comment") {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+
+				PullRequestComment comment = new PullRequestComment();
+				comment.setRequest(getPullRequest());
+				comment.setUser(getLoginUser());
+				comment.setContent(input.getModelObject());
+				InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPage().getPageId()));
+				try {
+					GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
+				} finally {
+					InheritableThreadLocalData.clear();
+				}
+				input.setModelObject("");
+				
+				target.add(addComment);
+				
+				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
+				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentPullRequest(comment)); 
+				activitiesView.add(newActivityRow);
+				
+				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+						newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
+				target.prependJavaScript(script);
+				target.add(newActivityRow);
+			}
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
+				target.add(form);
+			}
+
+		});
 		
 		add(newIntegrationStrategyContainer());
 		add(newAssigneeContainer());

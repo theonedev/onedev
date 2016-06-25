@@ -14,6 +14,7 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
@@ -69,6 +70,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return false;
 		} else {
 			return currentUser.equals(reply.getUser()) || canManage(reply.getComment().getDepot());
+		}
+	}
+	
+	public static boolean canModify(PullRequestComment comment) {
+		Account currentUser = getAccount();
+		if (currentUser == null) {
+			return false;
+		} else {
+			return currentUser.equals(comment.getUser()) || canModify(comment.getRequest());
 		}
 	}
 	

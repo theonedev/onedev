@@ -2,11 +2,9 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview;
 
 import java.util.Date;
 
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -17,9 +15,11 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.Reque
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
-class SinceChangesLink extends Panel {
+public class SinceChangesLink extends BookmarkablePageLink<Void> {
 
 	private final IModel<PullRequest> requestModel;
+	
+	private final Date sinceDate;
 	
 	private final IModel<String> oldCommitModel = new LoadableDetachableModel<String>() {
 
@@ -39,39 +39,19 @@ class SinceChangesLink extends Panel {
 		
 	};
 	
-	private final Date sinceDate;
-	
-	private final String tooltip;
-	
-	public SinceChangesLink(String id, IModel<PullRequest> requestModel, Date sinceDate, String tooltip) {
-		super(id);
-		
+	public SinceChangesLink(String id, IModel<PullRequest> requestModel, Date sinceDate) {
+		super(id, RequestChangesPage.class);
 		this.requestModel = requestModel;
 		this.sinceDate = sinceDate;
-		this.tooltip = tooltip;
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		Link<Void> link = new Link<Void>("link") {
-
-			@Override
-			public void onClick() {
-				PullRequest request = requestModel.getObject();
-				RequestChangesPage.State state = new RequestChangesPage.State();
-				state.oldCommit = oldCommitModel.getObject();
-				state.newCommit = request.getLatestUpdate().getHeadCommitHash();
-				PageParameters params = RequestChangesPage.paramsOf(request, state);
-				setResponsePage(RequestChangesPage.class, params);
-			}
-			
-		};
-		link.add(AttributeAppender.append("title", tooltip));
-		add(link);
-		
-		setOutputMarkupPlaceholderTag(true);
+	public PageParameters getPageParameters() {
+		PullRequest request = requestModel.getObject();
+		RequestChangesPage.State state = new RequestChangesPage.State();
+		state.oldCommit = oldCommitModel.getObject();
+		state.newCommit = request.getLatestUpdate().getHeadCommitHash();
+		return RequestChangesPage.paramsOf(request, state);
 	}
 
 	@Override
@@ -83,6 +63,12 @@ class SinceChangesLink extends Panel {
 			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
 			partialPageRequestHandler.add(this);
 		}
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		setOutputMarkupId(true);
 	}
 
 	@Override

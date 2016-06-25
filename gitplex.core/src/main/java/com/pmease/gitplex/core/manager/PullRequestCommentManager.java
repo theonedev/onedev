@@ -5,6 +5,7 @@ import com.pmease.gitplex.core.entity.PullRequestComment;
 
 public interface PullRequestCommentManager extends EntityDao<PullRequestComment> {
 
-	void save(PullRequestComment comment, boolean notify);
-	
+	void save(PullRequestComment comment);
+
+	void delete(PullRequestComment comment);
 }

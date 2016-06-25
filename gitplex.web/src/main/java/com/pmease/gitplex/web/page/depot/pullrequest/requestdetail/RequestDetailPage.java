@@ -84,7 +84,6 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.Reque
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.CodeCommentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
 import com.pmease.gitplex.web.util.DateUtils;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
@@ -258,7 +257,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		List<Tab> tabs = new ArrayList<>();
 		
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
-		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
 		tabs.add(new RequestTab("File Changes", RequestChangesPage.class));
 		tabs.add(new RequestTab("Code Comments", CodeCommentsPage.class));
 		tabs.add(new RequestTab("Integration Preview", IntegrationPreviewPage.class));

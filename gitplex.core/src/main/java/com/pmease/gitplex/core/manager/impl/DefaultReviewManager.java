@@ -93,7 +93,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 			requestComment.setUser(reviewer);
 			requestComment.setContent(comment);
 			
-			commentManager.save(requestComment, false);
+			commentManager.save(requestComment);
 		}
 		
 		for (PullRequestListener listener: pullRequestListeners)

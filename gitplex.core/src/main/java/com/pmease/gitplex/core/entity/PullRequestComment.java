@@ -13,8 +13,6 @@ import javax.persistence.Version;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.GitPlex;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -80,10 +78,6 @@ public class PullRequestComment extends AbstractEntity {
 
 	public Depot getDepot() {
 		return request.getTargetDepot();
-	}
-
-	public void delete() {
-		GitPlex.getInstance(Dao.class).remove(this);
 	}
 
 }

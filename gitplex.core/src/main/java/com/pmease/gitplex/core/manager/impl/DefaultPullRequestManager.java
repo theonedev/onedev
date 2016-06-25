@@ -215,7 +215,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			requestComment.setContent(comment);
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
-			commentManager.save(requestComment, false);
+			commentManager.save(requestComment);
 		}
 
 		onSourceBranchUpdate(request, false);
@@ -244,7 +244,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
 			
-			commentManager.save(requestComment, false);
+			commentManager.save(requestComment);
 		}
 
 		CloseInfo closeInfo = new CloseInfo();
@@ -324,7 +324,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			requestComment.setContent(comment);
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
-			commentManager.save(requestComment, false);
+			commentManager.save(requestComment);
 		}
 
 		CloseInfo closeInfo = new CloseInfo();
