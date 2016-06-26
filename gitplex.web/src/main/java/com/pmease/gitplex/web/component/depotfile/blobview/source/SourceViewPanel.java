@@ -21,6 +21,8 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -99,6 +101,7 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.util.DateUtils;
+import com.pmease.gitplex.web.websocket.CodeCommentChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -263,8 +266,19 @@ public class SourceViewPanel extends BlobViewPanel {
 				super.renderHead(response);
 				response.render(OnDomReadyHeaderItem.forScript("gitplex.sourceview.initComment();"));
 			}
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (event.getPayload() instanceof CodeCommentChanged) {
+					CodeCommentChanged codeCommentChanged = (CodeCommentChanged) event.getPayload();
+					IPartialPageRequestHandler partialPageRequestHandler = codeCommentChanged.getPartialPageRequestHandler();
+					partialPageRequestHandler.add(get("head").get("toggleResolve"));
+				}				
+			}
 			
 		};
+		
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
@@ -447,29 +461,20 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		if (context.getOpenComment() != null) {
-			IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, context.getOpenComment().getId()) {
 
 				@Override
-				protected CodeComment load() {
-					return context.getOpenComment();
-				}
-				
-			};
-			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentModel) {
-
-				@Override
-				protected void onCommentDeleted(AjaxRequestTarget target) {
-					CodeComment comment = commentModel.getObject();
+				protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
 					SourceViewPanel.this.onCommentDeleted(target, comment);
 				}
 
 				@Override
-				protected CompareContext getCompareContext() {
+				protected CompareContext getCompareContext(CodeComment comment) {
 					return SourceViewPanel.this.getCompareContext();
 				}
 
 				@Override
-				protected void onSaveComment(AjaxRequestTarget target) {
+				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 					target.add(commentContainer.get("head"));
 				}
 
@@ -587,30 +592,20 @@ public class SourceViewPanel extends BlobViewPanel {
 							
 							GitPlex.getInstance(CodeCommentManager.class).save(comment);
 							
-							Long commentId = comment.getId();
-							IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+							CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
 								@Override
-								protected CodeComment load() {
-									return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-								}
-								
-							};
-							CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), commentModel) {
-
-								@Override
-								protected void onCommentDeleted(AjaxRequestTarget target) {
-									CodeComment comment = commentModel.getObject();
+								protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
 									SourceViewPanel.this.onCommentDeleted(target, comment);
 								}
 
 								@Override
-								protected CompareContext getCompareContext() {
+								protected CompareContext getCompareContext(CodeComment comment) {
 									return SourceViewPanel.this.getCompareContext();
 								}
 
 								@Override
-								protected void onSaveComment(AjaxRequestTarget target) {
+								protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 									target.add(commentContainer.get("head"));
 								}
 
@@ -639,29 +634,20 @@ public class SourceViewPanel extends BlobViewPanel {
 					break;
 				case "openComment":
 					Long commentId = params.getParameterValue("param1").toLong();
-					IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+					CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentId) {
 
 						@Override
-						protected CodeComment load() {
-							return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-						}
-						
-					};
-					CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentModel) {
-
-						@Override
-						protected void onCommentDeleted(AjaxRequestTarget target) {
-							CodeComment comment = commentModel.getObject();
+						protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
 							SourceViewPanel.this.onCommentDeleted(target, comment);
 						}
 
 						@Override
-						protected CompareContext getCompareContext() {
+						protected CompareContext getCompareContext(CodeComment comment) {
 							return SourceViewPanel.this.getCompareContext();
 						}
 
 						@Override
-						protected void onSaveComment(AjaxRequestTarget target) {
+						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 							target.add(commentContainer.get("head"));
 						}
 
@@ -674,10 +660,10 @@ public class SourceViewPanel extends BlobViewPanel {
 					commentContainer.replace(commentPanel);
 					commentContainer.setVisible(true);
 					target.add(commentContainer);
-					script = String.format("gitplex.sourceview.onOpenComment(%s);", 
-							getJsonOfComment(commentModel.getObject()));
+					CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+					script = String.format("gitplex.sourceview.onOpenComment(%s);", getJsonOfComment(comment));
 					target.appendJavaScript(script);
-					context.onCommentOpened(target, commentModel.getObject());
+					context.onCommentOpened(target, comment);
 					break;
 				}
 			}

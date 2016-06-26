@@ -1,14 +1,18 @@
 package com.pmease.gitplex.web.component.comment;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -17,7 +21,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -49,24 +53,79 @@ import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.DateUtils;
+import com.pmease.gitplex.web.websocket.CodeCommentChangeRenderer;
+import com.pmease.gitplex.web.websocket.CodeCommentChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
+public abstract class CodeCommentPanel extends Panel {
 
+	private final Long commentId;
+	
 	private RepeatingView repliesView;
 	
-	public CodeCommentPanel(String id, IModel<CodeComment> commentModel) {
-		super(id, commentModel);
+	/**
+	 * We pass comment id instead of comment model as we want to make sure that 
+	 * comment is always loaded upon usage as this panel is involved in websocket
+	 * update and websocket update does not detach models at end of request which 
+	 * may result in Hibernate lazy load exception when the comment is used again
+	 * in next request 
+	 * 
+	 * @param id
+	 * @param commentId
+	 */
+	public CodeCommentPanel(String id, Long commentId) {
+		super(id);
+		this.commentId = commentId;
 	}
 
+	protected CodeComment getComment() {
+		return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+	}
+	
 	@Override
 	protected void onAfterRender() {
 		super.onAfterRender();
 		Account user = SecurityUtils.getAccount();
 		if (user != null) 
 			GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (event.getPayload() instanceof CodeCommentChanged) {
+			CodeCommentChanged codeCommentChanged = (CodeCommentChanged) event.getPayload();
+			IPartialPageRequestHandler partialPageRequestHandler = codeCommentChanged.getPartialPageRequestHandler();
+
+			Date lastPostDate;
+			String prevPostMarkupId;
+			if (repliesView.size() != 0) {
+				@SuppressWarnings("deprecation")
+				Component lastReplyContainer = repliesView.get(repliesView.size()-1);
+				CodeCommentReply lastReply = GitPlex.getInstance(CodeCommentReplyManager.class)
+						.load((Long) lastReplyContainer.getDefaultModelObject());
+				lastPostDate = lastReply.getDate();
+				prevPostMarkupId = lastReplyContainer.getMarkupId();
+			} else {
+				lastPostDate = getComment().getCreateDate();
+				prevPostMarkupId = get("comment").getMarkupId();
+			}
+			for (CodeCommentReply reply: getComment().getSortedReplies()) {
+				if (reply.getDate().after(lastPostDate)) {
+					Component newReplyContainer = newReplyContainer(repliesView.newChildId(), reply.getId()); 
+					repliesView.add(newReplyContainer);
+					
+					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+							newReplyContainer.getMarkupId(), prevPostMarkupId);
+					partialPageRequestHandler.prependJavaScript(script);
+					partialPageRequestHandler.add(newReplyContainer);
+					prevPostMarkupId = newReplyContainer.getMarkupId();
+				}
+			}
+		}
 	}
 
 	private WebMarkupContainer newCommentContainer() {
@@ -90,7 +149,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getCompareContext().equals(getComment().getCompareContext()));
+				setVisible(!getCompareContext(getComment()).equals(getComment().getCompareContext()));
 			}
 
 			@Override
@@ -176,12 +235,6 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		foot.add(new AjaxLink<Void>("edit") {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getComment()));
-			}
-			
-			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment(commentContainer.getId(), "commentEditFrag", CodeCommentPanel.this);
 				Form<?> form = new Form<Void>("form");
@@ -250,7 +303,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 							WebMarkupContainer commentContainer = newCommentContainer();
 							fragment.replaceWith(commentContainer);
 							target.add(commentContainer);
-							onSaveComment(target);
+							onSaveComment(target, comment);
 						} catch (StaleObjectStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
@@ -266,6 +319,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			}
 			
 		});
+		
 		foot.add(new AjaxLink<Void>("delete") {
 
 			@Override
@@ -282,15 +336,9 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			}
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getComment()));
-			}
-
-			@Override
 			public void onClick(AjaxRequestTarget target) {
+				onDeleteComment(target, getComment());
 				GitPlex.getInstance(CodeCommentManager.class).delete(getComment());
-				onCommentDeleted(target);
 			}
 			
 		});
@@ -300,7 +348,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 	}
 	
 	private WebMarkupContainer newReplyContainer(String componentId, Long replyId) {
-		Fragment replyContainer = new Fragment(componentId, "viewFrag", this);
+		Fragment replyContainer = new Fragment(componentId, "viewFrag", this, Model.of(replyId));
 		replyContainer.setOutputMarkupId(true);
 		
 		replyContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
@@ -320,7 +368,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getCompareContext().equals(getReply(replyId).getCompareContext()));
+				setVisible(!getCompareContext(getComment()).equals(getReply(replyId).getCompareContext()));
 			}
 
 			@Override
@@ -408,14 +456,9 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		foot.add(new AjaxLink<Void>("edit") {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getReply(replyId)));
-			}
-			
-			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment(replyContainer.getId(), "replyEditFrag", CodeCommentPanel.this);
+				Fragment fragment = new Fragment(replyContainer.getId(), "replyEditFrag", 
+						CodeCommentPanel.this, Model.of(replyId));
 				Form<?> form = new Form<Void>("form");
 				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent())) {
 
@@ -500,13 +543,8 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 			}
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getComment()));
-			}
-
-			@Override
 			public void onClick(AjaxRequestTarget target) {
+				replyContainer.remove();
 				GitPlex.getInstance(CodeCommentReplyManager.class).delete(getReply(replyId));
 				String script = String.format("$('#%s').remove();", replyContainer.getMarkupId());
 				target.appendJavaScript(script);
@@ -557,6 +595,8 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		add(newAddReplyContainer());
 		
 		setOutputMarkupId(true);
+		
+		add(new CodeCommentChangeRenderer(getComment().getId()));
 	}
 
 	@Override
@@ -566,10 +606,6 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 				CodeCommentPanel.class, "code-comment.css")));
 	}
 
-	private CodeComment getComment() {
-		return getModelObject();
-	}
-	
 	private CodeCommentReply getReply(Long replyId) {
 		return GitPlex.getInstance(CodeCommentReplyManager.class).load(replyId);
 	}
@@ -639,7 +675,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 						manager.save(getComment());
 						onReplyAdded(target, fragment, null);
 					}
-					onSaveComment(target);
+					onSaveComment(target, getComment());
 				} else {
 					CodeCommentReply reply = newReply(contentInput.getModelObject());
 					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
@@ -687,15 +723,15 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		reply.setComment(getComment());
 		reply.setUser(SecurityUtils.getAccount());
 		reply.setContent(content);
-		reply.setCompareContext(getCompareContext());
+		reply.setCompareContext(getCompareContext(getComment()));
 		return reply;
 	}
 	
-	protected abstract void onCommentDeleted(AjaxRequestTarget target);
+	protected abstract void onDeleteComment(AjaxRequestTarget target, CodeComment comment);
 	
-	protected abstract void onSaveComment(AjaxRequestTarget target);
+	protected abstract void onSaveComment(AjaxRequestTarget target, CodeComment comment);
 	
-	protected abstract CompareContext getCompareContext();
+	protected abstract CompareContext getCompareContext(CodeComment comment);
 	
 	@Nullable
 	protected abstract PullRequest getPullRequest();

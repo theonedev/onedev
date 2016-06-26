@@ -3,11 +3,14 @@ package com.pmease.gitplex.web.websocket;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.wicket.core.request.handler.IPageRequestHandler;
+import org.apache.wicket.request.component.IRequestablePage;
+import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -17,6 +20,7 @@ import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.listener.PullRequestListener;
 
+@Singleton
 public class PullRequestChangeBroadcaster implements PullRequestListener {
 	
 	private final Dao dao;
@@ -86,11 +90,18 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 			@Override
 			public void run() {
 				// Send web socket message in a thread in order not to blocking UI operations
+				IRequestablePage page;
+				if (RequestCycle.get() != null && RequestCycle.get().getActiveRequestHandler() instanceof IPageRequestHandler) {
+					IPageRequestHandler handler = (IPageRequestHandler) RequestCycle.get().getActiveRequestHandler();					
+					page = handler.getPage();
+				} else {
+					page = null;
+				}
 				GitPlex.getInstance(ExecutorService.class).execute(new Runnable() {
 
 					@Override
 					public void run() {
-						WebSocketRenderBehavior.requestToRender(trait, PageId.fromObj(InheritableThreadLocalData.get()));
+						WebSocketRenderBehavior.requestToRender(trait, page);
 					}
 					
 				});

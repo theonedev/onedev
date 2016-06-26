@@ -193,7 +193,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	@Transactional
 	@Override
 	public void reopen(PullRequest request, String comment) {
-		Preconditions.checkState(!request.isOpen());
+		Preconditions.checkState(!request.isOpen(), "Pull request is alreay opened");
 		
 		Account user = userManager.getCurrent();
 		request.setCloseInfo(null);
@@ -374,7 +374,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	
 	@Transactional
 	@Override
-	public void open(PullRequest request, Object listenerData) {
+	public void open(PullRequest request) {
 		request.setNumber(getNextNumber(request.getTargetDepot()));
 		persist(request);
 		

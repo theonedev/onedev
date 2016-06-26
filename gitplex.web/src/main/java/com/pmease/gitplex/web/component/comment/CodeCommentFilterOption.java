@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
+import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
@@ -200,7 +200,7 @@ public class CodeCommentFilterOption implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getCommentedFiles() {
-		RenderPageRequestHandler handler = (RenderPageRequestHandler) RequestCycle.get().getActiveRequestHandler();
+		IPageRequestHandler handler = (IPageRequestHandler) RequestCycle.get().getActiveRequestHandler();
 		return ((CodeCommentAware)handler.getPage()).getCommentedFiles();
 	}
 	

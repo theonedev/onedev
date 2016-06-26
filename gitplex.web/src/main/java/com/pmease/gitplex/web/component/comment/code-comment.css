@@ -8,7 +8,7 @@
 	padding-left: 12px;
 	border-left: 4px solid white;
 }
-.code-comment>.post>.detail {
+.code-comment>.post>.detail, .code-comment>.post>form {
 	padding-bottom: 8px;
 	margin-bottom: 8px;
 	border-bottom: 1px solid #EEE;

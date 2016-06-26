@@ -44,7 +44,6 @@ import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
@@ -520,7 +519,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 					
 					getPullRequest().setAssignee(dao.load(Account.class, getPullRequest().getAssignee().getId()));
 					
-					GitPlex.getInstance(PullRequestManager.class).open(getPullRequest(), new PageId(getPageId()));
+					GitPlex.getInstance(PullRequestManager.class).open(getPullRequest());
 					
 					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
 				}

@@ -48,10 +48,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
@@ -59,7 +62,6 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -70,6 +72,7 @@ import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.BranchLink;
@@ -93,6 +96,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends PullRequestPage {
 
+	private static final Logger logger = LoggerFactory.getLogger(RequestDetailPage.class);
+	
 	protected IModel<PullRequest> requestModel;
 	
 	private boolean editingTitle;
@@ -120,7 +125,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 		PullRequest request = getPullRequest();
 
-		final WebMarkupContainer requestTitle = new WebMarkupContainer("requestHead");
+		WebMarkupContainer requestTitle = new WebMarkupContainer("requestHead");
 		requestTitle.setOutputMarkupId(true);
 		add(requestTitle);
 		
@@ -237,8 +242,18 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				super.onEvent(event);
 
 				if (event.getPayload() instanceof PullRequestChanged) {
-					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					pullRequestChanged.getPartialPageRequestHandler().add(this);
+					Form<?> form = visitChildren(Form.class, new IVisitor<Form<?>, Form<?>>() {
+
+						@Override
+						public void component(Form<?> object, IVisit<Form<?>> visit) {
+							visit.stop(object);
+						}
+						
+					});
+					if (form == null) {
+						PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+						pullRequestChanged.getPartialPageRequestHandler().add(this);
+					}
 				}
 			}
 
@@ -693,17 +708,20 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				
 				String actionName = operation.name().toLowerCase();
 
-				InheritableThreadLocalData.set(new PageId(getPage().getPageId()));
 				PullRequest request = getPullRequest();
 				try {
 					operation.operate(request, noteInput.getModelObject());
+					GitPlex.getInstance(VisitInfoManager.class).visit(getLoginUser(), getPullRequest());
 					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 				} catch (Exception e) {
-					error("Unable to " + actionName + ": " + e.getMessage());
+					if (e.getMessage() != null) {
+						error("Unable to " + actionName + ": " + e.getMessage());
+						logger.error("Error " + actionName, e);
+					} else {
+						error("Unable to " + actionName + ": check log for details");
+					}
 					target.add(operationsContainer);
-				} finally {
-					InheritableThreadLocalData.clear();
-				}
+				} 
 			}
 
 		}.add(AttributeModifier.replace("value", new AbstractReadOnlyModel<String>() {

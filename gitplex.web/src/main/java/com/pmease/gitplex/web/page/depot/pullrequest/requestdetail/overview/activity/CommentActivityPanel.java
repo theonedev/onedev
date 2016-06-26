@@ -6,6 +6,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -158,6 +159,7 @@ class CommentActivityPanel extends AbstractActivityPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				GitPlex.getInstance(PullRequestCommentManager.class).delete(getComment());
+				send(CommentActivityPanel.this, Broadcast.BUBBLE, new CommentRemoved(target, getComment()));
 			}
 			
 			@Override

@@ -6,7 +6,7 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
 			"is accepted here. You can also input:" +
 			"<ul>" +
 			"<li><b>@user_login_name</b> to mention/notify an user. " +
-			"<li><b>#pull_request_id</b> to reference a pull request. " +
+			"<li><b>#pull_request_number</b> to reference a pull request. " +
 			"<li><b>:emoji:</b> to insert an emoji." +
 			"</ul>");
 

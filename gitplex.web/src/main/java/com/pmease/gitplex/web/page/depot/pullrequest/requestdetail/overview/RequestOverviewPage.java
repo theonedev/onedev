@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -29,16 +28,13 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -48,20 +44,19 @@ import com.pmease.gitplex.core.entity.PullRequestActivity;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReference;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.PullRequestVisit;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
-import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
@@ -71,6 +66,7 @@ import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ApprovePullRequest;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentPullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentRemoved;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DeleteSourceBranch;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DisapprovePullRequest;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DiscardPullRequest;
@@ -90,11 +86,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 
 @SuppressWarnings("serial")
 public class RequestOverviewPage extends RequestDetailPage {
-	
-	private static class ActivityRendered extends MetaDataKey<RenderableActivity> {
-	};
-	
-	private static final ActivityRendered RENDERED_ACTIVITY = new ActivityRendered();		
 	
 	private static final String ASSIGNEE_HELP = "Assignee has write permission to the "
 			+ "repository and is resonsible for integrating the pull request into "
@@ -125,7 +116,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 	}
 	
 	private Component newActivityRow(final String id, RenderableActivity activity) {
-		final WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity)) {
+		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity)) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -158,8 +149,27 @@ public class RequestOverviewPage extends RequestDetailPage {
 			row.add(AttributeAppender.append("class", " update"));
 		else
 			row.add(AttributeAppender.append("class", " non-update"));
+
+		boolean visited = false;
+		Account user = SecurityUtils.getAccount();
+		if (user != null) {
+			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, getPullRequest());
+			visited = visitDate != null && visitDate.after(activity.getDate());
+		} else {
+			visited = true;
+		}
+		if (!visited)
+			row.add(AttributeAppender.append("class", "new"));
 		
 		return row;
+	}
+	
+	@Override
+	protected void onAfterRender() {
+		super.onAfterRender();
+		Account user = SecurityUtils.getAccount();
+		if (user != null) 
+			GitPlex.getInstance(VisitInfoManager.class).visit(user, getPullRequest());
 	}
 	
 	private List<RenderableActivity> getActivities() {
@@ -169,8 +179,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 		for (PullRequestUpdate update: request.getUpdates())
 			renderableActivities.add(new UpdatePullRequest(update));
 		
-		for (PullRequestComment comment: request.getComments()) 
+		for (PullRequestComment comment: request.getComments()) { 
 			renderableActivities.add(new CommentPullRequest(comment));
+		}
 		
 		for (PullRequestReference reference: request.getReferencedBy()) {
 			renderableActivities.add(new ReferencePullRequest(request, reference.getUser(), 
@@ -215,58 +226,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 		return renderableActivities;
 	}
 	
-	private Component newActivitiesView() {
-		activitiesView = new RepeatingView("requestActivities") {
-
-			@Override
-			protected void onDetach() {
-				RenderableActivity activity = RequestCycle.get().getMetaData(RENDERED_ACTIVITY);
-				
-				if (activity != null) {
-					// this logic prevents visit to be saved multiple times as 
-					// onDetach can be called multiple times at end of a request cycle
-					RequestCycle.get().setMetaData(RENDERED_ACTIVITY, null);
-					
-					Account user = getLoginUser();
-					if (user != null) {
-						PullRequestVisit visit = getPullRequest().getVisit(user);
-						if (visit == null) {
-							visit = new PullRequestVisit();
-							visit.setRequest(getPullRequest());
-							visit.setUser(user);
-							getPullRequest().getVisits().add(visit);
-						} else {
-							visit.setDate(new Date());
-						}
-						GitPlex.getInstance(Dao.class).persist(visit);
-					}
-				}
-				super.onDetach();
-			}
-			
-		};
-		activitiesView.setOutputMarkupId(true);
-		
-		List<RenderableActivity> activities = getActivities();
-		
-		for (RenderableActivity activity: activities) 
-			activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
-		
-		return activitiesView;
-	}
-	
-	@Override
-	protected void onBeforeRender() {
-		addOrReplace(newActivitiesView());
-		
-		super.onBeforeRender();
-	}
-
-	@Override
-	public void detachModels() {
-		super.detachModels();
-	}
-
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
@@ -275,6 +234,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
 			List<RenderableActivity> activities = getActivities();
+
 			@SuppressWarnings("deprecation")
 			Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
 			RenderableActivity lastAcvitity = (RenderableActivity) lastActivityRow.getDefaultModelObject();
@@ -297,12 +257,20 @@ public class RequestOverviewPage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
+		add(activitiesView = new RepeatingView("requestActivities"));
+		activitiesView.setOutputMarkupId(true);
+		
+		List<RenderableActivity> activities = getActivities();
+		
+		for (RenderableActivity activity: activities) 
+			activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
+		
+		WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(GitPlex.getInstance(AccountManager.class).getCurrent() != null);
+				setVisible(getLoginUser() != null);
 			}
 			
 		};
@@ -340,16 +308,14 @@ public class RequestOverviewPage extends RequestDetailPage {
 				comment.setRequest(getPullRequest());
 				comment.setUser(getLoginUser());
 				comment.setContent(input.getModelObject());
-				InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPage().getPageId()));
-				try {
-					GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
-				} finally {
-					InheritableThreadLocalData.clear();
-				}
+				GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
 				input.setModelObject("");
+
+				GitPlex.getInstance(VisitInfoManager.class).visit(getLoginUser(), getPullRequest());
 				
 				target.add(addComment);
 				
+				@SuppressWarnings("deprecation")
 				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
 				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentPullRequest(comment)); 
 				activitiesView.add(newActivityRow);

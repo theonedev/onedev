@@ -56,7 +56,9 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Entity
 /*
@@ -996,6 +998,16 @@ public class PullRequest extends AbstractEntity {
 		List<BriefCommit> commits = new ArrayList<>();
 		getSortedUpdates().forEach(update->commits.addAll(update.getCommits()));
 		return commits;
+	}
+	
+	public boolean isVisited(boolean includingActivities) {
+		Account user = SecurityUtils.getAccount();
+		if (user != null) {
+			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
+			return visitDate != null && visitDate.after(includingActivities?getLastEventDate():getSubmitDate());
+		} else {
+			return true;
+		}
 	}
 	
 	public static class ComparingInfo implements Serializable {

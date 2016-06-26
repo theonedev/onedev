@@ -804,30 +804,20 @@ public class RevisionDiffPanel extends Panel {
 									comment.setContent(contentInput.getModelObject());
 									GitPlex.getInstance(CodeCommentManager.class).save(comment);
 									
-									Long commentId = comment.getId();
-									IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+									CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
 										@Override
-										protected CodeComment load() {
-											return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-										}
-										
-									};
-									CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), commentModel) {
-
-										@Override
-										protected void onCommentDeleted(AjaxRequestTarget target) {
-											CodeComment comment = commentModel.getObject();
+										protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
 											RevisionDiffPanel.this.onCommentDeleted(target, comment);
 										}
 										
 										@Override
-										protected CompareContext getCompareContext() {
-											return RevisionDiffPanel.this.getCompareContext(commentModel.getObject().getCommentPos().getCommit());
+										protected CompareContext getCompareContext(CodeComment comment) {
+											return RevisionDiffPanel.this.getCompareContext(comment.getCommentPos().getCommit());
 										}
 
 										@Override
-										protected void onSaveComment(AjaxRequestTarget target) {
+										protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 											target.add(commentContainer.get("head"));
 										}
 
@@ -901,31 +891,20 @@ public class RevisionDiffPanel extends Panel {
 	}
 
 	private void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-		Long commentId = comment.getId();
-		IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+		CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, comment.getId()) {
 
 			@Override
-			protected CodeComment load() {
-				return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-			}
-			
-		};
-		
-		CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentModel) {
-
-			@Override
-			protected void onCommentDeleted(AjaxRequestTarget target) {
-				CodeComment comment = commentModel.getObject();
+			protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
 				RevisionDiffPanel.this.onCommentDeleted(target, comment);
 			}
 
 			@Override
-			protected CompareContext getCompareContext() {
-				return RevisionDiffPanel.this.getCompareContext(commentModel.getObject().getCommentPos().getCommit());
+			protected CompareContext getCompareContext(CodeComment comment) {
+				return RevisionDiffPanel.this.getCompareContext(comment.getCommentPos().getCommit());
 			}
 
 			@Override
-			protected void onSaveComment(AjaxRequestTarget target) {
+			protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 				target.add(commentContainer.get("head"));
 			}
 
@@ -1276,29 +1255,20 @@ public class RevisionDiffPanel extends Panel {
 		}
 		
 		if (locatable) {
-			IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, getOpenComment().getId()) {
 
 				@Override
-				protected CodeComment load() {
-					return getOpenComment();
-				}
-				
-			};
-			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentModel) {
-
-				@Override
-				protected void onCommentDeleted(AjaxRequestTarget target) {
-					CodeComment comment = commentModel.getObject();
+				protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
 					RevisionDiffPanel.this.onCommentDeleted(target, comment);
 				}
 				
 				@Override
-				protected CompareContext getCompareContext() {
-					return RevisionDiffPanel.this.getCompareContext(commentModel.getObject().getCommentPos().getCommit());
+				protected CompareContext getCompareContext(CodeComment comment) {
+					return RevisionDiffPanel.this.getCompareContext(comment.getCommentPos().getCommit());
 				}
 
 				@Override
-				protected void onSaveComment(AjaxRequestTarget target) {
+				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 					target.add(commentContainer.get("head"));
 				}
 

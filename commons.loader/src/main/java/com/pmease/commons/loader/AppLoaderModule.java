@@ -2,10 +2,8 @@ package com.pmease.commons.loader;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
@@ -49,27 +47,7 @@ public class AppLoaderModule extends AbstractModule {
 
 			@Override
 			public ExecutorService get() {
-				return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 300L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>()) {
-
-					@Override
-					public void execute(final Runnable command) {
-						final Object inheritableThreadLocalData = InheritableThreadLocalData.get();
-						super.execute(new Runnable() {
-
-							@Override
-							public void run() {
-								InheritableThreadLocalData.set(inheritableThreadLocalData);
-								try {
-									command.run();
-								} finally {
-									InheritableThreadLocalData.clear();
-								}
-							}
-							
-						});
-					}
-					
-				};
+				return Executors.newCachedThreadPool();
 			}
 	    	
 	    }).in(Singleton.class);

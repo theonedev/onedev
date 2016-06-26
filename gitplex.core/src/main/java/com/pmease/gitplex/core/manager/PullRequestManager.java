@@ -68,7 +68,7 @@ public interface PullRequestManager extends EntityDao<PullRequest> {
      */
     void deleteRefs(PullRequest request);
     
-    void open(PullRequest request, @Nullable Object listenerData);
+    void open(PullRequest request);
     
     void delete(PullRequest request);
     

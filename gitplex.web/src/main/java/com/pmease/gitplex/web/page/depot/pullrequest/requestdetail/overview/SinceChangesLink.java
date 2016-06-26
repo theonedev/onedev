@@ -68,7 +68,7 @@ public class SinceChangesLink extends BookmarkablePageLink<Void> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		setOutputMarkupId(true);
+		setOutputMarkupPlaceholderTag(true);
 	}
 
 	@Override
