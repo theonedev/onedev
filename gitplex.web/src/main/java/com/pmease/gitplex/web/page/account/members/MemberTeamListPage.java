@@ -154,7 +154,7 @@ public class MemberTeamListPage extends MemberPage {
 				TeamMembership membership = new TeamMembership();
 				membership.setTeam(selection);
 				membership.setUser(getMembership().getUser());
-				GitPlex.getInstance(TeamMembershipManager.class).persist(membership);
+				GitPlex.getInstance(TeamMembershipManager.class).save(membership);
 				target.add(teamsContainer);
 				target.add(noTeamsContainer);
 			}

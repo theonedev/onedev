@@ -11,7 +11,7 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
@@ -22,7 +22,7 @@ import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Singleton
-public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAuthorization> 
+public class DefaultTeamAuthorizationManager extends AbstractEntityManager<TeamAuthorization> 
 		implements TeamAuthorizationManager, DepotListener {
 
 	@Inject
@@ -40,7 +40,7 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAutho
 
 	@Transactional
 	@Override
-	public void persist(TeamAuthorization entity) {
+	public void save(TeamAuthorization entity) {
 		DepotPrivilege privilege = entity.getPrivilege();
 		
 		/*
@@ -50,7 +50,7 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAutho
 		 * team side 
 		 */
 		Preconditions.checkArgument(privilege == DepotPrivilege.READ || privilege == DepotPrivilege.WRITE);
-		super.persist(entity);
+		dao.persist(entity);
 	}
 
 	@Transactional
@@ -65,7 +65,7 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAutho
 	@Override
 	public void delete(Collection<TeamAuthorization> authorizations) {
 		for (TeamAuthorization authorization: authorizations)
-			remove(authorization);
+			dao.remove(authorization);
 	}
 
 	@Sessional

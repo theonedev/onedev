@@ -17,7 +17,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
@@ -29,7 +29,7 @@ import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 
 @Singleton
-public class DefaultAccountManager extends AbstractEntityDao<Account> implements AccountManager, LifecycleListener {
+public class DefaultAccountManager extends AbstractEntityManager<Account> implements AccountManager, LifecycleListener {
 
     private final DepotManager repositoryManager;
     
@@ -52,7 +52,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     	if (account.isAdministrator()) {
     		getSession().replicate(account, ReplicationMode.OVERWRITE);
     	} else {
-    		persist(account);
+    		dao.persist(account);
     	}
 
     	if (oldName != null && !oldName.equals(account.getName())) {
@@ -120,7 +120,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     	for (Depot depot: account.getDepots())
     		repositoryManager.delete(depot);
     	
-		remove(account);
+		dao.remove(account);
 		
 		for (Depot depot: dao.allOf(Depot.class)) {
 			for (Iterator<IntegrationPolicy> it = depot.getIntegrationPolicies().iterator(); it.hasNext();) {

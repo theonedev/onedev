@@ -183,7 +183,7 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 				UserAuthorization authorization = new UserAuthorization();
 				authorization.setUser(collaboratorModel.getObject());
 				authorization.setDepot(selection);
-				GitPlex.getInstance(UserAuthorizationManager.class).persist(authorization);
+				GitPlex.getInstance(UserAuthorizationManager.class).save(authorization);
 				target.add(depotsContainer);
 				target.add(pagingNavigator);
 				target.add(noDepotsContainer);
@@ -322,7 +322,7 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 								close();
 								UserAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
-								GitPlex.getInstance(UserAuthorizationManager.class).persist(authorization);
+								GitPlex.getInstance(UserAuthorizationManager.class).save(authorization);
 								target.add(pagingNavigator);
 								target.add(depotsContainer);
 								target.add(noDepotsContainer);

@@ -45,7 +45,7 @@ import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
@@ -83,7 +83,7 @@ import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Singleton
-public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> implements PullRequestManager, 
+public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest> implements PullRequestManager, 
 		DepotListener, RefListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
@@ -142,7 +142,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	public void delete(PullRequest request) {
 		deleteRefs(request);
 		
-		remove(request);
+		dao.remove(request);
 	}
 
 	@Sessional
@@ -169,7 +169,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			activity.setAction(PullRequestActivity.Action.RESTORE_SOURCE_BRANCH);
 			activity.setDate(new Date());
 			activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-			pullRequestActivityManager.persist(activity);
+			pullRequestActivityManager.save(activity);
 		}
 	}
 
@@ -186,7 +186,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			activity.setAction(PullRequestActivity.Action.DELETE_SOURCE_BRANCH);
 			activity.setDate(new Date());
 			activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-			pullRequestActivityManager.persist(activity);
+			pullRequestActivityManager.save(activity);
 		}
 	}
 	
@@ -200,7 +200,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		request.setSubmitter(user);
 		request.setSubmitDate(new Date());
 		
-		persist(request);
+		dao.persist(request);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
@@ -208,7 +208,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		activity.setAction(PullRequestActivity.Action.REOPEN);
 		activity.setUser(user);
 		
-		pullRequestActivityManager.persist(activity);
+		pullRequestActivityManager.save(activity);
 
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
@@ -236,7 +236,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		activity.setAction(PullRequestActivity.Action.DISCARD);
 		activity.setUser(user);
 		
-		pullRequestActivityManager.persist(activity);
+		pullRequestActivityManager.save(activity);
 
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
@@ -253,7 +253,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
 		request.setLastEventDate(activity.getDate());
-		persist(request);
+		dao.persist(request);
 		
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onDiscardRequest(request, user, comment);
@@ -317,7 +317,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		activity.setAction(PullRequestActivity.Action.INTEGRATE);
 		activity.setUser(user);
 		
-		pullRequestActivityManager.persist(activity);
+		pullRequestActivityManager.save(activity);
 
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
@@ -335,7 +335,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		
 		request.setLastEventDate(activity.getDate());
 
-		persist(request);
+		dao.persist(request);
 
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onIntegrateRequest(request, user, comment);
@@ -376,14 +376,14 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	@Override
 	public void open(PullRequest request) {
 		request.setNumber(getNextNumber(request.getTargetDepot()));
-		persist(request);
+		dao.persist(request);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setDate(request.getSubmitDate());
 		activity.setAction(PullRequestActivity.Action.OPEN);
 		activity.setRequest(request);
 		activity.setUser(request.getSubmitter());
-		pullRequestActivityManager.persist(activity);
+		pullRequestActivityManager.save(activity);
 		
 		FileUtils.cleanDir(storageManager.getCacheDir(request));
 		
@@ -430,7 +430,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	@Transactional
 	@Override
 	public void onAssigneeChange(PullRequest request) {
-		persist(request);
+		dao.persist(request);
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onAssignRequest(request);
 	}
@@ -457,7 +457,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			activity.setUser(GitPlex.getInstance(AccountManager.class).getRoot());
 			activity.setAction(PullRequestActivity.Action.INTEGRATE);
 			activity.setDate(new Date());
-			pullRequestActivityManager.persist(activity);
+			pullRequestActivityManager.save(activity);
 			
 			request.setLastIntegrationPreview(null);
 			CloseInfo closeInfo = new CloseInfo();
@@ -467,7 +467,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			request.setCloseInfo(closeInfo);
 			request.setLastEventDate(activity.getDate());
 			
-			persist(request);
+			dao.persist(request);
 			
 			for (PullRequestListener listener: pullRequestListeners)
 				listener.onIntegrateRequest(request, null, null);
@@ -650,7 +650,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 									FileUtils.deleteDir(tempDir);
 								}
 							}
-							persist(request);
+							dao.persist(request);
 
 							if (request.getStatus() == PENDING_INTEGRATE 
 									&& preview.getIntegrated() != null

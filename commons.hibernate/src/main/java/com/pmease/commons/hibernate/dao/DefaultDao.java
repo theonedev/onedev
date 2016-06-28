@@ -3,6 +3,7 @@ package com.pmease.commons.hibernate.dao;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -25,9 +26,12 @@ public class DefaultDao implements Dao, Serializable {
 
 	private final Provider<Session> sessionProvider;
 	
+	private final Provider<Set<DaoListener>> listenersProvider;
+	
 	@Inject
-	public DefaultDao(Provider<Session> sessionProvider) {
+	public DefaultDao(Provider<Session> sessionProvider, Provider<Set<DaoListener>> listenersProvider) {
 		this.sessionProvider = sessionProvider;
+		this.listenersProvider = listenersProvider;
 	}
 	
 	@Sessional
@@ -45,12 +49,16 @@ public class DefaultDao implements Dao, Serializable {
 	@Transactional
 	@Override
 	public void persist(AbstractEntity entity) {
+		for (DaoListener listener: listenersProvider.get())
+			listener.onPersistEntity(entity);
 		getSession().saveOrUpdate(entity);
 	}
 
 	@Transactional
 	@Override
 	public void remove(AbstractEntity entity) {
+		for (DaoListener listener: listenersProvider.get())
+			listener.onRemoveEntity(entity);
 		getSession().delete(entity);
 	}
 

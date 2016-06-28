@@ -6,14 +6,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 
 @Singleton
-public class DefaultPullRequestCommentManager extends AbstractEntityDao<PullRequestComment> 
+public class DefaultPullRequestCommentManager extends AbstractEntityManager<PullRequestComment> 
 		implements PullRequestCommentManager {
 
 	private final Set<PullRequestListener> pullRequestListeners;
@@ -28,7 +28,7 @@ public class DefaultPullRequestCommentManager extends AbstractEntityDao<PullRequ
 	@Transactional
 	@Override
 	public void save(PullRequestComment comment) {
-		persist(comment);
+		dao.persist(comment);
 		
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onCommentRequest(comment);
@@ -37,7 +37,7 @@ public class DefaultPullRequestCommentManager extends AbstractEntityDao<PullRequ
 	@Transactional
 	@Override
 	public void delete(PullRequestComment comment) {
-		remove(comment);
+		dao.remove(comment);
 	}
 
 }

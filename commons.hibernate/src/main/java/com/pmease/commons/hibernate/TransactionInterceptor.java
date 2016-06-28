@@ -19,20 +19,42 @@ import com.google.inject.Inject;
 
 public class TransactionInterceptor implements MethodInterceptor {
 
+	private static ThreadLocal<Integer> transactionRefCounter = new ThreadLocal<Integer>() {
+
+		@Override
+		protected Integer initialValue() {
+			return 0;
+		}
+		
+	};
+	
 	@Inject
 	private UnitOfWork unitOfWork;
+	
+	private void increaseTransactionRefCounter() {
+		transactionRefCounter.set(transactionRefCounter.get()+1);
+	}
+	
+	private void decreaseTransactionRefCounter() {
+		transactionRefCounter.set(transactionRefCounter.get()-1);
+	}
 	
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		unitOfWork.begin();
 		try {
 			Session session = unitOfWork.getSession();
 			if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-				return mi.proceed();
+				increaseTransactionRefCounter();
+				try {
+					return mi.proceed();
+				} finally {
+					decreaseTransactionRefCounter();
+				}
 			} else {
+				Transaction tx = session.beginTransaction();
 				FlushMode previousMode = session.getFlushMode();
 				session.setFlushMode(FlushMode.COMMIT);
-
-				Transaction tx = session.beginTransaction();
+				increaseTransactionRefCounter();
 				try {
 					Object result = mi.proceed();
 					tx.commit();
@@ -44,6 +66,7 @@ public class TransactionInterceptor implements MethodInterceptor {
 					}
 					throw t;
 				} finally {
+					decreaseTransactionRefCounter();
 					session.setFlushMode(previousMode);
 				}
 			}
@@ -52,4 +75,9 @@ public class TransactionInterceptor implements MethodInterceptor {
 			unitOfWork.end();
 		}
 	}
+	
+	public static boolean isInitiating() {
+		return transactionRefCounter.get() == 1;
+	}
+	
 }

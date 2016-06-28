@@ -11,7 +11,7 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -22,7 +22,7 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 
 @Singleton
-public class DefaultVerificationManager extends AbstractEntityDao<Verification> implements VerificationManager {
+public class DefaultVerificationManager extends AbstractEntityManager<Verification> implements VerificationManager {
 
 	private final PullRequestManager pullRequestManager;
 	
@@ -61,7 +61,7 @@ public class DefaultVerificationManager extends AbstractEntityDao<Verification> 
 	@Transactional
 	@Override
 	public void save(Verification verification) {
-		persist(verification);
+		dao.persist(verification);
 
 		onVerificationChange(verification.getRequest());
 	}
@@ -69,7 +69,7 @@ public class DefaultVerificationManager extends AbstractEntityDao<Verification> 
 	@Transactional
 	@Override
 	public void delete(Verification verification) {
-		remove(verification);
+		dao.remove(verification);
 		
 		onVerificationChange(verification.getRequest());
 	}

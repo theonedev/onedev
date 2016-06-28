@@ -2,12 +2,12 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.setting.MailSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
-public interface ConfigManager extends EntityDao<Config> {
+public interface ConfigManager extends EntityManager<Config> {
 	
 	/**
 	 * Retrieve config by key.

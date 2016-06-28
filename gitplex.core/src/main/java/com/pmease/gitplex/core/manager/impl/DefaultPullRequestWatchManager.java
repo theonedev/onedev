@@ -24,7 +24,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
 import com.pmease.gitplex.core.entity.Account;
@@ -45,7 +45,7 @@ import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 
 @Singleton
-public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullRequestWatch> implements PullRequestWatchManager {
+public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRequestWatch> implements PullRequestWatchManager {
 
 	private final AccountManager userManager;
 	
@@ -206,7 +206,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 			watch.setUser(user);
 			watch.setReason(reason);
 			request.getWatches().add(watch);
-			persist(watch);
+			dao.persist(watch);
 		}
 	}
 
@@ -247,7 +247,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 		request.setLastEventDate(new Date());
 		request.setLastEvent(event);
 		
-		pullRequestManager.persist(request);
+		pullRequestManager.save(request);
 	}
 
 	@Transactional

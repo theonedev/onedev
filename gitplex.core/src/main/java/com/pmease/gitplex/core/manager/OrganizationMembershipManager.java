@@ -4,12 +4,12 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.entity.TeamMembership;
 
-public interface OrganizationMembershipManager extends EntityDao<OrganizationMembership> {
+public interface OrganizationMembershipManager extends EntityManager<OrganizationMembership> {
 	
 	void save(OrganizationMembership membership);
 	

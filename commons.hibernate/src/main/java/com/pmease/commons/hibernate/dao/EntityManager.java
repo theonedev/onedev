@@ -7,7 +7,7 @@ import org.hibernate.criterion.DetachedCriteria;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-public interface EntityDao<T extends AbstractEntity> {
+public interface EntityManager<T extends AbstractEntity> {
 	
 	/**
 	 * Get the entity with the specified type and id from data store.
@@ -45,7 +45,7 @@ public interface EntityDao<T extends AbstractEntity> {
 	 * @param entity
 	 * 			the entity to be saved
 	 */
-	void persist(T entity);
+	void save(T entity);
 
 	/**
 	 * Remove the specified entity from the datastore.
@@ -53,7 +53,7 @@ public interface EntityDao<T extends AbstractEntity> {
 	 * @param entity
 	 * 			the entity to be deleted
 	 */
-	void remove(T entity);
+	void delete(T entity);
 
 	/**
 	 * Query with specified criteria.

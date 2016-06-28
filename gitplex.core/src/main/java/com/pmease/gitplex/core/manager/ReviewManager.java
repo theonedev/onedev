@@ -4,13 +4,13 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 
-public interface ReviewManager extends EntityDao<Review> {
+public interface ReviewManager extends EntityManager<Review> {
 
 	Review findBy(Account reviewer, PullRequestUpdate update);
 

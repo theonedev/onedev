@@ -11,20 +11,15 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.schedule.SchedulableTask;
 import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestComment;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.manager.AttachmentManager;
-import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 
 @Singleton
@@ -40,17 +35,13 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	
     private final Dao dao;
     
-    private final DepotManager depotManager;
-    
     private String taskId;
     
 	@Inject
-	public DefaultAttachmentManager(Dao dao, StorageManager storageManager, TaskScheduler taskScheduler, 
-			DepotManager depotManager) {
+	public DefaultAttachmentManager(Dao dao, StorageManager storageManager, TaskScheduler taskScheduler) {
 		this.dao = dao;
 		this.storageManager = storageManager;
 		this.taskScheduler = taskScheduler;
-		this.depotManager = depotManager;
 	}
 	
 	@Override
@@ -75,19 +66,6 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		return new File(getTempAttachmentDir(depot), attachmentDirUUID);
 	}
 
-	@Override
-	public void onDeleteDepot(Depot depot) {
-		FileUtils.deleteDir(storageManager.getAttachmentDir(depot));
-	}
-
-	@Override
-	public void onRenameDepot(Depot renamedDepot, String oldName) {
-	}
-
-	@Override
-	public void onTransferDepot(Depot depot, Account oldAccount) {
-	}
-
 	private void makeAttachmentPermanent(Depot depot, String attachmentDirUUID) {
 		File tempAttachmentDir = getTempAttachmentDir(depot, attachmentDirUUID);
 		File permanentAttachmentDir = getPermanentAttachmentDir(depot, attachmentDirUUID);
@@ -100,25 +78,6 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		}
 	}
 	
-	@Override
-	public void onSaveComment(CodeComment comment) {
-		dao.afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				makeAttachmentPermanent(comment.getDepot(), comment.getUUID());
-			}
-			
-		});
-	}
-
-	@Override
-	public void onDeleteComment(CodeComment comment) {
-		File permanentAttachmentDir = getPermanentAttachmentDir(comment.getDepot(), comment.getUUID());
-		if (permanentAttachmentDir.exists())
-			FileUtils.deleteDir(permanentAttachmentDir);
-	}
-
 	@Override
 	public void systemStarting() {
 	}
@@ -140,7 +99,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Override
 	public void execute() {
 		try {
-			for (Depot depot: depotManager.all()) {
+			for (Depot depot: dao.allOf(Depot.class)) {
 				File tempDir = getTempAttachmentDir(depot);
 				if (tempDir.exists()) {
 					for (File file: tempDir.listFiles()) {
@@ -161,84 +120,43 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	}
 
 	@Override
-	public void onOpenRequest(PullRequest request) {
-		dao.afterCommit(new Runnable() {
+	public void onPersistEntity(AbstractEntity entity) {
+		if (entity.isNew()) {
+			if (entity instanceof PullRequest) {
+				PullRequest request = (PullRequest) entity;
+				dao.afterCommit(new Runnable() {
+	
+					@Override
+					public void run() {
+						makeAttachmentPermanent(request.getTargetDepot(), request.getUUID());
+					}
+					
+				});
+			} else if (entity instanceof CodeComment) {
+				CodeComment comment = (CodeComment) entity;
+				dao.afterCommit(new Runnable() {
 
-			@Override
-			public void run() {
-				makeAttachmentPermanent(request.getTargetDepot(), request.getUUID());
+					@Override
+					public void run() {
+						makeAttachmentPermanent(comment.getDepot(), comment.getUUID());
+					}
+					
+				});
 			}
-			
-		});
+		}
 	}
 
 	@Override
-	public void onReopenRequest(PullRequest request, Account user, String comment) {
-	}
-
-	@Override
-	public void onUpdateRequest(PullRequestUpdate update) {
-	}
-
-	@Override
-	public void onMentionAccount(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onMentionAccount(PullRequestComment comment, Account user) {
-	}
-
-	@Override
-	public void onCommentRequest(PullRequestComment comment) {
-	}
-
-	@Override
-	public void onReviewRequest(Review review, String comment) {
-	}
-
-	@Override
-	public void onAssignRequest(PullRequest request) {
-	}
-
-	@Override
-	public void onVerifyRequest(PullRequest request) {
-	}
-
-	@Override
-	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
-	}
-
-	@Override
-	public void onDiscardRequest(PullRequest request, Account user, String comment) {
-	}
-
-	@Override
-	public void onIntegrationPreviewCalculated(PullRequest request) {
-	}
-
-	@Override
-	public void onInvitingReview(ReviewInvitation invitation) {
-	}
-
-	@Override
-	public void pendingIntegration(PullRequest request) {
-	}
-
-	@Override
-	public void pendingUpdate(PullRequest request) {
-	}
-
-	@Override
-	public void pendingApproval(PullRequest request) {
-	}
-
-	@Override
-	public void onDeleteRequest(PullRequest request) {
-		FileUtils.deleteDir(getPermanentAttachmentDir(request.getTargetDepot(), request.getUUID()));
-	}
-
-	@Override
-	public void onSaveDepot(Depot depot) {
+	public void onRemoveEntity(AbstractEntity entity) {
+		if (entity instanceof Depot) {
+			Depot depot = (Depot) entity;
+			FileUtils.deleteDir(storageManager.getAttachmentDir(depot));
+		} else if (entity instanceof CodeComment) {
+			CodeComment comment = (CodeComment) entity;
+			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getDepot(), comment.getUUID());
+			if (permanentAttachmentDir.exists())
+				FileUtils.deleteDir(permanentAttachmentDir);
+		}
 	}
 
 }

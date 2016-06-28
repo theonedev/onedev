@@ -9,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
@@ -19,7 +19,7 @@ import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 
 @Singleton
-public class DefaultReviewInvitationManager extends AbstractEntityDao<ReviewInvitation> implements ReviewInvitationManager {
+public class DefaultReviewInvitationManager extends AbstractEntityManager<ReviewInvitation> implements ReviewInvitationManager {
 
 	private final Set<PullRequestListener> pullRequestListeners;
 	
@@ -42,7 +42,7 @@ public class DefaultReviewInvitationManager extends AbstractEntityDao<ReviewInvi
 	@Transactional
 	@Override
 	public void save(ReviewInvitation invitation) {
-		persist(invitation);
+		dao.persist(invitation);
 		
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onInvitingReview(invitation);

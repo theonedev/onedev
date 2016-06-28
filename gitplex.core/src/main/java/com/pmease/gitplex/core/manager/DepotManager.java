@@ -6,11 +6,11 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.Repository;
 
-import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 
-public interface DepotManager extends EntityDao<Depot> {
+public interface DepotManager extends EntityManager<Depot> {
 	
 	@Nullable Depot findBy(String accountName, String depotName);
 	

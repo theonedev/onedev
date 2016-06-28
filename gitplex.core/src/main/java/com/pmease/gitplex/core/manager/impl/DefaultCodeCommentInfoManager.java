@@ -30,6 +30,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.listener.CodeCommentListener;
@@ -291,14 +292,16 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	@Sessional
 	@Override
 	public void onSaveComment(CodeComment comment) {
-		dao.afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				collect(comment.getDepot());
-			}
-			
-		});
+		if (comment.isNew()) {
+			dao.afterCommit(new Runnable() {
+	
+				@Override
+				public void run() {
+					collect(comment.getDepot());
+				}
+				
+			});
+		}
 	}
 
 	@Override
@@ -355,6 +358,20 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 			filesCache.put(depot.getId(), files);
 		}
 		return files;
+	}
+
+	@Override
+	public void onSaveCommentAndReply(CodeComment comment, CodeCommentReply reply) {
+		if (comment.isNew()) {
+			dao.afterCommit(new Runnable() {
+				
+				@Override
+				public void run() {
+					collect(comment.getDepot());
+				}
+				
+			});
+		}
 	}
 
 	static class StringByteIterable extends ArrayByteIterable {

@@ -1,9 +1,6 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.Set;
-
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
@@ -11,30 +8,25 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.Config.Key;
-import com.pmease.gitplex.core.listener.ConfigListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.setting.MailSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
-public class DefaultConfigManager extends AbstractEntityDao<Config> implements ConfigManager {
-	
-	private final Provider<Set<ConfigListener>> listenersProvider;
+public class DefaultConfigManager extends AbstractEntityManager<Config> implements ConfigManager {
 	
 	private volatile Long systemSettingConfigId;
 	
 	private volatile Long mailSettingConfigId;
 	
 	@Inject
-	public DefaultConfigManager(Dao dao, Provider<Set<ConfigListener>> listenersProvider) {
+	public DefaultConfigManager(Dao dao) {
 		super(dao);
-		
-		this.listenersProvider = listenersProvider;
 	}
 
 	@Sessional
@@ -64,10 +56,7 @@ public class DefaultConfigManager extends AbstractEntityDao<Config> implements C
 			config.setKey(Key.SYSTEM);
 		}
 		config.setSetting(systemSetting);
-		persist(config);
-		
-		for (ConfigListener listener: listenersProvider.get())
-			listener.onSave(config);
+		dao.persist(config);
 	}
 
 	@Sessional
@@ -99,10 +88,7 @@ public class DefaultConfigManager extends AbstractEntityDao<Config> implements C
 			config.setKey(Key.MAIL);
 		}
 		config.setSetting(mailSetting);
-		persist(config);
-
-		for (ConfigListener listener: listenersProvider.get())
-			listener.onSave(config);
+		dao.persist(config);
 	}
 
 }

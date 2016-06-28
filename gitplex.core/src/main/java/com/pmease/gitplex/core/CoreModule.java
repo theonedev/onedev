@@ -12,6 +12,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
+import com.pmease.commons.hibernate.dao.DaoListener;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
@@ -19,12 +20,9 @@ import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
-import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.EntityLocator;
 import com.pmease.gitplex.core.entity.persistlistener.ListenerLocator;
-import com.pmease.gitplex.core.listener.CodeCommentListener;
 import com.pmease.gitplex.core.listener.CodeCommentReplyListener;
-import com.pmease.gitplex.core.listener.ConfigListener;
 import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.listener.PullRequestListener;
@@ -205,8 +203,7 @@ public class CoreModule extends AbstractPluginModule {
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 
-		contribute(CodeCommentListener.class, DefaultAttachmentManager.class);
-		contribute(CodeCommentListener.class, DefaultCodeCommentInfoManager.class);
+		contribute(DaoListener.class, DefaultAttachmentManager.class);
 		
 		contribute(DepotListener.class, DefaultPullRequestManager.class);
 		contribute(DepotListener.class, DefaultCommitInfoManager.class);
@@ -220,7 +217,6 @@ public class CoreModule extends AbstractPluginModule {
 		
 		contribute(PullRequestListener.class, DefaultNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
-		contribute(PullRequestListener.class, DefaultAttachmentManager.class);
 		
 		contribute(PullRequestUpdateListener.class, DefaultPullRequestInfoManager.class);
 		
@@ -233,13 +229,6 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LifecycleListener.class, DefaultAttachmentManager.class);
 		contribute(LifecycleListener.class, DefaultPullRequestInfoManager.class);
 		
-		contribute(ConfigListener.class, new ConfigListener() {
-
-			@Override
-			public void onSave(Config config) {
-			}
-			
-		});
 		contribute(CodeCommentReplyListener.class, new CodeCommentReplyListener() {
 			
 			@Override

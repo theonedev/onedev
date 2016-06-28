@@ -2,11 +2,11 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Team;
 
-public interface TeamManager extends EntityDao<Team> {
+public interface TeamManager extends EntityManager<Team> {
 	/**
 	 * Save specified team in specified organization
 	 * 

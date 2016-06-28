@@ -13,7 +13,7 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
@@ -32,7 +32,7 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 
 @Singleton
-public class DefaultReviewManager extends AbstractEntityDao<Review> implements ReviewManager {
+public class DefaultReviewManager extends AbstractEntityManager<Review> implements ReviewManager {
 
 	private final PullRequestManager pullRequestManager;
 	
@@ -75,7 +75,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 		review.setUpdate(request.getLatestUpdate());
 		review.setReviewer(reviewer);
 		
-		persist(review);	
+		dao.persist(review);	
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		if (result == Review.Result.APPROVE)
@@ -85,7 +85,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 		activity.setDate(new Date());
 		activity.setRequest(request);
 		activity.setUser(reviewer);
-		pullRequestActivityManager.persist(activity);
+		pullRequestActivityManager.save(activity);
 		
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
@@ -130,14 +130,14 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 	@Transactional
 	@Override
 	public void delete(Review review) {
-		remove(review);
+		dao.remove(review);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setAction(PullRequestActivity.Action.UNDO_REVIEW);
 		activity.setDate(new Date());
 		activity.setRequest(review.getUpdate().getRequest());
 		activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-		pullRequestActivityManager.persist(activity);
+		pullRequestActivityManager.save(activity);
 
 		final Long requestId = review.getUpdate().getRequest().getId();
 		afterCommit(new Runnable() {

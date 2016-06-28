@@ -163,7 +163,7 @@ public class DepotTeamListPage extends DepotSettingPage {
 				TeamAuthorization authorization = new TeamAuthorization();
 				authorization.setTeam(selection);
 				authorization.setDepot(depotModel.getObject());
-				GitPlex.getInstance(TeamAuthorizationManager.class).persist(authorization);
+				GitPlex.getInstance(TeamAuthorizationManager.class).save(authorization);
 				target.add(teamsContainer);
 				target.add(noTeamsContainer);
 			}
@@ -304,7 +304,7 @@ public class DepotTeamListPage extends DepotSettingPage {
 								close();
 								TeamAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
-								GitPlex.getInstance(TeamAuthorizationManager.class).persist(authorization);
+								GitPlex.getInstance(TeamAuthorizationManager.class).save(authorization);
 								target.add(teamsContainer);
 								target.add(noTeamsContainer);
 								Session.get().success("Privilege updated");

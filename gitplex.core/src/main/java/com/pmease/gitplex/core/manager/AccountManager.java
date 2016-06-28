@@ -6,10 +6,10 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Account;
 
-public interface AccountManager extends EntityDao<Account> {
+public interface AccountManager extends EntityManager<Account> {
 	
 	/**
 	 * Save specified account

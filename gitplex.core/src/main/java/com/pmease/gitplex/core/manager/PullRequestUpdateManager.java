@@ -4,11 +4,11 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 
-public interface PullRequestUpdateManager extends EntityDao<PullRequestUpdate> {
+public interface PullRequestUpdateManager extends EntityManager<PullRequestUpdate> {
 	
 	void save(PullRequestUpdate update, boolean notify);
 	

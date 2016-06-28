@@ -15,7 +15,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentRelation;
@@ -27,7 +27,7 @@ import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
 
 @Singleton
-public class DefaultCodeCommentRelationManager extends AbstractEntityDao<CodeCommentRelation> 
+public class DefaultCodeCommentRelationManager extends AbstractEntityManager<CodeCommentRelation> 
 		implements CodeCommentRelationManager {
 
 	private final CodeCommentInfoManager codeCommentInfoManager;
@@ -91,7 +91,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityDao<CodeCom
 						CodeCommentRelation relation = new CodeCommentRelation();
 						relation.setComment(comment);
 						relation.setRequest(request);
-						persist(relation);
+						dao.persist(relation);
 						request.getCodeCommentRelations().add(relation);
 					}
 				}

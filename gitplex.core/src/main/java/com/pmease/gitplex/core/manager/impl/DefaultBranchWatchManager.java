@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 
 @Singleton
-public class DefaultBranchWatchManager extends AbstractEntityDao<BranchWatch> implements BranchWatchManager {
+public class DefaultBranchWatchManager extends AbstractEntityManager<BranchWatch> implements BranchWatchManager {
 
 	@Inject
 	public DefaultBranchWatchManager(Dao dao) {

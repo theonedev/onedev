@@ -9,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
@@ -20,7 +20,7 @@ import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
 
 @Singleton
-public class DefaultOrganizationMembershipManager extends AbstractEntityDao<OrganizationMembership> 
+public class DefaultOrganizationMembershipManager extends AbstractEntityManager<OrganizationMembership> 
 		implements OrganizationMembershipManager {
 
 	private final AccountManager accountManager;
@@ -44,7 +44,7 @@ public class DefaultOrganizationMembershipManager extends AbstractEntityDao<Orga
 	public void save(OrganizationMembership membership) {
 		if (membership.getOrganization().isNew())
 			accountManager.save(membership.getOrganization(), null);
-		persist(membership);
+		dao.persist(membership);
 	}
 
 	@Sessional
@@ -62,7 +62,7 @@ public class DefaultOrganizationMembershipManager extends AbstractEntityDao<Orga
 		for (OrganizationMembership organizationMembership: organizationMemberships)
 			organizationMembershipManager.save(organizationMembership);
 		for (TeamMembership teamMembership: teamMemberships)
-			teamMembershipManager.persist(teamMembership);
+			teamMembershipManager.save(teamMembership);
 	}	
 
 	@Transactional
@@ -77,11 +77,11 @@ public class DefaultOrganizationMembershipManager extends AbstractEntityDao<Orga
 	@Override
 	public void save(OrganizationMembership organizationMembership, Collection<TeamMembership> teamMembershipsToAdd,
 			Collection<TeamMembership> teamMembershipsToRemove) {
-		persist(organizationMembership);
+		dao.persist(organizationMembership);
 		for (TeamMembership teamMembership: teamMembershipsToAdd)
-			teamMembershipManager.persist(teamMembership);
+			teamMembershipManager.save(teamMembership);
 		for (TeamMembership teamMembership: teamMembershipsToRemove)
-			teamMembershipManager.remove(teamMembership);
+			teamMembershipManager.delete(teamMembership);
 	}
 
 	@Transactional
@@ -90,9 +90,9 @@ public class DefaultOrganizationMembershipManager extends AbstractEntityDao<Orga
 		Account organization = organizationMembership.getOrganization();
 		Account user = organizationMembership.getUser();
 		for (TeamMembership teamMembership: teamMembershipManager.query(organization, user)) {
-			teamMembershipManager.remove(teamMembership);
+			teamMembershipManager.delete(teamMembership);
 		}
-		remove(organizationMembership);
+		dao.remove(organizationMembership);
 	}
 
 }

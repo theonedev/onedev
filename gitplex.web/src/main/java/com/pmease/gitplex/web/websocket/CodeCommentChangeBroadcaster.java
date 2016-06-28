@@ -5,11 +5,10 @@ import java.util.concurrent.ExecutorService;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.component.IRequestablePage;
-import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
@@ -41,14 +40,7 @@ public class CodeCommentChangeBroadcaster implements CodeCommentListener, CodeCo
 			@Override
 			public void run() {
 				// Send web socket message in a thread in order not to blocking UI operations
-				IRequestablePage page;
-				if (RequestCycle.get() != null && RequestCycle.get().getActiveRequestHandler() instanceof IPageRequestHandler) {
-					IPageRequestHandler handler = (IPageRequestHandler) RequestCycle.get().getActiveRequestHandler();					
-					page = handler.getPage();
-				} else {
-					page = null;
-				}
-				
+				IRequestablePage page = WicketUtils.getPage();
 				GitPlex.getInstance(ExecutorService.class).execute(new Runnable() {
 
 					@Override
@@ -73,11 +65,17 @@ public class CodeCommentChangeBroadcaster implements CodeCommentListener, CodeCo
 
 	@Override
 	public void onSaveReply(CodeCommentReply reply) {
-		onChange(reply.getComment());
+		if (reply.isNew())
+			onChange(reply.getComment());
 	}
 
 	@Override
 	public void onDeleteReply(CodeCommentReply reply) {
+	}
+
+	@Override
+	public void onSaveCommentAndReply(CodeComment comment, CodeCommentReply reply) {
+		onChange(comment);
 	}
 		
 }

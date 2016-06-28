@@ -14,7 +14,7 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
@@ -38,7 +38,7 @@ import com.pmease.gitplex.core.manager.UrlManager;
  *
  */
 @Singleton
-public class DefaultNotificationManager extends AbstractEntityDao<Notification> implements NotificationManager {
+public class DefaultNotificationManager extends AbstractEntityManager<Notification> implements NotificationManager {
 	
 	private final MailManager mailManager;
 	
@@ -154,7 +154,7 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 					.add(Restrictions.eq("user", user))
 					.add(Restrictions.eq("task", notification.getTask()));
 			if (find(criteria) == null) {
-				persist(notification);
+				dao.persist(notification);
 				String subject = String.format("Please review pull request #%d (%s)", 
 						request.getId(), request.getTitle());
 				String url = urlManager.urlFor(request);
@@ -235,7 +235,7 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 				.add(Restrictions.eq("user", user))
 				.add(Restrictions.eq("task", notification.getTask()));
 		if (find(criteria) == null) {
-			persist(notification);
+			dao.persist(notification);
 			String subject = String.format("Please integrate pull request #%d (%s)", 
 					request.getId(), request.getTitle());
 			String url = urlManager.urlFor(request);
@@ -267,7 +267,7 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 					.add(Restrictions.eq("user", notification.getUser()))
 					.add(Restrictions.eq("task", notification.getTask()));
 			if (find(criteria) == null)
-				persist(notification);
+				dao.persist(notification);
 		}
 	}
 

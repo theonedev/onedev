@@ -216,7 +216,7 @@ public class TeamDepotListPage extends TeamPage {
 				TeamAuthorization authorization = new TeamAuthorization();
 				authorization.setDepot(selection);
 				authorization.setTeam(teamModel.getObject());
-				GitPlex.getInstance(TeamAuthorizationManager.class).persist(authorization);
+				GitPlex.getInstance(TeamAuthorizationManager.class).save(authorization);
 				target.add(depotsContainer);
 				target.add(pagingNavigator);
 				target.add(noDepotsContainer);
@@ -334,7 +334,7 @@ public class TeamDepotListPage extends TeamPage {
 								close();
 								TeamAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
-								GitPlex.getInstance(TeamAuthorizationManager.class).persist(authorization);
+								GitPlex.getInstance(TeamAuthorizationManager.class).save(authorization);
 								target.add(pagingNavigator);
 								target.add(depotsContainer);
 								target.add(noDepotsContainer);

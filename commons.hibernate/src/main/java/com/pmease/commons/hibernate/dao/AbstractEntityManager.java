@@ -7,15 +7,15 @@ import org.hibernate.Session;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.util.ReflectionUtils;
 
-public abstract class AbstractEntityDao<T extends AbstractEntity> implements EntityDao<T> {
+public abstract class AbstractEntityManager<T extends AbstractEntity> implements EntityManager<T> {
 
 	private final Class<T> entityClass;
 	
 	protected final Dao dao;
 	
 	@SuppressWarnings("unchecked")
-	public AbstractEntityDao(Dao dao) {
-		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(AbstractEntityDao.class, getClass());
+	public AbstractEntityManager(Dao dao) {
+		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(AbstractEntityManager.class, getClass());
 		if (typeArguments.size() == 1 && AbstractEntity.class.isAssignableFrom(typeArguments.get(0))) {
 			entityClass = (Class<T>) typeArguments.get(0);
 		} else {
@@ -36,12 +36,12 @@ public abstract class AbstractEntityDao<T extends AbstractEntity> implements Ent
 	}
 
 	@Override
-	public void persist(T entity) {
+	public void save(T entity) {
 		dao.persist(entity);
 	}
 
 	@Override
-	public void remove(T entity) {
+	public void delete(T entity) {
 		dao.remove(entity);
 	}
 

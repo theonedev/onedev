@@ -9,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
@@ -19,7 +19,7 @@ import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.TeamManager;
 
 @Singleton
-public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamManager {
+public class DefaultTeamManager extends AbstractEntityManager<Team> implements TeamManager {
 
 	@Inject
 	public DefaultTeamManager(Dao dao) {
@@ -36,7 +36,7 @@ public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamM
 				}
 			}
 		}
-		persist(team);
+		dao.persist(team);
 	}
 
 	@Transactional
@@ -48,7 +48,7 @@ public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamM
 					it.remove();
 			}
 		}
-		remove(team);
+		dao.remove(team);
 	}
 
 	@Sessional

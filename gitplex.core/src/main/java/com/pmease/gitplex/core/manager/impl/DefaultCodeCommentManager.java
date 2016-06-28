@@ -16,8 +16,9 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.TransactionInterceptor;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.CodeComment;
@@ -30,7 +31,7 @@ import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Singleton
-public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> implements CodeCommentManager {
+public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment> implements CodeCommentManager {
 
 	private final Provider<Set<CodeCommentListener>> listenersProvider;
 	
@@ -76,8 +77,10 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> im
 	@Transactional
 	@Override
 	public void save(CodeComment comment) {
-		for (CodeCommentListener listener: listenersProvider.get())
-			listener.onSaveComment(comment);
+		if (TransactionInterceptor.isInitiating()) {
+			for (CodeCommentListener listener: listenersProvider.get())
+				listener.onSaveComment(comment);
+		}
 		dao.persist(comment);
 		visitInfoManager.visit(SecurityUtils.getAccount(), comment);
 	}
@@ -85,8 +88,10 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> im
 	@Transactional
 	@Override
 	public void delete(CodeComment comment) {
-		for (CodeCommentListener listener: listenersProvider.get())
-			listener.onDeleteComment(comment);
+		if (TransactionInterceptor.isInitiating()) {
+			for (CodeCommentListener listener: listenersProvider.get())
+				listener.onDeleteComment(comment);
+		}
 		dao.remove(comment);
 	}
 
@@ -113,9 +118,15 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> im
 		return query(criteria);
 	}
 
+	@Transactional
 	@Override
 	public void save(CodeComment comment, CodeCommentReply reply) {
-		save(comment);
+		if (TransactionInterceptor.isInitiating()) {
+			for (CodeCommentListener listener: listenersProvider.get()) {
+				listener.onSaveCommentAndReply(comment, reply);
+			}
+		}
+		dao.persist(comment);
 		codeCommentReplyManager.save(reply);
 		visitInfoManager.visit(SecurityUtils.getAccount(), comment);
 	}

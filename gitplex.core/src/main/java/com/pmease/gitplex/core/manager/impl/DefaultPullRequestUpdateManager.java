@@ -12,7 +12,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
@@ -26,7 +26,7 @@ import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 
 @Singleton
-public class DefaultPullRequestUpdateManager extends AbstractEntityDao<PullRequestUpdate> implements PullRequestUpdateManager {
+public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> implements PullRequestUpdateManager {
 	
 	private final StorageManager storageManager;
 	
@@ -52,7 +52,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityDao<PullReque
 		for (PullRequestUpdateListener listener: pullRequestUpdateListenersProvider.get())
 			listener.onSaveUpdate(update);
 		
-		persist(update);
+		dao.persist(update);
 		
 		FileUtils.cleanDir(storageManager.getCacheDir(update));
 

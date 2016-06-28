@@ -10,7 +10,7 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
@@ -20,7 +20,7 @@ import com.pmease.gitplex.core.manager.UserAuthorizationManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Singleton
-public class DefaultUserAuthorizationManager extends AbstractEntityDao<UserAuthorization> 
+public class DefaultUserAuthorizationManager extends AbstractEntityManager<UserAuthorization> 
 		implements UserAuthorizationManager {
 
 	@Inject
@@ -30,7 +30,7 @@ public class DefaultUserAuthorizationManager extends AbstractEntityDao<UserAutho
 
 	@Transactional
 	@Override
-	public void persist(UserAuthorization entity) {
+	public void save(UserAuthorization entity) {
 		DepotPrivilege privilege = entity.getPrivilege();
 		
 		/*
@@ -41,7 +41,7 @@ public class DefaultUserAuthorizationManager extends AbstractEntityDao<UserAutho
 		 */
 		Preconditions.checkArgument(privilege == DepotPrivilege.READ || privilege == DepotPrivilege.WRITE);
 		
-		super.persist(entity);
+		dao.persist(entity);
 	}
 	
 	@Sessional
@@ -64,7 +64,7 @@ public class DefaultUserAuthorizationManager extends AbstractEntityDao<UserAutho
 	@Override
 	public void delete(Collection<UserAuthorization> authorizations) {
 		for (UserAuthorization authorization: authorizations)
-			remove(authorization);
+			dao.remove(authorization);
 	}
 	
 }

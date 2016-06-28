@@ -32,7 +32,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Pair;
@@ -58,7 +58,7 @@ import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Singleton
-public class DefaultDepotManager extends AbstractEntityDao<Depot> implements DepotManager, LifecycleListener, RefListener {
+public class DefaultDepotManager extends AbstractEntityManager<Depot> implements DepotManager, LifecycleListener, RefListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultDepotManager.class);
 	
@@ -146,7 +146,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     	
     	boolean isNew = depot.isNew();
     	
-    	persist(depot);
+    	dao.persist(depot);
     	
     	if (oldAccountId != null && !depot.getAccount().getId().equals(oldAccountId)) {
     		Account oldAccount = userManager.load(oldAccountId);
@@ -210,7 +210,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     	query.setParameter("forkedFrom", depot);
     	query.executeUpdate();
 
-    	remove(depot);
+    	dao.remove(depot);
     	
 		for (Depot each: all()) {
 			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
@@ -309,7 +309,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 				forked.setName(depot.getName());
 			}
 
-			persist(forked);
+			dao.persist(forked);
 
             FileUtils.cleanDir(forked.git().depotDir());
             forked.git().clone(depot.git().depotDir().getAbsolutePath(), true, false, false, null);
