@@ -75,7 +75,13 @@ public class TransactionInterceptor implements MethodInterceptor {
 			unitOfWork.end();
 		}
 	}
-	
+
+	/**
+	 * Checks if current transactional method invocation is the initiating invocation. If a transactional 
+	 * method is called from another transactional method, its invocation is not considered to be 
+	 * initiating. This is important as we often only want to invoke action listeners on initiating 
+	 * invocations when implementation of one action calls other actions
+	 */
 	public static boolean isInitiating() {
 		return transactionRefCounter.get() == 1;
 	}
