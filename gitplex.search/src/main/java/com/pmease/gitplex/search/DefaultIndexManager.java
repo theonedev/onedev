@@ -147,9 +147,10 @@ public class DefaultIndexManager implements IndexManager {
 		return indexVersion.get();
 	}
 	
-	private IndexResult index(org.eclipse.jgit.lib.Repository jgitRepo, AnyObjectId commitId, 
+	private IndexResult index(Repository repository, AnyObjectId commitId, 
 			IndexWriter writer, final IndexSearcher searcher) throws Exception {
-		try (RevWalk revWalk = new RevWalk(jgitRepo); TreeWalk treeWalk = new TreeWalk(jgitRepo)) {
+		try (	RevWalk revWalk = new RevWalk(repository); 
+				TreeWalk treeWalk = new TreeWalk(repository)) {
 			treeWalk.addTree(revWalk.parseCommit(commitId).getTree());
 			treeWalk.setRecursive(true);
 			
@@ -163,8 +164,8 @@ public class DefaultIndexManager implements IndexManager {
 					String lastCommitAnalyzersVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
 					if (lastCommitAnalyzersVersion.equals(extractors.getVersion())) {
 						String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
-						ObjectId lastCommitId = jgitRepo.resolve(lastCommitHash);
-						if (jgitRepo.hasObject(lastCommitId)) { 
+						ObjectId lastCommitId = repository.resolve(lastCommitHash);
+						if (repository.hasObject(lastCommitId)) { 
 							treeWalk.addTree(revWalk.parseCommit(lastCommitId).getTree());
 							treeWalk.setFilter(TreeFilter.ANY_DIFF);
 						}
@@ -220,14 +221,14 @@ public class DefaultIndexManager implements IndexManager {
 						if (currentBlobIndexVersion != null) {
 							if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
 								writer.deleteDocuments(query);
-								indexBlob(writer, jgitRepo, extractor, blobId, blobPath);
+								indexBlob(writer, repository, extractor, blobId, blobPath);
 								indexed++;
 							}
 						} else {
 							writer.deleteDocuments(query);
 						}
 					} else if (currentBlobIndexVersion != null) {
-						indexBlob(writer, jgitRepo, extractor, blobId, blobPath);
+						indexBlob(writer, repository, extractor, blobId, blobPath);
 						indexed++;
 					}
 				}

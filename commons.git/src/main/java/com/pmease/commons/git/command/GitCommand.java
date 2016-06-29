@@ -23,20 +23,20 @@ public abstract class GitCommand<V> implements Callable<V> {
 	
 	private static final String MIN_VERSION = "1.8.0";
 	
-	protected final File repoDir;
+	protected final File gitDir;
 	
 	private final Map<String, String> environments;
 	
-	public GitCommand(File repoDir, @Nullable Map<String, String> environments) {
-		this.repoDir = repoDir;
+	public GitCommand(File gitDir, @Nullable Map<String, String> environments) {
+		this.gitDir = gitDir;
 		this.environments = environments;
 		
-		if (!repoDir.exists())
-		    FileUtils.createDir(repoDir);
+		if (!gitDir.exists())
+		    FileUtils.createDir(gitDir);
 	}
 
-	public GitCommand(File repoDir) {
-		this(repoDir, null);
+	public GitCommand(File gitDir) {
+		this(gitDir, null);
 	}
 
 	/**
@@ -91,7 +91,7 @@ public abstract class GitCommand<V> implements Callable<V> {
 	
 	public Commandline cmd() {
 		String gitExe = getGitExe();
-		Commandline cmd = new Commandline(gitExe).workingDir(repoDir);
+		Commandline cmd = new Commandline(gitExe).workingDir(gitDir);
 		if (environments != null)
 			cmd.environments(environments);
 		return cmd;

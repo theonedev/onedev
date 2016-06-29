@@ -41,7 +41,7 @@ public class IsTreeLinkCommand extends GitCommand<Boolean> {
 		
 		String targetPath;
 		try {
-			targetPath = new String(new Git(repoDir).show(revision, symlink), "UTF8");
+			targetPath = new String(new Git(gitDir).show(revision, symlink), "UTF8");
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

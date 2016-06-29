@@ -359,6 +359,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		return new Git(AppLoader.getInstance(StorageManager.class).getGitDir(this));
 	}
 	
+	public File getGitDir() {
+		return AppLoader.getInstance(StorageManager.class).getGitDir(this);
+	}
+	
 	/**
 	 * Whether or not specified git represents a valid repository git. This can be used to tell 
 	 * apart a GitPlex repository git from some other Git repositories.

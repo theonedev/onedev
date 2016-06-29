@@ -74,7 +74,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						case CommitQueryParser.COMMITTER:
 							Map<String, Range> suggestedInputs = new LinkedHashMap<>();
 							CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
-							List<NameAndEmail> contributors = commitInfoManager.getContributors(depot);
+							List<NameAndEmail> contributors = commitInfoManager.getAuthors(depot);
 							for (NameAndEmail contributor: contributors) {
 								String content;
 								if (StringUtils.isNotBlank(contributor.getEmailAddress()))

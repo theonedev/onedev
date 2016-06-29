@@ -1,7 +1,6 @@
 package com.pmease.gitplex.core.manager;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -19,11 +18,9 @@ public interface CommitInfoManager {
 	
 	int getCommitCount(Depot depot);
 	
-	List<NameAndEmail> getContributors(Depot depot);
+	List<NameAndEmail> getAuthors(Depot depot);
 	
-	Map<String, Map<NameAndEmail, Long>> getContributions(Depot depot, Set<String> files);
-
-	Map<NameAndEmail, Long> getContributions(Depot depot, String file);
+	List<NameAndEmail> getCommitters(Depot depot);
 	
 	/**
 	 * Given an ancestor commit, get all its descendant commits. The result might be incomplete 

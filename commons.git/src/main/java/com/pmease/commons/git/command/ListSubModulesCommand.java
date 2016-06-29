@@ -24,7 +24,7 @@ public class ListSubModulesCommand extends GitCommand<Map<String, String>> {
 	public Map<String, String> call() {
 		Map<String, String> modules = new HashMap<>();
 		
-		String content = new String(new Git(repoDir).show(revision, ".gitmodules"));
+		String content = new String(new Git(gitDir).show(revision, ".gitmodules"));
 		
 		String path = null;
 		String url = null;

@@ -115,7 +115,7 @@ public class MergeCommand extends GitCommand<String> {
 		
 		result.checkReturnCode();
 		
-		Git git = new Git(repoDir);
+		Git git = new Git(gitDir);
 		if (squash) 
 			git.commit(message, false, false);
 		return git.parseRevision("HEAD", true);

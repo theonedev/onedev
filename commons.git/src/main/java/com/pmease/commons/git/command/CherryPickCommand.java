@@ -72,7 +72,7 @@ public class CherryPickCommand extends GitCommand<String> {
 				});
 				
 				if (emptyCommitSet.get())
-					return new Git(repoDir).parseRevision("HEAD", true);
+					return new Git(gitDir).parseRevision("HEAD", true);
 				
 				if (hasConflict.get())
 					return null;
@@ -80,7 +80,7 @@ public class CherryPickCommand extends GitCommand<String> {
 				result.checkReturnCode();
 	    	}
 	    }
-		return new Git(repoDir).parseRevision("HEAD", true);
+		return new Git(gitDir).parseRevision("HEAD", true);
 	}
 
 }
