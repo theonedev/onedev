@@ -224,7 +224,7 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 				}
 			}
 	
-			recentSentMessages.put(new RenderData(trait, page.getPageId()), new Date());
+			recentSentMessages.put(new RenderData(trait, page!=null?page.getPageId():null), new Date());
 		} catch (Exception e) {
 			logger.error("Error sending websocket message", e);
 		}
