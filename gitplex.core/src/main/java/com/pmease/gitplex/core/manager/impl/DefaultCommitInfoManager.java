@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +122,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 	}
 	
 	private void doCollect(Depot depot, ObjectId commitId) {
-		logger.info("Collecting commit information (repository: {}, until commit: {})", 
+		logger.debug("Collecting commit information (repository: {}, until commit: {})", 
 				depot.getFQN(), commitId.name());
 		Environment env = getEnv(depot);
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -138,27 +139,31 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 					lastCommitId = ObjectId.fromRaw(bytes);
 				else
 					lastCommitId = null;
-				
-				bytes = getBytes(defaultStore.get(txn, COMMIT_COUNT_KEY));
-				int commitCount;
-				if (bytes != null)
-					commitCount = (int) SerializationUtils.deserialize(bytes);
-				else
-					commitCount = 0;
 
-				Set<NameAndEmail> authors;
+				bytes = getBytes(defaultStore.get(txn, COMMIT_COUNT_KEY));
+				int prevCommitCount;
+				if (bytes != null)
+					prevCommitCount = (int) SerializationUtils.deserialize(bytes);
+				else
+					prevCommitCount = 0;
+				
+				int newCommitCount = prevCommitCount;
+
+				Set<NameAndEmail> prevAuthors;
 				bytes = getBytes(defaultStore.get(txn, AUTHORS_KEY));
 				if (bytes != null)
-					authors = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
+					prevAuthors = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
 				else
-					authors = new HashSet<NameAndEmail>();
+					prevAuthors = new HashSet<NameAndEmail>();
+				Set<NameAndEmail> authors = new HashSet<>(prevAuthors);			
 				
-				Set<NameAndEmail> committers;
+				Set<NameAndEmail> prevCommitters;
 				bytes = getBytes(defaultStore.get(txn, COMMITTERS_KEY));
 				if (bytes != null)
-					committers = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
+					prevCommitters = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
 				else
-					committers = new HashSet<NameAndEmail>();
+					prevCommitters = new HashSet<NameAndEmail>();
+				Set<NameAndEmail> committers = new HashSet<>(prevCommitters);
 				
 				try (	RevWalk revWalk = new RevWalk(depot.getRepository());
 						TreeWalk treeWalk = new TreeWalk(depot.getRepository());) {
@@ -173,21 +178,24 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 						treeWalk.setFilter(TreeFilter.ANY_DIFF);
 					}
 					
-					Set<String> files;
+					Set<String> prevFiles;
 					bytes = getBytes(defaultStore.get(txn, FILES_KEY));
 					if (bytes != null) {
-						files = (Set<String>) SerializationUtils.deserialize(bytes);
+						prevFiles = (Set<String>) SerializationUtils.deserialize(bytes);
 					} else {
-						files = new HashSet<String>();
+						prevFiles = new HashSet<String>();
 					}
+					Set<String> files = new HashSet<>(prevFiles);
 
 					while (treeWalk.next()) {
 						files.add(treeWalk.getPathString());
 					}
-					
-					bytes = SerializationUtils.serialize((Serializable) files);
-					defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
-					filesCache.remove(depot.getId());
+
+					if (!files.equals(prevFiles)) {
+						bytes = SerializationUtils.serialize((Serializable) files);
+						defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
+						filesCache.remove(depot.getId());
+					}
 					
 					RevCommit commit = revWalk.next();
 					while (commit != null) {
@@ -213,7 +221,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 							}
 							commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
 							
-							commitCount++;
+							newCommitCount++;
 							
 							for (RevCommit parent: commit.getParents()) {
 								keyBytes = new byte[20];
@@ -238,7 +246,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 									|| StringUtils.isNotBlank(commit.getCommitterIdent().getEmailAddress())) {
 								committers.add(new NameAndEmail(commit.getCommitterIdent()));
 							}
-							
+
 							if (lastCommitId == null)
 								lastCommitId = commit.copy();
 						}		
@@ -248,18 +256,24 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 					throw new RuntimeException(e);
 				}
 				
-				bytes = SerializationUtils.serialize((Serializable) authors);
-				defaultStore.put(txn, AUTHORS_KEY, new ArrayByteIterable(bytes));
-				authorsCache.remove(depot.getId());
+				if (!authors.equals(prevAuthors)) {
+					bytes = SerializationUtils.serialize((Serializable) authors);
+					defaultStore.put(txn, AUTHORS_KEY, new ArrayByteIterable(bytes));
+					authorsCache.remove(depot.getId());
+				} 
 				
-				bytes = SerializationUtils.serialize((Serializable) committers);
-				defaultStore.put(txn, COMMITTERS_KEY, new ArrayByteIterable(bytes));
-				committersCache.remove(depot.getId());
+				if (!committers.equals(prevCommitters)) {
+					bytes = SerializationUtils.serialize((Serializable) committers);
+					defaultStore.put(txn, COMMITTERS_KEY, new ArrayByteIterable(bytes));
+					committersCache.remove(depot.getId());
+				}
 				
-				bytes = SerializationUtils.serialize(commitCount);
-				defaultStore.put(txn, COMMIT_COUNT_KEY, new ArrayByteIterable(bytes));
-				commitCountCache.put(depot.getId(), commitCount);
-
+				if (newCommitCount != prevCommitCount) {
+					bytes = SerializationUtils.serialize(newCommitCount);
+					defaultStore.put(txn, COMMIT_COUNT_KEY, new ArrayByteIterable(bytes));
+					commitCountCache.put(depot.getId(), newCommitCount);
+				}
+				
 				bytes = new byte[20];
 				commitId.copyRawTo(bytes, 0);
 				defaultStore.put(txn, LAST_COMMIT_KEY, new ArrayByteIterable(bytes));
@@ -267,7 +281,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 			
 		});
 		
-		logger.info("Commit information collected (repository: {}, until commit: {})", depot.getFQN(), commitId.name());		
+		logger.debug("Commit information collected (repository: {}, until commit: {})", depot.getFQN(), commitId.name());		
 	}
 	
 	@Override
@@ -537,10 +551,12 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 			Collection<Ref> refs = new ArrayList<>();
 			refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
 			refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
-			
+
+			List<RevCommit> commits = new ArrayList<>();
 			for (Ref ref: refs) {
 				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
 				if (revObj instanceof RevCommit) {
+					RevCommit commit = (RevCommit) revObj;
 					Environment env = getEnv(depot);
 					Store commitsStore = getStore(env, COMMITS_STORE);
 					boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
@@ -548,7 +564,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 						@Override
 						public Boolean compute(Transaction txn) {
 							byte[] keyBytes = new byte[20];
-							revObj.copyRawTo(keyBytes, 0);
+							commit.copyRawTo(keyBytes, 0);
 							ByteIterable key = new ArrayByteIterable(keyBytes);
 							byte[] valueBytes = getBytes(commitsStore.get(txn, key));
 							return valueBytes != null && valueBytes.length%2 != 0;
@@ -556,8 +572,12 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 						
 					});
 					if (!collected) 
-						collect(depot, revObj);
+						commits.add(commit);
 				}
+			}
+			commits.sort(Comparator.comparing(RevCommit::getCommitTime));
+			for (RevCommit commit: commits) {
+				doCollect(depot, commit);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
