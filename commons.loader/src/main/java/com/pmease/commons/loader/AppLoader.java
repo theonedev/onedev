@@ -84,7 +84,7 @@ public class AppLoader implements Startable {
 
 	@Override
 	public void stop() {
-		logger.info("Shutting down executor...");
+		logger.info("Shutting down general executor...");
 		injector.getInstance(ExecutorService.class).shutdown();
 		
 		logger.info("Stopping plugin manager...");

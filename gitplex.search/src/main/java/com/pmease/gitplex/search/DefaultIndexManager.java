@@ -18,10 +18,9 @@ import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -61,6 +60,7 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
@@ -71,13 +71,13 @@ import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.ContentDetector;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.concurrent.PrioritizedCallable;
+import com.pmease.commons.util.concurrent.Prioritized;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.manager.IndexResult;
-import com.pmease.gitplex.core.manager.SequentialWorkManager;
+import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.manager.WorkManager;
+import com.pmease.gitplex.core.manager.support.BatchWorker;
+import com.pmease.gitplex.core.manager.support.IndexResult;
 
 @Singleton
 public class DefaultIndexManager implements IndexManager {
@@ -92,9 +92,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final StorageManager storageManager;
 	
-	private final WorkManager workManager;
-	
-	private final SequentialWorkManager sequentialWorkManager;
+	private final BatchWorkManager batchWorkManager;
 	
 	private final Set<IndexListener> listeners;
 	
@@ -106,12 +104,11 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Inject
 	public DefaultIndexManager(Set<IndexListener> listeners, StorageManager storageManager, 
-			WorkManager workManager, SequentialWorkManager sequentialWorkManager, 
-			Extractors extractors, UnitOfWork unitOfWork, Dao dao) {
+			BatchWorkManager batchWorkManager, Extractors extractors, 
+			UnitOfWork unitOfWork, Dao dao) {
 		this.listeners = listeners;
 		this.storageManager = storageManager;
-		this.workManager = workManager;
-		this.sequentialWorkManager = sequentialWorkManager;
+		this.batchWorkManager = batchWorkManager;
 		this.extractors = extractors;
 		this.unitOfWork = unitOfWork;
 		this.dao = dao;
@@ -307,82 +304,69 @@ public class DefaultIndexManager implements IndexManager {
 		return config;
 	}
 	
-	private String getSequentialExecutorKey(Depot depot) {
-		return "depot-" + depot.getId() + "-indexBlob";
+	private BatchWorker getBatchWorker(Depot depot) {
+		Long depotId = depot.getId();
+		return new BatchWorker("depot-" + depotId + "-indexBlob", 1) {
+
+			@Override
+			public void doWork(Collection<Prioritized> works) {
+				Preconditions.checkState(works.size() == 1);
+				unitOfWork.call(new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						Depot depot = dao.load(Depot.class, depotId);
+						IndexWork indexWork = (IndexWork) works.iterator().next();
+						index(depot, indexWork.getCommitId());
+						return null;
+					}
+					
+				});
+			}
+			
+		};
 	}
 	
 	@Override
-	public Future<IndexResult> index(Depot depot, ObjectId commit) {
-		final Long depotId = depot.getId();
-		final int priority;
-		if (RequestCycle.get() != null)
-			priority = UI_INDEXING_PRIORITY;
-		else
-			priority = BACKEND_INDEXING_PRIORITY;
-		
-		return sequentialWorkManager.submit(getSequentialExecutorKey(depot), 
-				new PrioritizedCallable<IndexResult>(priority) {
-
-			@Override
-			public IndexResult call() throws Exception {
-				try {
-					return workManager.submit(new PrioritizedCallable<IndexResult>(priority) {
-
-						@Override
-						public IndexResult call() throws Exception {
-							return unitOfWork.call(new Callable<IndexResult>() {
-
-								@Override
-								public IndexResult call() throws Exception {
-									Depot depot = dao.load(Depot.class, depotId);
-									logger.info("Indexing commit (repository: {}, commit: {})", depot.getFQN(), commit.getName());
-									IndexResult indexResult;
-									File indexDir = storageManager.getIndexDir(depot);
-									try (Directory directory = FSDirectory.open(indexDir)) {
-										if (DirectoryReader.indexExists(directory)) {
-											try (IndexReader reader = DirectoryReader.open(directory)) {
-												IndexSearcher searcher = new IndexSearcher(reader);
-												try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-													try {
-														indexResult = index(depot.getRepository(), commit, writer, searcher);
-														writer.commit();
-													} catch (Exception e) {
-														writer.rollback();
-														throw Throwables.propagate(e);
-													}
-												}
-											}
-										} else {
-											try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-												try {
-													indexResult = index(depot.getRepository(), commit, writer, null);
-													writer.commit();
-												} catch (Exception e) {
-													writer.rollback();
-													throw Throwables.propagate(e);
-												}
-											}
-										}
-									}
-									logger.info("Commit indexed (repository: {}, commit: {}, checked blobs: {}, indexed blobs: {})", 
-											depot.getFQN(), commit.name(), indexResult.getChecked(), indexResult.getIndexed());
-									
-									for (IndexListener listener: listeners)
-										listener.commitIndexed(depot, commit);
-									
-									return indexResult;
-								}
-								
-							});
+	public IndexResult index(Depot depot, ObjectId commit) {
+		logger.debug("Indexing commit (repository: {}, commit: {})", depot.getFQN(), commit.getName());
+		IndexResult indexResult;
+		File indexDir = storageManager.getIndexDir(depot);
+		try (Directory directory = FSDirectory.open(indexDir)) {
+			if (DirectoryReader.indexExists(directory)) {
+				try (IndexReader reader = DirectoryReader.open(directory)) {
+					IndexSearcher searcher = new IndexSearcher(reader);
+					try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
+						try {
+							indexResult = index(depot.getRepository(), commit, writer, searcher);
+							writer.commit();
+						} catch (Exception e) {
+							writer.rollback();
+							throw Throwables.propagate(e);
 						}
-
-					}).get();
-				} catch (InterruptedException | ExecutionException e) {
-					throw new RuntimeException(e);
+					}
+				}
+			} else {
+				try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
+					try {
+						indexResult = index(depot.getRepository(), commit, writer, null);
+						writer.commit();
+					} catch (Exception e) {
+						writer.rollback();
+						throw Throwables.propagate(e);
+					}
 				}
 			}
-
-		});
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		logger.debug("Commit indexed (repository: {}, commit: {}, checked blobs: {}, indexed blobs: {})", 
+				depot.getFQN(), commit.name(), indexResult.getChecked(), indexResult.getIndexed());
+		
+		for (IndexListener listener: listeners)
+			listener.commitIndexed(depot, commit);
+		
+		return indexResult;
 	}
 
 	private String getCurrentCommitIndexVersion() {
@@ -429,8 +413,10 @@ public class DefaultIndexManager implements IndexManager {
 	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		// only index branches at back end, tags will be indexed on demand from GUI 
 		// as many tags might be pushed all at once when the repository is imported 
-		if (refName.startsWith(Constants.R_HEADS) && !newCommit.equals(ObjectId.zeroId()))
-			index(depot, newCommit);
+		if (refName.startsWith(Constants.R_HEADS) && !newCommit.equals(ObjectId.zeroId())) {
+			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, newCommit);
+			batchWorkManager.submit(getBatchWorker(depot), work);
+		}
 	}
 
 	@Override
@@ -439,6 +425,32 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Override
 	public void onSaveDepot(Depot depot) {
+	}
+
+	@Override
+	public void requestToIndex(Depot depot, ObjectId commit) {
+		int priority;
+		if (RequestCycle.get() != null)
+			priority = UI_INDEXING_PRIORITY;
+		else
+			priority = BACKEND_INDEXING_PRIORITY;
+		IndexWork work = new IndexWork(priority, commit);
+		batchWorkManager.submit(getBatchWorker(depot), work);
+	}
+	
+	private static class IndexWork extends Prioritized {
+
+		private final ObjectId commitId;
+		
+		public IndexWork(int priority, ObjectId commitId) {
+			super(priority);
+			this.commitId = commitId;
+		}
+
+		public ObjectId getCommitId() {
+			return commitId;
+		}
+		
 	}
 
 }

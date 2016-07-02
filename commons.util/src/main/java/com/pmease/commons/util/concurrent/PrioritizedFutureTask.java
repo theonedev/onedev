@@ -3,7 +3,7 @@ package com.pmease.commons.util.concurrent;
 import java.util.concurrent.FutureTask;
 
 public class PrioritizedFutureTask<T> extends FutureTask<T> 
-		implements Prioritized, Comparable<Prioritized> {
+		implements PriorityAware, Comparable<PriorityAware> {
 
 	private final int priority;
 	
@@ -23,7 +23,7 @@ public class PrioritizedFutureTask<T> extends FutureTask<T>
 	}
 
 	@Override
-	public int compareTo(Prioritized o) {
+	public int compareTo(PriorityAware o) {
 		return priority - o.getPriority();
 	}
 

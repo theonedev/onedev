@@ -29,6 +29,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.git.command.RevListCommand;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.loadingindicator.LoadingIndicator;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
@@ -52,7 +53,7 @@ class ContributionPanel extends Panel {
 	public ContributionPanel(String id, IModel<Depot> depotModel, BlobIdent blobIdent) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.depotModel = depotModel;		
 
 		this.blobIdent = blobIdent;
 		
@@ -81,6 +82,11 @@ class ContributionPanel extends Panel {
 				return new AjaxLazyLoadPanel(id) {
 
 					@Override
+					public Component getLoadingComponent(String markupId) {
+						return new LoadingIndicator(markupId);
+					}
+
+					@Override
 					public Component getLazyLoadComponent(String markupId) {
 						Fragment fragment = new Fragment(id, "contributorsFrag", ContributionPanel.this);
 						fragment.add(new ListView<NameAndEmail>("contributors", new LoadableDetachableModel<List<NameAndEmail>>() {
@@ -89,7 +95,8 @@ class ContributionPanel extends Panel {
 							protected List<NameAndEmail> load() {
 								Depot depot = depotModel.getObject();
 								RevListCommand revList = new RevListCommand(depot.getGitDir());
-								revList.paths(Lists.newArrayList(blobIdent.path));
+								if (blobIdent.path != null)
+									revList.paths(Lists.newArrayList(blobIdent.path));
 								revList.revisions(Lists.newArrayList(blobIdent.revision));
 								revList.count(MAX_CONTRIBUTORS);
 								Set<NameAndEmail> setOfAuthors = new HashSet<>();
@@ -114,8 +121,13 @@ class ContributionPanel extends Panel {
 								PersonIdent person = new PersonIdent(nameAndEmail.getName(), nameAndEmail.getEmailAddress());
 								DepotCommitsPage.State state = new DepotCommitsPage.State(); 
 								state.setCompareWith(blobIdent.revision);
-								state.setQuery(String.format("path(%s) author(%s <%s>)", 
-										blobIdent.path, nameAndEmail.getName(), nameAndEmail.getEmailAddress()));
+								if (blobIdent.path != null) {
+									state.setQuery(String.format("path(%s) author(%s <%s>)", 
+											blobIdent.path, nameAndEmail.getName(), nameAndEmail.getEmailAddress()));
+								} else {
+									state.setQuery(String.format("author(%s <%s>)", 
+											nameAndEmail.getName(), nameAndEmail.getEmailAddress()));
+								}
 								Link<Void> link = new BookmarkablePageLink<Void>("link", DepotCommitsPage.class, 
 										DepotCommitsPage.paramsOf(depotModel.getObject(), state));
 								link.add(new Avatar("avatar", person));
@@ -130,12 +142,6 @@ class ContributionPanel extends Panel {
 				};
 			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(blobIdent.isFile());
-			}
-			
 		});
 		
 		setOutputMarkupId(true);

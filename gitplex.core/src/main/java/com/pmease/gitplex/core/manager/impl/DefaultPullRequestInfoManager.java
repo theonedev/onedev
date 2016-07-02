@@ -11,35 +11,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import org.apache.commons.lang3.SerializationUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.concurrent.PrioritizedRunnable;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.listener.LifecycleListener;
-import com.pmease.gitplex.core.listener.PullRequestUpdateListener;
-import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.manager.PullRequestInfoManager;
-import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
-import com.pmease.gitplex.core.manager.SequentialWorkManager;
-import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.manager.WorkManager;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -51,6 +26,30 @@ import jetbrains.exodus.env.StoreConfig;
 import jetbrains.exodus.env.Transaction;
 import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.concurrent.Prioritized;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.listener.DepotListener;
+import com.pmease.gitplex.core.listener.LifecycleListener;
+import com.pmease.gitplex.core.listener.PullRequestUpdateListener;
+import com.pmease.gitplex.core.manager.BatchWorkManager;
+import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.manager.PullRequestInfoManager;
+import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
+import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.support.BatchWorker;
 
 @Singleton
 public class DefaultPullRequestInfoManager implements PullRequestInfoManager, DepotListener, 
@@ -68,9 +67,7 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 	
 	private final StorageManager storageManager;
 	
-	private final WorkManager workManager;
-	
-	private final SequentialWorkManager sequentialWorkManager;
+	private final BatchWorkManager batchWorkManager;
 	
 	private final DepotManager depotManager;
 	
@@ -84,31 +81,48 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 	
 	@Inject
 	public DefaultPullRequestInfoManager(Dao dao, DepotManager depotManager, StorageManager storageManager, 
-			PullRequestUpdateManager pullRequestUpdateManager, WorkManager workManager, 
-			SequentialWorkManager sequentialWorkManager, UnitOfWork unitOfWork) {
+			PullRequestUpdateManager pullRequestUpdateManager, BatchWorkManager batchWorkManager, 
+			UnitOfWork unitOfWork) {
 		this.dao = dao;
 		this.depotManager = depotManager;
 		this.storageManager = storageManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.workManager = workManager;
-		this.sequentialWorkManager = sequentialWorkManager;
+		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
 	}
 	
-	private String getSequentialExecutorKey(Depot depot) {
-		return "repository-" + depot.getId() + "-collectPullRequestInfo";
+	private BatchWorker getBatchWorker(Depot depot) {
+		Long depotId = depot.getId();
+		return new BatchWorker("repository-" + depot.getId() + "-collectPullRequestInfo") {
+
+			@Override
+			public void doWork(Collection<Prioritized> works) {
+				unitOfWork.call(new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						collect(depotManager.load(depotId));
+						return null;
+					}
+					
+				});
+			}
+			
+		};
 	}
 	
-	private synchronized Environment getEnv(Depot depot) {
-		Environment env = envs.get(depot.getId());
-		if (env == null) {
-			EnvironmentConfig config = new EnvironmentConfig();
-			config.setLogCacheShared(false);
-			config.setMemoryUsage(1024*1024*16);
-			env = Environments.newInstance(getInfoDir(depot), config);
-			envs.put(depot.getId(), env);
+	private Environment getEnv(Depot depot) {
+		synchronized (envs) {
+			Environment env = envs.get(depot.getId());
+			if (env == null) {
+				EnvironmentConfig config = new EnvironmentConfig();
+				config.setLogCacheShared(false);
+				config.setMemoryUsage(1024*1024*16);
+				env = Environments.newInstance(getInfoDir(depot), config);
+				envs.put(depot.getId(), env);
+			}
+			return env;
 		}
-		return env;
 	}
 	
 	private File getInfoDir(Depot depot) {
@@ -128,11 +142,13 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 	}
 
 	@Override
-	public synchronized void onDeleteDepot(Depot depot) {
-		sequentialWorkManager.removeExecutor(getSequentialExecutorKey(depot));
-		Environment env = envs.remove(depot.getId());
-		if (env != null)
-			env.close();
+	public void onDeleteDepot(Depot depot) {
+		batchWorkManager.remove(getBatchWorker(depot));
+		synchronized (envs) {
+			Environment env = envs.remove(depot.getId());
+			if (env != null)
+				env.close();
+		}
 		FileUtils.deleteDir(getInfoDir(depot));
 	}
 	
@@ -157,37 +173,8 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 	
 	@Override
 	public void collect(Depot depot) {
-		Long depotId = depot.getId();
-		sequentialWorkManager.execute(getSequentialExecutorKey(depot), new PrioritizedRunnable(PRIORITY) {
-
-			@Override
-			public void run() {
-				try {
-					workManager.submit(new PrioritizedRunnable(PRIORITY) {
-
-						@Override
-						public void run() {
-							unitOfWork.call(new Callable<Void>() {
-
-								@Override
-								public Void call() throws Exception {
-									doCollect(depotManager.load(depotId));
-									return null;
-								}
-								
-							});
-						}
-
-					}).get();
-				} catch (InterruptedException | ExecutionException e) {
-					logger.error("Error collecting pull request information", e);
-				}
-			}
-
-		});
-	}
-	
-	private void doCollect(Depot depot) {
+		logger.debug("Collecting pull request info (repository: {})...", depot);
+		
 		Environment env = getEnv(depot);
 		Store store = getStore(env, DEFAULT_STORE);
 
@@ -234,12 +221,15 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 				throw new RuntimeException(e);
 			}		
 		}
+		logger.debug("Pull request info collected (repository: {})", depot);
 	}
 	
 	@Override
-	public synchronized void systemStopping() {
-		for (Environment env: envs.values())
-			env.close();
+	public void systemStopping() {
+		synchronized (envs) {
+			for (Environment env: envs.values())
+				env.close();
+		}
 	}
 
 	@Override
@@ -284,7 +274,8 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 
 			@Override
 			public void run() {
-				collect(update.getRequest().getTargetDepot());
+				Depot depot = update.getRequest().getTargetDepot();
+				batchWorkManager.submit(getBatchWorker(depot), new Prioritized(PRIORITY));
 			}
 			
 		});

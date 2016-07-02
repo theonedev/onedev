@@ -12,8 +12,6 @@ public interface CommitInfoManager {
 	
 	void collect(Depot depot);
 	
-	void collect(Depot depot, ObjectId commit);
-	
 	List<String> getFiles(Depot depot);
 	
 	int getCommitCount(Depot depot);

@@ -24,6 +24,9 @@
 	margin-top: 10px;
 	white-space: nowrap;
 }
+#repo-commits>.body .compare {
+	margin: 10px 0 0 8px;
+}
 #repo-commits>.body a {
 	color: #555;
 }

@@ -93,6 +93,9 @@
 #repo-file>.contribution a {
 	color: #666;
 }
+#repo-file>.contribution .contributors a {
+	text-decoration: none;
+}
 #repo-file>.contribution .pull-left {
 	margin-right: 12px;
 }
@@ -117,17 +120,17 @@
     height: 4px;
 }
 
-.floating>.content>ul.contributors {
+.floating ul.contributors {
 	margin: 0;
 	padding: 8px 0;
 }
-.floating>.content>ul.contributors>li>a {
+.floating ul.contributors>li>a {
 	display: block;
 	padding: 4px 8px;
 	text-decoration: none;
 	color: #666;
 }
-.floating>.content>ul.contributors>li>a:hover {
+.floating ul.contributors>li>a:hover {
 	background: #EEE;
 }
 

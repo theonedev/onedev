@@ -143,12 +143,7 @@ public class RevListCommand extends GitCommand<List<String>> {
 	@Override
     public List<String> call() {
         Commandline cmd = cmd();
-        cmd.addArgs("log",
-                        "--format=*** commit_begin ***%n%B%n*** commit_message_end ***%n%N"
-                        + "*** commit_note_end ***%nhash:%H%nauthor:%aN%nauthorEmail:%aE%n"
-                        + "committerEmail:%cE%ncommitter:%cN%nparents:%P%ncommitterDate:%cd %n"
-                        + "authorDate:%ad %n",
-                        "--date=raw");
+        cmd.addArgs("rev-list");
         
         if (!revisions.isEmpty()) {
         	for (String revision: revisions)

@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import jersey.repackaged.com.google.common.collect.Lists;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -48,7 +50,7 @@ import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
-import com.pmease.gitplex.core.manager.WorkManager;
+import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphResourceReference;
@@ -63,7 +65,6 @@ import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.QueryContext;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class DepotCommitsPage extends DepotPage {
@@ -110,7 +111,7 @@ public class DepotCommitsPage extends DepotPage {
 			List<Commit> logCommits;
 			try {
 				state.applyTo(logCommand);
-				logCommits = GitPlex.getInstance(WorkManager.class).submit(new PrioritizedCallable<List<Commit>>(LOG_PRIORITY) {
+				logCommits = GitPlex.getInstance(WorkExecutor.class).submit(new PrioritizedCallable<List<Commit>>(LOG_PRIORITY) {
 
 					@Override
 					public List<Commit> call() throws Exception {

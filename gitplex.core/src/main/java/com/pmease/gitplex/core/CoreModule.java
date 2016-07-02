@@ -19,10 +19,8 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.EntityLocator;
 import com.pmease.gitplex.core.entity.persistlistener.ListenerLocator;
-import com.pmease.gitplex.core.listener.CodeCommentReplyListener;
 import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.listener.PullRequestListener;
@@ -30,6 +28,7 @@ import com.pmease.gitplex.core.listener.PullRequestUpdateListener;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.AttachmentManager;
+import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
@@ -51,7 +50,6 @@ import com.pmease.gitplex.core.manager.PullRequestVisitManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
-import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.TeamManager;
@@ -59,9 +57,10 @@ import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.manager.UserAuthorizationManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
-import com.pmease.gitplex.core.manager.WorkManager;
+import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAttachmentManager;
+import com.pmease.gitplex.core.manager.impl.DefaultBatchWorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentManager;
@@ -83,7 +82,6 @@ import com.pmease.gitplex.core.manager.impl.DefaultPullRequestVisitManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewInvitationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
-import com.pmease.gitplex.core.manager.impl.DefaultSequentialWorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
@@ -91,7 +89,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultTeamMembershipManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVisitInfoManager;
-import com.pmease.gitplex.core.manager.impl.DefaultWorkManager;
+import com.pmease.gitplex.core.manager.impl.DefaultWorkExecutor;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
@@ -188,8 +186,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestInfoManager.class).to(DefaultPullRequestInfoManager.class);
 		bind(CodeCommentInfoManager.class).to(DefaultCodeCommentInfoManager.class);
 		bind(VisitInfoManager.class).to(DefaultVisitInfoManager.class);
-		bind(WorkManager.class).to(DefaultWorkManager.class);
-		bind(SequentialWorkManager.class).to(DefaultSequentialWorkManager.class);
+		bind(BatchWorkManager.class).to(DefaultBatchWorkManager.class);
 		bind(TeamManager.class).to(DefaultTeamManager.class);
 		bind(OrganizationMembershipManager.class).to(DefaultOrganizationMembershipManager.class);
 		bind(TeamMembershipManager.class).to(DefaultTeamMembershipManager.class);
@@ -200,9 +197,10 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentReplyManager.class).to(DefaultCodeCommentReplyManager.class);
 		bind(AttachmentManager.class).to(DefaultAttachmentManager.class);
 		bind(CodeCommentRelationManager.class).to(DefaultCodeCommentRelationManager.class);
+		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
-
+		
 		contribute(DaoListener.class, DefaultAttachmentManager.class);
 		
 		contribute(DepotListener.class, DefaultPullRequestManager.class);
@@ -224,22 +222,10 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LifecycleListener.class, DefaultAccountManager.class);
 		contribute(LifecycleListener.class, DefaultDepotManager.class);
 		contribute(LifecycleListener.class, DefaultCommitInfoManager.class);
-		contribute(LifecycleListener.class, DefaultWorkManager.class);
-		contribute(LifecycleListener.class, DefaultSequentialWorkManager.class);
+		contribute(LifecycleListener.class, DefaultBatchWorkManager.class);
 		contribute(LifecycleListener.class, DefaultAttachmentManager.class);
 		contribute(LifecycleListener.class, DefaultPullRequestInfoManager.class);
-		
-		contribute(CodeCommentReplyListener.class, new CodeCommentReplyListener() {
-			
-			@Override
-			public void onSaveReply(CodeCommentReply reply) {
-			}
-			
-			@Override
-			public void onDeleteReply(CodeCommentReply reply) {
-			}
-			
-		});
+		contribute(LifecycleListener.class, DefaultWorkExecutor.class);
 		
 		contributeFromPackage(PersistListener.class, ListenerLocator.class);
 	}

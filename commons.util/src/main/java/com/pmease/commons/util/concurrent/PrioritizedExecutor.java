@@ -31,25 +31,25 @@ public class PrioritizedExecutor extends ThreadPoolExecutor {
 
 	@Override
 	public void execute(Runnable command) {
-		Preconditions.checkArgument(command instanceof Prioritized);
+		Preconditions.checkArgument(command instanceof PriorityAware);
 		super.execute(command);
 	}
 
 	@Override
 	public Future<?> submit(Runnable task) {
-		Preconditions.checkArgument(task instanceof Prioritized);
+		Preconditions.checkArgument(task instanceof PriorityAware);
 		return super.submit(task);
 	}
 
 	@Override
 	public <T> Future<T> submit(Runnable task, T result) {
-		Preconditions.checkArgument(task instanceof Prioritized);
+		Preconditions.checkArgument(task instanceof PriorityAware);
 		return super.submit(task, result);
 	}
 
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
-		Preconditions.checkArgument(task instanceof Prioritized);
+		Preconditions.checkArgument(task instanceof PriorityAware);
 		return super.submit(task);
 	}
 
@@ -57,7 +57,7 @@ public class PrioritizedExecutor extends ThreadPoolExecutor {
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) 
 			throws InterruptedException, ExecutionException {
 		for (Callable<T> task: tasks) 
-			Preconditions.checkArgument(task instanceof Prioritized);
+			Preconditions.checkArgument(task instanceof PriorityAware);
 		return super.invokeAny(tasks);
 	}
 
@@ -65,7 +65,7 @@ public class PrioritizedExecutor extends ThreadPoolExecutor {
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		for (Callable<T> task: tasks) 
-			Preconditions.checkArgument(task instanceof Prioritized);
+			Preconditions.checkArgument(task instanceof PriorityAware);
 		return super.invokeAny(tasks, timeout, unit);
 	}
 
@@ -73,7 +73,7 @@ public class PrioritizedExecutor extends ThreadPoolExecutor {
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) 
 			throws InterruptedException {
 		for (Callable<T> task: tasks) 
-			Preconditions.checkArgument(task instanceof Prioritized);
+			Preconditions.checkArgument(task instanceof PriorityAware);
 		return super.invokeAll(tasks);
 	}
 
@@ -81,7 +81,7 @@ public class PrioritizedExecutor extends ThreadPoolExecutor {
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
 			throws InterruptedException {
 		for (Callable<T> task: tasks) 
-			Preconditions.checkArgument(task instanceof Prioritized);
+			Preconditions.checkArgument(task instanceof PriorityAware);
 		return super.invokeAll(tasks, timeout, unit);
 	}
 

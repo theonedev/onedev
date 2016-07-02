@@ -33,7 +33,11 @@
 			</div>
 			<div wicket:id="contribution"></div>
 		</div>
-		<a wicket:id="compare" class="compare pull-right btn btn-xs btn-default" title="Compare"><i class="fa fa-ext fa-file-diff"></i></a>
+		<wicket:enclosure>
+		<div class="pull-right">
+			<a wicket:id="compare" class="compare btn btn-xs btn-default" title="Compare"><i class="fa fa-ext fa-file-diff"></i></a>
+		</div>
+		</wicket:enclosure>
 		<div wicket:id="hashAndCode" class="pull-right"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="dateFrag">

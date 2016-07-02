@@ -1,5 +1,21 @@
 package com.pmease.commons.util.concurrent;
 
-public interface Prioritized extends Comparable<Prioritized> {
-	int getPriority();
+public class Prioritized implements PriorityAware {
+
+	private final int priority;
+
+	public Prioritized(int priority) {
+		this.priority = priority;
+	}
+	
+	@Override
+	public int getPriority() {
+		return priority;
+	}
+
+	@Override
+	public int compareTo(PriorityAware o) {
+		return priority - o.getPriority();
+	}
+	
 }

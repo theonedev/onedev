@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.manager;
+package com.pmease.gitplex.core.manager.support;
 
 public class IndexResult {
 	

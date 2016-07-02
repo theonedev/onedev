@@ -46,7 +46,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	private final AccountManager userManager;
 	
 	private final ServerConfig serverConfig;
-
+	
 	private final String appName;
 	
 	private volatile InitStage initStage;

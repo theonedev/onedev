@@ -77,7 +77,7 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.manager.WorkManager;
+import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.core.util.ChildAwareMatcher;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
@@ -110,7 +110,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final Set<Long> integrationPreviewCalculatingRequestIds = new ConcurrentHashSet<>();
 
-	private final WorkManager workManager;
+	private final WorkExecutor workManager;
 	
 	private final PullRequestActivityManager pullRequestActivityManager;
 	
@@ -121,7 +121,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestUpdateManager pullRequestUpdateManager, StorageManager storageManager, 
 			ReviewInvitationManager reviewInvitationManager, AccountManager userManager, 
 			NotificationManager notificationManager, PullRequestCommentManager commentManager, 
-			MarkdownManager markdownManager, WorkManager workManager, 
+			MarkdownManager markdownManager, WorkExecutor workManager, 
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners, 
 			PullRequestActivityManager pullRequestActivityManager) {
 		super(dao);

@@ -27,11 +27,12 @@
 	<logger name="java.sql.DatabaseMetaData" level="WARN"></logger>
 	<logger name="org.hibernate.cache.ehcache.AbstractEhcacheRegionFactory" level="ERROR"></logger>
 	<logger name="com.jolbox.bonecp.BoneCPConfig" level="WARN" />
-	<logger name="com.sun.jersey" level="WARN" />
+	<logger name="com.sun.jersey" level="WARN" ></logger>
 	<logger name="org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl" level="ERROR"></logger>
 	<logger name="org.reflections" level="WARN"></logger>
 	<logger name="org.apache.shiro.realm.AuthorizingRealm" level="WARN"></logger>
 	<logger name="jetbrains.exodus" level="WARN"></logger>
+	<logger name="com.pmease" level="DEBUG"></logger>	
 	
 	<root level="INFO">
 		<appender-ref ref="FILE" />

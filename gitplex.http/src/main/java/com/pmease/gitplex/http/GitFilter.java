@@ -33,11 +33,11 @@ import com.pmease.commons.git.command.UploadCommand;
 import com.pmease.commons.git.exception.GitException;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.manager.WorkManager;
+import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.setting.ServerConfig;
 
@@ -56,17 +56,17 @@ public class GitFilter implements Filter {
 	
 	private final DepotManager repositoryManager;
 	
-	private final WorkManager workManager;
+	private final WorkExecutor workExecutor;
 	
 	private final ServerConfig serverConfig;
 	
 	@Inject
 	public GitFilter(GitPlex gitPlex, StorageManager storageManager, DepotManager repositoryManager, 
-			WorkManager workManager, ServerConfig serverConfig) {
+			WorkExecutor workManager, ServerConfig serverConfig) {
 		this.gitPlex = gitPlex;
 		this.storageManager = storageManager;
 		this.repositoryManager = repositoryManager;
-		this.workManager = workManager;
+		this.workExecutor = workManager;
 		this.serverConfig = serverConfig;
 	}
 	
@@ -133,7 +133,7 @@ public class GitFilter implements Filter {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(depot))) {
 				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
-			workManager.submit(new PrioritizedRunnable(PRIORITY) {
+			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
 				@Override
 				public void run() {
@@ -152,7 +152,7 @@ public class GitFilter implements Filter {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(depot))) {
 				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
-			workManager.submit(new PrioritizedRunnable(PRIORITY) {
+			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
 				@Override
 				public void run() {

@@ -310,7 +310,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				if (!indexManager.isIndexed(getDepot(), trait.commitId)) {
-					GitPlex.getInstance(IndexManager.class).index(getDepot(), trait.commitId);
+					GitPlex.getInstance(IndexManager.class).requestToIndex(getDepot(), trait.commitId);
 					setVisible(true);
 				} else {
 					setVisible(false);

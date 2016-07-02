@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,36 +13,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import org.apache.commons.lang3.SerializationUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.concurrent.PrioritizedRunnable;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.CodeComment;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
-import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.listener.CodeCommentListener;
-import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.listener.LifecycleListener;
-import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
-import com.pmease.gitplex.core.manager.CodeCommentManager;
-import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.manager.SequentialWorkManager;
-import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.manager.WorkManager;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -53,6 +28,31 @@ import jetbrains.exodus.env.StoreConfig;
 import jetbrains.exodus.env.Transaction;
 import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.concurrent.Prioritized;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.CodeCommentReply;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.component.CompareContext;
+import com.pmease.gitplex.core.listener.CodeCommentListener;
+import com.pmease.gitplex.core.listener.DepotListener;
+import com.pmease.gitplex.core.listener.LifecycleListener;
+import com.pmease.gitplex.core.manager.BatchWorkManager;
+import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
+import com.pmease.gitplex.core.manager.CodeCommentManager;
+import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.support.BatchWorker;
 
 @Singleton
 public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, DepotListener, 
@@ -72,9 +72,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	
 	private final StorageManager storageManager;
 	
-	private final WorkManager workManager;
-	
-	private final SequentialWorkManager sequentialWorkManager;
+	private final BatchWorkManager batchWorkManager;
 	
 	private final DepotManager depotManager;
 	
@@ -89,32 +87,49 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultCodeCommentInfoManager(Dao dao, DepotManager depotManager, StorageManager storageManager, 
-			CodeCommentManager codeCommentManager, WorkManager workManager, 
-			SequentialWorkManager sequentialWorkManager, UnitOfWork unitOfWork) {
+	public DefaultCodeCommentInfoManager(Dao dao, DepotManager depotManager, 
+			StorageManager storageManager, CodeCommentManager codeCommentManager, 
+			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork) {
 		this.dao = dao;
 		this.depotManager = depotManager;
 		this.storageManager = storageManager;
 		this.codeCommentManager = codeCommentManager;
-		this.workManager = workManager;
-		this.sequentialWorkManager = sequentialWorkManager;
+		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
 	}
 	
-	private String getSequentialExecutorKey(Depot depot) {
-		return "repository-" + depot.getId() + "-collectCodeCommentInfo";
+	private BatchWorker getBatchWorker(Depot depot) {
+		Long depotId = depot.getId();
+		return new BatchWorker("repository-" + depotId + "-collectCodeCommentInfo") {
+
+			@Override
+			public void doWork(Collection<Prioritized> works) {
+				unitOfWork.call(new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						collect(depotManager.load(depotId));
+						return null;
+					}
+					
+				});
+			}
+			
+		};
 	}
 	
-	private synchronized Environment getEnv(Depot depot) {
-		Environment env = envs.get(depot.getId());
-		if (env == null) {
-			EnvironmentConfig config = new EnvironmentConfig();
-			config.setLogCacheShared(false);
-			config.setMemoryUsage(1024*1024*16);
-			env = Environments.newInstance(getInfoDir(depot), config);
-			envs.put(depot.getId(), env);
+	private Environment getEnv(Depot depot) {
+		synchronized (envs) {
+			Environment env = envs.get(depot.getId());
+			if (env == null) {
+				EnvironmentConfig config = new EnvironmentConfig();
+				config.setLogCacheShared(false);
+				config.setMemoryUsage(1024*1024*16);
+				env = Environments.newInstance(getInfoDir(depot), config);
+				envs.put(depot.getId(), env);
+			}
+			return env;
 		}
-		return env;
 	}
 	
 	private File getInfoDir(Depot depot) {
@@ -134,11 +149,13 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	}
 
 	@Override
-	public synchronized void onDeleteDepot(Depot depot) {
-		sequentialWorkManager.removeExecutor(getSequentialExecutorKey(depot));
-		Environment env = envs.remove(depot.getId());
-		if (env != null)
-			env.close();
+	public void onDeleteDepot(Depot depot) {
+		batchWorkManager.remove(getBatchWorker(depot));
+		synchronized (envs) {
+			Environment env = envs.remove(depot.getId());
+			if (env != null)
+				env.close();
+		}
 		filesCache.remove(depot.getId());
 		FileUtils.deleteDir(getInfoDir(depot));
 	}
@@ -164,37 +181,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	
 	@Override
 	public void collect(Depot depot) {
-		Long depotId = depot.getId();
-		sequentialWorkManager.execute(getSequentialExecutorKey(depot), new PrioritizedRunnable(PRIORITY) {
-
-			@Override
-			public void run() {
-				try {
-					workManager.submit(new PrioritizedRunnable(PRIORITY) {
-
-						@Override
-						public void run() {
-							unitOfWork.call(new Callable<Void>() {
-
-								@Override
-								public Void call() throws Exception {
-									doCollect(depotManager.load(depotId));
-									return null;
-								}
-								
-							});
-						}
-
-					}).get();
-				} catch (InterruptedException | ExecutionException e) {
-					logger.error("Error collecting comment information", e);
-				}
-			}
-
-		});
-	}
-	
-	private void doCollect(Depot depot) {
+		logger.debug("Collecting code comment info (depot: {})", depot);
 		Environment env = getEnv(depot);
 		Store store = getStore(env, DEFAULT_STORE);
 
@@ -246,12 +233,15 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 				
 			});
 		}
+		logger.debug("Code comment info collected (depot: {})", depot);
 	}
 	
 	@Override
-	public synchronized void systemStopping() {
-		for (Environment env: envs.values())
-			env.close();
+	public void systemStopping() {
+		synchronized (envs) {
+			for (Environment env: envs.values())
+				env.close();
+		}
 	}
 
 	@Override
@@ -297,7 +287,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	
 				@Override
 				public void run() {
-					collect(comment.getDepot());
+					batchWorkManager.submit(getBatchWorker(comment.getDepot()), new Prioritized(PRIORITY));
 				}
 				
 			});

@@ -6,3 +6,8 @@
     position: absolute;
 	z-index: 2000;
 }
+
+/* wicket default ajax lazyload style */ 
+.floating>.content>div>img[alt="Loading..."] {
+	margin: 8px;
+}
