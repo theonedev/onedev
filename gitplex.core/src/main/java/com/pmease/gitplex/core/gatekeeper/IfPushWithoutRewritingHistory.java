@@ -30,7 +30,7 @@ public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
 	@Override
 	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
-			if (depot.isAncestor(oldCommit.name(), newCommit.name()))
+			if (depot.isMergedInto(oldCommit.name(), newCommit.name()))
 				return passed(Lists.newArrayList("Push operation does not rewrite history"));
 			else
 				return failed(Lists.newArrayList("Push operation rewrites history"));

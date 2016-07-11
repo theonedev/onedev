@@ -20,13 +20,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.collect.Sets;
-import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.util.Pair;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.BranchWatch;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -96,13 +96,13 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 	private void addParticipantsToWatchList(PullRequestUpdate update) {
 		// we use a name-email pair to filter off duplicate person as equals method of PersonIdent also takes 
 		// "when" field into account
-		Set<Pair<String, String>> nameEmailPairs = new HashSet<>();
-		for (Commit commit: update.getCommits()) {
-			nameEmailPairs.add(new Pair<String, String>(commit.getCommitter().getName(), commit.getCommitter().getEmailAddress()));
-			nameEmailPairs.add(new Pair<String, String>(commit.getAuthor().getName(), commit.getAuthor().getEmailAddress()));
+		Set<NameAndEmail> setOfNameAndEmail = new HashSet<>();
+		for (RevCommit commit: update.getCommits()) {
+			setOfNameAndEmail.add(new NameAndEmail(commit.getCommitterIdent().getName(), commit.getCommitterIdent().getEmailAddress()));
+			setOfNameAndEmail.add(new NameAndEmail(commit.getAuthorIdent().getName(), commit.getAuthorIdent().getEmailAddress()));
 		}
-		for (Pair<String, String> pair: nameEmailPairs) {
-			PersonIdent person = new PersonIdent(pair.getFirst(), pair.getSecond());
+		for (NameAndEmail nameAndEmail: setOfNameAndEmail) {
+			PersonIdent person = new PersonIdent(nameAndEmail.getName(), nameAndEmail.getEmailAddress());
 			Account user = userManager.findByPerson(person);
 			if (user != null) 
 				watch(update.getRequest(), user, "You are set to watch this pull request as it contains your commits.");

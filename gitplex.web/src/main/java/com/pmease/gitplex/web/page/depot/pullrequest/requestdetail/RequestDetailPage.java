@@ -22,7 +22,6 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -35,7 +34,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -65,7 +63,6 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Verification;
@@ -81,7 +78,7 @@ import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.CodeCommentsPage;
@@ -105,8 +102,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 	public RequestDetailPage(final PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasRefs()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
+		if (getDepot().getDefaultBranch() == null) 
+			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -645,60 +642,29 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			final WebMarkupContainer operationsContainer) {
 		PullRequest request = getPullRequest();
 
-		final Fragment fragment = new Fragment(id, "operationConfirmFrag", this);
+		Fragment fragment = new Fragment(id, "operationConfirmFrag", this);
 		Form<?> form = new Form<Void>("form");
 		fragment.add(form);
-		final FormComponent<String> noteInput;
 
 		DepotAndBranch source = request.getSource();
 		Preconditions.checkNotNull(source);
 		
-		if (operation != INTEGRATE) {
-			form.add(noteInput = new CommentInput("note", Model.of("")) {
+		FormComponent<String> commentInput;
+		form.add(commentInput = new CommentInput("comment", Model.of("")) {
 
-				@Override
-				protected AttachmentSupport getAttachmentSupport() {
-					return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
-							requestModel.getObject().getUUID());
-				}
-
-				@Override
-				protected Depot getDepot() {
-					return requestModel.getObject().getTargetDepot();
-				}
-				
-			});
-			noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
-		} else {
-			IntegrationPreview preview = request.getIntegrationPreview();
-			if (preview == null || preview.getIntegrated() == null) {
-				Session.get().warn("Unable to integrate now as integration preview has to be recalculated");
-				return new WebMarkupContainer(id).setVisible(false);
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
+						requestModel.getObject().getUUID());
 			}
-			IntegrationStrategy strategy = preview.getIntegrationStrategy();
-			if (strategy == REBASE_SOURCE_ONTO_TARGET 
-					|| strategy == REBASE_TARGET_ONTO_SOURCE
-					|| preview.getIntegrated().equals(preview.getRequestHead())) {
-				form.add(noteInput = new CommentInput("note", Model.of("")) {
 
-					@Override
-					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
-								requestModel.getObject().getUUID());
-					}
-
-					@Override
-					protected Depot getDepot() {
-						return requestModel.getObject().getTargetDepot();
-					}
-					
-				});
-				noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
-			} else {
-				form.add(noteInput = new TextArea<String>("note", Model.of("")));
-				noteInput.add(AttributeModifier.replace("placeholder", "Commit message"));
+			@Override
+			protected Depot getDepot() {
+				return requestModel.getObject().getTargetDepot();
 			}
-		}
+			
+		});
+		commentInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
 		form.add(new NotificationPanel("feedback", form));
 		form.add(new AjaxButton("submit") {
 
@@ -710,7 +676,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 				PullRequest request = getPullRequest();
 				try {
-					operation.operate(request, noteInput.getModelObject());
+					operation.operate(request, commentInput.getModelObject());
 					GitPlex.getInstance(VisitInfoManager.class).visit(getLoginUser(), getPullRequest());
 					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 				} catch (Exception e) {

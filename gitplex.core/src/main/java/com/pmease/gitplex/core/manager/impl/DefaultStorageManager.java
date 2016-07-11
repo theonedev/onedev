@@ -7,8 +7,6 @@ import javax.inject.Singleton;
 
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 
@@ -29,12 +27,6 @@ public class DefaultStorageManager implements StorageManager {
         return depotDir;
     }
     
-    private File getRequestDir(PullRequest request) {
-    	File requestDir = new File(getDepotDir(request.getTargetDepot()), "requests/" + request.getId());
-    	FileUtils.createDir(requestDir);
-    	return requestDir;
-    }
-    
     @Override
     public File getGitDir(Depot depot) {
         File gitDir = new File(getDepotDir(depot), "git");
@@ -47,21 +39,6 @@ public class DefaultStorageManager implements StorageManager {
         File cacheDir = new File(getDepotDir(depot), "info");
         FileUtils.createDir(cacheDir);
         return cacheDir;
-	}
-
-	@Override
-	public File getCacheDir(PullRequest request) {
-        File cacheDir = new File(getRequestDir(request), "cache");
-        FileUtils.createDir(cacheDir);
-        return cacheDir;
-	}
-
-	@Override
-	public File getCacheDir(PullRequestUpdate update) {
-		File requestCacheDir = getCacheDir(update.getRequest());
-        File updateCacheDir = new File(requestCacheDir, "updates/" + update.getId());
-        FileUtils.createDir(updateCacheDir);
-        return updateCacheDir;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.util.ThreadContext;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -38,6 +39,8 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 	
 	private final PullRequestActivityManager pullRequestActivityManager;
 	
+	private final AccountManager accountManager;
+	
 	private final PullRequestCommentManager commentManager;
 
 	private final UnitOfWork unitOfWork;
@@ -47,12 +50,14 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 	@Inject
 	public DefaultReviewManager(Dao dao, PullRequestActivityManager pullRequestActivityManager, 
 			PullRequestManager pullRequestManager, PullRequestCommentManager commentManager, 
-			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
+			AccountManager accountManager, UnitOfWork unitOfWork, 
+			Set<PullRequestListener> pullRequestListeners) {
 		super(dao);
 		
 		this.pullRequestActivityManager = pullRequestActivityManager;
 		this.pullRequestManager = pullRequestManager;
 		this.commentManager = commentManager;
+		this.accountManager = accountManager;
 		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
 	}
@@ -109,7 +114,12 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 
 					@Override
 					public void run() {
-						pullRequestManager.check(dao.load(PullRequest.class, requestId));
+						try {
+					        ThreadContext.bind(accountManager.getRoot().asSubject());
+							pullRequestManager.check(dao.load(PullRequest.class, requestId));
+						} finally {
+							ThreadContext.unbindSubject();
+						}
 					}
 					
 				});
@@ -139,7 +149,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 		activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
 		pullRequestActivityManager.save(activity);
 
-		final Long requestId = review.getUpdate().getRequest().getId();
+		Long requestId = review.getUpdate().getRequest().getId();
 		afterCommit(new Runnable() {
 
 			@Override
@@ -148,7 +158,12 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 
 					@Override
 					public void run() {
-						pullRequestManager.check(dao.load(PullRequest.class, requestId));
+						try {
+					        ThreadContext.bind(accountManager.getRoot().asSubject());
+							pullRequestManager.check(dao.load(PullRequest.class, requestId));
+						} finally {
+							ThreadContext.unbindSubject();
+						}
 					}
 					
 				});

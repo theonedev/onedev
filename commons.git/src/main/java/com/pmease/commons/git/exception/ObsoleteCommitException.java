@@ -11,6 +11,7 @@ public class ObsoleteCommitException extends GitException {
 	private final ObjectId oldCommitId;
 	
 	public ObsoleteCommitException(@Nullable ObjectId oldCommitId) {
+		super("Commit is obsolete");
 		this.oldCommitId = oldCommitId;
 	}
 

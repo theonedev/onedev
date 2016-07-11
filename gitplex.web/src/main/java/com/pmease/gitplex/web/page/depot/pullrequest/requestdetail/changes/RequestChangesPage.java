@@ -33,8 +33,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.component.DropdownLink;
@@ -72,11 +72,11 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	
 	private WebMarkupContainer head;
 	
-	private final IModel<List<BriefCommit>> commitsModel = new LoadableDetachableModel<List<BriefCommit>>() {
+	private final IModel<List<RevCommit>> commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
 		@Override
-		protected List<BriefCommit> load() {
-			List<BriefCommit> commits = new ArrayList<>();
+		protected List<RevCommit> load() {
+			List<RevCommit> commits = new ArrayList<>();
 			for (PullRequestUpdate update: getPullRequest().getSortedUpdates()) {
 				commits.addAll(update.getCommits());
 			}
@@ -104,8 +104,8 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	private int getCommitIndex(String commitHash) {
 		int index = -1;
 		for (int i=0; i<commitsModel.getObject().size(); i++) {
-			BriefCommit commit = commitsModel.getObject().get(i);
-			if (commit.getHash().equals(commitHash)) {
+			RevCommit commit = commitsModel.getObject().get(i);
+			if (commit.name().equals(commitHash)) {
 				index = i;
 				break;
 			}
@@ -154,12 +154,12 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			public void onClick(AjaxRequestTarget target) {
 				int index = getCommitIndex(state.oldCommit);
 				if (index != -1) {
-					state.newCommit = commitsModel.getObject().get(index).getHash();
+					state.newCommit = commitsModel.getObject().get(index).name();
 					index--;
 					if (index == -1) {
 						state.oldCommit = getPullRequest().getBaseCommitHash();
 					} else {
-						state.oldCommit = commitsModel.getObject().get(index).getHash();
+						state.oldCommit = commitsModel.getObject().get(index).name();
 					}
 					newRevisionDiff(target);
 				}
@@ -206,7 +206,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 						state.oldCommit = state.newCommit;
 					}
 					index++;
-					state.newCommit = commitsModel.getObject().get(index).getHash();
+					state.newCommit = commitsModel.getObject().get(index).name();
 					newRevisionDiff(target);
 				} 
 				target.add(head);
@@ -256,14 +256,14 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 					
 				};
 				fragment.add(callbackBehavior);
-				fragment.add(new ListView<BriefCommit>("commits", commitsModel) {
+				fragment.add(new ListView<RevCommit>("commits", commitsModel) {
 
 					@Override
-					protected void populateItem(ListItem<BriefCommit> item) {
-						BriefCommit commit = item.getModelObject();
-						item.add(AttributeAppender.append("data-hash", commit.getHash()));
-						item.add(new Label("hash", GitUtils.abbreviateSHA(commit.getHash())));
-						item.add(new Label("subject", commit.getSubject()));
+					protected void populateItem(ListItem<RevCommit> item) {
+						RevCommit commit = item.getModelObject();
+						item.add(AttributeAppender.append("data-hash", commit.name()));
+						item.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
+						item.add(new Label("subject", commit.getShortMessage()));
 					}
 					
 				});

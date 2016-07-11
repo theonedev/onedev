@@ -50,6 +50,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
@@ -69,7 +70,7 @@ import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -91,16 +92,16 @@ public class DepotBranchesPage extends DepotPage {
 	
 	private String baseBranch;
 	
-	private IModel<List<Ref>> branchesModel = new LoadableDetachableModel<List<Ref>>() {
+	private IModel<List<RefInfo>> branchesModel = new LoadableDetachableModel<List<RefInfo>>() {
 
 		@Override
-		protected List<Ref> load() {
-			List<Ref> refs = getDepot().getBranchRefs();
+		protected List<RefInfo> load() {
+			List<RefInfo> refs = getDepot().getBranches();
 			String searchFor = searchField.getModelObject();
 			if (StringUtils.isNotBlank(searchFor)) {
 				searchFor = searchFor.trim().toLowerCase();
-				for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
-					String branch = GitUtils.ref2branch(it.next().getName());
+				for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
+					String branch = GitUtils.ref2branch(it.next().getRef().getName());
 					if (!branch.toLowerCase().contains(searchFor))
 						it.remove();
 				}
@@ -112,7 +113,7 @@ public class DepotBranchesPage extends DepotPage {
 	
 	private BranchSingleChoice baseChoice;
 	
-	private PageableListView<Ref> branchesView;
+	private PageableListView<RefInfo> branchesView;
 	
 	private Component pagingNavigator;
 	
@@ -129,19 +130,18 @@ public class DepotBranchesPage extends DepotPage {
 		@Override
 		protected Map<ObjectId, AheadBehind> load() {
 			List<ObjectId> compareIds = new ArrayList<>(); 
-			List<Ref> branches = branchesModel.getObject();
+			List<RefInfo> branches = branchesModel.getObject();
 			for (long i=branchesView.getFirstItemOffset(); i<branches.size(); i++) {
 				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
 					break;
-				Ref ref = branches.get((int)i); 
-				compareIds.add(ref.getObjectId());
+				RefInfo ref = branches.get((int)i); 
+				compareIds.add(ref.getRef().getObjectId());
 			}
 
 			Ref baseRef = getDepot().getRefs(Constants.R_HEADS).get(getBaseBranch());
 			Preconditions.checkNotNull(baseRef);
 			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
 			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
-
 				RevCommit baseCommit = revWalk.lookupCommit(baseRef.getObjectId());
 				for (ObjectId compareId: compareIds) {
 					RevCommit compareCommit = revWalk.lookupCommit(compareId);
@@ -252,8 +252,8 @@ public class DepotBranchesPage extends DepotPage {
 		
 		baseBranch = params.get(PARAM_BASE).toString();
 		
-		if (!getDepot().git().hasRefs()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
+		if (getDepot().getDefaultBranch() == null) 
+			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 	}
 	
 	@Override
@@ -410,12 +410,12 @@ public class DepotBranchesPage extends DepotPage {
 		});
 		branchesContainer.setOutputMarkupPlaceholderTag(true);
 		
-		branchesContainer.add(branchesView = new PageableListView<Ref>("branches", branchesModel, PAGE_SIZE) {
+		branchesContainer.add(branchesView = new PageableListView<RefInfo>("branches", branchesModel, PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(final ListItem<Ref> item) {
-				Ref ref = item.getModelObject();
-				final String branch = GitUtils.ref2branch(ref.getName());
+			protected void populateItem(ListItem<RefInfo> item) {
+				RefInfo ref = item.getModelObject();
+				final String branch = GitUtils.ref2branch(ref.getRef().getName());
 				
 				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent.revision = branch;
@@ -424,7 +424,7 @@ public class DepotBranchesPage extends DepotPage {
 				link.add(new Label("name", branch));
 				item.add(link);
 				
-				RevCommit lastCommit = getDepot().getRevCommit(ref.getObjectId());
+				RevCommit lastCommit = getDepot().getRevCommit(ref.getRef().getObjectId());
 
 				PageParameters params = CommitDetailPage.paramsOf(getDepot(), lastCommit.name());
 				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
@@ -470,6 +470,8 @@ public class DepotBranchesPage extends DepotPage {
 						} else {
 							tag.put("title", "" + ab.getBehind() + " commits ahead of base branch");
 						}
+						if (ab.getBehind() == 0)
+							tag.setName("span");
 					}
 
 					@Override
@@ -529,6 +531,8 @@ public class DepotBranchesPage extends DepotPage {
 						} else {
 							tag.put("title", "" + ab.getAhead() + " commits ahead of base branch");
 						}
+						if (ab.getAhead() == 0)
+							tag.setName("span");
 					}
 
 					@Override
@@ -634,9 +638,9 @@ public class DepotBranchesPage extends DepotPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						Ref ref = item.getModelObject();
+						RefInfo ref = item.getModelObject();
 						if (!getDepot().getDefaultBranch().equals(branch) 
-								&& SecurityUtils.canPushRef(getDepot(), ref.getName(), ref.getObjectId(), ObjectId.zeroId())) {
+								&& SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getRef().getObjectId(), ObjectId.zeroId())) {
 							setVisible(true);
 							PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
 							PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);

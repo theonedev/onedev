@@ -109,10 +109,10 @@ public abstract class DepotPage extends AccountPage {
 		// we do not need to reload the depot this time as we already have that object on hand
 		depotModel.setObject(depot);
 		
-		if (!(this instanceof NoCommitsPage) 
+		if (!(this instanceof NoBranchesPage) 
 				&& !(this instanceof DepotSettingPage) 
-				&& !getDepot().git().hasRefs()) { 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
+				&& getDepot().getDefaultBranch() == null) { 
+			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 		}
 	}
 	

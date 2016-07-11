@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.entity;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,9 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.criterion.Criterion;
@@ -36,9 +40,6 @@ import org.hibernate.criterion.Restrictions;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -264,9 +265,9 @@ public class PullRequest extends AbstractEntity {
 
 	private transient PullRequestUpdate referentialUpdate;
 	
-	private transient Set<String> pendingCommits;
+	private transient Collection<RevCommit> pendingCommits;
 	
-	private transient Collection<Commit> mergedCommits;
+	private transient Collection<RevCommit> mergedCommits;
 	
 	private transient List<Review> reviews;
 	
@@ -395,13 +396,10 @@ public class PullRequest extends AbstractEntity {
 		this.baseCommitHash = baseCommitHash;
 	}
 	
-	public Commit getBaseCommit() {
-		return getTargetDepot().getCommit(getBaseCommitHash());
+	public RevCommit getBaseCommit() {
+		return getTargetDepot().getRevCommit(ObjectId.fromString(getBaseCommitHash()));
 	}
 	
-	public Git git() {
-		return getTargetDepot().git();
-	}
 	/**
 	 * Get unmodifiable collection of updates of this pull request. To add update 
 	 * to the pull request, call {@link this#addUpdate(PullRequestUpdate)} instead.
@@ -619,7 +617,7 @@ public class PullRequest extends AbstractEntity {
 
 			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = getSortedUpdates().get(i);
-				if (!getTargetDepot().isAncestor(update.getHeadCommitHash(), getTarget().getObjectName()))
+				if (!getTargetDepot().isMergedInto(update.getHeadCommitHash(), getTarget().getObjectName()))
 					effectiveUpdates.add(update);
 				else 
 					break;
@@ -643,11 +641,6 @@ public class PullRequest extends AbstractEntity {
 		return getSortedUpdates().get(getSortedUpdates().size()-1);
 	}
 	
-	public Collection<String> findTouchedFiles() {
-		Git git = getTargetDepot().git();
-		return git.listChangedFiles(getTarget().getObjectName(), getLatestUpdate().getHeadCommitHash(), null);
-	}
-
 	@JsonView(ExternalView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
@@ -664,9 +657,8 @@ public class PullRequest extends AbstractEntity {
 	 * Delete refs of this pull request, without touching refs of its updates.
 	 */
 	public void deleteRefs() {
-		Git git = getTargetDepot().git();
-		git.deleteRef(getBaseRef(), null, null);
-		git.deleteRef(getIntegrateRef(), null, null);
+		GitUtils.deleteRef(getTargetDepot().updateRef(getBaseRef()));
+		GitUtils.deleteRef(getTargetDepot().updateRef(getIntegrateRef()));
 	}
 	
 	/**
@@ -817,12 +809,17 @@ public class PullRequest extends AbstractEntity {
 	 * @return
 	 * 			commits pending integration
 	 */
-	public Set<String> getPendingCommits() {
+	public Collection<RevCommit> getPendingCommits() {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
-			Depot repo = getTargetDepot();
-			for (Commit commit: repo.git().log(getTarget().getObjectName(), getLatestUpdate().getHeadCommitHash(), null, 0, 0, false))
-				pendingCommits.add(commit.getHash());
+			Depot depot = getTargetDepot();
+			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
+				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getLatestUpdate().getHeadCommitHash())));
+				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getTarget().getObjectName())));
+				revWalk.forEach(c->pendingCommits.add(c));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return pendingCommits;
 	}
@@ -833,13 +830,17 @@ public class PullRequest extends AbstractEntity {
 	 * @return
 	 * 			commits already merged to target branch since base commit
 	 */
-	public Collection<Commit> getMergedCommits() {
+	public Collection<RevCommit> getMergedCommits() {
 		if (mergedCommits == null) {
 			mergedCommits = new HashSet<>();
-
-			Depot repo = getTargetDepot();
-			for (Commit commit: repo.git().log(getBaseCommitHash(), getTarget().getObjectName(), null, 0, 0, false))
-				mergedCommits.add(commit);
+			Depot depot = getTargetDepot();
+			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
+				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getTarget().getObjectName())));
+				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
+				revWalk.forEach(c->mergedCommits.add(c));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return mergedCommits;
 	}
@@ -959,7 +960,7 @@ public class PullRequest extends AbstractEntity {
 		List<String> commits = new ArrayList<>();
 		commits.add(getBaseCommitHash());
 		for (PullRequestUpdate update: getSortedUpdates()) {
-			commits.addAll(update.getCommits().stream().map(BriefCommit::getHash).collect(Collectors.toList()));
+			commits.addAll(update.getCommits().stream().map(RevCommit::getName).collect(Collectors.toList()));
 		}
 		String commit = commentComparingInfo.getCommit();
 		CompareContext compareContext = commentComparingInfo.getCompareContext();
@@ -994,10 +995,18 @@ public class PullRequest extends AbstractEntity {
 		} 
 	}
 	
-	public List<BriefCommit> getCommits() {
-		List<BriefCommit> commits = new ArrayList<>();
+	public List<RevCommit> getCommits() {
+		List<RevCommit> commits = new ArrayList<>();
 		getSortedUpdates().forEach(update->commits.addAll(update.getCommits()));
 		return commits;
+	}
+	
+	public String getCommitMessage() {
+		String commitMessage = getTitle() + "\n\n";
+		if (getDescription() != null)
+			commitMessage += getDescription() + "\n\n";
+		commitMessage += "This commit is created as result of integrating pull request #" + getNumber();
+		return commitMessage;
 	}
 	
 	public boolean isVisited(boolean includingActivities) {

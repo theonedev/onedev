@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -14,8 +12,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
@@ -34,19 +32,6 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 
 	private final IModel<PullRequestUpdate> updateModel;
 	
-	private final IModel<Set<String>> mergedCommitsModel = new LoadableDetachableModel<Set<String>>() {
-
-		@Override
-		protected Set<String> load() {
-			Set<String> hashes = new HashSet<>();
-
-			for (Commit commit: updateModel.getObject().getRequest().getMergedCommits())
-				hashes.add(commit.getHash());
-			return hashes;
-		}
-		
-	};
-
 	public UpdateActivityPanel(String id, RenderableActivity activity, IModel<PullRequestUpdate> updateModel) {
 		super(id, activity);
 		
@@ -67,11 +52,11 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 			}
 			
 		});
-		add(new ListView<Commit>("commits", new LoadableDetachableModel<List<Commit>>() {
+		add(new ListView<RevCommit>("commits", new LoadableDetachableModel<List<RevCommit>>() {
 
 			@Override
-			protected List<Commit> load() {
-				List<Commit> commits = updateModel.getObject().getCommits();
+			protected List<RevCommit> load() {
+				List<RevCommit> commits = updateModel.getObject().getCommits();
 				if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
 					return commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
 				else 
@@ -81,10 +66,10 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 		}) {
 
 			@Override
-			protected void populateItem(final ListItem<Commit> item) {
-				Commit commit = item.getModelObject();
+			protected void populateItem(final ListItem<RevCommit> item) {
+				RevCommit commit = item.getModelObject();
 				
-				item.add(new AvatarLink("author", commit.getAuthor(), new TooltipConfig()));
+				item.add(new AvatarLink("author", commit.getAuthorIdent(), new TooltipConfig()));
 
 				IModel<Depot> depotModel = new AbstractReadOnlyModel<Depot>() {
 
@@ -94,14 +79,7 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 					}
 					
 				};
-				item.add(new CommitMessagePanel("message", depotModel, new AbstractReadOnlyModel<Commit>() {
-
-					@Override
-					public Commit getObject() {
-						return item.getModelObject();
-					}
-					
-				}));
+				item.add(new CommitMessagePanel("message", depotModel, item.getModel()));
 
 				IModel<PullRequest> requestModel = new AbstractReadOnlyModel<PullRequest>() {
 
@@ -111,7 +89,7 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 					}
 					
 				};
-				item.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
+				item.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.name())) {
 
 					@Override
 					protected Component newStatusComponent(String id, final IModel<Verification.Status> statusModel) {
@@ -166,12 +144,14 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 						return updateModel.getObject().getRequest().getTargetDepot();
 					}
 					
-				}, commit.getHash(), null));
+				}, commit.name(), null));
 				
-				if (mergedCommitsModel.getObject().contains(commit.getHash())) {
+				PullRequestUpdate update = updateModel.getObject();
+				
+				if (update.getRequest().getMergedCommits().contains(commit)) {
 					item.add(AttributeAppender.append("class", " integrated"));
 					item.add(AttributeAppender.append("title", "This commit has been integrated"));
-				} else if (!updateModel.getObject().getRequest().getPendingCommits().contains(commit.getHash())) {
+				} else if (!update.getRequest().getPendingCommits().contains(commit)) {
 					item.add(AttributeAppender.append("class", " rebased"));
 					item.add(AttributeAppender.append("title", "This commit has been rebased"));
 				}
@@ -187,7 +167,6 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 		super.onDetach();
 		
 		updateModel.detach();
-		mergedCommitsModel.detach();
 	}
 
 }

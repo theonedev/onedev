@@ -1,5 +1,7 @@
 package com.pmease.commons.hibernate;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.hibernate.Interceptor;
@@ -8,6 +10,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 
+import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
@@ -41,12 +44,26 @@ public class HibernateModule extends AbstractPluginModule {
 	    TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 	    requestInjection(transactionInterceptor);
 	    
-	    bindInterceptor(Matchers.any(), Matchers.annotatedWith(Transactional.class), transactionInterceptor);
+	    bindInterceptor(Matchers.any(), new AbstractMatcher<AnnotatedElement>() {
+
+			@Override
+			public boolean matches(AnnotatedElement element) {
+				return element.isAnnotationPresent(Transactional.class) && !((Method) element).isSynthetic();
+			}
+	    	
+	    }, transactionInterceptor);
 	    
 	    SessionInterceptor sessionInterceptor = new SessionInterceptor();
 	    requestInjection(sessionInterceptor);
 	    
-	    bindInterceptor(Matchers.any(), Matchers.annotatedWith(Sessional.class), sessionInterceptor);
+	    bindInterceptor(Matchers.any(), new AbstractMatcher<AnnotatedElement>() {
+
+			@Override
+			public boolean matches(AnnotatedElement element) {
+				return element.isAnnotationPresent(Sessional.class) && !((Method) element).isSynthetic();
+			}
+	    	
+	    }, sessionInterceptor);
 	    
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
 	    

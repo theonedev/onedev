@@ -4,17 +4,16 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.pmease.commons.git.Git;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
@@ -98,10 +97,9 @@ public enum PullRequestOperation {
 			}
 			
 			// now check if source branch is integrated into target branch
-			Git git = request.getTargetDepot().git();
 			String sourceHead = request.getSource().getObjectName();
-			return git.parseRevision(sourceHead, false) == null 
-					|| !request.getTargetDepot().isAncestor(sourceHead, request.getTarget().getObjectName());
+			return request.getTargetDepot().getObjectId(sourceHead, false) == null 
+					|| !request.getTargetDepot().isMergedInto(sourceHead, request.getTarget().getObjectName());
 		}
 
 		@Override

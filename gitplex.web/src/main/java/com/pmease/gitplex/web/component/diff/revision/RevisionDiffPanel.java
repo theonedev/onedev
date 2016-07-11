@@ -66,7 +66,6 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
@@ -1010,11 +1009,11 @@ public class RevisionDiffPanel extends Panel {
 			protected Component newContent(String id) {
 				if (requestModel.getObject() != null) {
 					Fragment fragment = new Fragment(id, "requestCommitSelectorFrag", RevisionDiffPanel.this);
-					IModel<List<BriefCommit>> commitsModel = new LoadableDetachableModel<List<BriefCommit>>() {
+					IModel<List<RevCommit>> commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
 						@Override
-						protected List<BriefCommit> load() {
-							List<BriefCommit> commits = new ArrayList<>();
+						protected List<RevCommit> load() {
+							List<RevCommit> commits = new ArrayList<>();
 							PullRequest request = requestModel.getObject();
 							commits.add(request.getBaseCommit());
 							commits.addAll(request.getCommits());
@@ -1022,11 +1021,11 @@ public class RevisionDiffPanel extends Panel {
 						}
 						
 					};
-					fragment.add(new ListView<BriefCommit>("commits", commitsModel) {
+					fragment.add(new ListView<RevCommit>("commits", commitsModel) {
 
 						@Override
-						protected void populateItem(ListItem<BriefCommit> item) {
-							BriefCommit commit = item.getModelObject();
+						protected void populateItem(ListItem<RevCommit> item) {
+							RevCommit commit = item.getModelObject();
 							AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 								@Override
@@ -1035,14 +1034,14 @@ public class RevisionDiffPanel extends Panel {
 									CodeComment comment = getOpenComment();
 									state.commentId = comment.getId();
 									state.mark = comment.getCommentPos();
-									int index = commitsModel.getObject().stream().map(BriefCommit::getHash).collect(Collectors.toList())
+									int index = commitsModel.getObject().stream().map(RevCommit::getName).collect(Collectors.toList())
 											.indexOf(comment.getCommentPos().getCommit());
 									int compareIndex = commitsModel.getObject().indexOf(commit);
 									if (index < compareIndex) {
 										state.oldCommit = comment.getCommentPos().getCommit();
-										state.newCommit = commit.getHash();
+										state.newCommit = commit.name();
 									} else {
-										state.oldCommit = commit.getHash();
+										state.oldCommit = commit.name();
 										state.newCommit = comment.getCommentPos().getCommit();
 									}
 									PageParameters params = RequestChangesPage.paramsOf(requestModel.getObject(), state);
@@ -1050,9 +1049,9 @@ public class RevisionDiffPanel extends Panel {
 								}
 								
 							};
-							link.add(new Label("hash", GitUtils.abbreviateSHA(commit.getHash())));
-							link.add(new Label("subject", commit.getSubject()));
-							if (commit.getHash().equals(getOpenComment().getCommentPos().getCommit())) {
+							link.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
+							link.add(new Label("subject", commit.getShortMessage()));
+							if (commit.name().equals(getOpenComment().getCommentPos().getCommit())) {
 								link.setEnabled(false);
 								link.add(AttributeAppender.append("class", "commented"));
 								link.add(new WebMarkupContainer("commented"));

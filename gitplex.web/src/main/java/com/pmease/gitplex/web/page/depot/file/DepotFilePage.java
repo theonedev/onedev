@@ -84,7 +84,7 @@ import com.pmease.gitplex.web.component.depotfile.filelist.FileListPanel;
 import com.pmease.gitplex.web.component.depotfile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 
 @SuppressWarnings("serial")
 public class DepotFilePage extends DepotPage implements BlobViewContext {
@@ -146,8 +146,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	public DepotFilePage(final PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasRefs()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
+		if (getDepot().getDefaultBranch() == null) 
+			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 		
 		trait.depotId = getDepot().getId();
 		

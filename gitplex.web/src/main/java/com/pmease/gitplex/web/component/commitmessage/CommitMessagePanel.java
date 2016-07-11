@@ -15,9 +15,10 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
-import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.Highlighter;
 import com.pmease.commons.util.Transformer;
 import com.pmease.gitplex.core.entity.Depot;
@@ -28,12 +29,12 @@ public class CommitMessagePanel extends Panel {
 
 	private final IModel<Depot> depotModel;
 	
-	private final IModel<Commit> commitModel;
+	private final IModel<RevCommit> commitModel;
 	
 	private final IModel<List<Pattern>> patternsModel;
 	
 	public CommitMessagePanel(String id, IModel<Depot> depotModel, 
-			IModel<Commit> commitModel, IModel<List<Pattern>> patternsModel) {
+			IModel<RevCommit> commitModel, IModel<List<Pattern>> patternsModel) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -41,7 +42,7 @@ public class CommitMessagePanel extends Panel {
 		this.patternsModel = patternsModel;
 	}
 
-	public CommitMessagePanel(String id, IModel<Depot> depotModel, IModel<Commit> commitModel) {
+	public CommitMessagePanel(String id, IModel<Depot> depotModel, IModel<RevCommit> commitModel) {
 		this(id, depotModel, commitModel, new LoadableDetachableModel<List<Pattern>>() {
 
 			@Override
@@ -76,14 +77,14 @@ public class CommitMessagePanel extends Panel {
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("link",
 				CommitDetailPage.class,
-				CommitDetailPage.paramsOf(depotModel.getObject(), commitModel.getObject().getHash()));
+				CommitDetailPage.paramsOf(depotModel.getObject(), commitModel.getObject().name()));
 		
 		add(link);
 		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return highlight(commitModel.getObject().getSubject());
+				return highlight(commitModel.getObject().getShortMessage());
 			}
 			
 		}).setEscapeModelStrings(false));
@@ -92,7 +93,7 @@ public class CommitMessagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return highlight(commitModel.getObject().getBody());
+				return highlight(GitUtils.getDetailMessage(commitModel.getObject()));
 			}
 			
 		}) {
@@ -101,7 +102,7 @@ public class CommitMessagePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(commitModel.getObject().getBody() != null);
+				setVisible(GitUtils.getDetailMessage(commitModel.getObject()) != null);
 			}
 		}.setEscapeModelStrings(false));
 		
@@ -110,7 +111,7 @@ public class CommitMessagePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(commitModel.getObject().getBody() != null);
+				setVisible(GitUtils.getDetailMessage(commitModel.getObject()) != null);
 			}
 		};
 		add(detailedToggle);

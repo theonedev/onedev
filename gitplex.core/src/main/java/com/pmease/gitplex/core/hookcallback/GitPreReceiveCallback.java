@@ -3,11 +3,10 @@ package com.pmease.gitplex.core.hookcallback;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,33 +16,53 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.RefUpdate;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.gatekeeper.GateKeeper;
+import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.security.ObjectPermission;
 
 @SuppressWarnings("serial")
 @Singleton
-public class GitPostReceiveCallback extends HttpServlet {
+public class GitPreReceiveCallback extends HttpServlet {
 
-    public static final String PATH = "/git-postreceive-callback";
-    
-    private final DepotManager depotManager;
-    
-    private final Provider<Set<RefListener>> listenersProvider;
-    
-    @Inject
-    public GitPostReceiveCallback(DepotManager depotManager, Provider<Set<RefListener>> listenersProvider) {
-    	this.depotManager = depotManager;
-        this.listenersProvider = listenersProvider;
-    }
+	public static final String PATH = "/git-prereceive-callback";
 
-    @Override
+	private final DepotManager depotManager;
+	
+	private final AccountManager userManager;
+	
+	@Inject
+	public GitPreReceiveCallback(DepotManager depotManager, AccountManager userManager) {
+		this.depotManager = depotManager;
+		this.userManager = userManager;
+	}
+	
+	private void error(Output output, String refName, String... messages) {
+		output.markError();
+		output.writeLine();
+		output.writeLine("*******************************************************");
+		output.writeLine("*");
+		output.writeLine("*  ERROR PUSHING REF: " + refName);
+		output.writeLine("-------------------------------------------------------");
+		for (String message: messages)
+			output.writeLine("*  " + message);
+		output.writeLine("*");
+		output.writeLine("*******************************************************");
+		output.writeLine();
+	}
+	
+	@Transactional
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String clientIp = request.getHeader("X-Forwarded-For");
         if (clientIp == null) clientIp = request.getRemoteAddr();
@@ -64,6 +83,8 @@ public class GitPostReceiveCallback extends HttpServlet {
 	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	        IOUtils.copy(request.getInputStream(), baos);
 	        
+	        Output output = new Output(response.getOutputStream());
+	        
 	        /*
 	         * If multiple refs are updated, the hook stdin will put each ref update info into
 	         * a separate line, however the line breaks is omitted when forward the hook stdin
@@ -83,20 +104,33 @@ public class GitPostReceiveCallback extends HttpServlet {
 	        	String field = fields.get(pos);
 	        	ObjectId oldCommit = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
 	        	
-	        	if (!newCommit.equals(ObjectId.zeroId())) {
-	        		depot.cacheObjectId(refName, newCommit);
-	        	} else {
-	        		newCommit = ObjectId.zeroId();
-	        		depot.cacheObjectId(refName, null);
-	        	}
-	        	
-	        	String branch = GitUtils.ref2branch(refName);
-	        	if (branch != null && depot.getDefaultBranch() == null) {
-	        		RefUpdate refUpdate = depot.updateRef("HEAD");
-	        		GitUtils.linkRef(refUpdate, refName);
-	        	}
-	    		for (RefListener listener: listenersProvider.get())
-	    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
+	    		Account user = userManager.getCurrent();
+	    		Preconditions.checkNotNull(user);
+
+	    		if (refName.startsWith(Depot.REFS_GITPLEX)) {
+	    			if (!user.asSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
+	    				error(output, refName, "Only repository administrators can update gitplex refs.");
+	    				break;
+	    			}
+	    		} else {
+	    			GateKeeper gateKeeper = depot.getGateKeeper();
+	    			CheckResult checkResult = gateKeeper.checkPush(user, depot, refName, oldCommit, newCommit);
+	    			if (!(checkResult instanceof Passed)) {
+	    				List<String> messages = new ArrayList<>();
+	    				for (String each: checkResult.getReasons())
+	    					messages.add(each);
+	    				if (GitUtils.ref2branch(refName) != null 
+	    						&& !oldCommit.equals(ObjectId.zeroId()) 
+	    						&& !newCommit.equals(ObjectId.zeroId()) 
+	    						&& !(checkResult instanceof Failed)) {
+	    					messages.add("");
+	    					messages.add("----------------------------------------------------");
+	    					messages.add("You may submit a pull request instead.");
+	    				}
+	    				error(output, refName, messages.toArray(new String[messages.size()]));
+	    				break;
+	    			}
+	    		}
 	    		
 	        	field = field.substring(40);
 	        	if (field.length() == 0)
@@ -106,7 +140,6 @@ public class GitPostReceiveCallback extends HttpServlet {
 	        }
         } finally {
         	SecurityUtils.getSubject().releaseRunAs();
-        }
-	}
-
+        }		
+	}	
 }

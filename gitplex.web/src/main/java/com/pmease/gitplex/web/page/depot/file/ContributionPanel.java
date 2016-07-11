@@ -25,7 +25,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.git.command.RevListCommand;
 import com.pmease.commons.wicket.component.DropdownLink;
@@ -45,10 +44,23 @@ class ContributionPanel extends Panel {
 	
 	private final IModel<Depot> depotModel;
 	
-	private final Commit commit;
+	private final IModel<RevCommit> commitModel = new LoadableDetachableModel<RevCommit>() {
+
+		@Override
+		protected RevCommit load() {
+			// call revlist command for performance reason
+			RevListCommand command = new RevListCommand(depotModel.getObject().getDirectory());
+			command.revisions(Lists.newArrayList(blobIdent.revision));
+			if (blobIdent.path != null)
+				command.paths(Lists.newArrayList(blobIdent.path));
+			command.count(1);
+			String commitId = command.call().iterator().next();
+			return depotModel.getObject().getRevCommit(commitId);
+		}
+		
+	};
 	
 	private final BlobIdent blobIdent;
-	
 	
 	public ContributionPanel(String id, IModel<Depot> depotModel, BlobIdent blobIdent) {
 		super(id);
@@ -56,24 +68,23 @@ class ContributionPanel extends Panel {
 		this.depotModel = depotModel;		
 
 		this.blobIdent = blobIdent;
-		
-		// call git command line for performance reason
-		commit = depotModel.getObject().git().log(null, blobIdent.revision, blobIdent.path, 1, 0, false).iterator().next();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AvatarLink("avatar", commit.getAuthor()));
-		add(new ContributorPanel("contributor", commit.getAuthor(), commit.getCommitter(), false));
+		RevCommit commit = commitModel.getObject();
+		add(new AvatarLink("avatar", commit.getAuthorIdent()));
+		add(new ContributorPanel("contributor", commit.getAuthorIdent(), 
+				commit.getCommitterIdent(), false));
 		
 		Link<Void> link = new BookmarkablePageLink<Void>("messageLink", CommitDetailPage.class, 
-				CommitDetailPage.paramsOf(depotModel.getObject(), commit.getHash()));
-		link.add(new Label("message", commit.getSubject()));
+				CommitDetailPage.paramsOf(depotModel.getObject(), commit.name()));
+		link.add(new Label("message", commit.getShortMessage()));
 		add(link);
 
-		add(new Label("date", DateUtils.formatAge(commit.getCommitter().getWhen())));
+		add(new Label("date", DateUtils.formatAge(commit.getCommitterIdent().getWhen())));
 		
 		add(new DropdownLink("contributors") {
 
@@ -94,7 +105,7 @@ class ContributionPanel extends Panel {
 							@Override
 							protected List<NameAndEmail> load() {
 								Depot depot = depotModel.getObject();
-								RevListCommand revList = new RevListCommand(depot.getGitDir());
+								RevListCommand revList = new RevListCommand(depot.getDirectory());
 								if (blobIdent.path != null)
 									revList.paths(Lists.newArrayList(blobIdent.path));
 								revList.revisions(Lists.newArrayList(blobIdent.revision));
@@ -149,6 +160,7 @@ class ContributionPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
+		commitModel.detach();
 		depotModel.detach();
 		
 		super.onDetach();

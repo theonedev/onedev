@@ -10,11 +10,10 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.jgit.lib.Ref;
-
 import com.google.common.base.Preconditions;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.match.PatternApplied;
@@ -38,8 +37,8 @@ public class SuggestionUtils {
 				suggestions.add(new InputSuggestion(wildcard, wildcardDescription, matchRange));
 			}
 		}
-		for (Ref ref: depot.getBranchRefs()) {
-			String branch = GitUtils.ref2branch(ref.getName());
+		for (RefInfo ref: depot.getBranches()) {
+			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			int index = branch.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
@@ -77,8 +76,8 @@ public class SuggestionUtils {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (Ref ref: depot.getTagRefs()) {
-			String tag = GitUtils.ref2tag(ref.getName());
+		for (RefInfo ref: depot.getTags()) {
+			String tag = GitUtils.ref2tag(ref.getRef().getName());
 			int index = tag.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());

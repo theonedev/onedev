@@ -3,8 +3,6 @@ package com.pmease.gitplex.core.manager;
 import java.io.File;
 
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
 
 public interface StorageManager {
     
@@ -32,22 +30,6 @@ public interface StorageManager {
      */
     File getInfoDir(Depot depot);
     
-    /**
-     * Get directory to store cache data of specified pull request
-     * 
-     * @return
-     * 			directory to store cache data, the directory will be exist after calling this method
-     */
-    File getCacheDir(PullRequest request);
-    
-    /**
-     * Get directory to store cache data of specified pull request update
-     * 
-     * @return
-     * 			directory to store cache data, the directory will be exist after calling this method
-     */
-    File getCacheDir(PullRequestUpdate update);
-
     /**
      * Get directory to store attachments of specified depot
      * 

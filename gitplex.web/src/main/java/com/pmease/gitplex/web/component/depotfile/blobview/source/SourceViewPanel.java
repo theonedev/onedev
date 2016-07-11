@@ -62,6 +62,7 @@ import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
@@ -854,7 +855,9 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 			String commitHash = context.getCommit().name();
 			
-			for (Blame blame: context.getDepot().git().blame(commitHash, context.getBlobIdent().path).values()) {
+			BlameCommand cmd = new BlameCommand(context.getDepot().getDirectory());
+			cmd.commitHash(commitHash).file(context.getBlobIdent().path);
+			for (Blame blame: cmd.call().values()) {
 				BlameInfo blameInfo = new BlameInfo();
 				blameInfo.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
 				blameInfo.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -33,11 +34,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
@@ -110,7 +111,7 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("text", GitUtils.getShortMessage(getCommit())));
+		add(new Label("text", getCommit().getShortMessage()));
 		
 		add(new HashAndCodePanel("hashAndCode", depotModel, getCommit().getId().name()));
 		
@@ -153,40 +154,25 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 					}
 					
 				};
-				fragment.add(new ListView<Ref>("refs", new LoadableDetachableModel<List<Ref>>() {
+				fragment.add(new ListView<RefInfo>("refs", new LoadableDetachableModel<List<RefInfo>>() {
 
 					@Override
-					protected List<Ref> load() {
+					protected List<RefInfo> load() {
 						Set<ObjectId> descendants = GitPlex.getInstance(CommitInfoManager.class)
 								.getDescendants(getDepot(), getCommit().getId());
 						descendants.add(getCommit().getId());
-						
-						List<Ref> branchRefs = new ArrayList<>();
-						for (Ref ref: getDepot().getBranchRefs()) {
-							if (descendants.contains(ref.getObjectId())) {
-								branchRefs.add(ref);
-							}
-						}
-						
-						List<Ref> tagRefs = new ArrayList<>();
-						for (Ref ref: getDepot().getTagRefs()) {
-							RevCommit taggedCommit = getDepot().getRevCommit(ref.getObjectId());
-							if (descendants.contains(taggedCommit.getId()))
-								tagRefs.add(ref);
-						}
-
-						List<Ref> refs = new ArrayList<>();
-						refs.addAll(branchRefs);
-						refs.addAll(tagRefs);
-						
-						return refs;
+					
+						List<RefInfo> refs = new ArrayList<>();
+						refs.addAll(getDepot().getBranches());
+						refs.addAll(getDepot().getTags());
+						return refs.stream().filter(ref->descendants.contains(ref.getPeeledObj())).collect(Collectors.toList());
 					}
 					
 				}) {
 
 					@Override
-					protected void populateItem(ListItem<Ref> item) {
-						String ref = item.getModelObject().getName();
+					protected void populateItem(ListItem<RefInfo> item) {
+						String ref = item.getModelObject().getRef().getName();
 						String branch = GitUtils.ref2branch(ref); 
 						if (branch != null) {
 							DepotFilePage.State state = new DepotFilePage.State();

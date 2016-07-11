@@ -1,6 +1,9 @@
 package com.pmease.gitplex.core.gatekeeper;
 
+import java.io.IOException;
+
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
@@ -72,12 +75,17 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	@Override
 	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
-			for (String file: depot.git().listChangedFiles(oldCommit.name(), newCommit.name(), null)) {
-				if (matches(file))
-					return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));
+			try (TreeWalk treeWalk = new TreeWalk(depot.getRepository())) {
+				treeWalk.addTree(depot.getRevCommit(oldCommit));
+				treeWalk.addTree(depot.getRevCommit(newCommit));
+				while (treeWalk.next()) {
+					if (matches(treeWalk.getPathString()))
+						return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));
+				}
+				return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			
-			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'"));
 		} else {
 			return ignored();
 		}

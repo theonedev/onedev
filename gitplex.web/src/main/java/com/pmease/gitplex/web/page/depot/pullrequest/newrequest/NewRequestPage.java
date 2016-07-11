@@ -3,8 +3,9 @@ package com.pmease.gitplex.web.page.depot.pullrequest.newrequest;
 import static com.pmease.gitplex.core.entity.PullRequest.Status.INTEGRATED;
 import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_UPDATE;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -32,10 +33,14 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.command.CalcMergeBaseCommand;
+import com.pmease.commons.git.command.CloneCommand;
+import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.FileUtils;
@@ -70,7 +75,7 @@ import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoi
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
 import com.pmease.gitplex.web.model.ReviewersModel;
-import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
@@ -89,7 +94,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 	
 	private DepotAndBranch source;
 	
-	private IModel<List<Commit>> commitsModel;
+	private IModel<List<RevCommit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
 	
@@ -113,8 +118,8 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 	public NewRequestPage(PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasRefs()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
+		if (getDepot().getDefaultBranch() == null) 
+			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 
 		if (params.get("target").toString() != null) {
 			target = new DepotAndBranch(params.get("target").toString());
@@ -167,23 +172,21 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 				pullRequest.setAssignee(getDepot().getAccount());
 
 			if (target.getDepot().equals(source.getDepot())) {
-				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(
-						target.getObjectName(), source.getObjectName()));			
-				if (target.getDepot().isAncestor(source.getObjectName(), target.getObjectName())) {
+				pullRequest.setBaseCommitHash(GitUtils.getMergeBase(target.getDepot().getRepository(), target.getObjectId(), source.getObjectId()).name());			
+				if (target.getDepot().isMergedInto(source.getObjectName(), target.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setCloseDate(new Date());
 					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
 					pullRequest.setCloseInfo(closeInfo);
 				}
 			} else {
-				Git tempGit = new Git(FileUtils.createTempDir());
+				File tempDir = FileUtils.createTempDir();
 				try {
-					tempGit.clone(target.getDepot().git(), false, true, true, pullRequest.getTarget().getBranch());
-					tempGit.reset(null, null);
-					tempGit.fetch(source.getDepot().git(), source.getBranch());
-					pullRequest.setBaseCommitHash(tempGit.calcMergeBase(target.getObjectName(), source.getObjectName()));			
+					new CloneCommand(tempDir).bare(true).shared(true).from(target.getDepot().getDirectory().getAbsolutePath()).call();
+					new FetchCommand(tempDir).from(source.getDepot().getDirectory().getAbsolutePath()).refspec(source.getBranch()).call();
+					pullRequest.setBaseCommitHash(new CalcMergeBaseCommand(tempDir).rev1(target.getObjectName()).rev2(source.getObjectName()).call());			
 				} finally {
-					FileUtils.deleteDir(tempGit.depotDir());
+					FileUtils.deleteDir(tempDir);
 				}
 				if (pullRequest.getBaseCommitHash().equals(source.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
@@ -206,14 +209,21 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			requestModel.setObject(pullRequest);
 		}
 		
-		commitsModel = new LoadableDetachableModel<List<Commit>>() {
+		commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
 			@Override
-			protected List<Commit> load() {
+			protected List<RevCommit> load() {
 				PullRequest request = getPullRequest();
-				List<Commit> commits = source.getDepot().git().log(request.getBaseCommitHash(), 
-						request.getLatestUpdate().getHeadCommitHash(), null, 0, 0, false);
-				Collections.reverse(commits);
+				List<RevCommit> commits = new ArrayList<>();
+				try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
+					ObjectId headId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
+					revWalk.markStart(revWalk.parseCommit(headId));
+					ObjectId baseId = ObjectId.fromString(request.getBaseCommitHash());
+					revWalk.markUninteresting(revWalk.parseCommit(baseId));
+					revWalk.forEach(c->commits.add(c));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 				return commits;
 			}
 			
@@ -538,10 +548,10 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			@Override
 			public String getObject() {
 				if (getPullRequest().getTitle() == null) {
-					List<Commit> commits = commitsModel.getObject();
+					List<RevCommit> commits = commitsModel.getObject();
 					Preconditions.checkState(!commits.isEmpty());
 					if (commits.size() == 1)
-						getPullRequest().setTitle(commits.get(0).getSubject());
+						getPullRequest().setTitle(commits.get(0).getShortMessage());
 					else
 						getPullRequest().setTitle(getPullRequest().getSource().getBranch());
 				}

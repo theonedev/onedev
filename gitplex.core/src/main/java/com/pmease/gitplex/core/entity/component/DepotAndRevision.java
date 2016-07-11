@@ -103,7 +103,7 @@ public class DepotAndRevision implements Serializable {
 	}
 	
 	public boolean isDefault() {
-		return getDepot().getDefaultBranch().equals(getRevision());
+		return getRevision().equals(getDepot().getDefaultBranch());
 	}
 
 	public void delete() {

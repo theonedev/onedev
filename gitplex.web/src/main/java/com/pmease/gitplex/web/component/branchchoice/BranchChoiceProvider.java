@@ -7,11 +7,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.model.IModel;
-import org.eclipse.jgit.lib.Ref;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.RefInfo;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.vaynberg.wicket.select2.ChoiceProvider;
@@ -31,8 +31,8 @@ public class BranchChoiceProvider extends ChoiceProvider<String> {
 		term = term.toLowerCase();
 		List<String> branches = new ArrayList<>();
 		Depot depot = depotModel.getObject();
-		for (Ref ref: depot.getBranchRefs()) {
-			String branch = GitUtils.ref2branch(ref.getName());
+		for (RefInfo ref: depot.getBranches()) {
+			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			if (branch.toLowerCase().startsWith(term))
 				branches.add(branch);
 		}

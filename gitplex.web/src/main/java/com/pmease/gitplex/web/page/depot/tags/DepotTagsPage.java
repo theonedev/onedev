@@ -25,22 +25,21 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
@@ -53,7 +52,7 @@ import com.pmease.gitplex.web.component.archivemenulink.ArchiveMenuLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -74,8 +73,8 @@ public class DepotTagsPage extends DepotPage {
 	public DepotTagsPage(PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasRefs()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
+		if (getDepot().getDefaultBranch() == null) 
+			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 	}
 	
 	@Override
@@ -215,16 +214,16 @@ public class DepotTagsPage extends DepotPage {
 			
 		});
 		
-		IModel<List<Ref>> tagsModel = new AbstractReadOnlyModel<List<Ref>>() {
+		IModel<List<RefInfo>> tagsModel = new LoadableDetachableModel<List<RefInfo>>() {
 
 			@Override
-			public List<Ref> getObject() {
-				List<Ref> refs = getDepot().getTagRefs();
+			protected List<RefInfo> load() {
+				List<RefInfo> refs = getDepot().getTags();
 				String searchFor = searchField.getModelObject();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
-					for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
-						String tag = GitUtils.ref2tag(it.next().getName());
+					for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
+						String tag = GitUtils.ref2tag(it.next().getRef().getName());
 						if (!tag.toLowerCase().contains(searchFor))
 							it.remove();
 					}
@@ -245,15 +244,15 @@ public class DepotTagsPage extends DepotPage {
 		});
 		tagsContainer.setOutputMarkupPlaceholderTag(true);
 		
-		PageableListView<Ref> tagsView;
+		PageableListView<RefInfo> tagsView;
 
-		tagsContainer.add(tagsView = new PageableListView<Ref>("tags", tagsModel, 
+		tagsContainer.add(tagsView = new PageableListView<RefInfo>("tags", tagsModel, 
 				com.pmease.gitplex.web.Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(final ListItem<Ref> item) {
-				Ref ref = item.getModelObject();
-				final String tagName = GitUtils.ref2tag(ref.getName());
+			protected void populateItem(ListItem<RefInfo> item) {
+				RefInfo ref = item.getModelObject();
+				String tagName = GitUtils.ref2tag(ref.getRef().getName());
 				
 				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent.revision = tagName;
@@ -262,9 +261,8 @@ public class DepotTagsPage extends DepotPage {
 				link.add(new Label("name", tagName));
 				item.add(link);
 
-				RevObject revObject = getDepot().getRevObject(ref.getObjectId());
-				if (revObject instanceof RevTag) {
-					RevTag revTag = (RevTag) revObject;
+				if (ref.getObj() instanceof RevTag) {
+					RevTag revTag = (RevTag) ref.getObj();
 					Fragment fragment = new Fragment("annotated", "annotatedFrag", DepotTagsPage.this);
 					if (revTag.getTaggerIdent() != null) {
 						fragment.add(new AccountLink("author", revTag.getTaggerIdent()));
@@ -286,7 +284,7 @@ public class DepotTagsPage extends DepotPage {
 					item.add(new WebMarkupContainer("annotated").setVisible(false));
 				}
 
-				RevCommit commit = getDepot().getRevCommit(ref.getObjectId());
+				RevCommit commit = (RevCommit) ref.getPeeledObj();
 				item.add(new CommitHashPanel("hash", commit.name()));
 				PageParameters params = CommitDetailPage.paramsOf(getDepot(), commit.name());
 				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
@@ -307,16 +305,14 @@ public class DepotTagsPage extends DepotPage {
 					@Override
 					public void onClick() {
 						try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
-							RevCommit currentCommit = revWalk.lookupCommit(
-									getDepot().getRevCommit(item.getModelObject().getObjectId()).getId());
-							Ref prevAncestorRef = null;
+							RevCommit currentCommit = revWalk.lookupCommit(item.getModelObject().getPeeledObj());
+							RefInfo prevAncestorRef = null;
 							for (int i=item.getIndex()+1; i<tagsModel.getObject().size(); i++) {
-								Ref prevRef = tagsModel.getObject().get(i);
+								RefInfo prevRef = tagsModel.getObject().get(i);
 								revWalk.setRevFilter(RevFilter.MERGE_BASE);
 								revWalk.markStart(currentCommit);
 								
-								RevCommit prevCommit = revWalk.lookupCommit(
-										getDepot().getRevCommit(prevRef.getObjectId()).getId());
+								RevCommit prevCommit = revWalk.lookupCommit(prevRef.getPeeledObj());
 								revWalk.markStart(prevCommit);
 								if (prevCommit.equals(revWalk.next())) {
 									prevAncestorRef = prevRef;
@@ -327,13 +323,13 @@ public class DepotTagsPage extends DepotPage {
 							DepotAndRevision target;
 							if (prevAncestorRef != null) {
 								target = new DepotAndRevision(getDepot(), 
-										GitUtils.ref2tag(prevAncestorRef.getName()));
+										GitUtils.ref2tag(prevAncestorRef.getRef().getName()));
 							} else {
 								target = new DepotAndRevision(getDepot(), 
-										GitUtils.ref2tag(item.getModelObject().getName()));
+										GitUtils.ref2tag(item.getModelObject().getRef().getName()));
 							}
 							DepotAndRevision source = new DepotAndRevision(getDepot(), 
-									GitUtils.ref2tag(item.getModelObject().getName()));
+									GitUtils.ref2tag(item.getModelObject().getRef().getName()));
 							RevisionComparePage.State state = new RevisionComparePage.State();
 							state.leftSide = target;
 							state.rightSide = source;
@@ -370,9 +366,8 @@ public class DepotTagsPage extends DepotPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						Ref ref = item.getModelObject();
-						ObjectId commit = getDepot().getRevCommit(ref.getObjectId());
-						setVisible(SecurityUtils.canPushRef(getDepot(), ref.getName(), commit, ObjectId.zeroId()));
+						RefInfo ref = item.getModelObject();
+						setVisible(SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getPeeledObj(), ObjectId.zeroId()));
 					}
 					
 				});

@@ -5,8 +5,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 import org.unbescape.java.JavaEscape;
 
-import com.pmease.commons.git.command.LogCommand;
-import com.pmease.gitplex.web.page.depot.commit.CommitQueryBaseListener;
+import com.pmease.commons.git.command.RevListCommand;
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.AfterContext;
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.AuthorContext;
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.BeforeContext;
@@ -18,29 +17,29 @@ import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.RevisionExclus
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.RevisionRangeContext;
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.SingleRevisionContext;
 
-public class LogCommandFiller extends CommitQueryBaseListener {
+public class RevListCommandFiller extends CommitQueryBaseListener {
 
-	private final LogCommand logCommand;
+	private final RevListCommand command;
 	
 	private ParseTreeProperty<String> value = new ParseTreeProperty<>();
 
-	public LogCommandFiller(LogCommand logCommand) {
-		this.logCommand = logCommand;
+	public RevListCommandFiller(RevListCommand command) {
+		this.command = command;
 	}
 
 	@Override
 	public void exitSingleRevision(SingleRevisionContext ctx) {
-		logCommand.revisions().add(value.get(ctx.revision()));
+		command.revisions().add(value.get(ctx.revision()));
 	}
 
 	@Override
 	public void exitRevisionExclusion(RevisionExclusionContext ctx) {
-		logCommand.revisions().add("^" + value.get(ctx.revision()));
+		command.revisions().add("^" + value.get(ctx.revision()));
 	}
 
 	@Override
 	public void exitRevisionRange(RevisionRangeContext ctx) {
-		logCommand.revisions().add(value.get(ctx.revision(0)) + ctx.Range().getText() + value.get(ctx.revision(1)));
+		command.revisions().add(value.get(ctx.revision(0)) + ctx.Range().getText() + value.get(ctx.revision(1)));
 	}
 
 	@Override
@@ -55,36 +54,36 @@ public class LogCommandFiller extends CommitQueryBaseListener {
 
 	@Override
 	public void exitAfter(AfterContext ctx) {
-		logCommand.after(getValue(ctx.Value()));
+		command.after(getValue(ctx.Value()));
 	}
 
 	@Override
 	public void exitBefore(BeforeContext ctx) {
-		logCommand.before(getValue(ctx.Value()));
+		command.before(getValue(ctx.Value()));
 	}
 	
 	@Override
 	public void exitCommitter(CommitterContext ctx) {
 		String value = JavaEscape.unescapeJava(getValue(ctx.Value()));
 		value = StringUtils.replace(value, "*", ".*");
-		logCommand.committers().add(value);
+		command.committers().add(value);
 	}
 	
 	@Override
 	public void exitAuthor(AuthorContext ctx) {
 		String value = JavaEscape.unescapeJava(getValue(ctx.Value()));
 		value = StringUtils.replace(value, "*", ".*");
-		logCommand.authors().add(value);
+		command.authors().add(value);
 	}
 	
 	@Override
 	public void exitPath(PathContext ctx) {
-		logCommand.paths().add(getValue(ctx.Value()));
+		command.paths().add(getValue(ctx.Value()));
 	}
 	
 	@Override
 	public void exitMessage(MessageContext ctx) {
-		logCommand.messages().add(JavaEscape.unescapeJava(getValue(ctx.Value())));
+		command.messages().add(JavaEscape.unescapeJava(getValue(ctx.Value())));
 	}
 	
 }

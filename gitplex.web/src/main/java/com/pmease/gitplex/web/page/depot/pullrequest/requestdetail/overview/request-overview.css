@@ -11,10 +11,12 @@
 	border-right: 1px solid #E8E8E8;
 }
 #request-detail .discussion>td.avatar {
-	width: 40px; 
+	width: 48px; 
+	border-left: 4px solid white;
+	padding-left: 8px;
 }
 #request-detail .discussion>td.spacer {
-	width: 35px; 
+	width: 30px; 
 }
 #request-detail .discussion>td.content>div.activity {
 	position: relative;
@@ -71,6 +73,10 @@
 #request-detail div.activity, #request-detail div.activity a {
 	color: #999; 
 }
+#request-detail div.activity>div.body {
+	color: #444; 
+}
+
 #request-detail div.activity .operations>* {
 	color: #DDD;
 	margin-left: 4px;
@@ -179,7 +185,7 @@
 	color: #AFAD1F;
 }
 #request-detail .activities tr.activity.new>.avatar {
-	background: #4667EE;
+	border-color: #4667EE;
 }
 
 #request-detail .activities tr.activity>.content>.discard>.icon {

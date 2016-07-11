@@ -13,20 +13,14 @@ import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.util.ThreadContext;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pmease.commons.git.GitConfig;
-import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppName;
 import com.pmease.commons.loader.ManagedSerializedForm;
-import com.pmease.commons.schedule.SchedulableTask;
-import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.gitplex.core.listener.LifecycleListener;
@@ -43,7 +37,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private final DataManager dataManager;
 	
-	private final AccountManager userManager;
+	private final AccountManager accountManager;
 	
 	private final ServerConfig serverConfig;
 	
@@ -51,27 +45,16 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private volatile InitStage initStage;
 	
-	private final TaskScheduler taskScheduler;
-	
-	private final Provider<GitConfig> gitConfigProvider;
-	
 	private final Provider<Set<LifecycleListener>> listenersProvider;
-	
-	private volatile String gitError;
-	
-	private String gitCheckTaskId;
 	
 	@Inject
 	public GitPlex(ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager,
-            TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
-            AccountManager userManager, Provider<Set<LifecycleListener>> listenersProvider, 
+            AccountManager accountManager, Provider<Set<LifecycleListener>> listenersProvider, 
             @AppName String appName) {
 		this.configManager = configManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
-		this.taskScheduler = taskScheduler;
-		this.gitConfigProvider = gitConfigProvider;
-		this.userManager = userManager;
+		this.accountManager = accountManager;
 		this.listenersProvider = listenersProvider;
 		
 		this.appName = appName;
@@ -91,29 +74,10 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 			initStage.waitFor();
 		}
 
-		ThreadContext.bind(userManager.getRoot().asSubject());
+		ThreadContext.bind(accountManager.getRoot().asSubject());
 		
 		for (LifecycleListener listener: listenersProvider.get())
 			listener.systemStarting();
-		
-		gitCheckTaskId = taskScheduler.schedule(new SchedulableTask() {
-			
-			@Override
-			public ScheduleBuilder<?> getScheduleBuilder() {
-				return SimpleScheduleBuilder.repeatHourlyForever();
-			}
-			
-			@Override
-			public void execute() {
-				checkGit();
-			}
-			
-		});
-		checkGit();
-	}
-	
-	public void checkGit() {
-		gitError = GitCommand.checkError(gitConfigProvider.get().getExecutable());
 	}
 	
 	@Sessional
@@ -184,7 +148,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void preStop() {
-		ThreadContext.bind(userManager.getRoot().asSubject());
+		ThreadContext.bind(accountManager.getRoot().asSubject());
 		for (LifecycleListener listener: listenersProvider.get())
 			listener.systemStopping();
 	}
@@ -192,16 +156,11 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void stop() {
-		taskScheduler.unschedule(gitCheckTaskId);
 		for (LifecycleListener listener: listenersProvider.get())
 			listener.systemStopped();
 		ThreadContext.unbindSubject();
 	}
 	
-	public String getGitError() {
-		return gitError;
-	}
-
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(GitPlex.class);
 	}	

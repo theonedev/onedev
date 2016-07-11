@@ -31,7 +31,7 @@ import com.pmease.gitplex.web.page.admin.MailSettingPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.admin.account.AccountListPage;
 import com.pmease.gitplex.web.page.admin.account.NewUserPage;
-import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
 import com.pmease.gitplex.web.page.depot.comments.DepotCommentsPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
@@ -187,7 +187,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new DepotMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
 		add(new DepotMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));
 		
-		add(new DepotMapper("${account}/${depot}/no-commits", NoCommitsPage.class));
+		add(new DepotMapper("${account}/${depot}/no-branches", NoBranchesPage.class));
 	}
 
 }

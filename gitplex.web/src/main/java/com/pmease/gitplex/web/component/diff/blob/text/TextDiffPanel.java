@@ -44,8 +44,8 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BriefCommit;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
@@ -133,10 +133,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private BlameInfo getBlameInfo() {
 		blameInfo = new BlameInfo();
-		Git git = depotModel.getObject().git();
+		BlameCommand cmd = new BlameCommand(depotModel.getObject().getDirectory());
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
-			for (Blame blame: git.blame(getOldCommit().name(), oldPath).values()) {
+			cmd.commitHash(getOldCommit().name()).file(oldPath);
+			for (Blame blame: cmd.call().values()) {
 				for (Range range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<range.getTo(); i++) 
 						blameInfo.oldBlame.put(i, blame.getCommit());
@@ -145,7 +146,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		}
 		String newPath = change.getNewBlobIdent().path;
 		if (newPath != null) {
-			for (Blame blame: git.blame(getNewCommit().name(), newPath).values()) {
+			cmd.commitHash(getNewCommit().name()).file(newPath);
+			for (Blame blame: cmd.call().values()) {
 				for (Range range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<range.getTo(); i++) 
 						blameInfo.newBlame.put(i, blame.getCommit());

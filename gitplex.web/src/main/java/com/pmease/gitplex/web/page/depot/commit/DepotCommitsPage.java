@@ -1,13 +1,12 @@
 package com.pmease.gitplex.web.page.depot.commit;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
-
-import jersey.repackaged.com.google.common.collect.Lists;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -35,6 +34,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +44,7 @@ import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.command.LogCommand;
+import com.pmease.commons.git.command.RevListCommand;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
@@ -65,6 +66,7 @@ import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.QueryContext;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class DepotCommitsPage extends DepotPage {
@@ -105,50 +107,54 @@ public class DepotCommitsPage extends DepotPage {
 		protected Commits load() {
 			Commits commits = new Commits();
 			
-			LogCommand logCommand = new LogCommand(getDepot().git().depotDir());
-			logCommand.ignoreCase(true);
-			
-			List<Commit> logCommits;
+			List<String> commitHashes;
 			try {
-				state.applyTo(logCommand);
-				logCommits = GitPlex.getInstance(WorkExecutor.class).submit(new PrioritizedCallable<List<Commit>>(LOG_PRIORITY) {
+				RevListCommand command = new RevListCommand(getDepot().getDirectory());
+				command.ignoreCase(true);
+				state.applyTo(command);
+				commitHashes = GitPlex.getInstance(WorkExecutor.class).submit(new PrioritizedCallable<List<String>>(LOG_PRIORITY) {
 
 					@Override
-					public List<Commit> call() throws Exception {
-						return logCommand.call();
+					public List<String> call() throws Exception {
+						return command.call();
 					}
 					
 				}).get();
 			} catch (Exception e) {
 				if (e.getMessage() != null && e.getMessage().contains(GIT_ERROR_START)) {
 					queryForm.error(StringUtils.substringAfter(e.getMessage(), GIT_ERROR_START));
-					logCommits = new ArrayList<>();
+					commitHashes = new ArrayList<>();
 				} else {
 					throw Throwables.propagate(e);
 				}
 			}
 			
-			hasMore = logCommits.size() == state.getStep()*COUNT;
+			hasMore = commitHashes.size() == state.getStep()*COUNT;
 			
-			int lastMaxCount = (state.getStep()-1)*COUNT;
+			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
+				int lastMaxCount = (state.getStep()-1)*COUNT;
 
-			commits.last = new ArrayList<>();
-			
-			for (int i=0; i<lastMaxCount; i++) 
-				commits.last.add(logCommits.get(i));
-			
-			CommitGraphUtils.sort(commits.last, 0);
-			
-			commits.current = new ArrayList<>(commits.last);
-			for (int i=lastMaxCount; i<logCommits.size(); i++)
-				commits.current.add(logCommits.get(i));
-			
-			CommitGraphUtils.sort(commits.current, lastMaxCount);
+				commits.last = new ArrayList<>();
+				
+				for (int i=0; i<lastMaxCount; i++) { 
+					revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i)));
+				}
+				
+				CommitGraphUtils.sort(commits.last, 0);
+				
+				commits.current = new ArrayList<>(commits.last);
+				for (int i=lastMaxCount; i<commitHashes.size(); i++)
+					commits.current.add(revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i))));
+				
+				CommitGraphUtils.sort(commits.current, lastMaxCount);
 
-			commits.last = separateByDate(commits.last);
-			commits.current = separateByDate(commits.current);
-			
-			return commits;
+				commits.last = separateByDate(commits.last);
+				commits.current = separateByDate(commits.current);
+				
+				return commits;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		
 	};
@@ -260,11 +266,11 @@ public class DepotCommitsPage extends DepotPage {
 				int commitIndex = 0;
 				int lastCommitIndex = 0;
 				for (int i=0; i<commits.last.size(); i++) {
-					Commit lastCommit = commits.last.get(i);
-					Commit currentCommit = commits.current.get(i);
+					RevCommit lastCommit = commits.last.get(i);
+					RevCommit currentCommit = commits.current.get(i);
 					if (lastCommit == null) {
 						if (currentCommit == null) {
-							if (!commits.last.get(i+1).getHash().equals(commits.current.get(i+1).getHash())) 
+							if (!commits.last.get(i+1).name().equals(commits.current.get(i+1).name())) 
 								replaceItem(target, i);
 						} else {
 							addCommitClass(replaceItem(target, i), commitIndex);
@@ -273,7 +279,7 @@ public class DepotCommitsPage extends DepotPage {
 						if (currentCommit == null) {
 							replaceItem(target, i);
 						} else if (commitIndex != lastCommitIndex 
-								|| !lastCommit.getHash().equals(currentCommit.getHash())){
+								|| !lastCommit.name().equals(currentCommit.name())){
 							addCommitClass(replaceItem(target, i), commitIndex);
 						}						
 					}
@@ -341,7 +347,7 @@ public class DepotCommitsPage extends DepotPage {
 		commitsView.setOutputMarkupId(true);
 		
 		int commitIndex = 0;
-		List<Commit> commits = commitsModel.getObject().current;
+		List<RevCommit> commits = commitsModel.getObject().current;
 		for (int i=0; i<commits.size(); i++) {
 			Component item = newCommitItem(commitsView.newChildId(), i);
 			if (commits.get(i) != null)
@@ -357,18 +363,18 @@ public class DepotCommitsPage extends DepotPage {
 	}
 	
 	private Component newCommitItem(String itemId, final int index) {
-		List<Commit> current = commitsModel.getObject().current;
-		Commit commit = current.get(index);
+		List<RevCommit> current = commitsModel.getObject().current;
+		RevCommit commit = current.get(index);
 		
 		Fragment item;
 		if (commit != null) {
 			item = new Fragment(itemId, "commitFrag", this);
-			item.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
+			item.add(new ContributorAvatars("avatar", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-			item.add(new CommitMessagePanel("message", depotModel, new LoadableDetachableModel<Commit>() {
+			item.add(new CommitMessagePanel("message", depotModel, new LoadableDetachableModel<RevCommit>() {
 
 				@Override
-				protected Commit load() {
+				protected RevCommit load() {
 					return commitsModel.getObject().current.get(index);
 				}
 				
@@ -396,14 +402,15 @@ public class DepotCommitsPage extends DepotPage {
 
 			RepeatingView labelsView = new RepeatingView("labels");
 
-			List<String> commitLabels = labelsModel.getObject().get(commit.getHash());
+			List<String> commitLabels = labelsModel.getObject().get(commit.name());
 			if (commitLabels == null)
 				commitLabels = new ArrayList<>();
 			for (String label: commitLabels) 
 				labelsView.add(new Label(labelsView.newChildId(), label));
 			item.add(labelsView);
 			
-			item.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter(), true));
+			item.add(new ContributorPanel("contribution", 
+					commit.getAuthorIdent(), commit.getCommitterIdent(), true));
 			
 			/*
 			 * If we query a single definitive path, let's record it to be used for 
@@ -429,7 +436,7 @@ public class DepotCommitsPage extends DepotPage {
 			}
 			if (state.getCompareWith() != null) {
 				RevisionComparePage.State state = new RevisionComparePage.State();
-				state.leftSide = new DepotAndRevision(getDepot(), commit.getHash());
+				state.leftSide = new DepotAndRevision(getDepot(), commit.name());
 				state.rightSide = new DepotAndRevision(getDepot(), DepotCommitsPage.this.state.getCompareWith());
 				state.pathFilter = path;
 				state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
@@ -439,12 +446,12 @@ public class DepotCommitsPage extends DepotPage {
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}
-			item.add(new HashAndCodePanel("hashAndCode", depotModel, commit.getHash(), path));
+			item.add(new HashAndCodePanel("hashAndCode", depotModel, commit.name(), path));
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);
-			DateTime dateTime = new DateTime(current.get(index+1).getCommitter().getWhen());
+			DateTime dateTime = new DateTime(current.get(index+1).getCommitterIdent().getWhen());
 			item.add(new Label("date", Constants.DATE_FORMATTER.print(dateTime)));
 			item.add(AttributeAppender.append("class", "date"));
 		}
@@ -497,11 +504,11 @@ public class DepotCommitsPage extends DepotPage {
 		super.onDetach();
 	}
 
-	private List<Commit> separateByDate(List<Commit> commits) {
-		List<Commit> separated = new ArrayList<>();
+	private List<RevCommit> separateByDate(List<RevCommit> commits) {
+		List<RevCommit> separated = new ArrayList<>();
 		DateTime groupTime = null;
-		for (Commit commit: commits) {
-			DateTime commitTime = new DateTime(commit.getCommitter().getWhen());
+		for (RevCommit commit: commits) {
+			DateTime commitTime = new DateTime(commit.getCommitterIdent().getWhen());
 			if (groupTime == null || commitTime.getYear() != groupTime.getYear() 
 					|| commitTime.getDayOfYear() != groupTime.getDayOfYear()) {
 				groupTime = commitTime;
@@ -538,9 +545,9 @@ public class DepotCommitsPage extends DepotPage {
 	 *
 	 */
 	private static class Commits {
-		List<Commit> last;
+		List<RevCommit> last;
 		
-		List<Commit> current;
+		List<RevCommit> current;
 	}
 	
 	public static class State implements Serializable {
@@ -611,17 +618,17 @@ public class DepotCommitsPage extends DepotPage {
 			return parseTree.orNull();
 		}
 		
-		public void applyTo(LogCommand logCommand) {
+		public void applyTo(RevListCommand command) {
 			if (step > MAX_STEPS)
 				throw new RuntimeException("Step should be no more than " + MAX_STEPS);
 			
-			logCommand.count(step*COUNT);
+			command.count(step*COUNT);
 
 			QueryContext parseTree = getParseTree();
 			if (parseTree != null) { 
-				new ParseTreeWalker().walk(new LogCommandFiller(logCommand), parseTree);
-				if (logCommand.revisions().isEmpty() && compareWith != null)
-					logCommand.revisions(Lists.newArrayList(compareWith));
+				new ParseTreeWalker().walk(new RevListCommandFiller(command), parseTree);
+				if (command.revisions().isEmpty() && compareWith != null)
+					command.revisions(Lists.newArrayList(compareWith));
 			}
 		}
 		

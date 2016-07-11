@@ -18,6 +18,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -26,10 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
@@ -78,9 +80,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     
     private final TeamAuthorizationManager teamAuthorizationManager;
     
-    private final String gitUpdateHook;
-    
-    private final String gitPostReceiveHook;
+    private final String gitReceiveHook;
     
 	private final BiMap<Pair<Long, String>, Long> nameToId = HashBiMap.create();
 	
@@ -104,19 +104,13 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
         this.pullRequestManager = pullRequestManager;
         this.listenersProvider = listenersProvider;
         
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook")) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
-            gitUpdateHook = StringUtils.join(IOUtils.readLines(is), "\n");
+            gitReceiveHook = StringUtils.join(IOUtils.readLines(is), "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-postreceive-hook")) {
-        	Preconditions.checkNotNull(is);
-            gitPostReceiveHook = StringUtils.join(IOUtils.readLines(is), "\n");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
     
     @Override
@@ -127,7 +121,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     			repository = repositoryCache.get(depot.getId());
     			if (repository == null) {
     				try {
-						repository = new FileRepository(depot.git().depotDir());
+						repository = new FileRepository(depot.getDirectory());
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -311,8 +305,8 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 
 			dao.persist(forked);
 
-            FileUtils.cleanDir(forked.git().depotDir());
-            forked.git().clone(depot.git().depotDir().getAbsolutePath(), true, false, false, null);
+            FileUtils.cleanDir(forked.getDirectory());
+            new CloneCommand(forked.getDirectory()).bare(true).from(depot.getDirectory().getAbsolutePath()).call();
 		}
 		
 		return forked;
@@ -321,28 +315,31 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	private void checkSanity(Depot depot) {
 		logger.info("Checking sanity of repository '{}'...", depot);
 
-		Git git = depot.git();
-
-		if (git.depotDir().exists() && !git.isValid()) {
-        	logger.warn("Directory '" + git.depotDir() + "' is not a valid git repository, removing...");
-        	FileUtils.deleteDir(git.depotDir());
+		File gitDir = depot.getDirectory();
+		if (depot.getDirectory().exists() && !GitUtils.isValid(gitDir)) {
+        	logger.warn("Directory '" + gitDir + "' is not a valid git repository, removing...");
+        	FileUtils.deleteDir(gitDir);
         }
         
-        if (!git.depotDir().exists()) {
-        	logger.warn("Initializing git repository in '" + git.depotDir() + "'...");
-            FileUtils.createDir(git.depotDir());
-            git.init(true);
+        if (!gitDir.exists()) {
+        	logger.warn("Initializing git repository in '" + gitDir + "'...");
+            FileUtils.createDir(gitDir);
+            try {
+				Git.init().setDirectory(gitDir).setBare(true).call();
+			} catch (Exception e) {
+				Throwables.propagate(e);
+			}
         }
         
         if (!depot.isValid()) {
-            File hooksDir = new File(depot.git().depotDir(), "hooks");
+            File hooksDir = new File(gitDir, "hooks");
 
-            File gitUpdateHookFile = new File(hooksDir, "update");
-            FileUtils.writeFile(gitUpdateHookFile, gitUpdateHook);
-            gitUpdateHookFile.setExecutable(true);
+            File gitPreReceiveHookFile = new File(hooksDir, "pre-receive");
+            FileUtils.writeFile(gitPreReceiveHookFile, String.format(gitReceiveHook, "git-prereceive-callback"));
+            gitPreReceiveHookFile.setExecutable(true);
             
             File gitPostReceiveHookFile = new File(hooksDir, "post-receive");
-            FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
+            FileUtils.writeFile(gitPostReceiveHookFile, String.format(gitReceiveHook, "git-postreceive-callback"));
             gitPostReceiveHookFile.setExecutable(true);
         }
 	}

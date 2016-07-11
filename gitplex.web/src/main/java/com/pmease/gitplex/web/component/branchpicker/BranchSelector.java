@@ -27,9 +27,9 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.eclipse.jgit.lib.Ref;
 
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.InputChangeBehavior;
@@ -60,8 +60,8 @@ public abstract class BranchSelector extends Panel {
 		this.depotModel = depotModel;
 		this.branch = branch;		
 		
-		for (Ref ref: depotModel.getObject().getBranchRefs())
-			branches.add(GitUtils.ref2branch(ref.getName()));
+		for (RefInfo ref: depotModel.getObject().getBranches())
+			branches.add(GitUtils.ref2branch(ref.getRef().getName()));
 		
 		filteredBranches.addAll(branches);
 	}

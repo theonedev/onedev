@@ -44,6 +44,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.util.FileUtils;
@@ -169,9 +170,11 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 						TreeWalk treeWalk = new TreeWalk(depot.getRepository());) {
 					revWalk.markStart(commits);
 					if (lastCommitId != null) {
-						RevCommit lastCommit = revWalk.parseCommit(lastCommitId);
-						revWalk.markUninteresting(lastCommit);
-						treeWalk.addTree(lastCommit.getTree());
+						RevCommit lastCommit = GitUtils.parseCommit(revWalk, lastCommitId);
+						if (lastCommit != null) {
+							revWalk.markUninteresting(lastCommit);
+							treeWalk.addTree(lastCommit.getTree());
+						}
 					}
 					treeWalk.addTree(latestCommit.getTree());
 					treeWalk.setRecursive(true);

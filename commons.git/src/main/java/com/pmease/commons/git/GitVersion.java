@@ -14,7 +14,7 @@ public class GitVersion implements Comparable<GitVersion> {
 			
 	private boolean msysgit = false;
 	
-	public GitVersion(final String versionStr) {
+	public GitVersion(String versionStr) {
 		for (String each: StringUtils.splitAndTrim(versionStr, ".")) {
 			if (NumberUtils.isDigits(each))
 				parts.add(Integer.valueOf(each));

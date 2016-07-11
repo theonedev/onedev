@@ -20,9 +20,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 
-import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
@@ -38,7 +38,7 @@ public class CommitListPanel extends Panel {
 
 	private final IModel<Depot> depotModel;
 	
-	private final IModel<List<Commit>> commitsModel;
+	private final IModel<List<RevCommit>> commitsModel;
 	
 	private final IModel<Map<String, List<String>>> labelsModel = new CommitRefsModel(new AbstractReadOnlyModel<Depot>() {
 
@@ -51,14 +51,14 @@ public class CommitListPanel extends Panel {
 	
 	private WebMarkupContainer container;
 	
-	public CommitListPanel(String id, IModel<Depot> depotModel, IModel<List<Commit>> commitsModel) {
+	public CommitListPanel(String id, IModel<Depot> depotModel, IModel<List<RevCommit>> commitsModel) {
 		super(id);
 		this.depotModel = depotModel;
-		this.commitsModel = new LoadableDetachableModel<List<Commit>>() {
+		this.commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
 			@Override
-			protected List<Commit> load() {
-				List<Commit> commits = commitsModel.getObject();
+			protected List<RevCommit> load() {
+				List<RevCommit> commits = commitsModel.getObject();
 				if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
 					commits = commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
 				CommitGraphUtils.sort(commits, 0);
@@ -101,7 +101,7 @@ public class CommitListPanel extends Panel {
 		container = new WebMarkupContainer("container");
 		container.setOutputMarkupId(true);
 		add(container);
-		container.add(new ListView<Commit>("commits", commitsModel) {
+		container.add(new ListView<RevCommit>("commits", commitsModel) {
 
 			private int itemIndex;
 			
@@ -112,31 +112,33 @@ public class CommitListPanel extends Panel {
 			}
 
 			@Override
-			protected void populateItem(ListItem<Commit> item) {
-				Commit commit = item.getModelObject();
+			protected void populateItem(ListItem<RevCommit> item) {
+				RevCommit commit = item.getModelObject();
 				
 				Fragment fragment;
 				if (commit != null) {
 					fragment = new Fragment("commit", "commitFrag", CommitListPanel.this);
-					fragment.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
+					fragment.add(new ContributorAvatars("avatar", 
+							commit.getAuthorIdent(), commit.getCommitterIdent()));
 
 					fragment.add(new CommitMessagePanel("message", depotModel, item.getModel()));
 
 					RepeatingView labelsView = new RepeatingView("labels");
 
-					List<String> commitLabels = labelsModel.getObject().get(commit.getHash());
+					List<String> commitLabels = labelsModel.getObject().get(commit.name());
 					if (commitLabels == null)
 						commitLabels = new ArrayList<>();
 					for (String label: commitLabels) 
 						labelsView.add(new Label(labelsView.newChildId(), label));
 					fragment.add(labelsView);
 					
-					fragment.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter(), true));
-					fragment.add(new HashAndCodePanel("hashAndCode", depotModel, commit.getHash()));
+					fragment.add(new ContributorPanel("contribution", 
+							commit.getAuthorIdent(), commit.getCommitterIdent(), true));
+					fragment.add(new HashAndCodePanel("hashAndCode", depotModel, commit.name()));
 					item.add(AttributeAppender.append("class", "commit clearfix commit-item-" + itemIndex++));
 				} else {
 					fragment = new Fragment("commit", "dateFrag", CommitListPanel.this);
-					DateTime dateTime = new DateTime(getModelObject().get(item.getIndex()+1).getCommitter().getWhen());
+					DateTime dateTime = new DateTime(getModelObject().get(item.getIndex()+1).getCommitterIdent().getWhen());
 					fragment.add(new Label("date", Constants.DATE_FORMATTER.print(dateTime)));
 					if (item.getIndex() == 0)
 						item.add(AttributeAppender.append("class", "date first"));
@@ -150,11 +152,11 @@ public class CommitListPanel extends Panel {
 		
 	}
 
-	private List<Commit> separateByDate(List<Commit> commits) {
-		List<Commit> separated = new ArrayList<>();
+	private List<RevCommit> separateByDate(List<RevCommit> commits) {
+		List<RevCommit> separated = new ArrayList<>();
 		DateTime groupTime = null;
-		for (Commit commit: commits) {
-			DateTime commitTime = new DateTime(commit.getCommitter().getWhen());
+		for (RevCommit commit: commits) {
+			DateTime commitTime = new DateTime(commit.getCommitterIdent().getWhen());
 			if (groupTime == null || commitTime.getYear() != groupTime.getYear() 
 					|| commitTime.getDayOfYear() != groupTime.getDayOfYear()) {
 				groupTime = commitTime;

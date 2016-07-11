@@ -6,33 +6,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.eclipse.jgit.revwalk.RevCommit;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.GitPlex;
 
 public class CommitGraphUtils {
 	
-	public static void sort(List<Commit> commits, int from) {
+	public static void sort(List<RevCommit> commits, int from) {
 		final Map<String, Long> hash2index = new HashMap<>();
-		Map<String, Commit> hash2commit = new HashMap<>();
+		Map<String, RevCommit> hash2commit = new HashMap<>();
 		for (int i=0; i<commits.size(); i++) {
-			Commit commit = commits.get(i);
-			hash2index.put(commit.getHash(), 1L*i*commits.size());
-			hash2commit.put(commit.getHash(), commit);
+			RevCommit commit = commits.get(i);
+			hash2index.put(commit.name(), 1L*i*commits.size());
+			hash2commit.put(commit.name(), commit);
 		}
 
-		Stack<Commit> stack = new Stack<>();
+		Stack<RevCommit> stack = new Stack<>();
 		
 		for (int i=commits.size()-1; i>=from; i--)
 			stack.push(commits.get(i));
 
 		// commits are nearly ordered, so this should be fast
 		while (!stack.isEmpty()) {
-			Commit commit = stack.pop();
-			long commitIndex = hash2index.get(commit.getHash());
+			RevCommit commit = stack.pop();
+			long commitIndex = hash2index.get(commit.name());
 			int count = 1;
-			for (String parentHash: commit.getParentHashes()) {
+			for (RevCommit parent: commit.getParents()) {
+				String parentHash = parent.name();
 				Long parentIndex = hash2index.get(parentHash);
 				if (parentIndex != null && parentIndex.longValue()<commitIndex) {
 					stack.push(hash2commit.get(parentHash));
@@ -42,7 +44,7 @@ public class CommitGraphUtils {
 		}
 		
 		commits.sort((o1, o2) -> {
-			long value = hash2index.get(o1.getHash()) - hash2index.get(o2.getHash());
+			long value = hash2index.get(o1.name()) - hash2index.get(o2.name());
 			if (value < 0)
 				return -1;
 			else if (value > 0)
@@ -52,20 +54,20 @@ public class CommitGraphUtils {
 		});
 	}
 	
-	public static String asJSON(List<Commit> commits) {
+	public static String asJSON(List<RevCommit> commits) {
 		Map<String, Integer> hash2index = new HashMap<>();
 		int commitIndex = 0;
 		for (int i=0; i<commits.size(); i++) { 
-			Commit commit = commits.get(i);
+			RevCommit commit = commits.get(i);
 			if (commit != null)
-				hash2index.put(commit.getHash(), commitIndex++);
+				hash2index.put(commit.name(), commitIndex++);
 		}
 		List<List<Integer>> commitIndexes = new ArrayList<>();
-		for (Commit commit: commits) {
+		for (RevCommit commit: commits) {
 			if (commit != null) {
 				List<Integer> parentIndexes = new ArrayList<>();
-				for (String parentHash: commit.getParentHashes()) {
-					Integer parentIndex = hash2index.get(parentHash);
+				for (RevCommit parent: commit.getParents()) {
+					Integer parentIndex = hash2index.get(parent.name());
 					if (parentIndex != null)
 						parentIndexes.add(parentIndex);
 				}

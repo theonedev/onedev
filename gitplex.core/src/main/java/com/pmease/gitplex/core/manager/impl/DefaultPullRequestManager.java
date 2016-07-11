@@ -12,7 +12,6 @@ import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_APPROVAL
 import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_INTEGRATE;
 import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_UPDATE;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,9 +26,16 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jetty.util.ConcurrentHashSet;
+import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectInserter;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
@@ -38,10 +44,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
@@ -49,7 +54,6 @@ import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.commons.util.match.PatternMatcher;
 import com.pmease.gitplex.core.GitPlex;
@@ -76,7 +80,6 @@ import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
-import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.core.util.ChildAwareMatcher;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
@@ -98,9 +101,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final PullRequestCommentManager commentManager;
 	
-	private final AccountManager userManager;
-	
-	private final StorageManager storageManager;
+	private final AccountManager accountManager;
 	
 	private final UnitOfWork unitOfWork;
 	
@@ -118,8 +119,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Inject
 	public DefaultPullRequestManager(Dao dao, 
-			PullRequestUpdateManager pullRequestUpdateManager, StorageManager storageManager, 
-			ReviewInvitationManager reviewInvitationManager, AccountManager userManager, 
+			PullRequestUpdateManager pullRequestUpdateManager,  
+			ReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
 			NotificationManager notificationManager, PullRequestCommentManager commentManager, 
 			MarkdownManager markdownManager, WorkExecutor workManager, 
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners, 
@@ -127,10 +128,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.storageManager = storageManager;
 		this.reviewInvitationManager = reviewInvitationManager;
 		this.commentManager = commentManager;
-		this.userManager = userManager;
+		this.accountManager = accountManager;
 		this.workManager = workManager;
 		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
@@ -160,10 +160,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Preconditions.checkState(!request.isOpen() && request.getSourceDepot() != null);
 
 		if (request.getSource().getObjectName(false) == null) {
-			String latestCommitHash = request.getLatestUpdate().getHeadCommitHash();
-			request.getSourceDepot().git().createBranch(
-					request.getSourceBranch(), latestCommitHash);
-			request.getSourceDepot().cacheObjectId(request.getSourceBranch(), ObjectId.fromString(latestCommitHash));
+			RevCommit latestCommit = request.getLatestUpdate().getHeadCommit();
+			try {
+				request.getSourceDepot().git().branchCreate().setName(request.getSourceBranch()).setStartPoint(latestCommit).call();
+			} catch (Exception e) {
+				Throwables.propagate(e);
+			}
+			request.getSourceDepot().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
 			PullRequestActivity activity = new PullRequestActivity();
 			activity.setRequest(request);
 			activity.setAction(PullRequestActivity.Action.RESTORE_SOURCE_BRANCH);
@@ -195,7 +198,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void reopen(PullRequest request, String comment) {
 		Preconditions.checkState(!request.isOpen(), "Pull request is alreay opened");
 		
-		Account user = userManager.getCurrent();
+		Account user = accountManager.getCurrent();
 		request.setCloseInfo(null);
 		request.setSubmitter(user);
 		request.setSubmitDate(new Date());
@@ -229,7 +232,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
  	public void discard(PullRequest request, final String comment) {
-		Account user = userManager.getCurrent();
+		Account user = accountManager.getCurrent();
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
 		activity.setDate(new Date());
@@ -273,43 +276,56 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (integrated == null)
 			throw new IllegalStateException("There are integration conflicts.");
 		
-		Account user = userManager.getCurrent();
+		ObjectId integratedCommitId = ObjectId.fromString(integrated);
+		RevCommit integratedCommit = request.getTargetDepot().getRevCommit(integratedCommitId);
+		
+		Account user = accountManager.getCurrent();
 
 		Depot targetDepot = request.getTargetDepot();
-		Git git = targetDepot.git();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		if ((strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY || strategy == MERGE_WITH_SQUASH) 
-				&& !preview.getIntegrated().equals(preview.getRequestHead()) && comment != null) {
-			File tempDir = FileUtils.createTempDir();
-			try {
-				Git tempGit = new Git(tempDir);
-				tempGit.clone(git.depotDir().getAbsolutePath(), false, true, true, request.getTargetBranch());
-				tempGit.updateRef("HEAD", preview.getIntegrated(), null, null);
-				tempGit.reset(null, null);
-				
-				tempGit.commit(comment, false, true);
-				integrated = tempGit.parseRevision("HEAD", true);
-				git.fetch(tempGit, "+HEAD:" + request.getIntegrateRef());									
-				comment = null;
-			} finally {
-				FileUtils.deleteDir(tempDir);
+				&& !preview.getIntegrated().equals(preview.getRequestHead()) 
+				&& !integratedCommit.getFullMessage().equals(request.getCommitMessage())) {
+			try (	RevWalk revWalk = new RevWalk(targetDepot.getRepository());
+					ObjectInserter inserter = targetDepot.getRepository().newObjectInserter()) {
+				RevCommit commit = revWalk.parseCommit(ObjectId.fromString(integrated));
+		        CommitBuilder newCommit = new CommitBuilder();
+		        newCommit.setAuthor(commit.getAuthorIdent());
+		        newCommit.setCommitter(user.asPerson());
+		        newCommit.setMessage(request.getCommitMessage());
+		        newCommit.setTreeId(commit.getTree());
+		        newCommit.setParentIds(commit.getParents());
+		        integrated = inserter.insert(newCommit).name();
+		        inserter.flush();
+			} catch (Exception e) {
+				Throwables.propagate(e);
 			}
 		}
-		ObjectId integratedCommit = ObjectId.fromString(integrated);
+		integratedCommitId = ObjectId.fromString(integrated);
 		if (strategy == REBASE_SOURCE_ONTO_TARGET || strategy == MERGE_WITH_SQUASH) {
 			Depot sourceDepot = request.getSourceDepot();
-			Git sourceGit = sourceDepot.git();
-			String sourceRef = request.getSourceRef();
-			sourceGit.updateRef(sourceRef, integrated, preview.getRequestHead(), 
-					"Pull request #" + request.getNumber());
-			sourceDepot.cacheObjectId(request.getSourceRef(), integratedCommit);
-			onRefUpdate(sourceDepot, sourceRef, ObjectId.fromString(preview.getRequestHead()), integratedCommit);
+			RefUpdate refUpdate = sourceDepot.updateRef(request.getSourceRef());
+			refUpdate.setNewObjectId(integratedCommitId);
+			ObjectId requestHeadId = ObjectId.fromString(preview.getRequestHead());
+			refUpdate.setExpectedOldObjectId(requestHeadId);
+			refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
+			GitUtils.updateRef(refUpdate);
+			
+			sourceDepot.cacheObjectId(request.getSourceRef(), integratedCommitId);
+			onRefUpdate(sourceDepot, request.getSourceRef(), requestHeadId, integratedCommitId);
 		}
 		
 		String targetRef = request.getTargetRef();
-		git.updateRef(targetRef, integrated, preview.getTargetHead(), "Pull request #" + request.getNumber());
-		targetDepot.cacheObjectId(request.getTargetRef(), ObjectId.fromString(integrated));
-		onRefUpdate(targetDepot, targetRef, ObjectId.fromString(preview.getTargetHead()), integratedCommit);
+		ObjectId targetHeadId = ObjectId.fromString(preview.getTargetHead());
+		RefUpdate refUpdate = targetDepot.updateRef(targetRef);
+		refUpdate.setRefLogIdent(user.asPerson());
+		refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
+		refUpdate.setExpectedOldObjectId(targetHeadId);
+		refUpdate.setNewObjectId(integratedCommitId);
+		GitUtils.updateRef(refUpdate);
+		
+		targetDepot.cacheObjectId(request.getTargetRef(), integratedCommitId);
+		onRefUpdate(targetDepot, targetRef, ObjectId.fromString(preview.getTargetHead()), integratedCommitId);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
@@ -385,9 +401,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		activity.setUser(request.getSubmitter());
 		pullRequestActivityManager.save(activity);
 		
-		FileUtils.cleanDir(storageManager.getCacheDir(request));
-		
-		request.git().updateRef(request.getBaseRef(), request.getBaseCommitHash(), null, null);
+		RefUpdate refUpdate = request.getTargetDepot().updateRef(request.getBaseRef());
+		refUpdate.setNewObjectId(ObjectId.fromString(request.getBaseCommitHash()));
+		refUpdate.setExpectedOldObjectId(ObjectId.zeroId());
+		GitUtils.updateRef(refUpdate);
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
 			update.setDate(new DateTime(activity.getDate()).plusSeconds(1).toDate());
@@ -451,7 +468,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Transactional
 	private void closeIfMerged(PullRequest request) {
-		if (request.getTargetDepot().isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getObjectName())) {
+		if (request.getTargetDepot().isMergedInto(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getObjectName())) {
 			PullRequestActivity activity = new PullRequestActivity();
 			activity.setRequest(request);
 			activity.setUser(GitPlex.getInstance(AccountManager.class).getRoot());
@@ -481,7 +498,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestUpdate update = new PullRequestUpdate();
 			update.setRequest(request);
 			update.setHeadCommitHash(request.getSource().getObjectName());
-			
 			request.addUpdate(update);
 			pullRequestUpdateManager.save(update, notify);
 			closeIfMerged(request);
@@ -496,7 +512,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 							@Override
 							public void run() {
-								check(load(requestId));
+								try {
+							        ThreadContext.bind(accountManager.getRoot().asSubject());
+									check(load(requestId));
+								} finally {
+									ThreadContext.unbindSubject();
+								}
 							}
 							
 						});
@@ -592,62 +613,40 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
 							String targetHead = request.getTarget().getObjectName();
 							Depot targetDepot = request.getTargetDepot();
-							Git git = request.getTargetDepot().git();
 							preview = new IntegrationPreview(targetHead, 
 									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
 							request.setLastIntegrationPreview(preview);
 							String integrateRef = request.getIntegrateRef();
-							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetDepot.isAncestor(targetHead, requestHead)
-									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && targetDepot.isAncestor(targetHead, requestHead)
-											&& git.log(targetHead, requestHead, null, 0, 0, false).size() == 1) {
+							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetDepot.isMergedInto(targetHead, requestHead)) {
 								preview.setIntegrated(requestHead);
-								git.updateRef(integrateRef, requestHead, null, null);
+								RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
+								refUpdate.setNewObjectId(ObjectId.fromString(requestHead));
+								GitUtils.updateRef(refUpdate);
 							} else {
-								File tempDir = FileUtils.createTempDir();
-								try {
-									Git tempGit = new Git(tempDir);
-									tempGit.clone(git.depotDir().getAbsolutePath(), false, true, true, 
-											request.getTargetBranch());
-									
-									String integrated;
-
-									if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
-										tempGit.updateRef("HEAD", requestHead, null, null);
-										tempGit.reset(null, null);
-										List<String> cherries = tempGit.listCherries("HEAD", targetHead);
-										integrated = tempGit.cherryPick(cherries.toArray(new String[cherries.size()]));
-									} else {
-										tempGit.updateRef("HEAD", targetHead, null, null);
-										tempGit.reset(null, null);
-										if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
-											List<String> cherries = tempGit.listCherries("HEAD", requestHead);
-											integrated = tempGit.cherryPick(cherries.toArray(new String[cherries.size()]));
-										} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
-											String commitMessage = request.getTitle() + "\n\n";
-											if (request.getDescription() != null)
-												commitMessage += request.getDescription() + "\n\n";
-											commitMessage += "(squashed commit of pull request #" + request.getNumber() + ")\n";
-											integrated = tempGit.squash(requestHead, null, null, commitMessage);
-										} else {
-											FastForwardMode fastForwardMode;
-											if (preview.getIntegrationStrategy() == MERGE_ALWAYS)
-												fastForwardMode = FastForwardMode.NO_FF;
-											else 
-												fastForwardMode = FastForwardMode.FF;
-											String commitMessage = "Merge pull request #" + request.getNumber() 
-													+ "\n\n" + request.getTitle() + "\n";
-											integrated = tempGit.merge(requestHead, fastForwardMode, null, null, commitMessage);
-										}
-									}
-									 
-									if (integrated != null) {
-										preview.setIntegrated(integrated);
-										git.fetch(tempGit, "+HEAD:" + integrateRef);									
-									} else {
-										git.deleteRef(integrateRef, null, null);
-									}
-								} finally {
-									FileUtils.deleteDir(tempDir);
+								PersonIdent user = accountManager.getRoot().asPerson();
+								ObjectId integrated;
+								ObjectId requestHeadId = ObjectId.fromString(requestHead);
+								ObjectId targetHeadId = ObjectId.fromString(targetHead);
+								if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
+									integrated = GitUtils.rebase(targetDepot.getRepository(), targetHeadId, requestHeadId, user);
+								} else if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
+									integrated = GitUtils.rebase(targetDepot.getRepository(), requestHeadId, targetHeadId, user);
+								} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
+									integrated = GitUtils.merge(targetDepot.getRepository(), 
+											requestHeadId, targetHeadId, true, user, request.getCommitMessage());
+								} else {
+									integrated = GitUtils.merge(targetDepot.getRepository(), 
+											requestHeadId, targetHeadId, false, user, request.getCommitMessage());
+								} 
+								
+								if (integrated != null) {
+									preview.setIntegrated(integrated.name());
+									RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
+									refUpdate.setNewObjectId(integrated);
+									GitUtils.updateRef(refUpdate);
+								} else {
+									RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
+									GitUtils.deleteRef(refUpdate);
 								}
 							}
 							dao.persist(request);
@@ -655,7 +654,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							if (request.getStatus() == PENDING_INTEGRATE 
 									&& preview.getIntegrated() != null
 									&& request.getAssignee() == null) {
-								integrate(request, "Integrated automatically by system");
+								integrate(request, "Integrated automatically by GitPlex");
 							}
 							
 							for (PullRequestListener listener: pullRequestListeners)
@@ -750,13 +749,18 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 							@Override
 							public void run() {
-								DepotAndBranch depotAndBranch = new DepotAndBranch(depotId, branch);								
-								Criterion criterion = Restrictions.and(ofOpen(), ofTarget(depotAndBranch));
-								for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) { 
-									if (request.getSourceDepot().getObjectId(request.getBaseCommitHash(), false) != null)
-										onTargetBranchUpdate(request);
-									else
-										logger.error("Unable to update pull request #{} due to unexpected target repository.", request.getNumber());
+								try {
+							        ThreadContext.bind(accountManager.getRoot().asSubject());
+									DepotAndBranch depotAndBranch = new DepotAndBranch(depotId, branch);								
+									Criterion criterion = Restrictions.and(ofOpen(), ofTarget(depotAndBranch));
+									for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) { 
+										if (request.getSourceDepot().getObjectId(request.getBaseCommitHash(), false) != null)
+											onTargetBranchUpdate(request);
+										else
+											logger.error("Unable to update pull request #{} due to unexpected target repository.", request.getNumber());
+									}
+								} finally {
+									ThreadContext.unbindSubject();
 								}
 							}
 							

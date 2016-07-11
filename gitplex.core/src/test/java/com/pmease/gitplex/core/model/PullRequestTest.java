@@ -1,71 +1,69 @@
 package com.pmease.gitplex.core.model;
 
-import java.io.IOException;
+import java.io.File;
 
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryCache.FileKey;
-import org.eclipse.jgit.util.FS;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 import com.pmease.commons.git.AbstractGitTest;
-import com.pmease.commons.git.Git;
+import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.manager.DepotManager;
 
 public class PullRequestTest extends AbstractGitTest {
 
     private Depot depot;
 
     @Override
-    public void setup() {
-    	super.setup();
+    public void before() {
+    	super.before();
     	
         depot = new Depot() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Git git() {
-				return git;
+			public File getDirectory() {
+				return git.getRepository().getDirectory();
 			}
 
 			@Override
 			public Repository getRepository() {
-				try {
-					return RepositoryCache.open(FileKey.lenient(git.depotDir(), FS.DETECTED));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				return git.getRepository();
 			}
         	
         };
+        DepotManager depotManager = Mockito.mock(DepotManager.class);    
+        Mockito.when(depotManager.load(Matchers.any())).thenReturn(depot);
+        Mockito.when(AppLoader.getInstance(DepotManager.class)).thenReturn(depotManager);
     }
 
     @Test
-    public void shouldReturnAllUpdatesAsEffectiveIfTheyAreFastForward() {
+    public void shouldReturnAllUpdatesAsEffectiveIfTheyAreFastForward() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "commit");
         
-        git.checkout("HEAD", "dev");
+        git.checkout().setName("dev").setCreateBranch(true).call();
 
         addFileAndCommit("b", "", "commit");
 
-        depot.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
+        depot.cacheObjectId("master", git.getRepository().resolve("master"));
         
-        request.setBaseCommitHash(git.parseRevision("master", true));
+        request.setBaseCommitHash(git.getRepository().resolve("master").name());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        git.updateRef(update1.getHeadRef(), "HEAD", null, null);
-        update1.setHeadCommitHash(git.parseRevision(update1.getHeadRef(), true));
+        updateRef(update1.getHeadRef(), "HEAD", null);
+        update1.setHeadCommitHash(git.getRepository().resolve(update1.getHeadRef()).name());
         request.addUpdate(update1);
 
         addFileAndCommit("c", "", "commit");
@@ -73,34 +71,34 @@ public class PullRequestTest extends AbstractGitTest {
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        git.updateRef(update2.getHeadRef(), "HEAD", null, null);
-        update2.setHeadCommitHash(git.parseRevision(update2.getHeadRef(), true));
+        updateRef(update2.getHeadRef(), "HEAD", null);
+        update2.setHeadCommitHash(git.getRepository().resolve(update2.getHeadRef()).name());
         request.addUpdate(update2);
         
         Assert.assertEquals(request.getEffectiveUpdates().size(), 2);
     }
 
     @Test
-    public void shouldReturnLatestUpdateAsEffectiveIfAllOthersHaveBeenMerged() {
+    public void shouldReturnLatestUpdateAsEffectiveIfAllOthersHaveBeenMerged() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "master:1");
         
-        git.checkout("HEAD", "dev");
+        git.checkout().setName("dev").setCreateBranch(true).call();
 
         addFileAndCommit("b", "", "dev:2");
         
-        request.setBaseCommitHash(git.parseRevision("master", true));
+        request.setBaseCommitHash(git.getRepository().resolve("master").name());
 
         addFileAndCommit("c", "", "dev:3");
         
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        git.updateRef(update1.getHeadRef(), "HEAD", null, null);
-        update1.setHeadCommitHash(git.parseRevision(update1.getHeadRef(), true));
+        updateRef(update1.getHeadRef(), "HEAD", null);
+        update1.setHeadCommitHash(git.getRepository().resolve(update1.getHeadRef()).name());
         String secondRef = update1.getHeadRef();
         request.addUpdate(update1);
 
@@ -109,17 +107,17 @@ public class PullRequestTest extends AbstractGitTest {
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        git.updateRef(update2.getHeadRef(), "HEAD", null, null);
-        update2.setHeadCommitHash(git.parseRevision(update2.getHeadRef(), true));
+        updateRef(update2.getHeadRef(), "HEAD", null);
+        update2.setHeadCommitHash(git.getRepository().resolve(update2.getHeadRef()).name());
         request.addUpdate(update2);
         
-        git.checkout("master", null);
+        git.checkout().setName("master").call();
 
         addFileAndCommit("e", "", "master:5");
         
-        git.merge(secondRef, null, null, null, null);
+        git.merge().include(git.getRepository().resolve(secondRef)).setCommit(true).call();
 
-        depot.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
+        depot.cacheObjectId("master", git.getRepository().resolve("master"));
 
         Assert.assertEquals(1, request.getEffectiveUpdates().size());
         Assert.assertEquals(2L, request.getEffectiveUpdates().get(0).getId().longValue());

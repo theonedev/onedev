@@ -2,19 +2,17 @@ package com.pmease.commons.git.command;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.util.Map;
 
 import org.junit.Test;
 
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Blame;
-import com.pmease.commons.git.Git;
 
 public class BlameCommandTest extends AbstractGitTest {
 
 	@Test
-	public void test() {
+	public void test() throws Exception {
 		addFileAndCommit(
 				"file", 
 				"1st line\n"
@@ -28,8 +26,11 @@ public class BlameCommandTest extends AbstractGitTest {
 				+ "9th line\n", 
 				"initial commit");
 		
-		String commitHash = git.parseRevision("master", true);
-		Map<String, Blame> blames = git.blame(commitHash, "file");
+		String commitHash = git.getRepository().resolve("master").name();
+		Map<String, Blame> blames = new BlameCommand(git.getRepository().getDirectory())
+				.commitHash(commitHash)
+				.file("file")
+				.call();
 		assertEquals(1, blames.size());
 		assertEquals(commitHash + ": 0-9", blames.get(commitHash).toString());
 		
@@ -46,12 +47,15 @@ public class BlameCommandTest extends AbstractGitTest {
 				+ "nineth line\n",
 				"second commit");
 		
-		commitHash = git.parseRevision("master", true);
-		blames = git.blame(commitHash, "file");
+		commitHash = git.getRepository().resolve("master").name();
+		blames = new BlameCommand(git.getRepository().getDirectory())
+				.commitHash(commitHash)
+				.file("file")
+				.call();
 		assertEquals(2, blames.size());
 		
 		assertEquals(commitHash + ": 0-1, 8-9", blames.get(commitHash).toString());
-		commitHash = git.parseRevision("master~1", true);
+		commitHash = git.getRepository().resolve("master~1").name();
 		assertEquals(commitHash + ": 1-8", blames.get(commitHash).toString());
 		
 		addFileAndCommit(
@@ -59,13 +63,13 @@ public class BlameCommandTest extends AbstractGitTest {
 				"first line\n"
 				+ "nineth line\n", 
 				"third commit");
+		commitHash = git.getRepository().resolve("master").name();
+		blames = new BlameCommand(git.getRepository().getDirectory())
+				.commitHash(commitHash)
+				.file("file")
+				.call();
 		
-		Git bareGit = new Git(new File(tempDir, "bare"));
-		bareGit.clone(git, true, false, false, null);
-		commitHash = bareGit.parseRevision("master", true);
-		blames = bareGit.blame(commitHash, "file");
-		
-		commitHash = bareGit.parseRevision("master~1", true);
+		commitHash = git.getRepository().resolve("master~1").name();
 		
 		assertEquals(1, blames.size());
 		assertEquals(commitHash + ": 0-2", blames.get(commitHash).toString());

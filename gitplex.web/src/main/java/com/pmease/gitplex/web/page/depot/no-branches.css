@@ -1,0 +1,17 @@
+#no-branches {
+	padding: 20px;
+}
+#no-branches>.body>ul {
+	background: #333;
+	color: #EEE;
+	border-radius: 4px;
+	font-family: monospace;
+	margin: 4px 0 16px 0;
+}
+#no-branches>.body>ul>li:before {
+	content: "$";
+	margin-right: 8px;
+}
+#no-branches>.body>.help-block {
+	margin-top: -8px;
+}

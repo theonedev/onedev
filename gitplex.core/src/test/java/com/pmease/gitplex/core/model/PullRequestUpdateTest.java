@@ -1,144 +1,85 @@
 package com.pmease.gitplex.core.model;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryCache.FileKey;
-import org.eclipse.jgit.util.FS;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.AbstractGitTest;
-import com.pmease.commons.git.Git;
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.manager.StorageManager;
 
 public class PullRequestUpdateTest extends AbstractGitTest {
 
-    private Git bareGit;
-    
     private Depot depot;
     
     @Override
-    public void setup() {
-    	super.setup();
+    public void before() {
+    	super.before();
     	
-        bareGit = new Git(new File(tempDir, "bare"));
-        bareGit.clone(git, true, false, false, null);
-        
         depot = new Depot() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Git git() {
-				return bareGit;
+			public File getDirectory() {
+				return git.getRepository().getDirectory();
+			}
+
+			@Override
+			public Repository getRepository() {
+				return git.getRepository();
 			}
         	
         };
         
-        Repository repository;
-		try {
-			repository = RepositoryCache.open(FileKey.lenient(depot.git().depotDir(), FS.DETECTED));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-        
-        DepotManager depotManager = Mockito.mock(DepotManager.class);        
-        Mockito.when(depotManager.getRepository(Matchers.any())).thenReturn(repository);
-        Mockito.when(AppLoader.getInstance(DepotManager.class)).thenReturn(depotManager);
-		Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(new StorageManager() {
-			
-			@Override
-			public File getGitDir(Depot depot) {
-				throw new UnsupportedOperationException();
-			}
-			
-			@Override
-			public File getCacheDir(PullRequestUpdate update) {
-				File cacheDir = new File(tempDir, "updates/" + update.getId());
-				cacheDir.mkdirs();
-				return cacheDir;
-			}
-			
-			@Override
-			public File getCacheDir(PullRequest request) {
-				throw new UnsupportedOperationException();
-			}
-			
-			@Override
-			public File getInfoDir(Depot depot) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public File getIndexDir(Depot depot) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public File getAttachmentDir(Depot depot) {
-				throw new UnsupportedOperationException();
-			}
-
-		});
     }
     
     @Test
-    public void testResolveChangedFilesWhenThereIsNoMerge() {
+    public void testResolveChangedFilesWhenThereIsNoMerge() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "master:1");
         
-        git.checkout("HEAD", "dev");
+        git.checkout().setCreateBranch(true).setName("dev").call();
 
         addFileAndCommit("b", "", "dev:2");
         
         addFileAndCommit("c", "", "dev:3");
         
-        git.checkout("master", null);
+        git.checkout().setName("master").call();
 
         addFileAndCommit("d", "", "master:4");
 
-        git.push(bareGit.depotDir().getAbsolutePath(), "master:master");
-        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
-        
-        request.setBaseCommitHash(bareGit.showRevision("master~1").getHash());
+        request.setBaseCommitHash(git.getRepository().resolve("master~1").name());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommitHash(bareGit.showRevision("dev~1").getHash());
-        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
+        update1.setHeadCommitHash(git.getRepository().resolve("dev~1").name());
+        update1.setMergeCommitHash(request.getBaseCommitHash());
+        updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null);
         request.addUpdate(update1);
         
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        update2.setHeadCommitHash(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
+        update2.setHeadCommitHash(git.getRepository().resolve("dev").name());
+        update2.setMergeCommitHash(request.getBaseCommitHash());
+        updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null);
         request.addUpdate(update2);
 
-        depot.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
-        
         Assert.assertEquals(Sets.newHashSet("c"), update2.getChangedFiles());
         Assert.assertEquals(Sets.newHashSet("b"), update1.getChangedFiles());
     }
 
     @Test
-    public void testResolveChangedFilesWhenThereIsMerge() {
+    public void testResolveChangedFilesWhenThereIsMerge() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
         request.setTargetBranch("master");
@@ -147,141 +88,130 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("2", "", "master:2");
         
-        git.checkout("master~1", "dev");
+        git.checkout().setStartPoint("master~1").setName("dev").setCreateBranch(true).call();
 
         addFileAndCommit("3", "", "dev:3");
-        
-        git.merge("master", null, null, null, null);
+
+        git.merge().include(git.getRepository().resolve("master")).setCommit(true).call();
 
         addFileAndCommit("4", "", "dev:4");
 
-        git.push(bareGit.depotDir().getAbsolutePath(), "master:master");
-        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
-
-        request.setBaseCommitHash(bareGit.calcMergeBase("dev~2", "master"));
+        request.setBaseCommitHash(depot.getMergeBase("dev~2", "master").name());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommitHash(bareGit.showRevision("dev~2").getHash());
-        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
+        update1.setHeadCommitHash(git.getRepository().resolve("dev~2").name());
+        update1.setMergeCommitHash(request.getBaseCommitHash());
+        updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null);
         request.addUpdate(update1);
         
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        update2.setHeadCommitHash(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
+        update2.setHeadCommitHash(git.getRepository().resolve("dev").name());
+        update2.setMergeCommitHash(git.getRepository().resolve("master").name());
+        updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null);
         request.addUpdate(update2);
 
-        depot.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
-        
         Assert.assertEquals(Sets.newHashSet("4"), update2.getChangedFiles());
     }
 
     @Test
-    public void testGetCommitsWhenTargetBranchIsMergedToSourceBranch() {
+    public void testGetCommitsWhenTargetBranchIsMergedToSourceBranch() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("0", "", "0");
         
-        git.checkout("HEAD", "dev");
-        git.checkout("master", null);
+        git.checkout().setName("dev").setCreateBranch(true).call();
+        git.checkout().setName("master").call();
 
         addFileAndCommit("m1", "", "m1");
         
-        git.checkout("dev", null);
+        git.checkout().setName("dev").call();
 
         addFileAndCommit("d1", "", "d1");
 
         addFileAndCommit("d2", "", "d2");
 
-        git.push(bareGit.depotDir().getAbsolutePath(), "master:master");
-        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
-        
-        request.setBaseCommitHash(bareGit.calcMergeBase("master", "dev"));
+        request.setBaseCommitHash(depot.getMergeBase("master", "dev").name());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommitHash(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
+        update1.setHeadCommitHash(git.getRepository().resolve("dev").name());
+        update1.setMergeCommitHash(request.getBaseCommitHash());
+        updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null);
         request.addUpdate(update1);
 
-        git.merge("master", null, null, null, "merge master to dev");
-        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
+        git.merge().include(git.getRepository().resolve("master")).setCommit(true).setMessage("merge master to dev").call();
         
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        update2.setHeadCommitHash(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
+        update2.setHeadCommitHash(git.getRepository().resolve("dev").name());
+        update2.setMergeCommitHash(git.getRepository().resolve("master").name());
+        updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null);
         request.addUpdate(update2);
         
-        depot.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
-        
         Assert.assertEquals(2, update1.getCommits().size());
-        Assert.assertEquals("d1", update1.getCommits().get(0).getMessage());
-        Assert.assertEquals("d2", update1.getCommits().get(1).getMessage());
+        Assert.assertEquals("d1", update1.getCommits().get(0).getFullMessage().trim());
+        Assert.assertEquals("d2", update1.getCommits().get(1).getFullMessage().trim());
         
         Assert.assertEquals(1, update2.getCommits().size());
-        Assert.assertTrue(update2.getCommits().get(0).getMessage().startsWith("merge master to dev"));
+        Assert.assertTrue(update2.getCommits().get(0).getFullMessage().startsWith("merge master to dev"));
     }
 
     @Test
-    public void testGetCommitsWhenSourceBranchIsMergedToTargetBranch() {
+    public void testGetCommitsWhenSourceBranchIsMergedToTargetBranch() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("0", "", "0");
         
-        git.checkout("HEAD", "dev");
-        git.checkout("master", null);
+        git.checkout().setName("dev").setCreateBranch(true).call();
+        git.checkout().setName("master").call();
 
         addFileAndCommit("m1", "", "m1");
         
-        git.checkout("dev", null);
+        git.checkout().setName("dev").call();
 
         addFileAndCommit("d1", "", "d1");
         
-        request.setBaseCommitHash(git.parseRevision("master", true));
+        request.setBaseCommitHash(git.getRepository().resolve("master~1").name());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
         update1.setRequest(request);
-        update1.setHeadCommitHash(git.showRevision("dev").getHash());
+        update1.setHeadCommitHash(git.getRepository().resolve("dev").name());
+        update1.setMergeCommitHash(request.getBaseCommitHash());
         request.addUpdate(update1);
 
         addFileAndCommit("d2", "", "d2");
 
-        git.checkout("master", null);
-        git.merge("dev", null, null, null, null);
+        git.checkout().setName("master").call();
+        git.merge().include(git.getRepository().resolve("dev")).setCommit(true).call();
         
-        git.checkout("dev", null);
+        git.checkout().setName("dev").call();
         
         addFileAndCommit("d3", "", "d3");
 
-        git.push(bareGit.depotDir().getAbsolutePath(), "master:master");
-        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
-        
-        bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
+        updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null);
 
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
         update2.setRequest(request);
-        update2.setHeadCommitHash(bareGit.showRevision("dev").getHash());
-        bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
+        update2.setHeadCommitHash(git.getRepository().resolve("dev").name());
+        update2.setMergeCommitHash(git.getRepository().resolve("dev~1").name());
+        updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null);
         
         request.addUpdate(update2);
         
-        depot.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
-        
-        Assert.assertEquals(2, update2.getCommits().size());
-        Assert.assertEquals("d2", update2.getCommits().get(0).getMessage());
-        Assert.assertEquals("d3", update2.getCommits().get(1).getMessage());
+        Assert.assertEquals(1, update2.getCommits().size());
+        Assert.assertEquals("d3", update2.getCommits().get(0).getFullMessage().trim());
     }
 
 }

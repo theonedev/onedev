@@ -6,17 +6,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryCache.FileKey;
-import org.eclipse.jgit.util.FS;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -54,15 +49,9 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	
 	private Extractors extractors;
 	
-	private BatchWorkManager batchWorkManager;
-	
 	private IndexManager indexManager;
 	
 	private SearchManager searchManager;
-	
-	private UnitOfWork unitOfWork;
-	
-	private Dao dao;
 	
 	@Override
 	protected void setup() {
@@ -75,12 +64,13 @@ public class IndexAndSearchTest extends AbstractGitTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
+			public File getDirectory() {
+				return git.getRepository().getDirectory();
+			}
+
+			@Override
 			public Repository getRepository() {
-				try {
-					return RepositoryCache.open(FileKey.lenient(git().depotDir(), FS.DETECTED));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				return git.getRepository();
 			}
 			
 		};
@@ -91,10 +81,6 @@ public class IndexAndSearchTest extends AbstractGitTest {
         
 		storageManager = mock(StorageManager.class);
 		when(storageManager.getIndexDir(Mockito.any(Depot.class))).thenReturn(indexDir);
-		when(storageManager.getGitDir(Mockito.any(Depot.class))).thenReturn(new File(git.depotDir(), ".git"));
-		
-		dao = mock(Dao.class);
-		when(dao.load(Depot.class, 1L)).thenReturn(depot);
 		
 		when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
 		
@@ -106,13 +92,12 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		
 		searchManager = new DefaultSearchManager(storageManager);
 		
-		unitOfWork = mock(UnitOfWork.class);
 		indexManager = new DefaultIndexManager(Sets.<IndexListener>newHashSet(searchManager), 
-				storageManager, batchWorkManager, extractors, unitOfWork, dao);
+				storageManager, mock(BatchWorkManager.class), extractors, mock(UnitOfWork.class), mock(Dao.class));
 	}
 
 	@Test
-	public void testBasic() throws InterruptedException, ExecutionException {
+	public void testBasic() throws Exception {
 		String code = ""
 				+ "public class Dog {\n"
 				+ "  public String name;\n"
@@ -125,7 +110,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("Cat.java", code, "add cat");
 		
-		ObjectId commit = ObjectId.fromString(git.parseRevision("master", true));
+		ObjectId commit = git.getRepository().resolve("master");
 		assertEquals(2, indexManager.index(depot, commit).getIndexed());
 		
 		BlobQuery query = new TextQuery("public", false, false, false, null, null, Integer.MAX_VALUE);
@@ -155,7 +140,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("Dog.java", code, "add dog age");		
 
-		commit = ObjectId.fromString(git.parseRevision("master", true));
+		commit = git.getRepository().resolve("master");
 		assertEquals(1, indexManager.index(depot, commit).getIndexed());
 
 		query = new TextQuery("strin", false, false, false, null, null, Integer.MAX_VALUE);
@@ -179,13 +164,13 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("Cat.java", code, "add cat age");
 		
-		commit = ObjectId.fromString(git.parseRevision("master", true));
+		commit = git.getRepository().resolve("master");
 		
 		IndexResult indexResult = indexManager.index(depot, commit);
 		assertEquals(2, indexResult.getChecked());
 		assertEquals(1, indexResult.getIndexed());
 		
-		commit = ObjectId.fromString(git.parseRevision("master~2", true));
+		commit = git.getRepository().resolve("master~2");
 		assertEquals(0, indexManager.index(depot, commit).getChecked());
 		
 		when(extractors.getVersion()).thenReturn("java:2");
@@ -245,7 +230,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	}
 	
 	@Test
-	public void testRegex() throws InterruptedException {
+	public void testRegex() throws Exception {
 		String code = ""
 				+ "public class Dog {\n"
 				+ "  public String name;\n"
@@ -259,7 +244,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("Cat.java", code, "add cat");
 		
-		ObjectId commit = ObjectId.fromString(git.parseRevision("master", true));
+		ObjectId commit = git.getRepository().resolve("master");
 		indexManager.index(depot, commit);
 
 		BlobQuery query = new TextQuery("public|}", true, false, false, null, null, Integer.MAX_VALUE);
@@ -276,7 +261,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	}
 	
 	@Test
-	public void testPath() throws InterruptedException {
+	public void testPath() throws Exception {
 		String code = ""
 				+ "public class Dog {\n"
 				+ "  public String name;\n"
@@ -295,7 +280,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("plants/Pine.java", code, "add pine");
 		
-		ObjectId commit = ObjectId.fromString(git.parseRevision("master", true));
+		ObjectId commit = git.getRepository().resolve("master");
 		indexManager.index(depot, commit);
 
 		BlobQuery query = new TextQuery("name", false, true, false, "plants/", null, Integer.MAX_VALUE);

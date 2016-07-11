@@ -9,6 +9,7 @@ public class RefUpdateException extends GitException {
 	private final RefUpdate.Result result;
 	
 	public RefUpdateException(RefUpdate.Result result) {
+		super(result.name());
 		this.result = result;
 	}
 

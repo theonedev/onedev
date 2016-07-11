@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.component.revisionpicker;
 
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +14,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.*;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -32,15 +34,18 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.InputChangeBehavior;
@@ -91,11 +96,11 @@ public abstract class RevisionSelector extends Panel {
 		List<String> names = new ArrayList<>();
 		
 		if (branchesActive) {
-			for (Ref ref: depotModel.getObject().getBranchRefs())
-				names.add(GitUtils.ref2branch(ref.getName()));
+			for (RefInfo ref: depotModel.getObject().getBranches())
+				names.add(GitUtils.ref2branch(ref.getRef().getName()));
 		} else {
-			for (Ref ref: depotModel.getObject().getTagRefs())
-				names.add(GitUtils.ref2tag(ref.getName()));
+			for (RefInfo ref: depotModel.getObject().getTags())
+				names.add(GitUtils.ref2tag(ref.getRef().getName()));
 		}
 		return names;
 	}
@@ -306,24 +311,27 @@ public abstract class RevisionSelector extends Panel {
 			}
 			if (itemValues.size() < count && !found) {
 				Depot depot = depotModel.getObject();
-				if (depot.getRevCommit(revInput, false) != null) {
-					itemValues.add(COMMIT_FLAG + revInput);
-				} else if (branchesActive) {
-					if (canCreateBranch) {
-						String refName = Constants.R_HEADS + revInput;
-						if (Repository.isValidRefName(refName) 
-								&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
-							itemValues.add(ADD_FLAG + revInput);
+				try {
+					if (depot.getRepository().resolve(revInput) != null) {
+						itemValues.add(COMMIT_FLAG + revInput);
+					} else if (branchesActive) {
+						if (canCreateBranch) {
+							String refName = Constants.R_HEADS + revInput;
+							if (SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
+								itemValues.add(ADD_FLAG + revInput);
+							}
+						}
+					} else {
+						if (canCreateTag) {
+							String refName = Constants.R_TAGS + revInput;
+							if (SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
+								itemValues.add(ADD_FLAG + revInput);
+							}
 						}
 					}
-				} else {
-					if (canCreateTag) {
-						String refName = Constants.R_TAGS + revInput;
-						if (Repository.isValidRefName(refName) 
-								&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
-							itemValues.add(ADD_FLAG + revInput);
-						}
-					}
+				} catch (RevisionSyntaxException | AmbiguousObjectException | IncorrectObjectTypeException e) {
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
 			}
 		} else {

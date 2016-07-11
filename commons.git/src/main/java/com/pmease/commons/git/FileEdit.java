@@ -29,7 +29,6 @@ import com.pmease.commons.git.exception.NotTreeException;
 import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
-import com.pmease.commons.git.exception.RefUpdateException;
 
 public class FileEdit implements Serializable {
 	
@@ -145,7 +144,7 @@ public class FileEdit implements Serializable {
 	/**
 	 * Commit specified file into specified repository.
 	 * 
-	 * @param repo 
+	 * @param repository 
 	 * 			repository to make the new commit
 	 * @param refName
 	 * 			ref name to associate the new commit with
@@ -169,13 +168,13 @@ public class FileEdit implements Serializable {
 	 * 			if added/renamed file already exists when newFile!=null && (oldPath==null || !oldPath.equals(newFile.getPath()))
 	 * 			 
 	 */
-	public ObjectId commit(Repository repo, String refName, 
+	public ObjectId commit(Repository repository, String refName, 
 			ObjectId expectedOldCommitId, ObjectId parentCommitId, 
 			PersonIdent authorAndCommitter, String commitMessage) {
 		
-		try (	RevWalk revWalk = new RevWalk(repo); 
-				TreeWalk treeWalk = new TreeWalk(repo);
-				ObjectInserter inserter = repo.newObjectInserter();) {
+		try (	RevWalk revWalk = new RevWalk(repository); 
+				TreeWalk treeWalk = new TreeWalk(repository);
+				ObjectInserter inserter = repository.newObjectInserter();) {
 
 	        CommitBuilder commit = new CommitBuilder();
 	        
@@ -189,7 +188,7 @@ public class FileEdit implements Serializable {
 
 			FileMode newFileMode;
 			if (oldPath != null) {
-				TreeWalk oldPathTreeWalk = TreeWalk.forPath(repo, oldPath, revTree);
+				TreeWalk oldPathTreeWalk = TreeWalk.forPath(repository, oldPath, revTree);
 				if (oldPathTreeWalk == null)
 					throw new ObjectNotExistException("Path not exist: " + oldPath);
 				newFileMode = oldPathTreeWalk.getFileMode(0);
@@ -214,19 +213,12 @@ public class FileEdit implements Serializable {
 	        
 	        ObjectId commitId = inserter.insert(commit);
 	        inserter.flush();
-	        RefUpdate ru = repo.updateRef(refName);
+	        RefUpdate ru = repository.updateRef(refName);
 	        ru.setRefLogIdent(authorAndCommitter);
 	        ru.setNewObjectId(commitId);
 	        ru.setExpectedOldObjectId(expectedOldCommitId);
-	        RefUpdate.Result result = ru.update();
-	        if (result == RefUpdate.Result.LOCK_FAILURE 
-	        		&& !expectedOldCommitId.equals(ru.getOldObjectId())) {
-	        	throw new ObsoleteCommitException(ru.getOldObjectId());
-	        } else if (result != RefUpdate.Result.FAST_FORWARD) {
-	        	throw new RefUpdateException(result);
-	        } else {
-	        	return commitId;
-	        }
+	        GitUtils.updateRef(ru);
+	        return commitId;
 		} catch (RevisionSyntaxException | IOException e) {
 			throw new RuntimeException(e);
 		}

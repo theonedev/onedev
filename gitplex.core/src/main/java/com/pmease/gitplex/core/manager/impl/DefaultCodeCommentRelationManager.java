@@ -12,8 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -62,8 +62,8 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 			
 			Collection<String> involvedCommits = new HashSet<>();
 			for (PullRequestUpdate update: request.getUpdates()) {
-				for (BriefCommit commit: update.getCommits())
-					involvedCommits.add(commit.getHash());
+				for (RevCommit commit: update.getCommits())
+					involvedCommits.add(commit.name());
 			}
 			involvedCommits.add(request.getBaseCommitHash());
 
