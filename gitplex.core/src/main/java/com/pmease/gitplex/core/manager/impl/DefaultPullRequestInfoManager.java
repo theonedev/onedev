@@ -16,23 +16,14 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.EnvironmentConfig;
-import jetbrains.exodus.env.Environments;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
-import jetbrains.exodus.env.TransactionalExecutable;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -50,6 +41,17 @@ import com.pmease.gitplex.core.manager.PullRequestInfoManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.support.BatchWorker;
+
+import jetbrains.exodus.ArrayByteIterable;
+import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.EnvironmentConfig;
+import jetbrains.exodus.env.Environments;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.StoreConfig;
+import jetbrains.exodus.env.Transaction;
+import jetbrains.exodus.env.TransactionalComputable;
+import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
 public class DefaultPullRequestInfoManager implements PullRequestInfoManager, DepotListener, 
@@ -191,32 +193,36 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 		for (PullRequestUpdate update: pullRequestUpdateManager.queryAfter(depot, lastUpdate)) {
 			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
 				List<ObjectId> commits = new ArrayList<>();
-				revWalk.markStart(revWalk.lookupCommit(ObjectId.fromString(update.getHeadCommitHash())));
-				revWalk.markUninteresting(revWalk.lookupCommit(ObjectId.fromString(update.getBaseCommitHash())));
-				revWalk.forEach(commit->commits.add(commit.getId().copy()));
-				env.executeInTransaction(new TransactionalExecutable() {
+				RevCommit headCommit = GitUtils.parseCommit(revWalk, ObjectId.fromString(update.getHeadCommitHash()));
+				RevCommit baseCommit = GitUtils.parseCommit(revWalk, ObjectId.fromString(update.getBaseCommitHash()));
+				if (headCommit != null && baseCommit != null) {
+					revWalk.markStart(headCommit);
+					revWalk.markUninteresting(baseCommit);
+					revWalk.forEach(commit->commits.add(commit.getId().copy()));
+					env.executeInTransaction(new TransactionalExecutable() {
 
-					@SuppressWarnings("unchecked")
-					@Override
-					public void execute(Transaction txn) {
-						ByteIterable key = new StringByteIterable(update.getUUID());
-						for (ObjectId commit: commits) {
-							byte[] keyBytes = new byte[20];
-							commit.copyRawTo(keyBytes, 0);
-							ByteIterable commitKey = new ArrayByteIterable(keyBytes);
-							byte[] valueBytes = getBytes(store.get(txn, commitKey));
-							Collection<String> requests;
-							if (valueBytes != null)
-								requests = (Collection<String>) SerializationUtils.deserialize(valueBytes);
-							else
-								requests = new HashSet<>();
-							requests.add(update.getRequest().getUUID());
-							store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) requests)));
+						@SuppressWarnings("unchecked")
+						@Override
+						public void execute(Transaction txn) {
+							ByteIterable key = new StringByteIterable(update.getUUID());
+							for (ObjectId commit: commits) {
+								byte[] keyBytes = new byte[20];
+								commit.copyRawTo(keyBytes, 0);
+								ByteIterable commitKey = new ArrayByteIterable(keyBytes);
+								byte[] valueBytes = getBytes(store.get(txn, commitKey));
+								Collection<String> requests;
+								if (valueBytes != null)
+									requests = (Collection<String>) SerializationUtils.deserialize(valueBytes);
+								else
+									requests = new HashSet<>();
+								requests.add(update.getRequest().getUUID());
+								store.put(txn, commitKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) requests)));
+							}
+							store.put(txn, LAST_UPDATE_KEY, key);
 						}
-						store.put(txn, LAST_UPDATE_KEY, key);
-					}
-					
-				});
+						
+					});
+				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}		

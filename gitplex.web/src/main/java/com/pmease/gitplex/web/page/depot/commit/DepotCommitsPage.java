@@ -137,7 +137,7 @@ public class DepotCommitsPage extends DepotPage {
 				commits.last = new ArrayList<>();
 				
 				for (int i=0; i<lastMaxCount; i++) { 
-					revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i)));
+					commits.last.add(revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i))));
 				}
 				
 				CommitGraphUtils.sort(commits.last, 0);

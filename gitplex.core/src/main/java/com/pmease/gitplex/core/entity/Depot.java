@@ -796,7 +796,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     	String refName = GitUtils.branch2ref(branch);
     	ObjectId commitId = getRevCommit(refName).getId();
     	try {
-			git().branchDelete().setBranchNames(branch).call();
+			git().branchDelete().setForce(true).setBranchNames(branch).call();
 		} catch (Exception e) {
 			Throwables.propagate(e);
 		}

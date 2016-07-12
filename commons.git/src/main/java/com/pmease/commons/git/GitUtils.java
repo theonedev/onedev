@@ -322,9 +322,7 @@ public class GitUtils {
     		List<RevCommit> commits = RevWalkUtils.find(revWalk, sourceCommit, targetCommit);
     		Collections.reverse(commits);
     		RevCommit headCommit = targetCommit;
-    		int count = 0;
     		for (RevCommit commit: commits) {
-    			count++;
         		ResolveMerger merger = (ResolveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
         		merger.setBase(commit.getParent(0));
         		if (merger.merge(headCommit, commit)) {
@@ -338,7 +336,6 @@ public class GitUtils {
 				        headCommit = revWalk.parseCommit(inserter.insert(newCommit));
 					}
         		} else {
-            		System.out.println(count);
         			return null;
         		}
     		}
