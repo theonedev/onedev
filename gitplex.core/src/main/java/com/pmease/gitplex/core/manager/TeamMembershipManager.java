@@ -8,9 +8,9 @@ import com.pmease.gitplex.core.entity.TeamMembership;
 
 public interface TeamMembershipManager extends EntityManager<TeamMembership> {
 
-	Collection<TeamMembership> query(Account organization, Account user);
+	Collection<TeamMembership> findAll(Account organization, Account user);
 	
-	Collection<TeamMembership> query(Account organization);
+	Collection<TeamMembership> findAll(Account organization);
 	
 	void delete(Collection<TeamMembership> memberships);
 }

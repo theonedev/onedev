@@ -39,7 +39,7 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
     }
 
     private CheckResult checkSubmitter(Account user) {
-		Account expectedUser = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
+		Account expectedUser = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).find(userName));
         if (expectedUser.equals(user)) 
         	return passed(Lists.newArrayList("Submitted by " + expectedUser.getDisplayName()));
         else 

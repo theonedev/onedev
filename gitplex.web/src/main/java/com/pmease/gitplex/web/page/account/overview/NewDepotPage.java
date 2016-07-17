@@ -44,7 +44,7 @@ public class NewDepotPage extends AccountLayoutPage {
 				
 				depot.setAccount(getAccount());
 				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
-				Depot depotWithSameName = depotManager.findBy(getAccount(), depot.getName());
+				Depot depotWithSameName = depotManager.find(getAccount(), depot.getName());
 				if (depotWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another repository in this account.");

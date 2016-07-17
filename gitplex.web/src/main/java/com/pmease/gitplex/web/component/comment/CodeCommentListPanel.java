@@ -46,6 +46,7 @@ import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -134,95 +135,108 @@ public abstract class CodeCommentListPanel extends Panel {
 		List<IColumn<CodeComment, Void>> columns = new ArrayList<>();
 		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Code Comment")) {
 
+			private void openComment(CodeComment comment) {
+				Depot depot = ((DepotPage) getPage()).getDepot();
+				
+				PullRequest request = getPullRequest();
+				List<CodeCommentReply> replies = comment.getSortedReplies();
+				if (request != null) {
+					PullRequest.ComparingInfo comparingInfo = null;
+					for (int i=replies.size()-1; i>=0; i--) {
+						CodeCommentReply reply = replies.get(i);
+						comparingInfo = request.getRequestComparingInfo(reply.getComparingInfo());
+						if (comparingInfo != null)
+							break;
+					}
+					if (comparingInfo == null) {
+						comparingInfo = Preconditions.checkNotNull(request.getRequestComparingInfo(comment.getComparingInfo()));
+					}
+					RequestChangesPage.State state = new RequestChangesPage.State();
+					state.commentId = comment.getId();
+					state.mark = comment.getCommentPos();
+					state.oldCommit = comparingInfo.getOldCommit();
+					state.newCommit = comparingInfo.getNewCommit();
+					state.pathFilter = comparingInfo.getPathFilter();
+					state.whitespaceOption = comparingInfo.getWhitespaceOption();
+					setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
+				} else {
+					CompareContext compareContext;
+					if (!replies.isEmpty()) {
+						CodeCommentReply lastReply = replies.get(replies.size()-1);
+						compareContext = lastReply.getCompareContext();
+					} else {
+						compareContext = comment.getCompareContext();
+					}
+					if (!compareContext.getCompareCommit().equals(comment.getCommentPos().getCommit())) {
+						RevisionComparePage.State state = new RevisionComparePage.State();
+						state.commentId = comment.getId();
+						state.mark = comment.getCommentPos();
+						state.compareWithMergeBase = false;
+						if (compareContext.isLeftSide()) {
+							state.leftSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
+							state.rightSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
+						} else {
+							state.leftSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
+							state.rightSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
+						}
+						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+						state.whitespaceOption = compareContext.getWhitespaceOption();
+						state.pathFilter = compareContext.getPathFilter();
+						setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, state));
+					} else {
+						DepotFilePage.State state = new DepotFilePage.State();
+						state.blobIdent.revision = comment.getCommentPos().getCommit();
+						state.blobIdent.path = comment.getCommentPos().getPath();
+						state.blobIdent.mode = FileMode.TYPE_FILE;
+						state.commentId = comment.getId();
+						state.mark = comment.getCommentPos().getRange();
+						setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot, state));
+					}
+				}				
+			}
+			
 			@Override
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem,
 					String componentId, IModel<CodeComment> rowModel) {
 				CodeComment comment = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "commentFrag", CodeCommentListPanel.this);
-				Link<Void> link = new Link<Void>("link") {
+				Link<Void> titleLink = new Link<Void>("title") {
 
 					@Override
 					public void onClick() {
-						Depot depot = ((DepotPage) getPage()).getDepot();
-						
-						CodeComment comment = rowModel.getObject();
-						PullRequest request = getPullRequest();
-						List<CodeCommentReply> replies = comment.getSortedReplies();
-						if (request != null) {
-							PullRequest.ComparingInfo comparingInfo = null;
-							for (int i=replies.size()-1; i>=0; i--) {
-								CodeCommentReply reply = replies.get(i);
-								comparingInfo = request.getRequestComparingInfo(reply.getComparingInfo());
-								if (comparingInfo != null)
-									break;
-							}
-							if (comparingInfo == null) {
-								comparingInfo = Preconditions.checkNotNull(request.getRequestComparingInfo(comment.getComparingInfo()));
-							}
-							RequestChangesPage.State state = new RequestChangesPage.State();
-							state.commentId = comment.getId();
-							state.mark = comment.getCommentPos();
-							state.oldCommit = comparingInfo.getOldCommit();
-							state.newCommit = comparingInfo.getNewCommit();
-							state.pathFilter = comparingInfo.getPathFilter();
-							state.whitespaceOption = comparingInfo.getWhitespaceOption();
-							setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
-						} else {
-							CompareContext compareContext;
-							if (!replies.isEmpty()) {
-								CodeCommentReply lastReply = replies.get(replies.size()-1);
-								compareContext = lastReply.getCompareContext();
-							} else {
-								compareContext = comment.getCompareContext();
-							}
-							if (!compareContext.getCompareCommit().equals(comment.getCommentPos().getCommit())) {
-								RevisionComparePage.State state = new RevisionComparePage.State();
-								state.commentId = comment.getId();
-								state.mark = comment.getCommentPos();
-								state.compareWithMergeBase = false;
-								if (compareContext.isLeftSide()) {
-									state.leftSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
-									state.rightSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
-								} else {
-									state.leftSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
-									state.rightSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
-								}
-								state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-								state.whitespaceOption = compareContext.getWhitespaceOption();
-								state.pathFilter = compareContext.getPathFilter();
-								setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, state));
-							} else {
-								DepotFilePage.State state = new DepotFilePage.State();
-								state.blobIdent.revision = comment.getCommentPos().getCommit();
-								state.blobIdent.path = comment.getCommentPos().getPath();
-								state.blobIdent.mode = FileMode.TYPE_FILE;
-								state.commentId = comment.getId();
-								state.mark = comment.getCommentPos().getRange();
-								setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot, state));
-							}
-						}
+						openComment(rowModel.getObject());
 					}
 					
 				};
-				link.add(new Label("title", comment.getTitle()));
-				link.add(new WebMarkupContainer("resolved").setVisible(comment.isResolved()));
-				link.add(new Label("user", comment.getUser().getDisplayName()));
-				if (comment.getCommentPos().getPath() != null)
-					link.add(new Label("what", comment.getCommentPos().getPath()));
-				else
-					link.add(new Label("what", comment.getCommentPos().getCommit()));
-				link.add(new Label("age", DateUtils.formatAge(comment.getCreateDate())));
+				titleLink.add(new Label("label", comment.getTitle()));
+				fragment.add(titleLink);
+				fragment.add(new WebMarkupContainer("resolved").setVisible(comment.isResolved()));
+				fragment.add(new AccountLink("user", comment.getUser()));
 				
-				WebMarkupContainer lastReply = new WebMarkupContainer("lastReply");
-				lastReply.setVisible(comment.getLastReplyUser() != null);
-				lastReply.add(new Label("user", comment.getLastReplyUser()));
-				lastReply.add(new Label("age", DateUtils.formatAge(comment.getUpdateDate())));
-				link.add(lastReply);
+				Link<Void> fileLink = new Link<Void>("file") {
+
+					@Override
+					public void onClick() {
+						openComment(rowModel.getObject());
+					}
+					
+				};
+				fileLink.add(new Label("label", comment.getCommentPos().getPath()));
+				fragment.add(fileLink);
 				
-				fragment.add(link);
+				fragment.add(new Label("age", DateUtils.formatAge(comment.getCreateDate())));
+				
+				WebMarkupContainer lastEvent = new WebMarkupContainer("lastEvent");
+				lastEvent.add(new Label("description", comment.getLastEvent()));
+				lastEvent.setVisible(comment.getLastEventUser() != null);
+				lastEvent.add(new AccountLink("user", comment.getLastEventUser()).setVisible(comment.getLastEventUser()!=null));
+				lastEvent.add(new Label("age", DateUtils.formatAge(comment.getLastEventDate())));
+				fragment.add(lastEvent);
+				
 				cellItem.add(fragment);
 				
-				cellItem.add(AttributeAppender.append("class", comment.isVisited(true)?"comment":"comment new"));
+				cellItem.add(AttributeAppender.append("class", 
+						comment.isVisitedAfter(comment.getLastEventDate())?"comment":"comment new"));
 			}
 			
 		});
@@ -246,7 +260,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					criteria.add(Restrictions.eq("depot", page.getDepot()));
 					filterOptionModel.getObject().fill(criteria);
 					criteria.addOrder(Order.desc("id"));
-					return GitPlex.getInstance(Dao.class).query(criteria, (int)first, (int)count).iterator();
+					return GitPlex.getInstance(Dao.class).findRange(criteria, (int)first, (int)count).iterator();
 				}
 			}
 

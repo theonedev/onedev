@@ -42,7 +42,7 @@ public interface AccountManager extends EntityManager<Account> {
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable Account findByName(String accountName);
+	@Nullable Account find(String accountName);
 	
 	/**
 	 * Find user by person
@@ -52,7 +52,7 @@ public interface AccountManager extends EntityManager<Account> {
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable Account findByPerson(PersonIdent person);
+	@Nullable Account find(PersonIdent person);
 	
 	/**
 	 * Get current authenticated user in Shiro context, or <tt>null</tt> if not 
@@ -63,8 +63,8 @@ public interface AccountManager extends EntityManager<Account> {
 	 */
 	@Nullable Account getCurrent();
 	
-	List<Account> allUsers();
+	List<Account> findAllUsers();
 	
-	List<Account> allOrganizations();
+	List<Account> findAllOrganizations();
 	
 }

@@ -51,7 +51,7 @@ public class MentionParser {
 			while (matcher.find()) {
 				String userName = matcher.group(2);
 				String userTag;
-				Account user = userManager.findByName(userName);
+				Account user = userManager.find(userName);
 				if (user != null) {
 					mentions.add(user);
 					userTag = toHtml(user);

@@ -27,19 +27,19 @@ public class DefaultTeamMembershipManager extends AbstractEntityManager<TeamMemb
 
 	@Sessional
 	@Override
-	public Collection<TeamMembership> query(Account organization, Account user) {
+	public Collection<TeamMembership> findAll(Account organization, Account user) {
 		EntityCriteria<TeamMembership> criteria = newCriteria();
 		criteria.add(Restrictions.eq("user", user));
 		criteria.createCriteria("team").add(Restrictions.eq("organization", organization));
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Sessional
 	@Override
-	public Collection<TeamMembership> query(Account organization) {
+	public Collection<TeamMembership> findAll(Account organization) {
 		EntityCriteria<TeamMembership> criteria = newCriteria();
 		criteria.createCriteria("team").add(Restrictions.eq("organization", organization));
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Transactional

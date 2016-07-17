@@ -15,11 +15,8 @@ import javax.persistence.Version;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment.ComparingInfo;
 import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.manager.VisitInfoManager;
-import com.pmease.gitplex.core.security.SecurityUtils;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -99,16 +96,6 @@ public class CodeCommentReply extends AbstractEntity {
 
 	public void setVersion(long version) {
 		this.version = version;
-	}
-	
-	public boolean isVisited() {
-		Account user = SecurityUtils.getAccount();
-		if (user != null) {
-			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, getComment());
-			return visitDate != null && visitDate.after(getDate());
-		} else {
-			return true;
-		}
 	}
 	
 	public ComparingInfo getComparingInfo() {

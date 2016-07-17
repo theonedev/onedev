@@ -62,7 +62,7 @@ public class RepositoryResource {
 		
 		EntityCriteria<Depot> criteria = EntityCriteria.of(Depot.class);
 		if (path != null) {
-			Depot depot = depotManager.findBy(path);
+			Depot depot = depotManager.find(path);
 			if (depot != null)
 				depots.add(depot);
 		} else {
@@ -70,7 +70,7 @@ public class RepositoryResource {
 				criteria.add(Restrictions.eq("account.id", userId));
 			if (name != null)
 				criteria.add(Restrictions.eq("name", name));
-			depots.addAll(dao.query(criteria));
+			depots.addAll(dao.findAll(criteria));
 		}
 		
 		for (Depot depot: depots) {

@@ -37,7 +37,7 @@ public class AccountLink extends BookmarkablePageLink<Void> {
 	public AccountLink(String id, PersonIdent person) {
 		super(id, AccountOverviewPage.class);
 		name = person.getName();
-		Account account = GitPlex.getInstance(AccountManager.class).findByPerson(person);
+		Account account = GitPlex.getInstance(AccountManager.class).find(person);
 		if (account != null) { 
 			params = AccountPage.paramsOf(account);
 		} else {

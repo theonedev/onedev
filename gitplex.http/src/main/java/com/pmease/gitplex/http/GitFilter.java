@@ -91,7 +91,7 @@ public class GitFilter implements Filter {
 		if (repositoryName.endsWith(".git"))
 			repositoryName = repositoryName.substring(0, repositoryName.length()-".git".length());
 		
-		Depot depot = repositoryManager.findBy(accountName, repositoryName);
+		Depot depot = repositoryManager.find(accountName, repositoryName);
 		if (depot == null) {
 			throw new GitException(String.format("Unable to find repository %s under account %s.", repositoryName, accountName));
 		}

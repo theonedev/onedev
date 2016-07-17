@@ -70,14 +70,10 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityManager<TeamA
 
 	@Sessional
 	@Override
-	public Collection<TeamAuthorization> query(Account organization) {
+	public Collection<TeamAuthorization> findAll(Account organization) {
 		EntityCriteria<TeamAuthorization> criteria = newCriteria(); 
 		criteria.createCriteria("depot").add(Restrictions.eq("account", organization));
-		return query(criteria);
-	}
-
-	@Override
-	public void onSaveDepot(Depot depot) {
+		return findAll(criteria);
 	}
 
 }

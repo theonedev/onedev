@@ -1,48 +1,65 @@
-#request-list>.head {
-	padding: 12px 20px;
-	border-bottom: 1px solid #DDD;
-	background: white;
-}
-#request-list>.head>a {
-	margin-right: 16px;
-}
-
-#request-list td.filter {
-	width: 200px;
+#request-list {
 	padding: 20px;
-	border-right: 1px solid #EEE;
 }
-#request-list td.filter form button.top {
-	margin-bottom: 10px;
+#request-list>.head {
+	margin-bottom: 20px;
 }
-#request-list td.filter .select2-container .avatar {
-	display: none;
+#request-list>.head a {
+	margin-right: 8px;
 }
-#request-list td.requests>table td {
+#request-list td.filter {
+	width: 25%;
+	border: 1px solid #DDD;
+}
+#request-list td.filter>.head {
+	font-size: 16px;
+	border-bottom: 1px solid #DDD;
+	padding: 8px 12px;
+	background: #F2F2F2;
+}
+#request-list td.filter>.body {
 	padding: 12px;
 }
-#request-list td.requests>table>thead td {
-	border-bottom: 1px solid #DDD;
+#request-list td.spacing {
+	width: 20px;
 }
-#request-list td.requests>table>tfoot td {
-	border-top: none;
+#request-list td.result {
+	border: 1px solid #DDD;
 }
-#request-list td.requests>table>tbody>tr:FIRST-CHILD>td {
-	border-top: none;
+#request-list td.request {
+	color: #888;
+	padding: 8px 8px 0 8px;
+	border-left: 4px solid white;
 }
-#request-list td.request .first-line {
-	font-size: 16px;
-	margin-bottom: 4px;
+#request-list td.request.new {
+	border-left: 4px solid #4667EE;
 }
-#request-list td.request .first-line>span.pull-left {
-	margin-right: 6px;
+#request-list td.request>div {
+	padding-bottom: 8px;
+	border-bottom: 1px dotted #BBB;
 }
-#request-list td.request .title {
+#request-list td.result tr:last-child td.request>div {
+	border-bottom: none;
+}
+#request-list td.request a.title {
 	font-weight: bold;
+	font-size: 16px;
+	color: #444;
+	margin-right: 8px;
 }
-#request-list td.request .title a {
+#request-list td.request .number {
+	font-size: 16px;
+	margin-right: 8px;	
+}
+#request-list td.request .second-line, #request-list td.request .third-line {
+	margin-top: 2px;
+}
+#request-list td.request .second-line a, #request-list td.request .third-line a {
 	color: #444;
 }
-#request-list td.request .number, #request-list td.request .auxiliary {
-	color: #888;
+#request-list td.result .norecords-td {
+	padding: 20px;
+	font-size: 20px;
+	text-align: center;
+	font-style: italic;
 }

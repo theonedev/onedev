@@ -70,11 +70,11 @@ public interface Dao {
 	 * @return
 	 * 			a list of execution result of the detached criteria
 	 */
-	<T extends AbstractEntity> List<T> query(EntityCriteria<T> criteria, int firstResult, int maxResults);
+	<T extends AbstractEntity> List<T> findRange(EntityCriteria<T> criteria, int firstResult, int maxResults);
 	
-	<T extends AbstractEntity> List<T> query(EntityCriteria<T> criteria);
+	<T extends AbstractEntity> List<T> findAll(EntityCriteria<T> criteria);
 	
-	<T extends AbstractEntity> List<T> allOf(Class<T> entityClass);
+	<T extends AbstractEntity> List<T> findAll(Class<T> entityClass);
 	
 	/**
 	 * This method expects to lookup a single entity with specified criteria

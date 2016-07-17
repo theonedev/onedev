@@ -10,21 +10,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.gitplex.core.entity.component.PullRequestEvent;
 
 @Entity
 public class PullRequestActivity extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Action {OPEN, INTEGRATE, DISCARD, APPROVE, DISAPPROVE, UNDO_REVIEW, 
-		REOPEN, DELETE_SOURCE_BRANCH, RESTORE_SOURCE_BRANCH};
-	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
 	@Column(nullable=false)
-	private Action action;
+	private PullRequestEvent event;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Account user;
@@ -40,12 +38,12 @@ public class PullRequestActivity extends AbstractEntity {
 		this.request = request;
 	}
 
-	public Action getAction() {
-		return action;
+	public PullRequestEvent getEvent() {
+		return event;
 	}
 
-	public void setAction(Action action) {
-		this.action = action;
+	public void setEvent(PullRequestEvent event) {
+		this.event = event;
 	}
 
 	@Nullable

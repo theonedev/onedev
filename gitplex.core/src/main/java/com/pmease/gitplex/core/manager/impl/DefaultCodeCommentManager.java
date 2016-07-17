@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.manager.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -21,47 +22,45 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.component.CodeCommentEvent;
 import com.pmease.gitplex.core.listener.CodeCommentListener;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
-import com.pmease.gitplex.core.manager.VisitInfoManager;
-import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Singleton
-public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment> implements CodeCommentManager {
+public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment> 
+		implements CodeCommentManager, CodeCommentListener {
 
 	private final Provider<Set<CodeCommentListener>> listenersProvider;
 	
 	private final CodeCommentReplyManager codeCommentReplyManager;
 	
-	private final VisitInfoManager visitInfoManager;
-	
 	@Inject
 	public DefaultCodeCommentManager(Dao dao, Provider<Set<CodeCommentListener>> listenersProvider, 
-			CodeCommentReplyManager codeCommentReplyManager, VisitInfoManager visitInfoManager) {
+			CodeCommentReplyManager codeCommentReplyManager) {
 		super(dao);
 		this.listenersProvider = listenersProvider;
 		this.codeCommentReplyManager = codeCommentReplyManager;
-		this.visitInfoManager = visitInfoManager;
 	}
 
 	@Sessional
 	@Override
-	public Collection<CodeComment> query(Depot depot, ObjectId commitId, String path) {
+	public Collection<CodeComment> findAll(Depot depot, ObjectId commitId, String path) {
 		EntityCriteria<CodeComment> criteria = newCriteria();
 		criteria.add(Restrictions.eq("depot", depot));
 		criteria.add(Restrictions.eq("commentPos.commit", commitId.name()));
 		if (path != null)
 			criteria.add(Restrictions.eq("commentPos.path", path));
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Sessional
 	@Override
-	public Collection<CodeComment> query(Depot depot, ObjectId... commitIds) {
+	public Collection<CodeComment> findAll(Depot depot, ObjectId... commitIds) {
 		Preconditions.checkArgument(commitIds.length > 0);
 		
 		EntityCriteria<CodeComment> criteria = newCriteria();
@@ -71,27 +70,31 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			criterions.add(Restrictions.eq("commentPos.commit", commitId.name()));
 		}
 		criteria.add(Restrictions.or(criterions.toArray(new Criterion[criterions.size()])));
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Transactional
 	@Override
 	public void save(CodeComment comment) {
-		if (TransactionInterceptor.isInitiating()) {
-			for (CodeCommentListener listener: listenersProvider.get())
-				listener.onSaveComment(comment);
+		boolean isNew;
+		if (comment.isNew()) {
+			comment.setLastEvent(CodeCommentEvent.CREATED);
+			comment.setLastEventDate(comment.getCreateDate());
+			comment.setLastEventUser(comment.getUser());
+			isNew = true;
+		} else {
+			isNew = false;
 		}
 		dao.persist(comment);
-		visitInfoManager.visit(SecurityUtils.getAccount(), comment);
+		if (TransactionInterceptor.isInitiating() && isNew) {
+			for (CodeCommentListener listener: listenersProvider.get())
+				listener.onComment(comment);
+		}
 	}
 
 	@Transactional
 	@Override
 	public void delete(CodeComment comment) {
-		if (TransactionInterceptor.isInitiating()) {
-			for (CodeCommentListener listener: listenersProvider.get())
-				listener.onDeleteComment(comment);
-		}
 		dao.remove(comment);
 	}
 
@@ -105,7 +108,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	
 	@Sessional
 	@Override
-	public List<CodeComment> queryAfter(Depot depot, String commentUUID) {
+	public List<CodeComment> findAllAfter(Depot depot, String commentUUID) {
 		EntityCriteria<CodeComment> criteria = newCriteria();
 		criteria.add(Restrictions.eq("depot", depot));
 		criteria.addOrder(Order.asc("id"));
@@ -115,20 +118,56 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 				criteria.add(Restrictions.gt("id", comment.getId()));
 			}
 		}
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Transactional
 	@Override
-	public void save(CodeComment comment, CodeCommentReply reply) {
+	public void toggleResolve(CodeComment comment, CodeCommentReply reply) {
+		save(comment);
+		if (reply != null) 
+			codeCommentReplyManager.save(reply);
+		
 		if (TransactionInterceptor.isInitiating()) {
 			for (CodeCommentListener listener: listenersProvider.get()) {
-				listener.onSaveCommentAndReply(comment, reply);
+				listener.onToggleResolve(comment, reply.getUser());
 			}
 		}
-		dao.persist(comment);
-		codeCommentReplyManager.save(reply);
-		visitInfoManager.visit(SecurityUtils.getAccount(), comment);
+	}
+
+	@Transactional
+	@Override
+	public void toggleResolve(CodeComment comment, Account user) {
+		save(comment);
+		if (TransactionInterceptor.isInitiating()) {
+			for (CodeCommentListener listener: listenersProvider.get()) {
+				listener.onToggleResolve(comment, user);
+			}
+		}
+	}
+	
+	@Override
+	public void onComment(CodeComment comment) {
+	}
+
+	@Transactional
+	@Override
+	public void onReplyComment(CodeCommentReply reply) {
+		reply.getComment().setLastEvent(CodeCommentEvent.REPLIED);
+		reply.getComment().setLastEventDate(reply.getDate());
+		reply.getComment().setLastEventUser(reply.getUser());
+		save(reply.getComment());
+	}
+
+	@Override
+	public void onToggleResolve(CodeComment comment, Account user) {
+		if (comment.isResolved())
+			comment.setLastEvent(CodeCommentEvent.RESOLVED);
+		else
+			comment.setLastEvent(CodeCommentEvent.UNRESOLVED);
+		comment.setLastEventDate(new Date());
+		comment.setLastEventUser(user);
+		save(comment);
 	}
 
 }

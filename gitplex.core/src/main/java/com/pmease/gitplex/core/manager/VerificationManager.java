@@ -12,9 +12,9 @@ public interface VerificationManager extends EntityManager<Verification> {
 	
 	void delete(Verification verification);
 	
-	Collection<Verification> findBy(PullRequest request, String commit);
+	Collection<Verification> findAll(PullRequest request, String commit);
 	
-	Verification findBy(PullRequest request, String commit, String configuration);
+	Verification find(PullRequest request, String commit, String configuration);
 	
 	Verification.Status getOverallStatus(Collection<Verification> verifications);
 }

@@ -26,19 +26,19 @@ public class DefaultBranchWatchManager extends AbstractEntityManager<BranchWatch
 
 	@Sessional
 	@Override
-	public Collection<BranchWatch> findBy(Account user, Depot depot) {
+	public Collection<BranchWatch> find(Account user, Depot depot) {
 		EntityCriteria<BranchWatch> criteria = EntityCriteria.of(BranchWatch.class);
 		criteria.add(Restrictions.eq("user", user));
 		criteria.add(Restrictions.eq("depot", depot));
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Override
-	public Collection<BranchWatch> findBy(Depot depot, String branch) {
+	public Collection<BranchWatch> find(Depot depot, String branch) {
 		EntityCriteria<BranchWatch> criteria = EntityCriteria.of(BranchWatch.class);
 		criteria.add(Restrictions.eq("depot", depot));
 		criteria.add(Restrictions.eq("branch", branch));
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 }

@@ -4,12 +4,14 @@ import java.util.Collection;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.shiro.util.ThreadContext;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.TransactionInterceptor;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
@@ -32,31 +34,31 @@ public class DefaultVerificationManager extends AbstractEntityManager<Verificati
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final Set<PullRequestListener> pullRequestListeners;
+	private final Provider<Set<PullRequestListener>> listenersProvider;
 
 	@Inject
 	public DefaultVerificationManager(Dao dao, AccountManager accountManager, 
 			PullRequestManager pullRequestManager, UnitOfWork unitOfWork, 
-			Set<PullRequestListener> pullRequestListeners) {
+			Provider<Set<PullRequestListener>> listenersProvider) {
 		super(dao);
 		
 		this.pullRequestManager = pullRequestManager;
 		this.accountManager = accountManager;
 		this.unitOfWork = unitOfWork;
-		this.pullRequestListeners = pullRequestListeners;
+		this.listenersProvider = listenersProvider;
 	}
 
 	@Sessional
 	@Override
-	public Collection<Verification> findBy(PullRequest request, String commit) {
-		return query(EntityCriteria.of(Verification.class)
+	public Collection<Verification> findAll(PullRequest request, String commit) {
+		return findRange(EntityCriteria.of(Verification.class)
 				.add(Restrictions.eq("request", request))
 				.add(Restrictions.eq("commit", commit)), 0, 0);
 	}
 
 	@Sessional
 	@Override
-	public Verification findBy(PullRequest request, String commit, String configuration) {
+	public Verification find(PullRequest request, String commit, String configuration) {
 		return find(EntityCriteria.of(Verification.class)
 				.add(Restrictions.eq("request", request))
 				.add(Restrictions.eq("commit", commit))
@@ -68,7 +70,14 @@ public class DefaultVerificationManager extends AbstractEntityManager<Verificati
 	public void save(Verification verification) {
 		dao.persist(verification);
 
-		onVerificationChange(verification.getRequest());
+		PullRequest request = verification.getRequest();
+		requestToCheck(request);
+
+		if (TransactionInterceptor.isInitiating()) {
+			for (PullRequestListener listener: listenersProvider.get()) {
+				listener.onVerifyRequest(verification.getRequest());
+			}
+		}
 	}
 
 	@Transactional
@@ -76,14 +85,12 @@ public class DefaultVerificationManager extends AbstractEntityManager<Verificati
 	public void delete(Verification verification) {
 		dao.remove(verification);
 		
-		onVerificationChange(verification.getRequest());
+		requestToCheck(verification.getRequest());
 	}
-	
-	private void onVerificationChange(PullRequest request) {
-		for (PullRequestListener listener: pullRequestListeners)
-			listener.onVerifyRequest(request);
 
-		final Long requestId = request.getId();
+	@Sessional
+	private void requestToCheck(PullRequest request) {
+		Long requestId = request.getId();
 		afterCommit(new Runnable() {
 
 			@Override

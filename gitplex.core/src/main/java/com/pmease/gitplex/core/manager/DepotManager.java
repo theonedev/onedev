@@ -12,11 +12,11 @@ import com.pmease.gitplex.core.entity.Depot;
 
 public interface DepotManager extends EntityManager<Depot> {
 	
-	@Nullable Depot findBy(String accountName, String depotName);
+	@Nullable Depot find(String accountName, String depotName);
 	
-	@Nullable Depot findBy(Account account, String depotName);
+	@Nullable Depot find(Account account, String depotName);
 
-	@Nullable Depot findBy(String depotFQN);
+	@Nullable Depot find(String depotFQN);
 
 	/**
 	 * Fork specified repository as specified user.
@@ -54,6 +54,6 @@ public interface DepotManager extends EntityManager<Depot> {
 	
 	Repository getRepository(Depot depot);
 	
-	Collection<Depot> getAccessibles(@Nullable Account account, @Nullable Account user);
+	Collection<Depot> findAllAccessible(@Nullable Account account, @Nullable Account user);
 
 }

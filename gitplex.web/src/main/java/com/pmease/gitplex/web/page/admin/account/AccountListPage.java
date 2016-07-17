@@ -167,7 +167,7 @@ public class AccountListPage extends AdministrationPage {
 			@Override
 			protected List<Account> load() {
 				List<Account> accounts = new ArrayList<>();
-				for (Account account: GitPlex.getInstance(AccountManager.class).all()) {
+				for (Account account: GitPlex.getInstance(AccountManager.class).findAll()) {
 					if (account.matches(searchField.getInput())) {
 						if (filterType == null 
 								|| filterType.equals(TYPE_USER) && !account.isOrganization() 

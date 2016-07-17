@@ -204,7 +204,7 @@ public class DepotBranchesPage extends DepotPage {
 			Map<String, PullRequest> requests = new HashMap<>();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
-			for (PullRequest request: pullRequestManager.queryOpenTo(depotAndBranch, getDepot())) 
+			for (PullRequest request: pullRequestManager.findAllOpenTo(depotAndBranch, getDepot())) 
 				requests.put(request.getSource().getBranch(), request);
 			return requests;
 		}
@@ -219,7 +219,7 @@ public class DepotBranchesPage extends DepotPage {
 			Map<String, PullRequest> requests = new HashMap<>();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
-			for (PullRequest request: pullRequestManager.queryOpenFrom(depotAndBranch, getDepot())) 
+			for (PullRequest request: pullRequestManager.findAllOpenFrom(depotAndBranch, getDepot())) 
 				requests.put(request.getTarget().getBranch(), request);
 			return requests;
 		}
@@ -232,7 +232,7 @@ public class DepotBranchesPage extends DepotPage {
 		@Override
 		protected Map<String, BranchWatch> load() {
 			Map<String, BranchWatch> requestWatches = new HashMap<>();
-			for (BranchWatch watch: GitPlex.getInstance(BranchWatchManager.class).findBy(
+			for (BranchWatch watch: GitPlex.getInstance(BranchWatchManager.class).find(
 					Preconditions.checkNotNull(getLoginUser()), getDepot()))
 				requestWatches.put(watch.getBranch(), watch);
 			return requestWatches;

@@ -128,7 +128,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 		@Override
 		protected Collection<CodeComment> load() {
-			return GitPlex.getInstance(CodeCommentManager.class).query(
+			return GitPlex.getInstance(CodeCommentManager.class).findAll(
 					context.getDepot(), context.getCommit(), context.getBlobIdent().path);
 		}
 		

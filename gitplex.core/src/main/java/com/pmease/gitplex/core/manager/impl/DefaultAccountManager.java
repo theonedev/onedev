@@ -56,7 +56,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	}
 
     	if (oldName != null && !oldName.equals(account.getName())) {
-    		for (Depot depot: dao.allOf(Depot.class)) {
+    		for (Depot depot: dao.findAll(Depot.class)) {
     			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
     				integrationPolicy.onAccountRename(oldName, account.getName());
     			}
@@ -95,9 +95,12 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	Query query = getSession().createQuery("update PullRequest set submitter=null where submitter=:submitter");
     	query.setParameter("submitter", account);
     	query.executeUpdate();
+
+    	query = getSession().createQuery("update PullRequest set lastEventUser=null where lastEventUser=:lastEventUser");
+    	query.setParameter("lastEventUser", account);
+    	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set assignee.id=:rootId where assignee=:assignee");
-    	query.setParameter("rootId", Account.ADMINISTRATOR_ID);
+    	query = getSession().createQuery("update PullRequest set assignee=null where assignee=:assignee");
     	query.setParameter("assignee", account);
     	query.executeUpdate();
     	
@@ -117,12 +120,16 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	query.setParameter("user", account);
     	query.executeUpdate();
 
+    	query = getSession().createQuery("update CodeComment set lastUpdateUser=null where lastUpdateUser=:user");
+    	query.setParameter("user", account);
+    	query.executeUpdate();
+    	
     	for (Depot depot: account.getDepots())
     		repositoryManager.delete(depot);
     	
 		dao.remove(account);
 		
-		for (Depot depot: dao.allOf(Depot.class)) {
+		for (Depot depot: dao.findAll(Depot.class)) {
 			for (Iterator<IntegrationPolicy> it = depot.getIntegrationPolicies().iterator(); it.hasNext();) {
 				if (it.next().onAccountDelete(account.getName()))
 					it.remove();
@@ -151,7 +158,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 
 	@Sessional
     @Override
-    public Account findByName(String userName) {
+    public Account find(String userName) {
     	idLock.readLock().lock();
     	try {
     		Long id = nameToId.get(userName);
@@ -166,7 +173,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 
     @Sessional
     @Override
-    public Account findByPerson(PersonIdent person) {
+    public Account find(PersonIdent person) {
     	idLock.readLock().lock();
     	try {
     		Long id = emailToId.get(person.getEmailAddress());
@@ -193,7 +200,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 	@Sessional
 	@Override
 	public void systemStarting() {
-        for (Account user: all()) {
+        for (Account user: findAll()) {
         	if (user.getEmail() != null)
         		emailToId.inverse().put(user.getId(), user.getEmail());
         	nameToId.inverse().put(user.getId(), user.getName());
@@ -214,18 +221,18 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 
 	@Sessional
 	@Override
-	public List<Account> allUsers() {
+	public List<Account> findAllUsers() {
 		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
 		criteria.add(Restrictions.eq("organization", false));
-		return query(criteria, 0, 0);
+		return findRange(criteria, 0, 0);
 	}
 
 	@Sessional
 	@Override
-	public List<Account> allOrganizations() {
+	public List<Account> findAllOrganizations() {
 		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
 		criteria.add(Restrictions.eq("organization", true));
-		return query(criteria, 0, 0);
+		return findRange(criteria, 0, 0);
 	}
 
 }

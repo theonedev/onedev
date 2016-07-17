@@ -31,50 +31,50 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	
 	@Override
 	public void onOpenRequest(PullRequest request) {
-		onChange(request, PullRequest.Event.OPENED);
+		onChange(request);
 	}
 
 	@Override
 	public void onUpdateRequest(PullRequestUpdate update) {
-		onChange(update.getRequest(), PullRequest.Event.UPDATED);
+		onChange(update.getRequest());
 	}
 
 	@Override
 	public void onReviewRequest(Review review, String comment) {
-		onChange(review.getUpdate().getRequest(), PullRequest.Event.REVIEWED);
+		onChange(review.getUpdate().getRequest());
 	}
 
 	@Override
 	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
-		onChange(request, PullRequest.Event.INTEGRATED);
+		onChange(request);
 	}
 
 	@Override
 	public void onDiscardRequest(PullRequest request, Account user, String comment) {
-		onChange(request, PullRequest.Event.DISCARDED);
+		onChange(request);
 	}
 
 	@Override
 	public void onIntegrationPreviewCalculated(PullRequest request) {
-		onChange(request, PullRequest.Event.INTEGRATION_PREVIEW_CALCULATED);
+		onChange(request);
 	}
 
 	@Override
 	public void onCommentRequest(PullRequestComment comment) {
-		onChange(comment.getRequest(), PullRequest.Event.COMMENTED);
+		onChange(comment.getRequest());
 	}
 
 	@Override
 	public void onVerifyRequest(PullRequest request) {
-		onChange(request, PullRequest.Event.VERIFIED);
+		onChange(request);
 	}
 
 	@Override
-	public void onAssignRequest(PullRequest request) {
-		onChange(request, PullRequest.Event.ASSIGNED);
+	public void onAssignRequest(PullRequest request, Account user) {
+		onChange(request);
 	}
 
-	private void onChange(PullRequest request, PullRequest.Event event) {
+	private void onChange(PullRequest request) {
 		/*
 		 * Make sure that pull request and associated objects are committed before
 		 * sending render request; otherwise rendering request may not reflect
@@ -83,7 +83,6 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 		 */
 		PullRequestChangeTrait trait = new PullRequestChangeTrait();
 		trait.requestId = request.getId();
-		trait.requestEvent = event;
 		dao.afterCommit(new Runnable() {
 
 			@Override
@@ -105,7 +104,7 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	
 	@Override
 	public void onReopenRequest(PullRequest request, Account user, String comment) {
-		onChange(request, PullRequest.Event.REOPENED);
+		onChange(request);
 	}
 
 	@Override
@@ -134,6 +133,18 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 
 	@Override
 	public void onDeleteRequest(PullRequest request) {
+	}
+
+	@Override
+	public void onRestoreSourceBranch(PullRequest request) {
+	}
+
+	@Override
+	public void onDeleteSourceBranch(PullRequest request) {
+	}
+
+	@Override
+	public void onWithdrawReview(Review review, Account user) {
 	}
 
 }

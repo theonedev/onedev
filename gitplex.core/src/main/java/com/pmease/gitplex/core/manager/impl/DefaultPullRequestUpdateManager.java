@@ -16,6 +16,7 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.TransactionInterceptor;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -23,36 +24,43 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.component.PullRequestEvent;
 import com.pmease.gitplex.core.listener.PullRequestListener;
-import com.pmease.gitplex.core.listener.PullRequestUpdateListener;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 
 @Singleton
-public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> implements PullRequestUpdateManager {
+public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 
+		implements PullRequestUpdateManager {
 	
-	private final Set<PullRequestListener> pullRequestListeners;
+	private final PullRequestManager pullRequestManager;
 	
-	private final Provider<Set<PullRequestUpdateListener>> pullRequestUpdateListenersProvider;
+	private final Provider<Set<PullRequestListener>> pullRequestListenersProvider;
 	
 	@Inject
-	public DefaultPullRequestUpdateManager(Dao dao,  
-			Set<PullRequestListener> pullRequestListeners, 
-			Provider<Set<PullRequestUpdateListener>> pullRequestUpdateListenersProvider,
+	public DefaultPullRequestUpdateManager(Dao dao, PullRequestManager pullRequestManager, 
+			Provider<Set<PullRequestListener>> pullRequestListenersProvider,
 			PullRequestCommentManager commentManager) {
 		super(dao);
 		
-		this.pullRequestListeners = pullRequestListeners;
-		this.pullRequestUpdateListenersProvider = pullRequestUpdateListenersProvider;
+		this.pullRequestManager = pullRequestManager;
+		this.pullRequestListenersProvider = pullRequestListenersProvider;
 	}
 
 	@Transactional
 	@Override
-	public void save(PullRequestUpdate update, boolean notify) {
-		for (PullRequestUpdateListener listener: pullRequestUpdateListenersProvider.get())
-			listener.onSaveUpdate(update);
-		
+	public void save(PullRequestUpdate update) {
 		PullRequest request = update.getRequest();
+		if (TransactionInterceptor.isInitiating()) {
+			for (PullRequestListener listener: pullRequestListenersProvider.get())
+				listener.onUpdateRequest(update);
+			request.setLastEvent(PullRequestEvent.UPDATED);
+			request.setLastEventDate(update.getDate());
+			request.setLastEventUser(null);
+			pullRequestManager.save(request);
+		}
+		
 		String sourceHead = request.getSource().getObjectName();
 
 		update.setMergeCommitHash(GitUtils.getMergeBase(request.getTargetDepot().getRepository(), 
@@ -74,11 +82,6 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			refUpdate.setNewObjectId(ObjectId.fromString(sourceHead));
 			GitUtils.updateRef(refUpdate);
 		}
-		if (notify) { 
-			for (PullRequestListener listener: pullRequestListeners)
-				listener.onUpdateRequest(update);
-		}
-		
 	}
 
 	@Sessional
@@ -91,7 +94,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 
 	@Sessional
 	@Override
-	public List<PullRequestUpdate> queryAfter(Depot depot, String updateUUID) {
+	public List<PullRequestUpdate> findAllAfter(Depot depot, String updateUUID) {
 		EntityCriteria<PullRequestUpdate> criteria = newCriteria();
 		criteria.createCriteria("request").add(Restrictions.eq("targetDepot", depot));
 		criteria.addOrder(Order.asc("id"));
@@ -101,7 +104,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 				criteria.add(Restrictions.gt("id", update.getId()));
 			}
 		}
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 }

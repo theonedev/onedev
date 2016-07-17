@@ -99,7 +99,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Override
 	public void execute() {
 		try {
-			for (Depot depot: dao.allOf(Depot.class)) {
+			for (Depot depot: dao.findAll(Depot.class)) {
 				File tempDir = getTempAttachmentDir(depot);
 				if (tempDir.exists()) {
 					for (File file: tempDir.listFiles()) {

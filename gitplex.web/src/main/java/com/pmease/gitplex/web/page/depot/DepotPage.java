@@ -81,7 +81,7 @@ public abstract class DepotPage extends AccountPage {
 		if (depotName.endsWith(Constants.DOT_GIT_EXT))
 			depotName = depotName.substring(0, depotName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Depot depot = GitPlex.getInstance(DepotManager.class).findBy(getAccount(), depotName);
+		Depot depot = GitPlex.getInstance(DepotManager.class).find(getAccount(), depotName);
 		
 		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + getAccount().getName() + "/" + depotName);

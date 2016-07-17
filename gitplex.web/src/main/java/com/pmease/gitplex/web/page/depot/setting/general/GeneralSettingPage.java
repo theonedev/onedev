@@ -82,7 +82,7 @@ public class GeneralSettingPage extends DepotSettingPage {
 				
 				Depot depot = getDepot();
 				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
-				Depot depotWithSameName = depotManager.findBy(getAccount(), depot.getName());
+				Depot depotWithSameName = depotManager.find(getAccount(), depot.getName());
 				if (depotWithSameName != null && !depotWithSameName.equals(depot)) {
 					String errorMessage = "This name has already been used by another repository in account " 
 							+ getAccount().getName() + "."; 
@@ -132,7 +132,7 @@ public class GeneralSettingPage extends DepotSettingPage {
 							@Override
 							public void query(String term, int page, Response<Account> response) {
 								List<Account> accounts = new ArrayList<>();
-								for (Account account: GitPlex.getInstance(AccountManager.class).all()) {
+								for (Account account: GitPlex.getInstance(AccountManager.class).findAll()) {
 									if (!account.equals(getAccount()) && SecurityUtils.canManage(account)) {
 										accounts.add(account);
 									}
@@ -150,7 +150,7 @@ public class GeneralSettingPage extends DepotSettingPage {
 							protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 								super.onSubmit(target, form);
 								DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
-								if (depotManager.findBy(account, getDepot().getName()) != null) {
+								if (depotManager.find(account, getDepot().getName()) != null) {
 									form.error("A repository with name '" + getDepot().getName() + "' already exist "
 											+ "under this account, please rename the repository and try transfer "
 											+ "again");

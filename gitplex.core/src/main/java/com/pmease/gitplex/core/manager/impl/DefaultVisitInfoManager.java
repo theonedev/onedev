@@ -14,8 +14,10 @@ import javax.inject.Singleton;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.listener.CodeCommentListener;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 
@@ -31,7 +33,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultVisitInfoManager implements VisitInfoManager {
+public class DefaultVisitInfoManager implements VisitInfoManager, CodeCommentListener {
 
 	private static final String INFO_DIR = "visit";
 	
@@ -217,4 +219,20 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 			return bytes;
 		}
 	}
+
+	@Override
+	public void onReplyComment(CodeCommentReply reply) {
+		visit(reply.getUser(), reply.getComment());
+	}
+
+	@Override
+	public void onComment(CodeComment comment) {
+		visit(comment.getUser(), comment);
+	}
+
+	@Override
+	public void onToggleResolve(CodeComment comment, Account user) {
+		visit(user, comment);
+	}
+	
 }

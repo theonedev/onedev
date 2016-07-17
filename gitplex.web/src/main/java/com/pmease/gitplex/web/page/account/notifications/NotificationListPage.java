@@ -10,6 +10,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
@@ -30,10 +31,9 @@ import com.pmease.gitplex.core.entity.Notification;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
-import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -72,12 +72,12 @@ public class NotificationListPage extends AccountLayoutPage {
 					Item<ICellPopulator<Notification>> cellItem,
 					String componentId, IModel<Notification> rowModel) {
 				Notification notification = rowModel.getObject();
-				cellItem.add(new RequestLink(componentId, new EntityModel<PullRequest>(notification.getRequest())) {
+				cellItem.add(new BookmarkablePageLink<Void>(componentId, RequestOverviewPage.class, 
+						RequestOverviewPage.paramsOf(notification.getRequest())) {
 
 					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.setName("a");
+					public IModel<?> getBody() {
+						return Model.of(rowModel.getObject().getRequest().getTitle());
 					}
 					
 				});

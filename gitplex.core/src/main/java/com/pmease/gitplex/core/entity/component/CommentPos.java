@@ -36,7 +36,6 @@ public class CommentPos implements Serializable {
 		this.commit = commit;
 	}
 
-	@Nullable
 	public String getPath() {
 		return path;
 	}
@@ -45,7 +44,6 @@ public class CommentPos implements Serializable {
 		this.path = path;
 	}
 
-	@Nullable
 	public TextRange getRange() {
 		return range;
 	}

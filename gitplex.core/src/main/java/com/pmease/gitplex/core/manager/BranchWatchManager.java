@@ -9,8 +9,8 @@ import com.pmease.gitplex.core.entity.Depot;
 
 public interface BranchWatchManager extends EntityManager<BranchWatch> {
 	
-	Collection<BranchWatch> findBy(Account user, Depot depot);
+	Collection<BranchWatch> find(Account user, Depot depot);
 	
-	Collection<BranchWatch> findBy(Depot depot, String branch);
+	Collection<BranchWatch> find(Depot depot, String branch);
 	
 }

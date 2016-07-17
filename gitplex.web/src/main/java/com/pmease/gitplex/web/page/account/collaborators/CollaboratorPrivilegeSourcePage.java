@@ -27,7 +27,7 @@ public class CollaboratorPrivilegeSourcePage extends CollaboratorPage {
 			@Override
 			protected Depot load() {
 				return Preconditions.checkNotNull(
-						GitPlex.getInstance(DepotManager.class).findBy(getAccount(), depotName));
+						GitPlex.getInstance(DepotManager.class).find(getAccount(), depotName));
 			}
 			
 		};

@@ -1,21 +1,15 @@
 package com.pmease.gitplex.web.websocket;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
-import com.pmease.gitplex.core.entity.PullRequest;
 
 public class PullRequestChangeTrait implements WebSocketTrait {
 	
 	private static final long serialVersionUID = 1L;
 
 	public Long requestId;
-	
-	@Nullable
-	public PullRequest.Event requestEvent;
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -36,14 +30,7 @@ public class PullRequestChangeTrait implements WebSocketTrait {
 	public boolean is(WebSocketTrait trait) {
 		if (trait instanceof PullRequestChangeTrait) {
 			PullRequestChangeTrait pullRequestChangeTrait = (PullRequestChangeTrait) trait;
-			if (requestId.equals(pullRequestChangeTrait.requestId)) {
-				if (requestEvent == null) 
-					return pullRequestChangeTrait.requestEvent == null;
-				else 
-					return pullRequestChangeTrait.requestEvent == null || requestEvent == pullRequestChangeTrait.requestEvent;
-			} else {
-				return false;
-			}
+			return requestId.equals(pullRequestChangeTrait.requestId);
 		} else {
 			return false;
 		}

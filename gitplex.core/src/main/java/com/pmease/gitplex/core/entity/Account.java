@@ -401,21 +401,21 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	public Collection<TeamAuthorization> getAllTeamAuthorizationsInOrganization() {
 		if (allTeamAuthorizationsInOrganization == null) {
-			allTeamAuthorizationsInOrganization = GitPlex.getInstance(TeamAuthorizationManager.class).query(this);
+			allTeamAuthorizationsInOrganization = GitPlex.getInstance(TeamAuthorizationManager.class).findAll(this);
 		}
 		return allTeamAuthorizationsInOrganization;
 	}
 
 	public Collection<UserAuthorization> getAllUserAuthorizationsInOrganization() {
 		if (allUserAuthorizationsInOrganization == null) {
-			allUserAuthorizationsInOrganization = GitPlex.getInstance(UserAuthorizationManager.class).query(this);
+			allUserAuthorizationsInOrganization = GitPlex.getInstance(UserAuthorizationManager.class).findAll(this);
 		}
 		return allUserAuthorizationsInOrganization;
 	}
 	
 	public Collection<TeamMembership> getAllTeamMembershipsInOrganiation() {
 		if (allTeamMembershipsInOrganiation == null) {
-			allTeamMembershipsInOrganiation = GitPlex.getInstance(TeamMembershipManager.class).query(this);
+			allTeamMembershipsInOrganiation = GitPlex.getInstance(TeamMembershipManager.class).findAll(this);
 		}
 		return allTeamMembershipsInOrganiation;
 	}

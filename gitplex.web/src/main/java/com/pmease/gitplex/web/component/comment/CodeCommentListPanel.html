@@ -24,23 +24,23 @@
 		</tr>
 	</table>
 	<wicket:fragment wicket:id="commentFrag">
-		<a wicket:id="link">
-			<div class="first-line">
-				<span wicket:id="title" class="title"></span> 
-				<span wicket:id="resolved" title="This comment is resolved" class="resolved fa fa-check-circle"></span>
-			</div>
-			<div class="second-line">
-				Commented by 
-				<span wicket:id="user" class="user"></span>
-				on 
-				<span wicket:id="what" class="what"></span>
-				<span wicket:id="age" class="age"></span>
-			</div>
-			<div wicket:id="lastReply" class="third-line">
-				Last replied by 
-				<span wicket:id="user" class="user"></span>	
-				<span wicket:id="age" class="age"></span>
-			</div>
-		</a>
+		<div class="first-line">
+			<a wicket:id="title" class="title"><span wicket:id="label"></span></a> 
+			<span wicket:id="resolved" title="This comment is resolved" class="resolved fa fa-check-circle"></span>
+		</div>
+		<div class="second-line">
+			commented by 
+			<a wicket:id="user" class="user"></a>
+			on 
+			<a wicket:id="file" class="file"><span wicket:id="label"></span></a>
+			<span wicket:id="age" class="age"></span>
+		</div>
+		<div wicket:id="lastEvent" class="third-line">
+			<span wicket:id="description"></span>
+			<wicket:enclosure child="user"> 
+			by <a wicket:id="user" class="user"></a>	
+			</wicket:enclosure>
+			<span wicket:id="age" class="age"></span>
+		</div>
 	</wicket:fragment>
 </wicket:panel>

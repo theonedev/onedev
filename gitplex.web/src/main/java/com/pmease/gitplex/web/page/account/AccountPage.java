@@ -28,7 +28,7 @@ public abstract class AccountPage extends LayoutPage {
 		String name = params.get(PARAM_ACCOUNT).toString();
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
 		
-		Account account = GitPlex.getInstance(AccountManager.class).findByName(name);
+		Account account = GitPlex.getInstance(AccountManager.class).find(name);
 		if (account == null) 
 			throw (new EntityNotFoundException("Account " + name + " not found"));
 		

@@ -17,14 +17,17 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     @Nullable 
     PullRequest findOpen(DepotAndBranch target, DepotAndBranch source);
     
-    Collection<PullRequest> queryOpenTo(DepotAndBranch target, @Nullable Depot sourceDepot);
+    Collection<PullRequest> findAllOpenTo(DepotAndBranch target, @Nullable Depot sourceDepot);
 
-    Collection<PullRequest> queryOpenFrom(DepotAndBranch source, @Nullable Depot targetDepot);
+    Collection<PullRequest> findAllOpenFrom(DepotAndBranch source, @Nullable Depot targetDepot);
    
-    Collection<PullRequest> queryOpen(DepotAndBranch sourceOrTarget);
+    Collection<PullRequest> findAllOpen(DepotAndBranch sourceOrTarget);
     
     @Nullable
     PullRequest find(Depot target, long number);
+    
+	@Nullable
+	PullRequest find(String uuid);
     
     boolean canIntegrate(PullRequest request);
     
@@ -44,9 +47,9 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
     void onTargetBranchUpdate(PullRequest request);
     
-    void onSourceBranchUpdate(PullRequest request, boolean notify);
+    void onSourceBranchUpdate(PullRequest request);
     
-    void onAssigneeChange(PullRequest request);
+    void changeAssignee(PullRequest request);
     
     void check(PullRequest request);
     

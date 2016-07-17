@@ -31,7 +31,7 @@ public class NewUserPage extends AdministrationPage {
 				super.onSubmit();
 				
 				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = userManager.findByName(user.getName());
+				Account accountWithSameName = userManager.find(user.getName());
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");

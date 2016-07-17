@@ -46,7 +46,7 @@ public class UserResource {
 			criteria.add(Restrictions.eq("email", email));
 		if (fullName != null)
 			criteria.add(Restrictions.eq("fullName", fullName));
-		return dao.query(criteria);
+		return dao.findAll(criteria);
 	}
 	
     @GET

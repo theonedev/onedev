@@ -31,7 +31,7 @@ public class TeamChoiceProvider extends AbstractTeamChoiceProvider {
 		EntityCriteria<Team> criteria = teamManager.newCriteria();
 		criteria.add(Restrictions.ilike("name", term, MatchMode.ANYWHERE))
 				.add(Restrictions.eq("organization", organizationModel.getObject()));
-		List<Team> teams = teamManager.query(criteria, first, Constants.DEFAULT_PAGE_SIZE + 1);
+		List<Team> teams = teamManager.findRange(criteria, first, Constants.DEFAULT_PAGE_SIZE + 1);
 
 		if (teams.size() <= Constants.DEFAULT_PAGE_SIZE) {
 			response.addAll(teams);

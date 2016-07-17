@@ -99,7 +99,7 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					protected Collection<Depot> load() {
-						return GitPlex.getInstance(DepotManager.class).getAccessibles(null, getLoginUser());
+						return GitPlex.getInstance(DepotManager.class).findAllAccessible(null, getLoginUser());
 					}
 					
 				}, Depot.idOf(getDepot())) {

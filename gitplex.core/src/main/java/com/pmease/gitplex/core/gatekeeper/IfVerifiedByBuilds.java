@@ -91,7 +91,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		VerificationManager verificationManager = GitPlex.getInstance(VerificationManager.class);
 
 		int passedCount = 0;
-		Collection<Verification> verifications = verificationManager.findBy(request, commit);
+		Collection<Verification> verifications = verificationManager.findAll(request, commit);
 		for (Verification each: verifications) {
 			if (each.getStatus() == Verification.Status.NOT_PASSED)
 				return failed(Lists.newArrayList("At least one build is not passed for the commit"));

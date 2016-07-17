@@ -45,7 +45,7 @@ public class RegisterPage extends BasePage {
 				super.onSubmit();
 				
 				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = userManager.findByName(account.getName());
+				Account accountWithSameName = userManager.find(account.getName());
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");

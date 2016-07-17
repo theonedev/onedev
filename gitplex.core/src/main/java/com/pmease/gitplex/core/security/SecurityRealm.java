@@ -47,7 +47,7 @@ public class SecurityRealm extends AbstractRealm {
 
     @Override
     protected AbstractUser getUserByName(String userName) {
-    	return accountManager.findByName(userName);
+    	return accountManager.find(userName);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class SecurityRealm extends AbstractRealm {
 			                    		
 	                				Set<Team> teams = new HashSet<>();
 	                				for (TeamMembership teamMembership: 
-	                						teamMembershipManager.query(checkAccount, user)) {
+	                						teamMembershipManager.findAll(checkAccount, user)) {
 	                					teams.add(teamMembership.getTeam());
 	                				}
 		                			for (TeamAuthorization authorization: checkDepot.getAuthorizedTeams()) {

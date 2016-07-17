@@ -55,7 +55,7 @@ public class CreateDepotPage extends LayoutPage {
 				Account owner = getOwner();
 				depot.setAccount(owner);
 				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
-				Depot depotWithSameName = depotManager.findBy(owner, depot.getName());
+				Depot depotWithSameName = depotManager.find(owner, depot.getName());
 				if (depotWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another repository in account '" + owner.getDisplayName() + "'");
@@ -97,7 +97,7 @@ public class CreateDepotPage extends LayoutPage {
 					Criterion criterion = Restrictions.and(Restrictions.or(
 							Restrictions.ilike("name", term, MatchMode.ANYWHERE),
 							Restrictions.ilike("fullName", term, MatchMode.ANYWHERE)));
-					List<Account> accounts = accountManager.query(accountManager.newCriteria()
+					List<Account> accounts = accountManager.findRange(accountManager.newCriteria()
 							.add(criterion).addOrder(Order.asc("name")), first, Constants.DEFAULT_PAGE_SIZE + 1);
 
 					if (accounts.size() <= Constants.DEFAULT_PAGE_SIZE) {

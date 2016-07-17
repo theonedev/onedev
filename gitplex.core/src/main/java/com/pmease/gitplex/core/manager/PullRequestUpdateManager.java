@@ -10,10 +10,8 @@ import com.pmease.gitplex.core.entity.PullRequestUpdate;
 
 public interface PullRequestUpdateManager extends EntityManager<PullRequestUpdate> {
 	
-	void save(PullRequestUpdate update, boolean notify);
-	
 	@Nullable
 	PullRequestUpdate find(String uuid);
 	
-	List<PullRequestUpdate> queryAfter(Depot depot, @Nullable String updateUUID);
+	List<PullRequestUpdate> findAllAfter(Depot depot, @Nullable String updateUUID);
 }

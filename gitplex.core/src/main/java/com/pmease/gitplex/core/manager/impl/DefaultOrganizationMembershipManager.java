@@ -89,7 +89,7 @@ public class DefaultOrganizationMembershipManager extends AbstractEntityManager<
 	public void delete(OrganizationMembership organizationMembership) {
 		Account organization = organizationMembership.getOrganization();
 		Account user = organizationMembership.getUser();
-		for (TeamMembership teamMembership: teamMembershipManager.query(organization, user)) {
+		for (TeamMembership teamMembership: teamMembershipManager.findAll(organization, user)) {
 			teamMembershipManager.delete(teamMembership);
 		}
 		dao.remove(organizationMembership);

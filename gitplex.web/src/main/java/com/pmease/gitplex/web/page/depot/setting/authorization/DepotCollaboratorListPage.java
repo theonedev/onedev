@@ -128,7 +128,7 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 			public void query(String term, int page, Response<Account> response) {
 				List<Account> collaborators = new ArrayList<>();
 				term = term.toLowerCase();
-				for (Account user: GitPlex.getInstance(AccountManager.class).allUsers()) {
+				for (Account user: GitPlex.getInstance(AccountManager.class).findAllUsers()) {
 					if (user.matches(term) && !user.equals(getAccount()) && !user.isAdministrator()) {
 						boolean authorized = false;
 						for (UserAuthorization authorization: depotModel.getObject().getAuthorizedUsers()) {

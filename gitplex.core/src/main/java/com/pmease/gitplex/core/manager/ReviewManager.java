@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.entity.Review;
 
 public interface ReviewManager extends EntityManager<Review> {
 
-	Review findBy(Account reviewer, PullRequestUpdate update);
+	Review find(Account reviewer, PullRequestUpdate update);
 
 	void review(PullRequest request, Account reviewer, Review.Result result, @Nullable String comment);
 	
@@ -24,7 +24,7 @@ public interface ReviewManager extends EntityManager<Review> {
 	 * @return
 	 * 			list of reviews ordered by review date
 	 */
-	List<Review> findBy(PullRequest request);
+	List<Review> findAll(PullRequest request);
 	
 	void delete(Review review);
 }

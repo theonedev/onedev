@@ -10,12 +10,12 @@
 #request-detail tr.activity>td.spacer {
 	border-right: 1px solid #E8E8E8;
 }
-#request-detail .discussion>td.avatar {
+#request-detail td.avatar {
 	width: 48px; 
 	border-left: 4px solid white;
 	padding-left: 8px;
 }
-#request-detail .discussion>td.spacer {
+#request-detail td.spacer {
 	width: 30px; 
 }
 #request-detail .discussion>td.content>div.activity {

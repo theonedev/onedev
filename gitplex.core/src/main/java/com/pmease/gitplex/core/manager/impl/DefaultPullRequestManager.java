@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -39,7 +40,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +48,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.TransactionInterceptor;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
@@ -56,12 +57,13 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.commons.util.match.PatternMatcher;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.CodeCommentRelation;
+import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.entity.PullRequestActivity;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
@@ -69,17 +71,19 @@ import com.pmease.gitplex.core.entity.component.CloseInfo;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.entity.component.PullRequestEvent;
+import com.pmease.gitplex.core.listener.CodeCommentListener;
 import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
-import com.pmease.gitplex.core.manager.PullRequestActivityManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.core.util.ChildAwareMatcher;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
@@ -87,7 +91,7 @@ import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest> implements PullRequestManager, 
-		DepotListener, RefListener, LifecycleListener {
+		DepotListener, RefListener, LifecycleListener, CodeCommentListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
@@ -103,9 +107,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final AccountManager accountManager;
 	
+	private final VisitInfoManager visitInfoManager;
+	
 	private final UnitOfWork unitOfWork;
 	
-	private final Set<PullRequestListener> pullRequestListeners;
+	private final Provider<Set<PullRequestListener>> listenersProvider;
 	
 	private final ReviewInvitationManager reviewInvitationManager;
 	
@@ -113,28 +119,25 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	private final WorkExecutor workManager;
 	
-	private final PullRequestActivityManager pullRequestActivityManager;
-	
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 
 	@Inject
-	public DefaultPullRequestManager(Dao dao, 
+	public DefaultPullRequestManager(Dao dao, VisitInfoManager visitInfoManager,
 			PullRequestUpdateManager pullRequestUpdateManager,  
 			ReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
 			NotificationManager notificationManager, PullRequestCommentManager commentManager, 
 			MarkdownManager markdownManager, WorkExecutor workManager, 
-			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners, 
-			PullRequestActivityManager pullRequestActivityManager) {
+			UnitOfWork unitOfWork, Provider<Set<PullRequestListener>> listenersProvider) {
 		super(dao);
 		
+		this.visitInfoManager = visitInfoManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.reviewInvitationManager = reviewInvitationManager;
 		this.commentManager = commentManager;
 		this.accountManager = accountManager;
 		this.workManager = workManager;
 		this.unitOfWork = unitOfWork;
-		this.pullRequestListeners = pullRequestListeners;
-		this.pullRequestActivityManager = pullRequestActivityManager;
+		this.listenersProvider = listenersProvider;
 	}
 
 	@Transactional
@@ -158,7 +161,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public void restoreSourceBranch(PullRequest request) {
 		Preconditions.checkState(!request.isOpen() && request.getSourceDepot() != null);
-
 		if (request.getSource().getObjectName(false) == null) {
 			RevCommit latestCommit = request.getLatestUpdate().getHeadCommit();
 			try {
@@ -167,12 +169,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				Throwables.propagate(e);
 			}
 			request.getSourceDepot().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
-			PullRequestActivity activity = new PullRequestActivity();
-			activity.setRequest(request);
-			activity.setAction(PullRequestActivity.Action.RESTORE_SOURCE_BRANCH);
-			activity.setDate(new Date());
-			activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-			pullRequestActivityManager.save(activity);
+			if (TransactionInterceptor.isInitiating()) {
+				for (PullRequestListener listener: listenersProvider.get()) {
+					listener.onRestoreSourceBranch(request);
+				}
+			}
 		}
 	}
 
@@ -183,13 +184,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		if (request.getSource().getObjectName(false) != null) {
 			request.getSource().delete();
-			
-			PullRequestActivity activity = new PullRequestActivity();
-			activity.setRequest(request);
-			activity.setAction(PullRequestActivity.Action.DELETE_SOURCE_BRANCH);
-			activity.setDate(new Date());
-			activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-			pullRequestActivityManager.save(activity);
+			if (TransactionInterceptor.isInitiating()) {
+				for (PullRequestListener listener: listenersProvider.get()) {
+					listener.onDeleteSourceBranch(request);
+				}
+			}
 		}
 	}
 	
@@ -199,20 +198,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Preconditions.checkState(!request.isOpen(), "Pull request is alreay opened");
 		
 		Account user = accountManager.getCurrent();
+		
 		request.setCloseInfo(null);
-		request.setSubmitter(user);
-		request.setSubmitDate(new Date());
+		request.setLastEvent(PullRequestEvent.REOPENED);
+		request.setLastEventDate(new Date());
+		request.setLastEventUser(user);
 		
 		dao.persist(request);
 		
-		PullRequestActivity activity = new PullRequestActivity();
-		activity.setRequest(request);
-		activity.setDate(new DateTime(request.getSubmitDate()).minusSeconds(1).toDate());
-		activity.setAction(PullRequestActivity.Action.REOPEN);
-		activity.setUser(user);
-		
-		pullRequestActivityManager.save(activity);
-
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setContent(comment);
@@ -221,10 +214,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			commentManager.save(requestComment);
 		}
 
-		onSourceBranchUpdate(request, false);
+		onSourceBranchUpdate(request);
 		
 		if (request.isOpen()) {
-			for (PullRequestListener listener: pullRequestListeners)
+			for (PullRequestListener listener: listenersProvider.get())
 				listener.onReopenRequest(request, user, comment);
 		}
 	}
@@ -233,14 +226,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
  	public void discard(PullRequest request, final String comment) {
 		Account user = accountManager.getCurrent();
-		PullRequestActivity activity = new PullRequestActivity();
-		activity.setRequest(request);
-		activity.setDate(new Date());
-		activity.setAction(PullRequestActivity.Action.DISCARD);
-		activity.setUser(user);
 		
-		pullRequestActivityManager.save(activity);
-
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setContent(comment);
@@ -251,14 +237,18 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 
 		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setCloseDate(activity.getDate());
+		closeInfo.setCloseDate(new Date());
 		closeInfo.setClosedBy(user);
 		closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
-		request.setLastEventDate(activity.getDate());
-		dao.persist(request);
 		
-		for (PullRequestListener listener: pullRequestListeners)
+		request.setLastEvent(PullRequestEvent.DISCARDED);
+		request.setLastEventUser(user);
+		request.setLastEventDate(new Date());
+		
+		dao.persist(request);
+
+		for (PullRequestListener listener: listenersProvider.get())
 			listener.onDiscardRequest(request, user, comment);
 	}
 	
@@ -276,11 +266,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (integrated == null)
 			throw new IllegalStateException("There are integration conflicts.");
 		
+		Account user = accountManager.getCurrent();
+
 		ObjectId integratedCommitId = ObjectId.fromString(integrated);
 		RevCommit integratedCommit = request.getTargetDepot().getRevCommit(integratedCommitId);
 		
-		Account user = accountManager.getCurrent();
-
 		Depot targetDepot = request.getTargetDepot();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		if ((strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY || strategy == MERGE_WITH_SQUASH) 
@@ -327,14 +317,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		targetDepot.cacheObjectId(request.getTargetRef(), integratedCommitId);
 		onRefUpdate(targetDepot, targetRef, ObjectId.fromString(preview.getTargetHead()), integratedCommitId);
 		
-		PullRequestActivity activity = new PullRequestActivity();
-		activity.setRequest(request);
-		activity.setDate(new Date());
-		activity.setAction(PullRequestActivity.Action.INTEGRATE);
-		activity.setUser(user);
-		
-		pullRequestActivityManager.save(activity);
-
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setContent(comment);
@@ -344,16 +326,18 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 
 		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setCloseDate(activity.getDate());
+		closeInfo.setCloseDate(new Date());
 		closeInfo.setClosedBy(user);
 		closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
 		request.setCloseInfo(closeInfo);
 		
-		request.setLastEventDate(activity.getDate());
-
+		request.setLastEvent(PullRequestEvent.INTEGRATED);
+		request.setLastEventUser(user);
+		request.setLastEventDate(new Date());
+		
 		dao.persist(request);
-
-		for (PullRequestListener listener: pullRequestListeners)
+		
+		for (PullRequestListener listener: listenersProvider.get())
 			listener.onIntegrateRequest(request, user, comment);
 	}
 	
@@ -392,29 +376,23 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public void open(PullRequest request) {
 		request.setNumber(getNextNumber(request.getTargetDepot()));
+		request.setLastEvent(PullRequestEvent.OPENED);
+		request.setLastEventDate(request.getSubmitDate());
+		request.setLastEventUser(request.getSubmitter());
 		dao.persist(request);
-		
-		PullRequestActivity activity = new PullRequestActivity();
-		activity.setDate(request.getSubmitDate());
-		activity.setAction(PullRequestActivity.Action.OPEN);
-		activity.setRequest(request);
-		activity.setUser(request.getSubmitter());
-		pullRequestActivityManager.save(activity);
 		
 		RefUpdate refUpdate = request.getTargetDepot().updateRef(request.getBaseRef());
 		refUpdate.setNewObjectId(ObjectId.fromString(request.getBaseCommitHash()));
-		refUpdate.setExpectedOldObjectId(ObjectId.zeroId());
 		GitUtils.updateRef(refUpdate);
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
-			update.setDate(new DateTime(activity.getDate()).plusSeconds(1).toDate());
-			pullRequestUpdateManager.save(update, false);
+			pullRequestUpdateManager.save(update);
 		}
 		
 		for (ReviewInvitation invitation: request.getReviewInvitations())
 			reviewInvitationManager.save(invitation);
 
-		for (PullRequestListener listener: pullRequestListeners)
+		for (PullRequestListener listener: listenersProvider.get())
 			listener.onOpenRequest(request);
 		
 		afterCommit(new Runnable() {
@@ -446,13 +424,20 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Transactional
 	@Override
-	public void onAssigneeChange(PullRequest request) {
+	public void changeAssignee(PullRequest request) {
+		Account user = accountManager.getCurrent();
+		request.setLastEvent(PullRequestEvent.ASSIGNED);
+		request.setLastEventUser(user);
+		request.setLastEventDate(new Date());
 		dao.persist(request);
-		for (PullRequestListener listener: pullRequestListeners)
-			listener.onAssignRequest(request);
+		
+		if (TransactionInterceptor.isInitiating()) {
+			for (PullRequestListener listener: listenersProvider.get())
+				listener.onAssignRequest(request, user);
+		}
 	}
 	
-	@Transactional
+	@Sessional
 	@Override
 	public void onTargetBranchUpdate(PullRequest request) {
 		String targetHead = request.getTarget().getObjectName();
@@ -469,37 +454,37 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	private void closeIfMerged(PullRequest request) {
 		if (request.getTargetDepot().isMergedInto(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getObjectName())) {
-			PullRequestActivity activity = new PullRequestActivity();
-			activity.setRequest(request);
-			activity.setUser(GitPlex.getInstance(AccountManager.class).getRoot());
-			activity.setAction(PullRequestActivity.Action.INTEGRATE);
-			activity.setDate(new Date());
-			pullRequestActivityManager.save(activity);
+			Account user = accountManager.getCurrent();
 			
 			request.setLastIntegrationPreview(null);
 			CloseInfo closeInfo = new CloseInfo();
-			closeInfo.setCloseDate(activity.getDate());
-			closeInfo.setClosedBy(activity.getUser());
+			closeInfo.setCloseDate(new Date());
+			closeInfo.setClosedBy(user);
 			closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
 			request.setCloseInfo(closeInfo);
-			request.setLastEventDate(activity.getDate());
+			
+			request.setLastEvent(PullRequestEvent.INTEGRATED);
+			request.setLastEventUser(user);
+			request.setLastEventDate(new Date());
 			
 			dao.persist(request);
-			
-			for (PullRequestListener listener: pullRequestListeners)
-				listener.onIntegrateRequest(request, null, null);
+
+			if (TransactionInterceptor.isInitiating()) {
+				for (PullRequestListener listener: listenersProvider.get())
+					listener.onIntegrateRequest(request, user, null);
+			}
 		} 
 	}
 
-	@Transactional
+	@Sessional
 	@Override
-	public void onSourceBranchUpdate(PullRequest request, boolean notify) {
+	public void onSourceBranchUpdate(PullRequest request) {
 		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			PullRequestUpdate update = new PullRequestUpdate();
 			update.setRequest(request);
 			update.setHeadCommitHash(request.getSource().getObjectName());
 			request.addUpdate(update);
-			pullRequestUpdateManager.save(update, notify);
+			pullRequestUpdateManager.save(update);
 			closeIfMerged(request);
 
 			if (request.isOpen()) {
@@ -533,7 +518,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	 * did not call it, we can always call it later), so normally should be called in an 
 	 * executor
 	 */
-	@Transactional
+	@Sessional
 	@Override
 	public void check(PullRequest request) {
 		Date now = new Date();
@@ -541,26 +526,25 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			closeIfMerged(request);
 			if (request.isOpen()) {
 				if (request.getStatus() == PENDING_UPDATE) {
-					for (PullRequestListener listener: pullRequestListeners)
+					for (PullRequestListener listener: listenersProvider.get())
 						listener.pendingUpdate(request);
 				} else if (request.getStatus() == PENDING_INTEGRATE) {
-					for (PullRequestListener listener: pullRequestListeners)
-						listener.pendingIntegration(request);
-					
 					IntegrationPreview integrationPreview = request.getIntegrationPreview();
 					if (integrationPreview != null 
 							&& integrationPreview.getIntegrated() != null 
 							&& request.getAssignee() == null) {
 						integrate(request, "Integrated automatically by system");
+					} else {
+						for (PullRequestListener listener: listenersProvider.get())
+							listener.pendingIntegration(request);
 					}
 				} else if (request.getStatus() == PENDING_APPROVAL) {
-					for (PullRequestListener listener: pullRequestListeners)
-						listener.pendingApproval(request);
-					
 					for (ReviewInvitation invitation: request.getReviewInvitations()) { 
 						if (!invitation.getDate().before(now))
 							reviewInvitationManager.save(invitation);
 					}
+					for (PullRequestListener listener: listenersProvider.get())
+						listener.pendingApproval(request);
 				}
 			}
 		}
@@ -657,7 +641,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 								integrate(request, "Integrated automatically by GitPlex");
 							}
 							
-							for (PullRequestListener listener: pullRequestListeners)
+							for (PullRequestListener listener: listenersProvider.get())
 								listener.onIntegrationPreviewCalculated(request);
 						}
 						logger.info("Integration preview of pull request #{} in repository '{}' is calculated.", 
@@ -720,10 +704,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void onRenameDepot(Depot renamedDepot, String oldName) {
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		final String branch = GitUtils.ref2branch(refName);
+		String branch = GitUtils.ref2branch(refName);
 		if (branch != null) {
 			DepotAndBranch depotAndBranch = new DepotAndBranch(depot, branch);
 			if (!newCommit.equals(ObjectId.zeroId())) {
@@ -733,9 +717,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				 * in a executor service like target branch update below
 				 */
 				Criterion criterion = Restrictions.and(ofOpen(), ofSource(depotAndBranch));
-				for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) {
+				for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
 					if (depot.getObjectId(request.getBaseCommitHash(), false) != null)
-						onSourceBranchUpdate(request, true);
+						onSourceBranchUpdate(request);
 					else
 						logger.error("Unable to update pull request #{} due to unexpected source repository.", request.getNumber());
 				}
@@ -753,7 +737,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							        ThreadContext.bind(accountManager.getRoot().asSubject());
 									DepotAndBranch depotAndBranch = new DepotAndBranch(depotId, branch);								
 									Criterion criterion = Restrictions.and(ofOpen(), ofTarget(depotAndBranch));
-									for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) { 
+									for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) { 
 										if (request.getSourceDepot().getObjectId(request.getBaseCommitHash(), false) != null)
 											onTargetBranchUpdate(request);
 										else
@@ -772,7 +756,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				Criterion criterion = Restrictions.and(
 						ofOpen(), 
 						Restrictions.or(ofSource(depotAndBranch), ofTarget(depotAndBranch)));
-				for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) {
+				for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
 					if (request.getTargetDepot().equals(depot) && request.getTargetBranch().equals(branch)) 
 						discard(request, "Target branch is deleted.");
 					else
@@ -791,45 +775,45 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public Collection<PullRequest> queryOpenTo(DepotAndBranch target, @Nullable Depot sourceDepot) {
+	public Collection<PullRequest> findAllOpenTo(DepotAndBranch target, @Nullable Depot sourceDepot) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofTarget(target));
 
 		if (sourceDepot != null)
 			criteria.add(Restrictions.eq("sourceDepot", sourceDepot));
 		criteria.add(ofOpen());
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Sessional
 	@Override
-	public Collection<PullRequest> queryOpenFrom(DepotAndBranch source, @Nullable Depot targetDepot) {
+	public Collection<PullRequest> findAllOpenFrom(DepotAndBranch source, @Nullable Depot targetDepot) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofSource(source));
 		
 		if (targetDepot != null)
 			criteria.add(Restrictions.eq("targetDepot", targetDepot));
 		criteria.add(ofOpen());
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Sessional
 	@Override
-	public Collection<PullRequest> queryOpen(DepotAndBranch sourceOrTarget) {
+	public Collection<PullRequest> findAllOpen(DepotAndBranch sourceOrTarget) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
 		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
-		return query(criteria);
+		return findAll(criteria);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public void checkSanity() {
 		logger.info("Checking sanity of pull requests...");
 		
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
-		for (PullRequest request: query(criteria)) {
+		for (PullRequest request: findAll(criteria)) {
 			Depot sourceDepot = request.getSourceDepot();
 			if (sourceDepot == null) {
 				discard(request, "Source repository is deleted.");
@@ -844,7 +828,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					if (sourceHead == null) 
 						discard(request, "Source branch is deleted.");
 					else 
-						onSourceBranchUpdate(request, true);
+						onSourceBranchUpdate(request);
 				} else {
 					logger.error("Unable to update pull request #{} due to unexpected source repository", request.getNumber());
 				}
@@ -889,18 +873,56 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		return count(criteria);
 	}
 
-	@Override
-	public void onSaveDepot(Depot depot) {
-	}
-
 	@Sessional
 	@Override
 	public PullRequest find(Depot target, long number) {
 		EntityCriteria<PullRequest> criteria = newCriteria();
 		criteria.add(Restrictions.eq("targetDepot", target));
 		criteria.add(Restrictions.eq("number", number));
-		
 		return find(criteria);
+	}
+
+	@Sessional
+	@Override
+	public PullRequest find(String uuid) {
+		EntityCriteria<PullRequest> criteria = newCriteria();
+		criteria.add(Restrictions.eq("uuid", uuid));
+		return find(criteria);
+	}
+
+	@Override
+	public void onComment(CodeComment comment) {
+	}
+
+	@Override
+	public void onReplyComment(CodeCommentReply reply) {
+		for (CodeCommentRelation relation: reply.getComment().getRequestRelations()) {
+			PullRequest request = relation.getRequest();
+			request.setLastEvent(PullRequestEvent.CODE_COMMENT_REPLIED);
+			request.setLastEventDate(reply.getDate());
+			request.setLastEventUser(reply.getUser());
+			request.setLastCodeCommentEventDate(reply.getDate());
+			save(request);
+			
+			visitInfoManager.visit(reply.getUser(), request);
+		}
+	}
+
+	@Override
+	public void onToggleResolve(CodeComment comment, Account user) {
+		for (CodeCommentRelation relation: comment.getRequestRelations()) {
+			PullRequest request = relation.getRequest();
+			if (comment.isResolved())
+				request.setLastEvent(PullRequestEvent.CODE_COMMENT_RESOLVED);
+			else
+				request.setLastEvent(PullRequestEvent.CODE_COMMENT_UNRESOLVED);
+			request.setLastEventDate(new Date());
+			request.setLastEventUser(user);
+			request.setLastCodeCommentEventDate(new Date());
+			save(request);
+			
+			visitInfoManager.visit(user, request);
+		}
 	}
 
 }

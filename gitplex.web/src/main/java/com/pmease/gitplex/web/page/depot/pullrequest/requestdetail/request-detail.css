@@ -95,3 +95,11 @@
 	font-family: monospace;
 	margin: 4px 0 16px 0;
 }
+
+#request-detail>ul.tabs>li>a .fa-circle {
+	color: #4667EE;
+	display: none;
+}
+#request-detail>ul.tabs>li>a.new .fa-circle {
+	display: inline;
+}

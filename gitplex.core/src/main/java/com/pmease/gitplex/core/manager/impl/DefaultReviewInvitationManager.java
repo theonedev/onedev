@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.manager.impl;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
@@ -21,14 +22,13 @@ import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 @Singleton
 public class DefaultReviewInvitationManager extends AbstractEntityManager<ReviewInvitation> implements ReviewInvitationManager {
 
-	private final Set<PullRequestListener> pullRequestListeners;
+	private final Provider<Set<PullRequestListener>> listenersProvider;
 	
 	@Inject
-	public DefaultReviewInvitationManager(Dao dao, 
-			Set<PullRequestListener> pullRequestListeners) {
+	public DefaultReviewInvitationManager(Dao dao, Provider<Set<PullRequestListener>> listenersProvider) {
 		super(dao);
 		
-		this.pullRequestListeners = pullRequestListeners;
+		this.listenersProvider = listenersProvider;
 	}
 
 	@Sessional
@@ -44,7 +44,7 @@ public class DefaultReviewInvitationManager extends AbstractEntityManager<Review
 	public void save(ReviewInvitation invitation) {
 		dao.persist(invitation);
 		
-		for (PullRequestListener listener: pullRequestListeners)
+		for (PullRequestListener listener: listenersProvider.get())
 			listener.onInvitingReview(invitation);
 	}
 

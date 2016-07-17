@@ -87,7 +87,7 @@ public class PullRequestResource {
 		if (endDate != null)
 			criteria.add(Restrictions.le("submitDate", endDate));
 
-		List<PullRequest> requests = dao.query(criteria);
+		List<PullRequest> requests = dao.findAll(criteria);
 		
 		for (PullRequest request: requests) {
 	    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(request.getTarget().getDepot())))

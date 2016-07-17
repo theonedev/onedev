@@ -24,17 +24,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.Prioritized;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
-import com.pmease.gitplex.core.listener.PullRequestUpdateListener;
+import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestInfoManager;
@@ -55,7 +58,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
 public class DefaultPullRequestInfoManager implements PullRequestInfoManager, DepotListener, 
-		LifecycleListener, PullRequestUpdateListener {
+		LifecycleListener, PullRequestListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestInfoManager.class);
 	
@@ -95,7 +98,7 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 	
 	private BatchWorker getBatchWorker(Depot depot) {
 		Long depotId = depot.getId();
-		return new BatchWorker("repository-" + depot.getId() + "-collectPullRequestInfo") {
+		return new BatchWorker("repository-" + depotId + "-collectPullRequestInfo") {
 
 			@Override
 			public void doWork(Collection<Prioritized> works) {
@@ -190,7 +193,7 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 			
 		});
 		
-		for (PullRequestUpdate update: pullRequestUpdateManager.queryAfter(depot, lastUpdate)) {
+		for (PullRequestUpdate update: pullRequestUpdateManager.findAllAfter(depot, lastUpdate)) {
 			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
 				List<ObjectId> commits = new ArrayList<>();
 				RevCommit headCommit = GitUtils.parseCommit(revWalk, ObjectId.fromString(update.getHeadCommitHash()));
@@ -198,7 +201,8 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 				if (headCommit != null && baseCommit != null) {
 					revWalk.markStart(headCommit);
 					revWalk.markUninteresting(baseCommit);
-					revWalk.forEach(commit->commits.add(commit.getId().copy()));
+					commits.add(baseCommit);
+					revWalk.forEach(commit->commits.add(commit));
 					env.executeInTransaction(new TransactionalExecutable() {
 
 						@SuppressWarnings("unchecked")
@@ -247,10 +251,6 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 	}
 
 	@Override
-	public void onSaveDepot(Depot depot) {
-	}
-
-	@Override
 	public Collection<String> getRequests(Depot depot, ObjectId commit) {
 		Environment env = getEnv(depot);
 		Store store = getStore(env, DEFAULT_STORE);
@@ -270,20 +270,6 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 					return new HashSet<>();
 				}
 			}
-		});
-	}
-
-	@Sessional
-	@Override
-	public void onSaveUpdate(PullRequestUpdate update) {
-		dao.afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				Depot depot = update.getRequest().getTargetDepot();
-				batchWorkManager.submit(getBatchWorker(depot), new Prioritized(PRIORITY));
-			}
-			
 		});
 	}
 
@@ -318,6 +304,104 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 		StringByteIterable(String value) {
 			super(value.getBytes());
 		}
+	}
+
+	@Override
+	public void onOpenRequest(PullRequest request) {
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				Depot depot = request.getTargetDepot();
+				batchWorkManager.submit(getBatchWorker(depot), new Prioritized(PRIORITY));
+			}
+			
+		});
+	}
+
+	@Override
+	public void onDeleteRequest(PullRequest request) {
+	}
+
+	@Override
+	public void onReopenRequest(PullRequest request, Account user, String comment) {
+	}
+
+	@Override
+	public void onUpdateRequest(PullRequestUpdate update) {
+		dao.afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				Depot depot = update.getRequest().getTargetDepot();
+				batchWorkManager.submit(getBatchWorker(depot), new Prioritized(PRIORITY));
+			}
+			
+		});
+	}
+
+	@Override
+	public void onMentionAccount(PullRequest request, Account account) {
+	}
+
+	@Override
+	public void onMentionAccount(PullRequestComment comment, Account account) {
+	}
+
+	@Override
+	public void onCommentRequest(PullRequestComment comment) {
+	}
+
+	@Override
+	public void onReviewRequest(Review review, String comment) {
+	}
+
+	@Override
+	public void onAssignRequest(PullRequest request, Account user) {
+	}
+
+	@Override
+	public void onVerifyRequest(PullRequest request) {
+	}
+
+	@Override
+	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
+	}
+
+	@Override
+	public void onDiscardRequest(PullRequest request, Account user, String comment) {
+	}
+
+	@Override
+	public void onIntegrationPreviewCalculated(PullRequest request) {
+	}
+
+	@Override
+	public void onInvitingReview(ReviewInvitation invitation) {
+	}
+
+	@Override
+	public void pendingIntegration(PullRequest request) {
+	}
+
+	@Override
+	public void pendingUpdate(PullRequest request) {
+	}
+
+	@Override
+	public void pendingApproval(PullRequest request) {
+	}
+
+	@Override
+	public void onRestoreSourceBranch(PullRequest request) {
+	}
+
+	@Override
+	public void onDeleteSourceBranch(PullRequest request) {
+	}
+
+	@Override
+	public void onWithdrawReview(Review review, Account user) {
 	}
 
 }

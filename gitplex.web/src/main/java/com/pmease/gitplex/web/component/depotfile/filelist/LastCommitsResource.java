@@ -79,7 +79,7 @@ class LastCommitsResource extends AbstractResource {
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
-					Account user = userManager.findByPerson(author);
+					Account user = userManager.find(author);
 					if (user != null) {
 						info.authorName = HtmlEscape.escapeHtml5(user.getDisplayName());
 						info.authorAvatarUrl = avatarManager.getAvatarUrl(user);

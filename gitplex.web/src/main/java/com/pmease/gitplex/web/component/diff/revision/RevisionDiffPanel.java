@@ -348,7 +348,7 @@ public class RevisionDiffPanel extends Panel {
 		@Override
 		protected Collection<CodeComment> load() {
 			if (commentSupport != null) {
-				return GitPlex.getInstance(CodeCommentManager.class).query(
+				return GitPlex.getInstance(CodeCommentManager.class).findAll(
 						depotModel.getObject(), getOldCommit(), getNewCommit());
 			} else {
 				return new ArrayList<>();

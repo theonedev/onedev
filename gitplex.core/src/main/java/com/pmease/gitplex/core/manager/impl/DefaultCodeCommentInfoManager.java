@@ -18,17 +18,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.EnvironmentConfig;
-import jetbrains.exodus.env.Environments;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
-import jetbrains.exodus.env.TransactionalExecutable;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
@@ -53,6 +42,17 @@ import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.support.BatchWorker;
+
+import jetbrains.exodus.ArrayByteIterable;
+import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.EnvironmentConfig;
+import jetbrains.exodus.env.Environments;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.StoreConfig;
+import jetbrains.exodus.env.Transaction;
+import jetbrains.exodus.env.TransactionalComputable;
+import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
 public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, DepotListener, 
@@ -195,7 +195,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 			
 		});
 		
-		for (CodeComment comment: codeCommentManager.queryAfter(depot, lastComment)) {
+		for (CodeComment comment: codeCommentManager.findAllAfter(depot, lastComment)) {
 			env.executeInTransaction(new TransactionalExecutable() {
 
 				@SuppressWarnings("unchecked")
@@ -253,10 +253,6 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	}
 
 	@Override
-	public void onSaveDepot(Depot depot) {
-	}
-
-	@Override
 	public Map<String, CompareContext> getComments(Depot depot, ObjectId commit) {
 		Environment env = getEnv(depot);
 		Store store = getStore(env, DEFAULT_STORE);
@@ -281,21 +277,19 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 
 	@Sessional
 	@Override
-	public void onSaveComment(CodeComment comment) {
-		if (comment.isNew()) {
-			dao.afterCommit(new Runnable() {
-	
-				@Override
-				public void run() {
-					batchWorkManager.submit(getBatchWorker(comment.getDepot()), new Prioritized(PRIORITY));
-				}
-				
-			});
-		}
-	}
+	public void onComment(CodeComment comment) {
+		dao.afterCommit(new Runnable() {
 
+			@Override
+			public void run() {
+				batchWorkManager.submit(getBatchWorker(comment.getDepot()), new Prioritized(PRIORITY));
+			}
+			
+		});
+	}
+	
 	@Override
-	public void onDeleteComment(CodeComment comment) {
+	public void onReplyComment(CodeCommentReply reply) {
 	}
 
 	@Override
@@ -351,17 +345,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	}
 
 	@Override
-	public void onSaveCommentAndReply(CodeComment comment, CodeCommentReply reply) {
-		if (comment.isNew()) {
-			dao.afterCommit(new Runnable() {
-				
-				@Override
-				public void run() {
-					collect(comment.getDepot());
-				}
-				
-			});
-		}
+	public void onToggleResolve(CodeComment comment, Account user) {
 	}
 
 	static class StringByteIterable extends ArrayByteIterable {

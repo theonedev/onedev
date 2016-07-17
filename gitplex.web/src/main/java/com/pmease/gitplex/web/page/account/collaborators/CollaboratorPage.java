@@ -41,7 +41,7 @@ public abstract class CollaboratorPage extends AccountLayoutPage {
 			@Override
 			protected Account load() {
 				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
-				Account collaborator = accountManager.findByName(collaboratorName);
+				Account collaborator = accountManager.find(collaboratorName);
 				return Preconditions.checkNotNull(collaborator);
 			}
 			

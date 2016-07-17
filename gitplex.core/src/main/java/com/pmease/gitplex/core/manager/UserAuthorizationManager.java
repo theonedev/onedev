@@ -16,6 +16,6 @@ public interface UserAuthorizationManager extends EntityManager<UserAuthorizatio
 	
 	void delete(Collection<UserAuthorization> authorizations);
 
-	Collection<UserAuthorization> query(Account account);
+	Collection<UserAuthorization> findAll(Account account);
 	
 }

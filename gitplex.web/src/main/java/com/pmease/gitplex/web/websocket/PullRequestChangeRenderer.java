@@ -31,8 +31,7 @@ public class PullRequestChangeRenderer extends WebSocketRenderBehavior {
 		Component component = getComponent();
 		PullRequestChangeTrait pullRequestChangeTrait = (PullRequestChangeTrait) trait;
 		PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(pullRequestChangeTrait.requestId);
-		component.send(component.getPage(), Broadcast.BREADTH, 
-				new PullRequestChanged(handler, request, pullRequestChangeTrait.requestEvent));
+		component.send(component.getPage(), Broadcast.BREADTH, new PullRequestChanged(handler, request));
 	}
 
 }

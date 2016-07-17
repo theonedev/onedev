@@ -128,7 +128,7 @@ public enum PullRequestOperation {
 							|| request.getSource().getObjectName().equals(preview.getIntegrated()))
 					&& SecurityUtils.canModify(request)
 					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), request.getSource().getObjectId(), ObjectId.zeroId())
-					&& pullRequestManager.queryOpenTo(request.getSource(), null).isEmpty();
+					&& pullRequestManager.findAllOpenTo(request.getSource(), null).isEmpty();
 		}
 		
 	}, 

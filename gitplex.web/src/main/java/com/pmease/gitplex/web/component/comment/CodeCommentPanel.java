@@ -136,7 +136,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return getComment().isVisited(false)?"": "new";
+				return getComment().isVisitedAfter(getComment().getCreateDate())?"": "new";
 			}
 			
 		}));
@@ -355,7 +355,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return getReply(replyId).isVisited()?"":"new";
+				return getComment().isVisitedAfter(getReply(replyId).getDate())?"":"new";
 			}
 			
 		}));
@@ -668,11 +668,11 @@ public abstract class CodeCommentPanel extends Panel {
 					if (replyContent != null) {
 						CodeCommentReply reply = newReply(replyContent);
 						getComment().setResolved(!getComment().isResolved());
-						manager.save(getComment(), reply);
+						manager.toggleResolve(getComment(), reply);
 						onReplyAdded(target, fragment, reply);
 					} else {
 						getComment().setResolved(!getComment().isResolved());
-						manager.save(getComment());
+						manager.toggleResolve(getComment(), SecurityUtils.getAccount());
 						onReplyAdded(target, fragment, null);
 					}
 					onSaveComment(target, getComment());

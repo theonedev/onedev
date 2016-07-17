@@ -24,7 +24,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static Collection<Account> findUsersCan(Depot depot, DepotPrivilege operation) {
 		Set<Account> authorizedUsers = new HashSet<Account>();
-		for (Account user: GitPlex.getInstance(AccountManager.class).all()) {
+		for (Account user: GitPlex.getInstance(AccountManager.class).findAll()) {
 			if (user.asSubject().isPermitted(new ObjectPermission(depot, operation)))
 				authorizedUsers.add(user);
 		}

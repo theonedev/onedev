@@ -26,6 +26,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.component.CodeCommentEvent;
 import com.pmease.gitplex.core.entity.component.CommentPos;
 import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
@@ -63,12 +64,16 @@ public class CodeComment extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Date createDate = new Date();
+
+	@Column(nullable=false)
+	private CodeCommentEvent lastEvent;
 	
 	@Column(nullable=false)
-	private Date updateDate = new Date();
+	private Date lastEventDate;
 	
-	private String lastReplyUser;
-	
+	@ManyToOne(fetch=FetchType.LAZY)
+	private Account lastEventUser;
+
 	@Embedded
 	private CommentPos commentPos;
 	
@@ -130,12 +135,20 @@ public class CodeComment extends AbstractEntity {
 		return createDate;
 	}
 
-	public Date getUpdateDate() {
-		return updateDate;
+	public CodeCommentEvent getLastEvent() {
+		return lastEvent;
 	}
 
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
+	public void setLastEvent(CodeCommentEvent lastEvent) {
+		this.lastEvent = lastEvent;
+	}
+
+	public Date getLastEventDate() {
+		return lastEventDate;
+	}
+
+	public void setLastEventDate(Date lastEventDate) {
+		this.lastEventDate = lastEventDate;
 	}
 
 	public void setCreateDate(Date createDate) {
@@ -190,19 +203,19 @@ public class CodeComment extends AbstractEntity {
 		this.resolved = resolved;
 	}
 
-	public String getLastReplyUser() {
-		return lastReplyUser;
+	public Account getLastEventUser() {
+		return lastEventUser;
 	}
 
-	public void setLastReplyUser(String lastReplyUser) {
-		this.lastReplyUser = lastReplyUser;
+	public void setLastEventUser(Account lastEventUser) {
+		this.lastEventUser = lastEventUser;
 	}
 
-	public boolean isVisited(boolean includingReplies) {
+	public boolean isVisitedAfter(Date date) {
 		Account user = SecurityUtils.getAccount();
 		if (user != null) {
 			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
-			return visitDate != null && visitDate.after(includingReplies?getUpdateDate():getCreateDate());
+			return visitDate != null && visitDate.after(date);
 		} else {
 			return true;
 		}

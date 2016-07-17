@@ -35,7 +35,7 @@ public class AccountChoiceProvider extends AbstractAccountChoiceProvider {
 		criteria.add(criterion);
 		criteria.add(Restrictions.eq("organization", organization));
 		criteria.addOrder(Order.asc("name"));
-		List<Account> accounts = dao.query(criteria, first, Constants.DEFAULT_PAGE_SIZE + 1);
+		List<Account> accounts = dao.findRange(criteria, first, Constants.DEFAULT_PAGE_SIZE + 1);
 
 		if (accounts.size() <= Constants.DEFAULT_PAGE_SIZE) {
 			response.addAll(accounts);

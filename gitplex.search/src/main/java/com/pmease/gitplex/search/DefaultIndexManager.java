@@ -424,10 +424,6 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public void onSaveDepot(Depot depot) {
-	}
-
-	@Override
 	public void requestToIndex(Depot depot, ObjectId commit) {
 		int priority;
 		if (RequestCycle.get() != null)

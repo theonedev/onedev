@@ -2,7 +2,6 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -47,6 +46,7 @@ import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.component.PullRequestEvent;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -64,19 +64,19 @@ import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoi
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ApprovePullRequest;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentPullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ApprovedRenderer;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentRemoved;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DeleteSourceBranch;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DisapprovePullRequest;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DiscardPullRequest;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.IntegratePullRequest;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.OpenPullRequest;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReferencePullRequest;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReopenPullRequest;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.RestoreSourceBranch;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.UndoReviewPullRequest;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.UpdatePullRequest;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DisapprovedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DiscardedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.IntegratedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.OpenedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReferencedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReopenedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReviewWithdrawedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.SourceBranchDeletedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.SourceBranchRestoredRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.UpdatedRenderer;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
@@ -115,8 +115,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 		super(params);
 	}
 	
-	private Component newActivityRow(final String id, RenderableActivity activity) {
-		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity)) {
+	private Component newActivityRow(final String id, ActivityRenderer renderer) {
+		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(renderer)) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -134,96 +134,80 @@ public class RequestOverviewPage extends RequestDetailPage {
 		row.setOutputMarkupId(true);
 		
 		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
-		avatarColumn.add(new AvatarLink("avatar", activity.getUser(), null));
+		avatarColumn.add(new AvatarLink("avatar", renderer.getUser(), null));
 		row.add(avatarColumn);
 		
 		if (row.get("content") == null) 
-			row.add(activity.render("content"));
+			row.add(renderer.render("content"));
 		
-		if (activity instanceof OpenPullRequest || activity instanceof CommentPullRequest)
+		if (renderer instanceof OpenedRenderer || renderer instanceof CommentedRenderer)
 			row.add(AttributeAppender.append("class", " discussion"));
 		else
 			row.add(AttributeAppender.append("class", " non-discussion"));
 		
-		if (activity instanceof UpdatePullRequest)
+		if (renderer instanceof UpdatedRenderer)
 			row.add(AttributeAppender.append("class", " update"));
 		else
 			row.add(AttributeAppender.append("class", " non-update"));
 
-		boolean visited = false;
-		Account user = SecurityUtils.getAccount();
-		if (user != null) {
-			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, getPullRequest());
-			visited = visitDate != null && visitDate.after(activity.getDate());
-		} else {
-			visited = true;
-		}
-		if (!visited)
+		if (!getPullRequest().isVisitedAfter(renderer.getDate()))
 			row.add(AttributeAppender.append("class", "new"));
 		
 		return row;
 	}
 	
-	@Override
-	protected void onAfterRender() {
-		super.onAfterRender();
-		Account user = SecurityUtils.getAccount();
-		if (user != null) 
-			GitPlex.getInstance(VisitInfoManager.class).visit(user, getPullRequest());
-	}
-	
-	private List<RenderableActivity> getActivities() {
+	private List<ActivityRenderer> getActivityRenders() {
 		PullRequest request = getPullRequest();
-		List<RenderableActivity> renderableActivities = new ArrayList<>();
+		List<ActivityRenderer> renders = new ArrayList<>();
 
+		renders.add(new OpenedRenderer(request));
+		
 		for (PullRequestUpdate update: request.getUpdates())
-			renderableActivities.add(new UpdatePullRequest(update));
+			renders.add(new UpdatedRenderer(update));
 		
 		for (PullRequestComment comment: request.getComments()) { 
-			renderableActivities.add(new CommentPullRequest(comment));
+			renders.add(new CommentedRenderer(comment));
 		}
 		
 		for (PullRequestReference reference: request.getReferencedBy()) {
-			renderableActivities.add(new ReferencePullRequest(request, reference.getUser(), 
+			renders.add(new ReferencedRenderer(request, reference.getUser(), 
 					reference.getDate(), reference.getReferencedBy()));
 		}
 		
 		for (PullRequestActivity activity: request.getActivities()) {
-			if (activity.getAction() == PullRequestActivity.Action.OPEN) {
-				renderableActivities.add(new OpenPullRequest(activity));
-			} else if (activity.getAction() == PullRequestActivity.Action.INTEGRATE) {
-				renderableActivities.add(new IntegratePullRequest(activity));
-			} else if (activity.getAction() == PullRequestActivity.Action.DISCARD) { 
-				renderableActivities.add(new DiscardPullRequest(activity));
-			} else if (activity.getAction() == PullRequestActivity.Action.APPROVE) {
-				renderableActivities.add(new ApprovePullRequest(activity));
-			} else if (activity.getAction() == PullRequestActivity.Action.DISAPPROVE) {
-				renderableActivities.add(new DisapprovePullRequest(activity));
-			} else if (activity.getAction() == PullRequestActivity.Action.UNDO_REVIEW) {
-				renderableActivities.add(new UndoReviewPullRequest(activity));
-			} else if (activity.getAction() == PullRequestActivity.Action.REOPEN) {
-				renderableActivities.add(new ReopenPullRequest(activity));
-			} else if (activity.getAction() == PullRequestActivity.Action.DELETE_SOURCE_BRANCH) {
-				renderableActivities.add(new DeleteSourceBranch(activity));
-			} else if (activity.getAction() == PullRequestActivity.Action.RESTORE_SOURCE_BRANCH) {
-				renderableActivities.add(new RestoreSourceBranch(activity));
+			if (activity.getEvent() == PullRequestEvent.INTEGRATED) {
+				renders.add(new IntegratedRenderer(activity));
+			} else if (activity.getEvent() == PullRequestEvent.DISCARDED) { 
+				renders.add(new DiscardedRenderer(activity));
+			} else if (activity.getEvent() == PullRequestEvent.APPROVED) {
+				renders.add(new ApprovedRenderer(activity));
+			} else if (activity.getEvent() == PullRequestEvent.DISAPPROVED) {
+				renders.add(new DisapprovedRenderer(activity));
+			} else if (activity.getEvent() == PullRequestEvent.REVIEW_WITHDRAWED) {
+				renders.add(new ReviewWithdrawedRenderer(activity));
+			} else if (activity.getEvent() == PullRequestEvent.REOPENED) {
+				renders.add(new ReopenedRenderer(activity));
+			} else if (activity.getEvent() == PullRequestEvent.SOURCE_BRANCH_DELETED) {
+				renders.add(new SourceBranchDeletedRenderer(activity));
+			} else if (activity.getEvent() == PullRequestEvent.SOURCE_BRANCH_RESTORED) {
+				renders.add(new SourceBranchRestoredRenderer(activity));
 			} else {
-				throw new IllegalStateException("Unexpected activity: " + activity.getAction());
+				throw new IllegalStateException("Unexpected event: " + activity.getEvent());
 			}
 		}
 		
-		renderableActivities.sort((o1, o2) -> {
+		renders.sort((o1, o2) -> {
 			if (o1.getDate().before(o2.getDate()))
 				return -1;
 			else if (o1.getDate().after(o2.getDate()))
 				return 1;
-			else if (o1 instanceof OpenPullRequest)
+			else if (o1 instanceof OpenedRenderer)
 				return -1;
 			else
 				return 1;
 		});
 		
-		return renderableActivities;
+		return renders;
 	}
 	
 	@Override
@@ -233,12 +217,12 @@ public class RequestOverviewPage extends RequestDetailPage {
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
-			List<RenderableActivity> activities = getActivities();
+			List<ActivityRenderer> activities = getActivityRenders();
 
 			@SuppressWarnings("deprecation")
 			Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-			RenderableActivity lastAcvitity = (RenderableActivity) lastActivityRow.getDefaultModelObject();
-			for (RenderableActivity activity: activities) {
+			ActivityRenderer lastAcvitity = (ActivityRenderer) lastActivityRow.getDefaultModelObject();
+			for (ActivityRenderer activity: activities) {
 				if (activity.getDate().after(lastAcvitity.getDate())) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
 					activitiesView.add(newActivityRow);
@@ -260,9 +244,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 		add(activitiesView = new RepeatingView("requestActivities"));
 		activitiesView.setOutputMarkupId(true);
 		
-		List<RenderableActivity> activities = getActivities();
+		List<ActivityRenderer> activities = getActivityRenders();
 		
-		for (RenderableActivity activity: activities) 
+		for (ActivityRenderer activity: activities) 
 			activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
 		
 		WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
@@ -317,7 +301,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				
 				@SuppressWarnings("deprecation")
 				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentPullRequest(comment)); 
+				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentedRenderer(comment)); 
 				activitiesView.add(newActivityRow);
 				
 				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
@@ -394,8 +378,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				GitPlex.getInstance(Dao.class).persist(getPullRequest());
-				send(getPage(), Broadcast.BREADTH, 
-						new PullRequestChanged(target, getPullRequest(), PullRequest.Event.INTEGRATION_STRATEGY_CHANGED));								
+				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
 			}
 			
 		});
@@ -590,7 +573,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {
 						Preconditions.checkNotNull(getPullRequest().getAssignee());
-						GitPlex.getInstance(PullRequestManager.class).onAssigneeChange(getPullRequest());
+						GitPlex.getInstance(PullRequestManager.class).changeAssignee(getPullRequest());
+						GitPlex.getInstance(VisitInfoManager.class).visit(getLoginUser(), getPullRequest());
 					}
 					
 				});
@@ -638,8 +622,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 						super.onAvatarRemove(target);
 						
 						target.add(reviewersContainer);
-						send(getPage(), Broadcast.BREADTH, 
-								new PullRequestChanged(target, getPullRequest(), PullRequest.Event.REVIEWER_CHANGED));								
+						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
 					}
 					
 				});
@@ -666,8 +649,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				super.onSelect(target, user);
 				
 				target.add(reviewersContainer);
-				send(getPage(), Broadcast.BREADTH, 
-						new PullRequestChanged(target, getPullRequest(), PullRequest.Event.REVIEWER_CHANGED));								
+				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
 			}
 			
 		});

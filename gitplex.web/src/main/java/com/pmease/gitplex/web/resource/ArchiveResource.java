@@ -56,7 +56,7 @@ public class ArchiveResource extends AbstractResource {
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
 			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Depot depot = GitPlex.getInstance(DepotManager.class).findBy(userName, repoName);
+		Depot depot = GitPlex.getInstance(DepotManager.class).find(userName, repoName);
 		
 		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);

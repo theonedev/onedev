@@ -51,7 +51,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 		Preconditions.checkState(getAccount().isOrganization());
 		
 		String userName = params.get(PARAM_MEMBER).toString();
-		Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
+		Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).find(userName));
 		membershipModel = new LoadableDetachableModel<OrganizationMembership>() {
 
 			@Override

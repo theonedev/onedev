@@ -33,7 +33,7 @@ public class AccountSingleChoiceEditor extends PropertyEditor<String> {
 
 		Account account;
 		if (getModelObject() != null)
-			account = GitPlex.getInstance(AccountManager.class).findByName(getModelObject());
+			account = GitPlex.getInstance(AccountManager.class).find(getModelObject());
 		else
 			account = null;
 		

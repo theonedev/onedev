@@ -156,7 +156,7 @@ public class DashboardPage extends LayoutPage {
 			protected List<Depot> load() {
 				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
 				List<Depot> depots = new ArrayList<>();
-				for (Depot depot: depotManager.getAccessibles(null, getLoginUser())) {
+				for (Depot depot: depotManager.findAllAccessible(null, getLoginUser())) {
 					if (depot.matchesFQN(searchDepots.getInput())) {
 						depots.add(depot);
 					}

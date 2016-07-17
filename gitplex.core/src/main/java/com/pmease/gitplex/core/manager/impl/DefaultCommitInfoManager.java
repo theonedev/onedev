@@ -622,10 +622,6 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 		return commitCount;
 	}
 
-	@Override
-	public void onSaveDepot(Depot depot) {
-	}
-
 	static class StringByteIterable extends ArrayByteIterable {
 		StringByteIterable(String value) {
 			super(value.getBytes());

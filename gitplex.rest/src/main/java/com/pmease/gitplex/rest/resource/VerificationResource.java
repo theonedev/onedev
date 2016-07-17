@@ -67,7 +67,7 @@ public class VerificationResource {
 		if (commit != null)
 			criteria.add(Restrictions.eq("commit", commit));
 		
-		List<Verification> verifications = dao.query(criteria);
+		List<Verification> verifications = dao.findAll(criteria);
 		
     	for (Verification verification: verifications) {
     		if (!SecurityUtils.getSubject().isPermitted(

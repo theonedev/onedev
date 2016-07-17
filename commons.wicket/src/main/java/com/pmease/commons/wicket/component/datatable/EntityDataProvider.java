@@ -37,7 +37,7 @@ public class EntityDataProvider<T extends AbstractEntity> extends SortableDataPr
 				criteria.addOrder(Order.desc(getSort().getProperty()));
 		} 
 		
-		return AppLoader.getInstance(Dao.class).query(criteria, (int)first, (int)count).iterator();
+		return AppLoader.getInstance(Dao.class).findRange(criteria, (int)first, (int)count).iterator();
 	}
 
 	@Override

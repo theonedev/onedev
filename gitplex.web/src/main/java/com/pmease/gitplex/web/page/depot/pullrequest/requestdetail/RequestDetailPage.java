@@ -61,6 +61,7 @@ import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
@@ -116,6 +117,14 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 	}
 
+	@Override
+	protected void onAfterRender() {
+		super.onAfterRender();
+		Account user = SecurityUtils.getAccount();
+		if (user != null) 
+			GitPlex.getInstance(VisitInfoManager.class).visit(user, getPullRequest());
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -902,26 +911,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		return params;
 	}
 
-	private class RequestTab extends PageTab {
-
-		public RequestTab(String title, Class<? extends Page> pageClass) {
-			super(Model.of(title), pageClass);
-		}
-		
-		@Override
-		public Component render(String componentId) {
-			return new PageTabLink(componentId, this) {
-
-				@Override
-				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new BookmarkablePageLink<Void>(linkId, pageClass, paramsOf(getPullRequest()));
-				}
-				
-			};
-		}
-		
-	}
-	
 	public PullRequest getPullRequest() {
 		return requestModel.getObject();
 	}
@@ -932,6 +921,36 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RequestDetailPage.class, "request-detail.css")));
+	}
+	
+	private class RequestTab extends PageTab {
+
+		public RequestTab(String title, Class<? extends Page> pageClass) {
+			super(Model.of(title), pageClass);
+		}
+		
+		@Override
+		public Component render(String componentId) {
+			if (getMainPageClass() == CodeCommentsPage.class) {
+				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", RequestDetailPage.this);
+				PullRequest request = getPullRequest();
+				Link<Void> link = new BookmarkablePageLink<Void>("link", CodeCommentsPage.class, paramsOf(request));
+				if (request.getLastCodeCommentEventDate() != null && !request.isVisitedAfter(request.getLastCodeCommentEventDate()))
+					link.add(AttributeAppender.append("class", "new"));
+				fragment.add(link);
+				return fragment;
+			} else {
+				return new PageTabLink(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+						return new BookmarkablePageLink<Void>(linkId, pageClass, paramsOf(getPullRequest()));
+					}
+					
+				};
+			}
+		}
+		
 	}
 	
 }

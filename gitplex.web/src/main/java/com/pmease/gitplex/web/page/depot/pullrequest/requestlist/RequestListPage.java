@@ -16,9 +16,11 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationTo
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -39,15 +41,16 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.PullRequestEvent;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
 import com.pmease.gitplex.web.component.pullrequest.requeststatus.RequestStatusPanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -263,7 +266,7 @@ public class RequestListPage extends PullRequestPage {
 			
 		});
 
-		Form<?> form = new Form<Void>("form") {
+		Form<?> form = new Form<Void>("filterForm") {
 
 			@Override
 			protected void onSubmit() {
@@ -285,18 +288,34 @@ public class RequestListPage extends PullRequestPage {
 				PullRequest request = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "requestFrag", RequestListPage.this);
 				fragment.add(new Label("number", "#" + request.getNumber()));
-				fragment.add(new RequestLink("title", rowModel));
+				fragment.add(new BookmarkablePageLink<Void>("title", RequestOverviewPage.class, 
+						RequestOverviewPage.paramsOf(request)) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of(rowModel.getObject().getTitle());
+					}
+					
+				});
+				
 				fragment.add(new RequestStatusPanel("status", rowModel, false));
 				fragment.add(new AccountLink("submitter", rowModel.getObject().getSubmitter()));
-				fragment.add(new BranchLink("targetBranch", request.getTarget()));
+				fragment.add(new BranchLink("target", request.getTarget()));
 				fragment.add(new BranchLink("source", request.getSource()));
 				fragment.add(new Label("age", DateUtils.formatAge(request.getSubmitDate())));
-				fragment.add(new AccountLink("assignee", rowModel.getObject().getSubmitter())
-						.setVisible(request.getAssignee() != null));
+				
+				WebMarkupContainer lastEvent = new WebMarkupContainer("lastEvent");
+				lastEvent.setVisible(request.getLastEvent() != PullRequestEvent.OPENED);
+				lastEvent.add(new Label("description", request.getLastEvent().toString()));
+				lastEvent.add(new AccountLink("user", request.getLastEventUser())
+						.setVisible(request.getLastEventUser()!=null));
+				lastEvent.add(new Label("age", DateUtils.formatAge(request.getLastEventDate())));
+				fragment.add(lastEvent);
 				
 				cellItem.add(fragment);
 				
-				cellItem.add(AttributeAppender.append("class", "request"));
+				cellItem.add(AttributeAppender.append("class", 
+						request.isVisitedAfter(request.getLastEventDate())?"request":"request new"));
 			}
 			
 		});
@@ -313,7 +332,7 @@ public class RequestListPage extends PullRequestPage {
 				
 				EntityCriteria<PullRequest> criteria = searchOption.getCriteria(page.getDepot());
 				criteria.addOrder(sortOption.getOrder());
-				return GitPlex.getInstance(Dao.class).query(criteria, (int)first, (int)count).iterator();
+				return GitPlex.getInstance(Dao.class).findRange(criteria, (int)first, (int)count).iterator();
 			}
 
 			@Override
@@ -336,7 +355,7 @@ public class RequestListPage extends PullRequestPage {
 			}
 			
 		};
-		DataTable<PullRequest, Void> dataTable = new DataTable<>("pullRequests", columns, 
+		DataTable<PullRequest, Void> dataTable = new DataTable<>("requests", columns, 
 				dataProvider, Constants.DEFAULT_PAGE_SIZE);
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		dataTable.addBottomToolbar(new NavigationToolbar(dataTable) {

@@ -158,7 +158,6 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			pullRequest.addUpdate(update);
 			update.setRequest(pullRequest);
 			update.setHeadCommitHash(source.getObjectName());
-			pullRequest.setLastEventDate(new Date());
 			
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);

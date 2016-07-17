@@ -71,7 +71,7 @@ public class ProfileEditPage extends AccountSettingPage {
 				
 				Account account = getAccount();
 				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = accountManager.findByName(account.getName());
+				Account accountWithSameName = accountManager.find(account.getName());
 				if (accountWithSameName != null && !accountWithSameName.equals(account)) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");

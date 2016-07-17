@@ -132,7 +132,7 @@ public abstract class CommentInput extends TextArea<String> {
 					Restrictions.ilike("noSpaceFullName", query, MatchMode.ANYWHERE)));
 		}
 		criteria.addOrder(Order.asc("name"));
-		return GitPlex.getInstance(Dao.class).query(criteria, 0, count);
+		return GitPlex.getInstance(Dao.class).findRange(criteria, 0, count);
 	}
 
 	protected List<PullRequest> queryRequests(String query, int count) {
@@ -145,7 +145,7 @@ public abstract class CommentInput extends TextArea<String> {
 					Restrictions.ilike("numberStr", query, MatchMode.START)));
 		}
 		criteria.addOrder(Order.desc("number"));
-		return GitPlex.getInstance(Dao.class).query(criteria, 0, count);
+		return GitPlex.getInstance(Dao.class).findRange(criteria, 0, count);
 	}
 	
 	protected abstract AttachmentSupport getAttachmentSupport();

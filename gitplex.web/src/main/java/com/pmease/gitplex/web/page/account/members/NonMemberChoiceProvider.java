@@ -47,7 +47,7 @@ public class NonMemberChoiceProvider extends AccountChoiceProvider {
 		
 		List<Account> nonMembers = new ArrayList<>();
 		EntityCriteria<Account> criteria = accountManager.newCriteria(); 
-		for (Account user: accountManager.query(criteria.add(criterion).addOrder(Order.asc("name")), 0, 0)) {
+		for (Account user: accountManager.findRange(criteria.add(criterion).addOrder(Order.asc("name")), 0, 0)) {
 			if (!members.contains(user))
 				nonMembers.add(user);
 		}

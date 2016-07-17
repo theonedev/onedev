@@ -238,7 +238,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	/**
 	 * Get commits belonging to this update, reversely ordered by commit traversing. The list of commit will remain 
 	 * unchanged even if tip of target branch changes. This assumption is key to our caching of code comment to
-	 * to pull request relations. Check {@link DefaultCodeCommentRelationManager#queryCodeComments(PullRequest)} for
+	 * to pull request relations. Check {@link DefaultCodeCommentRelationManager#findAllCodeComments(PullRequest)} for
 	 * details
 	 * 
 	 * @return

@@ -86,7 +86,7 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 
 				UserAuthorizationManager userAuthorizationManager = 
 						GitPlex.getInstance(UserAuthorizationManager.class);
-				for (UserAuthorization authorization: userAuthorizationManager.query(getAccount())) {
+				for (UserAuthorization authorization: userAuthorizationManager.findAll(getAccount())) {
 					if (authorization.getUser().matches(searchField.getInput())) {
 						setOfCollaborators.add(authorization.getUser());
 					}

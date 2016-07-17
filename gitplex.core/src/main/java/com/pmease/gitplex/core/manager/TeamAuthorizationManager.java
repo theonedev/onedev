@@ -10,5 +10,5 @@ public interface TeamAuthorizationManager extends EntityManager<TeamAuthorizatio
 	
 	void delete(Collection<TeamAuthorization> authorizations);
 
-	Collection<TeamAuthorization> query(Account organization);
+	Collection<TeamAuthorization> findAll(Account organization);
 }

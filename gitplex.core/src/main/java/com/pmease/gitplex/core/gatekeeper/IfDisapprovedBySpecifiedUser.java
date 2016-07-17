@@ -38,8 +38,7 @@ public class IfDisapprovedBySpecifiedUser extends AbstractGateKeeper {
 	
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
-		Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class)
-					.findByName(userName));
+		Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).find(userName));
 		Review.Result result = user.checkReviewSince(request.getReferentialUpdate());
 		if (result == Review.Result.DISAPPROVE) {
             return passed(Lists.newArrayList("Disapproved by " + userName));

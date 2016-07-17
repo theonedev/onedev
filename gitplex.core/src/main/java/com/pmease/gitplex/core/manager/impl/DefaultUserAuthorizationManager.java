@@ -54,10 +54,10 @@ public class DefaultUserAuthorizationManager extends AbstractEntityManager<UserA
 
 	@Sessional
 	@Override
-	public Collection<UserAuthorization> query(Account account) {
+	public Collection<UserAuthorization> findAll(Account account) {
 		EntityCriteria<UserAuthorization> criteria = newCriteria();
 		criteria.createCriteria("depot").add(Restrictions.eq("account", account));
-		return query(criteria);
+		return findAll(criteria);
 	}
 
 	@Transactional

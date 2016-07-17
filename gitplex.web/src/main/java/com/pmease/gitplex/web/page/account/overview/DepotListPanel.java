@@ -113,7 +113,7 @@ public class DepotListPanel extends GenericPanel<Account> {
 			protected List<Depot> load() {
 				List<Depot> depots = new ArrayList<>();
 				for (Depot depot: GitPlex.getInstance(DepotManager.class)
-						.getAccessibles(getAccount(), SecurityUtils.getAccount())) {
+						.findAllAccessible(getAccount(), SecurityUtils.getAccount())) {
 					if (depot.matches(searchField.getInput())) {
 						depots.add(depot);
 					}

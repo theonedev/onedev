@@ -8,34 +8,41 @@
 		<table class="body">
 			<tr>
 				<td class="filter">
-					<form wicket:id="form">
-						<button type="submit" class="btn btn-primary btn-block top"><i class="fa fa-search"></i> Search</button>
-						<div wicket:id="editor"></div>
-						<button type="submit" class="btn btn-primary btn-block bottom"><i class="fa fa-search"></i> Search</button>
-					</form>
+					<div class="head">Filter options</div>
+					<div class="body">
+						<form wicket:id="filterForm">
+							<div wicket:id="editor"></div>
+							<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
+						</form>
+					</div>
 				</td>
-				<td class="requests">
-					<table wicket:id="pullRequests" class="table table-hover"></table>
+				<td class="spacing">&nbsp;</td>
+				<td class="result">
+					<table wicket:id="requests"></table>
 				</td>
 			</tr>
 		</table>
 	</div>
 	<wicket:fragment wicket:id="requestFrag">
 		<div class="first-line clearfix">
-			<span wicket:id="title" class="title pull-left"></span> 
+			<a wicket:id="title" class="title pull-left"></a> 
 			<span wicket:id="number" class="number pull-left"></span>
-			<span wicket:id="status" class="status pull-right"></span>
+			<span wicket:id="status" class="status pull-left"></span>
 		</div>
 		<div class="second-line">
-			<a wicket:id="targetBranch" class="branch"></a>
+			<a wicket:id="target" class="branch"></a>
 			<span class="fa fa-long-arrow-left"></span>
 			<a wicket:id="source" class="branch"></a>
-			<span class="auxiliary">, submitted by</span> 
-			<span wicket:id="submitter" class="submitter"></span>
+			, submitted by 
+			<a wicket:id="submitter" class="user"></a>
 			<span wicket:id="age" class="age"></span>
-			<wicket:enclosure child="assignee">
-			<span class="auxiliary">, assigned to</span> <span wicket:id="assignee"></span>
+		</div>
+		<div wicket:id="lastEvent" class="third-line">
+			<span wicket:id="description"></span> 
+			<wicket:enclosure child="user">
+			by <a wicket:id="user"></a>
 			</wicket:enclosure>
+			<span wicket:id="age"></span>
 		</div>
 	</wicket:fragment>
 </wicket:extend>

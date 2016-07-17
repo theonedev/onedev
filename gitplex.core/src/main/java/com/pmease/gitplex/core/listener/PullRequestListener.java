@@ -29,9 +29,15 @@ public interface PullRequestListener {
 	
 	void onReviewRequest(Review review, @Nullable String comment);
 	
-	void onAssignRequest(PullRequest request);
+	void onWithdrawReview(Review review, Account user);
+	
+	void onAssignRequest(PullRequest request, Account user);
 	
 	void onVerifyRequest(PullRequest request);
+	
+	void onRestoreSourceBranch(PullRequest request);
+	
+	void onDeleteSourceBranch(PullRequest request);
 	
 	void onIntegrateRequest(PullRequest request, @Nullable Account user, @Nullable String comment);
 	

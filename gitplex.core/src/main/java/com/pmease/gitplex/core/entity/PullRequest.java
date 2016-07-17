@@ -50,6 +50,7 @@ import com.pmease.gitplex.core.entity.component.CloseInfo;
 import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.entity.component.PullRequestEvent;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
@@ -75,7 +76,7 @@ public class PullRequest extends AbstractEntity {
 	private static final long serialVersionUID = 1L;
 
 	public static final int MAX_CODE_COMMENTS = 1000;
-	
+	 
 	public enum Status {
 		PENDING_APPROVAL("Pending Approval"), 
 		PENDING_UPDATE("Pending Update"), PENDING_INTEGRATE("Pending Integration"), 
@@ -130,34 +131,6 @@ public class PullRequest extends AbstractEntity {
 		
 	}
 	
-	public enum Event {
-		OPENED("Newly opened"), 
-		REVIEWED("New reviews in"), 
-		VERIFIED("Build verification is finished for"), 
-		UPDATED("New commits in"), 
-		COMMENTED("New comments in"), 
-		INTEGRATION_STRATEGY_CHANGED("Integration strategy is changed"),
-		INTEGRATED("Integration is done for"), 
-		DISCARDED("Discarded"), 
-		REOPENED("Reopened"),
-		INTEGRATION_PREVIEW_CALCULATED("Integration preview is calculated"),
-		ASSIGNED("Assigned"),
-		REVIEWER_CHANGED("Reviewer changed"),
-		REVIEW_REMOVED("Review removed"),
-		COMMENT_REPLIED("Comment is replied");
-		
-		private final String displayName;
-		
-		Event(String displayName) {
-			this.displayName = displayName;
-		}
-		
-		public String toString() {
-			return displayName;
-		}
-		
-	};
-	
 	@Embedded
 	private CloseInfo closeInfo;
 
@@ -190,6 +163,18 @@ public class PullRequest extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Account assignee;
 
+	@Column(nullable=false)
+	private PullRequestEvent lastEvent;
+	
+	@Column(nullable=false)
+	private Date lastEventDate;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	private Account lastEventUser;
+	
+	@Column(nullable=true)
+	private Date lastCodeCommentEventDate;
+
 	// used for number search in markdown editor
 	@Column(nullable=false)
 	private String numberStr;
@@ -207,14 +192,6 @@ public class PullRequest extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Date submitDate = new Date();
-	
-	@OptimisticLock(excluded=true)
-	@Column(nullable=false)
-	private Date lastEventDate = new Date();
-	
-	@OptimisticLock(excluded=true)
-	@Column(nullable=false)
-	private Event lastEvent = Event.OPENED;
 	
 	@Column(nullable=false)
 	private IntegrationStrategy integrationStrategy;
@@ -787,22 +764,6 @@ public class PullRequest extends AbstractEntity {
 		this.submitDate = submitDate;
 	}
 
-	public Date getLastEventDate() {
-		return lastEventDate;
-	}
-
-	public void setLastEventDate(Date lastEventDate) {
-		this.lastEventDate = lastEventDate;
-	}
-
-	public Event getLastEvent() {
-		return lastEvent;
-	}
-
-	public void setLastEvent(Event lastEvent) {
-		this.lastEvent = lastEvent;
-	}
-
 	/**
 	 * Get commits pending integration.
 	 * 
@@ -848,7 +809,7 @@ public class PullRequest extends AbstractEntity {
 	public List<Review> getReviews() {
 		if (reviews == null) { 
 			if (!isNew())
-				reviews = GitPlex.getInstance(ReviewManager.class).findBy(this);
+				reviews = GitPlex.getInstance(ReviewManager.class).findAll(this);
 			else
 				reviews = new ArrayList<>();
 		}
@@ -894,7 +855,7 @@ public class PullRequest extends AbstractEntity {
 				alreadyInvited.add(invitation.getReviewer());
 		}
 		ObjectPermission readPerm = ObjectPermission.ofDepotRead(getTargetDepot());
-		for (Account user: GitPlex.getInstance(Dao.class).allOf(Account.class)) {
+		for (Account user: GitPlex.getInstance(Dao.class).findAll(Account.class)) {
 			if (user.asSubject().isPermitted(readPerm) && !alreadyInvited.contains(user))
 				reviewers.add(user);
 		}
@@ -950,7 +911,7 @@ public class PullRequest extends AbstractEntity {
 
 	public List<CodeComment> getCodeComments() {
 		if (codeComments == null) {
-			codeComments = GitPlex.getInstance(CodeCommentRelationManager.class).queryCodeComments(this);
+			codeComments = GitPlex.getInstance(CodeCommentRelationManager.class).findAllCodeComments(this);
 		}
 		return codeComments;
 	}
@@ -1009,11 +970,43 @@ public class PullRequest extends AbstractEntity {
 		return commitMessage;
 	}
 	
-	public boolean isVisited(boolean includingActivities) {
+	public PullRequestEvent getLastEvent() {
+		return lastEvent;
+	}
+
+	public void setLastEvent(PullRequestEvent lastEvent) {
+		this.lastEvent = lastEvent;
+	}
+
+	public Date getLastEventDate() {
+		return lastEventDate;
+	}
+
+	public void setLastEventDate(Date lastEventDate) {
+		this.lastEventDate = lastEventDate;
+	}
+
+	public Date getLastCodeCommentEventDate() {
+		return lastCodeCommentEventDate;
+	}
+
+	public void setLastCodeCommentEventDate(Date lastCodeCommentEventDate) {
+		this.lastCodeCommentEventDate = lastCodeCommentEventDate;
+	}
+
+	public Account getLastEventUser() {
+		return lastEventUser;
+	}
+
+	public void setLastEventUser(Account lastEventUser) {
+		this.lastEventUser = lastEventUser;
+	}
+
+	public boolean isVisitedAfter(Date date) {
 		Account user = SecurityUtils.getAccount();
 		if (user != null) {
 			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
-			return visitDate != null && visitDate.after(includingActivities?getLastEventDate():getSubmitDate());
+			return visitDate != null && visitDate.after(date);
 		} else {
 			return true;
 		}

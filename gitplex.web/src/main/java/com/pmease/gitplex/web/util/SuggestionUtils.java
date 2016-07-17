@@ -61,7 +61,7 @@ public class SuggestionUtils {
 				suggestions.add(new InputSuggestion(wildcard, wildcardDescription, matchRange));
 			}
 		}
-		for (Depot affinal: GitPlex.getInstance(Dao.class).allOf(Depot.class)) {
+		for (Depot affinal: GitPlex.getInstance(Dao.class).findAll(Depot.class)) {
 			String FQN = affinal.getFQN();
 			int index = FQN.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {

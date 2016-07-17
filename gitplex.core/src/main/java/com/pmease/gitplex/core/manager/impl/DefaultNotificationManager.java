@@ -59,8 +59,6 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 	@Transactional
 	@Override
 	public void onOpenRequest(PullRequest request) {
-		if (request.getAssignee() != null && !request.getAssignee().equals(request.getSubmitter()))
-			onAssignRequest(request);
 	}
 
 	@Transactional
@@ -90,7 +88,7 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 
 	@Transactional
 	@Override
-	public void onAssignRequest(PullRequest request) {
+	public void onAssignRequest(PullRequest request, Account user) {
 		Preconditions.checkNotNull(request.getAssignee());
 		
 		if (request.getStatus() == PENDING_INTEGRATE) {  
@@ -220,8 +218,6 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 	@Transactional
 	@Override
 	public void onReopenRequest(PullRequest request, Account user, String comment) {
-		if (request.getAssignee() != null && !request.getAssignee().equals(user))
-			onAssignRequest(request);
 	}
 
 	private void requestIntegration(PullRequest request) {
@@ -273,6 +269,18 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 
 	@Override
 	public void onDeleteRequest(PullRequest request) {
+	}
+
+	@Override
+	public void onRestoreSourceBranch(PullRequest request) {
+	}
+
+	@Override
+	public void onDeleteSourceBranch(PullRequest request) {
+	}
+
+	@Override
+	public void onWithdrawReview(Review review, Account user) {
 	}
 
 }

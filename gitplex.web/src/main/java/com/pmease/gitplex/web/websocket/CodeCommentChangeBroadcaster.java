@@ -11,13 +11,13 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.listener.CodeCommentListener;
-import com.pmease.gitplex.core.listener.CodeCommentReplyListener;
 
 @Singleton
-public class CodeCommentChangeBroadcaster implements CodeCommentListener, CodeCommentReplyListener {
+public class CodeCommentChangeBroadcaster implements CodeCommentListener {
 	
 	private final Dao dao;
 	
@@ -55,26 +55,17 @@ public class CodeCommentChangeBroadcaster implements CodeCommentListener, CodeCo
 	}
 
 	@Override
-	public void onSaveComment(CodeComment comment) {
+	public void onComment(CodeComment comment) {
 		onChange(comment);
 	}
 
 	@Override
-	public void onDeleteComment(CodeComment comment) {
+	public void onReplyComment(CodeCommentReply reply) {
+		onChange(reply.getComment());
 	}
 
 	@Override
-	public void onSaveReply(CodeCommentReply reply) {
-		if (reply.isNew())
-			onChange(reply.getComment());
-	}
-
-	@Override
-	public void onDeleteReply(CodeCommentReply reply) {
-	}
-
-	@Override
-	public void onSaveCommentAndReply(CodeComment comment, CodeCommentReply reply) {
+	public void onToggleResolve(CodeComment comment, Account account) {
 		onChange(comment);
 	}
 		

@@ -1,0 +1,50 @@
+package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity;
+
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.LoadableDetachableModel;
+
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.web.component.AccountLink;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.ActivityRenderer;
+import com.pmease.gitplex.web.util.DateUtils;
+
+@SuppressWarnings("serial")
+class SourceBranchRestoredPanel extends ActivityPanel {
+
+	public SourceBranchRestoredPanel(String id, ActivityRenderer activity) {
+		super(id, activity);
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new AvatarLink("avatar", userModel.getObject(), null));
+		add(new AccountLink("name", userModel.getObject()));
+		add(new Label("age", DateUtils.formatAge(renderer.getDate())));
+		
+		add(new Label("branch", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				PullRequest request = requestModel.getObject();
+				if (request.getSourceDepot().equals(request.getTargetDepot()))
+					return request.getSourceBranch();
+				else
+					return request.getSource().getFQN();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(requestModel.getObject().getSourceDepot() != null);
+			}
+			
+		});
+	}
+
+}

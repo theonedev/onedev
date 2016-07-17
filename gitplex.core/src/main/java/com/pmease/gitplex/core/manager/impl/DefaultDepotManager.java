@@ -147,7 +147,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		for (DepotListener listener: listenersProvider.get())
     			listener.onTransferDepot(depot, oldAccount);
     		
-    		for (Depot each: all()) {
+    		for (Depot each: findAll()) {
     			for (IntegrationPolicy policy: each.getIntegrationPolicies()) {
     				policy.onDepotTransfer(depot, oldAccount);
     			}
@@ -161,7 +161,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		for (DepotListener listener: listenersProvider.get())
     			listener.onRenameDepot(depot, oldName);
     		
-    		for (Depot each: all()) {
+    		for (Depot each: findAll()) {
     			for (IntegrationPolicy integrationPolicy: each.getIntegrationPolicies()) {
     				integrationPolicy.onDepotRename(depot.getAccount(), oldName, depot.getName());
     			}
@@ -171,10 +171,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		}
     	}
     	
-    	for (DepotListener listener: listenersProvider.get()) {
-    		listener.onSaveDepot(depot);
-    	}
-
         afterCommit(new Runnable() {
 
 			@Override
@@ -206,7 +202,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 
     	dao.remove(depot);
     	
-		for (Depot each: all()) {
+		for (Depot each: findAll()) {
 			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
 				if (it.next().onDepotDelete(depot))
 					it.remove();
@@ -239,17 +235,17 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     
     @Sessional
     @Override
-    public Depot findBy(String accountName, String depotName) {
-    	Account user = userManager.findByName(accountName);
+    public Depot find(String accountName, String depotName) {
+    	Account user = userManager.find(accountName);
     	if (user != null)
-    		return findBy(user, depotName);
+    		return find(user, depotName);
     	else
     		return null;
     }
 
     @Sessional
     @Override
-    public Depot findBy(Account account, String depotName) {
+    public Depot find(Account account, String depotName) {
     	idLock.readLock().lock();
     	try {
     		Long id = nameToId.get(new Pair<>(account.getId(), depotName));
@@ -264,11 +260,11 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 
     @Sessional
     @Override
-    public Depot findBy(String depotFQN) {
+    public Depot find(String depotFQN) {
     	String userName = StringUtils.substringBefore(depotFQN, Depot.FQN_SEPARATOR);
-    	Account user = userManager.findByName(userName);
+    	Account user = userManager.find(userName);
     	if (user != null)
-    		return findBy(user, StringUtils.substringAfter(depotFQN, Depot.FQN_SEPARATOR));
+    		return find(user, StringUtils.substringAfter(depotFQN, Depot.FQN_SEPARATOR));
     	else
     		return null;
     }
@@ -347,14 +343,14 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	@Sessional
 	@Override
 	public void systemStarting() {
-        for (Depot depot: all()) 
+        for (Depot depot: findAll()) 
         	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getAccount().getId(), depot.getName()));
 	}
 	
 	@Transactional
 	@Override
 	public void systemStarted() {
-		for (Depot depot: all()) {
+		for (Depot depot: findAll()) {
 			checkSanity(depot);
 	        commitInfoManager.collect(depot);
 	        pullRequestInfoManager.collect(depot);
@@ -382,7 +378,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (newCommit.equals(ObjectId.zeroId())) {
 			String branch = GitUtils.ref2branch(refName);
-			for (Depot each: all()) {
+			for (Depot each: findAll()) {
 				if (branch != null) {
 					for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
 						if (it.next().onBranchDelete(each, depot, branch))
@@ -399,10 +395,10 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 
 	@Sessional
 	@Override
-	public Collection<Depot> getAccessibles(Account account, Account user) {
+	public Collection<Depot> findAllAccessible(Account account, Account user) {
 		Collection<Depot> depots;
 		if (account == null)
-			depots = GitPlex.getInstance(DepotManager.class).all();
+			depots = GitPlex.getInstance(DepotManager.class).findAll();
 		else
 			depots = account.getDepots();
 		
@@ -446,7 +442,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 			if (account != null)
 				authorizations = account.getAllTeamAuthorizationsInOrganization();
 			else
-				authorizations = teamAuthorizationManager.all();
+				authorizations = teamAuthorizationManager.findAll();
 			
 			for (TeamAuthorization authorization: authorizations) {
 				if (joinedTeams.contains(authorization.getTeam()))

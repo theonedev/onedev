@@ -45,7 +45,7 @@ public class TeamListPage extends AccountLayoutPage {
 		@Override
 		protected Collection<TeamMembership> load() {
 			TeamMembershipManager teamMembershipManager = GitPlex.getInstance(TeamMembershipManager.class);
-			return teamMembershipManager.query(getAccount());
+			return teamMembershipManager.findAll(getAccount());
 		}
 		
 	};

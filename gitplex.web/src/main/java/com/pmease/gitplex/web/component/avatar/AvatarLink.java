@@ -66,7 +66,7 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 		
-		Account account = GitPlex.getInstance(AccountManager.class).findByPerson(person);
+		Account account = GitPlex.getInstance(AccountManager.class).find(person);
 		if (account != null) { 
 			accountId = account.getId();
 			params = AccountPage.paramsOf(account);
