@@ -50,8 +50,6 @@ public interface DepotManager extends EntityManager<Depot> {
 	 */
 	void save(Depot depot, @Nullable Long oldAccountId, @Nullable String oldName);
 	
-	void delete(Depot depot);
-	
 	Repository getRepository(Depot depot);
 	
 	Collection<Depot> findAllAccessible(@Nullable Account account, @Nullable Account user);

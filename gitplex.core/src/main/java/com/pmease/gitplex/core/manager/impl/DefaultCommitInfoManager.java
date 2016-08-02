@@ -22,17 +22,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.EnvironmentConfig;
-import jetbrains.exodus.env.Environments;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
-import jetbrains.exodus.env.TransactionalExecutable;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -47,23 +36,33 @@ import org.slf4j.LoggerFactory;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.concurrent.Prioritized;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.listener.LifecycleListener;
-import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.event.RefUpdated;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.support.BatchWorker;
 
+import jetbrains.exodus.ArrayByteIterable;
+import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.EnvironmentConfig;
+import jetbrains.exodus.env.Environments;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.StoreConfig;
+import jetbrains.exodus.env.Transaction;
+import jetbrains.exodus.env.TransactionalComputable;
+import jetbrains.exodus.env.TransactionalExecutable;
+
 @Singleton
-public class DefaultCommitInfoManager implements CommitInfoManager, DepotListener, 
-		RefListener, LifecycleListener {
+public class DefaultCommitInfoManager implements CommitInfoManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
@@ -474,8 +473,9 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 		});
 	}
 
-	@Override
-	public void onDeleteDepot(Depot depot) {
+	@Listen
+	public void on(DepotDeleted event) {
+		Depot depot = event.getDepot();
 		batchWorkManager.remove(getBatchWorker(depot));
 		synchronized (envs) {
 			Environment env = envs.remove(depot.getId());
@@ -488,23 +488,11 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 		FileUtils.deleteDir(getInfoDir(depot));
 	}
 	
-	@Override
-	public void onRenameDepot(Depot renamedDepot, String oldName) {
-	}
-
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
 		if (byteIterable != null)
 			return Arrays.copyOf(byteIterable.getBytesUnsafe(), byteIterable.getLength());
 		else
 			return null;
-	}
-	
-	@Override
-	public void systemStarting() {
-	}
-
-	@Override
-	public void systemStarted() {
 	}
 	
 	private BatchWorker getBatchWorker(Depot depot) {
@@ -574,28 +562,20 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 		}
 	}
 
-	@Override
-	public void systemStopping() {
+	@Listen
+	public void on(SystemStopping event) {
 		synchronized (envs) {
 			for (Environment env: envs.values())
 				env.close();
 		}
 	}
 
-	@Override
-	public void systemStopped() {
-	}
-
-	@Override
-	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		if (!newCommit.equals(ObjectId.zeroId())) {
-			CollectingWork refUpdate = new CollectingWork(PRIORITY, newCommit);
-			batchWorkManager.submit(getBatchWorker(depot), refUpdate);
+	@Listen
+	public void on(RefUpdated event) {
+		if (!event.getNewCommit().equals(ObjectId.zeroId())) {
+			CollectingWork refUpdate = new CollectingWork(PRIORITY, event.getNewCommit());
+			batchWorkManager.submit(getBatchWorker(event.getDepot()), refUpdate);
 		}
-	}
-
-	@Override
-	public void onTransferDepot(Depot depot, Account oldAccount) {
 	}
 
 	@Override

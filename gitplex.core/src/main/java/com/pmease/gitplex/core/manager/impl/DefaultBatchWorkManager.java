@@ -14,15 +14,17 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.util.concurrent.Prioritized;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
-import com.pmease.gitplex.core.listener.LifecycleListener;
+import com.pmease.gitplex.core.event.lifecycle.SystemStarted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.core.manager.support.BatchWorker;
 
 @Singleton
-public class DefaultBatchWorkManager implements BatchWorkManager, LifecycleListener, Runnable {
+public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultBatchWorkManager.class);
 	
@@ -46,24 +48,16 @@ public class DefaultBatchWorkManager implements BatchWorkManager, LifecycleListe
 		return worksOfWorker;
 	}
 
-	@Override
-	public void systemStarting() {
-	}
-
-	@Override
-	public void systemStarted() {
+	@Listen
+	public void on(SystemStarted event) {
 		thread = new Thread(this);
 		thread.start();
 	}
 
-	@Override
-	public synchronized void systemStopping() {
+	@Listen
+	public synchronized void on(SystemStopping event) {
 		thread = null;
 		notify();
-	}
-
-	@Override
-	public void systemStopped() {
 	}
 
 	@Override

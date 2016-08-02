@@ -38,11 +38,11 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.entity.component.DepotAndRevision;
+import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
+import com.pmease.gitplex.core.entity.support.CompareContext;
+import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
@@ -139,12 +139,15 @@ public abstract class CodeCommentListPanel extends Panel {
 				Depot depot = ((DepotPage) getPage()).getDepot();
 				
 				PullRequest request = getPullRequest();
-				List<CodeCommentReply> replies = comment.getSortedReplies();
+				List<CodeCommentActivity> activities= new ArrayList<>();
+				activities.addAll(comment.getReplies());
+				activities.addAll(comment.getStatusChanges());
+				activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
 				if (request != null) {
 					PullRequest.ComparingInfo comparingInfo = null;
-					for (int i=replies.size()-1; i>=0; i--) {
-						CodeCommentReply reply = replies.get(i);
-						comparingInfo = request.getRequestComparingInfo(reply.getComparingInfo());
+					for (int i=activities.size()-1; i>=0; i--) {
+						CodeCommentActivity activity = activities.get(i);
+						comparingInfo = request.getRequestComparingInfo(activity.getComparingInfo());
 						if (comparingInfo != null)
 							break;
 					}
@@ -161,9 +164,9 @@ public abstract class CodeCommentListPanel extends Panel {
 					setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
 				} else {
 					CompareContext compareContext;
-					if (!replies.isEmpty()) {
-						CodeCommentReply lastReply = replies.get(replies.size()-1);
-						compareContext = lastReply.getCompareContext();
+					if (!activities.isEmpty()) {
+						CodeCommentActivity lastActivity = activities.get(activities.size()-1);
+						compareContext = lastActivity.getCompareContext();
 					} else {
 						compareContext = comment.getCompareContext();
 					}

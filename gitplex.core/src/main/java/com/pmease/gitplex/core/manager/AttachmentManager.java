@@ -2,11 +2,9 @@ package com.pmease.gitplex.core.manager;
 
 import java.io.File;
 
-import com.pmease.commons.hibernate.dao.DaoListener;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.listener.LifecycleListener;
 
-public interface AttachmentManager extends DaoListener, LifecycleListener {
+public interface AttachmentManager {
 
 	/**
 	 * Get directory to store attachment of specified depot and uuid

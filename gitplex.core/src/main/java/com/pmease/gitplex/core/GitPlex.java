@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.util.ThreadContext;
@@ -20,10 +19,14 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppName;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
-import com.pmease.gitplex.core.listener.LifecycleListener;
+import com.pmease.gitplex.core.event.lifecycle.SystemStarted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStarting;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopped;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
@@ -45,17 +48,16 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private volatile InitStage initStage;
 	
-	private final Provider<Set<LifecycleListener>> listenersProvider;
+	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
 	public GitPlex(ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager,
-            AccountManager accountManager, Provider<Set<LifecycleListener>> listenersProvider, 
-            @AppName String appName) {
+            AccountManager accountManager, ListenerRegistry listenerRegistry, @AppName String appName) {
 		this.configManager = configManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
 		this.accountManager = accountManager;
-		this.listenersProvider = listenersProvider;
+		this.listenerRegistry = listenerRegistry;
 		
 		this.appName = appName;
 		
@@ -76,17 +78,15 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 
 		ThreadContext.bind(accountManager.getRoot().asSubject());
 		
-		for (LifecycleListener listener: listenersProvider.get())
-			listener.systemStarting();
+		listenerRegistry.notify(new SystemStarting());
 	}
 	
 	@Sessional
 	@Override
 	public void postStart() {
 		initStage = null;
-		
-		for (LifecycleListener listener: listenersProvider.get())
-			listener.systemStarted();
+
+		listenerRegistry.notify(new SystemStarted());
 		
 		ThreadContext.unbindSubject();
 		
@@ -149,15 +149,13 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Override
 	public void preStop() {
 		ThreadContext.bind(accountManager.getRoot().asSubject());
-		for (LifecycleListener listener: listenersProvider.get())
-			listener.systemStopping();
+		listenerRegistry.notify(new SystemStopping());
 	}
 
 	@Sessional
 	@Override
 	public void stop() {
-		for (LifecycleListener listener: listenersProvider.get())
-			listener.systemStopped();
+		listenerRegistry.notify(new SystemStopped());
 		ThreadContext.unbindSubject();
 	}
 	

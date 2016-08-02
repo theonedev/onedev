@@ -17,7 +17,8 @@ import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.listener.PullRequestListener;
+import com.pmease.gitplex.core.entity.Verification;
+import com.pmease.gitplex.core.event.PullRequestListener;
 
 @Singleton
 public class PullRequestChangeBroadcaster implements PullRequestListener {
@@ -40,17 +41,17 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 
 	@Override
-	public void onReviewRequest(Review review, String comment) {
+	public void onReviewRequest(Review review) {
 		onChange(review.getUpdate().getRequest());
 	}
 
 	@Override
-	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
+	public void onIntegrateRequest(PullRequest request, Account user) {
 		onChange(request);
 	}
 
 	@Override
-	public void onDiscardRequest(PullRequest request, Account user, String comment) {
+	public void onDiscardRequest(PullRequest request, Account user) {
 		onChange(request);
 	}
 
@@ -65,8 +66,8 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 
 	@Override
-	public void onVerifyRequest(PullRequest request) {
-		onChange(request);
+	public void onVerifyRequest(Verification verification) {
+		onChange(verification.getRequest());
 	}
 
 	@Override
@@ -83,7 +84,7 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 		 */
 		PullRequestChangeTrait trait = new PullRequestChangeTrait();
 		trait.requestId = request.getId();
-		dao.afterCommit(new Runnable() {
+		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -103,7 +104,7 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 	
 	@Override
-	public void onReopenRequest(PullRequest request, Account user, String comment) {
+	public void onReopenRequest(PullRequest request, Account user) {
 		onChange(request);
 	}
 
@@ -132,10 +133,6 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 
 	@Override
-	public void onDeleteRequest(PullRequest request) {
-	}
-
-	@Override
 	public void onRestoreSourceBranch(PullRequest request) {
 	}
 
@@ -144,7 +141,13 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 
 	@Override
-	public void onWithdrawReview(Review review, Account user) {
+	public void onDeleteVerification(Verification verification) {
+		onChange(verification.getRequest());
+	}
+
+	@Override
+	public void onDeleteReview(Review review) {
+		onChange(review.getUpdate().getRequest());
 	}
 
 }

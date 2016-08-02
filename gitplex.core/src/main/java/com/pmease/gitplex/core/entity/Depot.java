@@ -74,17 +74,19 @@ import com.pmease.commons.git.Submodule;
 import com.pmease.commons.git.exception.NotFileException;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
+import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
+import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -800,8 +802,16 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		} catch (Exception e) {
 			Throwables.propagate(e);
 		}
-		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-			listener.onRefUpdate(this, refName, commitId, ObjectId.zeroId());
+    	GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+
+			@Override
+			public void run() {
+				Depot depot = GitPlex.getInstance(DepotManager.class).load(getId());
+				GitPlex.getInstance(ListenerRegistry.class).notify(
+						new RefUpdated(depot, refName, commitId, ObjectId.zeroId()));
+			}
+    		
+    	});
     }
     
     public void createBranch(String branchName, String branchRevision) {
@@ -837,8 +847,16 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
-		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-			listener.onRefUpdate(this, refName, commitId, ObjectId.zeroId());
+    	GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+
+			@Override
+			public void run() {
+				Depot depot = GitPlex.getInstance(DepotManager.class).load(getId());
+				GitPlex.getInstance(ListenerRegistry.class).notify(
+						new RefUpdated(depot, refName, commitId, ObjectId.zeroId()));
+			}
+    		
+    	});
     }
     
 	public Collection<TeamAuthorization> getAuthorizedTeams() {

@@ -9,14 +9,15 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Singleton;
 
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.util.concurrent.PrioritizedExecutor;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
-import com.pmease.gitplex.core.listener.LifecycleListener;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.WorkExecutor;
 
 @Singleton
-public class DefaultWorkExecutor implements WorkExecutor, LifecycleListener {
+public class DefaultWorkExecutor implements WorkExecutor {
 
 	private final PrioritizedExecutor delegator = new PrioritizedExecutor(Runtime.getRuntime().availableProcessors());
 	
@@ -66,21 +67,9 @@ public class DefaultWorkExecutor implements WorkExecutor, LifecycleListener {
 		return delegator.invokeAny(tasks, timeout, unit);
 	}
 
-	@Override
-	public void systemStarting() {
-	}
-
-	@Override
-	public void systemStarted() {
-	}
-
-	@Override
-	public void systemStopping() {
+	@Listen
+	public void on(SystemStopping event) {
 		delegator.shutdown();
-	}
-
-	@Override
-	public void systemStopped() {
 	}
 
 	@Override

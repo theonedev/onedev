@@ -20,7 +20,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;

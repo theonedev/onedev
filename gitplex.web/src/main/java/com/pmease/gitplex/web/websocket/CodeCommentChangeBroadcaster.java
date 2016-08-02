@@ -8,16 +8,14 @@ import javax.inject.Singleton;
 import org.apache.wicket.request.component.IRequestablePage;
 
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.CodeComment;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
-import com.pmease.gitplex.core.listener.CodeCommentListener;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentEvent;
 
 @Singleton
-public class CodeCommentChangeBroadcaster implements CodeCommentListener {
+public class CodeCommentChangeBroadcaster {
 	
 	private final Dao dao;
 	
@@ -26,7 +24,8 @@ public class CodeCommentChangeBroadcaster implements CodeCommentListener {
 		this.dao = dao;
 	}
 	
-	private void onChange(CodeComment comment) {
+	@Listen
+	public void on(CodeCommentEvent event) {
 		/*
 		 * Make sure that code comment and associated objects are committed before
 		 * sending render request; otherwise rendering request may not reflect
@@ -34,8 +33,8 @@ public class CodeCommentChangeBroadcaster implements CodeCommentListener {
 		 * executed before code comment modification is committed.
 		 */
 		CodeCommentChangeTrait trait = new CodeCommentChangeTrait();
-		trait.commentId = comment.getId();
-		dao.afterCommit(new Runnable() {
+		trait.commentId = event.getComment().getId();
+		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -52,21 +51,6 @@ public class CodeCommentChangeBroadcaster implements CodeCommentListener {
 			}
 			
 		});
-	}
-
-	@Override
-	public void onComment(CodeComment comment) {
-		onChange(comment);
-	}
-
-	@Override
-	public void onReplyComment(CodeCommentReply reply) {
-		onChange(reply.getComment());
-	}
-
-	@Override
-	public void onToggleResolve(CodeComment comment, Account account) {
-		onChange(comment);
 	}
 		
 }

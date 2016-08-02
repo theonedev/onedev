@@ -16,7 +16,7 @@ import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
 import com.pmease.commons.wicket.behavior.sortable.SortPosition;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
+import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 

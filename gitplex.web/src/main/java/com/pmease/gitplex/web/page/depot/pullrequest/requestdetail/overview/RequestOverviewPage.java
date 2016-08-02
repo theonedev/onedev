@@ -39,6 +39,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.entity.support.PullRequestEvent;
 import com.pmease.gitplex.core.entity.PullRequestActivity;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReference;
@@ -46,11 +47,9 @@ import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.component.PullRequestEvent;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -73,7 +72,6 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.acti
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.OpenedRenderer;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReferencedRenderer;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReopenedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReviewWithdrawedRenderer;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.SourceBranchDeletedRenderer;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.SourceBranchRestoredRenderer;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.UpdatedRenderer;
@@ -183,8 +181,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 				renders.add(new ApprovedRenderer(activity));
 			} else if (activity.getEvent() == PullRequestEvent.DISAPPROVED) {
 				renders.add(new DisapprovedRenderer(activity));
-			} else if (activity.getEvent() == PullRequestEvent.REVIEW_WITHDRAWED) {
-				renders.add(new ReviewWithdrawedRenderer(activity));
 			} else if (activity.getEvent() == PullRequestEvent.REOPENED) {
 				renders.add(new ReopenedRenderer(activity));
 			} else if (activity.getEvent() == PullRequestEvent.SOURCE_BRANCH_DELETED) {
@@ -295,8 +291,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 				GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
 				input.setModelObject("");
 
-				GitPlex.getInstance(VisitInfoManager.class).visit(getLoginUser(), getPullRequest());
-				
 				target.add(addComment);
 				
 				@SuppressWarnings("deprecation")
@@ -574,7 +568,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 					protected void onUpdate(AjaxRequestTarget target) {
 						Preconditions.checkNotNull(getPullRequest().getAssignee());
 						GitPlex.getInstance(PullRequestManager.class).changeAssignee(getPullRequest());
-						GitPlex.getInstance(VisitInfoManager.class).visit(getLoginUser(), getPullRequest());
 					}
 					
 				});
@@ -629,7 +622,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 				List<Review> userReviews = new ArrayList<>();
 				for (Review review: getPullRequest().getReviews()) {
-					if (review.getReviewer().equals(invitation.getReviewer()))
+					if (review.getUser().equals(invitation.getUser()))
 						userReviews.add(review);
 				}
 				if (!userReviews.isEmpty()) {

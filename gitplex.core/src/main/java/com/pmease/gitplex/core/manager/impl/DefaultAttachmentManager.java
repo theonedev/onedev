@@ -11,14 +11,18 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityPersisted;
+import com.pmease.commons.hibernate.dao.EntityRemoved;
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.schedule.SchedulableTask;
 import com.pmease.commons.schedule.TaskScheduler;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.event.lifecycle.SystemStarted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.AttachmentManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 
@@ -77,23 +81,15 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			}
 		}
 	}
-	
-	@Override
-	public void systemStarting() {
-	}
 
-	@Override
-	public void systemStarted() {
+	@Listen
+	public void on(SystemStarted event) {
 		taskId = taskScheduler.schedule(this);
 	}
 
-	@Override
-	public void systemStopping() {
+	@Listen
+	public void on(SystemStopping event) {
 		taskScheduler.unschedule(taskId);
-	}
-
-	@Override
-	public void systemStopped() {
 	}
 
 	@Override
@@ -119,12 +115,12 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 
-	@Override
-	public void onPersistEntity(AbstractEntity entity) {
-		if (entity.isNew()) {
-			if (entity instanceof PullRequest) {
-				PullRequest request = (PullRequest) entity;
-				dao.afterCommit(new Runnable() {
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.isNew()) {
+			if (event.getEntity() instanceof PullRequest) {
+				PullRequest request = (PullRequest) event.getEntity();
+				dao.doAfterCommit(new Runnable() {
 	
 					@Override
 					public void run() {
@@ -132,9 +128,9 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 					}
 					
 				});
-			} else if (entity instanceof CodeComment) {
-				CodeComment comment = (CodeComment) entity;
-				dao.afterCommit(new Runnable() {
+			} else if (event.getEntity() instanceof CodeComment) {
+				CodeComment comment = (CodeComment) event.getEntity();
+				dao.doAfterCommit(new Runnable() {
 
 					@Override
 					public void run() {
@@ -146,13 +142,13 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		}
 	}
 
-	@Override
-	public void onRemoveEntity(AbstractEntity entity) {
-		if (entity instanceof Depot) {
-			Depot depot = (Depot) entity;
+	@Listen
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Depot) {
+			Depot depot = (Depot) event.getEntity();
 			FileUtils.deleteDir(storageManager.getAttachmentDir(depot));
-		} else if (entity instanceof CodeComment) {
-			CodeComment comment = (CodeComment) entity;
+		} else if (event.getEntity() instanceof CodeComment) {
+			CodeComment comment = (CodeComment) event.getEntity();
 			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getDepot(), comment.getUUID());
 			if (permanentAttachmentDir.exists())
 				FileUtils.deleteDir(permanentAttachmentDir);

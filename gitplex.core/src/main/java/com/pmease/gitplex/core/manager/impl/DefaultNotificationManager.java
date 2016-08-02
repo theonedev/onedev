@@ -25,6 +25,8 @@ import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.Verification;
+import com.pmease.gitplex.core.event.PullRequestListener;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.UrlManager;
@@ -38,7 +40,8 @@ import com.pmease.gitplex.core.manager.UrlManager;
  *
  */
 @Singleton
-public class DefaultNotificationManager extends AbstractEntityManager<Notification> implements NotificationManager {
+public class DefaultNotificationManager extends AbstractEntityManager<Notification> 
+		implements NotificationManager, PullRequestListener {
 	
 	private final MailManager mailManager;
 	
@@ -77,17 +80,6 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 
 	@Transactional
 	@Override
-	public void onReviewRequest(Review review, String comment) {
-		Query query = getSession().createQuery("delete from Notification "
-				+ "where request=:request and user=:user and task=:task");
-		query.setParameter("request", review.getUpdate().getRequest());
-		query.setParameter("user", review.getReviewer());
-		query.setParameter("task", REVIEW);
-		query.executeUpdate();
-	}
-
-	@Transactional
-	@Override
 	public void onAssignRequest(PullRequest request, Account user) {
 		Preconditions.checkNotNull(request.getAssignee());
 		
@@ -103,13 +95,9 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 		}
 	}
 
-	@Override
-	public void onVerifyRequest(PullRequest request) {
-	}
-
 	@Transactional
 	@Override
-	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
+	public void onIntegrateRequest(PullRequest request, Account user) {
 		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
@@ -118,7 +106,7 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 
 	@Transactional
 	@Override
-	public void onDiscardRequest(PullRequest request, Account user, String comment) {
+	public void onDiscardRequest(PullRequest request, Account user) {
 		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
@@ -134,7 +122,7 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 	@Override
 	public void onInvitingReview(ReviewInvitation invitation) {
 		PullRequest request = invitation.getRequest();
-		Account user = invitation.getReviewer();
+		Account user = invitation.getUser();
 		if (!invitation.isPreferred()) {
 			Query query = getSession().createQuery("delete from Notification "
 					+ "where request=:request and user=:user and task=:task");
@@ -217,7 +205,7 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 	
 	@Transactional
 	@Override
-	public void onReopenRequest(PullRequest request, Account user, String comment) {
+	public void onReopenRequest(PullRequest request, Account usee) {
 	}
 
 	private void requestIntegration(PullRequest request) {
@@ -268,10 +256,6 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 	}
 
 	@Override
-	public void onDeleteRequest(PullRequest request) {
-	}
-
-	@Override
 	public void onRestoreSourceBranch(PullRequest request) {
 	}
 
@@ -279,8 +263,27 @@ public class DefaultNotificationManager extends AbstractEntityManager<Notificati
 	public void onDeleteSourceBranch(PullRequest request) {
 	}
 
+	@Transactional
 	@Override
-	public void onWithdrawReview(Review review, Account user) {
+	public void onReviewRequest(Review review) {
+		Query query = getSession().createQuery("delete from Notification "
+				+ "where request=:request and user=:user and task=:task");
+		query.setParameter("request", review.getUpdate().getRequest());
+		query.setParameter("user", review.getUser());
+		query.setParameter("task", REVIEW);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void onVerifyRequest(Verification verification) {
+	}
+
+	@Override
+	public void onDeleteVerification(Verification verification) {
+	}
+
+	@Override
+	public void onDeleteReview(Review review) {
 	}
 
 }

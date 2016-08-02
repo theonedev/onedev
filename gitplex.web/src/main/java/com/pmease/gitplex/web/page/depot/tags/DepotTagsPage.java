@@ -45,7 +45,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.DepotAndRevision;
+import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.archivemenulink.ArchiveMenuLink;

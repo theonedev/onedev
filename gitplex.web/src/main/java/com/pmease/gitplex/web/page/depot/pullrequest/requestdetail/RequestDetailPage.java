@@ -65,10 +65,10 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.support.DepotAndBranch;
+import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Verification;
-import com.pmease.gitplex.core.entity.component.DepotAndBranch;
-import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -686,7 +686,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				PullRequest request = getPullRequest();
 				try {
 					operation.operate(request, commentInput.getModelObject());
-					GitPlex.getInstance(VisitInfoManager.class).visit(getLoginUser(), getPullRequest());
 					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 				} catch (Exception e) {
 					if (e.getMessage() != null) {

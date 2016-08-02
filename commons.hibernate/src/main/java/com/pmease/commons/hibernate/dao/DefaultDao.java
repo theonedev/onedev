@@ -3,7 +3,6 @@ package com.pmease.commons.hibernate.dao;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -18,6 +17,8 @@ import org.hibernate.criterion.Projections;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.loader.ManagedSerializedForm;
 
 @Singleton
@@ -26,12 +27,16 @@ public class DefaultDao implements Dao, Serializable {
 
 	private final Provider<Session> sessionProvider;
 	
-	private final Provider<Set<DaoListener>> listenersProvider;
+	private final ListenerRegistry listenerRegistry;
+	
+	private final UnitOfWork unitOfWork;
 	
 	@Inject
-	public DefaultDao(Provider<Session> sessionProvider, Provider<Set<DaoListener>> listenersProvider) {
+	public DefaultDao(Provider<Session> sessionProvider, UnitOfWork unitOfWork, 
+			ListenerRegistry listenerRegistry) {
 		this.sessionProvider = sessionProvider;
-		this.listenersProvider = listenersProvider;
+		this.unitOfWork = unitOfWork;
+		this.listenerRegistry = listenerRegistry;
 	}
 	
 	@Sessional
@@ -49,17 +54,16 @@ public class DefaultDao implements Dao, Serializable {
 	@Transactional
 	@Override
 	public void persist(AbstractEntity entity) {
-		for (DaoListener listener: listenersProvider.get())
-			listener.onPersistEntity(entity);
+		boolean isNew = entity.isNew();
 		getSession().saveOrUpdate(entity);
+		listenerRegistry.notify(new EntityPersisted(entity, isNew));
 	}
 
 	@Transactional
 	@Override
 	public void remove(AbstractEntity entity) {
-		for (DaoListener listener: listenersProvider.get())
-			listener.onRemoveEntity(entity);
 		getSession().delete(entity);
+		listenerRegistry.notify(new EntityRemoved(entity));
 	}
 
 	@Override
@@ -125,7 +129,7 @@ public class DefaultDao implements Dao, Serializable {
 	}
 
 	@Override
-	public void afterCommit(final Runnable runnable) {
+	public void doAfterCommit(final Runnable runnable) {
 		getSession().getTransaction().registerSynchronization(new Synchronization() {
 			
 			@Override
@@ -138,6 +142,11 @@ public class DefaultDao implements Dao, Serializable {
 					runnable.run();
 			}
 		});
+	}
+
+	@Override
+	public void doUnitOfWorkAfterCommitAsync(Runnable runnable) {
+		unitOfWork.doAsync(runnable);
 	}	
 
 }

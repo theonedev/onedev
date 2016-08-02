@@ -14,8 +14,7 @@ import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.commons.markdown.extensionpoint.MarkdownExtension;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
-import com.pmease.gitplex.core.listener.CodeCommentListener;
-import com.pmease.gitplex.core.listener.PullRequestListener;
+import com.pmease.gitplex.core.event.PullRequestListener;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 import com.pmease.gitplex.core.util.validation.DepotNameReservation;
@@ -28,7 +27,7 @@ import com.pmease.gitplex.web.component.comment.PullRequestTransformer;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.component.diff.DiffRenderer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.IndexChangeBroadcaster;
 import com.pmease.gitplex.web.websocket.CodeCommentChangeBroadcaster;
 import com.pmease.gitplex.web.websocket.PullRequestChangeBroadcaster;
 
@@ -56,8 +55,7 @@ public class WebModule extends AbstractPluginModule {
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
 		contribute(PullRequestListener.class, PullRequestChangeBroadcaster.class);
-		contribute(CodeCommentListener.class, CodeCommentChangeBroadcaster.class);
-		contribute(IndexListener.class, DepotFilePage.IndexedListener.class);
+		contribute(IndexListener.class, IndexChangeBroadcaster.class);
 		
 		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
 		contributeFromPackage(BlobRenderer.class, BlobRenderer.class);
@@ -87,6 +85,7 @@ public class WebModule extends AbstractPluginModule {
 		});
 
 		bind(UrlManager.class).to(WebUrlManager.class);
+		bind(CodeCommentChangeBroadcaster.class);
 	}
 	
 }

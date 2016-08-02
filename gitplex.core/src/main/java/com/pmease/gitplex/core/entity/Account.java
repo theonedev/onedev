@@ -118,10 +118,10 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="closeInfo.closedBy")
 	private Collection<PullRequest> closedRequests = new ArrayList<>();
 	
-	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Review> reviews = new ArrayList<Review>();
 	
-	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
@@ -134,7 +134,10 @@ public class Account extends AbstractUser implements ProtectedObject {
     private Collection<Notification> requestNotifications = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestVisit> requestVisits = new ArrayList<>();
+    private Collection<PullRequestActivity> requestActivities = new ArrayList<>();
+    
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<CodeCommentStatusChange> commentActivities = new ArrayList<>();
     
     private transient Collection<TeamAuthorization> allTeamAuthorizationsInOrganization;
     
@@ -325,6 +328,22 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.requestNotifications = requestNotifications;
 	}
 
+	public Collection<PullRequestActivity> getRequestActivities() {
+		return requestActivities;
+	}
+
+	public void setRequestActivities(Collection<PullRequestActivity> requestActivities) {
+		this.requestActivities = requestActivities;
+	}
+
+	public Collection<CodeCommentStatusChange> getCommentActivities() {
+		return commentActivities;
+	}
+
+	public void setCommentActivities(Collection<CodeCommentStatusChange> commentActivities) {
+		this.commentActivities = commentActivities;
+	}
+
 	@Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof Account) {
@@ -340,7 +359,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 	
 	public Review.Result checkReviewSince(PullRequestUpdate update) {
 		for (Review vote: update.listReviewsOnwards()) {
-			if (vote.getReviewer().equals(this))
+			if (vote.getUser().equals(this))
 				return vote.getResult();
 		}
 		

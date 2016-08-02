@@ -22,7 +22,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.CommentPos;
+import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.DiffRenderer;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;

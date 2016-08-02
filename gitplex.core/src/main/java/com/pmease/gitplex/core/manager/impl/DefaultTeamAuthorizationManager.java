@@ -14,28 +14,20 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.loader.Listen;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.TeamAuthorization;
-import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.listener.DepotListener;
+import com.pmease.gitplex.core.event.depot.DepotTransferred;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Singleton
 public class DefaultTeamAuthorizationManager extends AbstractEntityManager<TeamAuthorization> 
-		implements TeamAuthorizationManager, DepotListener {
+		implements TeamAuthorizationManager {
 
 	@Inject
 	public DefaultTeamAuthorizationManager(Dao dao) {
 		super(dao);
-	}
-
-	@Override
-	public void onDeleteDepot(Depot depot) {
-	}
-
-	@Override
-	public void onRenameDepot(Depot renamedDepot, String oldName) {
 	}
 
 	@Transactional
@@ -54,10 +46,10 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityManager<TeamA
 	}
 
 	@Transactional
-	@Override
-	public void onTransferDepot(Depot depot, Account oldAccount) {
+	@Listen
+	public void on(DepotTransferred event) {
 		Query query = getSession().createQuery("delete from TeamAuthorization where depot=:depot");
-		query.setParameter("depot", depot);
+		query.setParameter("depot", event.getDepot());
 		query.executeUpdate();
 	}
 

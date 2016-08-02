@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -17,34 +15,36 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.TransactionInterceptor;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.entity.Account;
+import com.pmease.commons.loader.Listen;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
+import com.pmease.gitplex.core.entity.CodeCommentStatusChange;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.CodeCommentEvent;
-import com.pmease.gitplex.core.listener.CodeCommentListener;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
-import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
+import com.pmease.gitplex.core.manager.CodeCommentStatusChangeManager;
 
 @Singleton
-public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment> 
-		implements CodeCommentManager, CodeCommentListener {
+public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment> implements CodeCommentManager {
 
-	private final Provider<Set<CodeCommentListener>> listenersProvider;
+	private final ListenerRegistry listenerRegistry;
 	
-	private final CodeCommentReplyManager codeCommentReplyManager;
+	private final CodeCommentStatusChangeManager codeCommentActivityManager;
 	
 	@Inject
-	public DefaultCodeCommentManager(Dao dao, Provider<Set<CodeCommentListener>> listenersProvider, 
-			CodeCommentReplyManager codeCommentReplyManager) {
+	public DefaultCodeCommentManager(Dao dao, ListenerRegistry listenerRegistry, 
+			CodeCommentStatusChangeManager codeCommentActivityManager) {
 		super(dao);
-		this.listenersProvider = listenersProvider;
-		this.codeCommentReplyManager = codeCommentReplyManager;
+		this.listenerRegistry = listenerRegistry;
+		this.codeCommentActivityManager = codeCommentActivityManager;
 	}
 
 	@Sessional
@@ -76,19 +76,16 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Transactional
 	@Override
 	public void save(CodeComment comment) {
-		boolean isNew;
+		CodeCommentCreated event = null;
 		if (comment.isNew()) {
-			comment.setLastEvent(CodeCommentEvent.CREATED);
+			event = new CodeCommentCreated(comment);
+			comment.setLastEvent(event.getDescription());
 			comment.setLastEventDate(comment.getCreateDate());
 			comment.setLastEventUser(comment.getUser());
-			isNew = true;
-		} else {
-			isNew = false;
-		}
+		} 
 		dao.persist(comment);
-		if (TransactionInterceptor.isInitiating() && isNew) {
-			for (CodeCommentListener listener: listenersProvider.get())
-				listener.onComment(comment);
+		if (event != null) {
+			listenerRegistry.notify(event);
 		}
 	}
 
@@ -123,51 +120,47 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 	@Transactional
 	@Override
-	public void toggleResolve(CodeComment comment, CodeCommentReply reply) {
-		save(comment);
-		if (reply != null) 
-			codeCommentReplyManager.save(reply);
+	public void changeStatus(CodeCommentStatusChange statusChange) {
+		statusChange.getComment().setResolved(statusChange.isResolved());
+		save(statusChange.getComment());
 		
-		if (TransactionInterceptor.isInitiating()) {
-			for (CodeCommentListener listener: listenersProvider.get()) {
-				listener.onToggleResolve(comment, reply.getUser());
-			}
-		}
+		codeCommentActivityManager.save(statusChange);
+		
+		if (statusChange.isResolved())
+			listenerRegistry.notify(new CodeCommentResolved(statusChange.getComment(), statusChange.getUser()));
+		else
+			listenerRegistry.notify(new CodeCommentUnresolved(statusChange.getComment(), statusChange.getUser()));
 	}
 
 	@Transactional
-	@Override
-	public void toggleResolve(CodeComment comment, Account user) {
+	@Listen
+	public void on(CodeCommentReplied event) {
+		CodeCommentReply reply = event.getReply();
+		CodeComment comment = reply.getComment();
+		comment.setLastEvent(event.getDescription());
+		comment.setLastEventDate(reply.getDate());
+		comment.setLastEventUser(reply.getUser());
 		save(comment);
-		if (TransactionInterceptor.isInitiating()) {
-			for (CodeCommentListener listener: listenersProvider.get()) {
-				listener.onToggleResolve(comment, user);
-			}
-		}
+	}
+
+	@Transactional
+	@Listen
+	public void on(CodeCommentResolved event) {
+		CodeComment comment = event.getComment();
+		comment.setLastEvent(event.getDescription());
+		comment.setLastEventDate(new Date());
+		comment.setLastEventUser(event.getUser());
+		save(comment);
+	}
+
+	@Transactional
+	@Listen
+	public void on(CodeCommentUnresolved event) {
+		CodeComment comment = event.getComment();
+		comment.setLastEvent(event.getDescription());
+		comment.setLastEventDate(new Date());
+		comment.setLastEventUser(event.getUser());
+		save(comment);
 	}
 	
-	@Override
-	public void onComment(CodeComment comment) {
-	}
-
-	@Transactional
-	@Override
-	public void onReplyComment(CodeCommentReply reply) {
-		reply.getComment().setLastEvent(CodeCommentEvent.REPLIED);
-		reply.getComment().setLastEventDate(reply.getDate());
-		reply.getComment().setLastEventUser(reply.getUser());
-		save(reply.getComment());
-	}
-
-	@Override
-	public void onToggleResolve(CodeComment comment, Account user) {
-		if (comment.isResolved())
-			comment.setLastEvent(CodeCommentEvent.RESOLVED);
-		else
-			comment.setLastEvent(CodeCommentEvent.UNRESOLVED);
-		comment.setLastEventDate(new Date());
-		comment.setLastEventUser(user);
-		save(comment);
-	}
-
 }

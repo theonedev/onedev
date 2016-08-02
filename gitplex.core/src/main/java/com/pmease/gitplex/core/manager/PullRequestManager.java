@@ -9,8 +9,8 @@ import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.entity.component.DepotAndBranch;
-import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.entity.support.DepotAndBranch;
+import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
@@ -45,10 +45,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     void reopen(PullRequest request, @Nullable String comment);
 
-    void onTargetBranchUpdate(PullRequest request);
-    
-    void onSourceBranchUpdate(PullRequest request);
-    
     void changeAssignee(PullRequest request);
     
     void check(PullRequest request);

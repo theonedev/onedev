@@ -46,11 +46,11 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.jackson.ExternalView;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.component.CloseInfo;
-import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.entity.component.DepotAndBranch;
-import com.pmease.gitplex.core.entity.component.IntegrationPreview;
-import com.pmease.gitplex.core.entity.component.PullRequestEvent;
+import com.pmease.gitplex.core.entity.support.CloseInfo;
+import com.pmease.gitplex.core.entity.support.CompareContext;
+import com.pmease.gitplex.core.entity.support.DepotAndBranch;
+import com.pmease.gitplex.core.entity.support.IntegrationPreview;
+import com.pmease.gitplex.core.entity.support.PullRequestEvent;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
@@ -228,9 +228,6 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<Notification> notifications = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestVisit> visits = new ArrayList<>();
-
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
@@ -464,14 +461,6 @@ public class PullRequest extends AbstractEntity {
 		this.notifications = notifications;
 	}
 
-	public Collection<PullRequestVisit> getVisits() {
-		return visits;
-	}
-
-	public void setVisits(Collection<PullRequestVisit> visits) {
-		this.visits = visits;
-	}
-
 	public Collection<PullRequestWatch> getWatches() {
 		return watches;
 	}
@@ -655,16 +644,16 @@ public class PullRequest extends AbstractEntity {
 		 * invitation list as their reviews are still valid
 		 */
 		for (Review review: getReferentialUpdate().listReviewsOnwards())
-			pickList.remove(review.getReviewer());
+			pickList.remove(review.getUser());
 
 		final Map<Account, Date> firstChoices = new HashMap<>();
 		final Map<Account, Date> secondChoices = new HashMap<>();
 		
 		for (ReviewInvitation invitation: getReviewInvitations()) {
 			if (invitation.isPreferred())
-				firstChoices.put(invitation.getReviewer(), invitation.getDate());
+				firstChoices.put(invitation.getUser(), invitation.getDate());
 			else
-				secondChoices.put(invitation.getReviewer(), invitation.getDate());
+				secondChoices.put(invitation.getUser(), invitation.getDate());
 		}
 		
 		// submitter is not preferred
@@ -705,7 +694,7 @@ public class PullRequest extends AbstractEntity {
 		for (Account user: picked) {
 			boolean found = false;
 			for (ReviewInvitation invitation: getReviewInvitations()) {
-				if (invitation.getReviewer().equals(user)) {
+				if (invitation.getUser().equals(user)) {
 					invitation.setDate(new Date());
 					invitation.setPerferred(true);
 					found = true;
@@ -714,7 +703,7 @@ public class PullRequest extends AbstractEntity {
 			if (!found) {
 				ReviewInvitation invitation = new ReviewInvitation();
 				invitation.setRequest(this);
-				invitation.setReviewer(user);
+				invitation.setUser(user);
 				getReviewInvitations().add(invitation);
 			}
 		}
@@ -835,7 +824,7 @@ public class PullRequest extends AbstractEntity {
 	
 	public boolean isReviewEffective(Account user) {
 		for (Review review: getReviews()) {
-			if (review.getUpdate().equals(getLatestUpdate()) && review.getReviewer().equals(user)) 
+			if (review.getUpdate().equals(getLatestUpdate()) && review.getUser().equals(user)) 
 				return true;
 		}
 		return false;
@@ -852,7 +841,7 @@ public class PullRequest extends AbstractEntity {
 		Set<Account> alreadyInvited = new HashSet<>();
 		for (ReviewInvitation invitation: getReviewInvitations()) {
 			if (invitation.isPreferred())
-				alreadyInvited.add(invitation.getReviewer());
+				alreadyInvited.add(invitation.getUser());
 		}
 		ObjectPermission readPerm = ObjectPermission.ofDepotRead(getTargetDepot());
 		for (Account user: GitPlex.getInstance(Dao.class).findAll(Account.class)) {
@@ -871,15 +860,6 @@ public class PullRequest extends AbstractEntity {
 		return null;
 	}
 
-	@Nullable
-	public PullRequestVisit getVisit(Account user) {
-		for (PullRequestVisit visit: getVisits()) {
-			if (visit.getUser().equals(user))
-				return visit;
-		}
-		return null;
-	}
-	
 	public String getNumberStr() {
 		return numberStr;
 	}
@@ -1010,6 +990,12 @@ public class PullRequest extends AbstractEntity {
 		} else {
 			return true;
 		}
+	}
+	
+	public boolean isMerged() {
+		return getTargetDepot().isMergedInto(
+				getLatestUpdate().getHeadCommitHash(), 
+				getTarget().getObjectName());
 	}
 	
 	public static class ComparingInfo implements Serializable {

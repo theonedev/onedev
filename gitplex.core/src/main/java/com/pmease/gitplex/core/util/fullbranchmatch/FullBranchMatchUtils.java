@@ -14,7 +14,7 @@ import com.pmease.commons.util.match.IncludeExclude;
 import com.pmease.commons.util.match.Matcher;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.DepotAndBranch;
+import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.CriteriaContext;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.FullBranchMatchContext;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.MatchContext;

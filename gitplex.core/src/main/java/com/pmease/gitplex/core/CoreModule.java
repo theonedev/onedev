@@ -12,7 +12,6 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
-import com.pmease.commons.hibernate.dao.DaoListener;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
@@ -21,15 +20,12 @@ import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.entity.EntityLocator;
 import com.pmease.gitplex.core.entity.persistlistener.ListenerLocator;
-import com.pmease.gitplex.core.listener.CodeCommentListener;
-import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.listener.LifecycleListener;
-import com.pmease.gitplex.core.listener.PullRequestListener;
-import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.event.PullRequestListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.AttachmentManager;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
+import com.pmease.gitplex.core.manager.CodeCommentStatusChangeManager;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
@@ -46,7 +42,6 @@ import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestInfoManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
-import com.pmease.gitplex.core.manager.PullRequestVisitManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -61,6 +56,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAttachmentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBatchWorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
+import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentStatusChangeManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentRelationManager;
@@ -77,7 +73,6 @@ import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
-import com.pmease.gitplex.core.manager.impl.DefaultPullRequestVisitManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewInvitationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
@@ -190,44 +185,18 @@ public class CoreModule extends AbstractPluginModule {
 		bind(TeamAuthorizationManager.class).to(DefaultTeamAuthorizationManager.class);
 		bind(UserAuthorizationManager.class).to(DefaultUserAuthorizationManager.class);
 		bind(PullRequestActivityManager.class).to(DefaultPullRequestActivityManager.class);
-		bind(PullRequestVisitManager.class).to(DefaultPullRequestVisitManager.class);
 		bind(CodeCommentReplyManager.class).to(DefaultCodeCommentReplyManager.class);
 		bind(AttachmentManager.class).to(DefaultAttachmentManager.class);
 		bind(CodeCommentRelationManager.class).to(DefaultCodeCommentRelationManager.class);
+		bind(CodeCommentStatusChangeManager.class).to(DefaultCodeCommentStatusChangeManager.class);
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 		
-		contribute(DaoListener.class, DefaultAttachmentManager.class);
-		
-		contribute(DepotListener.class, DefaultPullRequestManager.class);
-		contribute(DepotListener.class, DefaultCommitInfoManager.class);
-		contribute(DepotListener.class, DefaultPullRequestInfoManager.class);
-		contribute(DepotListener.class, DefaultCodeCommentInfoManager.class);
-		contribute(DepotListener.class, DefaultTeamAuthorizationManager.class);
-		
-		contribute(RefListener.class, DefaultPullRequestManager.class);
-		contribute(RefListener.class, DefaultCommitInfoManager.class);
-		contribute(RefListener.class, DefaultDepotManager.class);
-		
 		contribute(PullRequestListener.class, DefaultNotificationManager.class);
-		contribute(PullRequestListener.class, DefaultPullRequestInfoManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestActivityManager.class);
-		
-		contribute(CodeCommentListener.class, DefaultCodeCommentManager.class);
-		contribute(CodeCommentListener.class, DefaultPullRequestManager.class);
-		contribute(CodeCommentListener.class, DefaultVisitInfoManager.class);
-		contribute(CodeCommentListener.class, DefaultCodeCommentInfoManager.class);
-		contribute(CodeCommentListener.class, DefaultCodeCommentRelationManager.class);
-		
-		contribute(LifecycleListener.class, DefaultPullRequestManager.class);
-		contribute(LifecycleListener.class, DefaultAccountManager.class);
-		contribute(LifecycleListener.class, DefaultDepotManager.class);
-		contribute(LifecycleListener.class, DefaultCommitInfoManager.class);
-		contribute(LifecycleListener.class, DefaultBatchWorkManager.class);
-		contribute(LifecycleListener.class, DefaultAttachmentManager.class);
-		contribute(LifecycleListener.class, DefaultPullRequestInfoManager.class);
-		contribute(LifecycleListener.class, DefaultWorkExecutor.class);
+		contribute(PullRequestListener.class, DefaultPullRequestManager.class);
+		contribute(PullRequestListener.class, DefaultAccountManager.class);
 		
 		contributeFromPackage(PersistListener.class, ListenerLocator.class);
 	}

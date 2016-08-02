@@ -51,6 +51,8 @@ public class AppLoaderModule extends AbstractModule {
 			}
 	    	
 	    }).in(Singleton.class);
+	    
+	    bind(ListenerRegistry.class).to(DefaultListenerRegistry.class);
 	}
 
 	private static abstract interface DummyInterface {

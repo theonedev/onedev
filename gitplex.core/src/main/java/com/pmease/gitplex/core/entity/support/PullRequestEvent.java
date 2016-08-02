@@ -1,11 +1,12 @@
-package com.pmease.gitplex.core.entity.component;
+package com.pmease.gitplex.core.entity.support;
 
 public enum PullRequestEvent {
 	OPENED("opened"), 
 	ASSIGNED("assigned"),
 	APPROVED("approved"), 
 	DISAPPROVED("disapproved"),
-	REVIEW_WITHDRAWED("review withdrawed"),
+	VERIFICATION_PASSED("verification passed"),
+	VERIFICATION_NOT_PASSED("verification not passed"),
 	UPDATED("has new commits"), 
 	COMMENTED("commented"), 
 	INTEGRATED("integrated"), 

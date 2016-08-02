@@ -67,7 +67,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 		PullRequest request = requestModel.getObject();
 		ReviewInvitation invitation = null;
 		for(ReviewInvitation each: request.getReviewInvitations()) {
-			if (each.getReviewer().equals(user)) {
+			if (each.getUser().equals(user)) {
 				invitation = each;
 				break;
 			}
@@ -78,7 +78,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 		} else {
 			invitation = new ReviewInvitation();
 			invitation.setRequest(request);
-			invitation.setReviewer(user);
+			invitation.setUser(user);
 			request.getReviewInvitations().add(invitation);
 		}
 		if (!request.isNew())

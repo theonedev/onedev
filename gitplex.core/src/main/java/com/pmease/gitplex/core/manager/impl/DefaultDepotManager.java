@@ -14,7 +14,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
@@ -36,6 +35,8 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.Listen;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
@@ -44,11 +45,15 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.TeamAuthorization;
-import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
+import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
+import com.pmease.gitplex.core.event.RefUpdated;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
+import com.pmease.gitplex.core.event.depot.DepotRenamed;
+import com.pmease.gitplex.core.event.depot.DepotTransferred;
+import com.pmease.gitplex.core.event.lifecycle.SystemStarted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStarting;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.listener.LifecycleListener;
-import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
@@ -60,11 +65,11 @@ import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Singleton
-public class DefaultDepotManager extends AbstractEntityManager<Depot> implements DepotManager, LifecycleListener, RefListener {
+public class DefaultDepotManager extends AbstractEntityManager<Depot> implements DepotManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultDepotManager.class);
 	
-	private final Provider<Set<DepotListener>> listenersProvider;
+	private final ListenerRegistry listenerRegistry;
 	
     private final StorageManager storageManager;
     
@@ -92,7 +97,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     public DefaultDepotManager(Dao dao, AccountManager userManager, CodeCommentInfoManager codeCommentInfoManager,
     		TeamAuthorizationManager teamAuthorizationManager, PullRequestInfoManager pullRequestInfoManager,
     		StorageManager storageManager, CommitInfoManager commitInfoManager, 
-    		PullRequestManager pullRequestManager, Provider<Set<DepotListener>> listenersProvider) {
+    		PullRequestManager pullRequestManager, ListenerRegistry listenerRegistry) {
     	super(dao);
     	
         this.storageManager = storageManager;
@@ -102,7 +107,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
         this.commitInfoManager = commitInfoManager;
         this.codeCommentInfoManager = codeCommentInfoManager;
         this.pullRequestManager = pullRequestManager;
-        this.listenersProvider = listenersProvider;
+        this.listenerRegistry = listenerRegistry;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -144,8 +149,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     	
     	if (oldAccountId != null && !depot.getAccount().getId().equals(oldAccountId)) {
     		Account oldAccount = userManager.load(oldAccountId);
-    		for (DepotListener listener: listenersProvider.get())
-    			listener.onTransferDepot(depot, oldAccount);
+    		listenerRegistry.notify(new DepotTransferred(depot, oldAccount));
     		
     		for (Depot each: findAll()) {
     			for (IntegrationPolicy policy: each.getIntegrationPolicies()) {
@@ -158,8 +162,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		}
     	}
     	if (oldName != null && !depot.getName().equals(oldName)) {
-    		for (DepotListener listener: listenersProvider.get())
-    			listener.onRenameDepot(depot, oldName);
+    		listenerRegistry.notify(new DepotRenamed(depot, oldName));
     		
     		for (Depot each: findAll()) {
     			for (IntegrationPolicy integrationPolicy: each.getIntegrationPolicies()) {
@@ -171,7 +174,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		}
     	}
     	
-        afterCommit(new Runnable() {
+        doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -193,9 +196,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     @Transactional
     @Override
     public void delete(Depot depot) {
-		for (DepotListener listener: listenersProvider.get())
-			listener.onDeleteDepot(depot);
-		
     	Query query = getSession().createQuery("update Depot set forkedFrom=null where forkedFrom=:forkedFrom");
     	query.setParameter("forkedFrom", depot);
     	query.executeUpdate();
@@ -213,7 +213,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 			}
 		}
 
-		afterCommit(new Runnable() {
+		doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -230,7 +230,8 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 			}
 			
 		});
-		
+
+		listenerRegistry.notify(new DepotDeleted(depot));
     }
     
     @Sessional
@@ -341,15 +342,15 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	}
 	
 	@Sessional
-	@Override
-	public void systemStarting() {
+	@Listen
+	public void on(SystemStarting event) {
         for (Depot depot: findAll()) 
         	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getAccount().getId(), depot.getName()));
 	}
 	
 	@Transactional
-	@Override
-	public void systemStarted() {
+	@Listen
+	public void on(SystemStarted event) {
 		for (Depot depot: findAll()) {
 			checkSanity(depot);
 	        commitInfoManager.collect(depot);
@@ -360,8 +361,8 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 		pullRequestManager.checkSanity();
 	}
 
-	@Override
-	public void systemStopping() {
+	@Listen
+	public void on(SystemStopping event) {
 		synchronized(repositoryCache) {
 			for (Repository repository: repositoryCache.values()) {
 				repository.close();
@@ -369,24 +370,20 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 		}
 	}
 
-	@Override
-	public void systemStopped() {
-	}
-
 	@Transactional
-	@Override
-	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		if (newCommit.equals(ObjectId.zeroId())) {
-			String branch = GitUtils.ref2branch(refName);
+	@Listen
+	public void on(RefUpdated event) {
+		if (event.getNewCommit().equals(ObjectId.zeroId())) {
+			String branch = GitUtils.ref2branch(event.getRefName());
 			for (Depot each: findAll()) {
 				if (branch != null) {
 					for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
-						if (it.next().onBranchDelete(each, depot, branch))
+						if (it.next().onBranchDelete(each, event.getDepot(), branch))
 							it.remove();
 					}
 				}
 				for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-					if (it.next().onRefDelete(refName))
+					if (it.next().onRefDelete(event.getRefName()))
 						it.remove();
 				}
 			}

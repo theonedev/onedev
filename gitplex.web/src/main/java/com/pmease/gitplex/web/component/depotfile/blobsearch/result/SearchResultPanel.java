@@ -33,7 +33,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
-import com.pmease.gitplex.core.entity.component.TextRange;
+import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;

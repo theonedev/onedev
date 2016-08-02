@@ -10,7 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.entity.component.PullRequestEvent;
+import com.pmease.gitplex.core.entity.support.PullRequestEvent;
 
 @Entity
 public class PullRequestActivity extends AbstractEntity {
@@ -28,7 +28,7 @@ public class PullRequestActivity extends AbstractEntity {
 	private Account user;
 	
 	@Column(nullable=false)
-	private Date date = new Date();
+	private Date date;
 
 	public PullRequest getRequest() {
 		return request;

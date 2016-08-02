@@ -16,7 +16,6 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.TransactionInterceptor;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -24,42 +23,34 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.component.PullRequestEvent;
-import com.pmease.gitplex.core.listener.PullRequestListener;
+import com.pmease.gitplex.core.event.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 
 		implements PullRequestUpdateManager {
 	
-	private final PullRequestManager pullRequestManager;
-	
-	private final Provider<Set<PullRequestListener>> pullRequestListenersProvider;
+	private final Provider<Set<PullRequestListener>> listenersProvider;
 	
 	@Inject
-	public DefaultPullRequestUpdateManager(Dao dao, PullRequestManager pullRequestManager, 
-			Provider<Set<PullRequestListener>> pullRequestListenersProvider,
+	public DefaultPullRequestUpdateManager(Dao dao, Provider<Set<PullRequestListener>> pullRequestListenersProvider,
 			PullRequestCommentManager commentManager) {
 		super(dao);
 		
-		this.pullRequestManager = pullRequestManager;
-		this.pullRequestListenersProvider = pullRequestListenersProvider;
+		this.listenersProvider = pullRequestListenersProvider;
 	}
 
 	@Transactional
 	@Override
 	public void save(PullRequestUpdate update) {
+		save(update, true);
+	}
+	
+	@Transactional
+	@Override
+	public void save(PullRequestUpdate update, boolean notifyListeners) {
 		PullRequest request = update.getRequest();
-		if (TransactionInterceptor.isInitiating()) {
-			for (PullRequestListener listener: pullRequestListenersProvider.get())
-				listener.onUpdateRequest(update);
-			request.setLastEvent(PullRequestEvent.UPDATED);
-			request.setLastEventDate(update.getDate());
-			request.setLastEventUser(null);
-			pullRequestManager.save(request);
-		}
 		
 		String sourceHead = request.getSource().getObjectName();
 
@@ -82,6 +73,8 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			refUpdate.setNewObjectId(ObjectId.fromString(sourceHead));
 			GitUtils.updateRef(refUpdate);
 		}
+
+		listenersProvider.get().forEach(each->each.onUpdateRequest(update));
 	}
 
 	@Sessional

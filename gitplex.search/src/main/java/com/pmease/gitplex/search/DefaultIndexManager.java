@@ -69,11 +69,13 @@ import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.util.ContentDetector;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.Prioritized;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.event.RefUpdated;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.support.BatchWorker;
@@ -94,6 +96,8 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final BatchWorkManager batchWorkManager;
 	
+	private final SearchManager searchManager;
+	
 	private final Set<IndexListener> listeners;
 	
 	private final Extractors extractors; 
@@ -105,13 +109,14 @@ public class DefaultIndexManager implements IndexManager {
 	@Inject
 	public DefaultIndexManager(Set<IndexListener> listeners, StorageManager storageManager, 
 			BatchWorkManager batchWorkManager, Extractors extractors, 
-			UnitOfWork unitOfWork, Dao dao) {
+			UnitOfWork unitOfWork, Dao dao, SearchManager searchManager) {
 		this.listeners = listeners;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.extractors = extractors;
 		this.unitOfWork = unitOfWork;
 		this.dao = dao;
+		this.searchManager = searchManager;
 	}
 
 	private String getCommitIndexVersion(final IndexSearcher searcher, AnyObjectId commitId) throws IOException {
@@ -398,33 +403,24 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Transactional
-	@Override
-	public void onDeleteDepot(Depot depot) {
-		for (IndexListener listener: listeners)
-			listener.indexRemoving(depot);
-		FileUtils.deleteDir(storageManager.getIndexDir(depot));
+	@Listen
+	public void on(DepotDeleted event) {
+		searchManager.closeSearcher(event.getDepot());
+		FileUtils.deleteDir(storageManager.getIndexDir(event.getDepot()));
 	}
 
-	@Override
-	public void onRenameDepot(Depot renamedDepot, String oldName) {
-	}
-
-	@Override
-	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	@Listen
+	public void on(RefUpdated event) {
 		// only index branches at back end, tags will be indexed on demand from GUI 
 		// as many tags might be pushed all at once when the repository is imported 
-		if (refName.startsWith(Constants.R_HEADS) && !newCommit.equals(ObjectId.zeroId())) {
-			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, newCommit);
-			batchWorkManager.submit(getBatchWorker(depot), work);
+		if (event.getRefName().startsWith(Constants.R_HEADS) && !event.getNewCommit().equals(ObjectId.zeroId())) {
+			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, event.getNewCommit());
+			batchWorkManager.submit(getBatchWorker(event.getDepot()), work);
 		}
 	}
 
 	@Override
-	public void onTransferDepot(Depot depot, Account oldAccount) {
-	}
-
-	@Override
-	public void requestToIndex(Depot depot, ObjectId commit) {
+	public void asyncIndex(Depot depot, ObjectId commit) {
 		int priority;
 		if (RequestCycle.get() != null)
 			priority = UI_INDEXING_PRIORITY;

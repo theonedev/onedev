@@ -16,25 +16,25 @@
 .code-comment>.post.new {
 	border-left: 4px solid #4667EE;
 }
-.code-comment>.post>.author-avatar {
+.code-comment>.post>.user-avatar {
 	position: absolute;
 	left: 12px;
 	top: 0;
 }
-.code-comment>.post>.author-avatar img {
+.code-comment>.post>.user-avatar img {
 	width: 32px;
 	height: 32px;
 }
 .code-comment>.post>.detail {
 	padding-left: 40px;
 }
-.code-comment>.post>.detail>.head .author-name {
+.code-comment>.post>.detail>.head .user-name {
 	color: #999;
 }
-.code-comment>.post>.detail>.head .author-name:hover {
+.code-comment>.post>.detail>.head .user-name:hover {
 	color: #333;
 }
-.code-comment>.post>.detail>.head .author-date {
+.code-comment>.post>.detail>.head .activity {
 	font-size: 12px;
 	color: #999;
 }
@@ -49,6 +49,10 @@
 }
 .code-comment>.post>.detail>.body>.feedback .alert {
 	margin-bottom: 0;
+}
+.code-comment>.post>.detail>.body .no-note {
+	font-style: italic;
+	margin-bottom: 10px;
 }
 .code-comment>.post>.detail>.foot a {
 	font-size: 12px;

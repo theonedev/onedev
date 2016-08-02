@@ -31,6 +31,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Range;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.support.IndexResult;
@@ -49,9 +50,9 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	
 	private Extractors extractors;
 	
-	private IndexManager indexManager;
+	private DefaultIndexManager indexManager;
 	
-	private SearchManager searchManager;
+	private DefaultSearchManager searchManager;
 	
 	@Override
 	protected void setup() {
@@ -93,7 +94,8 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		searchManager = new DefaultSearchManager(storageManager);
 		
 		indexManager = new DefaultIndexManager(Sets.<IndexListener>newHashSet(searchManager), 
-				storageManager, mock(BatchWorkManager.class), extractors, mock(UnitOfWork.class), mock(Dao.class));
+				storageManager, mock(BatchWorkManager.class), extractors, mock(UnitOfWork.class), 
+				mock(Dao.class), searchManager);
 	}
 
 	@Test
@@ -294,8 +296,8 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	
 	@Override
 	protected void teardown() {
+		indexManager.on(new DepotDeleted(depot));
 		super.teardown();
-		indexManager.onDeleteDepot(depot);
 	}
 
 }

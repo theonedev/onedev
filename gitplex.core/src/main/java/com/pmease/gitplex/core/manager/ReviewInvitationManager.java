@@ -9,5 +9,4 @@ public interface ReviewInvitationManager extends EntityManager<ReviewInvitation>
 	
 	ReviewInvitation find(Account reviewer, PullRequest request);
 	
-	void save(ReviewInvitation reviewInvitation);
 }

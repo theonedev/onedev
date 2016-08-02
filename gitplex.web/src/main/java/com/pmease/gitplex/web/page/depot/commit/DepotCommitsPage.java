@@ -50,7 +50,7 @@ import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.DepotAndRevision;
+import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;

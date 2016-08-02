@@ -11,15 +11,11 @@ import com.pmease.gitplex.core.entity.TeamMembership;
 
 public interface OrganizationMembershipManager extends EntityManager<OrganizationMembership> {
 	
-	void save(OrganizationMembership membership);
-	
 	@Nullable
 	OrganizationMembership find(Account organization, Account user);
 	
 	void save(Collection<OrganizationMembership> organizationMemberships, 
 			Collection<TeamMembership> teamMemberships);
-	
-	void delete(OrganizationMembership organizationMembership);
 	
 	void delete(Collection<OrganizationMembership> organizationMemberships);
 

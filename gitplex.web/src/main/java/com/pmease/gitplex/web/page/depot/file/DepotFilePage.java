@@ -46,7 +46,9 @@ import com.google.common.base.Objects;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.component.menu.MenuItem;
@@ -57,11 +59,10 @@ import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.TextRange;
-import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.entity.support.TextRange;
+import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -310,7 +311,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				if (!indexManager.isIndexed(getDepot(), trait.commitId)) {
-					GitPlex.getInstance(IndexManager.class).requestToIndex(getDepot(), trait.commitId);
+					GitPlex.getInstance(IndexManager.class).asyncIndex(getDepot(), trait.commitId);
 					setVisible(true);
 				} else {
 					setVisible(false);
@@ -482,8 +483,17 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					resolvedRevision = newCommit;
 					BlobIdent committed = new BlobIdent(
 							branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
-		    		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-		    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
+					
+					GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+
+						@Override
+						public void run() {
+							Depot depot = getDepot();
+							depot.cacheObjectId(branch, newCommit);
+							GitPlex.getInstance(ListenerRegistry.class).notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+						}
+						
+					});
 
 		    		State state = getState();
 	    			state.blobIdent = committed;
@@ -540,8 +550,18 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 								break;
 							}
 						}
-						for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-			    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
+						
+						GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+
+							@Override
+							public void run() {
+								Depot depot = getDepot();
+								depot.cacheObjectId(branch, newCommit);
+								GitPlex.getInstance(ListenerRegistry.class).notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+							}
+							
+						});
+						
 						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
 						State state = getState();
 						state.blobIdent = parentBlobIdent;
@@ -758,7 +778,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		setResponsePage(DepotFilePage.class, paramsOf(depot));
 	}
 	
-	private static class CommitIndexed implements WebSocketTrait {
+	static class CommitIndexed implements WebSocketTrait {
 
 		Long depotId;
 		
@@ -918,22 +938,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			}
 		}
 		return new ArrayList<>();
-	}
-
-	public static class IndexedListener implements IndexListener {
-
-		@Override
-		public void commitIndexed(Depot depot, ObjectId commit) {
-			CommitIndexed trait = new CommitIndexed();
-			trait.depotId = depot.getId();
-			trait.commitId = commit;
-			WebSocketRenderBehavior.requestToRender(trait);
-		}
-
-		@Override
-		public void indexRemoving(Depot depot) {
-		}
-		
 	}
 
 	public static class State implements Serializable {

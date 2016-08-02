@@ -16,14 +16,15 @@ import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.component.PullRequestEvent;
-import com.pmease.gitplex.core.listener.PullRequestListener;
+import com.pmease.gitplex.core.entity.Verification;
+import com.pmease.gitplex.core.entity.support.PullRequestEvent;
+import com.pmease.gitplex.core.event.PullRequestListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestActivityManager;
 
 @Singleton
-public class DefaultPullRequestActivityManager 
-		extends AbstractEntityManager<PullRequestActivity> implements PullRequestActivityManager, PullRequestListener {
+public class DefaultPullRequestActivityManager extends AbstractEntityManager<PullRequestActivity> 
+		implements PullRequestActivityManager, PullRequestListener {
 
 	@Inject
 	public DefaultPullRequestActivityManager(Dao dao) {
@@ -34,19 +35,14 @@ public class DefaultPullRequestActivityManager
 	public void onOpenRequest(PullRequest request) {
 	}
 
-	@Override
-	public void onDeleteRequest(PullRequest request) {
-	}
-
 	@Transactional
 	@Override
-	public void onReopenRequest(PullRequest request, Account user, String comment) {
+	public void onReopenRequest(PullRequest request, Account user) {
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
 		activity.setDate(new Date());
 		activity.setEvent(PullRequestEvent.REOPENED);
 		activity.setUser(user);
-		
 		save(activity);
 	}
 
@@ -68,20 +64,6 @@ public class DefaultPullRequestActivityManager
 
 	@Transactional
 	@Override
-	public void onReviewRequest(Review review, String comment) {
-		PullRequestActivity activity = new PullRequestActivity();
-		if (review.getResult() == Review.Result.APPROVE)
-			activity.setEvent(PullRequestEvent.APPROVED);
-		else
-			activity.setEvent(PullRequestEvent.DISAPPROVED);
-		activity.setDate(new Date());
-		activity.setRequest(review.getUpdate().getRequest());
-		activity.setUser(review.getReviewer());
-		save(activity);
-	}
-
-	@Transactional
-	@Override
 	public void onAssignRequest(PullRequest request, Account user) {
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setEvent(PullRequestEvent.ASSIGNED);
@@ -91,31 +73,25 @@ public class DefaultPullRequestActivityManager
 		save(activity);
 	}
 
-	@Override
-	public void onVerifyRequest(PullRequest request) {
-	}
-
 	@Transactional
 	@Override
-	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
+	public void onIntegrateRequest(PullRequest request, Account user) {
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
 		activity.setDate(new Date());
 		activity.setEvent(PullRequestEvent.INTEGRATED);
 		activity.setUser(user);
-		
 		save(activity);
 	}
 
 	@Transactional
 	@Override
-	public void onDiscardRequest(PullRequest request, Account user, String comment) {
+	public void onDiscardRequest(PullRequest request, Account user) {
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
 		activity.setDate(new Date());
 		activity.setEvent(PullRequestEvent.DISCARDED);
 		activity.setUser(user);
-
 		save(activity);
 	}
 
@@ -163,13 +139,41 @@ public class DefaultPullRequestActivityManager
 
 	@Transactional
 	@Override
-	public void onWithdrawReview(Review review, Account user) {
+	public void onReviewRequest(Review review) {
 		PullRequestActivity activity = new PullRequestActivity();
-		activity.setEvent(PullRequestEvent.REVIEW_WITHDRAWED);
+		if (review.getResult() == Review.Result.APPROVE)
+			activity.setEvent(PullRequestEvent.APPROVED);
+		else
+			activity.setEvent(PullRequestEvent.DISAPPROVED);
 		activity.setDate(new Date());
 		activity.setRequest(review.getUpdate().getRequest());
-		activity.setUser(user);
+		activity.setUser(review.getUser());
 		save(activity);
+	}
+
+	@Transactional
+	@Override
+	public void onVerifyRequest(Verification verification) {
+		if (verification.getStatus() != Verification.Status.ONGOING) {
+			PullRequestActivity activity = new PullRequestActivity();
+			if (verification.getStatus() == Verification.Status.PASSED)
+				activity.setEvent(PullRequestEvent.VERIFICATION_PASSED);
+			else if (verification.getStatus() == Verification.Status.NOT_PASSED)
+				activity.setEvent(PullRequestEvent.VERIFICATION_NOT_PASSED);
+			activity.setDate(new Date());
+			activity.setRequest(verification.getRequest());
+			save(activity);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void onDeleteVerification(Verification verification) {
+	}
+
+	@Transactional
+	@Override
+	public void onDeleteReview(Review review) {
 	}
 
 }

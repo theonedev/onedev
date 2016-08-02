@@ -88,7 +88,7 @@ public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 	}
 
 	@Override
-	public void asyncCall(final Runnable runnable) {
+	public void doAsync(final Runnable runnable) {
 		executorService.execute(new Runnable() {
 
 			@Override

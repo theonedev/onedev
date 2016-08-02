@@ -1,10 +1,13 @@
 package com.pmease.gitplex.web.component.comment;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -32,6 +35,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.hibernate.StaleObjectStateException;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
@@ -40,12 +44,15 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
+import com.pmease.gitplex.core.entity.CodeCommentStatusChange;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.entity.component.DepotAndRevision;
+import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
+import com.pmease.gitplex.core.entity.support.CompareContext;
+import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
+import com.pmease.gitplex.core.manager.CodeCommentStatusChangeManager;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
@@ -63,7 +70,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 	private final Long commentId;
 	
-	private RepeatingView repliesView;
+	private RepeatingView activitiesView;
 	
 	/**
 	 * We pass comment id instead of comment model as we want to make sure that 
@@ -100,30 +107,45 @@ public abstract class CodeCommentPanel extends Panel {
 			CodeCommentChanged codeCommentChanged = (CodeCommentChanged) event.getPayload();
 			IPartialPageRequestHandler partialPageRequestHandler = codeCommentChanged.getPartialPageRequestHandler();
 
-			Date lastPostDate;
-			String prevPostMarkupId;
-			if (repliesView.size() != 0) {
+			Date lastActivityDate;
+			String prevActivityMarkupId;
+			if (activitiesView.size() != 0) {
 				@SuppressWarnings("deprecation")
-				Component lastReplyContainer = repliesView.get(repliesView.size()-1);
+				Component lastReplyContainer = activitiesView.get(activitiesView.size()-1);
 				CodeCommentReply lastReply = GitPlex.getInstance(CodeCommentReplyManager.class)
 						.load((Long) lastReplyContainer.getDefaultModelObject());
-				lastPostDate = lastReply.getDate();
-				prevPostMarkupId = lastReplyContainer.getMarkupId();
+				lastActivityDate = lastReply.getDate();
+				prevActivityMarkupId = lastReplyContainer.getMarkupId();
 			} else {
-				lastPostDate = getComment().getCreateDate();
-				prevPostMarkupId = get("comment").getMarkupId();
+				lastActivityDate = getComment().getCreateDate();
+				prevActivityMarkupId = get("comment").getMarkupId();
 			}
-			for (CodeCommentReply reply: getComment().getSortedReplies()) {
-				if (reply.getDate().after(lastPostDate)) {
-					Component newReplyContainer = newReplyContainer(repliesView.newChildId(), reply.getId()); 
-					repliesView.add(newReplyContainer);
-					
-					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							newReplyContainer.getMarkupId(), prevPostMarkupId);
-					partialPageRequestHandler.prependJavaScript(script);
-					partialPageRequestHandler.add(newReplyContainer);
-					prevPostMarkupId = newReplyContainer.getMarkupId();
+			
+			PullRequest request = getPullRequest();
+			List<CodeCommentActivity> activities = new ArrayList<>();
+			for (CodeCommentReply reply: getComment().getReplies()) {
+				if (reply.getDate().after(lastActivityDate) 
+						&& (request == null || request.getRequestComparingInfo(reply.getComparingInfo()) != null)) {
+					activities.add(reply);
 				}
+			}
+			for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
+				if (statusChange.getDate().after(lastActivityDate) 
+						&& (request == null || request.getRequestComparingInfo(statusChange.getComparingInfo()) != null)) {
+					activities.add(statusChange);
+				}
+			}
+			activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
+			
+			for (CodeCommentActivity activity: activities) {
+				Component newActivityContainer = newActivityContainer(activitiesView.newChildId(), activity); 
+				activitiesView.add(newActivityContainer);
+				
+				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+						newActivityContainer.getMarkupId(), prevActivityMarkupId);
+				partialPageRequestHandler.prependJavaScript(script);
+				partialPageRequestHandler.add(newActivityContainer);
+				prevActivityMarkupId = newActivityContainer.getMarkupId();
 			}
 		}
 	}
@@ -141,9 +163,10 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}));
 		
-		commentContainer.add(new AvatarLink("authorAvatar", getComment().getUser()));
-		commentContainer.add(new AccountLink("authorName", getComment().getUser()));
-		commentContainer.add(new Label("authorDate", DateUtils.formatAge(getComment().getCreateDate())));
+		commentContainer.add(new AvatarLink("userAvatar", getComment().getUser()));
+		commentContainer.add(new AccountLink("userName", getComment().getUser()));
+		commentContainer.add(new Label("activityDescription", "commented"));
+		commentContainer.add(new Label("activityDate", DateUtils.formatAge(getComment().getCreateDate())));
 		commentContainer.add(new Link<Void>("compareContext") {
 
 			@Override
@@ -221,7 +244,7 @@ public abstract class CodeCommentPanel extends Panel {
 					GitPlex.getInstance(CodeCommentManager.class).save(comment);				
 					target.add(feedback); // clear the feedback
 				} catch (StaleObjectStateException e) {
-					commentContainer.warn("Some one changed the content you are editing. "
+					commentContainer.warn("Someone changed the content you are editing. "
 							+ "The content has now been reloaded, please try again.");
 					target.add(commentContainer);
 				}
@@ -347,53 +370,66 @@ public abstract class CodeCommentPanel extends Panel {
 		return commentContainer;
 	}
 	
-	private WebMarkupContainer newReplyContainer(String componentId, Long replyId) {
-		Fragment replyContainer = new Fragment(componentId, "viewFrag", this, Model.of(replyId));
-		replyContainer.setOutputMarkupId(true);
+	private WebMarkupContainer newActivityContainer(String componentId, CodeCommentActivity activity) {
+		Class<? extends CodeCommentActivity> activityClass = activity.getClass();
+		Long activityId = activity.getId();
+		Fragment activityContainer = new Fragment(componentId, "viewFrag", this, Model.of(activityId));
+		activityContainer.setOutputMarkupId(true);
 		
-		replyContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+		activityContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				return getComment().isVisitedAfter(getReply(replyId).getDate())?"":"new";
+				return getComment().isVisitedAfter(getActivity(activityClass, activityId).getDate())?"":"new";
 			}
 			
 		}));
 		
-		replyContainer.add(new AvatarLink("authorAvatar", getReply(replyId).getUser()));
-		replyContainer.add(new AccountLink("authorName", getReply(replyId).getUser()));
-		replyContainer.add(new Label("authorDate", DateUtils.formatAge(getReply(replyId).getDate())));
-		replyContainer.add(new Link<Void>("compareContext") {
+		activityContainer.add(new AvatarLink("userAvatar", activity.getUser()));
+		activityContainer.add(new AccountLink("userName", activity.getUser()));
+		String activityDescription;
+		if (activity instanceof CodeCommentStatusChange) {
+			CodeCommentStatusChange statusChange = (CodeCommentStatusChange) activity;
+			if (statusChange.isResolved())
+				activityDescription = "resolved";
+			else
+				activityDescription = "unresolved";
+		} else {
+			activityDescription = "replied";
+		}
+		activityContainer.add(new Label("activityDescription", activityDescription));
+		activityContainer.add(new Label("activityDate", DateUtils.formatAge(activity.getDate())));
+		activityContainer.add(new Link<Void>("compareContext") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getCompareContext(getComment()).equals(getReply(replyId).getCompareContext()));
+				setVisible(!getCompareContext(getComment()).equals(getActivity(activityClass, activityId).getCompareContext()));
 			}
 
 			@Override
 			public void onClick() {
-				CodeCommentReply reply = getReply(replyId);
-				CompareContext compareContext = reply.getCompareContext();
+				CodeCommentActivity activity = getActivity(activityClass, activityId);
+				CompareContext compareContext = activity.getCompareContext();
 				PullRequest request = getPullRequest();
 				if (request != null) {
 					RequestChangesPage.State state = new RequestChangesPage.State();
-					state.commentId = reply.getComment().getId();
+					state.commentId = activity.getComment().getId();
 					if (compareContext.isLeftSide()) {
 						state.oldCommit = compareContext.getCompareCommit();
-						state.newCommit = reply.getComment().getCommentPos().getCommit();
+						state.newCommit = activity.getComment().getCommentPos().getCommit();
 					} else {
-						state.oldCommit = reply.getComment().getCommentPos().getCommit();
+						state.oldCommit = activity.getComment().getCommentPos().getCommit();
 						state.newCommit = compareContext.getCompareCommit();
 					}
-					state.mark = reply.getComment().getCommentPos();
+					state.mark = activity.getComment().getCommentPos();
 					state.pathFilter = compareContext.getPathFilter();
 					state.whitespaceOption = compareContext.getWhitespaceOption();
 					PageParameters params  = RequestChangesPage.paramsOf(request, state);
 					setResponsePage(RequestChangesPage.class, params);
 				} else {
 					RevisionComparePage.State state = new RevisionComparePage.State();
-					CodeComment comment = reply.getComment();
+					CodeComment comment = activity.getComment();
 					state.commentId = comment.getId();
 					state.compareWithMergeBase = false;
 					if (compareContext.isLeftSide()) {
@@ -414,53 +450,65 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}.add(AttributeAppender.append("title", "This reply is added in a different compare context, click to show")));		
 
-		NotificationPanel feedback = new NotificationPanel("feedback", replyContainer);
+		NotificationPanel feedback = new NotificationPanel("feedback", activityContainer);
 		feedback.setOutputMarkupPlaceholderTag(true);
-		replyContainer.add(feedback);
-		AtomicLong lastVersionRef = new AtomicLong(getReply(replyId).getVersion());
-		replyContainer.add(new MarkdownViewer("content", new IModel<String>() {
+		activityContainer.add(feedback);
+		
+		if (StringUtils.isNotBlank(activity.getNote())) {
+			AtomicLong lastVersionRef = new AtomicLong(activity.getVersion());
+			activityContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return getReply(replyId).getContent();
-			}
-
-			@Override
-			public void setObject(String object) {
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				Preconditions.checkNotNull(target);
-				CodeCommentReply reply = getReply(replyId);
-				try {
-					if (reply.getVersion() != lastVersionRef.get())
-						throw new StaleObjectStateException(CodeCommentReply.class.getName(), reply.getId());
-					reply.setContent(object);
-					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);				
-					target.add(feedback); // clear the feedback
-				} catch (StaleObjectStateException e) {
-					replyContainer.warn("Some one changed the content you are editing. The content has now been reloaded, "
-							+ "please try again.");
-					target.add(replyContainer);
+				@Override
+				public void detach() {
 				}
-				lastVersionRef.set(reply.getVersion());
-			}
-			
-		}, SecurityUtils.canModify(getComment())));
+
+				@Override
+				public String getObject() {
+					return getActivity(activityClass, activityId).getNote();
+				}
+
+				@Override
+				public void setObject(String object) {
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					Preconditions.checkNotNull(target);
+					CodeCommentActivity activity = getActivity(activityClass, activityId);
+					try {
+						if (activity.getVersion() != lastVersionRef.get())
+							throw new StaleObjectStateException(activityClass.getName(), activity.getId());
+						if (activityClass == CodeCommentReply.class) {
+							CodeCommentReply reply = (CodeCommentReply) activity;
+							reply.setContent(object);
+							GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);				
+						} else {
+							CodeCommentStatusChange statusChange = (CodeCommentStatusChange) activity;
+							statusChange.setNote(object);
+							GitPlex.getInstance(CodeCommentStatusChangeManager.class).save(statusChange);				
+						}
+						target.add(feedback); // clear the feedback
+					} catch (StaleObjectStateException e) {
+						activityContainer.warn("Some one changed the content you are editing. The content has now been reloaded, "
+								+ "please try again.");
+						target.add(activityContainer);
+					}
+					lastVersionRef.set(activity.getVersion());
+				}
+				
+			}, SecurityUtils.canModify(getComment())));			
+		} else {
+			activityContainer.add(new Label("content", "<div class='no-note'>No note</div>").setEscapeModelStrings(false));
+		}
 		
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
-		foot.setVisible(SecurityUtils.canModify(getReply(replyId)));
+		foot.setVisible(SecurityUtils.canModify(activity));
 		
 		foot.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment(replyContainer.getId(), "replyEditFrag", 
-						CodeCommentPanel.this, Model.of(replyId));
+				Fragment fragment = new Fragment(activityContainer.getId(), "noteEditFrag", 
+						CodeCommentPanel.this, Model.of(activityId));
 				Form<?> form = new Form<Void>("form");
-				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent())) {
+				CommentInput contentInput = new CommentInput("content", Model.of(getActivity(activityClass, activityId).getNote())) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -473,8 +521,8 @@ public abstract class CodeCommentPanel extends Panel {
 					}
 					
 				};
+				contentInput.setRequired(activityClass == CodeCommentReply.class);
 				form.add(contentInput);
-				contentInput.setRequired(true);
 				
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
@@ -490,14 +538,14 @@ public abstract class CodeCommentPanel extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						WebMarkupContainer replyContainer = newReplyContainer(componentId, replyId);
+						WebMarkupContainer replyContainer = newActivityContainer(componentId, getActivity(activityClass, activityId));
 						fragment.replaceWith(replyContainer);
 						target.add(replyContainer);
 					}
 					
 				});
 				
-				long lastVersion = getReply(replyId).getVersion();
+				long lastVersion = getActivity(activityClass, activityId).getVersion();
 				form.add(new AjaxButton("save") {
 
 					@Override
@@ -511,14 +559,22 @@ public abstract class CodeCommentPanel extends Panel {
 						super.onSubmit(target, form);
 
 						try {
-							CodeCommentReply reply = getReply(replyId);
-							if (reply.getVersion() != lastVersion)
-								throw new StaleObjectStateException(CodeComment.class.getName(), reply.getId());
-							reply.setContent(contentInput.getModelObject());
-							GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
-							WebMarkupContainer replyContainer = newReplyContainer(componentId, replyId);
-							fragment.replaceWith(replyContainer);
-							target.add(replyContainer);
+							CodeCommentActivity activity = getActivity(activityClass, activityId);
+							if (activity.getVersion() != lastVersion)
+								throw new StaleObjectStateException(activityClass.getName(), activity.getId());
+							
+							if (activityClass == CodeCommentReply.class) {
+								CodeCommentReply reply = (CodeCommentReply) activity;
+								reply.setContent(contentInput.getModelObject());
+								GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);				
+							} else {
+								CodeCommentStatusChange statusChange = (CodeCommentStatusChange) activity;
+								statusChange.setNote(contentInput.getModelObject());
+								GitPlex.getInstance(CodeCommentStatusChangeManager.class).save(statusChange);				
+							}
+							WebMarkupContainer activityContainer = newActivityContainer(componentId, getActivity(activityClass, activityId));
+							fragment.replaceWith(activityContainer);
+							target.add(activityContainer);
 						} catch (StaleObjectStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
@@ -529,7 +585,7 @@ public abstract class CodeCommentPanel extends Panel {
 				
 				fragment.add(form);
 				fragment.setOutputMarkupId(true);
-				replyContainer.replaceWith(fragment);
+				activityContainer.replaceWith(fragment);
 				target.add(fragment);
 			}
 			
@@ -544,16 +600,16 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				replyContainer.remove();
-				GitPlex.getInstance(CodeCommentReplyManager.class).delete(getReply(replyId));
-				String script = String.format("$('#%s').remove();", replyContainer.getMarkupId());
+				activityContainer.remove();
+				GitPlex.getInstance(CodeCommentReplyManager.class).delete((CodeCommentReply) getActivity(activityClass, activityId));
+				String script = String.format("$('#%s').remove();", activityContainer.getMarkupId());
 				target.appendJavaScript(script);
 			}
 			
-		});
+		}.setVisible(activity instanceof CodeCommentReply));
 		
-		replyContainer.add(foot);		
-		return replyContainer;
+		activityContainer.add(foot);		
+		return activityContainer;			
 	}
 	
 	private WebMarkupContainer newAddReplyContainer() {
@@ -584,14 +640,27 @@ public abstract class CodeCommentPanel extends Panel {
 		
 		add(newCommentContainer());
 		
-		repliesView = new RepeatingView("replies");
+		activitiesView = new RepeatingView("activities");
 		PullRequest request = getPullRequest();
-		for (CodeCommentReply reply: getComment().getSortedReplies()) {
+		
+		List<CodeCommentActivity> activities = new ArrayList<>();
+		for (CodeCommentReply reply: getComment().getReplies()) {
 			if (request == null || request.getRequestComparingInfo(reply.getComparingInfo()) != null) {
-				repliesView.add(newReplyContainer(repliesView.newChildId(), reply.getId()));
+				activities.add(reply);
 			}
 		}
-		add(repliesView);
+		for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
+			if (request == null || request.getRequestComparingInfo(statusChange.getComparingInfo()) != null) {
+				activities.add(statusChange);
+			}
+		}
+
+		activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
+
+		for (CodeCommentActivity activity: activities) {
+			activitiesView.add(newActivityContainer(activitiesView.newChildId(), activity));				
+		}
+		add(activitiesView);
 		add(newAddReplyContainer());
 		
 		setOutputMarkupId(true);
@@ -606,12 +675,12 @@ public abstract class CodeCommentPanel extends Panel {
 				CodeCommentPanel.class, "code-comment.css")));
 	}
 
-	private CodeCommentReply getReply(Long replyId) {
-		return GitPlex.getInstance(CodeCommentReplyManager.class).load(replyId);
+	private CodeCommentActivity getActivity(Class<? extends CodeCommentActivity> entityClass, Long activityId) {
+		return GitPlex.getInstance(Dao.class).load(entityClass, activityId);
 	}
 	
-	private void onAddReply(AjaxRequestTarget target, boolean toggleResolve) {
-		Fragment fragment = new Fragment("addReply", "replyEditFrag", CodeCommentPanel.this);
+	private void onAddReply(AjaxRequestTarget target, boolean changeStatus) {
+		Fragment fragment = new Fragment("addReply", "noteEditFrag", CodeCommentPanel.this);
 		Form<?> form = new Form<Void>("form");
 		CommentInput contentInput = new CommentInput("content", Model.of("")) {
 
@@ -626,7 +695,7 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 			
 		};
-		contentInput.setRequired(!toggleResolve);
+		contentInput.setRequired(!changeStatus);
 		form.add(contentInput);
 		
 		NotificationPanel feedback = new NotificationPanel("feedback", form); 
@@ -662,29 +731,35 @@ public abstract class CodeCommentPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				if (toggleResolve) {
-					String replyContent = contentInput.getModelObject();
-					CodeCommentManager manager = GitPlex.getInstance(CodeCommentManager.class);				
-					if (replyContent != null) {
-						CodeCommentReply reply = newReply(replyContent);
-						getComment().setResolved(!getComment().isResolved());
-						manager.toggleResolve(getComment(), reply);
-						onReplyAdded(target, fragment, reply);
-					} else {
-						getComment().setResolved(!getComment().isResolved());
-						manager.toggleResolve(getComment(), SecurityUtils.getAccount());
-						onReplyAdded(target, fragment, null);
-					}
+				Account user = SecurityUtils.getAccount();
+				CodeComment comment = getComment();
+				Date date = new Date();
+				CompareContext compareContext = getCompareContext(comment);
+				if (changeStatus) {
+					CodeCommentStatusChange statusChange = new CodeCommentStatusChange();
+					statusChange.setComment(getComment());
+					statusChange.setUser(user);
+					statusChange.setCompareContext(compareContext);
+					statusChange.setResolved(!comment.isResolved());
+					statusChange.setDate(date);
+
+					GitPlex.getInstance(CodeCommentManager.class).changeStatus(statusChange);				
+					onStatusChanged(target, fragment, statusChange);
 					onSaveComment(target, getComment());
 				} else {
-					CodeCommentReply reply = newReply(contentInput.getModelObject());
+					CodeCommentReply reply = new CodeCommentReply();
+					reply.setComment(comment);
+					reply.setDate(date);
+					reply.setUser(user);
+					reply.setContent(contentInput.getModelObject());
+					reply.setCompareContext(compareContext);
 					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
 					onReplyAdded(target, fragment, reply);
 				}
 			}
 
 		};
-		if (toggleResolve) {
+		if (changeStatus) {
 			saveButton.add(new Label("label", getComment().isResolved()?"Confirm unresolve":"Confirm resolve"));
 		} else {
 			saveButton.add(new Label("label", "Save"));
@@ -698,33 +773,38 @@ public abstract class CodeCommentPanel extends Panel {
 		target.add(fragment);				
 	}
 	
-	public void onToggleResolve(AjaxRequestTarget target) {
+	public void onChangeStatus(AjaxRequestTarget target) {
 		onAddReply(target, true);
 	}
 	
-	private void onReplyAdded(AjaxRequestTarget target, Fragment fragment, @Nullable CodeCommentReply reply) {
-		if (reply != null) {
-			WebMarkupContainer replyContainer = newReplyContainer(repliesView.newChildId(), reply.getId());
-			repliesView.add(replyContainer);
-	
-			String script = String.format("$('#%s .add-reply').before('<div id=\"%s\"></div>');", 
-					CodeCommentPanel.this.getMarkupId(), replyContainer.getMarkupId());
-			target.prependJavaScript(script);
-			target.add(replyContainer);
-		}
-		
+	private void onStatusChanged(AjaxRequestTarget target, Fragment fragment, CodeCommentStatusChange statusChange) {
+		WebMarkupContainer activityContainer = newActivityContainer(activitiesView.newChildId(), statusChange);
+		activitiesView.add(activityContainer);
+
+		String script = String.format("$('#%s .add-reply').before('<div id=\"%s\"></div>');", 
+				CodeCommentPanel.this.getMarkupId(), activityContainer.getMarkupId());
+		target.prependJavaScript(script);
+		target.add(activityContainer);
+
 		WebMarkupContainer addReplyContainer = newAddReplyContainer();
 		fragment.replaceWith(addReplyContainer);
 		target.add(addReplyContainer);
 	}
 	
-	private CodeCommentReply newReply(String content) {
-		CodeCommentReply reply = new CodeCommentReply();
-		reply.setComment(getComment());
-		reply.setUser(SecurityUtils.getAccount());
-		reply.setContent(content);
-		reply.setCompareContext(getCompareContext(getComment()));
-		return reply;
+	private void onReplyAdded(AjaxRequestTarget target, Fragment fragment, @Nullable CodeCommentReply reply) {
+		if (reply != null) {
+			WebMarkupContainer activityContainer = newActivityContainer(activitiesView.newChildId(), reply);
+			activitiesView.add(activityContainer);
+	
+			String script = String.format("$('#%s .add-reply').before('<div id=\"%s\"></div>');", 
+					CodeCommentPanel.this.getMarkupId(), activityContainer.getMarkupId());
+			target.prependJavaScript(script);
+			target.add(activityContainer);
+		}
+		
+		WebMarkupContainer addReplyContainer = newAddReplyContainer();
+		fragment.replaceWith(addReplyContainer);
+		target.add(addReplyContainer);
 	}
 	
 	protected abstract void onDeleteComment(AjaxRequestTarget target, CodeComment comment);

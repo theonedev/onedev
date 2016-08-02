@@ -24,20 +24,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityPersisted;
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.Prioritized;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.listener.LifecycleListener;
-import com.pmease.gitplex.core.listener.PullRequestListener;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestInfoManager;
@@ -57,8 +54,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultPullRequestInfoManager implements PullRequestInfoManager, DepotListener, 
-		LifecycleListener, PullRequestListener {
+public class DefaultPullRequestInfoManager implements PullRequestInfoManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestInfoManager.class);
 	
@@ -146,34 +142,22 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 		});		
 	}
 
-	@Override
-	public void onDeleteDepot(Depot depot) {
-		batchWorkManager.remove(getBatchWorker(depot));
+	@Listen
+	public void on(DepotDeleted event) {
+		batchWorkManager.remove(getBatchWorker(event.getDepot()));
 		synchronized (envs) {
-			Environment env = envs.remove(depot.getId());
+			Environment env = envs.remove(event.getDepot().getId());
 			if (env != null)
 				env.close();
 		}
-		FileUtils.deleteDir(getInfoDir(depot));
+		FileUtils.deleteDir(getInfoDir(event.getDepot()));
 	}
 	
-	@Override
-	public void onRenameDepot(Depot renamedDepot, String oldName) {
-	}
-
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
 		if (byteIterable != null)
 			return Arrays.copyOf(byteIterable.getBytesUnsafe(), byteIterable.getLength());
 		else
 			return null;
-	}
-	
-	@Override
-	public void systemStarting() {
-	}
-
-	@Override
-	public void systemStarted() {
 	}
 	
 	@Override
@@ -234,20 +218,12 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 		logger.debug("Pull request info collected (repository: {})", depot);
 	}
 	
-	@Override
-	public void systemStopping() {
+	@Listen
+	public void on(SystemStopping event) {
 		synchronized (envs) {
 			for (Environment env: envs.values())
 				env.close();
 		}
-	}
-
-	@Override
-	public void systemStopped() {
-	}
-
-	@Override
-	public void onTransferDepot(Depot depot, Account oldAccount) {
 	}
 
 	@Override
@@ -300,108 +276,27 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager, De
 		});
 	}
 	
+	@Transactional
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.isNew() && event.getEntity() instanceof PullRequestUpdate) {
+			PullRequestUpdate update = (PullRequestUpdate) event.getEntity();
+			dao.doAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					Depot depot = update.getRequest().getTargetDepot();
+					batchWorkManager.submit(getBatchWorker(depot), new Prioritized(PRIORITY));
+				}
+				
+			});
+		}
+	}
+
 	static class StringByteIterable extends ArrayByteIterable {
 		StringByteIterable(String value) {
 			super(value.getBytes());
 		}
-	}
-
-	@Override
-	public void onOpenRequest(PullRequest request) {
-		dao.afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				Depot depot = request.getTargetDepot();
-				batchWorkManager.submit(getBatchWorker(depot), new Prioritized(PRIORITY));
-			}
-			
-		});
-	}
-
-	@Override
-	public void onDeleteRequest(PullRequest request) {
-	}
-
-	@Override
-	public void onReopenRequest(PullRequest request, Account user, String comment) {
-	}
-
-	@Override
-	public void onUpdateRequest(PullRequestUpdate update) {
-		dao.afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				Depot depot = update.getRequest().getTargetDepot();
-				batchWorkManager.submit(getBatchWorker(depot), new Prioritized(PRIORITY));
-			}
-			
-		});
-	}
-
-	@Override
-	public void onMentionAccount(PullRequest request, Account account) {
-	}
-
-	@Override
-	public void onMentionAccount(PullRequestComment comment, Account account) {
-	}
-
-	@Override
-	public void onCommentRequest(PullRequestComment comment) {
-	}
-
-	@Override
-	public void onReviewRequest(Review review, String comment) {
-	}
-
-	@Override
-	public void onAssignRequest(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onVerifyRequest(PullRequest request) {
-	}
-
-	@Override
-	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
-	}
-
-	@Override
-	public void onDiscardRequest(PullRequest request, Account user, String comment) {
-	}
-
-	@Override
-	public void onIntegrationPreviewCalculated(PullRequest request) {
-	}
-
-	@Override
-	public void onInvitingReview(ReviewInvitation invitation) {
-	}
-
-	@Override
-	public void pendingIntegration(PullRequest request) {
-	}
-
-	@Override
-	public void pendingUpdate(PullRequest request) {
-	}
-
-	@Override
-	public void pendingApproval(PullRequest request) {
-	}
-
-	@Override
-	public void onRestoreSourceBranch(PullRequest request) {
-	}
-
-	@Override
-	public void onDeleteSourceBranch(PullRequest request) {
-	}
-
-	@Override
-	public void onWithdrawReview(Review review, Account user) {
 	}
 
 }

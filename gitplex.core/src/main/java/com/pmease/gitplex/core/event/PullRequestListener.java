@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.listener;
+package com.pmease.gitplex.core.event;
 
 import javax.annotation.Nullable;
 
@@ -9,17 +9,24 @@ import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.Verification;
 
 @ExtensionPoint
 public interface PullRequestListener {
 	
 	void onOpenRequest(PullRequest request);
 	
-	void onDeleteRequest(PullRequest request);
-	
-	void onReopenRequest(PullRequest request, @Nullable Account user, @Nullable String comment);
+	void onReopenRequest(PullRequest request, @Nullable Account user);
 	
 	void onUpdateRequest(PullRequestUpdate update);
+	
+	void onReviewRequest(Review review);
+	
+	void onVerifyRequest(Verification verification);
+	
+	void onDeleteVerification(Verification verification);
+	
+	void onDeleteReview(Review review);
 	
 	void onMentionAccount(PullRequest request, Account account);
 	
@@ -27,21 +34,15 @@ public interface PullRequestListener {
 
 	void onCommentRequest(PullRequestComment comment);
 	
-	void onReviewRequest(Review review, @Nullable String comment);
-	
-	void onWithdrawReview(Review review, Account user);
-	
 	void onAssignRequest(PullRequest request, Account user);
-	
-	void onVerifyRequest(PullRequest request);
 	
 	void onRestoreSourceBranch(PullRequest request);
 	
 	void onDeleteSourceBranch(PullRequest request);
 	
-	void onIntegrateRequest(PullRequest request, @Nullable Account user, @Nullable String comment);
+	void onIntegrateRequest(PullRequest request, @Nullable Account user);
 	
-	void onDiscardRequest(PullRequest request, @Nullable Account user, @Nullable String comment);
+	void onDiscardRequest(PullRequest request, @Nullable Account user);
 
 	void onIntegrationPreviewCalculated(PullRequest request);
 	

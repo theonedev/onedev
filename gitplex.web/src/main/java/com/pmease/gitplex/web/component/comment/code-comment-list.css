@@ -32,7 +32,7 @@
 	padding-bottom: 8px;
 	border-bottom: 1px dotted #BBB;
 }
-.code-comment td.result tr:last-child td.comment>div {
+.code-comments td.result tr:last-child td.comment>div {
 	border-bottom: none;
 }
 

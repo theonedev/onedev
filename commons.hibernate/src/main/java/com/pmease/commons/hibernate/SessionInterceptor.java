@@ -13,7 +13,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import com.google.inject.Inject;
 
-public class SessionInterceptor implements MethodInterceptor {
+class SessionInterceptor implements MethodInterceptor {
 
 	@Inject
 	private UnitOfWork unitOfWork;

@@ -75,10 +75,14 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 		return dao.count(detachedCriteria);
 	}
 
-	protected void afterCommit(Runnable runnable) {
-		dao.afterCommit(runnable);
+	protected void doAfterCommit(Runnable runnable) {
+		dao.doAfterCommit(runnable);
 	}
 
+	protected void doUnitOfWorkAfterCommitAsync(Runnable runnable) {
+		dao.doUnitOfWorkAfterCommitAsync(runnable);
+	}
+	
 	protected Session getSession() {
 		return dao.getSession();
 	}

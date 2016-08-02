@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Verification;
-import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.VerificationManager;
 

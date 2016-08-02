@@ -11,11 +11,11 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.security.privilege.Privilege;
@@ -51,7 +51,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 			return true;
 		} else {
-			return review.getReviewer().equals(getAccount());
+			return review.getUser().equals(getAccount());
 		}
 	}
 	
@@ -64,12 +64,12 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 
-	public static boolean canModify(CodeCommentReply reply) {
+	public static boolean canModify(CodeCommentActivity activity) {
 		Account currentUser = getAccount();
 		if (currentUser == null) {
 			return false;
 		} else {
-			return currentUser.equals(reply.getUser()) || canManage(reply.getComment().getDepot());
+			return currentUser.equals(activity.getUser()) || canManage(activity.getComment().getDepot());
 		}
 	}
 	

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,11 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Modules.OverriddenModuleBuilder;
 import com.pmease.commons.bootstrap.Bootstrap;
@@ -43,6 +47,8 @@ public class AppLoader implements Startable {
 	private static final Logger logger = LoggerFactory.getLogger(AppLoader.class);
 
 	public static Injector injector;
+	
+	private static volatile Collection<Object> singletons;
 	
 	@SuppressWarnings("rawtypes")
 	private static Map<String, TypeLiteral> typeLiterals = new HashMap<String, TypeLiteral>();
@@ -177,6 +183,22 @@ public class AppLoader implements Startable {
 			
 			return injector.getInstance(Key.get(typeLiteral));
 		}
+	}
+	
+	
+	public static Collection<Object> getSingletons() {
+		if (AppLoader.singletons == null) {
+			Collection<Object> singletons = new ArrayList<>();
+			BindingScopingVisitor<Boolean> singletonVisitor = new SingletonBindingVisitor();
+		    for (Binding<?> binding : AppLoader.injector.getAllBindings().values()) {
+		        Key<?> key = binding.getKey();
+		        if (binding.acceptScopingVisitor(singletonVisitor)) {
+		        	singletons.add(AppLoader.injector.getInstance(key));
+		        }
+		    }
+		    AppLoader.singletons = singletons;
+		}
+		return AppLoader.singletons;
 	}
 	
 }

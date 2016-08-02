@@ -6,7 +6,7 @@ import java.util.Map;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.CompareContext;
+import com.pmease.gitplex.core.entity.support.CompareContext;
 
 public interface CodeCommentInfoManager {
 	

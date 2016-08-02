@@ -8,9 +8,9 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
@@ -61,9 +61,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
-			GitPlex.getInstance(ReviewManager.class).review(
-					request, user, Review.Result.APPROVE, comment);
+			GitPlex.getInstance(ReviewManager.class).review(request, Review.Result.APPROVE, comment);
 		}		
 		
 	},
@@ -76,9 +74,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
-			GitPlex.getInstance(ReviewManager.class).review(
-					request, user, Review.Result.DISAPPROVE, comment);
+			GitPlex.getInstance(ReviewManager.class).review(request, Review.Result.DISAPPROVE, comment);
 		}
 		
 	},
@@ -161,7 +157,7 @@ public enum PullRequestOperation {
 			return false;
 		} else {
 			for (ReviewInvitation invitation: request.getReviewInvitations()) {
-				if (invitation.isPreferred() && invitation.getReviewer().equals(user))
+				if (invitation.isPreferred() && invitation.getUser().equals(user))
 					return true;
 			}
 			return false;

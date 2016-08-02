@@ -20,8 +20,6 @@ public interface TeamManager extends EntityManager<Team> {
 	 */
 	void save(Team team, @Nullable String oldName);
 	
-	void delete(Team team);
-	
 	@Nullable
 	Team find(Account organization, String name);
 }

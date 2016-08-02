@@ -4,10 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -18,29 +16,38 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.manager.DepotManager;
 
 @SuppressWarnings("serial")
 @Singleton
 public class GitPostReceiveCallback extends HttpServlet {
 
+	private static final Logger logger = LoggerFactory.getLogger(GitPostReceiveCallback.class);
+	
     public static final String PATH = "/git-postreceive-callback";
     
     private final DepotManager depotManager;
+
+    private final ListenerRegistry listenerRegistry;
     
-    private final Provider<Set<RefListener>> listenersProvider;
+    private final UnitOfWork unitOfWork;
     
     @Inject
-    public GitPostReceiveCallback(DepotManager depotManager, Provider<Set<RefListener>> listenersProvider) {
+    public GitPostReceiveCallback(DepotManager depotManager, UnitOfWork unitOfWork, ListenerRegistry listenerRegistry) {
     	this.depotManager = depotManager;
-        this.listenersProvider = listenersProvider;
+    	this.unitOfWork = unitOfWork;
+        this.listenerRegistry = listenerRegistry;
     }
 
     @Override
@@ -54,59 +61,67 @@ public class GitPostReceiveCallback extends HttpServlet {
             return;
         }
 
-        List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
-        Preconditions.checkState(fields.size() == 2);
+        Preconditions.checkState(StringUtils.splitAndTrim(request.getPathInfo(), "/").size() == 2);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        IOUtils.copy(request.getInputStream(), baos);
         
-        SecurityUtils.getSubject().runAs(Account.asPrincipal(Long.valueOf(fields.get(1))));
-        try {
-            Depot depot = depotManager.load(Long.valueOf(fields.get(0)));
-            
-	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        IOUtils.copy(request.getInputStream(), baos);
-	        
-	        /*
-	         * If multiple refs are updated, the hook stdin will put each ref update info into
-	         * a separate line, however the line breaks is omitted when forward the hook stdin
-	         * to curl via "@-", below logic is used to parse these info correctly even 
-	         * without line breaks.  
-	         */
-	        String callbackData = new String(baos.toByteArray());
-	        callbackData = StringUtils.reverse(StringUtils.remove(callbackData, '\n'));
-	        fields = StringUtils.splitAndTrim(callbackData, " ");
-	        
-	        int pos = 0;
-	        while (true) {
-	        	String refName = StringUtils.reverse(fields.get(pos));
-	        	pos++;
-	        	ObjectId newCommit = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
-	        	pos++;
-	        	String field = fields.get(pos);
-	        	ObjectId oldCommit = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
-	        	
-	        	if (!newCommit.equals(ObjectId.zeroId())) {
-	        		depot.cacheObjectId(refName, newCommit);
-	        	} else {
-	        		newCommit = ObjectId.zeroId();
-	        		depot.cacheObjectId(refName, null);
-	        	}
-	        	
-	        	String branch = GitUtils.ref2branch(refName);
-	        	if (branch != null && depot.getDefaultBranch() == null) {
-	        		RefUpdate refUpdate = depot.updateRef("HEAD");
-	        		GitUtils.linkRef(refUpdate, refName);
-	        	}
-	    		for (RefListener listener: listenersProvider.get())
-	    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
-	    		
-	        	field = field.substring(40);
-	        	if (field.length() == 0)
-	        		break;
-	        	else
-	        		fields.set(pos, field);
-	        }
-        } finally {
-        	SecurityUtils.getSubject().releaseRunAs();
-        }
+        /*
+         * If multiple refs are updated, the hook stdin will put each ref update info into
+         * a separate line, however the line breaks is omitted when forward the hook stdin
+         * to curl via "@-", below logic is used to parse these info correctly even 
+         * without line breaks.  
+         */
+        String callbackData = new String(baos.toByteArray());
+        callbackData = StringUtils.reverse(StringUtils.remove(callbackData, '\n'));
+        List<String> fields = StringUtils.splitAndTrim(callbackData, " ");
+        
+        unitOfWork.doAsync(new Runnable() {
+
+			@Override
+			public void run() {
+		        SecurityUtils.getSubject().runAs(Account.asPrincipal(Long.valueOf(fields.get(1))));
+		        try {
+		            Depot depot = depotManager.load(Long.valueOf(fields.get(0)));
+		            
+			        int pos = 0;
+			        while (true) {
+			        	String refName = StringUtils.reverse(fields.get(pos));
+			        	pos++;
+			        	ObjectId newCommit = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
+			        	pos++;
+			        	String field = fields.get(pos);
+			        	ObjectId oldCommit = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
+			        	
+			        	if (!newCommit.equals(ObjectId.zeroId())) {
+			        		depot.cacheObjectId(refName, newCommit);
+			        	} else {
+			        		newCommit = ObjectId.zeroId();
+			        		depot.cacheObjectId(refName, null);
+			        	}
+			        	
+			        	String branch = GitUtils.ref2branch(refName);
+			        	if (branch != null && depot.getDefaultBranch() == null) {
+			        		RefUpdate refUpdate = depot.updateRef("HEAD");
+			        		GitUtils.linkRef(refUpdate, refName);
+			        	}
+			        	
+			        	listenerRegistry.notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+			    		
+			        	field = field.substring(40);
+			        	if (field.length() == 0)
+			        		break;
+			        	else
+			        		fields.set(pos, field);
+			        }
+		        } catch (Exception e) {
+		        	logger.error("Error executing post-receive callback", e);
+				} finally {
+		        	SecurityUtils.getSubject().releaseRunAs();
+		        }
+			}
+        	
+        });
 	}
 
 }

@@ -26,16 +26,15 @@ import org.slf4j.LoggerFactory;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.Prioritized;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.listener.CodeCommentListener;
-import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.listener.LifecycleListener;
+import com.pmease.gitplex.core.entity.support.CompareContext;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
@@ -55,8 +54,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, DepotListener, 
-		LifecycleListener, CodeCommentListener {
+public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCodeCommentInfoManager.class);
 	
@@ -148,8 +146,9 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 		});		
 	}
 
-	@Override
-	public void onDeleteDepot(Depot depot) {
+	@Listen
+	public void on(DepotDeleted event) {
+		Depot depot = event.getDepot();
 		batchWorkManager.remove(getBatchWorker(depot));
 		synchronized (envs) {
 			Environment env = envs.remove(depot.getId());
@@ -160,23 +159,11 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 		FileUtils.deleteDir(getInfoDir(depot));
 	}
 	
-	@Override
-	public void onRenameDepot(Depot renamedDepot, String oldName) {
-	}
-
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
 		if (byteIterable != null)
 			return Arrays.copyOf(byteIterable.getBytesUnsafe(), byteIterable.getLength());
 		else
 			return null;
-	}
-	
-	@Override
-	public void systemStarting() {
-	}
-
-	@Override
-	public void systemStarted() {
 	}
 	
 	@Override
@@ -236,20 +223,12 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 		logger.debug("Code comment info collected (depot: {})", depot);
 	}
 	
-	@Override
-	public void systemStopping() {
+	@Listen
+	public void on(SystemStopping event) {
 		synchronized (envs) {
 			for (Environment env: envs.values())
 				env.close();
 		}
-	}
-
-	@Override
-	public void systemStopped() {
-	}
-
-	@Override
-	public void onTransferDepot(Depot depot, Account oldAccount) {
 	}
 
 	@Override
@@ -276,22 +255,18 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 	}
 
 	@Sessional
-	@Override
-	public void onComment(CodeComment comment) {
-		dao.afterCommit(new Runnable() {
+	@Listen
+	public void on(CodeCommentCreated event) {
+		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				batchWorkManager.submit(getBatchWorker(comment.getDepot()), new Prioritized(PRIORITY));
+				batchWorkManager.submit(getBatchWorker(event.getComment().getDepot()), new Prioritized(PRIORITY));
 			}
 			
 		});
 	}
 	
-	@Override
-	public void onReplyComment(CodeCommentReply reply) {
-	}
-
 	@Override
 	public void removeComment(Depot depot, ObjectId commit, String comment) {
 		Environment env = getEnv(depot);
@@ -342,10 +317,6 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager, De
 			filesCache.put(depot.getId(), files);
 		}
 		return files;
-	}
-
-	@Override
-	public void onToggleResolve(CodeComment comment, Account user) {
 	}
 
 	static class StringByteIterable extends ArrayByteIterable {

@@ -8,6 +8,4 @@ public interface IndexListener {
 	
 	void commitIndexed(Depot depot, ObjectId commit);
 	
-	void indexRemoving(Depot depot);
-	
 }

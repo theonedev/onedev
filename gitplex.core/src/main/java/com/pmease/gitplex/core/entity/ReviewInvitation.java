@@ -14,7 +14,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"g_reviewer_id", "g_request_id"})
+		@UniqueConstraint(columnNames={"g_user_id", "g_request_id"})
 })
 public class ReviewInvitation extends AbstractEntity {
 
@@ -22,7 +22,7 @@ public class ReviewInvitation extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Account reviewer;
+	private Account user;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -33,12 +33,12 @@ public class ReviewInvitation extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date = new Date();
 	
-	public Account getReviewer() {
-		return reviewer;
+	public Account getUser() {
+		return user;
 	}
 
-	public void setReviewer(Account reviewer) {
-		this.reviewer = reviewer;
+	public void setUser(Account user) {
+		this.user = user;
 	}
 	
 	public PullRequest getRequest() {

@@ -40,7 +40,7 @@ import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.TextRange;
+import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.web.component.depotfile.editsave.EditSavePanel;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;

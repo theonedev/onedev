@@ -26,7 +26,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 	private final IModel<PullRequest> requestModel;
 	
 	public ReviewerAvatar(String id, ReviewInvitation invitation) {
-		super(id, new UserModel(invitation.getReviewer()), "Remove reviewer");
+		super(id, new UserModel(invitation.getUser()), "Remove reviewer");
 		
 		this.invitation = invitation;
 		requestModel = new EntityModel<PullRequest>(invitation.getRequest());		
@@ -53,8 +53,8 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		Set<Account> prevInvited = new HashSet<>();
 		for (ReviewInvitation each: request.getReviewInvitations()) {
 			if (each.isPreferred())
-				prevInvited.add(each.getReviewer());
-			if (each.getReviewer().equals(invitation.getReviewer())) {
+				prevInvited.add(each.getUser());
+			if (each.getUser().equals(invitation.getUser())) {
 				each.setPerferred(false);
 				each.setDate(new Date());
 			}
@@ -64,16 +64,16 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		Set<Account> nowInvited = new HashSet<>();
 		for (ReviewInvitation each: request.getReviewInvitations()) {
 			if (each.isPreferred())
-				nowInvited.add(each.getReviewer());
+				nowInvited.add(each.getUser());
 		}
 		
-		if (nowInvited.contains(invitation.getReviewer())) {
-			getSession().warn("Reviewer '" + invitation.getReviewer().getDisplayName() 
+		if (nowInvited.contains(invitation.getUser())) {
+			getSession().warn("Reviewer '" + invitation.getUser().getDisplayName() 
 					+ "' is required by gate keeper and can not be removed");
 		} else {
 			nowInvited.removeAll(prevInvited);
 			if (!nowInvited.isEmpty()) {
-				getSession().warn("Reviewer '" + invitation.getReviewer().getDisplayName() 
+				getSession().warn("Reviewer '" + invitation.getUser().getDisplayName() 
 						+ "' is removed and user '" + nowInvited.iterator().next().getDisplayName() 
 						+ "' is added as reviewer automatically to satisfy gate keeper requirement.");
 			}

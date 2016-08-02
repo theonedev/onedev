@@ -9,7 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.gitplex.core.entity.CodeComment;
-import com.pmease.gitplex.core.entity.component.CommentPos;
+import com.pmease.gitplex.core.entity.support.CommentPos;
 
 public interface BlobCommentSupport extends Serializable {
 	

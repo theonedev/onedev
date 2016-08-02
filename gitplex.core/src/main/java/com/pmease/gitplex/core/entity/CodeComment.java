@@ -3,9 +3,7 @@ package com.pmease.gitplex.core.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -26,9 +24,8 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.component.CodeCommentEvent;
-import com.pmease.gitplex.core.entity.component.CommentPos;
-import com.pmease.gitplex.core.entity.component.CompareContext;
+import com.pmease.gitplex.core.entity.support.CommentPos;
+import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
@@ -66,7 +63,7 @@ public class CodeComment extends AbstractEntity {
 	private Date createDate = new Date();
 
 	@Column(nullable=false)
-	private CodeCommentEvent lastEvent;
+	private String lastEvent;
 	
 	@Column(nullable=false)
 	private Date lastEventDate;
@@ -86,12 +83,13 @@ public class CodeComment extends AbstractEntity {
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentRelation> requestRelations = new ArrayList<>();
+	private Collection<CodeCommentRelation> relations = new ArrayList<>();
+	
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	private Collection<CodeCommentStatusChange> statusChanges= new ArrayList<>();
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
-	
-	private transient List<CodeCommentReply> sortedReplies;
 	
 	public Depot getDepot() {
 		return depot;
@@ -135,11 +133,11 @@ public class CodeComment extends AbstractEntity {
 		return createDate;
 	}
 
-	public CodeCommentEvent getLastEvent() {
+	public String getLastEvent() {
 		return lastEvent;
 	}
 
-	public void setLastEvent(CodeCommentEvent lastEvent) {
+	public void setLastEvent(String lastEvent) {
 		this.lastEvent = lastEvent;
 	}
 
@@ -179,12 +177,20 @@ public class CodeComment extends AbstractEntity {
 		this.replies = replies;
 	}
 
-	public Collection<CodeCommentRelation> getRequestRelations() {
-		return requestRelations;
+	public Collection<CodeCommentRelation> getRelations() {
+		return relations;
 	}
 
-	public void setRequestRelations(Collection<CodeCommentRelation> requestRelations) {
-		this.requestRelations = requestRelations;
+	public void setRelations(Collection<CodeCommentRelation> relations) {
+		this.relations = relations;
+	}
+
+	public Collection<CodeCommentStatusChange> getStatusChanges() {
+		return statusChanges;
+	}
+
+	public void setStatusChanges(Collection<CodeCommentStatusChange> statusChanges) {
+		this.statusChanges = statusChanges;
 	}
 
 	public String getUUID() {
@@ -221,14 +227,6 @@ public class CodeComment extends AbstractEntity {
 		}
 	}
 
-	public List<CodeCommentReply> getSortedReplies() {
-		if (sortedReplies == null) {
-			sortedReplies = new ArrayList<>(getReplies());
-			sortedReplies.sort(Comparator.comparing(CodeCommentReply::getId));
-		}
-		return sortedReplies;
-	}
-	
 	public ComparingInfo getComparingInfo() {
 		return new ComparingInfo(commentPos.getCommit(), compareContext);
 	}

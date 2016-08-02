@@ -83,10 +83,10 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.component.CommentPos;
-import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.entity.component.DepotAndRevision;
-import com.pmease.gitplex.core.entity.component.TextRange;
+import com.pmease.gitplex.core.entity.support.CommentPos;
+import com.pmease.gitplex.core.entity.support.CompareContext;
+import com.pmease.gitplex.core.entity.support.DepotAndRevision;
+import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -428,33 +428,23 @@ public class SourceViewPanel extends BlobViewPanel {
 				super.onComponentTag(tag);
 				CodeComment comment = context.getOpenComment();
 				if (comment != null) {
-					if (SecurityUtils.canModify(comment)) {
-						if (comment.isResolved()) {
-							tag.put("title", "Comment is currently resolved, click to unresolve");
-							tag.put("class", "pull-right resolve resolved");
-						} else {
-							tag.put("title", "Comment is currently unresolved, click to resolve");
-							tag.put("class", "pull-right resolve unresolved");
-						}
+					if (comment.isResolved()) {
+						tag.put("title", "Comment is currently resolved, click to unresolve");
+						tag.put("class", "pull-right resolve resolved");
 					} else {
-						if (comment.isResolved()) {
-							tag.put("title", "Comment is currently resolved, contact comment owner or repository manager to change status of the comment");
-							tag.put("class", "pull-right resolve resolved");
-						} else {
-							tag.put("title", "Comment is currently unresolved, contact comment owner or repository manager to change status of the comment");
-							tag.put("class", "pull-right resolve unresolved");
-						}
+						tag.put("title", "Comment is currently unresolved, click to resolve");
+						tag.put("class", "pull-right resolve unresolved");
 					}
 				} 
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				if (SecurityUtils.canModify(context.getOpenComment())) {
-					((CodeCommentPanel)commentContainer.get("body")).onToggleResolve(target);
+				if (SecurityUtils.getAccount() != null) {
+					((CodeCommentPanel)commentContainer.get("body")).onChangeStatus(target);
 					target.appendJavaScript("gitplex.sourceview.scrollToCommentBottom();");
 				} else {
-					Session.get().warn("Only repository manager and comment creator can change status");
+					Session.get().warn("Please login to resolve/unresolve comment");
 				}
 			}
 			

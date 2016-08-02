@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.entity.component;
+package com.pmease.gitplex.core.entity.support;
 
 import java.io.Serializable;
 

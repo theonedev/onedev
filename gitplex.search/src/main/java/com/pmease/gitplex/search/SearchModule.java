@@ -1,8 +1,6 @@
 package com.pmease.gitplex.search;
 
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.listener.RefListener;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -19,8 +17,6 @@ public class SearchModule extends AbstractPluginModule {
 		bind(SearchManager.class).to(DefaultSearchManager.class);
 		
 		contribute(IndexListener.class, DefaultSearchManager.class);
-		contribute(DepotListener.class, DefaultIndexManager.class);
-		contribute(RefListener.class, DefaultIndexManager.class);
 	}
 
 }

@@ -29,7 +29,7 @@ public interface UnitOfWork {
 
 	<T> T call(Callable<T> callable);
 	
-	void asyncCall(Runnable runnable);
+	void doAsync(Runnable runnable);
 	
 	Session getSession();
 	

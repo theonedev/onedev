@@ -56,11 +56,11 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.support.CloseInfo;
+import com.pmease.gitplex.core.entity.support.CommentPos;
+import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.component.CloseInfo;
-import com.pmease.gitplex.core.entity.component.CommentPos;
-import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
@@ -524,7 +524,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 					getPullRequest().setSource(source);
 					getPullRequest().setTarget(target);
 					for (ReviewInvitation invitation: getPullRequest().getReviewInvitations())
-						invitation.setReviewer(dao.load(Account.class, invitation.getReviewer().getId()));
+						invitation.setUser(dao.load(Account.class, invitation.getUser().getId()));
 					
 					getPullRequest().setAssignee(dao.load(Account.class, getPullRequest().getAssignee().getId()));
 					

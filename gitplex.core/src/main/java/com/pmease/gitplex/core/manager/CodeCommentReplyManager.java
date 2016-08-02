@@ -5,4 +5,6 @@ import com.pmease.gitplex.core.entity.CodeCommentReply;
 
 public interface CodeCommentReplyManager extends EntityManager<CodeCommentReply> {
 
+	void save(CodeCommentReply reply, boolean notifyListeners);
+	
 }

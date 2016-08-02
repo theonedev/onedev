@@ -17,15 +17,14 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.entity.Account;
+import com.pmease.commons.loader.Listen;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentRelation;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.entity.component.PullRequestEvent;
-import com.pmease.gitplex.core.listener.CodeCommentListener;
+import com.pmease.gitplex.core.entity.support.CompareContext;
+import com.pmease.gitplex.core.entity.support.PullRequestEvent;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
@@ -35,7 +34,7 @@ import com.pmease.gitplex.core.manager.VisitInfoManager;
 
 @Singleton
 public class DefaultCodeCommentRelationManager extends AbstractEntityManager<CodeCommentRelation> 
-		implements CodeCommentRelationManager, CodeCommentListener {
+		implements CodeCommentRelationManager {
 
 	private final PullRequestInfoManager pullRequestInfoManager;
 	
@@ -142,8 +141,9 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 	}
 
 	@Transactional
-	@Override
-	public void onComment(CodeComment comment) {
+	@Listen
+	public void on(CodeCommentCreated event) {
+		CodeComment comment = event.getComment();
 		ObjectId commitId = ObjectId.fromString(comment.getCommentPos().getCommit());
 		for (String uuid: pullRequestInfoManager.getRequests(comment.getDepot(), commitId)) {
 			PullRequest request = pullRequestManager.find(uuid);
@@ -162,14 +162,6 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 				save(relation);
 			}
 		}
-	}
-
-	@Override
-	public void onReplyComment(CodeCommentReply reply) {
-	}
-
-	@Override
-	public void onToggleResolve(CodeComment comment, Account user) {
 	}
 
 }

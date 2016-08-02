@@ -30,14 +30,15 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Throwables;
+import com.pmease.commons.loader.Listen;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.listener.LifecycleListener;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 
 @Singleton
-public class DefaultSearchManager implements SearchManager, IndexListener, LifecycleListener {
+public class DefaultSearchManager implements SearchManager, IndexListener {
 
 	private final StorageManager storageManager;
 	
@@ -150,7 +151,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 	}
 
 	@Override
-	public void indexRemoving(Depot depot) {
+	public void closeSearcher(Depot depot) {
 		synchronized (searcherManagers) {
 			SearcherManager searcherManager = searcherManagers.get(depot.getId());
 			if (searcherManager != null) {
@@ -164,16 +165,8 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 		}
 	}
 
-	@Override
-	public void systemStarting() {
-	}
-
-	@Override
-	public void systemStarted() {
-	}
-
-	@Override
-	public void systemStopping() {
+	@Listen
+	public void on(SystemStopping event) {
 		synchronized (searcherManagers) {
 			for (SearcherManager searcherManager: searcherManagers.values()) {
 				try {
@@ -184,10 +177,6 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 			}
 			searcherManagers.clear();
 		}
-	}
-
-	@Override
-	public void systemStopped() {
 	}
 
 }
