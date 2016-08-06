@@ -55,7 +55,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	private Date date = new Date();
 	
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
-	private Collection<Review> reviews = new ArrayList<Review>();
+	private Collection<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -96,7 +96,7 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.date = date;
 	}
 
-    public Collection<Review> getReviews() {
+    public Collection<PullRequestReview> getReviews() {
 		return getRequest().getReviews(this);
 	}
 
@@ -112,8 +112,8 @@ public class PullRequestUpdate extends AbstractEntity {
 	 * @return
 	 * 			list of found reviews, ordered by associated updates reversely
 	 */
-	public List<Review> listReviewsOnwards() {
-		List<Review> reviews = new ArrayList<Review>();
+	public List<PullRequestReview> listReviewsOnwards() {
+		List<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
 		
 		for (PullRequestUpdate update: getRequest().getEffectiveUpdates()) {
 			reviews.addAll(update.getReviews());

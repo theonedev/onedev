@@ -36,14 +36,14 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
      * 
      * @param request
      * 			pull request to be integrated
-     * @param comment
+     * @param note
      * 			comment for the integration
      */
-    void integrate(PullRequest request, @Nullable String comment);
+    void integrate(PullRequest request, @Nullable String note);
     
-    void discard(PullRequest request, @Nullable String comment);
+    void discard(PullRequest request, @Nullable String note);
     
-    void reopen(PullRequest request, @Nullable String comment);
+    void reopen(PullRequest request, @Nullable String note);
 
     void changeAssignee(PullRequest request);
     
@@ -73,9 +73,9 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
 	List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request);
 
-	void deleteSourceBranch(PullRequest request);
+	void deleteSourceBranch(PullRequest request, @Nullable String note);
 	
-	void restoreSourceBranch(PullRequest request);
+	void restoreSourceBranch(PullRequest request, @Nullable String note);
 	
 	void checkSanity();
 	

@@ -382,7 +382,9 @@ public class GitUtils {
 	public static void updateRef(RefUpdate refUpdate) {
 		try {
 			RefUpdate.Result result = refUpdate.forceUpdate();
-	        if (result == RefUpdate.Result.LOCK_FAILURE && !refUpdate.getExpectedOldObjectId().equals(refUpdate.getOldObjectId())) {
+	        if (result == RefUpdate.Result.LOCK_FAILURE 
+	        		&& refUpdate.getExpectedOldObjectId() != null 
+	        		&& !refUpdate.getExpectedOldObjectId().equals(refUpdate.getOldObjectId())) {
 	        	throw new ObsoleteCommitException(refUpdate.getOldObjectId());
 	        } else if (result != RefUpdate.Result.FAST_FORWARD && result != RefUpdate.Result.FORCED
 	        		&& result != RefUpdate.Result.NEW && result != RefUpdate.Result.NO_CHANGE) {
@@ -397,7 +399,9 @@ public class GitUtils {
 		try {
 			refUpdate.setForceUpdate(true);
 			RefUpdate.Result result = refUpdate.delete();
-	        if (result == RefUpdate.Result.LOCK_FAILURE && !refUpdate.getExpectedOldObjectId().equals(refUpdate.getOldObjectId())) {
+	        if (result == RefUpdate.Result.LOCK_FAILURE
+	        		&& refUpdate.getExpectedOldObjectId() != null
+	        		&& !refUpdate.getExpectedOldObjectId().equals(refUpdate.getOldObjectId())) {
 	        	throw new ObsoleteCommitException(refUpdate.getOldObjectId());
 	        } else if (result != RefUpdate.Result.FAST_FORWARD && result != RefUpdate.Result.FORCED
 	        		&& result != RefUpdate.Result.NEW && result != RefUpdate.Result.NO_CHANGE) {

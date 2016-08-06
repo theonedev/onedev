@@ -19,16 +19,13 @@ import com.pmease.gitplex.core.entity.CodeCommentRelation;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestComment;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.Verification;
-import com.pmease.gitplex.core.event.PullRequestListener;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 
@@ -44,7 +41,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultVisitInfoManager implements VisitInfoManager, PullRequestListener {
+public class DefaultVisitInfoManager implements VisitInfoManager {
 
 	private static final String INFO_DIR = "visit";
 	
@@ -240,116 +237,19 @@ public class DefaultVisitInfoManager implements VisitInfoManager, PullRequestLis
 	    return buffer.getLong();
 	}
 	
-	@Override
-	public void onOpenRequest(PullRequest request) {
+	@Listen
+	public void on(PullRequestCommented event) {
+		visit(event.getComment().getUser(), event.getRequest());
 	}
-
-	@Override
-	public void onReopenRequest(PullRequest request, Account user) {
-		visit(user, request);
+	
+	@Listen
+	public void on(PullRequestOpened event) {
+		visit(event.getRequest().getSubmitter(), event.getRequest());
 	}
-
-	@Override
-	public void onUpdateRequest(PullRequestUpdate update) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onReviewRequest(Review review) {
-		visit(review.getUser(), review.getUpdate().getRequest());
-	}
-
-	@Override
-	public void onVerifyRequest(Verification verification) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onDeleteVerification(Verification verification) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onDeleteReview(Review review) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMentionAccount(PullRequest request, Account account) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMentionAccount(PullRequestComment comment, Account account) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onCommentRequest(PullRequestComment comment) {
-		visit(comment.getUser(), comment.getRequest());
-	}
-
-	@Override
-	public void onAssignRequest(PullRequest request, Account user) {
-		visit(user, request);
-	}
-
-	@Override
-	public void onRestoreSourceBranch(PullRequest request) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onDeleteSourceBranch(PullRequest request) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onIntegrateRequest(PullRequest request, Account user) {
-		visit(user, request);
-	}
-
-	@Override
-	public void onDiscardRequest(PullRequest request, Account user) {
-		visit(user, request);
-	}
-
-	@Override
-	public void onIntegrationPreviewCalculated(PullRequest request) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onInvitingReview(ReviewInvitation invitation) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void pendingIntegration(PullRequest request) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void pendingUpdate(PullRequest request) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void pendingApproval(PullRequest request) {
-		// TODO Auto-generated method stub
-		
+	
+	@Listen
+	public void on(PullRequestStatusChangeEvent event) {
+		visit(event.getUser(), event.getRequest());
 	}
 
 	static class StringByteIterable extends ArrayByteIterable {

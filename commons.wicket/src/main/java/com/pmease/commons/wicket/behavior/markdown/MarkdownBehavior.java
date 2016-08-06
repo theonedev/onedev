@@ -42,7 +42,7 @@ import com.pmease.commons.wicket.assets.atwho.AtWhoResourceReference;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewerResourceReference;
+import com.pmease.commons.wicket.component.markdown.MarkdownResourceReference;
 
 @SuppressWarnings("serial")
 public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
@@ -197,7 +197,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 				new JavaScriptResourceReference(MarkdownBehavior.class, "markdown.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(MarkdownBehavior.class, "markdown.css")));
-		response.render(JavaScriptHeaderItem.forReference(MarkdownViewerResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(MarkdownResourceReference.INSTANCE));
 		
 		String encodedAttachmentSupport;
 		AttachmentSupport attachmentSupport = getAttachmentSupport();

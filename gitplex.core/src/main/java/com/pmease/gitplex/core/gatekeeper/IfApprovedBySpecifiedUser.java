@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.annotation.AccountChoice;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.AccountManager;
@@ -39,12 +39,12 @@ public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
     public CheckResult doCheckRequest(PullRequest request) {
         Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).find(userName));
 
-        Review.Result result = user.checkReviewSince(request.getReferentialUpdate());
+        PullRequestReview.Result result = user.checkReviewSince(request.getReferentialUpdate());
         if (result == null) {
             request.pickReviewers(Sets.newHashSet(user), 1);
 
             return pending(Lists.newArrayList("To be approved by " + user.getDisplayName()));
-        } else if (result == Review.Result.APPROVE) {
+        } else if (result == PullRequestReview.Result.APPROVE) {
             return passed(Lists.newArrayList("Approved by " + user.getDisplayName()));
         } else {
             return failed(Lists.newArrayList("Disapproved by " + user.getDisplayName()));

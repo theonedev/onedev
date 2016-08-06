@@ -99,4 +99,5 @@ public interface Dao {
 	void doUnitOfWorkAfterCommitAsync(Runnable runnable);
 	
 	Session getSession();
+	
 }

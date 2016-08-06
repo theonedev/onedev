@@ -6,6 +6,5 @@ import com.pmease.gitplex.core.manager.support.BatchWorker;
 public interface BatchWorkManager {
 
 	void submit(BatchWorker worker, Prioritized work);
-	
-	void remove(BatchWorker worker);
+
 }

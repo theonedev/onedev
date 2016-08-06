@@ -45,6 +45,13 @@
 	border-right: 7px solid #F5F5F5;
 	content: "";
 }
+#request-detail div.activity>.body>.actions {
+	margin-top: 8px;
+}
+#request-detail div.activity>.body>.actions>a {
+	margin-right: 0;
+	font-size: 13px;
+}
 #request-detail .discussion+.discussion>td {
 	padding-top: 30px;
 }
@@ -92,7 +99,7 @@
 #request-detail .non-discussion div.activity {
 	margin-left: -14px;
 }
-#request-detail .non-discussion div.activity>.icon {
+#request-detail .non-discussion div.activity>.head>.icon {
 	border-radius: 13px;
 	background: #5CA7F8;
 	width: 26px;
@@ -108,6 +115,9 @@
 }
 #request-detail .discussion div.activity>.body {
 	padding: 12px;
+}
+#request-detail .non-discussion div.activity>.body {
+	margin: 8px 0 0 36px;
 }
 #request-detail .non-discussion div.activity .user a {
 	font-weight: normal;
@@ -188,34 +198,33 @@
 	border-color: #4667EE;
 }
 
-#request-detail .activities tr.activity>.content>.discard>.icon {
+#request-detail .activities tr.activity>.content>.assigned>.head>.icon {
+	padding-left: 8px;
+}
+#request-detail .activities tr.activity>.content>.discarded>.head>.icon {
 	background: #F93333;
 	padding-left: 7px;
 }
-#request-detail .activities tr.activity>.content>.integrate>.icon {
+#request-detail .activities tr.activity>.content>.integrated>.head>.icon {
 	background: #35A612; 
 }
-#request-detail .activities tr.activity>.content>.approve>.icon {
+#request-detail .activities tr.activity>.content>.approved>.head>.icon,
+#request-detail .activities tr.activity>.content>.verification-succeeded>.head>.icon {
 	background: #35A612; 
 }
-#request-detail .activities tr.activity>.content>.disapprove>.icon {
+#request-detail .activities tr.activity>.content>.disapproved>.head>.icon,
+#request-detail .activities tr.activity>.content>.verification-failed>.head>.icon {
 	background: #F93333; 
 }
-#request-detail .activities tr.activity>.content>.undo-review>.icon {
-	padding-left: 8px;
-	padding-top: 7px;
-}
-#request-detail .activities tr.activity>.content>.delete-source-branch>.icon,
-#request-detail .activities tr.activity>.content>.restore-source-branch>.icon {
-	padding-top: 7px;
+#request-detail .activities tr.activity>.content>.deleted-review>.head>.icon,
+#request-detail .activities tr.activity>.content>.deleted-verification>.head>.icon,
+#request-detail .activities tr.activity>.content>.deleted-source-branch>.head>.icon {
+	padding-top: 6px;
 	padding-left: 8px;
 }
-#request-detail .activities tr.activity>.content>.delete-source-branch .branch,
-#request-detail .activities tr.activity>.content>.restore-source-branch .branch {
-	color: #666;
-}
-#request-detail .activities tr.activity>.content>.reopen>.icon {
-	padding-left: 7px;
+#request-detail .activities tr.activity>.content>.restored-source-branch>.head>.icon,
+#request-detail .activities tr.activity>.content>.reopened>.head>.icon {
+	padding-left: 8px;
 }
 #request-detail .activities tr.activity>.content>.reference>.head>.icon {
 	padding-left: 8px;
@@ -224,13 +233,13 @@
 	margin-bottom: 10px;
 }
 #request-detail .activities tr.activity>.content>.reference>.body {
-	margin-left: 20px;
+	margin-left: 36px;
 	font-size: 15px;
 }
 #request-detail .activities tr.activity>.content>.reference>.body a {
 	color: #333;
 }
-#request-detail .activities tr.activity>.content>.reference>.body a .id {
+#request-detail .activities tr.activity>.content>.reference>.body a .number {
 	color: #999;
 }
 #request-detail .activities tr.activity>.content>.reference>.body .status .help {
@@ -290,4 +299,3 @@
 #request-detail .info .reviewers .review-result {
 	top: -4px;
 }
-

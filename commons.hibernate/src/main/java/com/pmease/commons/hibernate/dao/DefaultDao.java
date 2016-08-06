@@ -129,7 +129,7 @@ public class DefaultDao implements Dao, Serializable {
 	}
 
 	@Override
-	public void doAfterCommit(final Runnable runnable) {
+	public void doAfterCommit(Runnable runnable) {
 		getSession().getTransaction().registerSynchronization(new Synchronization() {
 			
 			@Override

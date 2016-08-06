@@ -7,10 +7,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 
 @SuppressWarnings("serial")
-public class ReviewersModel extends LoadableDetachableModel<List<ReviewInvitation>>{
+public class ReviewersModel extends LoadableDetachableModel<List<PullRequestReviewInvitation>>{
 
 	private final IModel<PullRequest> requestModel;
 	
@@ -19,9 +19,9 @@ public class ReviewersModel extends LoadableDetachableModel<List<ReviewInvitatio
 	}
 	
 	@Override
-	protected List<ReviewInvitation> load() {
-		List<ReviewInvitation> invitations = new ArrayList<>();
-		for (ReviewInvitation invitation: requestModel.getObject().getReviewInvitations()) {
+	protected List<PullRequestReviewInvitation> load() {
+		List<PullRequestReviewInvitation> invitations = new ArrayList<>();
+		for (PullRequestReviewInvitation invitation: requestModel.getObject().getReviewInvitations()) {
 			if (invitation.isPreferred())
 				invitations.add(invitation);
 		}

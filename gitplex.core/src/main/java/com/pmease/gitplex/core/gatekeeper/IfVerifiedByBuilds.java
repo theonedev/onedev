@@ -12,10 +12,10 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Verification;
+import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.manager.VerificationManager;
+import com.pmease.gitplex.core.manager.PullRequestVerificationManager;
 
 @Editable(icon="fa-check-circle", order=1000,
 		description="This gate keeper will be satisfied if commit is verified successfully "
@@ -88,14 +88,14 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			commit = request.getLatestUpdate().getHeadCommitHash();
 		}
 
-		VerificationManager verificationManager = GitPlex.getInstance(VerificationManager.class);
+		PullRequestVerificationManager verificationManager = GitPlex.getInstance(PullRequestVerificationManager.class);
 
 		int passedCount = 0;
-		Collection<Verification> verifications = verificationManager.findAll(request, commit);
-		for (Verification each: verifications) {
-			if (each.getStatus() == Verification.Status.NOT_PASSED)
-				return failed(Lists.newArrayList("At least one build is not passed for the commit"));
-			else if (each.getStatus() == Verification.Status.PASSED)
+		Collection<PullRequestVerification> verifications = verificationManager.findAll(request, commit);
+		for (PullRequestVerification each: verifications) {
+			if (each.getStatus() == PullRequestVerification.Status.FAILED)
+				return failed(Lists.newArrayList("At least one build is failed for the commit"));
+			else if (each.getStatus() == PullRequestVerification.Status.SUCCESSFUL)
 				passedCount++;
 		}
 		int lacks = leastPassCount - passedCount;

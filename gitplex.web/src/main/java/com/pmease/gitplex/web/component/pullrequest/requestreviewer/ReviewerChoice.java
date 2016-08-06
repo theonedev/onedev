@@ -10,9 +10,9 @@ import org.apache.wicket.model.IModel;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.manager.ReviewInvitationManager;
+import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
@@ -65,8 +65,8 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 
 	protected void onSelect(AjaxRequestTarget target, Account user) {
 		PullRequest request = requestModel.getObject();
-		ReviewInvitation invitation = null;
-		for(ReviewInvitation each: request.getReviewInvitations()) {
+		PullRequestReviewInvitation invitation = null;
+		for(PullRequestReviewInvitation each: request.getReviewInvitations()) {
 			if (each.getUser().equals(user)) {
 				invitation = each;
 				break;
@@ -76,12 +76,12 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 			invitation.setPerferred(true);
 			invitation.setDate(new Date());
 		} else {
-			invitation = new ReviewInvitation();
+			invitation = new PullRequestReviewInvitation();
 			invitation.setRequest(request);
 			invitation.setUser(user);
 			request.getReviewInvitations().add(invitation);
 		}
 		if (!request.isNew())
-			GitPlex.getInstance(ReviewInvitationManager.class).save(invitation);
+			GitPlex.getInstance(PullRequestReviewInvitationManager.class).save(invitation);
 	};
 }

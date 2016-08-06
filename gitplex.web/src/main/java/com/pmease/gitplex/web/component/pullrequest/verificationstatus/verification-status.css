@@ -12,15 +12,15 @@ table.verifications {
 table.verifications .fa {
 	display: none;
 }
-table.verifications tr.passed .fa-check {
+table.verifications tr.successful .fa-check {
 	display: inline; 
 	color: #5CB85C;
 }
-table.verifications tr.not-passed .fa-times {
+table.verifications tr.failed .fa-times {
 	display: inline; 
 	color: #D9534F;
 }
-table.verifications tr.ongoing .fa-cog {
+table.verifications tr.running .fa-cog {
 	display: inline; 
 	color: #F0AD4E;
 }

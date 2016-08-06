@@ -23,22 +23,16 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.Listen;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestComment;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
-import com.pmease.gitplex.core.event.PullRequestListener;
 import com.pmease.gitplex.core.event.lifecycle.SystemStarting;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 
 @Singleton
-public class DefaultAccountManager extends AbstractEntityManager<Account> implements AccountManager, 
-		PullRequestListener {
+public class DefaultAccountManager extends AbstractEntityManager<Account> implements AccountManager {
 
     private final DepotManager repositoryManager;
     
@@ -105,7 +99,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	query.setParameter("submitter", account);
     	query.executeUpdate();
 
-    	query = getSession().createQuery("update PullRequest set lastEventUser=null where lastEventUser=:lastEventUser");
+    	query = getSession().createQuery("update PullRequest set lastEvent.user=null where lastEvent.user=:lastEventUser");
     	query.setParameter("lastEventUser", account);
     	query.executeUpdate();
     	
@@ -125,7 +119,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	query.setParameter("user", account);
     	query.executeUpdate();
 
-    	query = getSession().createQuery("update CodeComment set lastUpdateUser=null where lastUpdateUser=:user");
+    	query = getSession().createQuery("update CodeComment set lastEventUser=null where lastEventUser=:user");
     	query.setParameter("user", account);
     	query.executeUpdate();
     	
@@ -228,88 +222,20 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 		return findRange(criteria, 0, 0);
 	}
 
-	@Override
-	public void onOpenRequest(PullRequest request) {
-	}
-
-	@Override
-	public void onReopenRequest(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onUpdateRequest(PullRequestUpdate update) {
-	}
-
 	@Transactional
-	@Override
-	public void onReviewRequest(Review review) {
-		Account user = review.getUser();
+	@Listen
+	public void on(PullRequestApproved event) {
+		Account user = event.getReview().getUser();
 		user.setReviewEffort(user.getReviewEffort()+1);
 		save(user);
 	}
 
-	@Override
-	public void onVerifyRequest(Verification verification) {
+	@Transactional
+	@Listen
+	public void on(PullRequestDisapproved event) {
+		Account user = event.getReview().getUser();
+		user.setReviewEffort(user.getReviewEffort()+1);
+		save(user);
 	}
-
-	@Override
-	public void onDeleteVerification(Verification verification) {
-	}
-
-	@Override
-	public void onDeleteReview(Review review) {
-	}
-
-	@Override
-	public void onMentionAccount(PullRequest request, Account account) {
-	}
-
-	@Override
-	public void onMentionAccount(PullRequestComment comment, Account account) {
-	}
-
-	@Override
-	public void onCommentRequest(PullRequestComment comment) {
-	}
-
-	@Override
-	public void onAssignRequest(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onRestoreSourceBranch(PullRequest request) {
-	}
-
-	@Override
-	public void onDeleteSourceBranch(PullRequest request) {
-	}
-
-	@Override
-	public void onIntegrateRequest(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onDiscardRequest(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onIntegrationPreviewCalculated(PullRequest request) {
-	}
-
-	@Override
-	public void onInvitingReview(ReviewInvitation invitation) {
-	}
-
-	@Override
-	public void pendingIntegration(PullRequest request) {
-	}
-
-	@Override
-	public void pendingUpdate(PullRequest request) {
-	}
-
-	@Override
-	public void pendingApproval(PullRequest request) {
-	}
-
+	
 }

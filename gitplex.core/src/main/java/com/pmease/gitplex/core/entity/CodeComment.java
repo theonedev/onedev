@@ -26,6 +26,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.core.entity.support.CompareContext;
+import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
@@ -60,16 +61,10 @@ public class CodeComment extends AbstractEntity {
 	private String content;
 	
 	@Column(nullable=false)
-	private Date createDate = new Date();
+	private Date date = new Date();
 
-	@Column(nullable=false)
-	private String lastEvent;
-	
-	@Column(nullable=false)
-	private Date lastEventDate;
-	
-	@ManyToOne(fetch=FetchType.LAZY)
-	private Account lastEventUser;
+	@Embedded
+	private LastEvent lastEvent;
 
 	@Embedded
 	private CommentPos commentPos;
@@ -129,28 +124,12 @@ public class CodeComment extends AbstractEntity {
 		this.content = content;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
+	public Date getDate() {
+		return date;
 	}
 
-	public String getLastEvent() {
-		return lastEvent;
-	}
-
-	public void setLastEvent(String lastEvent) {
-		this.lastEvent = lastEvent;
-	}
-
-	public Date getLastEventDate() {
-		return lastEventDate;
-	}
-
-	public void setLastEventDate(Date lastEventDate) {
-		this.lastEventDate = lastEventDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	public CommentPos getCommentPos() {
@@ -209,12 +188,12 @@ public class CodeComment extends AbstractEntity {
 		this.resolved = resolved;
 	}
 
-	public Account getLastEventUser() {
-		return lastEventUser;
+	public LastEvent getLastEvent() {
+		return lastEvent;
 	}
 
-	public void setLastEventUser(Account lastEventUser) {
-		this.lastEventUser = lastEventUser;
+	public void setLastEvent(LastEvent lastEvent) {
+		this.lastEvent = lastEvent;
 	}
 
 	public boolean isVisitedAfter(Date date) {

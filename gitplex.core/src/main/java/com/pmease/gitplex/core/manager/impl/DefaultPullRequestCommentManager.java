@@ -1,29 +1,27 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.Set;
-
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.PullRequestComment;
-import com.pmease.gitplex.core.event.PullRequestListener;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 
 @Singleton
 public class DefaultPullRequestCommentManager extends AbstractEntityManager<PullRequestComment> 
 		implements PullRequestCommentManager {
 
-	private final Provider<Set<PullRequestListener>> listenersProvider;
+	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultPullRequestCommentManager(Dao dao, Provider<Set<PullRequestListener>> listenersProvider) {
+	public DefaultPullRequestCommentManager(Dao dao, ListenerRegistry listenerRegistry) {
 		super(dao);
 
-		this.listenersProvider = listenersProvider;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	@Transactional
@@ -38,8 +36,7 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 		boolean isNew = comment.isNew();
 		dao.persist(comment);
 		if (notifyListeners && isNew) {
-			for (PullRequestListener listener: listenersProvider.get())
-				listener.onCommentRequest(comment);
+			listenerRegistry.notify(new PullRequestCommented(comment));
 		}
 	}
 

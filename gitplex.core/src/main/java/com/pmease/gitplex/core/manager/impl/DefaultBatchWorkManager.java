@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.manager.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -63,7 +64,8 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 	@Override
 	public synchronized void run() {
 		while (thread != null) {
-			for (Map.Entry<BatchWorker, Works> entry: works.entrySet()) {
+			for (Iterator<Map.Entry<BatchWorker, Works>> it = works.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<BatchWorker, Works> entry = it.next();
 				BatchWorker worker = entry.getKey();
 				Works works = entry.getValue();
 				if (works.working.isEmpty()) {
@@ -87,6 +89,8 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 							}
 							
 						});
+					} else {
+						it.remove();
 					}
 				}
 			}
@@ -103,11 +107,6 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 		notify();
 	}
 
-	@Override
-	public synchronized void remove(BatchWorker worker) {
-		works.remove(worker);
-	}
-	
 	private static class Works {
 		BlockingQueue<Prioritized> queued = new PriorityBlockingQueue<>();
 		

@@ -6,148 +6,63 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.wicket.request.component.IRequestablePage;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestComment;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.Verification;
-import com.pmease.gitplex.core.event.PullRequestListener;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
 
 @Singleton
-public class PullRequestChangeBroadcaster implements PullRequestListener {
+public class PullRequestChangeBroadcaster {
 	
 	private final Dao dao;
 	
-	@Inject
-	public PullRequestChangeBroadcaster(Dao dao) {
-		this.dao = dao;
-	}
+	private final ExecutorService executorService;
 	
-	@Override
-	public void onOpenRequest(PullRequest request) {
-		onChange(request);
+	@Inject
+	public PullRequestChangeBroadcaster(Dao dao, ExecutorService executorService) {
+		this.dao = dao;
+		this.executorService = executorService;
 	}
 
-	@Override
-	public void onUpdateRequest(PullRequestUpdate update) {
-		onChange(update.getRequest());
-	}
-
-	@Override
-	public void onReviewRequest(Review review) {
-		onChange(review.getUpdate().getRequest());
-	}
-
-	@Override
-	public void onIntegrateRequest(PullRequest request, Account user) {
-		onChange(request);
-	}
-
-	@Override
-	public void onDiscardRequest(PullRequest request, Account user) {
-		onChange(request);
-	}
-
-	@Override
-	public void onIntegrationPreviewCalculated(PullRequest request) {
-		onChange(request);
-	}
-
-	@Override
-	public void onCommentRequest(PullRequestComment comment) {
-		onChange(comment.getRequest());
-	}
-
-	@Override
-	public void onVerifyRequest(Verification verification) {
-		onChange(verification.getRequest());
-	}
-
-	@Override
-	public void onAssignRequest(PullRequest request, Account user) {
-		onChange(request);
-	}
-
-	private void onChange(PullRequest request) {
-		/*
-		 * Make sure that pull request and associated objects are committed before
-		 * sending render request; otherwise rendering request may not reflect
-		 * expected status as rendering happens in another thread which may get
-		 * executed before pull request modification is committed.
-		 */
-		PullRequestChangeTrait trait = new PullRequestChangeTrait();
-		trait.requestId = request.getId();
-		dao.doAfterCommit(new Runnable() {
+	private void requestToRender(PullRequestChangeTrait trait) {
+		// Send web socket message in a thread in order not to blocking UI operations
+		IRequestablePage page = WicketUtils.getPage();
+		executorService.execute(new Runnable() {
 
 			@Override
 			public void run() {
-				// Send web socket message in a thread in order not to blocking UI operations
-				IRequestablePage page = WicketUtils.getPage();
-				GitPlex.getInstance(ExecutorService.class).execute(new Runnable() {
-
-					@Override
-					public void run() {
-						WebSocketRenderBehavior.requestToRender(trait, page);
-					}
-					
-				});
+				WebSocketRenderBehavior.requestToRender(trait, page);
 			}
 			
 		});
 	}
 	
-	@Override
-	public void onReopenRequest(PullRequest request, Account user) {
-		onChange(request);
-	}
-
-	@Override
-	public void onMentionAccount(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onMentionAccount(PullRequestComment comment, Account user) {
-	}
-
-	@Override
-	public void onInvitingReview(ReviewInvitation invitation) {
-	}
-
-	@Override
-	public void pendingIntegration(PullRequest request) {
-	}
-
-	@Override
-	public void pendingUpdate(PullRequest request) {
-	}
-
-	@Override
-	public void pendingApproval(PullRequest request) {
-	}
-
-	@Override
-	public void onRestoreSourceBranch(PullRequest request) {
-	}
-
-	@Override
-	public void onDeleteSourceBranch(PullRequest request) {
-	}
-
-	@Override
-	public void onDeleteVerification(Verification verification) {
-		onChange(verification.getRequest());
-	}
-
-	@Override
-	public void onDeleteReview(Review review) {
-		onChange(review.getUpdate().getRequest());
+	@Listen
+	public void on(PullRequestChangeEvent event) {
+		PullRequestChangeTrait trait = new PullRequestChangeTrait();
+		trait.requestId = event.getRequest().getId();
+		
+		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
+			/*
+			 * Make sure that pull request and associated objects are committed before
+			 * sending render request; otherwise rendering request may not reflect
+			 * expected status as rendering happens in another thread which may get
+			 * executed before pull request modification is committed.
+			 */
+			dao.doAfterCommit(new Runnable() {
+	
+				@Override
+				public void run() {
+					requestToRender(trait);
+				}
+				
+			});
+		} else {
+			requestToRender(trait);
+		}
 	}
 
 }

@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.slf4j.Logger;
@@ -61,8 +61,12 @@ public class GitPostReceiveCallback extends HttpServlet {
             return;
         }
 
-        Preconditions.checkState(StringUtils.splitAndTrim(request.getPathInfo(), "/").size() == 2);
-
+        List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
+        Preconditions.checkState(fields.size() == 2);
+        
+        Long depotId = Long.valueOf(fields.get(0));
+        Long userId = Long.valueOf(fields.get(1));
+        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtils.copy(request.getInputStream(), baos);
         
@@ -74,15 +78,17 @@ public class GitPostReceiveCallback extends HttpServlet {
          */
         String callbackData = new String(baos.toByteArray());
         callbackData = StringUtils.reverse(StringUtils.remove(callbackData, '\n'));
-        List<String> fields = StringUtils.splitAndTrim(callbackData, " ");
+        
+        fields.clear();
+        fields.addAll(StringUtils.splitAndTrim(callbackData, " "));
         
         unitOfWork.doAsync(new Runnable() {
 
 			@Override
 			public void run() {
-		        SecurityUtils.getSubject().runAs(Account.asPrincipal(Long.valueOf(fields.get(1))));
+				ThreadContext.bind(Account.asSubject(userId));
 		        try {
-		            Depot depot = depotManager.load(Long.valueOf(fields.get(0)));
+		            Depot depot = depotManager.load(depotId);
 		            
 			        int pos = 0;
 			        while (true) {
@@ -117,7 +123,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 		        } catch (Exception e) {
 		        	logger.error("Error executing post-receive callback", e);
 				} finally {
-		        	SecurityUtils.getSubject().releaseRunAs();
+		        	ThreadContext.unbindSubject();
 		        }
 			}
         	

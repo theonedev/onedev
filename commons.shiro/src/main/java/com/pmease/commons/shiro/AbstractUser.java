@@ -81,8 +81,7 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     }
 
     public Subject asSubject() {
-    	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
-        return new Subject.Builder(securityManager).principals(asPrincipal(getId())).buildSubject();
+    	return asSubject(getId());
     }
 
     public static Long getCurrentId() {
@@ -93,6 +92,11 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
 
     public static PrincipalCollection asPrincipal(Long userId) {
         return new SimplePrincipalCollection(userId, "");
+    }
+    
+    public static Subject asSubject(Long userId) {
+    	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
+        return new Subject.Builder(securityManager).principals(asPrincipal(userId)).buildSubject();
     }
     
 }

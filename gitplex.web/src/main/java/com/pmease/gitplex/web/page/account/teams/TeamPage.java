@@ -16,7 +16,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.ConfirmOnClick;
-import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -63,7 +63,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 
 		add(new Label("teamName", teamModel.getObject().getName()));
 		if (teamModel.getObject().getDescription() != null) {
-			add(new MarkdownViewer("teamDescription", Model.of(teamModel.getObject().getDescription()), false));
+			add(new MarkdownPanel("teamDescription", Model.of(teamModel.getObject().getDescription()), null));
 		} else {
 			add(new Label("teamDescription", "<i>No description</i>").setEscapeModelStrings(false));
 		}

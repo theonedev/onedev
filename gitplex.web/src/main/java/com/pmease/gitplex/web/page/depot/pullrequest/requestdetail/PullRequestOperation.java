@@ -9,11 +9,11 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
-import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestReview;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.ReviewManager;
+import com.pmease.gitplex.core.manager.PullRequestReviewManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
@@ -61,7 +61,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(ReviewManager.class).review(request, Review.Result.APPROVE, comment);
+			GitPlex.getInstance(PullRequestReviewManager.class).review(request, PullRequestReview.Result.APPROVE, comment);
 		}		
 		
 	},
@@ -74,7 +74,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(ReviewManager.class).review(request, Review.Result.DISAPPROVE, comment);
+			GitPlex.getInstance(PullRequestReviewManager.class).review(request, PullRequestReview.Result.DISAPPROVE, comment);
 		}
 		
 	},
@@ -108,7 +108,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(PullRequestManager.class).deleteSourceBranch(request);
+			GitPlex.getInstance(PullRequestManager.class).deleteSourceBranch(request, comment);
 		}
 
 		@Override
@@ -132,7 +132,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(PullRequestManager.class).restoreSourceBranch(request);
+			GitPlex.getInstance(PullRequestManager.class).restoreSourceBranch(request, comment);
 		}
 
 		@Override
@@ -156,7 +156,7 @@ public enum PullRequestOperation {
 				|| request.isReviewEffective(user)) { 
 			return false;
 		} else {
-			for (ReviewInvitation invitation: request.getReviewInvitations()) {
+			for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) {
 				if (invitation.isPreferred() && invitation.getUser().equals(user))
 					return true;
 			}

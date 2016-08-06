@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.wicket.component.MultilineLabel;
-import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.wicket.editable.EditSupport;
@@ -47,7 +47,7 @@ public class StringEditSupport implements EditSupport {
 								if (propertyDescriptor.getPropertyGetter().getAnnotation(Multiline.class) != null) {
 									return new MultilineLabel(id, model.getObject());
 								} else if (propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) != null) {
-									return new MarkdownViewer(id, Model.of(model.getObject()), false);
+									return new MarkdownPanel(id, Model.of(model.getObject()), null);
 								} else { 
 									return new Label(id, model.getObject());
 								}

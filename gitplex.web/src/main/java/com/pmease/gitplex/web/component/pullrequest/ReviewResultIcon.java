@@ -9,12 +9,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.PullRequestReview;
 
 @SuppressWarnings("serial")
 public class ReviewResultIcon extends WebComponent {
 
-	public ReviewResultIcon(String id, IModel<Review> reviewModel) {
+	public ReviewResultIcon(String id, IModel<PullRequestReview> reviewModel) {
 		super(id, reviewModel);
 	}
 
@@ -22,18 +22,18 @@ public class ReviewResultIcon extends WebComponent {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Review review = (Review) getDefaultModelObject();
+		PullRequestReview review = (PullRequestReview) getDefaultModelObject();
 		String css;
 		String tooltip;
 		if (review.getUpdate().equals(review.getUpdate().getRequest().getLatestUpdate())) { 
-			if (review.getResult() == Review.Result.APPROVE) {
+			if (review.getResult() == PullRequestReview.Result.APPROVE) {
 				css = " review-result approved current fa fa-check-circle";
 				tooltip = "Approved";
 			} else {
 				css = " review-result disapproved current fa fa-times-circle";
 				tooltip = "Disapproved";
 			}
-		} else if (review.getResult() == Review.Result.APPROVE) {
+		} else if (review.getResult() == PullRequestReview.Result.APPROVE) {
 			css = " review-result approved previous fa fa-check-circle";
 			tooltip = "Approved on previous updates";
 		} else {

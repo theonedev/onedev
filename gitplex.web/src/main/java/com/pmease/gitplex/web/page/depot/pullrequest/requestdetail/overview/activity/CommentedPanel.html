@@ -1,25 +1,27 @@
 <wicket:panel>
 	<div class="comment activity">
-		<div wicket:id="head" class="head clearfix">
+		<div class="head clearfix">
 			<div class="pull-left">
 				<span wicket:id="user" class="user"></span> commented <span wicket:id="age"></span>
 			</div>
 			<div class="operations pull-right">
-				<a wicket:id="edit" title="Edit comment"><span class="fa fa-pencil"></span></a>
-				<a wicket:id="delete" title="Delete comment"><span class="fa fa-trash"></span></a>
 				<a wicket:id="changes" title="Changes since this comment"><i class="fa fa-ext fa-file-diff"></i></a>
 			</div>
 		</div>
 		<div wicket:id="body" class="body"></div>
 	</div>
 	<wicket:fragment wicket:id="viewFrag">
-		<div wicket:id="feedback" class="feedback"></div>
 		<div wicket:id="content"></div>
+		<div wicket:id="actions" class="actions">
+			<a wicket:id="edit">Edit</a>
+			<span class="middot"></span>
+			<a wicket:id="delete">Delete</a>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="editFrag">
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
-			<textarea wicket:id="input" rows="10" class="form-control focusable"></textarea>
+			<textarea wicket:id="input" rows="5" class="form-control focusable"></textarea>
 			<div class="actions">
 				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
 				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>

@@ -21,10 +21,12 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.Listen;
 import com.pmease.commons.loader.ListenerRegistry;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.CodeCommentStatusChange;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
@@ -76,13 +78,12 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Transactional
 	@Override
 	public void save(CodeComment comment) {
-		CodeCommentCreated event = null;
+		CodeCommentCreated event;
 		if (comment.isNew()) {
 			event = new CodeCommentCreated(comment);
-			comment.setLastEvent(event.getDescription());
-			comment.setLastEventDate(comment.getCreateDate());
-			comment.setLastEventUser(comment.getUser());
-		} 
+		} else {
+			event = null;
+		}
 		dao.persist(comment);
 		if (event != null) {
 			listenerRegistry.notify(event);
@@ -137,9 +138,11 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	public void on(CodeCommentReplied event) {
 		CodeCommentReply reply = event.getReply();
 		CodeComment comment = reply.getComment();
-		comment.setLastEvent(event.getDescription());
-		comment.setLastEventDate(reply.getDate());
-		comment.setLastEventUser(reply.getUser());
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(reply.getDate());
+		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
+		lastEvent.setUser(reply.getUser());
+		comment.setLastEvent(lastEvent);
 		save(comment);
 	}
 
@@ -147,9 +150,11 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Listen
 	public void on(CodeCommentResolved event) {
 		CodeComment comment = event.getComment();
-		comment.setLastEvent(event.getDescription());
-		comment.setLastEventDate(new Date());
-		comment.setLastEventUser(event.getUser());
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(new Date());
+		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
+		lastEvent.setUser(event.getUser());
+		comment.setLastEvent(lastEvent);
 		save(comment);
 	}
 
@@ -157,9 +162,11 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Listen
 	public void on(CodeCommentUnresolved event) {
 		CodeComment comment = event.getComment();
-		comment.setLastEvent(event.getDescription());
-		comment.setLastEventDate(new Date());
-		comment.setLastEventUser(event.getUser());
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(new Date());
+		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
+		lastEvent.setUser(event.getUser());
+		comment.setLastEvent(lastEvent);
 		save(comment);
 	}
 	

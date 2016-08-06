@@ -60,7 +60,7 @@ import com.pmease.gitplex.core.entity.support.CloseInfo;
 import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
@@ -523,7 +523,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 				} else {
 					getPullRequest().setSource(source);
 					getPullRequest().setTarget(target);
-					for (ReviewInvitation invitation: getPullRequest().getReviewInvitations())
+					for (PullRequestReviewInvitation invitation: getPullRequest().getReviewInvitations())
 						invitation.setUser(dao.load(Account.class, invitation.getUser().getId()));
 					
 					getPullRequest().setAssignee(dao.load(Account.class, getPullRequest().getAssignee().getId()));
@@ -635,11 +635,11 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 		};
 		reviewersContainer.setOutputMarkupId(true);
 		form.add(reviewersContainer);
-		reviewersContainer.add(new ListView<ReviewInvitation>("reviewers", new ReviewersModel(requestModel)) {
+		reviewersContainer.add(new ListView<PullRequestReviewInvitation>("reviewers", new ReviewersModel(requestModel)) {
 
 			@Override
-			protected void populateItem(ListItem<ReviewInvitation> item) {
-				ReviewInvitation invitation = item.getModelObject();
+			protected void populateItem(ListItem<PullRequestReviewInvitation> item) {
+				PullRequestReviewInvitation invitation = item.getModelObject();
 				
 				item.add(new ReviewerAvatar("avatar", invitation) {
 					

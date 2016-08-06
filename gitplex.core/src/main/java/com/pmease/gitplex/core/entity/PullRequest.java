@@ -50,14 +50,14 @@ import com.pmease.gitplex.core.entity.support.CloseInfo;
 import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
-import com.pmease.gitplex.core.entity.support.PullRequestEvent;
+import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.ReviewManager;
+import com.pmease.gitplex.core.manager.PullRequestReviewManager;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -163,14 +163,8 @@ public class PullRequest extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Account assignee;
 
-	@Column(nullable=false)
-	private PullRequestEvent lastEvent;
-	
-	@Column(nullable=false)
-	private Date lastEventDate;
-	
-	@ManyToOne(fetch=FetchType.LAZY)
-	private Account lastEventUser;
+	@Embedded
+	private LastEvent lastEvent;
 	
 	@Column(nullable=true)
 	private Date lastCodeCommentEventDate;
@@ -208,7 +202,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<CodeCommentRelation> codeCommentRelations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
+	private Collection<PullRequestReviewInvitation> reviewInvitations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="referenced", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> referencedBy = new ArrayList<>();
@@ -217,16 +211,16 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestReference> referenced = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<Verification> verifications = new ArrayList<>();
+	private Collection<PullRequestVerification> verifications = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestActivity> activities = new ArrayList<>();
+	private Collection<PullRequestStatusChange> statusChanges = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<Notification> notifications = new ArrayList<>();
+	private Collection<PullRequestNotification> notifications = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
@@ -243,7 +237,7 @@ public class PullRequest extends AbstractEntity {
 	
 	private transient Collection<RevCommit> mergedCommits;
 	
-	private transient List<Review> reviews;
+	private transient List<PullRequestReview> reviews;
 	
 	private transient IntegrationPreview integrationPreview;
 	
@@ -405,19 +399,19 @@ public class PullRequest extends AbstractEntity {
 		this.codeCommentRelations = codeCommentRelations;
 	}
 
-	public Collection<ReviewInvitation> getReviewInvitations() {
+	public Collection<PullRequestReviewInvitation> getReviewInvitations() {
 		return reviewInvitations;
 	}
 
-	public void setReviewInvitations(Collection<ReviewInvitation> reviewInvitations) {
+	public void setReviewInvitations(Collection<PullRequestReviewInvitation> reviewInvitations) {
 		this.reviewInvitations = reviewInvitations;
 	}
 
-	public Collection<Verification> getVerifications() {
+	public Collection<PullRequestVerification> getVerifications() {
 		return verifications;
 	}
 
-	public void setVerifications(Collection<Verification> verifications) {
+	public void setVerifications(Collection<PullRequestVerification> verifications) {
 		this.verifications = verifications;
 	}
 
@@ -445,19 +439,19 @@ public class PullRequest extends AbstractEntity {
 		this.comments = comments;
 	}
 
-	public Collection<PullRequestActivity> getActivities() {
-		return activities;
+	public Collection<PullRequestStatusChange> getStatusChanges() {
+		return statusChanges;
 	}
 
-	public void setActivities(Collection<PullRequestActivity> activities) {
-		this.activities = activities;
+	public void setStatusChanges(Collection<PullRequestStatusChange> statusChanges) {
+		this.statusChanges = statusChanges;
 	}
 
-	public Collection<Notification> getNotifications() {
+	public Collection<PullRequestNotification> getNotifications() {
 		return notifications;
 	}
 
-	public void setNotifications(Collection<Notification> notifications) {
+	public void setNotifications(Collection<PullRequestNotification> notifications) {
 		this.notifications = notifications;
 	}
 
@@ -643,13 +637,13 @@ public class PullRequest extends AbstractEntity {
 		 * users already reviewed since base update should be excluded from
 		 * invitation list as their reviews are still valid
 		 */
-		for (Review review: getReferentialUpdate().listReviewsOnwards())
+		for (PullRequestReview review: getReferentialUpdate().listReviewsOnwards())
 			pickList.remove(review.getUser());
 
 		final Map<Account, Date> firstChoices = new HashMap<>();
 		final Map<Account, Date> secondChoices = new HashMap<>();
 		
-		for (ReviewInvitation invitation: getReviewInvitations()) {
+		for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
 			if (invitation.isPreferred())
 				firstChoices.put(invitation.getUser(), invitation.getDate());
 			else
@@ -693,7 +687,7 @@ public class PullRequest extends AbstractEntity {
 
 		for (Account user: picked) {
 			boolean found = false;
-			for (ReviewInvitation invitation: getReviewInvitations()) {
+			for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
 				if (invitation.getUser().equals(user)) {
 					invitation.setDate(new Date());
 					invitation.setPerferred(true);
@@ -701,7 +695,7 @@ public class PullRequest extends AbstractEntity {
 				}
 			}
 			if (!found) {
-				ReviewInvitation invitation = new ReviewInvitation();
+				PullRequestReviewInvitation invitation = new PullRequestReviewInvitation();
 				invitation.setRequest(this);
 				invitation.setUser(user);
 				getReviewInvitations().add(invitation);
@@ -795,10 +789,10 @@ public class PullRequest extends AbstractEntity {
 		return mergedCommits;
 	}
 	
-	public List<Review> getReviews() {
+	public List<PullRequestReview> getReviews() {
 		if (reviews == null) { 
 			if (!isNew())
-				reviews = GitPlex.getInstance(ReviewManager.class).findAll(this);
+				reviews = GitPlex.getInstance(PullRequestReviewManager.class).findAll(this);
 			else
 				reviews = new ArrayList<>();
 		}
@@ -813,9 +807,9 @@ public class PullRequest extends AbstractEntity {
 	 * @param update
 	 * @return
 	 */
-	public List<Review> getReviews(PullRequestUpdate update) {
-		List<Review> reviews = new ArrayList<>();
-		for (Review review: getReviews()) {
+	public List<PullRequestReview> getReviews(PullRequestUpdate update) {
+		List<PullRequestReview> reviews = new ArrayList<>();
+		for (PullRequestReview review: getReviews()) {
 			if (review.getUpdate().equals(update))
 				reviews.add(review);
 		}
@@ -823,7 +817,7 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public boolean isReviewEffective(Account user) {
-		for (Review review: getReviews()) {
+		for (PullRequestReview review: getReviews()) {
 			if (review.getUpdate().equals(getLatestUpdate()) && review.getUser().equals(user)) 
 				return true;
 		}
@@ -839,7 +833,7 @@ public class PullRequest extends AbstractEntity {
 	public List<Account> getPotentialReviewers() {
 		List<Account> reviewers = new ArrayList<>();
 		Set<Account> alreadyInvited = new HashSet<>();
-		for (ReviewInvitation invitation: getReviewInvitations()) {
+		for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
 			if (invitation.isPreferred())
 				alreadyInvited.add(invitation.getUser());
 		}
@@ -950,20 +944,12 @@ public class PullRequest extends AbstractEntity {
 		return commitMessage;
 	}
 	
-	public PullRequestEvent getLastEvent() {
+	public LastEvent getLastEvent() {
 		return lastEvent;
 	}
 
-	public void setLastEvent(PullRequestEvent lastEvent) {
+	public void setLastEvent(LastEvent lastEvent) {
 		this.lastEvent = lastEvent;
-	}
-
-	public Date getLastEventDate() {
-		return lastEventDate;
-	}
-
-	public void setLastEventDate(Date lastEventDate) {
-		this.lastEventDate = lastEventDate;
 	}
 
 	public Date getLastCodeCommentEventDate() {
@@ -972,14 +958,6 @@ public class PullRequest extends AbstractEntity {
 
 	public void setLastCodeCommentEventDate(Date lastCodeCommentEventDate) {
 		this.lastCodeCommentEventDate = lastCodeCommentEventDate;
-	}
-
-	public Account getLastEventUser() {
-		return lastEventUser;
-	}
-
-	public void setLastEventUser(Account lastEventUser) {
-		this.lastEventUser = lastEventUser;
 	}
 
 	public boolean isVisitedAfter(Date date) {

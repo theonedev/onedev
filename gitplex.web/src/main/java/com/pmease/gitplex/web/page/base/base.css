@@ -53,10 +53,10 @@ div.center {
 
 .middot:before {
 	content: ".";
-	font-size: 20px;
+	font-size: 16px;
 	line-height: 12px;
 	vertical-align: top;
-	color: #666;
+	color: #999;
 }
 
 .input-group>.form-control+.btn.input-group-addon {

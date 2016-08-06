@@ -13,7 +13,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
-import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
@@ -32,7 +32,7 @@ public class MarkdownFilePanel extends BlobViewPanel {
 		super.onInitialize();
 		
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
-		add(new MarkdownViewer("markdown", Model.of(blob.getText().getContent()), false));
+		add(new MarkdownPanel("markdown", Model.of(blob.getText().getContent()), null));
 	}
 
 	@Override

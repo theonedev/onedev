@@ -144,7 +144,6 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager {
 
 	@Listen
 	public void on(DepotDeleted event) {
-		batchWorkManager.remove(getBatchWorker(event.getDepot()));
 		synchronized (envs) {
 			Environment env = envs.remove(event.getDepot().getId());
 			if (env != null)

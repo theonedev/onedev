@@ -14,7 +14,8 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestComment;
-import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
+import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
@@ -46,7 +47,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return GitPlex.getInstance(AccountManager.class).getCurrent();
 	}
 	
-	public static boolean canModify(Review review) {
+	public static boolean canModify(PullRequestReview review) {
 		Depot depot = review.getUpdate().getRequest().getTargetDepot();
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 			return true;
@@ -79,6 +80,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return false;
 		} else {
 			return currentUser.equals(comment.getUser()) || canModify(comment.getRequest());
+		}
+	}
+	
+	public static boolean canModify(PullRequestStatusChange statusChange) {
+		Account currentUser = getAccount();
+		if (currentUser == null) {
+			return false;
+		} else {
+			return currentUser.equals(statusChange.getUser()) || canModify(statusChange.getRequest());
 		}
 	}
 	

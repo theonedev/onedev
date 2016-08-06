@@ -17,20 +17,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
@@ -57,45 +53,64 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.Listen;
 import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.commons.util.concurrent.PrioritizedRunnable;
+import com.pmease.commons.util.concurrent.Prioritized;
 import com.pmease.commons.util.match.PatternMatcher;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeCommentRelation;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.support.CloseInfo;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
-import com.pmease.gitplex.core.entity.support.PullRequestEvent;
-import com.pmease.gitplex.core.entity.PullRequestComment;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.Verification;
-import com.pmease.gitplex.core.event.PullRequestListener;
+import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
 import com.pmease.gitplex.core.event.depot.DepotDeleted;
+import com.pmease.gitplex.core.event.pullrequest.IntegrationPreviewCalculated;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestAssigned;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentReplied;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentResolved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentUnresolved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestDiscarded;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestIntegrated;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingApproval;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingIntegration;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingUpdate;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestReopened;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewDeleted;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestUpdated;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationDeleted;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationFailed;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationSucceeded;
+import com.pmease.gitplex.core.event.pullrequest.SourceBranchDeleted;
+import com.pmease.gitplex.core.event.pullrequest.SourceBranchRestored;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
-import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
-import com.pmease.gitplex.core.manager.ReviewInvitationManager;
-import com.pmease.gitplex.core.manager.WorkExecutor;
+import com.pmease.gitplex.core.manager.support.BatchWorker;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.util.ChildAwareMatcher;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Singleton
-public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest> implements PullRequestManager, 
-		PullRequestListener {
+public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest> implements PullRequestManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
@@ -107,39 +122,31 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final PullRequestCommentManager commentManager;
-	
 	private final AccountManager accountManager;
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final Provider<Set<PullRequestListener>> pullRequestListenersProvider;
-	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final ReviewInvitationManager reviewInvitationManager;
+	private final PullRequestReviewInvitationManager reviewInvitationManager;
 	
-	private final Set<Long> integrationPreviewCalculatingRequestIds = new ConcurrentHashSet<>();
-
-	private final WorkExecutor workExecutor;
+	private final BatchWorkManager batchWorkManager;
 	
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
-			ReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
-			NotificationManager notificationManager, PullRequestCommentManager commentManager, 
-			MarkdownManager markdownManager, WorkExecutor workManager, ListenerRegistry listenerRegistry,
-			UnitOfWork unitOfWork, Provider<Set<PullRequestListener>> pullRequestListenersProvider) {
+			PullRequestReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
+			NotificationManager notificationManager, MarkdownManager markdownManager, 
+			BatchWorkManager batchWorkManager, ListenerRegistry listenerRegistry,
+			UnitOfWork unitOfWork) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.reviewInvitationManager = reviewInvitationManager;
-		this.commentManager = commentManager;
 		this.accountManager = accountManager;
-		this.workExecutor = workManager;
+		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
-		this.pullRequestListenersProvider = pullRequestListenersProvider;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -161,7 +168,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Transactional
 	@Override
-	public void restoreSourceBranch(PullRequest request) {
+	public void restoreSourceBranch(PullRequest request, String note) {
 		Preconditions.checkState(!request.isOpen() && request.getSourceDepot() != null);
 		if (request.getSource().getObjectName(false) == null) {
 			RevCommit latestCommit = request.getLatestUpdate().getHeadCommit();
@@ -171,84 +178,58 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				Throwables.propagate(e);
 			}
 			request.getSourceDepot().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
-			for (PullRequestListener listener: pullRequestListenersProvider.get()) {
-				listener.onRestoreSourceBranch(request);
-			}
+			listenerRegistry.notify(new SourceBranchRestored(request, accountManager.getCurrent(), note));
 		}
 	}
 
 	@Transactional
 	@Override
-	public void deleteSourceBranch(PullRequest request) {
+	public void deleteSourceBranch(PullRequest request, String note) {
 		Preconditions.checkState(!request.isOpen() && request.getSourceDepot() != null); 
 		
 		if (request.getSource().getObjectName(false) != null) {
 			request.getSource().delete();
-			for (PullRequestListener listener: pullRequestListenersProvider.get()) {
-				listener.onDeleteSourceBranch(request);
-			}
+			listenerRegistry.notify(new SourceBranchDeleted(request, accountManager.getCurrent(), note));
 		}
 	}
 	
 	@Transactional
 	@Override
-	public void reopen(PullRequest request, String commentContent) {
+	public void reopen(PullRequest request, String note) {
 		Preconditions.checkState(!request.isOpen(), "Pull request is alreay opened");
 		updateIfNecessary(request, false);
-		if (commentContent != null)
-			addComment(request, commentContent, false);
 		Account user = accountManager.getCurrent();
 		if (request.isMerged()) {
-			closeAsIntegrated(request, true);
+			closeAsIntegrated(request, true, null);
 		} else {
 			request.setCloseInfo(null);
-			request.setLastEvent(PullRequestEvent.REOPENED);
-			request.setLastEventDate(new Date());
-			request.setLastEventUser(user);
 			
 			save(request);
 			checkAsync(request);
 			
-			for (PullRequestListener listener: pullRequestListenersProvider.get())
-				listener.onReopenRequest(request, user);
+			listenerRegistry.notify(new PullRequestReopened(request, user, note));
 		}
 	}
 
-	private void addComment(PullRequest request, String commentContent, boolean notifyListeners) {
-		PullRequestComment comment = new PullRequestComment();
-		comment.setContent(commentContent);
-		comment.setRequest(request);
-		comment.setUser(accountManager.getCurrent());
-		commentManager.save(comment, notifyListeners);
-	}
-	
 	@Transactional
 	@Override
- 	public void discard(PullRequest request, String commentContent) {
+ 	public void discard(PullRequest request, String note) {
 		Account user = accountManager.getCurrent();
 		
-		if (commentContent != null)
-			addComment(request, commentContent, false);
-
 		CloseInfo closeInfo = new CloseInfo();
 		closeInfo.setCloseDate(new Date());
 		closeInfo.setClosedBy(user);
 		closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
 		
-		request.setLastEvent(PullRequestEvent.DISCARDED);
-		request.setLastEventUser(user);
-		request.setLastEventDate(new Date());
-		
 		dao.persist(request);
 
-		for (PullRequestListener listener: pullRequestListenersProvider.get())
-			listener.onDiscardRequest(request, user);
+		listenerRegistry.notify(new PullRequestDiscarded(request, user, note));
 	}
 	
 	@Transactional
 	@Override
-	public void integrate(PullRequest request, String commentContent) {
+	public void integrate(PullRequest request, String note) {
 		if (request.getStatus() != PENDING_INTEGRATE)
 			throw new IllegalStateException("Gate keeper disallows integration right now.");
 	
@@ -262,10 +243,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		Account user = accountManager.getCurrent();
 
-		if (commentContent != null) 
-			addComment(request, commentContent, false);
-		
-		closeAsIntegrated(request, false);
+		closeAsIntegrated(request, false, note);
 
 		ObjectId integratedCommitId = ObjectId.fromString(integrated);
 		RevCommit integratedCommit = request.getTargetDepot().getRevCommit(integratedCommitId);
@@ -389,9 +367,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public void open(PullRequest request) {
 		request.setNumber(getNextNumber(request.getTargetDepot()));
-		request.setLastEvent(PullRequestEvent.OPENED);
-		request.setLastEventDate(request.getSubmitDate());
-		request.setLastEventUser(request.getSubmitter());
 		dao.persist(request);
 		
 		RefUpdate refUpdate = request.getTargetDepot().updateRef(request.getBaseRef());
@@ -402,22 +377,19 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			pullRequestUpdateManager.save(update, false);
 		}
 		
-		for (ReviewInvitation invitation: request.getReviewInvitations())
+		for (PullRequestReviewInvitation invitation: request.getReviewInvitations())
 			reviewInvitationManager.save(invitation);
 
 		doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
-				workExecutor.remove(task);
-				workExecutor.execute(task);
+				batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(UI_PREVIEW_PRIORITY));
 			}
 			
 		});
-
-		for (PullRequestListener listener: pullRequestListenersProvider.get())
-			listener.onOpenRequest(request);
+		
+		listenerRegistry.notify(new PullRequestOpened(request));
 	}
 
 	@Override
@@ -439,30 +411,26 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public void changeAssignee(PullRequest request) {
 		Account user = accountManager.getCurrent();
-		request.setLastEvent(PullRequestEvent.ASSIGNED);
-		request.setLastEventUser(user);
-		request.setLastEventDate(new Date());
+		
 		dao.persist(request);
 		
-		for (PullRequestListener listener: pullRequestListenersProvider.get())
-			listener.onAssignRequest(request, user);
+		String note = request.getAssignee().getDisplayName() + " is expected to integrate the pull request";
+		listenerRegistry.notify(new PullRequestAssigned(request, user, note));
 	}
 	
 	private void onTargetBranchUpdate(PullRequest request) {
 		String targetHead = request.getTarget().getObjectName();
 		if (request.getLastIntegrationPreview() == null || !request.getLastIntegrationPreview().getTargetHead().equals(targetHead)) {
 			if (request.isMerged()) {
-				closeAsIntegrated(request, true);
+				closeAsIntegrated(request, true, null);
 			}
 			if (request.isOpen()) {
-				IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
-				workExecutor.remove(task);
-				workExecutor.execute(task);
+				batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(BACKEND_PREVIEW_PRIORITY));
 			}
 		}
 	}
 
-	private void closeAsIntegrated(PullRequest request, boolean dueToMerged) {
+	private void closeAsIntegrated(PullRequest request, boolean dueToMerged, String note) {
 		Account user = accountManager.getCurrent();
 		
 		if (dueToMerged)
@@ -474,14 +442,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
 		request.setCloseInfo(closeInfo);
 		
-		request.setLastEvent(PullRequestEvent.INTEGRATED);
-		request.setLastEventUser(user);
-		request.setLastEventDate(new Date());
-		
 		dao.persist(request);
 
-		for (PullRequestListener listener: pullRequestListenersProvider.get())
-			listener.onIntegrateRequest(request, user);
+		if (dueToMerged)
+			note = "Source branch is already merged to target branch by some one";
+		listenerRegistry.notify(new PullRequestIntegrated(request, user, note));
 	}
 
 	private void updateIfNecessary(PullRequest request, boolean notifyListeners) {
@@ -504,11 +469,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void check(PullRequest request) {
 		if (request.isOpen()) {
 			if (request.isMerged()) {
-				closeAsIntegrated(request, true);
+				closeAsIntegrated(request, true, null);
 			} else {
 				if (request.getStatus() == PENDING_UPDATE) {
-					for (PullRequestListener listener: pullRequestListenersProvider.get())
-						listener.pendingUpdate(request);
+					listenerRegistry.notify(new PullRequestPendingUpdate(request));
 				} else if (request.getStatus() == PENDING_INTEGRATE) {
 					IntegrationPreview integrationPreview = request.getIntegrationPreview();
 					if (integrationPreview != null 
@@ -516,17 +480,15 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							&& request.getAssignee() == null) {
 						integrate(request, "Integrated automatically by system");
 					} else {
-						for (PullRequestListener listener: pullRequestListenersProvider.get())
-							listener.pendingIntegration(request);
+						listenerRegistry.notify(new PullRequestPendingIntegration(request));
 					}
 				} else if (request.getStatus() == PENDING_APPROVAL) {
 					Date now = new Date();
-					for (ReviewInvitation invitation: request.getReviewInvitations()) { 
+					for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) { 
 						if (!invitation.getDate().before(now))
 							reviewInvitationManager.save(invitation);
 					}
-					for (PullRequestListener listener: pullRequestListenersProvider.get())
-						listener.pendingApproval(request);
+					listenerRegistry.notify(new PullRequestPendingApproval(request));
 				}
 			}
 		}
@@ -546,116 +508,94 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public IntegrationPreview previewIntegration(PullRequest request) {
 		IntegrationPreview preview = request.getLastIntegrationPreview();
 		if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
-			IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
-			workExecutor.remove(task);
-			workExecutor.execute(task);
+			int priority = RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY;			
+			batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(priority));
 			return null;
 		} else {
 			return preview;
 		}
 	}
 	
-	private class IntegrationPreviewTask extends PrioritizedRunnable {
+	private BatchWorker getIntegrationPreviewer(PullRequest request) {
+		Long requestId = request.getId();
+		return new BatchWorker("request-" + requestId + "-previewIntegration", 1) {
 
-		private final Long requestId;
-		
-		public IntegrationPreviewTask(Long requestId) {
-			super(RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY);
-			this.requestId = requestId;
-		}
-		
-		@Override
-		public void run() {
-			unitOfWork.begin();
-			try {
-				if (!integrationPreviewCalculatingRequestIds.contains(requestId)) {
-					integrationPreviewCalculatingRequestIds.add(requestId);
-					try {
+			@Override
+			public void doWork(Collection<Prioritized> works) {
+				Preconditions.checkState(works.size() == 1);
+				unitOfWork.call(new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
 						PullRequest request = load(requestId);
-						logger.info("Calculating integration preview of pull request #{} in repository '{}'...", 
-								request.getNumber(), request.getTargetDepot());
-						IntegrationPreview preview = request.getLastIntegrationPreview();
-						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
-							String requestHead = request.getLatestUpdate().getHeadCommitHash();
-							String targetHead = request.getTarget().getObjectName();
-							Depot targetDepot = request.getTargetDepot();
-							preview = new IntegrationPreview(targetHead, 
-									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
-							request.setLastIntegrationPreview(preview);
-							String integrateRef = request.getIntegrateRef();
-							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetDepot.isMergedInto(targetHead, requestHead)) {
-								preview.setIntegrated(requestHead);
-								RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
-								refUpdate.setNewObjectId(ObjectId.fromString(requestHead));
-								GitUtils.updateRef(refUpdate);
-							} else {
-								PersonIdent user = accountManager.getRoot().asPerson();
-								ObjectId integrated;
-								ObjectId requestHeadId = ObjectId.fromString(requestHead);
-								ObjectId targetHeadId = ObjectId.fromString(targetHead);
-								if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
-									integrated = GitUtils.rebase(targetDepot.getRepository(), targetHeadId, requestHeadId, user);
-								} else if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
-									integrated = GitUtils.rebase(targetDepot.getRepository(), requestHeadId, targetHeadId, user);
-								} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
-									integrated = GitUtils.merge(targetDepot.getRepository(), 
-											requestHeadId, targetHeadId, true, user, request.getCommitMessage());
-								} else {
-									integrated = GitUtils.merge(targetDepot.getRepository(), 
-											requestHeadId, targetHeadId, false, user, request.getCommitMessage());
-								} 
-								
-								if (integrated != null) {
-									preview.setIntegrated(integrated.name());
+						try {
+							IntegrationPreview preview = request.getLastIntegrationPreview();
+							if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
+								logger.info("Calculating integration preview of pull request #{} in repository '{}'...", 
+										request.getNumber(), request.getTargetDepot());
+								String requestHead = request.getLatestUpdate().getHeadCommitHash();
+								String targetHead = request.getTarget().getObjectName();
+								Depot targetDepot = request.getTargetDepot();
+								preview = new IntegrationPreview(targetHead, 
+										request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
+								request.setLastIntegrationPreview(preview);
+								String integrateRef = request.getIntegrateRef();
+								if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetDepot.isMergedInto(targetHead, requestHead)) {
+									preview.setIntegrated(requestHead);
 									RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
-									refUpdate.setNewObjectId(integrated);
+									refUpdate.setNewObjectId(ObjectId.fromString(requestHead));
 									GitUtils.updateRef(refUpdate);
 								} else {
-									RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
-									GitUtils.deleteRef(refUpdate);
+									PersonIdent user = accountManager.getRoot().asPerson();
+									ObjectId integrated;
+									ObjectId requestHeadId = ObjectId.fromString(requestHead);
+									ObjectId targetHeadId = ObjectId.fromString(targetHead);
+									if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
+										integrated = GitUtils.rebase(targetDepot.getRepository(), targetHeadId, requestHeadId, user);
+									} else if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
+										integrated = GitUtils.rebase(targetDepot.getRepository(), requestHeadId, targetHeadId, user);
+									} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
+										integrated = GitUtils.merge(targetDepot.getRepository(), 
+												requestHeadId, targetHeadId, true, user, request.getCommitMessage());
+									} else {
+										integrated = GitUtils.merge(targetDepot.getRepository(), 
+												requestHeadId, targetHeadId, false, user, request.getCommitMessage());
+									} 
+									
+									if (integrated != null) {
+										preview.setIntegrated(integrated.name());
+										RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
+										refUpdate.setNewObjectId(integrated);
+										GitUtils.updateRef(refUpdate);
+									} else {
+										RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
+										GitUtils.deleteRef(refUpdate);
+									}
 								}
+								dao.persist(request);
+	
+								if (request.getStatus() == PENDING_INTEGRATE 
+										&& preview.getIntegrated() != null
+										&& request.getAssignee() == null) {
+									integrate(request, "Integrated automatically by GitPlex");
+								}
+								
+								listenerRegistry.notify(new IntegrationPreviewCalculated(request));
+								logger.info("Integration preview of pull request #{} in repository '{}' is calculated.", 
+										request.getNumber(), request.getTargetDepot());						
 							}
-							dao.persist(request);
-
-							if (request.getStatus() == PENDING_INTEGRATE 
-									&& preview.getIntegrated() != null
-									&& request.getAssignee() == null) {
-								integrate(request, "Integrated automatically by GitPlex");
-							}
-							
-							for (PullRequestListener listener: pullRequestListenersProvider.get())
-								listener.onIntegrationPreviewCalculated(request);
+						} catch (Exception e) {
+							logger.error("Error calculating pull request integration preview", e);
 						}
-						logger.info("Integration preview of pull request #{} in repository '{}' is calculated.", 
-								request.getNumber(), request.getTargetDepot());
-					} finally {
-						integrationPreviewCalculatingRequestIds.remove(requestId);
+						return null;
 					}
-				}
-			} catch (Exception e) {
-				logger.error("Error calculating pull request integration preview", e);
-			} finally {
-				unitOfWork.end();
+					
+				});
 			}
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (!(other instanceof IntegrationPreviewTask))
-				return false;
-			if (this == other)
-				return true;
-			IntegrationPreviewTask otherRunnable = (IntegrationPreviewTask) other;
-			return new EqualsBuilder().append(requestId, otherRunnable.requestId).isEquals();
-		}
-
-		@Override
-		public int hashCode() {
-			return new HashCodeBuilder(17, 37).append(requestId).toHashCode();
-		}
-
+			
+		};
 	}
-
+	
 	@Transactional
 	@Listen
 	public void on(DepotDeleted event) {
@@ -682,7 +622,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					if (event.getDepot().getObjectId(request.getBaseCommitHash(), false) != null) {
 						updateIfNecessary(request, true);
 						if (request.isMerged()) {
-							closeAsIntegrated(request, true);
+							closeAsIntegrated(request, true, null);
 						} else {
 							checkAsync(request);
 						}
@@ -777,7 +717,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					} else {
 						updateIfNecessary(request, false);
 						if (request.isMerged()) {
-							closeAsIntegrated(request, true);
+							closeAsIntegrated(request, true, null);
 						} else {
 							checkAsync(request);
 						}
@@ -840,9 +780,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		CodeCommentReply reply = event.getReply();
 		for (CodeCommentRelation relation: reply.getComment().getRelations()) {
 			PullRequest request = relation.getRequest();
-			request.setLastEvent(PullRequestEvent.CODE_COMMENT_REPLIED);
-			request.setLastEventDate(reply.getDate());
-			request.setLastEventUser(reply.getUser());
+			LastEvent lastEvent = new LastEvent();
+			lastEvent.setDate(reply.getDate());
+			lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommentReplied.class));
+			lastEvent.setUser(reply.getUser());
+			request.setLastEvent(lastEvent);
 			request.setLastCodeCommentEventDate(reply.getDate());
 			save(request);
 		}
@@ -852,10 +794,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void on(CodeCommentResolved event) {
 		for (CodeCommentRelation relation: event.getComment().getRelations()) {
 			PullRequest request = relation.getRequest();
-			request.setLastEvent(PullRequestEvent.CODE_COMMENT_RESOLVED);
-			request.setLastEventDate(new Date());
-			request.setLastEventUser(event.getUser());
-			request.setLastCodeCommentEventDate(new Date());
+			
+			LastEvent lastEvent = new LastEvent();
+			lastEvent.setDate(new Date());
+			lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommentResolved.class));
+			lastEvent.setUser(event.getUser());
+			request.setLastEvent(lastEvent);
+			request.setLastCodeCommentEventDate(lastEvent.getDate());
 			save(request);
 		}
 	}
@@ -864,104 +809,83 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void on(CodeCommentUnresolved event) {
 		for (CodeCommentRelation relation: event.getComment().getRelations()) {
 			PullRequest request = relation.getRequest();
-			request.setLastEvent(PullRequestEvent.CODE_COMMENT_UNRESOLVED);
-			request.setLastEventDate(new Date());
-			request.setLastEventUser(event.getUser());
-			request.setLastCodeCommentEventDate(new Date());
+			LastEvent lastEvent = new LastEvent();
+			lastEvent.setDate(new Date());
+			lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommentUnresolved.class));
+			lastEvent.setUser(event.getUser());
+			request.setLastEvent(lastEvent);
+			request.setLastCodeCommentEventDate(lastEvent.getDate());
 			save(request);
 		}
 	}
 	
-	@Override
-	public void onOpenRequest(PullRequest request) {
-	}
-
-	@Override
-	public void onReopenRequest(PullRequest request, Account user) {
-	}
-
 	@Transactional
-	@Override
-	public void onUpdateRequest(PullRequestUpdate update) {
-		PullRequest request = update.getRequest();
-		request.setLastEvent(PullRequestEvent.UPDATED);
-		request.setLastEventDate(update.getDate());
-		request.setLastEventUser(null);
+	@Listen
+	public void on(PullRequestUpdated event) {
+		PullRequest request = event.getRequest();
+		
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(event.getUpdate().getDate());
+		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
+		request.setLastEvent(lastEvent);
 		save(request);
 	}
 
-	@Override
-	public void onMentionAccount(PullRequest request, Account account) {
-	}
-
-	@Override
-	public void onMentionAccount(PullRequestComment comment, Account account) {
-	}
-
 	@Transactional
-	@Override
-	public void onCommentRequest(PullRequestComment comment) {
-		PullRequest request = comment.getRequest();
-		request.setLastEvent(PullRequestEvent.COMMENTED);
-		request.setLastEventUser(comment.getUser());
-		request.setLastEventDate(comment.getDate());
+	@Listen
+	public void on(PullRequestCommented event) {
+		PullRequest request = event.getRequest();
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(event.getComment().getDate());
+		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
+		lastEvent.setUser(event.getComment().getUser());
+		request.setLastEvent(lastEvent);
 		save(request);
 	}
 
-	@Override
-	public void onAssignRequest(PullRequest request, Account user) {
+	@Listen
+	public void on(PullRequestVerificationSucceeded event) {
+		checkAsync(event.getRequest());
 	}
 
-	@Override
-	public void onVerifyRequest(Verification verification) {
-		if (verification.getStatus() != Verification.Status.ONGOING) {
-			PullRequest request = verification.getRequest();
-			if (verification.getStatus() == Verification.Status.PASSED)
-				request.setLastEvent(PullRequestEvent.VERIFICATION_PASSED);
-			else
-				request.setLastEvent(PullRequestEvent.VERIFICATION_NOT_PASSED);
-			request.setLastEventUser(null);
-			request.setLastEventDate(new Date());
-			save(request);
-			
-			checkAsync(verification.getRequest());
-		}
+	@Listen
+	public void on(PullRequestVerificationFailed event) {
+		checkAsync(event.getRequest());
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestApproved event) {
+		checkAsync(event.getRequest());
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestDisapproved event) {
+		checkAsync(event.getRequest());
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestVerificationDeleted event) {
+		checkAsync(event.getRequest());
 	}
 
-	@Override
-	public void onRestoreSourceBranch(PullRequest request) {
+	@Transactional
+	@Listen
+	public void on(PullRequestReviewDeleted event) {
+		checkAsync(event.getRequest());
 	}
-
-	@Override
-	public void onDeleteSourceBranch(PullRequest request) {
-	}
-
-	@Override
-	public void onIntegrateRequest(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onDiscardRequest(PullRequest request, Account user) {
-	}
-
-	@Override
-	public void onIntegrationPreviewCalculated(PullRequest request) {
-	}
-
-	@Override
-	public void onInvitingReview(ReviewInvitation invitation) {
-	}
-
-	@Override
-	public void pendingIntegration(PullRequest request) {
-	}
-
-	@Override
-	public void pendingUpdate(PullRequest request) {
-	}
-
-	@Override
-	public void pendingApproval(PullRequest request) {
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestStatusChangeEvent event) {
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(new Date());
+		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
+		lastEvent.setUser(event.getUser());
+		event.getRequest().setLastEvent(lastEvent);
+		save(event.getRequest());
 	}
 
 	@Sessional
@@ -981,33 +905,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			}
 	
 		});
-	}
-
-	@Transactional
-	@Override
-	public void onReviewRequest(Review review) {
-		PullRequest request = review.getUpdate().getRequest();
-		if (review.getResult() == Review.Result.APPROVE)
-			request.setLastEvent(PullRequestEvent.APPROVED);
-		else
-			request.setLastEvent(PullRequestEvent.DISAPPROVED);
-		request.setLastEventUser(review.getUser());
-		request.setLastEventDate(new Date());
-		save(request);
-		
-		checkAsync(review.getUpdate().getRequest());
-	}
-
-	@Transactional
-	@Override
-	public void onDeleteVerification(Verification verification) {
-		checkAsync(verification.getRequest());
-	}
-
-	@Transactional
-	@Override
-	public void onDeleteReview(Review review) {
-		checkAsync(review.getUpdate().getRequest());
 	}
 
 }

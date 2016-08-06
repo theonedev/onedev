@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.depot.pullrequest.requestlist;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,7 +42,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.support.PullRequestEvent;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.AccountLink;
@@ -302,20 +302,31 @@ public class RequestListPage extends PullRequestPage {
 				fragment.add(new AccountLink("submitter", rowModel.getObject().getSubmitter()));
 				fragment.add(new BranchLink("target", request.getTarget()));
 				fragment.add(new BranchLink("source", request.getSource()));
-				fragment.add(new Label("age", DateUtils.formatAge(request.getSubmitDate())));
+				fragment.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 				
-				WebMarkupContainer lastEvent = new WebMarkupContainer("lastEvent");
-				lastEvent.setVisible(request.getLastEvent() != PullRequestEvent.OPENED);
-				lastEvent.add(new Label("description", request.getLastEvent().toString()));
-				lastEvent.add(new AccountLink("user", request.getLastEventUser())
-						.setVisible(request.getLastEventUser()!=null));
-				lastEvent.add(new Label("age", DateUtils.formatAge(request.getLastEventDate())));
-				fragment.add(lastEvent);
+				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
+				if (request.getLastEvent() != null) {
+					lastEventContainer.add(new AccountLink("user", request.getLastEvent().getUser())
+							.setVisible(request.getLastEvent().getUser()!=null));
+					lastEventContainer.add(new Label("description", request.getLastEvent().getDescription()));
+					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getLastEvent().getDate())));
+				} else {
+					lastEventContainer.add(new AccountLink("user", (Account)null));
+					lastEventContainer.add(new Label("description"));
+					lastEventContainer.add(new Label("date"));
+					lastEventContainer.setVisible(false);
+				}
+				fragment.add(lastEventContainer);
 				
 				cellItem.add(fragment);
-				
+
+				Date lastActivityDate;
+				if (request.getLastEvent() != null)
+					lastActivityDate = request.getLastEvent().getDate();
+				else
+					lastActivityDate = request.getSubmitDate();
 				cellItem.add(AttributeAppender.append("class", 
-						request.isVisitedAfter(request.getLastEventDate())?"request":"request new"));
+						request.isVisitedAfter(lastActivityDate)?"request":"request new"));
 			}
 			
 		});

@@ -1,10 +1,8 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -20,10 +18,11 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.event.PullRequestListener;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestUpdated;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 
@@ -31,14 +30,14 @@ import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 
 		implements PullRequestUpdateManager {
 	
-	private final Provider<Set<PullRequestListener>> listenersProvider;
+	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultPullRequestUpdateManager(Dao dao, Provider<Set<PullRequestListener>> pullRequestListenersProvider,
+	public DefaultPullRequestUpdateManager(Dao dao, ListenerRegistry listenerRegistry,
 			PullRequestCommentManager commentManager) {
 		super(dao);
 		
-		this.listenersProvider = pullRequestListenersProvider;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	@Transactional
@@ -74,7 +73,8 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			GitUtils.updateRef(refUpdate);
 		}
 
-		listenersProvider.get().forEach(each->each.onUpdateRequest(update));
+		if (notifyListeners)
+			listenerRegistry.notify(new PullRequestUpdated(update));
 	}
 
 	@Sessional

@@ -39,14 +39,13 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.entity.support.PullRequestEvent;
-import com.pmease.gitplex.core.entity.PullRequestActivity;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReference;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
-import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestReview;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -63,18 +62,12 @@ import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoi
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ApprovedRenderer;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentRemoved;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DisapprovedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.DiscardedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.IntegratedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.OpenedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReferencedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReopenedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.SourceBranchDeletedRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.SourceBranchRestoredRenderer;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.UpdatedRenderer;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentedActivity;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.OpenedActivity;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReferencedActivity;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.StatusChangeActivity;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.UpdatedActivity;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
@@ -113,8 +106,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 		super(params);
 	}
 	
-	private Component newActivityRow(final String id, ActivityRenderer renderer) {
-		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(renderer)) {
+	private Component newActivityRow(final String id, PullRequestActivity activity) {
+		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity)) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -131,79 +124,67 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 		row.setOutputMarkupId(true);
 		
+		if (row.get("content") == null) 
+			row.add(activity.render("content"));
+		
 		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
-		avatarColumn.add(new AvatarLink("avatar", renderer.getUser(), null));
 		row.add(avatarColumn);
 		
-		if (row.get("content") == null) 
-			row.add(renderer.render("content"));
-		
-		if (renderer instanceof OpenedRenderer || renderer instanceof CommentedRenderer)
+		if (activity instanceof OpenedActivity) {
 			row.add(AttributeAppender.append("class", " discussion"));
-		else
+			avatarColumn.add(new AvatarLink("avatar", ((OpenedActivity)activity).getRequest().getSubmitter(), null));
+		} else if (activity instanceof CommentedActivity) {
+			row.add(AttributeAppender.append("class", " discussion"));
+			avatarColumn.add(new AvatarLink("avatar", ((CommentedActivity)activity).getComment().getUser(), null));
+		} else {
 			row.add(AttributeAppender.append("class", " non-discussion"));
+			avatarColumn.add(new WebMarkupContainer("avatar"));
+		}
 		
-		if (renderer instanceof UpdatedRenderer)
+		if (activity instanceof UpdatedActivity)
 			row.add(AttributeAppender.append("class", " update"));
 		else
 			row.add(AttributeAppender.append("class", " non-update"));
 
-		if (!getPullRequest().isVisitedAfter(renderer.getDate()))
+		if (!getPullRequest().isVisitedAfter(activity.getDate()))
 			row.add(AttributeAppender.append("class", "new"));
 		
 		return row;
 	}
 	
-	private List<ActivityRenderer> getActivityRenders() {
+	private List<PullRequestActivity> getActivities() {
 		PullRequest request = getPullRequest();
-		List<ActivityRenderer> renders = new ArrayList<>();
+		List<PullRequestActivity> activities = new ArrayList<>();
 
-		renders.add(new OpenedRenderer(request));
+		activities.add(new OpenedActivity(request));
 		
 		for (PullRequestUpdate update: request.getUpdates())
-			renders.add(new UpdatedRenderer(update));
+			activities.add(new UpdatedActivity(update));
 		
 		for (PullRequestComment comment: request.getComments()) { 
-			renders.add(new CommentedRenderer(comment));
+			activities.add(new CommentedActivity(comment));
 		}
 		
 		for (PullRequestReference reference: request.getReferencedBy()) {
-			renders.add(new ReferencedRenderer(request, reference.getUser(), 
-					reference.getDate(), reference.getReferencedBy()));
+			activities.add(new ReferencedActivity(reference));
 		}
 		
-		for (PullRequestActivity activity: request.getActivities()) {
-			if (activity.getEvent() == PullRequestEvent.INTEGRATED) {
-				renders.add(new IntegratedRenderer(activity));
-			} else if (activity.getEvent() == PullRequestEvent.DISCARDED) { 
-				renders.add(new DiscardedRenderer(activity));
-			} else if (activity.getEvent() == PullRequestEvent.APPROVED) {
-				renders.add(new ApprovedRenderer(activity));
-			} else if (activity.getEvent() == PullRequestEvent.DISAPPROVED) {
-				renders.add(new DisapprovedRenderer(activity));
-			} else if (activity.getEvent() == PullRequestEvent.REOPENED) {
-				renders.add(new ReopenedRenderer(activity));
-			} else if (activity.getEvent() == PullRequestEvent.SOURCE_BRANCH_DELETED) {
-				renders.add(new SourceBranchDeletedRenderer(activity));
-			} else if (activity.getEvent() == PullRequestEvent.SOURCE_BRANCH_RESTORED) {
-				renders.add(new SourceBranchRestoredRenderer(activity));
-			} else {
-				throw new IllegalStateException("Unexpected event: " + activity.getEvent());
-			}
+		for (PullRequestStatusChange statusChange: request.getStatusChanges()) {
+			activities.add(new StatusChangeActivity(statusChange));
 		}
 		
-		renders.sort((o1, o2) -> {
+		activities.sort((o1, o2) -> {
 			if (o1.getDate().before(o2.getDate()))
 				return -1;
 			else if (o1.getDate().after(o2.getDate()))
 				return 1;
-			else if (o1 instanceof OpenedRenderer)
+			else if (o1 instanceof OpenedActivity)
 				return -1;
 			else
 				return 1;
 		});
 		
-		return renders;
+		return activities;
 	}
 	
 	@Override
@@ -213,12 +194,12 @@ public class RequestOverviewPage extends RequestDetailPage {
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
-			List<ActivityRenderer> activities = getActivityRenders();
+			List<PullRequestActivity> activities = getActivities();
 
 			@SuppressWarnings("deprecation")
 			Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-			ActivityRenderer lastAcvitity = (ActivityRenderer) lastActivityRow.getDefaultModelObject();
-			for (ActivityRenderer activity: activities) {
+			PullRequestActivity lastAcvitity = (PullRequestActivity) lastActivityRow.getDefaultModelObject();
+			for (PullRequestActivity activity: activities) {
 				if (activity.getDate().after(lastAcvitity.getDate())) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
 					activitiesView.add(newActivityRow);
@@ -240,9 +221,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 		add(activitiesView = new RepeatingView("requestActivities"));
 		activitiesView.setOutputMarkupId(true);
 		
-		List<ActivityRenderer> activities = getActivityRenders();
+		List<PullRequestActivity> activities = getActivities();
 		
-		for (ActivityRenderer activity: activities) 
+		for (PullRequestActivity activity: activities) 
 			activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
 		
 		WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
@@ -295,7 +276,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				
 				@SuppressWarnings("deprecation")
 				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentedRenderer(comment)); 
+				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentedActivity(comment)); 
 				activitiesView.add(newActivityRow);
 				
 				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
@@ -603,11 +584,11 @@ public class RequestOverviewPage extends RequestDetailPage {
 			
 		};
 		reviewersContainer.setOutputMarkupId(true);
-		reviewersContainer.add(new ListView<ReviewInvitation>("reviewers", new ReviewersModel(requestModel)) {
+		reviewersContainer.add(new ListView<PullRequestReviewInvitation>("reviewers", new ReviewersModel(requestModel)) {
 
 			@Override
-			protected void populateItem(ListItem<ReviewInvitation> item) {
-				ReviewInvitation invitation = item.getModelObject();
+			protected void populateItem(ListItem<PullRequestReviewInvitation> item) {
+				PullRequestReviewInvitation invitation = item.getModelObject();
 				item.add(new ReviewerAvatar("avatar", invitation) {
 
 					@Override
@@ -620,14 +601,14 @@ public class RequestOverviewPage extends RequestDetailPage {
 					
 				});
 
-				List<Review> userReviews = new ArrayList<>();
-				for (Review review: getPullRequest().getReviews()) {
+				List<PullRequestReview> userReviews = new ArrayList<>();
+				for (PullRequestReview review: getPullRequest().getReviews()) {
 					if (review.getUser().equals(invitation.getUser()))
 						userReviews.add(review);
 				}
 				if (!userReviews.isEmpty()) {
-					Review review = userReviews.get(userReviews.size()-1); 
-					item.add(new ReviewResultIcon("result", new EntityModel<Review>(review)));
+					PullRequestReview review = userReviews.get(userReviews.size()-1); 
+					item.add(new ReviewResultIcon("result", new EntityModel<PullRequestReview>(review)));
 				} else {
 					item.add(new WebMarkupContainer("result").setVisible(false));
 				}

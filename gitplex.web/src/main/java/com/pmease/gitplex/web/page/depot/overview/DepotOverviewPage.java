@@ -21,7 +21,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.UrlManager;
@@ -71,7 +71,7 @@ public class DepotOverviewPage extends DepotPage {
 		add(new TextField<String>("cloneUrl", cloneUrlModel));
 		
 		if (getDepot().getDescription() != null) {
-			add(new MarkdownViewer("description", Model.of(getDepot().getDescription()), false));
+			add(new MarkdownPanel("description", Model.of(getDepot().getDescription()), null));
 		} else {
 			add(new WebMarkupContainer("description").setVisible(false));
 		}
@@ -116,7 +116,7 @@ public class DepotOverviewPage extends DepotPage {
 			
 		});
 		
-		add(new MarkdownViewer("readme", new LoadableDetachableModel<String>() {
+		add(new MarkdownPanel("readme", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
@@ -128,7 +128,7 @@ public class DepotOverviewPage extends DepotPage {
 					return "This seems like a binary file!";
 			}
 			
-		}, false) {
+		}, null) {
 
 			@Override
 			protected void onConfigure() {

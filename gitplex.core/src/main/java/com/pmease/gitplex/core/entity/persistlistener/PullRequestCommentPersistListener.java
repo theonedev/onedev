@@ -2,7 +2,6 @@ package com.pmease.gitplex.core.entity.persistlistener;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,12 +13,13 @@ import org.hibernate.type.Type;
 import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReference;
-import com.pmease.gitplex.core.event.PullRequestListener;
+import com.pmease.gitplex.core.event.pullrequest.AccountMentionedInComment;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.util.markdown.MentionParser;
 import com.pmease.gitplex.core.util.markdown.PullRequestParser;
@@ -33,15 +33,15 @@ public class PullRequestCommentPersistListener implements PersistListener {
 	
 	private final AccountManager userManager;
 	
-	private final Set<PullRequestListener> pullRequestListeners;
+	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
 	public PullRequestCommentPersistListener(MarkdownManager markdownManager, Dao dao, 
-			AccountManager userManager, Set<PullRequestListener> pullRequestListeners) {
+			AccountManager userManager, ListenerRegistry listenerRegistry) {
 		this.markdownManager = markdownManager;
 		this.dao = dao;
 		this.userManager = userManager;
-		this.pullRequestListeners = pullRequestListeners;
+		this.listenerRegistry = listenerRegistry;
 	}
 	
 	@Override
@@ -68,8 +68,7 @@ public class PullRequestCommentPersistListener implements PersistListener {
 						
 						mentions.removeAll(mentionParser.parseMentions(prevHtml));
 						for (Account user: mentions) {
-							for (PullRequestListener listener: pullRequestListeners)
-								listener.onMentionAccount((PullRequestComment) entity, user);
+							listenerRegistry.notify(new AccountMentionedInComment((PullRequestComment) entity, user));
 						}
 						
 						Collection<PullRequest> requests = new PullRequestParser().parseRequests(html);
@@ -94,8 +93,7 @@ public class PullRequestCommentPersistListener implements PersistListener {
 					String html = markdownManager.parse(content);
 					Collection<Account> mentions = new MentionParser().parseMentions(html);
 					for (Account user: mentions) {
-						for (PullRequestListener listener: pullRequestListeners)
-							listener.onMentionAccount((PullRequestComment) entity, user);
+						listenerRegistry.notify(new AccountMentionedInComment((PullRequestComment) entity, user));
 					}
 					
 					Collection<PullRequest> requests = new PullRequestParser().parseRequests(html);

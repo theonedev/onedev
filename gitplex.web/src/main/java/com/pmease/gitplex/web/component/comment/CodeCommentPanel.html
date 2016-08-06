@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="code-comment">
-		<div wicket:id="comment" class="comment post"></div>
-		<div wicket:id="activities" class="reply post"></div>
+		<div wicket:id="comment" class="comment section"></div>
+		<div wicket:id="activities" class="reply section"></div>
 		<div wicket:id="addReply" class="add-reply"></div>
 	</div>
 	<wicket:fragment wicket:id="viewFrag">
@@ -16,7 +16,6 @@
 				</span>
 			</div>
 			<div class="body">
-				<div wicket:id="feedback" class="feedback"></div>
 				<div wicket:id="content"></div>
 			</div>
 			<div wicket:id="foot" class="foot">
@@ -45,7 +44,7 @@
 			</div>
 		</form>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="noteEditFrag">
+	<wicket:fragment wicket:id="activityEditFrag">
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
 			<textarea wicket:id="content" rows="10" class="form-control focusable"></textarea>

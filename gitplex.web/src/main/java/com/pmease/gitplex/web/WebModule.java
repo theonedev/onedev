@@ -14,7 +14,6 @@ import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.commons.markdown.extensionpoint.MarkdownExtension;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
-import com.pmease.gitplex.core.event.PullRequestListener;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 import com.pmease.gitplex.core.util.validation.DepotNameReservation;
@@ -54,7 +53,6 @@ public class WebModule extends AbstractPluginModule {
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
-		contribute(PullRequestListener.class, PullRequestChangeBroadcaster.class);
 		contribute(IndexListener.class, IndexChangeBroadcaster.class);
 		
 		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
@@ -86,6 +84,7 @@ public class WebModule extends AbstractPluginModule {
 
 		bind(UrlManager.class).to(WebUrlManager.class);
 		bind(CodeCommentChangeBroadcaster.class);
+		bind(PullRequestChangeBroadcaster.class);
 	}
 	
 }

@@ -149,7 +149,6 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager {
 	@Listen
 	public void on(DepotDeleted event) {
 		Depot depot = event.getDepot();
-		batchWorkManager.remove(getBatchWorker(depot));
 		synchronized (envs) {
 			Environment env = envs.remove(depot.getId());
 			if (env != null)

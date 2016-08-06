@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.component.comment;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -227,19 +229,31 @@ public abstract class CodeCommentListPanel extends Panel {
 				fileLink.add(new Label("label", comment.getCommentPos().getPath()));
 				fragment.add(fileLink);
 				
-				fragment.add(new Label("age", DateUtils.formatAge(comment.getCreateDate())));
+				fragment.add(new Label("date", DateUtils.formatAge(comment.getDate())));
 				
-				WebMarkupContainer lastEvent = new WebMarkupContainer("lastEvent");
-				lastEvent.add(new Label("description", comment.getLastEvent()));
-				lastEvent.setVisible(comment.getLastEventUser() != null);
-				lastEvent.add(new AccountLink("user", comment.getLastEventUser()).setVisible(comment.getLastEventUser()!=null));
-				lastEvent.add(new Label("age", DateUtils.formatAge(comment.getLastEventDate())));
-				fragment.add(lastEvent);
+				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
+				if (comment.getLastEvent() != null) {
+					lastEventContainer.add(new Label("description", comment.getLastEvent().getDescription()));
+					lastEventContainer.add(new AccountLink("user", comment.getLastEvent().getUser())
+							.setVisible(comment.getLastEvent().getUser()!=null));
+					lastEventContainer.add(new Label("date", DateUtils.formatAge(comment.getLastEvent().getDate())));
+				} else {
+					lastEventContainer.add(new Label("description"));
+					lastEventContainer.add(new AccountLink("user", (Account)null));
+					lastEventContainer.add(new Label("date"));
+					lastEventContainer.setVisible(false);
+				}
+				fragment.add(lastEventContainer);
 				
 				cellItem.add(fragment);
 				
+				Date lastUpdateDate;
+				if (comment.getLastEvent() != null)
+					lastUpdateDate = comment.getLastEvent().getDate();
+				else
+					lastUpdateDate = comment.getDate();
 				cellItem.add(AttributeAppender.append("class", 
-						comment.isVisitedAfter(comment.getLastEventDate())?"comment":"comment new"));
+						comment.isVisitedAfter(lastUpdateDate)?"comment":"comment new"));
 			}
 			
 		});

@@ -1,7 +1,6 @@
 package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity;
 
-import java.util.concurrent.atomic.AtomicLong;
-
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -11,20 +10,20 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.StaleObjectStateException;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown.MarkdownEditSupport;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -37,41 +36,76 @@ import com.pmease.gitplex.web.util.DateUtils;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-class CommentedPanel extends ActivityPanel {
+class CommentedPanel extends GenericPanel<PullRequestComment> {
 
-	private final IModel<PullRequestComment> commentModel = new LoadableDetachableModel<PullRequestComment>(){
-
-		@Override
-		protected PullRequestComment load() {
-			return ((CommentedRenderer)renderer).getComment();
-		}
-		
-	};
-	
-	public CommentedPanel(String id, CommentedRenderer activity) {
-		super(id, activity);
+	public CommentedPanel(String id, IModel<PullRequestComment> model) {
+		super(id, model);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer head = new WebMarkupContainer("head"); 
-		head.setOutputMarkupId(true);
-		add(head);
+		add(new AccountLink("user", getComment().getUser()));
+		add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 		
-		head.add(new AccountLink("user", getComment().getUser()));
-		head.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
+		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
 
-		head.add(new AjaxLink<Void>("edit") {
+			@Override
+			public PullRequest getObject() {
+				return getComment().getRequest();
+			}
+
+		}, getComment().getDate()));
+		
+		add(newViewer());
+
+		setOutputMarkupId(true);
+	}
+	
+	private Component newViewer() {
+		Fragment viewer = new Fragment("body", "viewFrag", this);
+		
+		MarkdownEditSupport editSupport;
+		if (SecurityUtils.canModify(getComment())) {
+			editSupport = new MarkdownEditSupport() {
+
+				@Override
+				public void setContent(String content) {
+					getComment().setContent(content);
+					GitPlex.getInstance(PullRequestCommentManager.class).save(getComment());				
+				}
+
+				@Override
+				public long getVersion() {
+					return getComment().getVersion();
+				}
+				
+			};
+		} else {
+			editSupport = null;
+		}
+		viewer.add(new MarkdownPanel("content", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getComment().getContent();
+			}
+			
+		}, editSupport));
+		
+		WebMarkupContainer actions = new WebMarkupContainer("actions");
+		actions.setVisible(SecurityUtils.canModify(getComment()));
+		
+		actions.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("body", "editFrag", CommentedPanel.this);
+				Fragment editor = new Fragment("body", "editFrag", CommentedPanel.this);
 
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
-				fragment.add(form);
+				editor.add(form);
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
@@ -103,10 +137,9 @@ class CommentedPanel extends ActivityPanel {
 							comment.setContent(input.getModelObject());
 							GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
 	
-							WebMarkupContainer viewer = newViewer();
-							CommentedPanel.this.replace(viewer);
+							Component viewer = newViewer();
+							editor.replaceWith(viewer);
 							target.add(viewer);
-							target.add(head);
 						} catch (StaleObjectStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
@@ -131,30 +164,21 @@ class CommentedPanel extends ActivityPanel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						WebMarkupContainer viewer = newViewer();
-						CommentedPanel.this.replace(viewer);
+						Component viewer = newViewer();
+						editor.replaceWith(viewer);
 						target.add(viewer);
-						target.add(head);
 					}
 					
 				});
 				
-				fragment.setOutputMarkupId(true);
-				CommentedPanel.this.replace(fragment);
-				target.add(fragment);
-				target.add(head);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(SecurityUtils.canModify(getComment()) && CommentedPanel.this.get("body").get("form") == null);
+				editor.setOutputMarkupId(true);
+				viewer.replaceWith(editor);
+				target.add(editor);
 			}
 
 		});
 		
-		head.add(new AjaxLink<Void>("delete") {
+		actions.add(new AjaxLink<Void>("delete") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -168,73 +192,16 @@ class CommentedPanel extends ActivityPanel {
 				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this comment?"));
 			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(SecurityUtils.canModify(getComment()));
-			}
-
 		});
-		
-		head.add(new SinceChangesLink("changes", requestModel, getComment().getDate()));
-		
-		add(newViewer());
-
-		setOutputMarkupId(true);
-	}
-	
-	private WebMarkupContainer newViewer() {
-		WebMarkupContainer viewer = new Fragment("body", "viewFrag", this);
+				
+		viewer.add(actions);
 		viewer.setOutputMarkupId(true);
 		
-		NotificationPanel feedback = new NotificationPanel("feedback", viewer);
-		feedback.setOutputMarkupPlaceholderTag(true);
-		viewer.add(feedback);
-		AtomicLong lastVersionRef = new AtomicLong(getComment().getVersion());
-		viewer.add(new MarkdownViewer("content", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return getComment().getContent();
-			}
-
-			@Override
-			public void setObject(String object) {
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				Preconditions.checkNotNull(target);
-				PullRequestComment comment = getComment();
-				try {
-					if (comment.getVersion() != lastVersionRef.get())
-						throw new StaleObjectStateException(CodeComment.class.getName(), comment.getId());
-					comment.setContent(object);
-					GitPlex.getInstance(PullRequestCommentManager.class).save(comment);				
-					target.add(feedback); // clear the feedback
-				} catch (StaleObjectStateException e) {
-					viewer.warn("Some one changed the content you are editing. "
-							+ "The content has now been reloaded, please try again.");
-					target.add(viewer);
-				}
-				lastVersionRef.set(comment.getVersion());
-			}
-			
-		}, SecurityUtils.canModify(getComment())));
-
-		return viewer;		
+		return viewer;
 	}
 	
 	private PullRequestComment getComment() {
-		return commentModel.getObject();
+		return getModelObject();
 	}
 	
-	@Override
-	protected void onDetach() {
-		commentModel.detach();
-		super.onDetach();
-	}
-
 }

@@ -119,10 +119,13 @@ public class Account extends AbstractUser implements ProtectedObject {
 	private Collection<PullRequest> closedRequests = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<Review> reviews = new ArrayList<Review>();
+	private Collection<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
+	private Collection<PullRequestVerification> verifications = new ArrayList<PullRequestVerification>();
+	
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestReviewInvitation> reviewInvitations = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<BranchWatch> branchWatches = new ArrayList<>();
@@ -131,10 +134,10 @@ public class Account extends AbstractUser implements ProtectedObject {
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<Notification> requestNotifications = new ArrayList<>();
+    private Collection<PullRequestNotification> requestNotifications = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestActivity> requestActivities = new ArrayList<>();
+    private Collection<PullRequestStatusChange> requestActivities = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<CodeCommentStatusChange> commentActivities = new ArrayList<>();
@@ -320,19 +323,19 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.branchWatches = branchWatches;
 	}
 
-	public Collection<Notification> getRequestNotifications() {
+	public Collection<PullRequestNotification> getRequestNotifications() {
 		return requestNotifications;
 	}
 
-	public void setRequestNotifications(Collection<Notification> requestNotifications) {
+	public void setRequestNotifications(Collection<PullRequestNotification> requestNotifications) {
 		this.requestNotifications = requestNotifications;
 	}
 
-	public Collection<PullRequestActivity> getRequestActivities() {
+	public Collection<PullRequestStatusChange> getRequestActivities() {
 		return requestActivities;
 	}
 
-	public void setRequestActivities(Collection<PullRequestActivity> requestActivities) {
+	public void setRequestActivities(Collection<PullRequestStatusChange> requestActivities) {
 		this.requestActivities = requestActivities;
 	}
 
@@ -357,8 +360,8 @@ public class Account extends AbstractUser implements ProtectedObject {
 		}
 	}
 	
-	public Review.Result checkReviewSince(PullRequestUpdate update) {
-		for (Review vote: update.listReviewsOnwards()) {
+	public PullRequestReview.Result checkReviewSince(PullRequestUpdate update) {
+		for (PullRequestReview vote: update.listReviewsOnwards()) {
 			if (vote.getUser().equals(this))
 				return vote.getResult();
 		}

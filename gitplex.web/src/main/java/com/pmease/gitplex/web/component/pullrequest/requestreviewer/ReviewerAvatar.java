@@ -9,9 +9,9 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.manager.ReviewInvitationManager;
+import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;
@@ -21,11 +21,11 @@ import com.pmease.gitplex.web.model.UserModel;
 @SuppressWarnings("serial")
 public class ReviewerAvatar extends RemoveableAvatar {
 
-	private final ReviewInvitation invitation;
+	private final PullRequestReviewInvitation invitation;
 	
 	private final IModel<PullRequest> requestModel;
 	
-	public ReviewerAvatar(String id, ReviewInvitation invitation) {
+	public ReviewerAvatar(String id, PullRequestReviewInvitation invitation) {
 		super(id, new UserModel(invitation.getUser()), "Remove reviewer");
 		
 		this.invitation = invitation;
@@ -51,7 +51,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		Date now = new Date();
 		PullRequest request = requestModel.getObject();
 		Set<Account> prevInvited = new HashSet<>();
-		for (ReviewInvitation each: request.getReviewInvitations()) {
+		for (PullRequestReviewInvitation each: request.getReviewInvitations()) {
 			if (each.isPreferred())
 				prevInvited.add(each.getUser());
 			if (each.getUser().equals(invitation.getUser())) {
@@ -62,7 +62,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		request.getTargetDepot().getGateKeeper().checkRequest(request);
 
 		Set<Account> nowInvited = new HashSet<>();
-		for (ReviewInvitation each: request.getReviewInvitations()) {
+		for (PullRequestReviewInvitation each: request.getReviewInvitations()) {
 			if (each.isPreferred())
 				nowInvited.add(each.getUser());
 		}
@@ -79,8 +79,8 @@ public class ReviewerAvatar extends RemoveableAvatar {
 			}
 		}
 		if (!request.isNew()) {
-			ReviewInvitationManager reviewInvitationManager = GitPlex.getInstance(ReviewInvitationManager.class);
-			for (ReviewInvitation invitation: request.getReviewInvitations()) {
+			PullRequestReviewInvitationManager reviewInvitationManager = GitPlex.getInstance(PullRequestReviewInvitationManager.class);
+			for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) {
 				if (!invitation.getDate().before(now))
 					reviewInvitationManager.save(invitation);
 			}

@@ -13,7 +13,5 @@ public abstract class CodeCommentEvent {
 	public CodeComment getComment() {
 		return comment;
 	}
-
-	public abstract String getDescription();
 	
 }

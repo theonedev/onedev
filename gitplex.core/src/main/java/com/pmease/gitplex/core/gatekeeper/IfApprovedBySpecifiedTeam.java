@@ -11,7 +11,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 
 @Editable(order=100, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
@@ -40,10 +40,10 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
         
     	Collection<Account> members = getTeamMembers(request.getTargetDepot().getAccount());
         for (Account member: members) {
-            Review.Result result = member.checkReviewSince(request.getReferentialUpdate());
+            PullRequestReview.Result result = member.checkReviewSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
-            } else if (result == Review.Result.APPROVE) {
+            } else if (result == PullRequestReview.Result.APPROVE) {
                 approvals++;
             }
         }

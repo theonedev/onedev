@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
@@ -37,7 +37,7 @@ public class OrganizationOverviewPanel extends GenericPanel<Account> {
 		});
 		
 		if (getOrganization().getDescription() != null) {
-			add(new MarkdownViewer("description", Model.of(getOrganization().getDescription()), false));
+			add(new MarkdownPanel("description", Model.of(getOrganization().getDescription()), null));
 		} else {
 			add(new WebMarkupContainer("description").setVisible(false));
 		}
