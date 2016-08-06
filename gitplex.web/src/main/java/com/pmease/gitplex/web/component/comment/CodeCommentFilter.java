@@ -19,7 +19,7 @@ import com.pmease.gitplex.core.annotation.FileChoice;
 import com.pmease.gitplex.core.entity.CodeComment;
 
 @Editable
-public class CodeCommentFilterOption implements Serializable {
+public class CodeCommentFilter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -103,10 +103,10 @@ public class CodeCommentFilterOption implements Serializable {
 		this.before = before;
 	}
 
-	public CodeCommentFilterOption() {
+	public CodeCommentFilter() {
 	}
 	
-	public CodeCommentFilterOption(PageParameters params) {
+	public CodeCommentFilter(PageParameters params) {
 		userName = params.get(PARAM_USER).toString();
 		unresolved = "yes".equals(params.get(PARAM_UNRESOLVED).toString());
 		path = params.get(PARAM_PATH).toString();

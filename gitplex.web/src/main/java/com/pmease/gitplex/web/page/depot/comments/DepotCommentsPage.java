@@ -12,21 +12,21 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.web.component.comment.CodeCommentAware;
-import com.pmease.gitplex.web.component.comment.CodeCommentFilterOption;
+import com.pmease.gitplex.web.component.comment.CodeCommentFilter;
 import com.pmease.gitplex.web.component.comment.CodeCommentListPanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")
 public class DepotCommentsPage extends DepotPage implements CodeCommentAware {
 
-	private final CodeCommentFilterOption filterOption;
+	private final CodeCommentFilter filterOption;
 	
 	private final List<String> commentedFiles;
 	
 	public DepotCommentsPage(PageParameters params) {
 		super(params);
 		
-		filterOption = new CodeCommentFilterOption(params);
+		filterOption = new CodeCommentFilter(params);
 		
 		commentedFiles = GitPlex.getInstance(CodeCommentInfoManager.class).getCommentedFiles(getDepot());
 	}
@@ -35,19 +35,19 @@ public class DepotCommentsPage extends DepotPage implements CodeCommentAware {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CodeCommentListPanel("codeComments", new IModel<CodeCommentFilterOption>() {
+		add(new CodeCommentListPanel("codeComments", new IModel<CodeCommentFilter>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public CodeCommentFilterOption getObject() {
+			public CodeCommentFilter getObject() {
 				return filterOption;
 			}
 
 			@Override
-			public void setObject(CodeCommentFilterOption object) {
+			public void setObject(CodeCommentFilter object) {
 				PageParameters params = paramsOf(getDepot());
 				object.fillPageParams(params);
 				setResponsePage(DepotCommentsPage.class, params);

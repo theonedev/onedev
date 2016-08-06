@@ -2,21 +2,25 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
-import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
+import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
+@SuppressWarnings("serial")
 public enum PullRequestOperation {
 	INTEGRATE {
 
@@ -34,7 +38,20 @@ public enum PullRequestOperation {
 		public void operate(PullRequest request, String comment) {
 			GitPlex.getInstance(PullRequestManager.class).integrate(request, comment);
 		}
-		
+
+		@Override
+		public Component newHinter(String id, PullRequest request) {
+			Long requestId = request.getId();
+			return new IntegrationHintPanel(id, new LoadableDetachableModel<PullRequest>() {
+
+				@Override
+				protected PullRequest load() {
+					return GitPlex.getInstance(PullRequestManager.class).load(requestId);
+				}
+				
+			});
+		}
+
 	},
 	DISCARD {
 
@@ -50,7 +67,7 @@ public enum PullRequestOperation {
 		public void operate(PullRequest request, String comment) {
 			GitPlex.getInstance(PullRequestManager.class).discard(request, comment);
 		}
-		
+
 	},
 	APPROVE {
 
@@ -62,7 +79,20 @@ public enum PullRequestOperation {
 		@Override
 		public void operate(PullRequest request, String comment) {
 			GitPlex.getInstance(PullRequestReviewManager.class).review(request, PullRequestReview.Result.APPROVE, comment);
-		}		
+		}
+
+		@Override
+		public Component newHinter(String id, PullRequest request) {
+			Long requestId = request.getId();
+			return new ApprovalHintPanel(id, new LoadableDetachableModel<PullRequest>() {
+
+				@Override
+				protected PullRequest load() {
+					return GitPlex.getInstance(PullRequestManager.class).load(requestId);
+				}
+				
+			});
+		}
 		
 	},
 	DISAPPROVE {
@@ -76,7 +106,7 @@ public enum PullRequestOperation {
 		public void operate(PullRequest request, String comment) {
 			GitPlex.getInstance(PullRequestReviewManager.class).review(request, PullRequestReview.Result.DISAPPROVE, comment);
 		}
-		
+
 	},
 	REOPEN {
 
@@ -102,7 +132,7 @@ public enum PullRequestOperation {
 		public void operate(PullRequest request, String comment) {
 			GitPlex.getInstance(PullRequestManager.class).reopen(request, comment);
 		}
-		
+
 	},
 	DELETE_SOURCE_BRANCH {
 
@@ -126,7 +156,7 @@ public enum PullRequestOperation {
 					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), request.getSource().getObjectId(), ObjectId.zeroId())
 					&& pullRequestManager.findAllOpenTo(request.getSource(), null).isEmpty();
 		}
-		
+
 	}, 
 	RESTORE_SOURCE_BRANCH {
 
@@ -142,7 +172,7 @@ public enum PullRequestOperation {
 					&& SecurityUtils.canModify(request) 
 					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), ObjectId.zeroId(), ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()));
 		}
-		
+
 	};
 	
 	private static boolean canReview(PullRequest request) {
@@ -167,4 +197,9 @@ public enum PullRequestOperation {
 	public abstract void operate(PullRequest request, @Nullable String comment);
 	
 	public abstract boolean canOperate(PullRequest request);	
+	
+	public Component newHinter(String id, PullRequest request) {
+		return new WebMarkupContainer(id).setVisible(false);
+	}
+	
 }

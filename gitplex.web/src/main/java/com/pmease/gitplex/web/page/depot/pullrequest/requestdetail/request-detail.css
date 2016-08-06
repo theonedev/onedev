@@ -75,6 +75,13 @@
 	font-size: 16px;
 }
 
+#request-detail>.summary>.operations>.confirm>form>.hint {
+	margin-bottom: 12px;
+	font-size: 16px;
+} 
+#request-detail>.summary>.operations>.confirm>form>.hint .warning {
+	color: #EC5544;
+} 
 #request-detail>.summary>.operations>.buttons>a, 
 #request-detail>.summary>.operations>.confirm>form>input {
 	margin-right: 12px;

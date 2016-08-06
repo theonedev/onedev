@@ -410,12 +410,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void changeAssignee(PullRequest request) {
-		Account user = accountManager.getCurrent();
-		
 		dao.persist(request);
 		
-		String note = request.getAssignee().getDisplayName() + " is expected to integrate the pull request";
-		listenerRegistry.notify(new PullRequestAssigned(request, user, note));
+		if (request.isOpen()) {
+			String note = request.getAssignee().getDisplayName() + " is expected to integrate the pull request";
+			listenerRegistry.notify(new PullRequestAssigned(request, accountManager.getCurrent(), note));
+		}
 	}
 	
 	private void onTargetBranchUpdate(PullRequest request) {

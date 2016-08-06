@@ -65,10 +65,10 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
-import com.pmease.gitplex.core.entity.support.DepotAndBranch;
-import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
+import com.pmease.gitplex.core.entity.support.DepotAndBranch;
+import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -531,7 +531,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		};
 		operationsContainer.setOutputMarkupId(true);
 		
-		final String confirmId = "confirm";
+		String confirmId = "confirm";
 		
 		operationsContainer.add(new AjaxLink<Void>("approve") {
 
@@ -647,8 +647,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		return operationsContainer;
 	}
 	
-	private Component newOperationConfirm(final String id, final PullRequestOperation operation, 
-			final WebMarkupContainer operationsContainer) {
+	private Component newOperationConfirm(String id, PullRequestOperation operation, 
+			WebMarkupContainer operationsContainer) {
 		PullRequest request = getPullRequest();
 
 		Fragment fragment = new Fragment(id, "operationConfirmFrag", this);
@@ -658,8 +658,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		DepotAndBranch source = request.getSource();
 		Preconditions.checkNotNull(source);
 		
-		FormComponent<String> commentInput;
-		form.add(commentInput = new CommentInput("comment", Model.of("")) {
+		FormComponent<String> noteInput;
+		form.add(noteInput = new CommentInput("note", Model.of("")) {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
@@ -673,7 +673,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 			
 		});
-		commentInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
+		noteInput.add(AttributeModifier.replace("placeholder", "Leave a note"));
+		form.add(operation.newHinter("hint", request));
 		form.add(new NotificationPanel("feedback", form));
 		form.add(new AjaxButton("submit") {
 
@@ -685,7 +686,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 				PullRequest request = getPullRequest();
 				try {
-					operation.operate(request, commentInput.getModelObject());
+					operation.operate(request, noteInput.getModelObject());
 					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 				} catch (Exception e) {
 					if (e.getMessage() != null) {

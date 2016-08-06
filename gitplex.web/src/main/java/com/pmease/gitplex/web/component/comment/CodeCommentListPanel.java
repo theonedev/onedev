@@ -60,9 +60,9 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
-	private final IModel<CodeCommentFilterOption> filterOptionModel;
+	private final IModel<CodeCommentFilter> filterOptionModel;
 	
-	public CodeCommentListPanel(String id, IModel<CodeCommentFilterOption> filterOptionModel) {
+	public CodeCommentListPanel(String id, IModel<CodeCommentFilter> filterOptionModel) {
 		super(id);
 		
 		this.filterOptionModel = filterOptionModel;
@@ -82,7 +82,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				CodeCommentFilterOption filterOption = new CodeCommentFilterOption();
+				CodeCommentFilter filterOption = new CodeCommentFilter();
 				filterOption.setUserName(SecurityUtils.getAccount().getName());
 				filterOptionModel.setObject(filterOption);
 			}
@@ -98,7 +98,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				CodeCommentFilterOption filterOption = new CodeCommentFilterOption();
+				CodeCommentFilter filterOption = new CodeCommentFilter();
 				filterOption.setUserName(SecurityUtils.getAccount().getName());
 				filterOption.setUnresolved(true);
 				filterOptionModel.setObject(filterOption);
@@ -109,7 +109,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				CodeCommentFilterOption filterOption = new CodeCommentFilterOption();
+				CodeCommentFilter filterOption = new CodeCommentFilter();
 				filterOption.setUnresolved(true);
 				filterOptionModel.setObject(filterOption);
 			}
@@ -119,7 +119,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				filterOptionModel.setObject(new CodeCommentFilterOption());
+				filterOptionModel.setObject(new CodeCommentFilter());
 			}
 			
 		});

@@ -23,6 +23,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.Listen;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.event.lifecycle.SystemStarting;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
@@ -30,11 +31,14 @@ import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 
 @Singleton
 public class DefaultAccountManager extends AbstractEntityManager<Account> implements AccountManager {
 
-    private final DepotManager repositoryManager;
+    private final DepotManager depotManager;
+    
+    private final PullRequestManager pullRequestManager;
     
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     		
@@ -43,10 +47,11 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultAccountManager(Dao dao, DepotManager repositoryManager) {
+    public DefaultAccountManager(Dao dao, DepotManager depotManager, PullRequestManager pullRequestManager) {
         super(dao);
         
-        this.repositoryManager = repositoryManager;
+        this.depotManager = depotManager;
+        this.pullRequestManager = pullRequestManager;
     }
 
     @Transactional
@@ -102,10 +107,11 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	query = getSession().createQuery("update PullRequest set lastEvent.user=null where lastEvent.user=:lastEventUser");
     	query.setParameter("lastEventUser", account);
     	query.executeUpdate();
-    	
-    	query = getSession().createQuery("update PullRequest set assignee=null where assignee=:assignee");
-    	query.setParameter("assignee", account);
-    	query.executeUpdate();
+
+    	for (PullRequest request: account.getAssignedRequests()) {
+    		request.setAssignee(request.getTargetDepot().getAccount());
+    		pullRequestManager.changeAssignee(request);
+    	}
     	
     	query = getSession().createQuery("update PullRequest set closeInfo.closedBy=null where closeInfo.closedBy=:closedBy");
     	query.setParameter("closedBy", account);
@@ -124,7 +130,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	query.executeUpdate();
     	
     	for (Depot depot: account.getDepots())
-    		repositoryManager.delete(depot);
+    		depotManager.delete(depot);
     	
 		dao.remove(account);
 		

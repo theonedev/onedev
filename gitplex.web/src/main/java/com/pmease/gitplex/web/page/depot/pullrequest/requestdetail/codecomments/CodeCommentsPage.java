@@ -10,21 +10,21 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.comment.CodeCommentAware;
-import com.pmease.gitplex.web.component.comment.CodeCommentFilterOption;
+import com.pmease.gitplex.web.component.comment.CodeCommentFilter;
 import com.pmease.gitplex.web.component.comment.CodeCommentListPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 
 @SuppressWarnings("serial")
 public class CodeCommentsPage extends RequestDetailPage implements CodeCommentAware {
 
-	private final CodeCommentFilterOption filterOption;
+	private final CodeCommentFilter filterOption;
 	
 	private final List<String> commentedFiles = new ArrayList<>();
 	
 	public CodeCommentsPage(PageParameters params) {
 		super(params);
 		
-		filterOption = new CodeCommentFilterOption(params);
+		filterOption = new CodeCommentFilter(params);
 		
 		for (CodeComment comment: getPullRequest().getCodeComments()) {
 			if (comment.getCommentPos().getPath() != null) 
@@ -37,19 +37,19 @@ public class CodeCommentsPage extends RequestDetailPage implements CodeCommentAw
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CodeCommentListPanel("codeComments", new IModel<CodeCommentFilterOption>() {
+		add(new CodeCommentListPanel("codeComments", new IModel<CodeCommentFilter>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public CodeCommentFilterOption getObject() {
+			public CodeCommentFilter getObject() {
 				return filterOption;
 			}
 
 			@Override
-			public void setObject(CodeCommentFilterOption object) {
+			public void setObject(CodeCommentFilter object) {
 				PageParameters params = paramsOf(getPullRequest());
 				object.fillPageParams(params);
 				setResponsePage(CodeCommentsPage.class, params);

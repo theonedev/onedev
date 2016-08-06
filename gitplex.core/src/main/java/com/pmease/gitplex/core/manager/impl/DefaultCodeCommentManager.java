@@ -169,5 +169,5 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		comment.setLastEvent(lastEvent);
 		save(comment);
 	}
-	
+
 }
