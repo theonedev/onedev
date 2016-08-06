@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -29,6 +30,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.joda.time.DateTime;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -106,7 +108,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		super(params);
 	}
 	
-	private Component newActivityRow(final String id, PullRequestActivity activity) {
+	private Component newActivityRow(String id, PullRequestActivity activity) {
 		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity)) {
 
 			@Override
@@ -146,9 +148,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 		else
 			row.add(AttributeAppender.append("class", " non-update"));
 
-		if (!getPullRequest().isVisitedAfter(activity.getDate()))
-			row.add(AttributeAppender.append("class", "new"));
-		
 		return row;
 	}
 	
@@ -174,9 +173,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 		}
 		
 		activities.sort((o1, o2) -> {
-			if (o1.getDate().before(o2.getDate()))
+			if (o1.getDate().getTime()<o2.getDate().getTime())
 				return -1;
-			else if (o1.getDate().after(o2.getDate()))
+			else if (o1.getDate().getTime()>o2.getDate().getTime())
 				return 1;
 			else if (o1 instanceof OpenedActivity)
 				return -1;
@@ -196,24 +195,62 @@ public class RequestOverviewPage extends RequestDetailPage {
 			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
 			List<PullRequestActivity> activities = getActivities();
 
+			PullRequest request = getPullRequest();
 			@SuppressWarnings("deprecation")
-			Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-			PullRequestActivity lastAcvitity = (PullRequestActivity) lastActivityRow.getDefaultModelObject();
+			Component prevActivityRow = activitiesView.get(activitiesView.size()-1);
+			PullRequestActivity lastActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject();
 			for (PullRequestActivity activity: activities) {
-				if (activity.getDate().after(lastAcvitity.getDate())) {
+				if (activity.getDate().getTime()>lastActivity.getDate().getTime()) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
+					Component sinceChangesRow = null;
+					if (!request.isVisitedAfter(activity.getDate())) {
+						PullRequestActivity prevActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject(); 
+						if (request.isVisitedAfter(prevActivity.getDate())) {
+							Date sinceDate = new DateTime(activity.getDate()).minusMillis(1).toDate();
+							sinceChangesRow = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
+							activitiesView.add(sinceChangesRow);
+							String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+									sinceChangesRow.getMarkupId(), prevActivityRow.getMarkupId());
+							partialPageRequestHandler.prependJavaScript(script);
+							partialPageRequestHandler.add(sinceChangesRow);
+						}
+						newActivityRow.add(AttributeAppender.append("class", "new"));
+						if (activity instanceof UpdatedActivity) {
+							partialPageRequestHandler.appendJavaScript("$('tr.since-changes').addClass('visible');");
+						}
+					}
 					activitiesView.add(newActivityRow);
 					
 					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
+							newActivityRow.getMarkupId(), 
+							sinceChangesRow!=null?sinceChangesRow.getMarkupId():prevActivityRow.getMarkupId());
 					partialPageRequestHandler.prependJavaScript(script);
 					partialPageRequestHandler.add(newActivityRow);
-					lastActivityRow = newActivityRow;
+					
+					prevActivityRow = newActivityRow;
 				}
 			}
 		}
 	}
 
+	private Component newSinceChangesRow(String id, Date sinceDate) {
+		WebMarkupContainer row = new WebMarkupContainer(id);
+		row.setOutputMarkupId(true);
+		row.add(AttributeAppender.append("class", " non-discussion"));
+		
+		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
+		avatarColumn.add(new WebMarkupContainer("avatar"));
+		row.add(avatarColumn);
+		
+		WebMarkupContainer contentColumn = new Fragment("content", "sinceChangesRowContentFrag", this);
+		contentColumn.add(new SinceChangesLink("sinceChanges", requestModel, sinceDate));
+		row.add(contentColumn);
+		
+		row.add(AttributeAppender.append("class", "since-changes"));
+		
+		return row;
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -222,9 +259,34 @@ public class RequestOverviewPage extends RequestDetailPage {
 		activitiesView.setOutputMarkupId(true);
 		
 		List<PullRequestActivity> activities = getActivities();
-		
-		for (PullRequestActivity activity: activities) 
-			activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
+
+		PullRequest request = getPullRequest();
+		Component sinceChangesRow = null;
+		boolean visible = false;
+		for (int i=0; i<activities.size(); i++) {
+			PullRequestActivity activity = activities.get(i);
+			Component row = newActivityRow(activitiesView.newChildId(), activity);
+			if (!request.isVisitedAfter(activity.getDate())) {
+				row.add(AttributeAppender.append("class", "new"));
+				if (sinceChangesRow == null) {
+					if (i != 0) {
+						Date prevActivityDate = activities.get(i-1).getDate();
+						if (request.isVisitedAfter(prevActivityDate)) {
+							Date sinceDate = new DateTime(activity.getDate()).minusMillis(1).toDate();
+							System.out.println(sinceDate.getTime());
+							sinceChangesRow = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
+							activitiesView.add(sinceChangesRow);
+						}
+					}
+				} 
+				if (activity instanceof UpdatedActivity) {
+					visible = true;
+				}
+			}
+			if (sinceChangesRow != null && visible)
+				sinceChangesRow.add(AttributeAppender.append("class", "visible"));
+			activitiesView.add(row);
+		}
 		
 		WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
 

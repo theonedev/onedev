@@ -96,10 +96,22 @@
 	font-weight: bold; 
 	font-style: normal;
 }
-#request-detail .non-discussion div.activity {
+#request-detail tr.activity.since-changes {
+	display: none;
+}
+#request-detail tr.activity.since-changes.visible {
+	display: table-row;
+}
+#request-detail .non-discussion div.activity,
+#request-detail tr.activity.since-changes td.content>div {
 	margin-left: -14px;
 }
-#request-detail .non-discussion div.activity>.head>.icon {
+#request-detail tr.activity.since-changes td.content>div a {
+	font-size: 16px;
+}
+
+#request-detail .non-discussion div.activity>.head>.icon,
+#request-detail tr.activity.since-changes .icon {
 	border-radius: 13px;
 	background: #5CA7F8;
 	width: 26px;

@@ -172,11 +172,11 @@ public class CodeCommentFilter implements Serializable {
 				it.remove();
 				continue;
 			}
-			if (before != null && comment.getDate().after(before)) {
+			if (before != null && comment.getDate().getTime()>before.getTime()) {
 				it.remove();
 				continue;
 			}
-			if (after != null && comment.getDate().before(after)) {
+			if (after != null && comment.getDate().getTime()<after.getTime()) {
 				it.remove();
 				continue;
 			}

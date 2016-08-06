@@ -122,13 +122,13 @@ public abstract class CodeCommentPanel extends Panel {
 			PullRequest request = getPullRequest();
 			List<CodeCommentActivity> activities = new ArrayList<>();
 			for (CodeCommentReply reply: getComment().getReplies()) {
-				if (reply.getDate().after(lastActivityDate) 
+				if (reply.getDate().getTime()>lastActivityDate.getTime() 
 						&& (request == null || request.getRequestComparingInfo(reply.getComparingInfo()) != null)) {
 					activities.add(reply);
 				}
 			}
 			for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
-				if (statusChange.getDate().after(lastActivityDate) 
+				if (statusChange.getDate().getTime()>lastActivityDate.getTime() 
 						&& (request == null || request.getRequestComparingInfo(statusChange.getComparingInfo()) != null)) {
 					activities.add(statusChange);
 				}

@@ -964,7 +964,7 @@ public class PullRequest extends AbstractEntity {
 		Account user = SecurityUtils.getAccount();
 		if (user != null) {
 			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
-			return visitDate != null && visitDate.after(date);
+			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
 		}

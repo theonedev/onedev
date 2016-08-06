@@ -81,7 +81,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		if (!request.isNew()) {
 			PullRequestReviewInvitationManager reviewInvitationManager = GitPlex.getInstance(PullRequestReviewInvitationManager.class);
 			for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) {
-				if (!invitation.getDate().before(now))
+				if (invitation.getDate().getTime()>=now.getTime())
 					reviewInvitationManager.save(invitation);
 			}
 		}

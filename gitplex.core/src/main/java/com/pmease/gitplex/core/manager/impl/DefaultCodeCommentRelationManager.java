@@ -132,7 +132,8 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 	public void save(CodeCommentRelation entity) {
 		PullRequest request = entity.getRequest();
 		CodeComment comment = entity.getComment();
-		if (entity.isNew() && (request.getLastEvent() == null || comment.getDate().after(request.getLastEvent().getDate()))) {
+		if (entity.isNew() && (request.getLastEvent() == null 
+				|| comment.getDate().getTime()>request.getLastEvent().getDate().getTime())) {
 			LastEvent lastEvent = new LastEvent();
 			lastEvent.setDate(comment.getDate());
 			lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommented.class));

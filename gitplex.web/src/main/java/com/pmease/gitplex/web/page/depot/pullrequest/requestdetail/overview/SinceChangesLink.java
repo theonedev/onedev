@@ -27,11 +27,9 @@ public class SinceChangesLink extends BookmarkablePageLink<Void> {
 		protected String load() {
 			PullRequest request = requestModel.getObject();
 			String commit = request.getBaseCommitHash();
-			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
-				PullRequestUpdate update = request.getSortedUpdates().get(i);
-				if (update.getDate().before(sinceDate)) {
+			for (PullRequestUpdate update: request.getSortedUpdates()) {
+				if (update.getDate().getTime()<sinceDate.getTime()) {
 					commit = update.getHeadCommitHash();
-					break;
 				}
 			}
 			return commit;

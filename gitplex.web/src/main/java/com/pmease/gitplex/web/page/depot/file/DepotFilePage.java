@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseException;
@@ -484,13 +486,19 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					BlobIdent committed = new BlobIdent(
 							branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
 					
+					Subject subject = SecurityUtils.getSubject();
 					GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
 						@Override
 						public void run() {
-							Depot depot = getDepot();
-							depot.cacheObjectId(branch, newCommit);
-							GitPlex.getInstance(ListenerRegistry.class).notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+							ThreadContext.bind(subject);
+							try {
+								Depot depot = getDepot();
+								depot.cacheObjectId(branch, newCommit);
+								GitPlex.getInstance(ListenerRegistry.class).notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+							} finally {
+								ThreadContext.unbindSubject();
+							}
 						}
 						
 					});
@@ -550,14 +558,20 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 								break;
 							}
 						}
-						
+
+						Subject subject = SecurityUtils.getSubject();
 						GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
 							@Override
 							public void run() {
-								Depot depot = getDepot();
-								depot.cacheObjectId(branch, newCommit);
-								GitPlex.getInstance(ListenerRegistry.class).notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+								ThreadContext.bind(subject);
+								try {
+									Depot depot = getDepot();
+									depot.cacheObjectId(branch, newCommit);
+									GitPlex.getInstance(ListenerRegistry.class).notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+								} finally {
+									ThreadContext.unbindSubject();
+								}
 							}
 							
 						});

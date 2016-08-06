@@ -485,7 +485,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				} else if (request.getStatus() == PENDING_APPROVAL) {
 					Date now = new Date();
 					for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) { 
-						if (!invitation.getDate().before(now))
+						if (invitation.getDate().getTime()>=now.getTime())
 							reviewInvitationManager.save(invitation);
 					}
 					listenerRegistry.notify(new PullRequestPendingApproval(request));

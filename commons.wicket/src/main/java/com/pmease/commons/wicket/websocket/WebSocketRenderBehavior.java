@@ -131,7 +131,7 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 							Map.Entry<RenderData, Date> entry = it.next();
 							Integer pageId = entry.getKey().getPageId();
 							WebSocketTrait trait = entry.getKey().getTrait();
-							if ((pageId == null || !pageId.equals(connectionPageId)) && entry.getValue().after(renderDate)) {
+							if ((pageId == null || !pageId.equals(connectionPageId)) && entry.getValue().getTime()>renderDate.getTime()) {
 								for (WebSocketTrait each: connectionTraits) {
 									if (trait.is(each)) {
 										try {
