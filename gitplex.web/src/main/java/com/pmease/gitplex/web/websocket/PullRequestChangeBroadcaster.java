@@ -5,12 +5,12 @@ import java.util.concurrent.ExecutorService;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.wicket.request.component.IRequestablePage;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.Listen;
 import com.pmease.commons.wicket.WicketUtils;
+import com.pmease.commons.wicket.websocket.PageKey;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
 
@@ -29,12 +29,12 @@ public class PullRequestChangeBroadcaster {
 
 	private void requestToRender(PullRequestChangeTrait trait) {
 		// Send web socket message in a thread in order not to blocking UI operations
-		IRequestablePage page = WicketUtils.getPage();
+		PageKey pageKey = WicketUtils.getPageKey();
 		executorService.execute(new Runnable() {
 
 			@Override
 			public void run() {
-				WebSocketRenderBehavior.requestToRender(trait, page);
+				WebSocketRenderBehavior.requestToRender(trait, pageKey);
 			}
 			
 		});

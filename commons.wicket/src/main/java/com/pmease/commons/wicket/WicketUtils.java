@@ -1,9 +1,11 @@
 package com.pmease.commons.wicket;
 
+import org.apache.wicket.Page;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.Url;
-import org.apache.wicket.request.component.IRequestablePage;
 import org.apache.wicket.request.cycle.RequestCycle;
+
+import com.pmease.commons.wicket.websocket.PageKey;
 
 public class WicketUtils {
 	
@@ -14,10 +16,10 @@ public class WicketUtils {
 			return RequestCycle.get().getUrlRenderer().renderContextRelativeUrl(url);
 	}
 	
-	public static IRequestablePage getPage() {
+	public static PageKey getPageKey() {
 		if (RequestCycle.get() != null && RequestCycle.get().getActiveRequestHandler() instanceof IPageRequestHandler) {
 			IPageRequestHandler handler = (IPageRequestHandler) RequestCycle.get().getActiveRequestHandler();					
-			return handler.getPage();
+			return new PageKey((Page) handler.getPage());
 		} else {
 			return null;
 		}
