@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.component.comment;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +49,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
 import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.entity.support.DepotAndRevision;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
 import com.pmease.gitplex.core.manager.CodeCommentStatusChangeManager;
@@ -109,11 +111,11 @@ public abstract class CodeCommentPanel extends Panel {
 			String prevActivityMarkupId;
 			if (activitiesView.size() != 0) {
 				@SuppressWarnings("deprecation")
-				Component lastReplyContainer = activitiesView.get(activitiesView.size()-1);
-				CodeCommentReply lastReply = GitPlex.getInstance(CodeCommentReplyManager.class)
-						.load((Long) lastReplyContainer.getDefaultModelObject());
-				lastActivityDate = lastReply.getDate();
-				prevActivityMarkupId = lastReplyContainer.getMarkupId();
+				Component lastActivityContainer = activitiesView.get(activitiesView.size()-1);
+				
+				CodeCommentActivity lastActivity = ((ActivityIdentity) lastActivityContainer.getDefaultModelObject()).getActivity();
+				lastActivityDate = lastActivity.getDate();
+				prevActivityMarkupId = lastActivityContainer.getMarkupId();
 			} else {
 				lastActivityDate = getComment().getDate();
 				prevActivityMarkupId = get("comment").getMarkupId();
@@ -137,6 +139,7 @@ public abstract class CodeCommentPanel extends Panel {
 			
 			for (CodeCommentActivity activity: activities) {
 				Component newActivityContainer = newActivityContainer(activitiesView.newChildId(), activity); 
+				newActivityContainer.add(AttributeAppender.append("class", "new"));
 				activitiesView.add(newActivityContainer);
 				
 				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
@@ -145,6 +148,10 @@ public abstract class CodeCommentPanel extends Panel {
 				partialPageRequestHandler.add(newActivityContainer);
 				prevActivityMarkupId = newActivityContainer.getMarkupId();
 			}
+			
+			Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
+			if (user != null)
+				GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());
 		}
 	}
 
@@ -362,19 +369,9 @@ public abstract class CodeCommentPanel extends Panel {
 	}
 	
 	private WebMarkupContainer newActivityContainer(String componentId, CodeCommentActivity activity) {
-		Class<? extends CodeCommentActivity> activityClass = activity.getClass();
-		Long activityId = activity.getId();
-		Fragment activityContainer = new Fragment(componentId, "viewFrag", this, Model.of(activityId));
+		ActivityIdentity identity = new ActivityIdentity(activity);
+		Fragment activityContainer = new Fragment(componentId, "viewFrag", this, Model.of(identity));
 		activityContainer.setOutputMarkupId(true);
-		
-		activityContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return getComment().isVisitedAfter(getActivity(activityClass, activityId).getDate())?"":"new";
-			}
-			
-		}));
 		
 		activityContainer.add(new AvatarLink("userAvatar", activity.getUser()));
 		activityContainer.add(new AccountLink("userName", activity.getUser()));
@@ -395,12 +392,12 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getCompareContext(getComment()).equals(getActivity(activityClass, activityId).getCompareContext()));
+				setVisible(!getCompareContext(getComment()).equals(identity.getActivity().getCompareContext()));
 			}
 
 			@Override
 			public void onClick() {
-				CodeCommentActivity activity = getActivity(activityClass, activityId);
+				CodeCommentActivity activity = identity.getActivity();
 				CompareContext compareContext = activity.getCompareContext();
 				PullRequest request = getPullRequest();
 				if (request != null) {
@@ -448,7 +445,7 @@ public abstract class CodeCommentPanel extends Panel {
 					
 					@Override
 					public void setContent(String content) {
-						if (activityClass == CodeCommentReply.class) {
+						if (identity.clazz == CodeCommentReply.class) {
 							CodeCommentReply reply = (CodeCommentReply) activity;
 							reply.setContent(content);
 							GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);				
@@ -461,7 +458,7 @@ public abstract class CodeCommentPanel extends Panel {
 					
 					@Override
 					public long getVersion() {
-						return getActivity(activityClass, activityId).getVersion();
+						return identity.getActivity().getVersion();
 					}
 					
 				};
@@ -472,7 +469,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 				@Override
 				protected String load() {
-					return getActivity(activityClass, activityId).getNote();
+					return identity.getActivity().getNote();
 				}
 				
 			}, editSupport));			
@@ -489,9 +486,9 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment(activityContainer.getId(), "activityEditFrag", 
-						CodeCommentPanel.this, Model.of(activityId));
+						CodeCommentPanel.this, Model.of(identity.id));
 				Form<?> form = new Form<Void>("form");
-				CommentInput contentInput = new CommentInput("content", Model.of(getActivity(activityClass, activityId).getNote())) {
+				CommentInput contentInput = new CommentInput("content", Model.of(identity.getActivity().getNote())) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -504,7 +501,7 @@ public abstract class CodeCommentPanel extends Panel {
 					}
 					
 				};
-				contentInput.setRequired(activityClass == CodeCommentReply.class);
+				contentInput.setRequired(identity.clazz == CodeCommentReply.class);
 				form.add(contentInput);
 				
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
@@ -521,14 +518,14 @@ public abstract class CodeCommentPanel extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						WebMarkupContainer replyContainer = newActivityContainer(componentId, getActivity(activityClass, activityId));
+						WebMarkupContainer replyContainer = newActivityContainer(componentId, identity.getActivity());
 						fragment.replaceWith(replyContainer);
 						target.add(replyContainer);
 					}
 					
 				});
 				
-				long lastVersion = getActivity(activityClass, activityId).getVersion();
+				long lastVersion = identity.getActivity().getVersion();
 				form.add(new AjaxButton("save") {
 
 					@Override
@@ -542,11 +539,11 @@ public abstract class CodeCommentPanel extends Panel {
 						super.onSubmit(target, form);
 
 						try {
-							CodeCommentActivity activity = getActivity(activityClass, activityId);
+							CodeCommentActivity activity = identity.getActivity();
 							if (activity.getVersion() != lastVersion)
-								throw new StaleObjectStateException(activityClass.getName(), activity.getId());
+								throw new StaleObjectStateException("", "");
 							
-							if (activityClass == CodeCommentReply.class) {
+							if (identity.clazz == CodeCommentReply.class) {
 								CodeCommentReply reply = (CodeCommentReply) activity;
 								reply.setContent(contentInput.getModelObject());
 								GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);				
@@ -555,7 +552,7 @@ public abstract class CodeCommentPanel extends Panel {
 								statusChange.setNote(contentInput.getModelObject());
 								GitPlex.getInstance(CodeCommentStatusChangeManager.class).save(statusChange);				
 							}
-							WebMarkupContainer activityContainer = newActivityContainer(componentId, getActivity(activityClass, activityId));
+							WebMarkupContainer activityContainer = newActivityContainer(componentId, identity.getActivity());
 							fragment.replaceWith(activityContainer);
 							target.add(activityContainer);
 						} catch (StaleObjectStateException e) {
@@ -584,7 +581,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				activityContainer.remove();
-				GitPlex.getInstance(CodeCommentReplyManager.class).delete((CodeCommentReply) getActivity(activityClass, activityId));
+				GitPlex.getInstance(CodeCommentReplyManager.class).delete((CodeCommentReply) identity.getActivity());
 				String script = String.format("$('#%s').remove();", activityContainer.getMarkupId());
 				target.appendJavaScript(script);
 			}
@@ -641,7 +638,10 @@ public abstract class CodeCommentPanel extends Panel {
 		activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
 
 		for (CodeCommentActivity activity: activities) {
-			activitiesView.add(newActivityContainer(activitiesView.newChildId(), activity));				
+			Component activityContainer = newActivityContainer(activitiesView.newChildId(), activity);				
+			if (!getComment().isVisitedAfter(activity.getDate()))
+				activityContainer.add(AttributeAppender.append("class", "new"));
+			activitiesView.add(activityContainer);			
 		}
 		add(activitiesView);
 		add(newAddReplyContainer());
@@ -658,10 +658,6 @@ public abstract class CodeCommentPanel extends Panel {
 				CodeCommentPanel.class, "code-comment.css")));
 	}
 
-	private CodeCommentActivity getActivity(Class<? extends CodeCommentActivity> entityClass, Long activityId) {
-		return GitPlex.getInstance(Dao.class).load(entityClass, activityId);
-	}
-	
 	private void onAddReply(AjaxRequestTarget target, boolean changeStatus) {
 		Fragment fragment = new Fragment("addReply", "activityEditFrag", CodeCommentPanel.this);
 		Form<?> form = new Form<Void>("form");
@@ -798,4 +794,21 @@ public abstract class CodeCommentPanel extends Panel {
 	
 	@Nullable
 	protected abstract PullRequest getPullRequest();
+	
+	private static class ActivityIdentity implements Serializable {
+
+		final Class<? extends CodeCommentActivity> clazz;
+		
+		final Long id;
+		
+		ActivityIdentity(CodeCommentActivity activity) {
+			this.clazz = activity.getClass();
+			this.id = activity.getId();
+		}
+
+		CodeCommentActivity getActivity() {
+			return GitPlex.getInstance(Dao.class).load(clazz, id);
+		}
+		
+	}
 }

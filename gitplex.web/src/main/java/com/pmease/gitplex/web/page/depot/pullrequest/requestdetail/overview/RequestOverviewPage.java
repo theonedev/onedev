@@ -43,14 +43,15 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReference;
+import com.pmease.gitplex.core.entity.PullRequestReview;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.entity.PullRequestStatusChange;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
-import com.pmease.gitplex.core.entity.PullRequestReview;
-import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -193,43 +194,55 @@ public class RequestOverviewPage extends RequestDetailPage {
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
-			List<PullRequestActivity> activities = getActivities();
 
 			PullRequest request = getPullRequest();
 			@SuppressWarnings("deprecation")
 			Component prevActivityRow = activitiesView.get(activitiesView.size()-1);
 			PullRequestActivity lastActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject();
-			for (PullRequestActivity activity: activities) {
-				if (activity.getDate().getTime()>lastActivity.getDate().getTime()) {
-					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
-					Component sinceChangesRow = null;
-					if (!request.isVisitedAfter(activity.getDate())) {
-						PullRequestActivity prevActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject(); 
-						if (request.isVisitedAfter(prevActivity.getDate())) {
-							Date sinceDate = new DateTime(activity.getDate()).minusMillis(1).toDate();
-							sinceChangesRow = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
-							activitiesView.add(sinceChangesRow);
-							String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-									sinceChangesRow.getMarkupId(), prevActivityRow.getMarkupId());
-							partialPageRequestHandler.prependJavaScript(script);
-							partialPageRequestHandler.add(sinceChangesRow);
-						}
-						newActivityRow.add(AttributeAppender.append("class", "new"));
-						if (activity instanceof UpdatedActivity) {
-							partialPageRequestHandler.appendJavaScript("$('tr.since-changes').addClass('visible');");
-						}
-					}
-					activitiesView.add(newActivityRow);
-					
-					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							newActivityRow.getMarkupId(), 
-							sinceChangesRow!=null?sinceChangesRow.getMarkupId():prevActivityRow.getMarkupId());
-					partialPageRequestHandler.prependJavaScript(script);
-					partialPageRequestHandler.add(newActivityRow);
-					
-					prevActivityRow = newActivityRow;
+			List<PullRequestActivity> newActivities = new ArrayList<>();
+			for (PullRequestActivity activity: getActivities()) {
+				if (activity.getDate().getTime() > lastActivity.getDate().getTime())
+					newActivities.add(activity);
+			}
+
+			Component sinceChangesRow = null;
+			for (Component row: activitiesView) {
+				if (row.getDefaultModelObject() == null) {
+					sinceChangesRow = row;
+					break;
 				}
 			}
+
+			if (sinceChangesRow == null && !newActivities.isEmpty()) {
+				Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusMillis(1).toDate();
+				sinceChangesRow = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
+				activitiesView.add(sinceChangesRow);
+				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+						sinceChangesRow.getMarkupId(), prevActivityRow.getMarkupId());
+				partialPageRequestHandler.prependJavaScript(script);
+				partialPageRequestHandler.add(sinceChangesRow);
+				prevActivityRow = sinceChangesRow;
+			}
+			
+			for (PullRequestActivity activity: newActivities) {
+				Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
+				newActivityRow.add(AttributeAppender.append("class", "new"));
+				activitiesView.add(newActivityRow);
+				
+				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+						newActivityRow.getMarkupId(), prevActivityRow.getMarkupId());
+				partialPageRequestHandler.prependJavaScript(script);
+				partialPageRequestHandler.add(newActivityRow);
+				
+				if (activity instanceof UpdatedActivity) {
+					partialPageRequestHandler.appendJavaScript("$('tr.since-changes').addClass('visible');");
+				}
+				prevActivityRow = newActivityRow;
+			}
+			
+			Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
+			if (user != null)
+				GitPlex.getInstance(VisitInfoManager.class).visit(user, request);
 		}
 	}
 
@@ -261,30 +274,35 @@ public class RequestOverviewPage extends RequestDetailPage {
 		List<PullRequestActivity> activities = getActivities();
 
 		PullRequest request = getPullRequest();
-		Component sinceChangesRow = null;
-		boolean visible = false;
-		for (int i=0; i<activities.size(); i++) {
-			PullRequestActivity activity = activities.get(i);
-			Component row = newActivityRow(activitiesView.newChildId(), activity);
-			if (!request.isVisitedAfter(activity.getDate())) {
-				row.add(AttributeAppender.append("class", "new"));
-				if (sinceChangesRow == null) {
-					if (i != 0) {
-						Date prevActivityDate = activities.get(i-1).getDate();
-						if (request.isVisitedAfter(prevActivityDate)) {
-							Date sinceDate = new DateTime(activity.getDate()).minusMillis(1).toDate();
-							System.out.println(sinceDate.getTime());
-							sinceChangesRow = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
-							activitiesView.add(sinceChangesRow);
-						}
-					}
-				} 
+		List<PullRequestActivity> oldActivities = new ArrayList<>();
+		List<PullRequestActivity> newActivities = new ArrayList<>();
+		for (PullRequestActivity activity: activities) {
+			if (request.isVisitedAfter(activity.getDate())) {
+				oldActivities.add(activity);
+			} else {
+				newActivities.add(activity);
+			}
+		}
+
+		for (PullRequestActivity activity: oldActivities) {
+			activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
+		}
+
+		if (!oldActivities.isEmpty() && !newActivities.isEmpty()) {
+			Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusMillis(1).toDate();
+			Component row = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
+			for (PullRequestActivity activity: newActivities) {
 				if (activity instanceof UpdatedActivity) {
-					visible = true;
+					row.add(AttributeAppender.append("class", "visible"));
+					break;
 				}
 			}
-			if (sinceChangesRow != null && visible)
-				sinceChangesRow.add(AttributeAppender.append("class", "visible"));
+			activitiesView.add(row);
+		}
+		
+		for (PullRequestActivity activity: newActivities) {
+			Component row = newActivityRow(activitiesView.newChildId(), activity);
+			row.add(AttributeAppender.append("class", "new"));
 			activitiesView.add(row);
 		}
 		
