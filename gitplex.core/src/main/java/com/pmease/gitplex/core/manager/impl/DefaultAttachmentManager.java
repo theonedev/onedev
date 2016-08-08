@@ -11,6 +11,7 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityPersisted;
 import com.pmease.commons.hibernate.dao.EntityRemoved;
@@ -115,6 +116,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 
+	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {
 		if (event.isNew()) {
@@ -142,6 +144,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		}
 	}
 
+	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Depot) {

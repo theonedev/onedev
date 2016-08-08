@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
@@ -37,6 +38,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,6 +134,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final BatchWorkManager batchWorkManager;
 	
+	private final ExecutorService executorService;
+	
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 
 	@Inject
@@ -139,7 +143,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
 			NotificationManager notificationManager, MarkdownManager markdownManager, 
 			BatchWorkManager batchWorkManager, ListenerRegistry listenerRegistry,
-			UnitOfWork unitOfWork) {
+			ExecutorService executorService, UnitOfWork unitOfWork) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -147,6 +151,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		this.accountManager = accountManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
+		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -536,8 +541,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 								String requestHead = request.getLatestUpdate().getHeadCommitHash();
 								String targetHead = request.getTarget().getObjectName();
 								Depot targetDepot = request.getTargetDepot();
-								preview = new IntegrationPreview(targetHead, 
-										request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
+								preview = new IntegrationPreview(targetHead, requestHead, request.getIntegrationStrategy(), null);
 								request.setLastIntegrationPreview(preview);
 								String integrateRef = request.getIntegrateRef();
 								if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetDepot.isMergedInto(targetHead, requestHead)) {
@@ -892,19 +896,35 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	private void checkAsync(PullRequest request) {
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
-		doUnitOfWorkAfterCommitAsync(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-			        ThreadContext.bind(subject);
-					check(load(requestId));
-				} finally {
-					ThreadContext.unbindSubject();
-				}
-			}
+		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
+			doUnitOfWorkAfterCommitAsync(new Runnable() {
 	
-		});
+				@Override
+				public void run() {
+					try {
+				        ThreadContext.bind(subject);
+						check(load(requestId));
+					} finally {
+						ThreadContext.unbindSubject();
+					}
+				}
+		
+			});
+		} else {
+			executorService.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+				        ThreadContext.bind(subject);
+						check(load(requestId));
+					} finally {
+						ThreadContext.unbindSubject();
+					}
+				}
+				
+			});
+		}
 	}
 
 }

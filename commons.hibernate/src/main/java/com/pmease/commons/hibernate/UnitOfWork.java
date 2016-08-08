@@ -29,6 +29,8 @@ public interface UnitOfWork {
 
 	<T> T call(Callable<T> callable);
 	
+	void run(Runnable runnable);
+	
 	void doAsync(Runnable runnable);
 	
 	Session getSession();

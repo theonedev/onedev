@@ -106,4 +106,14 @@ public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 		});
 	}
 
+	@Override
+	public void run(Runnable runnable) {
+		begin();
+		try {
+			runnable.run();
+		} finally {
+			end();
+		}
+	}
+
 }

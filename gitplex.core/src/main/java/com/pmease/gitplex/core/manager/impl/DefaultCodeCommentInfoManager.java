@@ -23,7 +23,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.Listen;
@@ -253,7 +253,7 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager {
 		});
 	}
 
-	@Sessional
+	@Transactional
 	@Listen
 	public void on(CodeCommentCreated event) {
 		dao.doAfterCommit(new Runnable() {

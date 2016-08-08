@@ -3,6 +3,7 @@ package com.pmease.commons.hibernate.dao;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -29,14 +30,17 @@ public class DefaultDao implements Dao, Serializable {
 	
 	private final ListenerRegistry listenerRegistry;
 	
+	private final ExecutorService executorService;
+	
 	private final UnitOfWork unitOfWork;
 	
 	@Inject
 	public DefaultDao(Provider<Session> sessionProvider, UnitOfWork unitOfWork, 
-			ListenerRegistry listenerRegistry) {
+			ListenerRegistry listenerRegistry, ExecutorService executorService) {
 		this.sessionProvider = sessionProvider;
 		this.unitOfWork = unitOfWork;
 		this.listenerRegistry = listenerRegistry;
+		this.executorService = executorService;
 	}
 	
 	@Sessional
@@ -145,8 +149,27 @@ public class DefaultDao implements Dao, Serializable {
 	}
 
 	@Override
+	public void doAfterCommitAsync(Runnable runnable) {
+		doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				executorService.submit(runnable);
+			}
+			
+		});
+	}
+	
+	@Override
 	public void doUnitOfWorkAfterCommitAsync(Runnable runnable) {
-		unitOfWork.doAsync(runnable);
+		doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				unitOfWork.doAsync(runnable);
+			}
+			
+		});
 	}	
 
 }
