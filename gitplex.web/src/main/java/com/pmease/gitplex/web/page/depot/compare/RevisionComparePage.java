@@ -592,6 +592,8 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		super.onPopState(target, data);
 		
 		state = (State) data;
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+		
 		newTabPanel(target);
 		target.add(tabbable);
 	}

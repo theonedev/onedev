@@ -360,6 +360,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		super.onPopState(target, data);
 
 		state = (State) data;
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 		
 		newRevisionDiff(target);
 	}
