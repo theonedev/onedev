@@ -433,7 +433,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				GitPlex.getInstance(Dao.class).persist(getPullRequest());
-				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
+				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
 			}
 			
 		});
@@ -676,7 +676,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 						super.onAvatarRemove(target);
 						
 						target.add(reviewersContainer);
-						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
+						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
 					}
 					
 				});
@@ -703,7 +703,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				super.onSelect(target, user);
 				
 				target.add(reviewersContainer);
-				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
+				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
 			}
 			
 		});

@@ -27,10 +27,8 @@ import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.util.IProvider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.bootstrap.Bootstrap;
-import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.wicket.websocket.WebSocketMessage;
+import com.pmease.commons.wicket.websocket.WebSocketManager;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 
@@ -103,9 +101,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 					@Override
 					public void sendError(int sc, String msg) {
 						try {
-							WebSocketMessage wsMessage = new WebSocketMessage(WebSocketMessage.ERROR_MESSAGE, msg);
-							String errorMessage = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(wsMessage);
-							connection.sendMessage(errorMessage);
+							connection.sendMessage(WebSocketManager.ERROR_MESSAGE);
 						} catch (IOException e) {
 						}
 					}

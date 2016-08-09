@@ -4,6 +4,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -38,6 +39,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.websocket.WebSocketManager;
+import com.pmease.commons.wicket.websocket.WebSocketRegion;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -49,7 +52,9 @@ import com.pmease.gitplex.web.component.diff.revision.CommentSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
+import com.pmease.gitplex.web.websocket.CodeCommentChangedRegion;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
+import com.pmease.gitplex.web.websocket.PullRequestChangedRegion;
 
 @SuppressWarnings("serial")
 public class RequestChangesPage extends RequestDetailPage implements CommentSupport {
@@ -491,6 +496,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		} else {
 			state.commentId = null;
 		}
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 		pushState(target);
 	}
 
@@ -505,6 +511,16 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+	}
+
+	@Override
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		Collection<WebSocketRegion> regions = new ArrayList<>();
+		if (state.commentId != null)
+			regions.add(new CodeCommentChangedRegion(state.commentId));
+		regions.add(new PullRequestChangedRegion(getPullRequest().getId()));
+		return regions;
 	}
 
 	public static class State implements Serializable {

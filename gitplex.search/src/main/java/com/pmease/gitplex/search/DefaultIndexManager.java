@@ -19,7 +19,6 @@ import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -70,6 +69,7 @@ import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.loader.Listen;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.util.ContentDetector;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.Prioritized;
@@ -98,19 +98,19 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final SearchManager searchManager;
 	
-	private final Set<IndexListener> listeners;
-	
 	private final Extractors extractors; 
 	
 	private final UnitOfWork unitOfWork;
 	
 	private final Dao dao;
 	
+	private final ListenerRegistry listenerRegistry;
+	
 	@Inject
-	public DefaultIndexManager(Set<IndexListener> listeners, StorageManager storageManager, 
+	public DefaultIndexManager(ListenerRegistry listenerRegistry, StorageManager storageManager, 
 			BatchWorkManager batchWorkManager, Extractors extractors, 
 			UnitOfWork unitOfWork, Dao dao, SearchManager searchManager) {
-		this.listeners = listeners;
+		this.listenerRegistry = listenerRegistry;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.extractors = extractors;
@@ -157,9 +157,6 @@ public class DefaultIndexManager implements IndexManager {
 			treeWalk.setRecursive(true);
 			
 			if (searcher != null) {
-				if (getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commitId)))
-					return new IndexResult(0, 0);
-				
 				TopDocs topDocs = searcher.search(META.query(LAST_COMMIT.name()), 1);
 				if (topDocs.scoreDocs.length != 0) {
 					Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
@@ -334,26 +331,31 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Override
 	public IndexResult index(Depot depot, ObjectId commit) {
-		logger.debug("Indexing commit (repository: {}, commit: {})", depot.getFQN(), commit.getName());
 		IndexResult indexResult;
 		File indexDir = storageManager.getIndexDir(depot);
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
-					try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-						try {
-							indexResult = index(depot.getRepository(), commit, writer, searcher);
-							writer.commit();
-						} catch (Exception e) {
-							writer.rollback();
-							throw Throwables.propagate(e);
+					if (getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commit))) {
+						return new IndexResult(0, 0);
+					} else {
+						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
+							logger.debug("Indexing commit (repository: {}, commit: {})", depot.getFQN(), commit.getName());
+							try {
+								indexResult = index(depot.getRepository(), commit, writer, searcher);
+								writer.commit();
+							} catch (Exception e) {
+								writer.rollback();
+								throw Throwables.propagate(e);
+							}
 						}
 					}
 				}
 			} else {
 				try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
 					try {
+						logger.debug("Indexing commit (repository: {}, commit: {})", depot.getFQN(), commit.getName());
 						indexResult = index(depot.getRepository(), commit, writer, null);
 						writer.commit();
 					} catch (Exception e) {
@@ -365,11 +367,11 @@ public class DefaultIndexManager implements IndexManager {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
+		listenerRegistry.notify(new CommitIndexed(depot, commit.copy()));
+		
 		logger.debug("Commit indexed (repository: {}, commit: {}, checked blobs: {}, indexed blobs: {})", 
 				depot.getFQN(), commit.name(), indexResult.getChecked(), indexResult.getIndexed());
-		
-		for (IndexListener listener: listeners)
-			listener.commitIndexed(depot, commit);
 		
 		return indexResult;
 	}

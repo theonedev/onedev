@@ -65,9 +65,7 @@ import org.apache.wicket.util.string.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.wicket.websocket.WebSocketMessage;
+import com.pmease.commons.wicket.websocket.WebSocketManager;
 
 /**
  * The base implementation of IWebSocketProcessor. Provides the common logic
@@ -251,9 +249,7 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 			catch (Exception x)
 			{
 				try {
-					WebSocketMessage wsMessage = new WebSocketMessage(WebSocketMessage.ERROR_MESSAGE, x.getMessage());
-					String errorMessage = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(wsMessage);
-					connection.sendMessage(errorMessage);
+					connection.sendMessage(WebSocketManager.ERROR_MESSAGE);
 				} catch (IOException e1) {
 				}
 				LOG.error("An error occurred during processing of a WebSocket message", x);
@@ -364,7 +360,7 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 		return payload;
 	}
 
-	private IKey getRegistryKey()
+	protected IKey getRegistryKey()
 	{
 		IKey key;
 		if (Strings.isEmpty(resourceName))

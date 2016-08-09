@@ -21,8 +21,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -42,6 +40,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -79,6 +78,7 @@ import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -102,7 +102,6 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.util.DateUtils;
-import com.pmease.gitplex.web.websocket.CodeCommentChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -268,17 +267,17 @@ public class SourceViewPanel extends BlobViewPanel {
 				response.render(OnDomReadyHeaderItem.forScript("gitplex.sourceview.initComment();"));
 			}
 
+		};
+		
+		commentContainer.add(new WebSocketRenderBehavior() {
+			
 			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				if (event.getPayload() instanceof CodeCommentChanged) {
-					CodeCommentChanged codeCommentChanged = (CodeCommentChanged) event.getPayload();
-					IPartialPageRequestHandler partialPageRequestHandler = codeCommentChanged.getPartialPageRequestHandler();
-					partialPageRequestHandler.add(get("head").get("toggleResolve"));
-				}				
+			protected void onRender(WebSocketRequestHandler handler) {
+				if (commentContainer.isVisible())
+					handler.add(commentContainer.get("head").get("toggleResolve"));
 			}
 			
-		};
+		});
 		
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);

@@ -27,6 +27,14 @@ public class PageKey {
 		this.pageId = new PageIdKey(page.getPageId());
 	}
 	
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public IKey getPageId() {
+		return pageId;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof PageKey))

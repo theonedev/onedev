@@ -14,6 +14,7 @@ import static com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.PullRe
 import static com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.PullRequestOperation.RESTORE_SOURCE_BRANCH;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -44,6 +46,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.visit.IVisit;
@@ -52,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.DropdownLink;
@@ -60,6 +64,8 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.commons.wicket.websocket.WebSocketRegion;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -86,8 +92,8 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.util.DateUtils;
-import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
+import com.pmease.gitplex.web.websocket.PullRequestChangedRegion;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -286,7 +292,14 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		add(new BackToTop("backToTop"));
 		
-		add(new PullRequestChangeRenderer(getPullRequest().getId()));
+		add(new WebSocketRenderBehavior() {
+			
+			@Override
+			protected void onRender(WebSocketRequestHandler handler) {
+				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(handler));				
+			}
+			
+		});
 	}
 	
 	private WebMarkupContainer newStatusAndBranchesContainer() {
@@ -915,6 +928,11 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		return requestModel.getObject();
 	}
 	
+	@Override
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		return Lists.newArrayList(new PullRequestChangedRegion(getPullRequest().getId()));
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

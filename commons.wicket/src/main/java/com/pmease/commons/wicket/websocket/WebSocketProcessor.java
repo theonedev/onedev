@@ -65,7 +65,10 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 
 			@Override
 			public void run() {
-				onConnect(new WebSocketConnection(session, WebSocketProcessor.this));
+				PageKey pageKey = new PageKey(getSessionId(), getRegistryKey());
+				WebSocketConnection connection = new WebSocketConnection(session, WebSocketProcessor.this, pageKey);
+				onConnect(connection);
+				AppLoader.getInstance(WebSocketManager.class).onConnect(connection);
 			}
 			
 		});

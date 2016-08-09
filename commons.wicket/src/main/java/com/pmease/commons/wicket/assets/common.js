@@ -373,10 +373,9 @@ pmease.commons = {
 	websocket: {
 		setupCallback: function() {
 			Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
-				var json = JSON.parse(message);
-				if (json.type == "RenderCallback")
+				if (message == "RenderCallback")
 					Wicket.WebSocket.send(message);
-				else if (json.type == "ErrorMessage")
+				else if (message == "ErrorMessage")
 					$("#websocket-error").show();
 			});
 		},

@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.depot.file;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +57,9 @@ import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.component.modal.ModalLink;
+import com.pmease.commons.wicket.websocket.WebSocketManager;
+import com.pmease.commons.wicket.websocket.WebSocketRegion;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
-import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -88,6 +90,8 @@ import com.pmease.gitplex.web.component.depotfile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
+import com.pmease.gitplex.web.websocket.CodeCommentChangedRegion;
+import com.pmease.gitplex.web.websocket.CommitIndexedRegion;
 
 @SuppressWarnings("serial")
 public class DepotFilePage extends DepotPage implements BlobViewContext {
@@ -142,7 +146,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private AtomicReference<String> newPathRef;	
 	
-	private final CommitIndexed trait = new CommitIndexed();
+	private ObjectId commitId;
 	
 	private transient List<QueryHit> queryHits;
 	
@@ -151,8 +155,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		if (getDepot().getDefaultBranch() == null) 
 			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
-		
-		trait.depotId = getDepot().getId();
 		
 		blobIdent.revision = params.get(PARAM_REVISION).toString();
 		blobIdent.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
@@ -164,7 +166,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		resolvedRevision = getDepot().getObjectId(blobIdent.revision);
 		
 		RevCommit commit = getDepot().getRevCommit(blobIdent.revision);
-		trait.commitId = commit.copy();
+		commitId = commit.copy();
 		
 		if (blobIdent.path != null) {
 			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
@@ -201,7 +203,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 						null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 				try {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					queryHits = searchManager.search(depotModel.getObject(), trait.commitId, query);
+					queryHits = searchManager.search(depotModel.getObject(), commitId, query);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}								
@@ -312,8 +314,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				super.onConfigure();
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
-				if (!indexManager.isIndexed(getDepot(), trait.commitId)) {
-					GitPlex.getInstance(IndexManager.class).asyncIndex(getDepot(), trait.commitId);
+				if (!indexManager.isIndexed(getDepot(), commitId)) {
+					GitPlex.getInstance(IndexManager.class).asyncIndex(getDepot(), commitId);
 					setVisible(true);
 				} else {
 					setVisible(false);
@@ -332,12 +334,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		add(new WebSocketRenderBehavior() {
 			
 			@Override
-			protected WebSocketTrait getTrait() {
-				return trait;
-			}
-
-			@Override
-			protected void onRender(WebSocketRequestHandler handler, WebSocketTrait trait) {
+			protected void onRender(WebSocketRequestHandler handler) {
 				handler.add(revisionIndexing);
 				resizeWindow(handler);
 			}
@@ -640,6 +637,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		mark = state.mark;
 		mode = state.mode;
 		commentId = state.commentId;
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 	}
 	
 	private void onSelect(AjaxRequestTarget target, String revision) {
@@ -699,7 +697,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			newSearchResult(target, null);
 		
 		setState(state);
-		trait.commitId = getDepot().getRevCommit(blobIdent.revision).getId();
+		commitId = getDepot().getRevCommit(blobIdent.revision).copy();
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 
 		newRevisionPicker(target);
 		
@@ -792,22 +791,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		setResponsePage(DepotFilePage.class, paramsOf(depot));
 	}
 	
-	static class CommitIndexed implements WebSocketTrait {
-
-		Long depotId;
-		
-		volatile ObjectId commitId;
-		
-		@Override
-		public boolean is(WebSocketTrait trait) {
-			if (trait == null || !(trait instanceof CommitIndexed))  
-				return false;  
-			CommitIndexed other = (CommitIndexed) trait;  
-		    return Objects.equal(depotId, other.depotId) && Objects.equal(commitId, other.commitId);
-		}
-		
-	}
-	
 	@Override
 	public BlobIdent getBlobIdent() {
 		return blobIdent;
@@ -862,6 +845,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			
 			mode = null;
 			commentId = null;
+			GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 			
 			newFileNavigator(target);
 			newContributionPanel(target);
@@ -917,12 +901,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		} else {
 			commentId = null;
 		}
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 		pushState(target);
 	}
 
 	@Override
 	public void onAddComment(AjaxRequestTarget target, TextRange mark) {
 		commentId = null;
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 		this.mark = mark;
 		pushState(target);
 	}
@@ -952,6 +938,15 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			}
 		}
 		return new ArrayList<>();
+	}
+
+	@Override
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		List<WebSocketRegion> regions = new ArrayList<>();
+		if (commentId != null)
+			regions.add(new CodeCommentChangedRegion(commentId));
+		regions.add(new CommitIndexedRegion(getDepot().getId(), commitId));
+		return regions;
 	}
 
 	public static class State implements Serializable {

@@ -34,16 +34,19 @@ public class WebSocketConnection extends AbstractWebSocketConnection
 {
 	private final Session session;
 
+	private final PageKey pageKey;
+	
 	/**
 	 * Constructor.
 	 *
 	 * @param session
 	 *            the jetty websocket connection
 	 */
-	public WebSocketConnection(Session session, AbstractWebSocketProcessor webSocketProcessor)
+	public WebSocketConnection(Session session, AbstractWebSocketProcessor webSocketProcessor, PageKey pageKey)
 	{
 		super(webSocketProcessor);
 		this.session = Args.notNull(session, "connection");
+		this.pageKey = pageKey;
 	}
 
 	@Override
@@ -59,6 +62,10 @@ public class WebSocketConnection extends AbstractWebSocketConnection
 		{
 			session.close(code, reason);
 		}
+	}
+
+	public PageKey getPageKey() {
+		return pageKey;
 	}
 
 	@Override

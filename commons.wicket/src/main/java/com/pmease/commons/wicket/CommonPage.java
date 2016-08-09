@@ -3,6 +3,8 @@ package com.pmease.commons.wicket;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
@@ -29,7 +31,8 @@ import org.apache.wicket.util.time.Duration;
 import org.eclipse.jetty.server.SessionManager;
 
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
+import com.pmease.commons.wicket.websocket.WebSocketManager;
+import com.pmease.commons.wicket.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public abstract class CommonPage extends WebPage {
@@ -99,7 +102,7 @@ public abstract class CommonPage extends WebPage {
 	
 	@Override
 	protected void onBeforeRender() {
-		WebSocketRenderBehavior.onPageRender(getSession().getId(), getPageId());
+		AppLoader.getInstance(WebSocketManager.class).onRenderPage(this);
 		rootComponents.removeAll();
 		super.onBeforeRender();
 	}
@@ -124,4 +127,15 @@ public abstract class CommonPage extends WebPage {
 		return rootComponents;
 	}
 
+	@Override
+	protected void onAfterRender() {
+		if (getWebSocketRegions() != null)
+			AppLoader.getInstance(WebSocketManager.class).onRegionChange(this);
+		super.onAfterRender();
+	}
+
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		return new ArrayList<>();
+	}
+	
 }

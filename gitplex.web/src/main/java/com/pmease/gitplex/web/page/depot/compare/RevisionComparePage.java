@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -41,6 +42,8 @@ import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.commons.wicket.websocket.WebSocketManager;
+import com.pmease.commons.wicket.websocket.WebSocketRegion;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -60,6 +63,7 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
+import com.pmease.gitplex.web.websocket.CodeCommentChangedRegion;
 
 @SuppressWarnings("serial")
 public class RevisionComparePage extends DepotPage implements CommentSupport {
@@ -701,6 +705,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			state.commentId = null;
 		}
 		pushState(target);
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 	}
 
 	@Override
@@ -714,6 +719,15 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+	}
+
+	@Override
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		Collection<WebSocketRegion> regions = new ArrayList<>();
+		if (state.commentId != null)
+			regions.add(new CodeCommentChangedRegion(state.commentId));
+		return regions;
 	}
 	
 }

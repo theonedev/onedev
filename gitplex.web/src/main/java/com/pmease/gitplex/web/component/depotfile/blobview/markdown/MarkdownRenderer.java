@@ -11,6 +11,13 @@ public class MarkdownRenderer implements BlobRenderer {
 
 	@Override
 	public BlobViewPanel render(String panelId, BlobViewContext context) {
+		if (context == null || context.getDepot() == null) {
+			if (context == null)
+				System.out.println("context is null");
+			else if (context.getDepot() == null)
+				System.out.println("context.getDepot() is null");
+			System.out.println(Thread.currentThread());
+		}
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		if (context.getBlobIdent().isFile() 
 				&& blob.getText() != null 

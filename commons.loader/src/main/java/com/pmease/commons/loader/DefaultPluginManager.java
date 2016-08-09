@@ -28,7 +28,7 @@ public class DefaultPluginManager implements PluginManager {
 	 * @param plugins
 	 */
 	@Inject
-	public DefaultPluginManager(final Set<Plugin> plugins, final ExecutorService executorService) {
+	public DefaultPluginManager(Set<Plugin> plugins, ExecutorService executorService) {
 		for (Plugin plugin: plugins)
 			pluginMap.put(plugin.getId(), plugin);
 		

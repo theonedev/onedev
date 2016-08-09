@@ -14,11 +14,12 @@ import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.commons.markdown.extensionpoint.MarkdownExtension;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
+import com.pmease.commons.wicket.websocket.DefaultWebSocketManager;
+import com.pmease.commons.wicket.websocket.WebSocketManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 import com.pmease.gitplex.core.util.validation.DepotNameReservation;
 import com.pmease.gitplex.core.util.validation.TeamNameReservation;
-import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
 import com.pmease.gitplex.web.component.comment.MentionTransformer;
@@ -26,8 +27,8 @@ import com.pmease.gitplex.web.component.comment.PullRequestTransformer;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.component.diff.DiffRenderer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
-import com.pmease.gitplex.web.page.depot.file.IndexChangeBroadcaster;
 import com.pmease.gitplex.web.websocket.CodeCommentChangeBroadcaster;
+import com.pmease.gitplex.web.websocket.CommitIndexedBroadcaster;
 import com.pmease.gitplex.web.websocket.PullRequestChangeBroadcaster;
 
 /**
@@ -45,6 +46,7 @@ public class WebModule extends AbstractPluginModule {
 		bind(WebApplication.class).to(WicketConfig.class);
 		bind(Application.class).to(WicketConfig.class);
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
+		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
 		contribute(ServletConfigurator.class, WebServletConfigurator.class);
 		contribute(AccountNameReservation.class, WebAccountNameReservation.class);
@@ -53,7 +55,7 @@ public class WebModule extends AbstractPluginModule {
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
-		contribute(IndexListener.class, IndexChangeBroadcaster.class);
+		bind(CommitIndexedBroadcaster.class);
 		
 		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
 		contributeFromPackage(BlobRenderer.class, BlobRenderer.class);

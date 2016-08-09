@@ -9,7 +9,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 
-public interface SearchManager extends IndexListener {
+public interface SearchManager {
 
 	/**
 	 * Search specified repository with specified revision and query.

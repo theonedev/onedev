@@ -38,7 +38,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 
 @Singleton
-public class DefaultSearchManager implements SearchManager, IndexListener {
+public class DefaultSearchManager implements SearchManager {
 
 	private final StorageManager storageManager;
 	
@@ -141,10 +141,10 @@ public class DefaultSearchManager implements SearchManager, IndexListener {
 		return hits;
 	}
 
-	@Override
-	public void commitIndexed(Depot depot, ObjectId commit) {
+	@Listen
+	public void on(CommitIndexed event) {
 		try {
-			getSearcherManager(depot).maybeRefresh();
+			getSearcherManager(event.getDepot()).maybeRefresh();
 		} catch (InterruptedException | IOException e) {
 			Throwables.propagate(e);
 		}

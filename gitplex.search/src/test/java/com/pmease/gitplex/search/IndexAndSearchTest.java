@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -27,6 +26,7 @@ import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.lang.extractors.java.JavaExtractor;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Range;
 import com.pmease.gitplex.core.entity.Account;
@@ -93,9 +93,18 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		
 		searchManager = new DefaultSearchManager(storageManager);
 		
-		indexManager = new DefaultIndexManager(Sets.<IndexListener>newHashSet(searchManager), 
-				storageManager, mock(BatchWorkManager.class), extractors, mock(UnitOfWork.class), 
-				mock(Dao.class), searchManager);
+		ListenerRegistry listenerRegistry = new ListenerRegistry() {
+			
+			@Override
+			public void notify(Object event) {
+				searchManager.on((CommitIndexed) event);
+			}
+			
+		};
+		
+		indexManager = new DefaultIndexManager(listenerRegistry, storageManager, 
+				mock(BatchWorkManager.class), extractors, 
+				mock(UnitOfWork.class), mock(Dao.class), searchManager);
 	}
 
 	@Test

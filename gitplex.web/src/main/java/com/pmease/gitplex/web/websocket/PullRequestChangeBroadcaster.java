@@ -11,7 +11,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.Listen;
 import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.websocket.PageKey;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
+import com.pmease.commons.wicket.websocket.WebSocketManager;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
 
 @Singleton
@@ -21,20 +21,24 @@ public class PullRequestChangeBroadcaster {
 	
 	private final ExecutorService executorService;
 	
+	private final WebSocketManager webSocketManager;
+	
 	@Inject
-	public PullRequestChangeBroadcaster(Dao dao, ExecutorService executorService) {
+	public PullRequestChangeBroadcaster(Dao dao, WebSocketManager webSocketManager, 
+			ExecutorService executorService) {
 		this.dao = dao;
 		this.executorService = executorService;
+		this.webSocketManager = webSocketManager;
 	}
 
-	private void requestToRender(PullRequestChangeTrait trait) {
+	private void requestToRender(PullRequestChangedRegion region) {
 		// Send web socket message in a thread in order not to blocking UI operations
 		PageKey pageKey = WicketUtils.getPageKey();
 		executorService.execute(new Runnable() {
 
 			@Override
 			public void run() {
-				WebSocketRenderBehavior.requestToRender(trait, pageKey);
+				webSocketManager.requestToRender(region, pageKey, null);
 			}
 			
 		});
@@ -42,9 +46,8 @@ public class PullRequestChangeBroadcaster {
 	
 	@Listen
 	public void on(PullRequestChangeEvent event) {
-		PullRequestChangeTrait trait = new PullRequestChangeTrait();
-		trait.requestId = event.getRequest().getId();
-		
+		PullRequestChangedRegion region = new PullRequestChangedRegion(event.getRequest().getId());
+			
 		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
 			/*
 			 * Make sure that pull request and associated objects are committed before
@@ -56,12 +59,12 @@ public class PullRequestChangeBroadcaster {
 	
 				@Override
 				public void run() {
-					requestToRender(trait);
+					requestToRender(region);
 				}
 				
 			});
 		} else {
-			requestToRender(trait);
+			requestToRender(region);
 		}
 	}
 

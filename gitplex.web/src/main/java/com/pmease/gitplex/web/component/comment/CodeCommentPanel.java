@@ -14,8 +14,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -29,6 +27,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.hibernate.StaleObjectStateException;
@@ -39,6 +38,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.markdown.MarkdownEditSupport;
 import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
@@ -60,8 +60,6 @@ import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.DateUtils;
-import com.pmease.gitplex.web.websocket.CodeCommentChangeRenderer;
-import com.pmease.gitplex.web.websocket.CodeCommentChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -97,62 +95,6 @@ public abstract class CodeCommentPanel extends Panel {
 		Account user = SecurityUtils.getAccount();
 		if (user != null) 
 			GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());
-	}
-
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (event.getPayload() instanceof CodeCommentChanged) {
-			CodeCommentChanged codeCommentChanged = (CodeCommentChanged) event.getPayload();
-			IPartialPageRequestHandler partialPageRequestHandler = codeCommentChanged.getPartialPageRequestHandler();
-
-			Date lastActivityDate;
-			String prevActivityMarkupId;
-			if (activitiesView.size() != 0) {
-				@SuppressWarnings("deprecation")
-				Component lastActivityContainer = activitiesView.get(activitiesView.size()-1);
-				
-				CodeCommentActivity lastActivity = ((ActivityIdentity) lastActivityContainer.getDefaultModelObject()).getActivity();
-				lastActivityDate = lastActivity.getDate();
-				prevActivityMarkupId = lastActivityContainer.getMarkupId();
-			} else {
-				lastActivityDate = getComment().getDate();
-				prevActivityMarkupId = get("comment").getMarkupId();
-			}
-			
-			PullRequest request = getPullRequest();
-			List<CodeCommentActivity> activities = new ArrayList<>();
-			for (CodeCommentReply reply: getComment().getReplies()) {
-				if (reply.getDate().getTime()>lastActivityDate.getTime() 
-						&& (request == null || request.getRequestComparingInfo(reply.getComparingInfo()) != null)) {
-					activities.add(reply);
-				}
-			}
-			for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
-				if (statusChange.getDate().getTime()>lastActivityDate.getTime() 
-						&& (request == null || request.getRequestComparingInfo(statusChange.getComparingInfo()) != null)) {
-					activities.add(statusChange);
-				}
-			}
-			activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
-			
-			for (CodeCommentActivity activity: activities) {
-				Component newActivityContainer = newActivityContainer(activitiesView.newChildId(), activity); 
-				newActivityContainer.add(AttributeAppender.append("class", "new"));
-				activitiesView.add(newActivityContainer);
-				
-				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-						newActivityContainer.getMarkupId(), prevActivityMarkupId);
-				partialPageRequestHandler.prependJavaScript(script);
-				partialPageRequestHandler.add(newActivityContainer);
-				prevActivityMarkupId = newActivityContainer.getMarkupId();
-			}
-			
-			Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
-			if (user != null)
-				GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());
-		}
 	}
 
 	private WebMarkupContainer newCommentContainer() {
@@ -648,7 +590,58 @@ public abstract class CodeCommentPanel extends Panel {
 		
 		setOutputMarkupId(true);
 		
-		add(new CodeCommentChangeRenderer(getComment().getId()));
+		add(new WebSocketRenderBehavior() {
+
+			@Override
+			protected void onRender(WebSocketRequestHandler handler) {
+				Date lastActivityDate;
+				String prevActivityMarkupId;
+				if (activitiesView.size() != 0) {
+					@SuppressWarnings("deprecation")
+					Component lastActivityContainer = activitiesView.get(activitiesView.size()-1);
+					
+					CodeCommentActivity lastActivity = ((ActivityIdentity) lastActivityContainer.getDefaultModelObject()).getActivity();
+					lastActivityDate = lastActivity.getDate();
+					prevActivityMarkupId = lastActivityContainer.getMarkupId();
+				} else {
+					lastActivityDate = getComment().getDate();
+					prevActivityMarkupId = get("comment").getMarkupId();
+				}
+				
+				PullRequest request = getPullRequest();
+				List<CodeCommentActivity> activities = new ArrayList<>();
+				for (CodeCommentReply reply: getComment().getReplies()) {
+					if (reply.getDate().getTime()>lastActivityDate.getTime() 
+							&& (request == null || request.getRequestComparingInfo(reply.getComparingInfo()) != null)) {
+						activities.add(reply);
+					}
+				}
+				for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
+					if (statusChange.getDate().getTime()>lastActivityDate.getTime() 
+							&& (request == null || request.getRequestComparingInfo(statusChange.getComparingInfo()) != null)) {
+						activities.add(statusChange);
+					}
+				}
+				activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
+				
+				for (CodeCommentActivity activity: activities) {
+					Component newActivityContainer = newActivityContainer(activitiesView.newChildId(), activity); 
+					newActivityContainer.add(AttributeAppender.append("class", "new"));
+					activitiesView.add(newActivityContainer);
+					
+					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+							newActivityContainer.getMarkupId(), prevActivityMarkupId);
+					handler.prependJavaScript(script);
+					handler.add(newActivityContainer);
+					prevActivityMarkupId = newActivityContainer.getMarkupId();
+				}
+				
+				Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
+				if (user != null)
+					GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());				
+			}
+			
+		});
 	}
 
 	@Override
