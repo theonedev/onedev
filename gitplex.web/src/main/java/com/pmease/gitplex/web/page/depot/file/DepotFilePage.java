@@ -66,6 +66,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.SearchManager;
@@ -315,7 +316,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				if (!indexManager.isIndexed(getDepot(), commitId)) {
-					GitPlex.getInstance(IndexManager.class).asyncIndex(getDepot(), commitId);
+					GitPlex.getInstance(IndexManager.class).indexAsync(getDepot(), commitId);
 					setVisible(true);
 				} else {
 					setVisible(false);
@@ -484,15 +485,18 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
 					
 					Subject subject = SecurityUtils.getSubject();
+					
+					Long depotId = depot.getId();
 					GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
 						@Override
 						public void run() {
 							ThreadContext.bind(subject);
 							try {
-								Depot depot = getDepot();
-								depot.cacheObjectId(branch, newCommit);
-								GitPlex.getInstance(ListenerRegistry.class).notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+								Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
+								depot.cacheObjectId(branch, newCommit.copy());
+								RefUpdated event = new RefUpdated(depot, refName, oldCommit.copy(), newCommit.copy());
+								GitPlex.getInstance(ListenerRegistry.class).notify(event);
 							} finally {
 								ThreadContext.unbindSubject();
 							}
@@ -556,6 +560,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							}
 						}
 
+						Long depotId = depot.getId();
 						Subject subject = SecurityUtils.getSubject();
 						GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
@@ -563,9 +568,10 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							public void run() {
 								ThreadContext.bind(subject);
 								try {
-									Depot depot = getDepot();
-									depot.cacheObjectId(branch, newCommit);
-									GitPlex.getInstance(ListenerRegistry.class).notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+									Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
+									depot.cacheObjectId(branch, newCommit.copy());
+									RefUpdated event = new RefUpdated(depot, refName, oldCommit.copy(), newCommit.copy());
+									GitPlex.getInstance(ListenerRegistry.class).notify(event);
 								} finally {
 									ThreadContext.unbindSubject();
 								}

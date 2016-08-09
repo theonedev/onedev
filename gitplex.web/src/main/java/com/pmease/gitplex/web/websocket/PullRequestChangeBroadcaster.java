@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.websocket;
 
-import java.util.concurrent.ExecutorService;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -19,34 +17,18 @@ public class PullRequestChangeBroadcaster {
 	
 	private final Dao dao;
 	
-	private final ExecutorService executorService;
-	
 	private final WebSocketManager webSocketManager;
 	
 	@Inject
-	public PullRequestChangeBroadcaster(Dao dao, WebSocketManager webSocketManager, 
-			ExecutorService executorService) {
+	public PullRequestChangeBroadcaster(Dao dao, WebSocketManager webSocketManager) {
 		this.dao = dao;
-		this.executorService = executorService;
 		this.webSocketManager = webSocketManager;
 	}
 
-	private void requestToRender(PullRequestChangedRegion region) {
-		// Send web socket message in a thread in order not to blocking UI operations
-		PageKey pageKey = WicketUtils.getPageKey();
-		executorService.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				webSocketManager.requestToRender(region, pageKey, null);
-			}
-			
-		});
-	}
-	
 	@Listen
 	public void on(PullRequestChangeEvent event) {
 		PullRequestChangedRegion region = new PullRequestChangedRegion(event.getRequest().getId());
+		PageKey sourcePageKey = WicketUtils.getPageKey();
 			
 		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
 			/*
@@ -59,13 +41,14 @@ public class PullRequestChangeBroadcaster {
 	
 				@Override
 				public void run() {
-					requestToRender(region);
+					webSocketManager.render(region, sourcePageKey);
 				}
 				
 			});
 		} else {
-			requestToRender(region);
+			webSocketManager.render(region, sourcePageKey);
 		}
+		
 	}
 
 }

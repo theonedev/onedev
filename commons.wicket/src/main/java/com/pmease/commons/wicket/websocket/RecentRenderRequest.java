@@ -8,15 +8,11 @@ public class RecentRenderRequest {
 	
 	private final PageKey sourcePageKey;
 	
-	private final PageKey targetPageKey;
-	
 	private final Date date;
 	
-	public RecentRenderRequest(WebSocketRegion region, 
-			PageKey sourcePageKey, PageKey targetPageKey, Date date) {
+	public RecentRenderRequest(WebSocketRegion region, PageKey sourcePageKey, Date date) {
 		this.region = region;
 		this.sourcePageKey = sourcePageKey;
-		this.targetPageKey = targetPageKey;
 		this.date = date;
 	}
 
@@ -26,10 +22,6 @@ public class RecentRenderRequest {
 
 	public PageKey getSourcePageKey() {
 		return sourcePageKey;
-	}
-
-	public PageKey getTargetPageKey() {
-		return targetPageKey;
 	}
 
 	public Date getDate() {

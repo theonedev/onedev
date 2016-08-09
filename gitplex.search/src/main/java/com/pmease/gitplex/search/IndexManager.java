@@ -9,7 +9,7 @@ public interface IndexManager {
 	
 	IndexResult index(Depot depot, ObjectId commit);
 	
-	void asyncIndex(Depot depot, ObjectId commit);
+	void indexAsync(Depot depot, ObjectId commit);
 	
 	boolean isIndexed(Depot depot, ObjectId commit);
 	

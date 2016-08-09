@@ -74,27 +74,30 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	}
 
 	@Override
-	public void requestToRender(WebSocketRegion region, @Nullable PageKey sourcePageKey, 
-			@Nullable PageKey targetPageKey) {
+	public void renderAsync(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
+		executorService.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				render(region, sourcePageKey);
+			}
+			
+		});
+	}
+	
+	@Override
+	public void render(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
 		try {
-			if (targetPageKey != null) {
-				WebSocketConnection connection = (WebSocketConnection) connectionRegistry.getConnection(
-						application, targetPageKey.getSessionId(), targetPageKey.getPageId());
-				if (connection != null && connection.isOpen() && containsRegion(connection, region)) {
+			for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
+				PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
+				if (connection.isOpen() 
+						&& (sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
+						&& containsRegion(connection, region)) {
 					connection.sendMessage(RENDER_CALLBACK);
-				}
-			} else {
-				for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
-					PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
-					if (connection.isOpen() 
-							&& (sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
-							&& containsRegion(connection, region)) {
-						connection.sendMessage(RENDER_CALLBACK);
-					}
 				}
 			}
 			
-			recentRenderRequests.add(new RecentRenderRequest(region, sourcePageKey, targetPageKey, new Date()));
+			recentRenderRequests.add(new RecentRenderRequest(region, sourcePageKey, new Date()));
 		} catch (Exception e) {
 			logger.error("Error sending websocket message", e);
 		}
@@ -136,12 +139,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 				if (request.getDate().getTime() > renderDate.getTime() 
 						&& containsRegion(connection, region)) {
 					PageKey sourcePageKey = request.getSourcePageKey();
-					PageKey targetPageKey = request.getTargetPageKey();
-					if (targetPageKey != null) {
-						if (connectionPageKey.equals(targetPageKey)) {
-							messagesToSend.add(RENDER_CALLBACK);
-						}
-					} else if (sourcePageKey == null || !sourcePageKey.equals(connectionPageKey)) {
+					if (sourcePageKey == null || !sourcePageKey.equals(connectionPageKey)) {
 						messagesToSend.add(RENDER_CALLBACK);
 					}
 				}
@@ -213,5 +211,5 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	public void stop() {
 		scheduledExecutorService.shutdown();
 	}
-	
+
 }

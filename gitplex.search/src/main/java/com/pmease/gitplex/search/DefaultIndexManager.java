@@ -422,7 +422,7 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public void asyncIndex(Depot depot, ObjectId commit) {
+	public void indexAsync(Depot depot, ObjectId commit) {
 		int priority;
 		if (RequestCycle.get() != null)
 			priority = UI_INDEXING_PRIORITY;
