@@ -53,9 +53,6 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 		
 		String sourceHead = request.getSource().getObjectName();
 
-		update.setMergeCommitHash(GitUtils.getMergeBase(request.getTargetDepot().getRepository(), 
-				request.getTarget().getObjectId(), ObjectId.fromString(update.getHeadCommitHash())).name());
-		
 		dao.persist(update);
 		
 		if (!request.getTargetDepot().equals(request.getSourceDepot())) {

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -114,9 +115,16 @@ public class PullRequestUpdate extends AbstractEntity {
 	 */
 	public List<PullRequestReview> listReviewsOnwards() {
 		List<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
-		
+		Set<Account> excludedReviewers = new HashSet<>();
+		for (PullRequestReviewInvitation invitation: getRequest().getReviewInvitations()) {
+			if (invitation.isExcluded())
+				excludedReviewers.add(invitation.getUser());
+		}
 		for (PullRequestUpdate update: getRequest().getEffectiveUpdates()) {
-			reviews.addAll(update.getReviews());
+			for (PullRequestReview review: update.getReviews()) {
+				if (!excludedReviewers.contains(review.getUser()))
+					reviews.add(review);
+			}
 			if (update.equals(this))
 				break;
 		}

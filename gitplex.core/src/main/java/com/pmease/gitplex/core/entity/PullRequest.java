@@ -5,11 +5,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -637,47 +636,42 @@ public class PullRequest extends AbstractEntity {
 		 * users already reviewed since base update should be excluded from
 		 * invitation list as their reviews are still valid
 		 */
-		for (PullRequestReview review: getReferentialUpdate().listReviewsOnwards())
+		for (PullRequestReview review: getReferentialUpdate().listReviewsOnwards()) {
 			pickList.remove(review.getUser());
+		}
 
-		final Map<Account, Date> firstChoices = new HashMap<>();
-		final Map<Account, Date> secondChoices = new HashMap<>();
+		Set<Account> firstChoices = new HashSet<>();
+		Set<Account> lastChoices = new HashSet<>();
 		
 		for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
-			if (invitation.isPreferred())
-				firstChoices.put(invitation.getUser(), invitation.getDate());
+			if (!invitation.isExcluded())
+				firstChoices.add(invitation.getUser());
 			else
-				secondChoices.put(invitation.getUser(), invitation.getDate());
+				lastChoices.add(invitation.getUser());
 		}
 		
 		// submitter is not preferred
 		if (getSubmitter() != null)
-			secondChoices.put(getSubmitter(), new Date());
+			lastChoices.add(getSubmitter());
 		
-		/* Follow below rules to pick reviewers:
-		 * 1. If user is excluded previously, it will be considered last.
-		 * 2. If user is already a reviewer, it will be considered first.
-		 * 3. Otherwise pick user with least reviews.
-		 */
-		pickList.sort((user1, user2) -> {
-			if (firstChoices.containsKey(user1)) {
-				if (firstChoices.containsKey(user2)) 
-					return user1.getReviewEffort() - user2.getReviewEffort();
-				else
-					return -1;
-			} else if (firstChoices.containsKey(user2)) {
-				return 1;
-			} else if (secondChoices.containsKey(user1)) {
-				if (secondChoices.containsKey(user2)) 
-					return secondChoices.get(user1).compareTo(secondChoices.get(user2));
-				else
-					return 1;
-			} else if (secondChoices.containsKey(user2)) {
-				return -1;
-			} else {
-				return user1.getReviewEffort() - user2.getReviewEffort();
-			}
-		});
+		List<Account> firstPickList = new ArrayList<>();
+		List<Account> lastPickList = new ArrayList<>();
+		List<Account> otherPickList = new ArrayList<>();
+		for (Account user: pickList) {
+			if (firstChoices.contains(user))
+				firstPickList.add(user);
+			else if (lastChoices.contains(user))
+				lastPickList.add(user);
+			else
+				otherPickList.add(user);
+		}
+		firstPickList.sort(Comparator.comparing(Account::getReviewEffort));
+		lastPickList.sort(Comparator.comparing(Account::getReviewEffort));
+		otherPickList.sort(Comparator.comparing(Account::getReviewEffort));
+		pickList.clear();
+		pickList.addAll(firstPickList);
+		pickList.addAll(lastPickList);
+		pickList.addAll(otherPickList);
 
 		List<Account> picked;
 		if (count <= pickList.size())
@@ -690,7 +684,7 @@ public class PullRequest extends AbstractEntity {
 			for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
 				if (invitation.getUser().equals(user)) {
 					invitation.setDate(new Date());
-					invitation.setPerferred(true);
+					invitation.setExcluded(false);
 					found = true;
 				}
 			}
@@ -834,7 +828,7 @@ public class PullRequest extends AbstractEntity {
 		List<Account> reviewers = new ArrayList<>();
 		Set<Account> alreadyInvited = new HashSet<>();
 		for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
-			if (invitation.isPreferred())
+			if (!invitation.isExcluded())
 				alreadyInvited.add(invitation.getUser());
 		}
 		ObjectPermission readPerm = ObjectPermission.ofDepotRead(getTargetDepot());
@@ -844,7 +838,7 @@ public class PullRequest extends AbstractEntity {
 		}
 		return reviewers;
 	}
-
+	
 	@Nullable
 	public PullRequestWatch getWatch(Account user) {
 		for (PullRequestWatch watch: getWatches()) {

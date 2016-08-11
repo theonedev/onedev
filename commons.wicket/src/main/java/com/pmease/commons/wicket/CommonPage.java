@@ -102,7 +102,6 @@ public abstract class CommonPage extends WebPage {
 	
 	@Override
 	protected void onBeforeRender() {
-		AppLoader.getInstance(WebSocketManager.class).onRenderPage(this);
 		rootComponents.removeAll();
 		super.onBeforeRender();
 	}

@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -17,8 +18,8 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestReview;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewDeleted;
@@ -78,6 +79,18 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		criteria.createCriteria("update").add(Restrictions.eq("request", request));
 		criteria.addOrder(Order.asc("date"));
 		return findAll(criteria);
+	}
+
+	@Transactional
+	@Override
+	public void deleteAll(Account user, PullRequest request) {
+		for (Iterator<PullRequestReview> it = request.getReviews().iterator(); it.hasNext();) {
+			PullRequestReview review = it.next();
+			if (review.getUser().equals(user)) {
+				delete(review);
+				it.remove();
+			}
+		}
 	}
 
 }

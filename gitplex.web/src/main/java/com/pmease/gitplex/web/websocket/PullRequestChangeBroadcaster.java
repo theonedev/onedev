@@ -41,12 +41,12 @@ public class PullRequestChangeBroadcaster {
 	
 				@Override
 				public void run() {
-					webSocketManager.render(region, sourcePageKey);
+					webSocketManager.renderAsync(region, sourcePageKey);
 				}
 				
 			});
 		} else {
-			webSocketManager.render(region, sourcePageKey);
+			webSocketManager.renderAsync(region, sourcePageKey);
 		}
 		
 	}

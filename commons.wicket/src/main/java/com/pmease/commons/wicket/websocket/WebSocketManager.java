@@ -14,8 +14,6 @@ public interface WebSocketManager {
 	
 	void onRegionChange(CommonPage page);
 	
-	void onRenderPage(CommonPage page);
-	
 	void onDestroySession(String sessionId);
 	
 	void onConnect(WebSocketConnection connection);

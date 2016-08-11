@@ -8,11 +8,10 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;
 import com.pmease.gitplex.web.model.EntityModel;
@@ -26,7 +25,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 	private final IModel<PullRequest> requestModel;
 	
 	public ReviewerAvatar(String id, PullRequestReviewInvitation invitation) {
-		super(id, new UserModel(invitation.getUser()), "Remove reviewer");
+		super(id, new UserModel(invitation.getUser()));
 		
 		this.invitation = invitation;
 		requestModel = new EntityModel<PullRequest>(invitation.getRequest());		
@@ -37,25 +36,19 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		super.onConfigure();
 
 		PullRequest request = requestModel.getObject();
-		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
-		
-		boolean reviewEffective = false;
-		if (!request.isNew())
-			reviewEffective = request.isReviewEffective(getUser());
-		setEnabled(request.isOpen() && !reviewEffective 
-				&& (currentUser!= null && currentUser.equals(request.getSubmitter()) || SecurityUtils.canManage(request.getTargetDepot())));
+		setEnabled(request.isOpen() && SecurityUtils.canModify(request));
 	}
 
 	@Override
-	protected void onAvatarRemove(AjaxRequestTarget target) {
+	public void onClick(AjaxRequestTarget target) {
 		Date now = new Date();
 		PullRequest request = requestModel.getObject();
 		Set<Account> prevInvited = new HashSet<>();
 		for (PullRequestReviewInvitation each: request.getReviewInvitations()) {
-			if (each.isPreferred())
+			if (!each.isExcluded())
 				prevInvited.add(each.getUser());
 			if (each.getUser().equals(invitation.getUser())) {
-				each.setPerferred(false);
+				each.setExcluded(true);
 				each.setDate(new Date());
 			}
 		}
@@ -63,7 +56,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 
 		Set<Account> nowInvited = new HashSet<>();
 		for (PullRequestReviewInvitation each: request.getReviewInvitations()) {
-			if (each.isPreferred())
+			if (!each.isExcluded())
 				nowInvited.add(each.getUser());
 		}
 		
@@ -79,11 +72,9 @@ public class ReviewerAvatar extends RemoveableAvatar {
 			}
 		}
 		if (!request.isNew()) {
-			PullRequestReviewInvitationManager reviewInvitationManager = GitPlex.getInstance(PullRequestReviewInvitationManager.class);
-			for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) {
-				if (invitation.getDate().getTime()>=now.getTime())
-					reviewInvitationManager.save(invitation);
-			}
+			PullRequestReviewInvitationManager reviewInvitationManager = 
+					GitPlex.getInstance(PullRequestReviewInvitationManager.class);
+			reviewInvitationManager.update(request.getReviewInvitations(), now);
 		}
 	}
 

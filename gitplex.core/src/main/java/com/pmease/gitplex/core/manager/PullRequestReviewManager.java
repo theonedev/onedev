@@ -26,4 +26,6 @@ public interface PullRequestReviewManager extends EntityManager<PullRequestRevie
 	 */
 	List<PullRequestReview> findAll(PullRequest request);
 	
+	void deleteAll(Account user, PullRequest request);
+	
 }

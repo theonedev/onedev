@@ -158,6 +158,8 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			pullRequest.addUpdate(update);
 			update.setRequest(pullRequest);
 			update.setHeadCommitHash(source.getObjectName());
+			update.setMergeCommitHash(GitUtils.getMergeBase(target.getDepot().getRepository(), 
+					target.getObjectId(), ObjectId.fromString(update.getHeadCommitHash())).name());
 			
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);
@@ -644,8 +646,8 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 				item.add(new ReviewerAvatar("avatar", invitation) {
 					
 					@Override
-					protected void onAvatarRemove(AjaxRequestTarget target) {
-						super.onAvatarRemove(target);
+					public void onClick(AjaxRequestTarget target) {
+						super.onClick(target);
 						
 						target.add(reviewersContainer);
 					}

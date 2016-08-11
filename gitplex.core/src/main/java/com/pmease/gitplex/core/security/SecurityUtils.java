@@ -34,12 +34,12 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	public static boolean canModify(PullRequest request) {
 		Depot depot = request.getTargetDepot();
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
+		if (canManage(depot)) {
 			return true;
 		} else {
 			Account currentUser = getAccount();
-			Account submitter = request.getSubmitter();
-			return currentUser != null && currentUser.equals(submitter);
+			return currentUser != null && 
+					(currentUser.equals(request.getSubmitter()) || currentUser.equals(request.getAssignee()));
 		}
 	}
 
@@ -49,7 +49,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static boolean canModify(PullRequestReview review) {
 		Depot depot = review.getUpdate().getRequest().getTargetDepot();
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
+		if (canManage(depot)) {
 			return true;
 		} else {
 			return review.getUser().equals(getAccount());

@@ -1,80 +1,61 @@
 package com.pmease.gitplex.web.component.avatar;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.web.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
-public abstract class RemoveableAvatar extends Panel {
+public abstract class RemoveableAvatar extends AjaxLink<Account> {
 
-	private final IModel<Account> userModel;
-	
-	private final String actionName;
-	
-	public RemoveableAvatar(String id, IModel<Account> userModel, String actionName) {
-		super(id);
-		
-		this.userModel = userModel;
-		this.actionName = actionName;
+	public RemoveableAvatar(String id, IModel<Account> model) {
+		super(id, model);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		configure();
 		
-		AjaxLink<Void> link = new AjaxLink<Void>("remove") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onAvatarRemove(target);
-			}
-
-		};
-
-		link.add(new Avatar("avatar", userModel.getObject(), null));
-		link.add(new TooltipBehavior(new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				// Force nowrap here when display tooltip as otherwise user name will be wrapped inside 
-				// an element with position set to relative
-				String tooltip;
-				if (isEnabled()) {
-					if (actionName != null)
-						tooltip = actionName + " " + userModel.getObject().getDisplayName();
-					else
-						tooltip = userModel.getObject().getDisplayName();
-				} else {
-					tooltip = userModel.getObject().getDisplayName();
-				}
-				return "<span style='white-space: nowrap;'>" + StringEscapeUtils.escapeHtml4(tooltip) + "</span>";
-			}
-			
-		}));
+		Account user = getModelObject();
+		String tooltip;
+		// Force nowrap here when display tooltip as otherwise user name will be wrapped inside 
+		// an element with position set to relative
+		if (isEnabled()) {
+			tooltip = "Remove reviewer " + user.getDisplayName();
+		} else {
+			tooltip = user.getDisplayName();
+		}
+		add(new TooltipBehavior(Model.of("<span style='white-space: nowrap;'>" 
+				+ StringEscapeUtils.escapeHtml4(tooltip) + "</span>")));
+		add(AttributeAppender.append("class", "removeable-avatar"));
+		add(AttributeAppender.append("data-html", "true"));
 		
-		add(link);
+		setEscapeModelStrings(false);
 	}
 	
-	protected Account getUser() {
-		return userModel.getObject();
-	}
-	
-	protected abstract void onAvatarRemove(AjaxRequestTarget target);
-
 	@Override
-	protected void onDetach() {
-		userModel.detach();
-		
-		super.onDetach();
+	public IModel<?> getBody() {
+		String url = GitPlex.getInstance(AvatarManager.class).getAvatarUrl(getModelObject());
+		return Model.of("<img src='" + url + "' class='avatar'></img> <i class='fa fa-times'></i>");
+	}
+	
+	@Override
+	protected void onComponentTag(ComponentTag tag) {
+		super.onComponentTag(tag);
+		if (!isEnabled())
+			tag.setName("span");
 	}
 
 	@Override

@@ -22,7 +22,7 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 	
     private String userName;
 
-    @Editable(name="Select User Below")
+    @Editable(name="Select User")
     @AccountChoice
     @NotEmpty
     public String getUserName() {

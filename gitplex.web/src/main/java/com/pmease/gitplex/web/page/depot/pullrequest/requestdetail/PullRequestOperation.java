@@ -187,7 +187,7 @@ public enum PullRequestOperation {
 			return false;
 		} else {
 			for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) {
-				if (invitation.isPreferred() && invitation.getUser().equals(user))
+				if (!invitation.isExcluded() && invitation.getUser().equals(user))
 					return true;
 			}
 			return false;

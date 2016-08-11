@@ -121,7 +121,7 @@ public class DefaultPullRequestNotificationManager extends AbstractEntityManager
 		PullRequestReviewInvitation invitation = event.getInvitation();
 		PullRequest request = invitation.getRequest();
 		Account user = invitation.getUser();
-		if (!invitation.isPreferred()) {
+		if (invitation.isExcluded()) {
 			Query query = getSession().createQuery("delete from PullRequestNotification "
 					+ "where request=:request and user=:user and task=:task");
 			query.setParameter("request", request);

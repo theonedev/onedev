@@ -20,6 +20,7 @@ img.avatar {
 
 .removeable-avatar {
 	position: relative;
+	display: block;
 }
 .removeable-avatar img {
 	width: 32px !important;
@@ -31,7 +32,7 @@ img.avatar {
 	font-size: 30px; 
 	position: absolute; 
 	left: 4px; 
-	top: -6px;
+	top: 1px;
 }
 a.removeable-avatar:hover i {
 	display: inline;

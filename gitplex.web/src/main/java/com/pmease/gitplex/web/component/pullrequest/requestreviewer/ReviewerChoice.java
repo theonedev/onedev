@@ -73,7 +73,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 			}
 		}
 		if (invitation != null) {
-			invitation.setPerferred(true);
+			invitation.setExcluded(false);
 			invitation.setDate(new Date());
 		} else {
 			invitation = new PullRequestReviewInvitation();

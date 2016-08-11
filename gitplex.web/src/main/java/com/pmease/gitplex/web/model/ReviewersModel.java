@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
@@ -22,10 +23,10 @@ public class ReviewersModel extends LoadableDetachableModel<List<PullRequestRevi
 	protected List<PullRequestReviewInvitation> load() {
 		List<PullRequestReviewInvitation> invitations = new ArrayList<>();
 		for (PullRequestReviewInvitation invitation: requestModel.getObject().getReviewInvitations()) {
-			if (invitation.isPreferred())
+			if (!invitation.isExcluded())
 				invitations.add(invitation);
 		}
-		invitations.sort((invitation1, invitation2) -> invitation1.getDate().compareTo(invitation2.getDate()));
+		invitations.sort(Comparator.comparing(PullRequestReviewInvitation::getDate));
 		return invitations;
 	}
 

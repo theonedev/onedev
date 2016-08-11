@@ -58,10 +58,10 @@ import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
-import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
+import com.pmease.gitplex.web.component.pullrequest.reviewresult.ReviewResultIcon;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
@@ -645,7 +645,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 	}
 	
 	private WebMarkupContainer newReviewersContainer() {
-		final WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers") {
+		WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers") {
 
 			@Override
 			protected void onConfigure() {
@@ -653,10 +653,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 				
 				PullRequest request = getPullRequest();
 				if (request.getReviewInvitations().isEmpty()) {
-					Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 					setVisible(request.isOpen() 
 							&& !request.getPotentialReviewers().isEmpty()
-							&& (currentUser != null && currentUser.equals(request.getSubmitter()) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(request.getTarget().getDepot()))));
+							&& SecurityUtils.canModify(request));
 				} else {
 					setVisible(true);
 				}
@@ -672,8 +671,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 				item.add(new ReviewerAvatar("avatar", invitation) {
 
 					@Override
-					protected void onAvatarRemove(AjaxRequestTarget target) {
-						super.onAvatarRemove(target);
+					public void onClick(AjaxRequestTarget target) {
+						super.onClick(target);
 						
 						target.add(reviewersContainer);
 						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								

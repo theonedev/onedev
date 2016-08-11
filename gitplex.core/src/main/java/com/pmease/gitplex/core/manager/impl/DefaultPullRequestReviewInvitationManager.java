@@ -1,5 +1,8 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Collection;
+import java.util.Date;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -16,17 +19,22 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.event.pullrequest.InvitingPullRequestReview;
 import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
+import com.pmease.gitplex.core.manager.PullRequestReviewManager;
 
 @Singleton
 public class DefaultPullRequestReviewInvitationManager extends AbstractEntityManager<PullRequestReviewInvitation> 
 		implements PullRequestReviewInvitationManager {
 
+	private final PullRequestReviewManager reviewManager;
+	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultPullRequestReviewInvitationManager(Dao dao, ListenerRegistry listenerRegistry) {
+	public DefaultPullRequestReviewInvitationManager(Dao dao, PullRequestReviewManager reviewManager, 
+			ListenerRegistry listenerRegistry) {
 		super(dao);
 		
+		this.reviewManager = reviewManager;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -46,4 +54,15 @@ public class DefaultPullRequestReviewInvitationManager extends AbstractEntityMan
 		listenerRegistry.notify(new InvitingPullRequestReview(invitation));
 	}
 
+	@Transactional
+	@Override
+	public void update(Collection<PullRequestReviewInvitation> invitations, Date since) {
+		for (PullRequestReviewInvitation invitation: invitations) {
+			if (invitation.getDate().getTime()>=since.getTime()) {
+				save(invitation);
+				if (invitation.isExcluded())
+					reviewManager.deleteAll(invitation.getUser(), invitation.getRequest());
+			}
+		}
+	}
 }

@@ -35,23 +35,22 @@
 }
 #session-feedback.success {
 	background: #DFF0D8;
-	color: #3C763D;
-	border-color: #D6E9C6;
+	color: #204021;
 }
 #session-feedback.error {
 	background: #F2DEDE;
 	color: #A94442;
-	border-color: #EBCCD1;
+	border-color: #622726;
 }
 #session-feedback.warning {
 	background: #FCF8E3;
 	color: #8A6D3B;
-	border-color: #FAEBCC;
+	border-color: #815A0D;
 }
 #session-feedback.info {
 	background: #D9EDF7;
 	color: #31708F;
-	border-color: #BCE8F1;
+	border-color: #145562;
 }
 #session-feedback ul {
 	padding: 0; margin: 0;

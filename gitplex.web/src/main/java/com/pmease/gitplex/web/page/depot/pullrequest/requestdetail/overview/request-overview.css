@@ -263,15 +263,18 @@
 
 #request-detail .info>div>div {
 	border-bottom: 1px dotted #BBB; 
-	margin-bottom: 16px; 
-	padding-bottom: 16px; 
+	margin-bottom: 20px; 
 	color: #666;
 }
 #request-detail .info>div>div:last-child {
 	border-bottom: none; 
 	margin-bottom: 0; 
-	padding-bottom: 0;
 }
+#request-detail .info>div>.assignee, #request-detail .info>div>.reviewers>div,
+#request-detail .info>div>.integration-strategy, #request-detail .info>div>.watch {
+	padding-bottom: 20px; 
+}
+
 #request-detail .info .help-block {
 	margin-bottom: 0; 
 	color: #888;
@@ -300,8 +303,8 @@
 	margin-bottom: 0;
 }
 #request-detail .info .reviewers li {
-	margin-right: 20px; 
-	margin-bottom: 10px; 
+	margin-right: 16px; 
+	margin-bottom: 20px; 
 	position: relative;
 }
 #request-detail .info .reviewers li a:hover {

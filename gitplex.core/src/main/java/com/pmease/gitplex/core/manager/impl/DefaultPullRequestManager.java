@@ -459,6 +459,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestUpdate update = new PullRequestUpdate();
 			update.setRequest(request);
 			update.setHeadCommitHash(request.getSource().getObjectName());
+			update.setMergeCommitHash(GitUtils.getMergeBase(request.getTargetDepot().getRepository(), 
+					request.getTarget().getObjectId(), ObjectId.fromString(update.getHeadCommitHash())).name());
 			request.addUpdate(update);
 			pullRequestUpdateManager.save(update, notifyListeners);
 		}
@@ -476,6 +478,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			if (request.isMerged()) {
 				closeAsIntegrated(request, true, null);
 			} else {
+				Date timeBeforeCheck = new Date();
 				if (request.getStatus() == PENDING_UPDATE) {
 					listenerRegistry.notify(new PullRequestPendingUpdate(request));
 				} else if (request.getStatus() == PENDING_INTEGRATE) {
@@ -488,9 +491,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						listenerRegistry.notify(new PullRequestPendingIntegration(request));
 					}
 				} else if (request.getStatus() == PENDING_APPROVAL) {
-					Date now = new Date();
 					for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) { 
-						if (invitation.getDate().getTime()>=now.getTime())
+						if (invitation.getDate().getTime()>=timeBeforeCheck.getTime())
 							reviewInvitationManager.save(invitation);
 					}
 					listenerRegistry.notify(new PullRequestPendingApproval(request));
