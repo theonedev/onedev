@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.event.pullrequest;
 
+import java.util.Date;
+
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 
@@ -9,7 +11,7 @@ public class PullRequestUpdated extends PullRequestChangeEvent {
 	private final PullRequestUpdate update;
 	
 	public PullRequestUpdated(PullRequestUpdate update) {
-		super(update.getRequest());
+		super(update.getRequest(), null, new Date());
 		this.update = update;
 	}
 

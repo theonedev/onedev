@@ -19,7 +19,7 @@ import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.entity.EntityLocator;
-import com.pmease.gitplex.core.entity.persistlistener.ListenerLocator;
+import com.pmease.gitplex.core.entity.persistlistener.PersistListenerLocator;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.AttachmentManager;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
@@ -34,7 +34,7 @@ import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.NotificationManager;
+import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestInfoManager;
@@ -50,6 +50,7 @@ import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.manager.UserAuthorizationManager;
 import com.pmease.gitplex.core.manager.PullRequestVerificationManager;
+import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.manager.WorkExecutor;
 import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
@@ -82,6 +83,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamMembershipManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestVerificationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVisitInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultWorkExecutor;
 import com.pmease.gitplex.core.security.SecurityRealm;
@@ -174,7 +176,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestReviewManager.class).to(DefaultPullRequestReviewManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
 		bind(BranchWatchManager.class).to(DefaultBranchWatchManager.class);
-		bind(NotificationManager.class).to(DefaultPullRequestNotificationManager.class);
+		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
+		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(CommitInfoManager.class).to(DefaultCommitInfoManager.class);
 		bind(PullRequestInfoManager.class).to(DefaultPullRequestInfoManager.class);
 		bind(CodeCommentInfoManager.class).to(DefaultCodeCommentInfoManager.class);
@@ -195,7 +198,7 @@ public class CoreModule extends AbstractPluginModule {
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 		
-		contributeFromPackage(PersistListener.class, ListenerLocator.class);
+		contributeFromPackage(PersistListener.class, PersistListenerLocator.class);
 	}
 	
 	@Override

@@ -49,7 +49,6 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
 import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.entity.support.DepotAndRevision;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
 import com.pmease.gitplex.core.manager.CodeCommentStatusChangeManager;
@@ -87,14 +86,6 @@ public abstract class CodeCommentPanel extends Panel {
 
 	protected CodeComment getComment() {
 		return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-	}
-	
-	@Override
-	protected void onAfterRender() {
-		super.onAfterRender();
-		Account user = SecurityUtils.getAccount();
-		if (user != null) 
-			GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());
 	}
 
 	private WebMarkupContainer newCommentContainer() {
@@ -635,10 +626,14 @@ public abstract class CodeCommentPanel extends Panel {
 					handler.add(newActivityContainer);
 					prevActivityMarkupId = newActivityContainer.getMarkupId();
 				}
-				
-				Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
-				if (user != null)
-					GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());				
+			}
+
+			@Override
+			protected void onInitialRenderDetach() {
+				Account user = SecurityUtils.getAccount();
+				if (user != null) 
+					GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());
+				super.onInitialRenderDetach();
 			}
 			
 		});
@@ -714,6 +709,7 @@ public abstract class CodeCommentPanel extends Panel {
 					statusChange.setCompareContext(compareContext);
 					statusChange.setResolved(!comment.isResolved());
 					statusChange.setDate(date);
+					statusChange.setNote(contentInput.getModelObject());
 
 					GitPlex.getInstance(CodeCommentManager.class).changeStatus(statusChange);				
 					onStatusChanged(target, fragment, statusChange);

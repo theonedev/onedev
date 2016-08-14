@@ -112,7 +112,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 			        		GitUtils.linkRef(refUpdate, refName);
 			        	}
 			        	
-			        	listenerRegistry.notify(new RefUpdated(depot, refName, oldCommit, newCommit));
+			        	listenerRegistry.post(new RefUpdated(depot, refName, oldCommit, newCommit));
 			    		
 			        	field = field.substring(40);
 			        	if (field.length() == 0)

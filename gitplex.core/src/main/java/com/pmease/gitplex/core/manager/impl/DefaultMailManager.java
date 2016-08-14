@@ -15,10 +15,18 @@ import org.apache.commons.mail.HtmlEmail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.pmease.commons.bootstrap.Bootstrap;
+import com.pmease.commons.loader.Listen;
+import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.event.mention.AccountMentionedInCodeComment;
+import com.pmease.gitplex.core.event.mention.AccountMentionedInPullRequest;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
+import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.setting.MailSetting;
 
 @Singleton
@@ -28,22 +36,29 @@ public class DefaultMailManager implements MailManager {
 	
 	private final ConfigManager configManager;
 	
+	private final MarkdownManager markdownManager;
+
 	private final ExecutorService executorService;
 	
+	private final UrlManager urlManager;
+	
 	@Inject
-	public DefaultMailManager(ConfigManager configManager, ExecutorService executorService) {
+	public DefaultMailManager(ConfigManager configManager, ExecutorService executorService,
+			MarkdownManager markdownManager, UrlManager urlManager) {
 		this.configManager = configManager;
 		this.executorService = executorService;
+		this.markdownManager = markdownManager;
+		this.urlManager = urlManager;
 	}
 	
 	@Override
-	public void sendMail(final Collection<Account> toList, final String subject, final String body) {
+	public void sendMailAsync(Collection<Account> toList, String subject, String body) {
 		executorService.execute(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					sendMailNow(null, toList, subject, body);
+					sendMail(toList, subject, body);
 				} catch (Exception e) {
 					logger.error("Error sending email (to: " + toList + ", subject: " + subject + ")", e);
 				}		
@@ -53,7 +68,7 @@ public class DefaultMailManager implements MailManager {
 	}
 
 	@Override
-	public void sendMailNow(MailSetting mailSetting, Collection<Account> toList, String subject, String body) {
+	public void sendMail(MailSetting mailSetting, Collection<Account> toList, String subject, String body) {
 		Collection<String> toAddresses = new ArrayList<>();
 		for (Account user: toList) {
 			if (user.getEmail() != null)
@@ -75,8 +90,7 @@ public class DefaultMailManager implements MailManager {
         if (mailSetting.getTimeout() != 0)
         	email.setSocketTimeout(mailSetting.getTimeout()*1000);
         
-        if (mailSetting.isEnableStartTLS())
-        	email.setStartTLSEnabled(true);
+        email.setStartTLSEnabled(true);
         
         email.setSSLCheckServerIdentity(false);
 		
@@ -92,16 +106,12 @@ public class DefaultMailManager implements MailManager {
 		}
 		try {
 			email.setFrom(senderEmail);
-			if (mailSetting.getReplyAddress() != null)
-				email.addReplyTo(mailSetting.getReplyAddress());
-			
 			for (String address: toAddresses)
 				email.addTo(address);
 	
 			email.setHostName(mailSetting.getSmtpHost());
 			email.setSmtpPort(mailSetting.getSmtpPort());
-			email.setSslSmtpPort(String.valueOf(mailSetting.getSslSmtpPort()));
-	        email.setSSLOnConnect(mailSetting.isSmtpOverSSL());
+			email.setSslSmtpPort(String.valueOf(mailSetting.getSmtpPort()));
 	        String smtpUser = mailSetting.getSmtpUser();
 			if (smtpUser != null)
 				email.setAuthentication(smtpUser, mailSetting.getSmtpPassword());
@@ -110,11 +120,57 @@ public class DefaultMailManager implements MailManager {
 			email.setSubject(subject);
 			email.setHtmlMsg(body);
 			
-			logger.debug("Sending email (to: {}, subject: {})... " + toAddresses, subject);
+			logger.debug("Sending email (to: {}, subject: {})... ", toAddresses, subject);
 			email.send();
 		} catch (EmailException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+	@Override
+	public void sendMail(Collection<Account> toList, String subject, String body) {
+		sendMail(configManager.getMailSetting(), toList, subject, body);
+	}
+
+	@Listen
+	public void on(AccountMentionedInPullRequest event) {
+		PullRequest request = event.getRequest();
+		Account user = event.getUser();
+		String subject = String.format("You are mentioned in pull request #%d (%s)", 
+				request.getNumber(), request.getTitle());
+		String url = urlManager.urlFor(request);
+		String body = String.format("%s."
+				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
+				+ "<p style='margin: 16px 0;'>"
+				+ "For details, please visit <a href='%s'>%s</a>", 
+				subject, markdownManager.escape(event.getMarkdown()), url, url);
+		
+		sendMailAsync(Sets.newHashSet(user), subject, decorate(user, body));
+	}
+
+	@Listen
+	public void on(AccountMentionedInCodeComment event) {
+		Account user = event.getUser();
+		CodeComment comment = event.getComment();
+		String subject = String.format("You are mentioned in code comment #%d (%s)", 
+				comment.getId(), comment.getTitle());
+		String url = urlManager.urlFor(comment);
+		String body = String.format("%s."
+				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
+				+ "<p style='margin: 16px 0;'>"
+				+ "For details, please visit <a href='%s'>%s</a>", 
+				subject, markdownManager.escape(event.getMarkdown()), url, url);
+		
+		sendMailAsync(Sets.newHashSet(user), subject, decorate(user, body));
+	}
+
+	private String decorate(Account user, String body) {
+		return String.format("Dear %s, "
+				+ "<p style='margin: 16px 0;'>"
+				+ "%s"
+				+ "<p style='margin: 16px 0;'>"
+				+ "-- Sent by GitPlex", 
+				user.getDisplayName(), body);
+	}
+	
 }

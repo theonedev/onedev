@@ -2,7 +2,6 @@ package com.pmease.gitplex.core.entity.persistlistener;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,32 +14,29 @@ import org.hibernate.type.Type;
 import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReference;
-import com.pmease.gitplex.core.event.pullrequest.AccountMentioned;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.util.markdown.MentionParser;
+import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.util.markdown.PullRequestParser;
 
 @Singleton
-public class PullRequestPersistListener implements PersistListener {
+public class PullRequestReferenceGenerator implements PersistListener {
 
 	private final MarkdownManager markdownManager;
-	
-	private final ListenerRegistry listenerRegistry;
 	
 	private final Dao dao;
 	
 	private final AccountManager userManager;
 	
 	@Inject
-	public PullRequestPersistListener(MarkdownManager markdownManager, 
-			ListenerRegistry listenerRegistry, Dao dao, AccountManager userManager) {
+	public PullRequestReferenceGenerator(MarkdownManager markdownManager, 
+			Dao dao, AccountManager userManager, 
+			UrlManager urlManager) {
 		this.markdownManager = markdownManager;
-		this.listenerRegistry = listenerRegistry;
 		this.dao = dao;
 		this.userManager = userManager;
 	}
@@ -60,32 +56,46 @@ public class PullRequestPersistListener implements PersistListener {
 				if (propertyNames[i].equals("description")) {
 					String description = (String) currentState[i];
 					String prevDescription = (String) previousState[i];
-					if (!Objects.equal(description, prevDescription)) {
-						MentionParser mentionParser = new MentionParser();
-						Collection<Account> mentions;
-						String html;
-						if (description != null) {
-							html = markdownManager.parse(description);
-							mentions = mentionParser.parseMentions(html);
-						} else {
-							mentions = new HashSet<>();
-							html = null;
-						}
-						if (prevDescription != null)
-							mentions.removeAll(mentionParser.parseMentions(markdownManager.parse(prevDescription)));
-						for (Account user: mentions) {
-							listenerRegistry.notify(new AccountMentioned((PullRequest) entity, user));
-						}
-						
-						if (html != null) {
-							for (PullRequest referenced: new PullRequestParser().parseRequests(html))
-								saveReference(referenced, request);
-						}
+					if (!Objects.equal(description, prevDescription) && description != null) {
+						String html = markdownManager.parse(description);
+						for (PullRequest referenced: new PullRequestParser().parseRequests(html))
+							saveReference(referenced, request);
+					}
+					break;
+				}
+			}
+		} else if (entity instanceof PullRequestComment) {
+			PullRequestComment comment = (PullRequestComment) entity;
+			for (int i=0; i<propertyNames.length; i++) {
+				if (propertyNames[i].equals("content")) {
+					String content = (String) currentState[i];
+					String prevContent = (String) previousState[i];
+					if (!content.equals(prevContent)) {
+						String html = markdownManager.parse(content);
+						Collection<PullRequest> requests = new PullRequestParser().parseRequests(html);
+						for (PullRequest request: requests)
+							saveReference(request, comment.getRequest());
+					}
+					break;
+				}
+			}
+		} else if (entity instanceof PullRequestStatusChange) {
+			PullRequestStatusChange statusChange = (PullRequestStatusChange) entity;
+			for (int i=0; i<propertyNames.length; i++) {
+				if (propertyNames[i].equals("note")) {
+					String note = (String) currentState[i];
+					String prevNote = (String) previousState[i];
+					if (!note.equals(prevNote)) {
+						String html = markdownManager.parse(note);
+						Collection<PullRequest> requests = new PullRequestParser().parseRequests(html);
+						for (PullRequest request: requests)
+							saveReference(request, statusChange.getRequest());
 					}
 					break;
 				}
 			}
 		} 
+		
 		return false;
 	}
 
@@ -114,17 +124,40 @@ public class PullRequestPersistListener implements PersistListener {
 					String description = (String) state[i];
 					if (description != null) {
 						String html = markdownManager.parse(description);
-						Collection<Account> mentions = new MentionParser().parseMentions(html);
-						for (Account user: mentions) {
-							listenerRegistry.notify(new AccountMentioned((PullRequest) entity, user));
-						}
-						
 						for (PullRequest referenced: new PullRequestParser().parseRequests(html))
 							saveReference(referenced, request);
 					}
+					break;
+				}
+			}
+		} else if (entity instanceof PullRequestComment) {
+			PullRequestComment comment = (PullRequestComment) entity;
+			for (int i=0; i<propertyNames.length; i++) {
+				if (propertyNames[i].equals("content")) {
+					String content = (String) state[i];
+					String html = markdownManager.parse(content);
+					Collection<PullRequest> requests = new PullRequestParser().parseRequests(html);
+					for (PullRequest request: requests)
+						saveReference(request, comment.getRequest());
+					break;
+				}
+			}
+		} else if (entity instanceof PullRequestStatusChange) {
+			PullRequestStatusChange statusChange = (PullRequestStatusChange) entity;
+			for (int i=0; i<propertyNames.length; i++) {
+				if (propertyNames[i].equals("note")) {
+					String note = (String) state[i];
+					if (note != null) {
+						String html = markdownManager.parse(note);
+						Collection<PullRequest> requests = new PullRequestParser().parseRequests(html);
+						for (PullRequest request: requests)
+							saveReference(request, statusChange.getRequest());
+					}
+					break;
 				}
 			}
 		} 
+		
 		return true;
 	}
 

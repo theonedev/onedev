@@ -49,7 +49,7 @@ public class EntityDataProvider<T extends AbstractEntity> extends SortableDataPr
 
 	@Override
 	public IModel<T> model(AbstractEntity entity) {
-		final Long entityId = entity.getId();
+		Long entityId = entity.getId();
 		return new LoadableDetachableModel<T>() {
 
 			@Override

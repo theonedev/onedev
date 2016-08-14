@@ -36,6 +36,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.component.DropdownLink;
@@ -46,6 +47,7 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
 import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.web.component.diff.revision.CommentSupport;
@@ -332,6 +334,27 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		State state = new State();
 		state.oldCommit = oldCommit;
 		state.newCommit = newCommit;
+		return paramsOf(request, state);
+	}
+	
+	public static PageParameters paramsOf(PullRequest request, CodeComment comment) {
+		PullRequest.ComparingInfo comparingInfo = null;
+		for (int i=comment.getActivities().size()-1; i>=0; i--) {
+			CodeCommentActivity activity = comment.getActivities().get(i);
+			comparingInfo = request.getRequestComparingInfo(activity.getComparingInfo());
+			if (comparingInfo != null)
+				break;
+		}
+		if (comparingInfo == null) {
+			comparingInfo = Preconditions.checkNotNull(request.getRequestComparingInfo(comment.getComparingInfo()));
+		}
+		RequestChangesPage.State state = new RequestChangesPage.State();
+		state.commentId = comment.getId();
+		state.mark = comment.getCommentPos();
+		state.oldCommit = comparingInfo.getOldCommit();
+		state.newCommit = comparingInfo.getNewCommit();
+		state.pathFilter = comparingInfo.getPathFilter();
+		state.whitespaceOption = comparingInfo.getWhitespaceOption();
 		return paramsOf(request, state);
 	}
 	

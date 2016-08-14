@@ -8,7 +8,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 public class PullRequestDiscarded extends PullRequestStatusChangeEvent {
 
 	public PullRequestDiscarded(PullRequest request, Account user, String note) {
-		super(request, user, note);
+		super(request, user, request.getCloseInfo().getCloseDate(), note);
 	}
 
 }

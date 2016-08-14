@@ -9,7 +9,7 @@ public class PullRequestDisapproved extends PullRequestStatusChangeEvent {
 	private final PullRequestReview review;
 	
 	public PullRequestDisapproved(PullRequestReview review, String note) {
-		super(review.getUpdate().getRequest(), review.getUser(), note);
+		super(review.getUpdate().getRequest(), review.getUser(), review.getDate(), note);
 		this.review = review;
 	}
 

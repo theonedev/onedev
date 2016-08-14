@@ -10,6 +10,7 @@ import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 
 @Singleton
 public class DefaultPullRequestCommentManager extends AbstractEntityManager<PullRequestComment> 
@@ -17,11 +18,15 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 
 	private final ListenerRegistry listenerRegistry;
 	
+	private final PullRequestManager pullRequestManager;
+	
 	@Inject
-	public DefaultPullRequestCommentManager(Dao dao, ListenerRegistry listenerRegistry) {
+	public DefaultPullRequestCommentManager(Dao dao, PullRequestManager pullRequestManager, 
+			ListenerRegistry listenerRegistry) {
 		super(dao);
 
 		this.listenerRegistry = listenerRegistry;
+		this.pullRequestManager = pullRequestManager;
 	}
 
 	@Transactional
@@ -36,7 +41,10 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 		boolean isNew = comment.isNew();
 		dao.persist(comment);
 		if (notifyListeners && isNew) {
-			listenerRegistry.notify(new PullRequestCommented(comment));
+			PullRequestCommented event = new PullRequestCommented(comment);
+			listenerRegistry.post(event);
+			comment.getRequest().setLastEvent(event);
+			pullRequestManager.save(event.getRequest());
 		}
 	}
 

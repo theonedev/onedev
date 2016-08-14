@@ -9,11 +9,10 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
 
@@ -33,10 +32,9 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 		super.onConfigure();
 
 		PullRequest request = requestModel.getObject();
-		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 		setVisible(request.isOpen() 
 				&& !request.getPotentialReviewers().isEmpty()
-				&& (currentUser != null && currentUser.equals(request.getSubmitter()) || SecurityUtils.canManage(request.getTargetDepot())));
+				&& SecurityUtils.canModify(request));
 	}
                                                                                                                               
 	@Override
@@ -72,15 +70,14 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 				break;
 			}
 		}
-		if (invitation != null) {
-			invitation.setExcluded(false);
-			invitation.setDate(new Date());
-		} else {
+		if (invitation == null) {
 			invitation = new PullRequestReviewInvitation();
 			invitation.setRequest(request);
 			invitation.setUser(user);
 			request.getReviewInvitations().add(invitation);
 		}
+		invitation.setStatus(PullRequestReviewInvitation.Status.ADDED_MANUALLY);
+		invitation.setDate(new Date());
 		if (!request.isNew())
 			GitPlex.getInstance(PullRequestReviewInvitationManager.class).save(invitation);
 	};

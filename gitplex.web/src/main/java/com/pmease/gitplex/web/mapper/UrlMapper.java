@@ -33,6 +33,7 @@ import com.pmease.gitplex.web.page.admin.account.AccountListPage;
 import com.pmease.gitplex.web.page.admin.account.NewUserPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
+import com.pmease.gitplex.web.page.depot.comments.CodeCommentPage;
 import com.pmease.gitplex.web.page.depot.comments.DepotCommentsPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
@@ -41,7 +42,7 @@ import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.CodeCommentsPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
@@ -173,12 +174,13 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new DepotMapper(
 				"${account}/${depot}/pulls/${request}/overview", RequestOverviewPage.class));
 		add(new DepotMapper(
-				"${account}/${depot}/pulls/${request}/code-comments", CodeCommentsPage.class));
+				"${account}/${depot}/pulls/${request}/code-comments", RequestCodeCommentsPage.class));
 		add(new DepotMapper(
 				"${account}/${depot}/pulls/${request}/changes", RequestChangesPage.class));
 		add(new DepotMapper(
 				"${account}/${depot}/pulls/${request}/integration-preview", IntegrationPreviewPage.class));
 		add(new DepotMapper("${account}/${depot}/comments", DepotCommentsPage.class));
+		add(new DepotMapper("${account}/${depot}/comments/${comment}", CodeCommentPage.class));
 
 		add(new DepotMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
 		add(new DepotMapper("${account}/${depot}/settings/teams", DepotTeamListPage.class));

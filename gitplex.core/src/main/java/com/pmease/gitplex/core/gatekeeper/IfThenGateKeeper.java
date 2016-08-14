@@ -8,7 +8,7 @@ import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
@@ -46,8 +46,8 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	protected CheckResult aggregate(Checker checker) {
-		CheckResult ifResult = checker.check(getIfGate());
+	protected GateCheckResult aggregate(Checker checker) {
+		GateCheckResult ifResult = checker.check(getIfGate());
 		if (ifResult instanceof Passed) {
 			return checker.check(getThenGate());
 		} else if (ifResult instanceof Failed) {
@@ -55,7 +55,7 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 		} else if (ifResult instanceof Blocking) {
 			return ifResult;
 		} else if (ifResult instanceof Pending) {
-			CheckResult thenResult = checker.check(getThenGate());
+			GateCheckResult thenResult = checker.check(getThenGate());
 			if (thenResult instanceof Passed)
 				return thenResult;
 			else 

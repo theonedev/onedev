@@ -28,8 +28,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public abstract class Wizard extends Panel {
 
-	private static final String STEP_CONTENT_ID = "content";
-	
 	private List<? extends WizardStep> steps;
 	
 	private int activeStepIndex;
@@ -45,7 +43,7 @@ public abstract class Wizard extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		final Form<?> form = new Form<Void>("form");
+		Form<?> form = new Form<Void>("form");
 		form.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
@@ -57,13 +55,13 @@ public abstract class Wizard extends Panel {
 		}));
 		
 		form.add(new NotificationPanel("feedback", form));
-		form.add(getActiveStep().render(STEP_CONTENT_ID));
+		form.add(getActiveStep().render("content"));
 		form.add(new Link<Void>("previous") {
 
 			@Override
 			public void onClick() {
 				activeStepIndex--;
-				form.replace(getActiveStep().render(STEP_CONTENT_ID));
+				form.replace(getActiveStep().render("content"));
 			}
 
 			@Override
@@ -89,7 +87,7 @@ public abstract class Wizard extends Panel {
 				if (activeStepIndex == steps.size() - 1)
 					finished(); 
 				else
-					form.replace(getActiveStep().render(STEP_CONTENT_ID));
+					form.replace(getActiveStep().render("content"));
 			}
 			
 			@Override
@@ -106,7 +104,7 @@ public abstract class Wizard extends Panel {
 				super.onSubmit();
 				getActiveStep().complete();
 				activeStepIndex++;
-				form.replace(getActiveStep().render(STEP_CONTENT_ID));
+				form.replace(getActiveStep().render("content"));
 			}
 			
 			@Override

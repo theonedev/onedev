@@ -17,7 +17,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -106,7 +106,7 @@ abstract class CreateTagPanel extends Panel {
 					Depot depot = depotModel.getObject();
 					ObjectId commitId = depot.getRevCommit(revision);
 					Account user = Preconditions.checkNotNull(SecurityUtils.getAccount());
-					CheckResult checkResult = depot.getGateKeeper().checkPush(user, 
+					GateCheckResult checkResult = depot.getGateKeeper().checkPush(user, 
 							depot, Constants.R_TAGS + tagName, ObjectId.zeroId(), commitId);
 					if (!checkResult.isPassed()) {
 						form.error(Joiner.on(", ").join(checkResult.getReasons()));

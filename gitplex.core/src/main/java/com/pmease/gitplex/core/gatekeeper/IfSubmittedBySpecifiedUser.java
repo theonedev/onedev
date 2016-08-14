@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.annotation.AccountChoice;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.manager.AccountManager;
 
 @Editable(order=600, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
@@ -34,11 +34,11 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
     }
 
     @Override
-    public CheckResult doCheckRequest(PullRequest request) {
+    public GateCheckResult doCheckRequest(PullRequest request) {
     	return checkSubmitter(request.getSubmitter());
     }
 
-    private CheckResult checkSubmitter(Account user) {
+    private GateCheckResult checkSubmitter(Account user) {
 		Account expectedUser = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).find(userName));
         if (expectedUser.equals(user)) 
         	return passed(Lists.newArrayList("Submitted by " + expectedUser.getDisplayName()));
@@ -47,12 +47,12 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
     }
     
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return checkSubmitter(user);
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return checkSubmitter(user);
 	}
 

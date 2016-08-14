@@ -1,0 +1,15 @@
+<wicket:extend>
+	<div id="code-comment" class="well">
+		<div>
+			<i class="fa fa-hand-o-right"></i> You may open this comment in context of below pull requests
+		</div>
+		<ul>
+			<li wicket:id="requests" class="request">
+				<a wicket:id="request">
+					#<span wicket:id="number" class="number"></span> - <span wicket:id="title" class="title"></span>
+				</a>
+			</li>
+		</ul>
+		<i class="fa fa-hand-o-right"></i> <a wicket:id="link">Or open it directly without pull requests</a>
+	</div>
+</wicket:extend>

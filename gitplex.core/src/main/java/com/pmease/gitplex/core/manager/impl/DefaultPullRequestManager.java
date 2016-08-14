@@ -57,10 +57,7 @@ import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.concurrent.Prioritized;
 import com.pmease.commons.util.match.PatternMatcher;
-import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.CodeCommentRelation;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
@@ -70,19 +67,11 @@ import com.pmease.gitplex.core.entity.support.CloseInfo;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
-import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.event.RefUpdated;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
 import com.pmease.gitplex.core.event.depot.DepotDeleted;
 import com.pmease.gitplex.core.event.pullrequest.IntegrationPreviewCalculated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestAssigned;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentReplied;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentResolved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentUnresolved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestDiscarded;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestIntegrated;
@@ -92,8 +81,6 @@ import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingIntegration;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingUpdate;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestReopened;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewDeleted;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestUpdated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationDeleted;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationFailed;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationSucceeded;
@@ -101,8 +88,8 @@ import com.pmease.gitplex.core.event.pullrequest.SourceBranchDeleted;
 import com.pmease.gitplex.core.event.pullrequest.SourceBranchRestored;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
-import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.support.BatchWorker;
@@ -141,7 +128,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
 			PullRequestReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
-			NotificationManager notificationManager, MarkdownManager markdownManager, 
+			PullRequestNotificationManager notificationManager, MarkdownManager markdownManager, 
 			BatchWorkManager batchWorkManager, ListenerRegistry listenerRegistry,
 			ExecutorService executorService, UnitOfWork unitOfWork) {
 		super(dao);
@@ -154,7 +141,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
 	}
-
+	
 	@Transactional
 	@Override
 	public void delete(PullRequest request) {
@@ -183,7 +170,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				Throwables.propagate(e);
 			}
 			request.getSourceDepot().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
-			listenerRegistry.notify(new SourceBranchRestored(request, accountManager.getCurrent(), note));
+			SourceBranchRestored event = new SourceBranchRestored(request, accountManager.getCurrent(), note); 
+			listenerRegistry.post(event);
+			request.setLastEvent(event);
+			save(request);
 		}
 	}
 
@@ -194,7 +184,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		if (request.getSource().getObjectName(false) != null) {
 			request.getSource().delete();
-			listenerRegistry.notify(new SourceBranchDeleted(request, accountManager.getCurrent(), note));
+			SourceBranchDeleted event = new SourceBranchDeleted(request, accountManager.getCurrent(), note); 
+			listenerRegistry.post(event);
+			request.setLastEvent(event);
+			save(request);
 		}
 	}
 	
@@ -208,11 +201,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			closeAsIntegrated(request, true, null);
 		} else {
 			request.setCloseInfo(null);
-			
+			PullRequestReopened event = new PullRequestReopened(request, user, note);
+			listenerRegistry.post(event);
+			request.setLastEvent(event);
 			save(request);
 			checkAsync(request);
-			
-			listenerRegistry.notify(new PullRequestReopened(request, user, note));
 		}
 	}
 
@@ -227,9 +220,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
 		
-		dao.persist(request);
-
-		listenerRegistry.notify(new PullRequestDiscarded(request, user, note));
+		PullRequestDiscarded event = new PullRequestDiscarded(request, user, note);
+		listenerRegistry.post(event);
+		request.setLastEvent(event);
+		save(request);
 	}
 	
 	@Transactional
@@ -297,7 +291,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					try {
 						PullRequest request = load(requestId);
 						request.getSourceDepot().cacheObjectId(request.getSourceRef(), newCommitId);
-						listenerRegistry.notify(new RefUpdated(
+						listenerRegistry.post(new RefUpdated(
 								request.getSourceDepot(), request.getSourceRef(), requestHeadId, newCommitId));
 					} finally {
 						ThreadContext.unbindSubject();
@@ -327,7 +321,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				try {
 					PullRequest request = load(requestId);
 					request.getTargetDepot().cacheObjectId(request.getTargetRef(), newCommitId);
-					listenerRegistry.notify(new RefUpdated(request.getTargetDepot(), targetRef, 
+					listenerRegistry.post(new RefUpdated(request.getTargetDepot(), targetRef, 
 								ObjectId.fromString(preview.getTargetHead()), newCommitId));
 				} finally {
 					ThreadContext.unbindSubject();
@@ -385,16 +379,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		for (PullRequestReviewInvitation invitation: request.getReviewInvitations())
 			reviewInvitationManager.save(invitation);
 
-		doAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(UI_PREVIEW_PRIORITY));
-			}
-			
-		});
+		checkAsync(request);
 		
-		listenerRegistry.notify(new PullRequestOpened(request));
+		listenerRegistry.post(new PullRequestOpened(request));
 	}
 
 	@Override
@@ -415,12 +402,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void changeAssignee(PullRequest request) {
-		dao.persist(request);
-		
 		if (request.isOpen()) {
 			String note = request.getAssignee().getDisplayName() + " is expected to integrate the pull request";
-			listenerRegistry.notify(new PullRequestAssigned(request, accountManager.getCurrent(), note));
+			PullRequestAssigned event = new PullRequestAssigned(request, accountManager.getCurrent(), note); 
+			listenerRegistry.post(event);
+			request.setLastEvent(event);
 		}
+		save(request);
 	}
 	
 	private void onTargetBranchUpdate(PullRequest request) {
@@ -447,11 +435,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
 		request.setCloseInfo(closeInfo);
 		
-		dao.persist(request);
-
 		if (dueToMerged)
 			note = "Source branch is already merged to target branch by some one";
-		listenerRegistry.notify(new PullRequestIntegrated(request, user, note));
+		PullRequestIntegrated event = new PullRequestIntegrated(request, user, note);
+		listenerRegistry.post(event);
+		request.setLastEvent(event);
+		save(request);
 	}
 
 	private void updateIfNecessary(PullRequest request, boolean notifyListeners) {
@@ -480,7 +469,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			} else {
 				Date timeBeforeCheck = new Date();
 				if (request.getStatus() == PENDING_UPDATE) {
-					listenerRegistry.notify(new PullRequestPendingUpdate(request));
+					listenerRegistry.post(new PullRequestPendingUpdate(request));
 				} else if (request.getStatus() == PENDING_INTEGRATE) {
 					IntegrationPreview integrationPreview = request.getIntegrationPreview();
 					if (integrationPreview != null 
@@ -488,14 +477,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							&& request.getAssignee() == null) {
 						integrate(request, "Integrated automatically by system");
 					} else {
-						listenerRegistry.notify(new PullRequestPendingIntegration(request));
+						listenerRegistry.post(new PullRequestPendingIntegration(request));
 					}
 				} else if (request.getStatus() == PENDING_APPROVAL) {
 					for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) { 
 						if (invitation.getDate().getTime()>=timeBeforeCheck.getTime())
 							reviewInvitationManager.save(invitation);
 					}
-					listenerRegistry.notify(new PullRequestPendingApproval(request));
+					listenerRegistry.post(new PullRequestPendingApproval(request));
 				}
 			}
 		}
@@ -586,7 +575,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 									integrate(request, "Integrated automatically by GitPlex");
 								}
 								
-								listenerRegistry.notify(new IntegrationPreviewCalculated(request));
+								listenerRegistry.post(new IntegrationPreviewCalculated(request));
 								logger.info("Integration preview of pull request #{} in repository '{}' is calculated.", 
 										request.getNumber(), request.getTargetDepot());						
 							}
@@ -782,74 +771,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 
 	@Listen
-	public void on(CodeCommentReplied event) {
-		CodeCommentReply reply = event.getReply();
-		for (CodeCommentRelation relation: reply.getComment().getRelations()) {
-			PullRequest request = relation.getRequest();
-			LastEvent lastEvent = new LastEvent();
-			lastEvent.setDate(reply.getDate());
-			lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommentReplied.class));
-			lastEvent.setUser(reply.getUser());
-			request.setLastEvent(lastEvent);
-			request.setLastCodeCommentEventDate(reply.getDate());
-			save(request);
-		}
-	}
-
-	@Listen
-	public void on(CodeCommentResolved event) {
-		for (CodeCommentRelation relation: event.getComment().getRelations()) {
-			PullRequest request = relation.getRequest();
-			
-			LastEvent lastEvent = new LastEvent();
-			lastEvent.setDate(new Date());
-			lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommentResolved.class));
-			lastEvent.setUser(event.getUser());
-			request.setLastEvent(lastEvent);
-			request.setLastCodeCommentEventDate(lastEvent.getDate());
-			save(request);
-		}
-	}
-
-	@Listen
-	public void on(CodeCommentUnresolved event) {
-		for (CodeCommentRelation relation: event.getComment().getRelations()) {
-			PullRequest request = relation.getRequest();
-			LastEvent lastEvent = new LastEvent();
-			lastEvent.setDate(new Date());
-			lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommentUnresolved.class));
-			lastEvent.setUser(event.getUser());
-			request.setLastEvent(lastEvent);
-			request.setLastCodeCommentEventDate(lastEvent.getDate());
-			save(request);
-		}
-	}
-	
-	@Transactional
-	@Listen
-	public void on(PullRequestUpdated event) {
-		PullRequest request = event.getRequest();
-		
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(event.getUpdate().getDate());
-		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
-		request.setLastEvent(lastEvent);
-		save(request);
-	}
-
-	@Transactional
-	@Listen
-	public void on(PullRequestCommented event) {
-		PullRequest request = event.getRequest();
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(event.getComment().getDate());
-		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
-		lastEvent.setUser(event.getComment().getUser());
-		request.setLastEvent(lastEvent);
-		save(request);
-	}
-
-	@Listen
 	public void on(PullRequestVerificationSucceeded event) {
 		checkAsync(event.getRequest());
 	}
@@ -883,17 +804,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		checkAsync(event.getRequest());
 	}
 	
-	@Transactional
-	@Listen
-	public void on(PullRequestStatusChangeEvent event) {
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(new Date());
-		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
-		lastEvent.setUser(event.getUser());
-		event.getRequest().setLastEvent(lastEvent);
-		save(event.getRequest());
-	}
-
 	@Sessional
 	private void checkAsync(PullRequest request) {
 		Long requestId = request.getId();

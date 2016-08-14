@@ -496,7 +496,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 								Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
 								depot.cacheObjectId(branch, newCommit.copy());
 								RefUpdated event = new RefUpdated(depot, refName, oldCommit.copy(), newCommit.copy());
-								GitPlex.getInstance(ListenerRegistry.class).notify(event);
+								GitPlex.getInstance(ListenerRegistry.class).post(event);
 							} finally {
 								ThreadContext.unbindSubject();
 							}
@@ -571,7 +571,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 									Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
 									depot.cacheObjectId(branch, newCommit.copy());
 									RefUpdated event = new RefUpdated(depot, refName, oldCommit.copy(), newCommit.copy());
-									GitPlex.getInstance(ListenerRegistry.class).notify(event);
+									GitPlex.getInstance(ListenerRegistry.class).post(event);
 								} finally {
 									ThreadContext.unbindSubject();
 								}
@@ -729,6 +729,16 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				new CssResourceReference(DepotFilePage.class, "depot-file.css")));
 	}
 
+	public static PageParameters paramsOf(Depot depot, CodeComment comment) {
+		DepotFilePage.State state = new DepotFilePage.State();
+		state.blobIdent.revision = comment.getCommentPos().getCommit();
+		state.blobIdent.path = comment.getCommentPos().getPath();
+		state.blobIdent.mode = FileMode.TYPE_FILE;
+		state.commentId = comment.getId();
+		state.mark = comment.getCommentPos().getRange();
+		return paramsOf(depot, state);
+	}
+	
 	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
 		if (state.blobIdent.revision != null)

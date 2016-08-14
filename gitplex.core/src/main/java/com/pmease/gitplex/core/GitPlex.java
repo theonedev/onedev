@@ -78,7 +78,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 
 		ThreadContext.bind(accountManager.getRoot().asSubject());
 		
-		listenerRegistry.notify(new SystemStarting());
+		listenerRegistry.post(new SystemStarting());
 	}
 	
 	@Sessional
@@ -86,7 +86,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	public void postStart() {
 		initStage = null;
 
-		listenerRegistry.notify(new SystemStarted());
+		listenerRegistry.post(new SystemStarted());
 		
 		ThreadContext.unbindSubject();
 		
@@ -149,13 +149,13 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Override
 	public void preStop() {
 		ThreadContext.bind(accountManager.getRoot().asSubject());
-		listenerRegistry.notify(new SystemStopping());
+		listenerRegistry.post(new SystemStopping());
 	}
 
 	@Sessional
 	@Override
 	public void stop() {
-		listenerRegistry.notify(new SystemStopped());
+		listenerRegistry.post(new SystemStopped());
 		ThreadContext.unbindSubject();
 	}
 	

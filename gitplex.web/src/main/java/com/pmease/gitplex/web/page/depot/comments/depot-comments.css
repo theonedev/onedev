@@ -1,3 +1,7 @@
 #depot-comments {
 	padding: 20px;
 }
+#code-comment {
+	margin: 20px;
+	font-size: 16px;
+}

@@ -1,9 +1,9 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_INTEGRATE;
 import static com.pmease.gitplex.core.entity.PullRequestNotification.Task.INTEGRATE;
 import static com.pmease.gitplex.core.entity.PullRequestNotification.Task.REVIEW;
 import static com.pmease.gitplex.core.entity.PullRequestNotification.Task.UPDATE;
-import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_INTEGRATE;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,16 +18,11 @@ import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.Listen;
-import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.PullRequestNotification;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
-import com.pmease.gitplex.core.event.pullrequest.AccountMentioned;
-import com.pmease.gitplex.core.event.pullrequest.AccountMentionedInComment;
-import com.pmease.gitplex.core.event.pullrequest.InvitingPullRequestReview;
+import com.pmease.gitplex.core.entity.PullRequestNotification;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestAssigned;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
@@ -36,37 +31,33 @@ import com.pmease.gitplex.core.event.pullrequest.PullRequestIntegrated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingApproval;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingIntegration;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingUpdate;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewInvitationChanged;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestUpdated;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.NotificationManager;
+import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 
 /**
- * This class manages pull request task notifications and send email to relevant users. This 
- * notification does not correlate with pull request watch notifications and can not be 
- * suppressed. 
+ * This class manages pull request tasks and send task notifications if necessary. 
+ * Unlike watch based notifications, task notifications can not be suppressed. 
  *   
  * @author robin
  *
  */
 @Singleton
 public class DefaultPullRequestNotificationManager extends AbstractEntityManager<PullRequestNotification> 
-		implements NotificationManager {
+		implements PullRequestNotificationManager {
 	
 	private final MailManager mailManager;
 	
 	private final UrlManager urlManager;
 	
-	private final MarkdownManager markdownManager;
-	
 	@Inject
-	public DefaultPullRequestNotificationManager(Dao dao, MailManager mailManager, 
-			UrlManager urlManager, MarkdownManager markdownManager) {
+	public DefaultPullRequestNotificationManager(Dao dao, MailManager mailManager, UrlManager urlManager) {
 		super(dao);
 		
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
-		this.markdownManager = markdownManager;
 	}
 
 	@Transactional
@@ -100,58 +91,67 @@ public class DefaultPullRequestNotificationManager extends AbstractEntityManager
 	@Transactional
 	@Listen
 	public void on(PullRequestIntegrated event) {
-		Query query = getSession().createQuery("delete from PullRequestNotification "
-				+ "where request=:request");
-		query.setParameter("request", event.getRequest());
-		query.executeUpdate();
+		onClosed(event.getRequest());
 	}
 
 	@Transactional
 	@Listen
 	public void on(PullRequestDiscarded event) {
+		onClosed(event.getRequest());
+	}
+	
+	private void onClosed(PullRequest request) {
 		Query query = getSession().createQuery("delete from PullRequestNotification "
 				+ "where request=:request");
-		query.setParameter("request", event.getRequest());
+		query.setParameter("request", request);
 		query.executeUpdate();
 	}
 
 	@Transactional
 	@Listen
-	public void on(InvitingPullRequestReview event) {
+	public void on(PullRequestReviewInvitationChanged event) {
 		PullRequestReviewInvitation invitation = event.getInvitation();
 		PullRequest request = invitation.getRequest();
 		Account user = invitation.getUser();
-		if (invitation.isExcluded()) {
+		if (invitation.getStatus() == PullRequestReviewInvitation.Status.EXCLUDED) {
 			Query query = getSession().createQuery("delete from PullRequestNotification "
 					+ "where request=:request and user=:user and task=:task");
 			query.setParameter("request", request);
 			query.setParameter("user", user);
 			query.setParameter("task", REVIEW);
 			query.executeUpdate();
-		} else {
-			PullRequestNotification notification = new PullRequestNotification();
-			notification.setRequest(request);
-			notification.setUser(user);
-			notification.setTask(REVIEW);
+		} else if (invitation.getStatus() == PullRequestReviewInvitation.Status.ADDED_BY_RULE) {
+			PullRequestNotification task = new PullRequestNotification();
+			task.setRequest(request);
+			task.setUser(user);
+			task.setTask(REVIEW);
 			EntityCriteria<PullRequestNotification> criteria = EntityCriteria.of(PullRequestNotification.class);
 			criteria.add(Restrictions.eq("request", request))
 					.add(Restrictions.eq("user", user))
-					.add(Restrictions.eq("task", notification.getTask()));
+					.add(Restrictions.eq("task", task.getTask()));
 			if (find(criteria) == null) {
-				dao.persist(notification);
+				save(task);
+				
 				String subject = String.format("Please review pull request #%d (%s)", 
-						request.getId(), request.getTitle());
+						request.getNumber(), request.getTitle());
 				String url = urlManager.urlFor(request);
-				String body = String.format("You are invited to review pull request #%d (%s). Please visit "
-						+ "<a href='%s'>%s</a> to add your comments.",
-						request.getId(), request.getTitle(), url, url);
-				mailManager.sendMail(Sets.newHashSet(notification.getUser()), subject, decorateMail(user, body));
+				String body = String.format("You are designated to review pull request #%d (%s).<br>"
+						+ "Please visit <a href='%s'>%s</a> to do the review.",
+						request.getNumber(), request.getTitle(), url, url);
+				mailManager.sendMailAsync(Sets.newHashSet(task.getUser()), subject, decorate(user, body));
 			}
+		} else {
+			String subject = String.format("You are invited to review pull request #%d (%s)", 
+					request.getNumber(), request.getTitle());
+			String url = urlManager.urlFor(request);
+			String body = String.format("You are invited to review pull request #%d (%s).<br>"
+					+ "Please visit <a href='%s'>%s</a> to do the review.",
+					request.getNumber(), request.getTitle(), url, url);
+			mailManager.sendMailAsync(Sets.newHashSet(invitation.getUser()), subject, decorate(user, body));
 		}
-		
 	}
 	
-	private String decorateMail(Account user, String body) {
+	private String decorate(Account user, String body) {
 		return String.format("Dear %s, "
 				+ "<p style='margin: 16px 0;'>"
 				+ "%s"
@@ -171,60 +171,26 @@ public class DefaultPullRequestNotificationManager extends AbstractEntityManager
 		query.executeUpdate();
 	}
 
-	@Transactional
-	@Listen
-	public void on(AccountMentioned event) {
-		PullRequest request = event.getRequest();
-		Account user = event.getUser();
-		String subject = String.format("You are mentioned in pull request #%d (%s)", 
-				request.getId(), request.getTitle());
-		String url = urlManager.urlFor(request);
-		String body = String.format("%s."
-				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
-				+ "<p style='margin: 16px 0;'>"
-				+ "For details, please visit <a href='%s'>%s</a>", 
-				subject, markdownManager.escape(request.getDescription()), url, url);
-		
-		mailManager.sendMail(Sets.newHashSet(user), subject, decorateMail(user, body));
-	}
-
-	@Transactional
-	@Listen
-	public void on(AccountMentionedInComment event) {
-		PullRequestComment comment = event.getComment();
-		Account user = event.getUser();
-		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
-				comment.getRequest().getId(), comment.getRequest().getTitle());
-		String url = urlManager.urlFor(comment);
-		String body = String.format("%s."
-				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
-				+ "<p style='margin: 16px 0;'>"
-				+ "For details, please visit <a href='%s'>%s</a>", 
-				subject, markdownManager.escape(comment.getContent()), url, url);
-		
-		mailManager.sendMail(Sets.newHashSet(user), subject, decorateMail(user, body));
-	}
-	
 	private void requestIntegration(PullRequest request) {
 		Account user = request.getAssignee();
-		PullRequestNotification notification = new PullRequestNotification();
-		notification.setRequest(request);
-		notification.setUser(user);
-		notification.setTask(INTEGRATE);
+		PullRequestNotification task = new PullRequestNotification();
+		task.setRequest(request);
+		task.setUser(user);
+		task.setTask(INTEGRATE);
 		EntityCriteria<PullRequestNotification> criteria = EntityCriteria.of(PullRequestNotification.class);
-		criteria.add(Restrictions.eq("request", notification.getRequest()))
+		criteria.add(Restrictions.eq("request", task.getRequest()))
 				.add(Restrictions.eq("user", user))
-				.add(Restrictions.eq("task", notification.getTask()));
+				.add(Restrictions.eq("task", task.getTask()));
 		if (find(criteria) == null) {
-			dao.persist(notification);
+			save(task);
 			String subject = String.format("Please integrate pull request #%d (%s)", 
-					request.getId(), request.getTitle());
+					request.getNumber(), request.getTitle());
 			String url = urlManager.urlFor(request);
-			String body = String.format("You are assignee of pull request #%d (%s). "
-					+ "Please visit <a href='%s'>%s</a> to integrate it into target branch.", 
-					request.getId(), request.getTitle(), url, url);
+			String body = String.format("Pull request #%d (%s) is pending integration.<br>"
+					+ "Please visit <a href='%s'>%s</a> to check and integrate.", 
+					request.getNumber(), request.getTitle(), url, url);
 			
-			mailManager.sendMail(Sets.newHashSet(notification.getUser()), subject, decorateMail(user, body));
+			mailManager.sendMailAsync(Sets.newHashSet(task.getUser()), subject, decorate(user, body));
 		}
 	}
 	
@@ -241,16 +207,25 @@ public class DefaultPullRequestNotificationManager extends AbstractEntityManager
 	public void on(PullRequestPendingUpdate event) {
 		PullRequest request = event.getRequest();
 		if (request.getSubmitter() != null) {
-			PullRequestNotification notification = new PullRequestNotification();
-			notification.setRequest(request);
-			notification.setUser(request.getSubmitter());
-			notification.setTask(UPDATE);
+			PullRequestNotification task = new PullRequestNotification();
+			task.setRequest(request);
+			task.setUser(request.getSubmitter());
+			task.setTask(UPDATE);
 			EntityCriteria<PullRequestNotification> criteria = EntityCriteria.of(PullRequestNotification.class);
-			criteria.add(Restrictions.eq("request", notification.getRequest()))
-					.add(Restrictions.eq("user", notification.getUser()))
-					.add(Restrictions.eq("task", notification.getTask()));
-			if (find(criteria) == null)
-				dao.persist(notification);
+			criteria.add(Restrictions.eq("request", task.getRequest()))
+					.add(Restrictions.eq("user", task.getUser()))
+					.add(Restrictions.eq("task", task.getTask()));
+			if (find(criteria) == null) {
+				save(task);
+				String subject = String.format("New commits are expected in pull request #%d (%s)", 
+						request.getNumber(), request.getTitle());
+				String url = urlManager.urlFor(request);
+				String body = String.format("Next commits are expected for next round of review in pull request #%d (%s).<br>"
+						+ "Please visit <a href='%s'>%s</a> for details",
+						request.getNumber(), request.getTitle(), url, url);
+				mailManager.sendMailAsync(Sets.newHashSet(request.getSubmitter()), subject, 
+						decorate(request.getSubmitter(), body));
+			}
 		}
 	}
 

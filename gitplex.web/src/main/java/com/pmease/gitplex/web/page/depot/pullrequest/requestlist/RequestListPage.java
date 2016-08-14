@@ -38,6 +38,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -308,7 +309,8 @@ public class RequestListPage extends PullRequestPage {
 				if (request.getLastEvent() != null) {
 					lastEventContainer.add(new AccountLink("user", request.getLastEvent().getUser())
 							.setVisible(request.getLastEvent().getUser()!=null));
-					lastEventContainer.add(new Label("description", request.getLastEvent().getDescription()));
+					String description = EditableUtils.getName(request.getLastEvent().getType());
+					lastEventContainer.add(new Label("description", description));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getLastEvent().getDate())));
 				} else {
 					lastEventContainer.add(new AccountLink("user", (Account)null));

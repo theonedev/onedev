@@ -149,7 +149,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     	
     	if (oldAccountId != null && !depot.getAccount().getId().equals(oldAccountId)) {
     		Account oldAccount = userManager.load(oldAccountId);
-    		listenerRegistry.notify(new DepotTransferred(depot, oldAccount));
+    		listenerRegistry.post(new DepotTransferred(depot, oldAccount));
     		
     		for (Depot each: findAll()) {
     			for (IntegrationPolicy policy: each.getIntegrationPolicies()) {
@@ -162,7 +162,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		}
     	}
     	if (oldName != null && !depot.getName().equals(oldName)) {
-    		listenerRegistry.notify(new DepotRenamed(depot, oldName));
+    		listenerRegistry.post(new DepotRenamed(depot, oldName));
     		
     		for (Depot each: findAll()) {
     			for (IntegrationPolicy integrationPolicy: each.getIntegrationPolicies()) {
@@ -231,7 +231,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 			
 		});
 
-		listenerRegistry.notify(new DepotDeleted(depot));
+		listenerRegistry.post(new DepotDeleted(depot));
     }
     
     @Sessional

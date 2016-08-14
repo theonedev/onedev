@@ -1,21 +1,21 @@
 package com.pmease.gitplex.core.event.codecomment;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.CodeCommentStatusChange;
 
 @Editable(name="unresolved")
 public class CodeCommentUnresolved extends CodeCommentEvent {
 
-	private final Account user;
+	private final CodeCommentStatusChange statusChange;
 	
-	public CodeCommentUnresolved(CodeComment comment, Account user) {
-		super(comment);
-		this.user = user;
+	public CodeCommentUnresolved(CodeCommentStatusChange statusChange) {
+		super(statusChange.getComment(), statusChange.getUser(), statusChange.getDate());
+		this.statusChange = statusChange;
 	}
 
-	public Account getUser() {
-		return user;
+	public CodeCommentStatusChange getStatusChange() {
+		return statusChange;
 	}
 
 }
+ 

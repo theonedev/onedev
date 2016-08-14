@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.annotation.RefMatch;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.util.ChildAwareMatcher;
 import com.pmease.gitplex.core.util.ParentAwareMatcher;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
@@ -40,7 +40,7 @@ public class IfTouchSpecifiedRefs extends AbstractGateKeeper {
 		this.refMatch = refMatch;
 	}
 
-	private CheckResult doCheck(String refName) {
+	private GateCheckResult doCheck(String refName) {
 		if (IncludeExcludeUtils.getIncludeExclude(refMatch).matches(INCLUDE_MATCHER, EXCLUDE_MATCHER, refName)) {
 			return passed(Lists.newArrayList("Target ref matches '" + refMatch + "'"));
 		} else {
@@ -49,17 +49,17 @@ public class IfTouchSpecifiedRefs extends AbstractGateKeeper {
 	}
 	
 	@Override
-	public CheckResult doCheckRequest(PullRequest request) {
+	public GateCheckResult doCheckRequest(PullRequest request) {
 		return doCheck(request.getTargetRef());
 	}
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return doCheck(GitUtils.branch2ref(branch));
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return doCheck(refName);
 	}
 

@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.util.ChildAwareMatcher;
 import com.pmease.gitplex.core.util.ParentAwareMatcher;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
@@ -47,7 +47,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	}
 	
 	@Override
-	public CheckResult doCheckRequest(PullRequest request) {
+	public GateCheckResult doCheckRequest(PullRequest request) {
 		for (PullRequestUpdate update: request.getEffectiveUpdates()) {
 			for (String file: update.getChangedFiles()) {
 				if (matches(file)) {
@@ -61,7 +61,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		if (file != null) {
 			if (matches(file)) 
 				return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));
@@ -73,7 +73,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			try (TreeWalk treeWalk = new TreeWalk(depot.getRepository())) {
 				treeWalk.addTree(depot.getRevCommit(oldCommit));

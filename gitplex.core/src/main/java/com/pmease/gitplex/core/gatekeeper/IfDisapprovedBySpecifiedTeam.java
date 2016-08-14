@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReview;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(order=300, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit gets specified number "
@@ -36,7 +36,7 @@ public class IfDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRequest(PullRequest request) {
+	protected GateCheckResult doCheckRequest(PullRequest request) {
         int disapprovals = 0;
         
     	Collection<Account> members = getTeamMembers(request.getTargetDepot().getAccount());
@@ -57,12 +57,12 @@ public class IfDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return failed(Lists.newArrayList("Not disapproved by anyone from team " + getTeamName()));
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit,
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit,
 			ObjectId newCommit) {
 		return failed(Lists.newArrayList("Not disapproved by anyone from team " + getTeamName()));
 	}

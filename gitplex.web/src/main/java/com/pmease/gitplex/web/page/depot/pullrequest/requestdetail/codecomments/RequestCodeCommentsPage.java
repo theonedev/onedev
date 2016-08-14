@@ -15,13 +15,13 @@ import com.pmease.gitplex.web.component.comment.CodeCommentListPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 
 @SuppressWarnings("serial")
-public class CodeCommentsPage extends RequestDetailPage implements CodeCommentAware {
+public class RequestCodeCommentsPage extends RequestDetailPage implements CodeCommentAware {
 
 	private final CodeCommentFilter filterOption;
 	
 	private final List<String> commentedFiles = new ArrayList<>();
 	
-	public CodeCommentsPage(PageParameters params) {
+	public RequestCodeCommentsPage(PageParameters params) {
 		super(params);
 		
 		filterOption = new CodeCommentFilter(params);
@@ -52,14 +52,14 @@ public class CodeCommentsPage extends RequestDetailPage implements CodeCommentAw
 			public void setObject(CodeCommentFilter object) {
 				PageParameters params = paramsOf(getPullRequest());
 				object.fillPageParams(params);
-				setResponsePage(CodeCommentsPage.class, params);
+				setResponsePage(RequestCodeCommentsPage.class, params);
 			}
 			
 		}) {
 			
 			@Override
 			protected PullRequest getPullRequest() {
-				return CodeCommentsPage.this.getPullRequest();
+				return RequestCodeCommentsPage.this.getPullRequest();
 			}
 
 		});

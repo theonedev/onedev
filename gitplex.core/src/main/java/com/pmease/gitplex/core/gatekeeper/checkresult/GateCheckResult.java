@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public abstract class CheckResult implements Serializable {
+public abstract class GateCheckResult implements Serializable {
 	
 	private final List<String> reasons;
 
-    public CheckResult(List<String> reasons) {
+    public GateCheckResult(List<String> reasons) {
         this.reasons = reasons;
     }
 

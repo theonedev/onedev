@@ -136,5 +136,8 @@ public abstract class CommonPage extends WebPage {
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		return new ArrayList<>();
 	}
-	
+
+	public void afterInitialWebSocketRender() {
+		
+	}
 }

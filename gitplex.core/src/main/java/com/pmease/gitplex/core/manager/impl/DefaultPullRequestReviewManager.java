@@ -21,23 +21,29 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewDeleted;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewManager;
 
 @Singleton
 public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullRequestReview> implements PullRequestReviewManager {
 
 	private final AccountManager accountManager;
+
+	private final PullRequestManager pullRequestManager;
 	
 	private final ListenerRegistry listenerRegistry;
-
+	
 	@Inject
-	public DefaultPullRequestReviewManager(Dao dao, AccountManager accountManager, ListenerRegistry listenerRegistry) {
+	public DefaultPullRequestReviewManager(Dao dao, AccountManager accountManager, PullRequestManager pullRequestManager, 
+			ListenerRegistry listenerRegistry) {
 		super(dao);
 		
 		this.accountManager = accountManager;
+		this.pullRequestManager = pullRequestManager;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -59,17 +65,25 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		review.setDate(new Date());
 		save(review);	
 		
-		if (result == PullRequestReview.Result.APPROVE)
-			listenerRegistry.notify(new PullRequestApproved(review, note));
-		else
-			listenerRegistry.notify(new PullRequestDisapproved(review, note));
+		PullRequestChangeEvent event;
+		if (result == PullRequestReview.Result.APPROVE) {
+			event = new PullRequestApproved(review, note);
+		} else {
+			event = new PullRequestDisapproved(review, note);
+		}
+		listenerRegistry.post(event);
+		request.setLastEvent(event);
+		pullRequestManager.save(request);
 	}
 
 	@Transactional
 	@Override
 	public void delete(PullRequestReview entity) {
 		super.delete(entity);
-		listenerRegistry.notify(new PullRequestReviewDeleted(entity, accountManager.getCurrent(), null));
+		PullRequestReviewDeleted event = new PullRequestReviewDeleted(entity, accountManager.getCurrent(), null); 
+		listenerRegistry.post(event);
+		event.getRequest().setLastEvent(event);
+		pullRequestManager.save(event.getRequest());
 	}
 
 	@Sessional

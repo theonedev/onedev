@@ -88,7 +88,7 @@ import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.CodeCommentsPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.util.DateUtils;
@@ -106,7 +106,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 	
 	private boolean editingTitle;
 	
-	public RequestDetailPage(final PageParameters params) {
+	public RequestDetailPage(PageParameters params) {
 		super(params);
 		
 		if (getDepot().getDefaultBranch() == null) 
@@ -123,14 +123,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 	}
 
-	@Override
-	protected void onAfterRender() {
-		super.onAfterRender();
-		Account user = SecurityUtils.getAccount();
-		if (user != null) 
-			GitPlex.getInstance(VisitInfoManager.class).visit(user, getPullRequest());
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -285,7 +277,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("File Changes", RequestChangesPage.class));
-		tabs.add(new RequestTab("Code Comments", CodeCommentsPage.class));
+		tabs.add(new RequestTab("Code Comments", RequestCodeCommentsPage.class));
 		tabs.add(new RequestTab("Integration Preview", IntegrationPreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
@@ -298,7 +290,14 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			protected void onRender(WebSocketRequestHandler handler) {
 				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(handler));				
 			}
-			
+
+			@Override
+			protected void onInitialRenderDetach() {
+				Account user = SecurityUtils.getAccount();
+				if (user != null) 
+					GitPlex.getInstance(VisitInfoManager.class).visit(user, getPullRequest());
+			}
+
 		});
 	}
 	
@@ -897,7 +896,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 			@Override
 			public List<String> getObject() {
-				return getPullRequest().getCheckResult().getReasons();
+				return getPullRequest().checkGates(false).getReasons();
 			}
 			
 		}) {
@@ -949,12 +948,32 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		@Override
 		public Component render(String componentId) {
-			if (getMainPageClass() == CodeCommentsPage.class) {
+			if (getMainPageClass() == RequestCodeCommentsPage.class) {
 				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", RequestDetailPage.this);
-				PullRequest request = getPullRequest();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", CodeCommentsPage.class, paramsOf(request));
-				if (request.getLastCodeCommentEventDate() != null && !request.isVisitedAfter(request.getLastCodeCommentEventDate()))
-					link.add(AttributeAppender.append("class", "new"));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", RequestCodeCommentsPage.class, paramsOf(getPullRequest())) {
+
+					@Override
+					public void onEvent(IEvent<?> event) {
+						super.onEvent(event);
+						if (event.getPayload() instanceof PullRequestChanged) {
+							((PullRequestChanged)event.getPayload()).getPartialPageRequestHandler().add(this);
+						}
+					}
+					
+				};
+				link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						PullRequest request = getPullRequest();
+						if (request.getLastCodeCommentEventDate() != null && !request.isVisitedAfter(request.getLastCodeCommentEventDate()))
+							return "new";
+						else
+							return "";
+					}
+					
+				}));
+				link.setOutputMarkupId(true);
 				fragment.add(link);
 				return fragment;
 			} else {

@@ -368,7 +368,7 @@ public class DefaultIndexManager implements IndexManager {
 			throw new RuntimeException(e);
 		}
 
-		listenerRegistry.notify(new CommitIndexed(depot, commit.copy()));
+		listenerRegistry.post(new CommitIndexed(depot, commit.copy()));
 		
 		logger.debug("Commit indexed (repository: {}, commit: {}, checked blobs: {}, indexed blobs: {})", 
 				depot.getFQN(), commit.name(), indexResult.getChecked(), indexResult.getIndexed());

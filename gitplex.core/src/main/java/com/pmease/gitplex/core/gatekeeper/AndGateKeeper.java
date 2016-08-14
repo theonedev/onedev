@@ -6,7 +6,7 @@ import java.util.List;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
@@ -20,12 +20,12 @@ public class AndGateKeeper extends AndOrGateKeeper {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected CheckResult aggregate(Checker checker) {
+	protected GateCheckResult aggregate(Checker checker) {
 		List<String> pendingReasons = new ArrayList<String>();
 		List<String> acceptReasons = new ArrayList<String>();
 		
 		for (GateKeeper each: getGateKeepers()) {
-			CheckResult result = checker.check(each);
+			GateCheckResult result = checker.check(each);
 			if (result instanceof Passed) {
 				acceptReasons.addAll(result.getReasons());
 			} else if (result instanceof Failed) {

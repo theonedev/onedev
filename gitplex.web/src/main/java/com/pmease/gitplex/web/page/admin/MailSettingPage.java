@@ -44,7 +44,6 @@ public class MailSettingPage extends AdministrationPage {
 				super.onSubmit();
 				GitPlex.getInstance(ConfigManager.class).saveMailSetting(mailSetting);
 				getSession().success("Mail setting has been updated");
-				setResponsePage(MailSettingPage.class);
 			}
 			
 		};
@@ -64,7 +63,7 @@ public class MailSettingPage extends AdministrationPage {
 					protected TestResult test() {
 						Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 						try {
-							GitPlex.getInstance(MailManager.class).sendMailNow(
+							GitPlex.getInstance(MailManager.class).sendMail(
 									mailSetting, Sets.newHashSet(currentUser), 
 									"Test email from GitPlex", "Great, your mail setting is correct!");
 							return new TestResult.Successful("Test mail has been sent to " + 

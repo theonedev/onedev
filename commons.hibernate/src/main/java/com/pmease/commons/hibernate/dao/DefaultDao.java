@@ -60,14 +60,14 @@ public class DefaultDao implements Dao, Serializable {
 	public void persist(AbstractEntity entity) {
 		boolean isNew = entity.isNew();
 		getSession().saveOrUpdate(entity);
-		listenerRegistry.notify(new EntityPersisted(entity, isNew));
+		listenerRegistry.post(new EntityPersisted(entity, isNew));
 	}
 
 	@Transactional
 	@Override
 	public void remove(AbstractEntity entity) {
 		getSession().delete(entity);
-		listenerRegistry.notify(new EntityRemoved(entity));
+		listenerRegistry.post(new EntityRemoved(entity));
 	}
 
 	@Override

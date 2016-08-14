@@ -19,6 +19,8 @@ import com.pmease.commons.hibernate.AbstractEntity;
 public class PullRequestReviewInvitation extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	public enum Status {ADDED_BY_RULE, ADDED_MANUALLY, EXCLUDED}
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -28,10 +30,10 @@ public class PullRequestReviewInvitation extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	private boolean excluded;
+	private Status status;
 	
 	@Column(nullable=false)
-	private Date date = new Date();
+	private Date date;
 	
 	public Account getUser() {
 		return user;
@@ -49,12 +51,12 @@ public class PullRequestReviewInvitation extends AbstractEntity {
 		this.request = request;
 	}
 
-	public boolean isExcluded() {
-		return excluded;
+	public Status getStatus() {
+		return status;
 	}
 
-	public void setExcluded(boolean excluded) {
-		this.excluded = excluded;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	public Date getDate() {

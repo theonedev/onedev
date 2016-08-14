@@ -11,7 +11,7 @@ import java.util.ArrayList;
  *
  */
 @SuppressWarnings("serial")
-public class Ignored extends CheckResult {
+public class Ignored extends GateCheckResult {
     
     public Ignored() {
         super(new ArrayList<String>());

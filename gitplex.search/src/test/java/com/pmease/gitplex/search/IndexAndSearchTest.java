@@ -96,7 +96,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		ListenerRegistry listenerRegistry = new ListenerRegistry() {
 			
 			@Override
-			public void notify(Object event) {
+			public void post(Object event) {
 				searchManager.on((CommitIndexed) event);
 			}
 			

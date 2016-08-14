@@ -807,7 +807,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			@Override
 			public void run() {
 				Depot depot = GitPlex.getInstance(DepotManager.class).load(getId());
-				GitPlex.getInstance(ListenerRegistry.class).notify(
+				GitPlex.getInstance(ListenerRegistry.class).post(
 						new RefUpdated(depot, refName, commitId, ObjectId.zeroId()));
 			}
     		
@@ -852,7 +852,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			@Override
 			public void run() {
 				Depot depot = GitPlex.getInstance(DepotManager.class).load(getId());
-				GitPlex.getInstance(ListenerRegistry.class).notify(
+				GitPlex.getInstance(ListenerRegistry.class).post(
 						new RefUpdated(depot, refName, commitId, ObjectId.zeroId()));
 			}
     		

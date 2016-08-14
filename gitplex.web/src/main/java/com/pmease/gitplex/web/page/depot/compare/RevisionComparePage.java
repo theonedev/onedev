@@ -49,6 +49,7 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.CommentPos;
+import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
@@ -115,6 +116,25 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	private ObjectId rightCommitId;
 	
 	private Tabbable tabbable;
+	
+	public static PageParameters paramsOf(Depot depot, CodeComment comment) {
+		RevisionComparePage.State state = new RevisionComparePage.State();
+		state.commentId = comment.getId();
+		state.mark = comment.getCommentPos();
+		state.compareWithMergeBase = false;
+		CompareContext compareContext = comment.getLastCompareContext();
+		if (compareContext.isLeftSide()) {
+			state.leftSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
+			state.rightSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
+		} else {
+			state.leftSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
+			state.rightSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
+		}
+		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+		state.whitespaceOption = compareContext.getWhitespaceOption();
+		state.pathFilter = compareContext.getPathFilter();
+		return paramsOf(depot, state);
+	}
 	
 	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);

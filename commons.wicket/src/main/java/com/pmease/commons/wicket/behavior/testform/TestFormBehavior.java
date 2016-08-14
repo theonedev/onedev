@@ -26,7 +26,8 @@ public abstract class TestFormBehavior extends AbstractDefaultAjaxBehavior {
 				+ "$button.removeAttr('disabled');"
 				+ "$button.val($button[0].prevValue);"
 				+ "$button.html($button[0].prevHtml);"
-				+ "$button.closest('form').append('%s');", 
+				+ "$button.closest('form').append('%s');"
+				+ "$button.removeClass('ajax-indicator');", 
 				getComponent().getMarkupId(), feedbackHtml));
 	}
 
@@ -37,6 +38,7 @@ public abstract class TestFormBehavior extends AbstractDefaultAjaxBehavior {
 				+ "$button[0].prevHtml = $button.html();"
 				+ "$button.val($button.val() + ' in progress...');"
 				+ "$button.html($button.html() + ' in progress...');"
+				+ "$button.addClass('ajax-indicator');"
 				+ "$button.closest('form').children('.test-feedback').remove();", 
 				getComponent().getMarkupId()));
 		target.appendJavaScript(getCallbackScript());

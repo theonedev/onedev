@@ -56,11 +56,11 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.support.CloseInfo;
 import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
@@ -489,7 +489,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 
 			@Override
 			protected List<String> load() {
-				return getPullRequest().getCheckResult().getReasons();
+				return getPullRequest().checkGates(false).getReasons();
 			}
 			
 		}) {

@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
@@ -33,7 +33,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 		
 	@Override
-	public CheckResult checkRequest(PullRequest request) {
+	public GateCheckResult checkRequest(PullRequest request) {
 		if (enabled)
 			return doCheckRequest(request);
 		else
@@ -41,7 +41,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 	
 	@Override
-	public CheckResult checkFile(Account user, Depot depot, String branch, String file) {
+	public GateCheckResult checkFile(Account user, Depot depot, String branch, String file) {
 		if (isEnabled())
 			return doCheckFile(user, depot, branch, file);
 		else
@@ -49,7 +49,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 	
 	@Override
-	public CheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	public GateCheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (isEnabled())
 			return doCheckPush(user, depot, refName, oldCommit, newCommit);
 		else
@@ -65,7 +65,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckRequest(PullRequest request);
+	protected abstract GateCheckResult doCheckRequest(PullRequest request);
 	
 	/**
 	 * Check if specified user can modify specified file in specified branch, without considering enable flag.
@@ -79,7 +79,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckFile(Account user, Depot depot, String branch, @Nullable String file);
+	protected abstract GateCheckResult doCheckFile(Account user, Depot depot, String branch, @Nullable String file);
 
 	/**
 	 * Check if specified user can push specified commit to specified branch, without considering enable flag.
@@ -93,25 +93,25 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
+	protected abstract GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
 
-	protected CheckResult ignored() {
+	protected GateCheckResult ignored() {
 		return new Ignored();
 	}
 
-	protected CheckResult passed(List<String> reasons) {
+	protected GateCheckResult passed(List<String> reasons) {
 		return new Passed(reasons);
 	}
 	
-	protected CheckResult failed(List<String> reasons) {
+	protected GateCheckResult failed(List<String> reasons) {
 		return new Failed(reasons);
 	}
 
-	protected CheckResult pending(List<String> reasons) {
+	protected GateCheckResult pending(List<String> reasons) {
 		return new Pending(reasons);
 	}
 
-	protected CheckResult blocking(List<String> reasons) {
+	protected GateCheckResult blocking(List<String> reasons) {
 		return new Blocking(reasons);
 	}
 

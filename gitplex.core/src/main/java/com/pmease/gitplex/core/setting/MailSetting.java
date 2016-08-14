@@ -14,21 +14,13 @@ public class MailSetting implements Serializable {
 
 	private String smtpHost;
 	
-	private int smtpPort = 25;
-	
-	private int sslSmtpPort = 465;
-	
-	private boolean smtpOverSSL;
+	private int smtpPort = 587;
 	
 	private String smtpUser;
 	
 	private String smtpPassword;
 	
-	private boolean enableStartTLS;
-	
 	private String senderAddress;
-	
-	private String replyAddress;
 	
 	private int timeout = 300;
 
@@ -56,32 +48,6 @@ public class MailSetting implements Serializable {
 		this.smtpPort = smtpPort;
 	}
 
-	@Editable(order=210, name="SSL SMTP Port", description=
-			"Specify SSL port number for the above SMTP host. This port number "
-			+ "will be used if the option 'Use SMTP over SSL' is checked."
-			)
-	public int getSslSmtpPort() {
-		return sslSmtpPort;
-	}
-
-	public void setSslSmtpPort(int sslSmtpPort) {
-		this.sslSmtpPort = sslSmtpPort;
-	}
-
-	@Editable(order=250, name="Use SMTP over SSL?", description=
-    	"Whether or not send email using SMTP over SSL. If SSL is enabled, and a " +
-    	"<b>SSLHandshakeException</b> is thrown with message <b>unable to find " +
-    	"valid certification path to requested target</b> while sending the email, " +
-    	"please make sure public key of your SMTP server is trusted by GitPlex."
-    	)
-	public boolean isSmtpOverSSL() {
-		return smtpOverSSL;
-	}
-
-	public void setSmtpOverSSL(boolean smtpOverSSL) {
-		this.smtpOverSSL = smtpOverSSL;
-	}
-
 	@Editable(order=300, name="SMTP User", description=
 		"Optionally specify user name here if the SMTP host needs authentication"
 		)
@@ -105,17 +71,6 @@ public class MailSetting implements Serializable {
 		this.smtpPassword = smtpPassword;
 	}
 
-	@Editable(order=450, name="Enable Start TLS?", description=
-			"Whether the STARTTLS command used to switch to an encrypted connection for authentication."
-			)
-	public boolean isEnableStartTLS() {
-		return enableStartTLS;
-	}
-
-	public void setEnableStartTLS(boolean enableStartTLS) {
-		this.enableStartTLS = enableStartTLS;
-	}
-
 	@Editable(order=500, description=
 		"This property is optional. If specified, GitPlex will use this email " +
 		"as the sender address when sending out emails. Otherwise, the sender " +
@@ -128,19 +83,6 @@ public class MailSetting implements Serializable {
 
 	public void setSenderAddress(String senderAddress) {
 		this.senderAddress = senderAddress;
-	}
-
-	@Editable(order=500, description=
-			"This property is optional. If specified, GitPlex will use this email " +
-			"as the reply-to address when user replies to the notification email. Otherwise, " +
-			"the sender address will be used."
-			)
-	public String getReplyAddress() {
-		return replyAddress;
-	}
-
-	public void setReplyAddress(String replyAddress) {
-		this.replyAddress = replyAddress;
 	}
 
 	@Editable(order=600, description="Specify timeout in seconds when communicating with the SMTP server. " +

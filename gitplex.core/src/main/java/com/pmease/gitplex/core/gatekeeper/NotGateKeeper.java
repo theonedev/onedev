@@ -7,7 +7,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 
@@ -31,8 +31,8 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult aggregate(Checker checker) {
-		CheckResult result = checker.check(getGateKeeper());
+	protected GateCheckResult aggregate(Checker checker) {
+		GateCheckResult result = checker.check(getGateKeeper());
 		
 		if (result instanceof Passed)
 			return failed(result.getReasons());

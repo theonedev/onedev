@@ -4,9 +4,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 
@@ -22,7 +22,7 @@ public class WebUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlFor(request.getTarget().getDepot()) + "/pulls/" + request.getId() + "/overview";
+		return urlFor(request.getTarget().getDepot()) + "/pulls/" + request.getNumber() + "/overview";
 	}
 
 	@Override
@@ -36,8 +36,8 @@ public class WebUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(PullRequestComment comment) {
-		return urlFor(comment.getRequest()) + "#comment" + comment.getId();
+	public String urlFor(CodeComment comment) {
+		return urlFor(comment.getDepot()) + "/comments/" + comment.getId();
 	}
 
 }

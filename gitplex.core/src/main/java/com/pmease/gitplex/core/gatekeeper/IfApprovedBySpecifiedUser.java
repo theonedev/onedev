@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.manager.AccountManager;
 
 @Editable(order=200, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
@@ -36,7 +36,7 @@ public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
     }
 
     @Override
-    public CheckResult doCheckRequest(PullRequest request) {
+    public GateCheckResult doCheckRequest(PullRequest request) {
         Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).find(userName));
 
         PullRequestReview.Result result = user.checkReviewSince(request.getReferentialUpdate());
@@ -52,12 +52,12 @@ public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
     }
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
     	return pending(Lists.newArrayList("Need approval from " + user.getName())); 
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
     	return pending(Lists.newArrayList("Need approval from " + user.getName())); 
 	}
 

@@ -17,7 +17,7 @@ import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
-import com.pmease.gitplex.core.event.pullrequest.InvitingPullRequestReview;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewInvitationChanged;
 import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewManager;
 
@@ -51,7 +51,7 @@ public class DefaultPullRequestReviewInvitationManager extends AbstractEntityMan
 	public void save(PullRequestReviewInvitation invitation) {
 		dao.persist(invitation);
 		
-		listenerRegistry.notify(new InvitingPullRequestReview(invitation));
+		listenerRegistry.post(new PullRequestReviewInvitationChanged(invitation));
 	}
 
 	@Transactional
@@ -60,7 +60,7 @@ public class DefaultPullRequestReviewInvitationManager extends AbstractEntityMan
 		for (PullRequestReviewInvitation invitation: invitations) {
 			if (invitation.getDate().getTime()>=since.getTime()) {
 				save(invitation);
-				if (invitation.isExcluded())
+				if (invitation.getStatus() == PullRequestReviewInvitation.Status.EXCLUDED)
 					reviewManager.deleteAll(invitation.getUser(), invitation.getRequest());
 			}
 		}

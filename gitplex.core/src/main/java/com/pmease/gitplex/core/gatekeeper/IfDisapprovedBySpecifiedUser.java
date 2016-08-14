@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReview;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.manager.AccountManager;
 
 @Editable(order=300, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
@@ -37,7 +37,7 @@ public class IfDisapprovedBySpecifiedUser extends AbstractGateKeeper {
     }
 	
 	@Override
-	protected CheckResult doCheckRequest(PullRequest request) {
+	protected GateCheckResult doCheckRequest(PullRequest request) {
 		Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).find(userName));
 		PullRequestReview.Result result = user.checkReviewSince(request.getReferentialUpdate());
 		if (result == PullRequestReview.Result.DISAPPROVE) {
@@ -48,12 +48,12 @@ public class IfDisapprovedBySpecifiedUser extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return failed(Lists.newArrayList("Not disapproved by " + userName));
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit,
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit,
 			ObjectId newCommit) {
 		return failed(Lists.newArrayList("Not disapproved by " + userName));
 	}

@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.event.pullrequest;
 
+import java.util.Date;
+
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
@@ -10,7 +12,7 @@ public class PullRequestVerificationDeleted extends PullRequestStatusChangeEvent
 	private final PullRequestVerification verification;
 	
 	public PullRequestVerificationDeleted(PullRequestVerification verification, Account user) {
-		super(verification.getRequest(), user, "configuration: " + verification.getConfiguration());
+		super(verification.getRequest(), user, new Date(), "configuration: " + verification.getConfiguration());
 		this.verification = verification;
 	}
 

@@ -7,7 +7,7 @@ import java.util.List;
  * of this gate keeper has been determined.
  */
 @SuppressWarnings("serial")
-public class Blocking extends CheckResult {
+public class Blocking extends GateCheckResult {
 	
 	public Blocking(List<String> reasons) {
 		super(reasons);

@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.comment.CodeCommentFilter;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.CodeCommentsPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 
 @SuppressWarnings("serial")
 public class ApprovalHintPanel extends GenericPanel<PullRequest> {
@@ -28,9 +28,9 @@ public class ApprovalHintPanel extends GenericPanel<PullRequest> {
 		
 		PullRequest request = getModelObject();
 		
-		PageParameters params = CodeCommentsPage.paramsOf(request);
+		PageParameters params = RequestCodeCommentsPage.paramsOf(request);
 		getFilter().fillPageParams(params);
-		add(new BookmarkablePageLink<Void>("link", CodeCommentsPage.class, params));
+		add(new BookmarkablePageLink<Void>("link", RequestCodeCommentsPage.class, params));
 	}
 	
 	private CodeCommentFilter getFilter() {

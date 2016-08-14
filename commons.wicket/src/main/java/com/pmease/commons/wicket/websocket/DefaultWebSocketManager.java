@@ -78,11 +78,13 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	public void render(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
 		try {
 			for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
-				PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
-				if (connection.isOpen() 
-						&& (sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
-						&& containsRegion(connection, region)) {
-					connection.sendMessage(RENDER_CALLBACK);
+				synchronized (connection) {
+					PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
+					if (connection.isOpen() 
+							&& (sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
+							&& containsRegion(connection, region)) {
+						connection.sendMessage(RENDER_CALLBACK);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -105,9 +107,11 @@ public class DefaultWebSocketManager implements WebSocketManager {
 
 	@Override
 	public void onConnect(WebSocketConnection connection) {
-		try {
-			connection.sendMessage(RENDER_CALLBACK);
-		} catch (IOException e) {
+		synchronized (connection) {
+			try {
+				connection.sendMessage(INITIAL_RENDER_CALLBACK);
+			} catch (IOException e) {
+			}
 		}
 	}
 	
@@ -118,11 +122,13 @@ public class DefaultWebSocketManager implements WebSocketManager {
 			@Override
 			public void run() {
 				for (IWebSocketConnection connection: new SimpleWebSocketConnectionRegistry().getConnections(application)) {
-					if (connection.isOpen()) {
-						try {
-							connection.sendMessage(WebSocketManager.KEEP_ALIVE);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
+					synchronized (connection) {
+						if (connection.isOpen()) {
+							try {
+								connection.sendMessage(WebSocketManager.KEEP_ALIVE);
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
 						}
 					}
 				}

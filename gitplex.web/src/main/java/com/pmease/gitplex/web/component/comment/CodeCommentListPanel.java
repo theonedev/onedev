@@ -29,29 +29,24 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.lib.FileMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
-import com.pmease.gitplex.core.entity.support.CompareContext;
-import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.comments.CodeCommentPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -141,62 +136,10 @@ public abstract class CodeCommentListPanel extends Panel {
 				Depot depot = ((DepotPage) getPage()).getDepot();
 				
 				PullRequest request = getPullRequest();
-				List<CodeCommentActivity> activities= new ArrayList<>();
-				activities.addAll(comment.getReplies());
-				activities.addAll(comment.getStatusChanges());
-				activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
 				if (request != null) {
-					PullRequest.ComparingInfo comparingInfo = null;
-					for (int i=activities.size()-1; i>=0; i--) {
-						CodeCommentActivity activity = activities.get(i);
-						comparingInfo = request.getRequestComparingInfo(activity.getComparingInfo());
-						if (comparingInfo != null)
-							break;
-					}
-					if (comparingInfo == null) {
-						comparingInfo = Preconditions.checkNotNull(request.getRequestComparingInfo(comment.getComparingInfo()));
-					}
-					RequestChangesPage.State state = new RequestChangesPage.State();
-					state.commentId = comment.getId();
-					state.mark = comment.getCommentPos();
-					state.oldCommit = comparingInfo.getOldCommit();
-					state.newCommit = comparingInfo.getNewCommit();
-					state.pathFilter = comparingInfo.getPathFilter();
-					state.whitespaceOption = comparingInfo.getWhitespaceOption();
-					setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
+					setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, comment));
 				} else {
-					CompareContext compareContext;
-					if (!activities.isEmpty()) {
-						CodeCommentActivity lastActivity = activities.get(activities.size()-1);
-						compareContext = lastActivity.getCompareContext();
-					} else {
-						compareContext = comment.getCompareContext();
-					}
-					if (!compareContext.getCompareCommit().equals(comment.getCommentPos().getCommit())) {
-						RevisionComparePage.State state = new RevisionComparePage.State();
-						state.commentId = comment.getId();
-						state.mark = comment.getCommentPos();
-						state.compareWithMergeBase = false;
-						if (compareContext.isLeftSide()) {
-							state.leftSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
-							state.rightSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
-						} else {
-							state.leftSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
-							state.rightSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
-						}
-						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-						state.whitespaceOption = compareContext.getWhitespaceOption();
-						state.pathFilter = compareContext.getPathFilter();
-						setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, state));
-					} else {
-						DepotFilePage.State state = new DepotFilePage.State();
-						state.blobIdent.revision = comment.getCommentPos().getCommit();
-						state.blobIdent.path = comment.getCommentPos().getPath();
-						state.blobIdent.mode = FileMode.TYPE_FILE;
-						state.commentId = comment.getId();
-						state.mark = comment.getCommentPos().getRange();
-						setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot, state));
-					}
+					setResponsePage(CodeCommentPage.class, CodeCommentPage.paramsOf(depot, comment));
 				}				
 			}
 			
@@ -233,7 +176,8 @@ public abstract class CodeCommentListPanel extends Panel {
 				
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (comment.getLastEvent() != null) {
-					lastEventContainer.add(new Label("description", comment.getLastEvent().getDescription()));
+					String description = EditableUtils.getName(comment.getLastEvent().getType());
+					lastEventContainer.add(new Label("description", description));
 					lastEventContainer.add(new AccountLink("user", comment.getLastEvent().getUser())
 							.setVisible(comment.getLastEvent().getUser()!=null));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(comment.getLastEvent().getDate())));

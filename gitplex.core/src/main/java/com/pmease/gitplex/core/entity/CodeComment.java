@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -24,9 +25,11 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
 import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.entity.support.LastEvent;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentEvent;
 import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
@@ -85,6 +88,8 @@ public class CodeComment extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
+	
+	private transient List<CodeCommentActivity> activities;
 	
 	public Depot getDepot() {
 		return depot;
@@ -195,6 +200,14 @@ public class CodeComment extends AbstractEntity {
 	public void setLastEvent(LastEvent lastEvent) {
 		this.lastEvent = lastEvent;
 	}
+	
+	public void setLastEvent(CodeCommentEvent event) {
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(event.getDate());
+		lastEvent.setType(event.getClass());
+		lastEvent.setUser(event.getUser());
+		setLastEvent(lastEvent);
+	}
 
 	public boolean isVisitedAfter(Date date) {
 		Account user = SecurityUtils.getAccount();
@@ -208,6 +221,25 @@ public class CodeComment extends AbstractEntity {
 
 	public ComparingInfo getComparingInfo() {
 		return new ComparingInfo(commentPos.getCommit(), compareContext);
+	}
+	
+	public List<CodeCommentActivity> getActivities() {
+		if (activities == null) {
+			activities= new ArrayList<>();
+			activities.addAll(getReplies());
+			activities.addAll(getStatusChanges());
+			activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
+		}
+		return activities;
+	}
+	
+	public CompareContext getLastCompareContext() {
+		if (!getActivities().isEmpty()) {
+			CodeCommentActivity lastActivity = activities.get(activities.size()-1);
+			return lastActivity.getCompareContext();
+		} else {
+			return getCompareContext();
+		}
 	}
 	
 	public static class ComparingInfo implements Serializable {

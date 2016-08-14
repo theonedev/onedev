@@ -48,10 +48,8 @@ import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.entity.PullRequestStatusChange;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.VisitInfoManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -195,7 +193,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
 
-			PullRequest request = getPullRequest();
 			@SuppressWarnings("deprecation")
 			Component prevActivityRow = activitiesView.get(activitiesView.size()-1);
 			PullRequestActivity lastActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject();
@@ -239,10 +236,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 				}
 				prevActivityRow = newActivityRow;
 			}
-			
-			Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
-			if (user != null)
-				GitPlex.getInstance(VisitInfoManager.class).visit(user, request);
 		}
 	}
 

@@ -24,7 +24,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.manager.AccountManager;
@@ -114,7 +114,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    			}
 	    		} else {
 	    			GateKeeper gateKeeper = depot.getGateKeeper();
-	    			CheckResult checkResult = gateKeeper.checkPush(user, depot, refName, oldCommit, newCommit);
+	    			GateCheckResult checkResult = gateKeeper.checkPush(user, depot, refName, oldCommit, newCommit);
 	    			if (!(checkResult instanceof Passed)) {
 	    				List<String> messages = new ArrayList<>();
 	    				for (String each: checkResult.getReasons())

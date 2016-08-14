@@ -117,7 +117,7 @@ public class PullRequestUpdate extends AbstractEntity {
 		List<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
 		Set<Account> excludedReviewers = new HashSet<>();
 		for (PullRequestReviewInvitation invitation: getRequest().getReviewInvitations()) {
-			if (invitation.isExcluded())
+			if (invitation.getStatus() == PullRequestReviewInvitation.Status.EXCLUDED)
 				excludedReviewers.add(invitation.getUser());
 		}
 		for (PullRequestUpdate update: getRequest().getEffectiveUpdates()) {

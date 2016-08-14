@@ -45,18 +45,18 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		PullRequest request = requestModel.getObject();
 		Set<Account> prevInvited = new HashSet<>();
 		for (PullRequestReviewInvitation each: request.getReviewInvitations()) {
-			if (!each.isExcluded())
+			if (each.getStatus() != PullRequestReviewInvitation.Status.EXCLUDED)
 				prevInvited.add(each.getUser());
 			if (each.getUser().equals(invitation.getUser())) {
-				each.setExcluded(true);
+				each.setStatus(PullRequestReviewInvitation.Status.EXCLUDED);
 				each.setDate(new Date());
 			}
 		}
-		request.getTargetDepot().getGateKeeper().checkRequest(request);
+		request.checkGates(true);
 
 		Set<Account> nowInvited = new HashSet<>();
 		for (PullRequestReviewInvitation each: request.getReviewInvitations()) {
-			if (!each.isExcluded())
+			if (each.getStatus() != PullRequestReviewInvitation.Status.EXCLUDED)
 				nowInvited.add(each.getUser());
 		}
 		

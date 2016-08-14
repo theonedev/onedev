@@ -7,7 +7,7 @@ import com.pmease.gitplex.core.entity.CodeComment;
 public class CodeCommentCreated extends CodeCommentEvent {
 
 	public CodeCommentCreated(CodeComment comment) {
-		super(comment);
+		super(comment, comment.getUser(), comment.getDate());
 	}
 
 }

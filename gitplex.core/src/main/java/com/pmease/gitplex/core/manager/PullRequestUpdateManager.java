@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.entity.PullRequestUpdate;
 
 public interface PullRequestUpdateManager extends EntityManager<PullRequestUpdate> {
 	
-	void save(PullRequestUpdate update, boolean notifyListeners);
+	void save(PullRequestUpdate update, boolean callListeners);
 	
 	@Nullable
 	PullRequestUpdate find(String uuid);

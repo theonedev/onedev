@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.event.pullrequest;
 
+import java.util.Date;
+
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -8,7 +10,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 public class SourceBranchDeleted extends PullRequestStatusChangeEvent {
 
 	public SourceBranchDeleted(PullRequest request, Account user, String note) {
-		super(request, user, note);
+		super(request, user, new Date(), note);
 	}
 
 }

@@ -16,11 +16,13 @@ import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.core.entity.PullRequestVerification.Status;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationDeleted;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationFailed;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationRunning;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationSucceeded;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestVerificationManager;
 
 @Singleton
@@ -31,11 +33,15 @@ public class DefaultPullRequestVerificationManager extends AbstractEntityManager
 	
 	private final ListenerRegistry listenerRegistry;
 	
+	private final PullRequestManager pullRequestManager;
+	
 	@Inject
-	public DefaultPullRequestVerificationManager(Dao dao, AccountManager accountManager, ListenerRegistry listenerRegistry) {
+	public DefaultPullRequestVerificationManager(Dao dao, AccountManager accountManager, 
+			ListenerRegistry listenerRegistry, PullRequestManager pullRequestManager) {
 		super(dao);
 		this.accountManager = accountManager;
 		this.listenerRegistry = listenerRegistry;
+		this.pullRequestManager = pullRequestManager;
 	}
 
 	@Transactional
@@ -43,19 +49,28 @@ public class DefaultPullRequestVerificationManager extends AbstractEntityManager
 	public void save(PullRequestVerification entity) {
 		super.save(entity);
 		
+		PullRequestChangeEvent event;
 		if (entity.getStatus() == PullRequestVerification.Status.FAILED)
-			listenerRegistry.notify(new PullRequestVerificationFailed(entity));
+			event = new PullRequestVerificationFailed(entity);
 		else if (entity.getStatus() == PullRequestVerification.Status.RUNNING)
-			listenerRegistry.notify(new PullRequestVerificationRunning(entity));
+			event = new PullRequestVerificationRunning(entity);
 		else
-			listenerRegistry.notify(new PullRequestVerificationSucceeded(entity));
+			event = new PullRequestVerificationSucceeded(entity);
+		if (entity.getStatus() != PullRequestVerification.Status.RUNNING) {
+			listenerRegistry.post(event);
+			event.getRequest().setLastEvent(event);
+			pullRequestManager.save(event.getRequest());
+		}
 	}
 
 	@Transactional
 	@Override
 	public void delete(PullRequestVerification entity) {
 		super.delete(entity);
-		listenerRegistry.notify(new PullRequestVerificationDeleted(entity, accountManager.getCurrent()));
+		PullRequestVerificationDeleted event = new PullRequestVerificationDeleted(entity, accountManager.getCurrent()); 
+		listenerRegistry.post(event);
+		event.getRequest().setLastEvent(event);
+		pullRequestManager.save(event.getRequest());
 	}
 
 	@Sessional

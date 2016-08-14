@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(order=200, icon="fa-wrench", description=
 		"This gate keeper will be passed if one of specified operations is performed")
@@ -56,7 +56,7 @@ public class IfPerformSpecifiedOperations extends AbstractGateKeeper implements 
 		this.deleteRef = deleteRef;
 	}
 
-	private CheckResult checkUpdate() {
+	private GateCheckResult checkUpdate() {
 		if (updateRef) {
 			return passed(Lists.newArrayList("Ref is being updated"));
 		} 
@@ -71,17 +71,17 @@ public class IfPerformSpecifiedOperations extends AbstractGateKeeper implements 
 	}
 	
 	@Override
-	public CheckResult doCheckRequest(PullRequest request) {
+	public GateCheckResult doCheckRequest(PullRequest request) {
 		return checkUpdate();
 	}
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return checkUpdate();
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (oldCommit.equals(ObjectId.zeroId())) {
 			if (createRef) {
 				return passed(Lists.newArrayList("Ref is being created"));

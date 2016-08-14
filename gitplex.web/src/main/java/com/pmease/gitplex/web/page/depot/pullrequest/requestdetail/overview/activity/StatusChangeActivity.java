@@ -31,7 +31,7 @@ public class StatusChangeActivity implements PullRequestActivity {
 		});
 	}
 
-	private PullRequestStatusChange getStatusChange() {
+	public PullRequestStatusChange getStatusChange() {
 		return GitPlex.getInstance(PullRequestStatusChangeManager.class).load(statusChangeId);
 	}
 

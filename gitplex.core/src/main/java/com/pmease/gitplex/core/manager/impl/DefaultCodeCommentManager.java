@@ -21,32 +21,41 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.Listen;
 import com.pmease.commons.loader.ListenerRegistry;
-import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.CodeCommentRelation;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.CodeCommentStatusChange;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.LastEvent;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentEvent;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentReplied;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentResolved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentUnresolved;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentStatusChangeManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 
 @Singleton
 public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment> implements CodeCommentManager {
 
 	private final ListenerRegistry listenerRegistry;
 	
-	private final CodeCommentStatusChangeManager codeCommentActivityManager;
+	private final CodeCommentStatusChangeManager codeCommentStatusChangeManager;
+	
+	private final PullRequestManager pullRequestManager;
 	
 	@Inject
 	public DefaultCodeCommentManager(Dao dao, ListenerRegistry listenerRegistry, 
-			CodeCommentStatusChangeManager codeCommentActivityManager) {
+			CodeCommentStatusChangeManager codeCommentStatusChangeManager, PullRequestManager pullRequestManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
-		this.codeCommentActivityManager = codeCommentActivityManager;
+		this.codeCommentStatusChangeManager = codeCommentStatusChangeManager;
+		this.pullRequestManager = pullRequestManager;
 	}
 
 	@Sessional
@@ -86,7 +95,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		}
 		dao.persist(comment);
 		if (event != null) {
-			listenerRegistry.notify(event);
+			listenerRegistry.post(event);
 		}
 	}
 
@@ -123,39 +132,47 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Override
 	public void changeStatus(CodeCommentStatusChange statusChange) {
 		statusChange.getComment().setResolved(statusChange.isResolved());
+		
+		codeCommentStatusChangeManager.save(statusChange);
+		
+		CodeCommentEvent event;
+		if (statusChange.isResolved()) {
+			event = new CodeCommentResolved(statusChange);
+		} else {
+			event = new CodeCommentUnresolved(statusChange);
+		}
+		listenerRegistry.post(event);
+		statusChange.getComment().setLastEvent(event);
 		save(statusChange.getComment());
-		
-		codeCommentActivityManager.save(statusChange);
-		
-		if (statusChange.isResolved())
-			listenerRegistry.notify(new CodeCommentResolved(statusChange.getComment(), statusChange.getUser()));
-		else
-			listenerRegistry.notify(new CodeCommentUnresolved(statusChange.getComment(), statusChange.getUser()));
 	}
 
 	@Transactional
 	@Listen
 	public void on(CodeCommentReplied event) {
 		CodeCommentReply reply = event.getReply();
-		CodeComment comment = reply.getComment();
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(reply.getDate());
-		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
-		lastEvent.setUser(reply.getUser());
-		comment.setLastEvent(lastEvent);
-		save(comment);
+		
+		for (CodeCommentRelation relation: reply.getComment().getRelations()) {
+			PullRequest request = relation.getRequest();
+			PullRequestCodeCommentReplied pullRequestCodeCommentReplied = 
+					new PullRequestCodeCommentReplied(request, reply);
+			listenerRegistry.post(pullRequestCodeCommentReplied);
+			request.setLastEvent(pullRequestCodeCommentReplied);
+			pullRequestManager.save(request);
+		}
+		
 	}
 
 	@Transactional
 	@Listen
 	public void on(CodeCommentResolved event) {
-		CodeComment comment = event.getComment();
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(new Date());
-		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
-		lastEvent.setUser(event.getUser());
-		comment.setLastEvent(lastEvent);
-		save(comment);
+		for (CodeCommentRelation relation: event.getComment().getRelations()) {
+			PullRequest request = relation.getRequest();
+			PullRequestCodeCommentResolved pullRequestCodeCommentResolved =
+					new PullRequestCodeCommentResolved(request, event.getStatusChange());
+			listenerRegistry.post(pullRequestCodeCommentResolved);
+			request.setLastEvent(pullRequestCodeCommentResolved);
+			pullRequestManager.save(request);
+		}
 	}
 
 	@Transactional
@@ -164,10 +181,19 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		CodeComment comment = event.getComment();
 		LastEvent lastEvent = new LastEvent();
 		lastEvent.setDate(new Date());
-		lastEvent.setDescription(EditableUtils.getName(event.getClass()));
+		lastEvent.setType(event.getClass());
 		lastEvent.setUser(event.getUser());
 		comment.setLastEvent(lastEvent);
 		save(comment);
+		
+		for (CodeCommentRelation relation: event.getComment().getRelations()) {
+			PullRequest request = relation.getRequest();
+			PullRequestCodeCommentUnresolved pullRequestCodeCommentUnresolved =
+					new PullRequestCodeCommentUnresolved(request, event.getStatusChange());
+			listenerRegistry.post(pullRequestCodeCommentUnresolved);
+			request.setLastEvent(pullRequestCodeCommentUnresolved);
+			pullRequestManager.save(request);
+		}
 	}
 
 }

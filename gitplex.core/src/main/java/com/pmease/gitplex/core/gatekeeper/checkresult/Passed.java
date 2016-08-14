@@ -3,7 +3,7 @@ package com.pmease.gitplex.core.gatekeeper.checkresult;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class Passed extends CheckResult {
+public class Passed extends GateCheckResult {
     
     public Passed(List<String> reasons) {
         super(reasons);

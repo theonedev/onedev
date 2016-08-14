@@ -8,7 +8,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 public class PullRequestIntegrated extends PullRequestStatusChangeEvent {
 
 	public PullRequestIntegrated(PullRequest request, Account user, String note) {
-		super(request, user, note);
+		super(request, user, request.getCloseInfo().getCloseDate(), note);
 	}
 
 }

@@ -18,13 +18,12 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.Listen;
-import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentRelation;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.support.CompareContext;
-import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommented;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
@@ -48,16 +47,20 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 	
 	private final VisitInfoManager visitInfoManager;
 	
+	private final ListenerRegistry listenerRegistry;
+	
 	@Inject
 	public DefaultCodeCommentRelationManager(Dao dao, PullRequestInfoManager pullRequestInfoManager,
 			CodeCommentInfoManager codeCommentInfoManager, CodeCommentManager codeCommentManager, 
-			PullRequestManager pullRequestManager, VisitInfoManager visitInfoManager) {
+			PullRequestManager pullRequestManager, VisitInfoManager visitInfoManager, 
+			ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.pullRequestInfoManager = pullRequestInfoManager;
 		this.codeCommentInfoManager = codeCommentInfoManager;
 		this.codeCommentManager = codeCommentManager;
 		this.pullRequestManager = pullRequestManager;
 		this.visitInfoManager = visitInfoManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	/*
@@ -134,11 +137,9 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 		CodeComment comment = entity.getComment();
 		if (entity.isNew() && (request.getLastEvent() == null 
 				|| comment.getDate().getTime()>request.getLastEvent().getDate().getTime())) {
-			LastEvent lastEvent = new LastEvent();
-			lastEvent.setDate(comment.getDate());
-			lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommented.class));
-			lastEvent.setUser(comment.getUser());
-			request.setLastCodeCommentEventDate(comment.getDate());
+			PullRequestCodeCommented event = new PullRequestCodeCommented(request, comment); 
+			listenerRegistry.post(event);
+			request.setLastEvent(event);
 			pullRequestManager.save(request);
 		}
 		super.save(entity);
@@ -152,14 +153,11 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 		for (String uuid: pullRequestInfoManager.getRequests(comment.getDepot(), commitId)) {
 			PullRequest request = pullRequestManager.find(uuid);
 			if (request != null && request.getRequestComparingInfo(comment.getComparingInfo()) != null) {
-				LastEvent lastEvent = new LastEvent();
-				lastEvent.setDate(comment.getDate());
-				lastEvent.setDescription(EditableUtils.getName(PullRequestCodeCommented.class));
-				lastEvent.setUser(comment.getUser());
-				request.setLastEvent(lastEvent);
-				request.setLastCodeCommentEventDate(comment.getDate());
+				PullRequestCodeCommented pullRequestCodeCommented = new PullRequestCodeCommented(request, comment); 
+				listenerRegistry.post(pullRequestCodeCommented);
+				request.setLastEvent(pullRequestCodeCommented);
 				pullRequestManager.save(request);
-				 
+				
 				visitInfoManager.visit(comment.getUser(), request);
 				
 				CodeCommentRelation relation = new CodeCommentRelation();

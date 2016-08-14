@@ -24,6 +24,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestUpdated;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 
 @Singleton
@@ -32,12 +33,15 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 	
 	private final ListenerRegistry listenerRegistry;
 	
+	private final PullRequestManager pullRequestManager;
+	
 	@Inject
 	public DefaultPullRequestUpdateManager(Dao dao, ListenerRegistry listenerRegistry,
-			PullRequestCommentManager commentManager) {
+			PullRequestCommentManager commentManager, PullRequestManager pullRequestManager) {
 		super(dao);
 		
 		this.listenerRegistry = listenerRegistry;
+		this.pullRequestManager = pullRequestManager;
 	}
 
 	@Transactional
@@ -48,7 +52,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 	
 	@Transactional
 	@Override
-	public void save(PullRequestUpdate update, boolean notifyListeners) {
+	public void save(PullRequestUpdate update, boolean callListeners) {
 		PullRequest request = update.getRequest();
 		
 		String sourceHead = request.getSource().getObjectName();
@@ -70,8 +74,12 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			GitUtils.updateRef(refUpdate);
 		}
 
-		if (notifyListeners)
-			listenerRegistry.notify(new PullRequestUpdated(update));
+		if (callListeners) {
+			PullRequestUpdated event = new PullRequestUpdated(update);
+			listenerRegistry.post(event);
+			request.setLastEvent(event);
+			pullRequestManager.save(request);
+		}
 	}
 
 	@Sessional

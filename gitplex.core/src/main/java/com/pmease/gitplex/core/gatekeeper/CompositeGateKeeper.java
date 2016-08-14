@@ -5,24 +5,24 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static interface Checker {
-		CheckResult check(GateKeeper gateKeeper);
+		GateCheckResult check(GateKeeper gateKeeper);
 	}
 	
-	protected abstract CheckResult aggregate(Checker checker);
+	protected abstract GateCheckResult aggregate(Checker checker);
 
 	@Override
-	public CheckResult doCheckRequest(final PullRequest request) {
+	public GateCheckResult doCheckRequest(final PullRequest request) {
 		return aggregate(new Checker() {
 
 			@Override
-			public CheckResult check(GateKeeper gateKeeper) {
+			public GateCheckResult check(GateKeeper gateKeeper) {
 				return gateKeeper.checkRequest(request);
 			}
 			
@@ -30,11 +30,11 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(final Account user, final Depot depot, final String branch, final String file) {
+	protected GateCheckResult doCheckFile(final Account user, final Depot depot, final String branch, final String file) {
 		return aggregate(new Checker() {
 
 			@Override
-			public CheckResult check(GateKeeper gateKeeper) {
+			public GateCheckResult check(GateKeeper gateKeeper) {
 				return gateKeeper.checkFile(user, depot, branch, file);
 			}
 			
@@ -42,12 +42,12 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckPush(final Account user, final Depot depot, final String refName, 
+	protected GateCheckResult doCheckPush(final Account user, final Depot depot, final String refName, 
 			final ObjectId oldCommit, final ObjectId newCommit) {
 		return aggregate(new Checker() {
 
 			@Override
-			public CheckResult check(GateKeeper gateKeeper) {
+			public GateCheckResult check(GateKeeper gateKeeper) {
 				return gateKeeper.checkPush(user, depot, refName, oldCommit, newCommit);
 			}
 			

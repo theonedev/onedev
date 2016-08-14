@@ -64,7 +64,7 @@ public class DefaultListenerRegistry implements ListenerRegistry {
 	}
 	
 	@Override
-	public void notify(Object event) {
+	public void post(Object event) {
 		for (Listener listener: getListeners(event.getClass())) {
 			listener.notify(event);
 		}

@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReview;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(order=100, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is approved by specified number of users "
@@ -34,7 +34,7 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
     }
     
     @Override
-    public CheckResult doCheckRequest(PullRequest request) {
+    public GateCheckResult doCheckRequest(PullRequest request) {
         int approvals = 0;
         int pendings = 0;
         
@@ -65,13 +65,13 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
     }
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
         return pending(Lists.newArrayList("Need to be approved by at least " + getLeastApprovals()
         			+ " member(s) of team " + getTeamName()));
 	}
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
         return pending(Lists.newArrayList("Need to be approved by at least " + getLeastApprovals()
         			+ " member(s) of team " + getTeamName()));
 	}

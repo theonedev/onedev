@@ -231,7 +231,7 @@ pmease.commons = {
 			if ($ajaxLoadingIndicator[0].timer)
 				clearTimeout($ajaxLoadingIndicator[0].timer);
 			$ajaxLoadingIndicator[0].timer = setTimeout(function() {
-				if (!$ajaxLoadingIndicator.is(":visible"))
+				if (!$ajaxLoadingIndicator.is(":visible") && $(".ajax-indicator:visible").length == 0)
 					$ajaxLoadingIndicator.show();
 			}, 2000);		
 		});
@@ -373,7 +373,7 @@ pmease.commons = {
 	websocket: {
 		setupCallback: function() {
 			Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
-				if (message == "RenderCallback")
+				if (message == "InitialRenderCallback" || message == "RenderCallback")
 					Wicket.WebSocket.send(message);
 				else if (message == "ErrorMessage")
 					$("#websocket-error").show();

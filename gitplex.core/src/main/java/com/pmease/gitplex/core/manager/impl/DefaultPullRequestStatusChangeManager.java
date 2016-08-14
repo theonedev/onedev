@@ -1,7 +1,5 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.Date;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -27,7 +25,7 @@ public class DefaultPullRequestStatusChangeManager extends AbstractEntityManager
 	public void on(PullRequestStatusChangeEvent event) {
 		PullRequestStatusChange statusChange = new PullRequestStatusChange();
 		statusChange.setRequest(event.getRequest());
-		statusChange.setDate(new Date());
+		statusChange.setDate(event.getDate());
 		statusChange.setEventType(event.getClass());
 		statusChange.setUser(event.getUser());
 		statusChange.setNote(event.getNote());

@@ -12,7 +12,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"branch", "g_user_id"})
+		@UniqueConstraint(columnNames={"g_depot_id", "branch", "g_user_id"})
 })
 public class BranchWatch extends AbstractEntity {
 
@@ -25,6 +25,10 @@ public class BranchWatch extends AbstractEntity {
 	@Column(nullable=false)
 	private String branch;
 
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
+	private Account user;
+	
 	public Depot getDepot() {
 		return depot;
 	}
@@ -41,10 +45,6 @@ public class BranchWatch extends AbstractEntity {
 		this.branch = branch;
 	}
 
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
-	private Account user;
-	
 	public Account getUser() {
 		return user;
 	}

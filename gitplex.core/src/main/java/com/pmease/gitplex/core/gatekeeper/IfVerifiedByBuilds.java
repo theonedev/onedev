@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.manager.PullRequestVerificationManager;
 
 @Editable(icon="fa-check-circle", order=1000,
@@ -64,7 +64,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRequest(PullRequest request) {
+	protected GateCheckResult doCheckRequest(PullRequest request) {
 		if (request.isNew()) {
 			if (blockMode)
 				return blocking(Lists.newArrayList("To be verified by build"));
@@ -118,7 +118,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		if (blockMode)
 			return blocking(Lists.newArrayList("Not verified by build"));
 		else
@@ -126,7 +126,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			if (blockMode) {
 				return blocking(Lists.newArrayList("Has to be verified by builds"));

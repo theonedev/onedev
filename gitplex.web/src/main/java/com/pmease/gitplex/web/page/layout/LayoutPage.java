@@ -141,7 +141,7 @@ public abstract class LayoutPage extends BasePage {
 		head.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
 		head.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
 		if (user != null) {
-			head.add(new BookmarkablePageLink<Void>("notification", 
+			head.add(new BookmarkablePageLink<Void>("notifications", 
 					NotificationListPage.class, 
 					NotificationListPage.paramsOf(user)) {
 	
@@ -153,7 +153,7 @@ public abstract class LayoutPage extends BasePage {
 				
 			});
 		} else {
-			head.add(new WebMarkupContainer("notification").setVisible(false));
+			head.add(new WebMarkupContainer("notifications").setVisible(false));
 		}
 		
 		if (signedIn) {

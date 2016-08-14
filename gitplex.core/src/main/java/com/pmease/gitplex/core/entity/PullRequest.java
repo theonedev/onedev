@@ -50,8 +50,13 @@ import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.entity.support.LastEvent;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentReplied;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentResolved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentUnresolved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommented;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
@@ -224,7 +229,7 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
-	private transient CheckResult checkResult;
+	private transient GateCheckResult gateCheckResult;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 	
@@ -468,9 +473,9 @@ public class PullRequest extends AbstractEntity {
 				return Status.INTEGRATED;
 			else 
 				return Status.DISCARDED;
-		} else if (getCheckResult() instanceof Pending || getCheckResult() instanceof Blocking) 
+		} else if (checkGates(false) instanceof Pending || checkGates(false) instanceof Blocking) 
 			return Status.PENDING_APPROVAL;
-		else if (getCheckResult() instanceof Failed) 
+		else if (checkGates(false) instanceof Failed) 
 			return Status.PENDING_UPDATE;
 		else  
 			return Status.PENDING_INTEGRATE;
@@ -501,15 +506,15 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	/**
-	 * Get gate keeper check result.
+	 * Check against gate keeper.
 	 *  
 	 * @return
-	 * 			check result of this pull request has not been refreshed yet
+	 * 			gate check result
 	 */
-	public CheckResult getCheckResult() {
-		if (checkResult == null) 
-			checkResult = getTargetDepot().getGateKeeper().checkRequest(this);
-		return checkResult;
+	public GateCheckResult checkGates(boolean recheck) {
+		if (gateCheckResult == null || recheck) 
+			gateCheckResult = getTargetDepot().getGateKeeper().checkRequest(this);
+		return gateCheckResult;
 	}
 	
 	/**
@@ -644,7 +649,7 @@ public class PullRequest extends AbstractEntity {
 		Set<Account> lastChoices = new HashSet<>();
 		
 		for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
-			if (!invitation.isExcluded())
+			if (invitation.getStatus() != PullRequestReviewInvitation.Status.EXCLUDED)
 				firstChoices.add(invitation.getUser());
 			else
 				lastChoices.add(invitation.getUser());
@@ -684,12 +689,14 @@ public class PullRequest extends AbstractEntity {
 			for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
 				if (invitation.getUser().equals(user)) {
 					invitation.setDate(new Date());
-					invitation.setExcluded(false);
+					invitation.setStatus(PullRequestReviewInvitation.Status.ADDED_BY_RULE);
 					found = true;
 				}
 			}
 			if (!found) {
 				PullRequestReviewInvitation invitation = new PullRequestReviewInvitation();
+				invitation.setDate(new Date());
+				invitation.setStatus(PullRequestReviewInvitation.Status.ADDED_BY_RULE);
 				invitation.setRequest(this);
 				invitation.setUser(user);
 				getReviewInvitations().add(invitation);
@@ -828,7 +835,7 @@ public class PullRequest extends AbstractEntity {
 		List<Account> reviewers = new ArrayList<>();
 		Set<Account> alreadyInvited = new HashSet<>();
 		for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
-			if (!invitation.isExcluded())
+			if (invitation.getStatus() != PullRequestReviewInvitation.Status.EXCLUDED)
 				alreadyInvited.add(invitation.getUser());
 		}
 		ObjectPermission readPerm = ObjectPermission.ofDepotRead(getTargetDepot());
@@ -968,6 +975,21 @@ public class PullRequest extends AbstractEntity {
 		return getTargetDepot().isMergedInto(
 				getLatestUpdate().getHeadCommitHash(), 
 				getTarget().getObjectName());
+	}
+	
+	public void setLastEvent(PullRequestChangeEvent event) {
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(event.getDate());
+		lastEvent.setType(event.getClass());
+		lastEvent.setUser(event.getUser());
+		setLastEvent(lastEvent);
+		
+		if (event instanceof PullRequestCodeCommented 
+				|| event instanceof PullRequestCodeCommentReplied 
+				|| event instanceof PullRequestCodeCommentResolved
+				|| event instanceof PullRequestCodeCommentUnresolved) {
+			setLastCodeCommentEventDate(event.getDate());
+		}
 	}
 	
 	public static class ComparingInfo implements Serializable {

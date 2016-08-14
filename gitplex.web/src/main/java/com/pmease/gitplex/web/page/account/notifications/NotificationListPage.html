@@ -1,10 +1,14 @@
 <wicket:extend>
 	<div>
 		<table wicket:id="notifications" class="table table-striped"></table>
+		<div wicket:id="noNotifications" class="alert alert-warning">No notifications found</div>
 		<wicket:enclosure child="deleteSelected">
 		<div class="help-block">
 			<i class="fa fa-info-circle"></i> GitPlex will remove notifications as you complete relevant tasks. However you can also <a wicket:id="deleteSelected">delete selected notifications</a> manually here.
 		</div>
 		</wicket:enclosure>
 	</div>
+	<wicket:fragment wicket:id="requestFrag">
+		<a wicket:id="link"></a>
+	</wicket:fragment>
 </wicket:extend>

@@ -10,7 +10,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(name="Misc")
 public interface GateKeeper extends Serializable {
@@ -30,7 +30,7 @@ public interface GateKeeper extends Serializable {
 	 * @return
 	 * 			result of the check
 	 */
-	CheckResult checkRequest(PullRequest request);
+	GateCheckResult checkRequest(PullRequest request);
 
 	/**
 	 * Check if specified user can modify specified file in specified branch.
@@ -45,7 +45,7 @@ public interface GateKeeper extends Serializable {
 	 * @return
 	 * 			result of the check. 
 	 */
-	CheckResult checkFile(Account user, Depot depot, String branch, @Nullable String file);
+	GateCheckResult checkFile(Account user, Depot depot, String branch, @Nullable String file);
 	
 	/**
 	 * Check if specified user can push specified commit to specified ref.
@@ -61,7 +61,7 @@ public interface GateKeeper extends Serializable {
 	 * @return
 	 * 			result of the check
 	 */
-	CheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
+	GateCheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
 	
 	void onDepotRename(Depot renamedDepot, String oldName);
 	

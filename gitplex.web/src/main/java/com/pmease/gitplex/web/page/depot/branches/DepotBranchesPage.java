@@ -51,7 +51,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
@@ -231,11 +230,11 @@ public class DepotBranchesPage extends DepotPage {
 
 		@Override
 		protected Map<String, BranchWatch> load() {
-			Map<String, BranchWatch> requestWatches = new HashMap<>();
+			Map<String, BranchWatch> watches = new HashMap<>();
 			for (BranchWatch watch: GitPlex.getInstance(BranchWatchManager.class).find(
 					Preconditions.checkNotNull(getLoginUser()), getDepot()))
-				requestWatches.put(watch.getBranch(), watch);
-			return requestWatches;
+				watches.put(watch.getBranch(), watch);
+			return watches;
 		}
 		
 	};
@@ -415,7 +414,7 @@ public class DepotBranchesPage extends DepotPage {
 			@Override
 			protected void populateItem(ListItem<RefInfo> item) {
 				RefInfo ref = item.getModelObject();
-				final String branch = GitUtils.ref2branch(ref.getRef().getName());
+				String branch = GitUtils.ref2branch(ref.getRef().getName());
 				
 				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent.revision = branch;
@@ -577,7 +576,7 @@ public class DepotBranchesPage extends DepotPage {
 					public void onClick(AjaxRequestTarget target) {
 						BranchWatch watch = branchWatchesModel.getObject().get(branch);
 						if (watch != null) {
-							GitPlex.getInstance(Dao.class).remove(watch);
+							GitPlex.getInstance(BranchWatchManager.class).delete(watch);
 							branchWatchesModel.getObject().remove(branch);
 						}
 						target.add(actionsContainer);
@@ -586,8 +585,7 @@ public class DepotBranchesPage extends DepotPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getLoginUser() != null 
-								&& branchWatchesModel.getObject().containsKey(item.getModelObject()));
+						setVisible(getLoginUser() != null && branchWatchesModel.getObject().containsKey(branch));
 					}
 
 				});
@@ -599,15 +597,14 @@ public class DepotBranchesPage extends DepotPage {
 						watch.setDepot(getDepot());
 						watch.setBranch(branch);
 						watch.setUser(getLoginUser());
-						GitPlex.getInstance(Dao.class).persist(watch);
+						GitPlex.getInstance(BranchWatchManager.class).save(watch);
 						target.add(actionsContainer);
 					}
 					
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getLoginUser() != null 
-								&& !branchWatchesModel.getObject().containsKey(item.getModelObject()));
+						setVisible(getLoginUser() != null && !branchWatchesModel.getObject().containsKey(branch));
 					}
 
 				});

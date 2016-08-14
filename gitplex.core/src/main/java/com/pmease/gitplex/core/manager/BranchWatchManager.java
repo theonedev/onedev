@@ -12,5 +12,5 @@ public interface BranchWatchManager extends EntityManager<BranchWatch> {
 	Collection<BranchWatch> find(Account user, Depot depot);
 	
 	Collection<BranchWatch> find(Depot depot, String branch);
-	
+
 }

@@ -6,12 +6,15 @@ import java.util.List;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -59,7 +62,7 @@ public class NotificationListPage extends AccountLayoutPage {
 			
 		};
 		
-		final SelectionColumn<PullRequestNotification, String> selectionColumn;
+		SelectionColumn<PullRequestNotification, String> selectionColumn;
 		
 		List<IColumn<PullRequestNotification, String>> columns = new ArrayList<>();
 		selectionColumn = new SelectionColumn<PullRequestNotification, String>();
@@ -72,7 +75,8 @@ public class NotificationListPage extends AccountLayoutPage {
 					Item<ICellPopulator<PullRequestNotification>> cellItem,
 					String componentId, IModel<PullRequestNotification> rowModel) {
 				PullRequestNotification notification = rowModel.getObject();
-				cellItem.add(new BookmarkablePageLink<Void>(componentId, RequestOverviewPage.class, 
+				Fragment fragment = new Fragment(componentId, "requestFrag", NotificationListPage.this);
+				fragment.add(new BookmarkablePageLink<Void>("link", RequestOverviewPage.class, 
 						RequestOverviewPage.paramsOf(notification.getRequest())) {
 
 					@Override
@@ -81,6 +85,7 @@ public class NotificationListPage extends AccountLayoutPage {
 					}
 					
 				});
+				cellItem.add(fragment);
 			}
 			
 		});
@@ -149,8 +154,12 @@ public class NotificationListPage extends AccountLayoutPage {
 			
 		});
 		
-		add(new DefaultDataTable<PullRequestNotification, String>("notifications", 
-				columns, dataProvider, Constants.DEFAULT_PAGE_SIZE));
+		DataTable<PullRequestNotification, String> dataTable = 
+				new DefaultDataTable<PullRequestNotification, String>("notifications", columns, dataProvider, Constants.DEFAULT_PAGE_SIZE);
+		dataTable.setVisible(dataTable.getRowCount() != 0);
+		add(dataTable);
+		
+		add(new WebMarkupContainer("noNotifications").setVisible(dataTable.getRowCount() == 0));
 		
 		add(new Link<Void>("deleteSelected") {
 
@@ -168,7 +177,7 @@ public class NotificationListPage extends AccountLayoutPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAccount().equals(getLoginUser()));
+				setVisible(getAccount().equals(getLoginUser()) && dataTable.getRowCount() != 0);
 			}
 			
 		});

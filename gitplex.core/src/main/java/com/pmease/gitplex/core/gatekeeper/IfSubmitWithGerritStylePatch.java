@@ -12,7 +12,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(order=3000, icon="fa-ext fa-file-diff", description="This gate keeper will be passed if the pull request "
 		+ "is submitted with gerrit style patch, that is, only one commit is submitted for review at "
@@ -22,7 +22,7 @@ public class IfSubmitWithGerritStylePatch extends AbstractGateKeeper {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	protected CheckResult doCheckRequest(PullRequest request) {
+	protected GateCheckResult doCheckRequest(PullRequest request) {
 		String branchHead = request.getBaseCommitHash();
 		String requestHead = request.getLatestUpdate().getHeadCommitHash();
 		Depot depot = request.getTargetDepot();
@@ -40,12 +40,12 @@ public class IfSubmitWithGerritStylePatch extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
+	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return ignored();
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return ignored();
 	}
 

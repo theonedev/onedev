@@ -4,7 +4,7 @@ import java.util.List;
 
 /* Reject the merge request. */
 @SuppressWarnings("serial")
-public class Failed extends CheckResult {
+public class Failed extends GateCheckResult {
 
 	public Failed(List<String> reasons) {
 		super(reasons);

@@ -9,7 +9,7 @@ public class CodeCommentReplied extends CodeCommentEvent {
 	private final CodeCommentReply reply;
 	
 	public CodeCommentReplied(CodeCommentReply reply) {
-		super(reply.getComment());
+		super(reply.getComment(), reply.getUser(), reply.getDate());
 		this.reply = reply;
 	}
 

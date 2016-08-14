@@ -4,10 +4,15 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.PullRequest;
 
 @Editable(name="opened")
-public class PullRequestOpened extends PullRequestChangeEvent {
+public class PullRequestOpened extends PullRequestChangeEvent implements MarkdownAware {
 
 	public PullRequestOpened(PullRequest request) {
-		super(request);
+		super(request, request.getSubmitter(), request.getSubmitDate());
+	}
+
+	@Override
+	public String getMarkdown() {
+		return getRequest().getDescription();
 	}
 
 }
