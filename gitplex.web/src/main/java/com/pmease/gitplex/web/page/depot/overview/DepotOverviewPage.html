@@ -1,11 +1,17 @@
 <wicket:extend>
 	<div class="depot overview">
-		<div wicket:id="description" class="description"></div>
+		<div class="head">
+			<div wicket:id="title" class="title"></div>
+			<div class="subtitle">
+				<span>belong to account: <a wicket:id="accountLink"></a></span> <span>id: <span wicket:id="id"></span></span>
+			</div>
+		</div>
 		<div class="metrics">
 			<a wicket:id="commitsLink"><span wicket:id="count"></span></a>
 			<a wicket:id="branchesLink"><span wicket:id="count"></span></a>
 			<a wicket:id="tagsLink"><span wicket:id="count"></span></a>
 		</div>
+		<div wicket:id="description" class="description"></div>
 		<div class="clone">
 			<div class="input-group">
 		    	<div class="input-group-addon">Clone URL</div>

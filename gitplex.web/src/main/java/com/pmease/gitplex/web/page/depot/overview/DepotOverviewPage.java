@@ -25,6 +25,7 @@ import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.UrlManager;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.depotfile.filelist.FileListPanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
@@ -66,6 +67,10 @@ public class DepotOverviewPage extends DepotPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new Label("title", getDepot().getName()));
+		add(new AccountLink("accountLink", getDepot().getAccount()));
+		add(new Label("id", getDepot().getId()));
+		
 		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getDepot()));
 		add(new TextField<String>("cloneUrl", cloneUrlModel));
