@@ -56,8 +56,8 @@ import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentResolved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentUnresolved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommented;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
-import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -163,7 +163,7 @@ public class PullRequest extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String baseCommitHash;
-
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Account assignee;
 
@@ -229,7 +229,9 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
-	private transient GateCheckResult gateCheckResult;
+	private transient GateCheckResult gateResult;
+	
+	private transient Boolean merged;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
 	
@@ -368,8 +370,16 @@ public class PullRequest extends AbstractEntity {
 		this.baseCommitHash = baseCommitHash;
 	}
 	
+	public String getHeadCommitHash() {
+		return getLatestUpdate().getHeadCommitHash();
+	}
+
 	public RevCommit getBaseCommit() {
 		return getTargetDepot().getRevCommit(ObjectId.fromString(getBaseCommitHash()));
+	}
+	
+	public RevCommit getHeadCommit() {
+		return getTargetDepot().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
 	}
 	
 	/**
@@ -469,16 +479,28 @@ public class PullRequest extends AbstractEntity {
 
 	public Status getStatus() {
 		if (closeInfo != null) {
-			if (closeInfo.getCloseStatus() == CloseInfo.Status.INTEGRATED) 
+			if (closeInfo.getCloseStatus() == CloseInfo.Status.INTEGRATED) { 
 				return Status.INTEGRATED;
-			else 
+			} else {
 				return Status.DISCARDED;
-		} else if (checkGates(false) instanceof Pending || checkGates(false) instanceof Blocking) 
-			return Status.PENDING_APPROVAL;
-		else if (checkGates(false) instanceof Failed) 
-			return Status.PENDING_UPDATE;
-		else  
-			return Status.PENDING_INTEGRATE;
+			}
+		} else {
+			GateCheckResult result = checkGates(false);					
+			if (result instanceof Pending || result instanceof Blocking) { 
+				return Status.PENDING_APPROVAL;
+			} else if (result instanceof Failed) { 
+				return Status.PENDING_INTEGRATE;
+			} else {
+				return Status.PENDING_INTEGRATE;
+			}
+		}
+	}
+	
+	public GateCheckResult checkGates(boolean recheck) {
+		if (recheck || gateResult == null) {
+			gateResult = getTargetDepot().getGateKeeper().checkRequest(this);
+		}
+		return gateResult;
 	}
 
 	@Nullable
@@ -505,18 +527,6 @@ public class PullRequest extends AbstractEntity {
 		this.referentialUpdate = referentiralUpdate;
 	}
 
-	/**
-	 * Check against gate keeper.
-	 *  
-	 * @return
-	 * 			gate check result
-	 */
-	public GateCheckResult checkGates(boolean recheck) {
-		if (gateCheckResult == null || recheck) 
-			gateCheckResult = getTargetDepot().getGateKeeper().checkRequest(this);
-		return gateCheckResult;
-	}
-	
 	/**
 	 * Get last integration preview of this pull request. Note that this method may return an 
 	 * out dated integration preview. Refer to {@link this#getIntegrationPreview()}
@@ -759,7 +769,7 @@ public class PullRequest extends AbstractEntity {
 			pendingCommits = new HashSet<>();
 			Depot depot = getTargetDepot();
 			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
-				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getLatestUpdate().getHeadCommitHash())));
+				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
 				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getTarget().getObjectName())));
 				revWalk.forEach(c->pendingCommits.add(c));
 			} catch (IOException e) {
@@ -886,7 +896,7 @@ public class PullRequest extends AbstractEntity {
 
 	public List<CodeComment> getCodeComments() {
 		if (codeComments == null) {
-			codeComments = GitPlex.getInstance(CodeCommentRelationManager.class).findAllCodeComments(this);
+			codeComments = GitPlex.getInstance(CodeCommentRelationManager.class).findCodeComments(this);
 		}
 		return codeComments;
 	}
@@ -972,9 +982,9 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public boolean isMerged() {
-		return getTargetDepot().isMergedInto(
-				getLatestUpdate().getHeadCommitHash(), 
-				getTarget().getObjectName());
+		if (merged == null) 
+			merged = getTargetDepot().isMergedInto(getHeadCommitHash(), getTarget().getObjectName());
+		return merged;
 	}
 	
 	public void setLastEvent(PullRequestChangeEvent event) {

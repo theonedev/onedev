@@ -14,7 +14,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
@@ -133,14 +133,14 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 						PullRequestComment comment = getComment();
 						try {
 							if (comment.getVersion() != lastVersion)
-								throw new StaleObjectStateException(PullRequestComment.class.getName(), comment.getId());
+								throw new StaleStateException("");
 							comment.setContent(input.getModelObject());
 							GitPlex.getInstance(PullRequestCommentManager.class).save(comment);
 	
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);
 							target.add(viewer);
-						} catch (StaleObjectStateException e) {
+						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
 						}

@@ -94,7 +94,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<jgitVersion>4.3.0.201604071810-r</jgitVersion>
+		<jgitVersion>4.4.1.201607150455-r</jgitVersion>
 		<moduleClass>com.pmease.commons.git.GitModule</moduleClass>
 	</properties>
 </project>

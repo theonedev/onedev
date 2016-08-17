@@ -79,7 +79,7 @@ public class IntegrationPreview implements Serializable {
 	}
 
 	public boolean isObsolete(PullRequest request) {
-		if (getRequestHead().equals(request.getLatestUpdate().getHeadCommitHash())
+		if (getRequestHead().equals(request.getHeadCommitHash())
 				&& getTargetHead().equals(request.getTarget().getObjectName())
 				&& getIntegrationStrategy() == request.getIntegrationStrategy()
 				&& (getIntegrated() == null || ObjectId.fromString(getIntegrated()).equals((request.getTargetDepot().getObjectId(request.getIntegrateRef(), false))))) {

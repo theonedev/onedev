@@ -79,8 +79,8 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 		dao.doAfterCommit(runnable);
 	}
 
-	protected void doUnitOfWorkAfterCommitAsync(Runnable runnable) {
-		dao.doUnitOfWorkAfterCommitAsync(runnable);
+	protected void doUnitOfWorkAsyncAfterCommit(Runnable runnable) {
+		dao.doUnitOfWorkAsyncAfterCommit(runnable);
 	}
 	
 	protected Session getSession() {

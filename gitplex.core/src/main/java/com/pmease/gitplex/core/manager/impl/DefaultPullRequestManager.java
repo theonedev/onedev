@@ -8,9 +8,6 @@ import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MER
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
-import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_APPROVAL;
-import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_INTEGRATE;
-import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_UPDATE;
 
 import java.util.Collection;
 import java.util.Date;
@@ -18,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
@@ -86,6 +82,10 @@ import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationFailed;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationSucceeded;
 import com.pmease.gitplex.core.event.pullrequest.SourceBranchDeleted;
 import com.pmease.gitplex.core.event.pullrequest.SourceBranchRestored;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -121,16 +121,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final BatchWorkManager batchWorkManager;
 	
-	private final ExecutorService executorService;
-	
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
-
+	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
 			PullRequestReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
 			PullRequestNotificationManager notificationManager, MarkdownManager markdownManager, 
 			BatchWorkManager batchWorkManager, ListenerRegistry listenerRegistry,
-			ExecutorService executorService, UnitOfWork unitOfWork) {
+			UnitOfWork unitOfWork) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -138,7 +136,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		this.accountManager = accountManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
-		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
 	}
 	
@@ -163,7 +160,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void restoreSourceBranch(PullRequest request, String note) {
 		Preconditions.checkState(!request.isOpen() && request.getSourceDepot() != null);
 		if (request.getSource().getObjectName(false) == null) {
-			RevCommit latestCommit = request.getLatestUpdate().getHeadCommit();
+			RevCommit latestCommit = request.getHeadCommit();
 			try {
 				request.getSourceDepot().git().branchCreate().setName(request.getSourceBranch()).setStartPoint(latestCommit).call();
 			} catch (Exception e) {
@@ -194,19 +191,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void reopen(PullRequest request, String note) {
-		Preconditions.checkState(!request.isOpen(), "Pull request is alreay opened");
-		updateIfNecessary(request, false);
 		Account user = accountManager.getCurrent();
-		if (request.isMerged()) {
-			closeAsIntegrated(request, true, null);
-		} else {
-			request.setCloseInfo(null);
-			PullRequestReopened event = new PullRequestReopened(request, user, note);
-			listenerRegistry.post(event);
-			request.setLastEvent(event);
-			save(request);
-			checkAsync(request);
-		}
+		request.setCloseInfo(null);
+		PullRequestReopened event = new PullRequestReopened(request, user, note);
+		listenerRegistry.post(event);
+		request.setLastEvent(event);
+		save(request);
+		checkAsync(request);
 	}
 
 	@Transactional
@@ -229,9 +220,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void integrate(PullRequest request, String note) {
-		if (request.getStatus() != PENDING_INTEGRATE)
-			throw new IllegalStateException("Gate keeper disallows integration right now.");
-	
 		IntegrationPreview preview = request.getIntegrationPreview();
 		if (preview == null)
 			throw new IllegalStateException("Integration preview has not been calculated yet.");
@@ -277,13 +265,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			refUpdate.setExpectedOldObjectId(requestHeadId);
 			refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
 			GitUtils.updateRef(refUpdate);
-			
-			updateIfNecessary(request, false);
+
+			checkUpdate(request, false);
 
 			Long requestId = request.getId();
 			Subject subject = SecurityUtils.getSubject();
 			ObjectId newCommitId = integratedCommitId;
-			doUnitOfWorkAfterCommitAsync(new Runnable() {
+			doUnitOfWorkAsyncAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
@@ -313,7 +301,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
 		ObjectId newCommitId = integratedCommitId;
-		doUnitOfWorkAfterCommitAsync(new Runnable() {
+		doUnitOfWorkAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -373,7 +361,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		GitUtils.updateRef(refUpdate);
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
-			pullRequestUpdateManager.save(update, false);
+			pullRequestUpdateManager.save(update);
 		}
 		
 		for (PullRequestReviewInvitation invitation: request.getReviewInvitations())
@@ -410,18 +398,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 		save(request);
 	}
-	
-	private void onTargetBranchUpdate(PullRequest request) {
-		String targetHead = request.getTarget().getObjectName();
-		if (request.getLastIntegrationPreview() == null || !request.getLastIntegrationPreview().getTargetHead().equals(targetHead)) {
-			if (request.isMerged()) {
-				closeAsIntegrated(request, true, null);
-			}
-			if (request.isOpen()) {
-				batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(BACKEND_PREVIEW_PRIORITY));
-			}
-		}
-	}
 
 	private void closeAsIntegrated(PullRequest request, boolean dueToMerged, String note) {
 		Account user = accountManager.getCurrent();
@@ -443,69 +419,73 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		save(request);
 	}
 
-	private void updateIfNecessary(PullRequest request, boolean notifyListeners) {
-		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
+	private void checkUpdate(PullRequest request, boolean independent) {
+		if (!request.getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			PullRequestUpdate update = new PullRequestUpdate();
 			update.setRequest(request);
 			update.setHeadCommitHash(request.getSource().getObjectName());
 			update.setMergeCommitHash(GitUtils.getMergeBase(request.getTargetDepot().getRepository(), 
 					request.getTarget().getObjectId(), ObjectId.fromString(update.getHeadCommitHash())).name());
 			request.addUpdate(update);
-			pullRequestUpdateManager.save(update, notifyListeners);
+			pullRequestUpdateManager.save(update, independent);
 		}
 	}
 
-	/**
-	 * This method might take some time and is not key to pull request logic (even if we 
-	 * did not call it, we can always call it later), so normally should be called in an 
-	 * executor
-	 */
-	@Sessional
+	@Transactional
 	@Override
 	public void check(PullRequest request) {
 		if (request.isOpen()) {
-			if (request.isMerged()) {
-				closeAsIntegrated(request, true, null);
+			if (request.getSourceDepot() == null) {
+				discard(request, "Source repository no longer exists");
+			} else if (request.getSource().getObjectId(false) == null) {
+				discard(request, "Source branch no longer exists");
+			} else if (request.getTarget().getObjectId(false) == null) {
+				discard(request, "Target branch no longer exists");
 			} else {
-				Date timeBeforeCheck = new Date();
-				if (request.getStatus() == PENDING_UPDATE) {
-					listenerRegistry.post(new PullRequestPendingUpdate(request));
-				} else if (request.getStatus() == PENDING_INTEGRATE) {
+				checkUpdate(request, true);
+				if (request.isMerged()) {
+					closeAsIntegrated(request, true, null);
+				} else {
 					IntegrationPreview integrationPreview = request.getIntegrationPreview();
-					if (integrationPreview != null 
-							&& integrationPreview.getIntegrated() != null 
-							&& request.getAssignee() == null) {
-						integrate(request, "Integrated automatically by system");
+					Date timeBeforeCheck = new Date();
+					GateCheckResult result = request.checkGates(false);					
+					if (result instanceof Pending || result instanceof Blocking) { 
+						for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) { 
+							if (invitation.getDate().getTime()>=timeBeforeCheck.getTime())
+								reviewInvitationManager.save(invitation);
+						}
+						listenerRegistry.post(new PullRequestPendingApproval(request));
+					} else if (result instanceof Failed) { 
+						listenerRegistry.post(new PullRequestPendingUpdate(request));
+					} else if (integrationPreview != null 
+								&& integrationPreview.getIntegrated() != null 
+								&& request.getAssignee() == null) {
+						integrate(request, "Integrated automatically by GitPlex");
 					} else {
 						listenerRegistry.post(new PullRequestPendingIntegration(request));
 					}
-				} else if (request.getStatus() == PENDING_APPROVAL) {
-					for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) { 
-						if (invitation.getDate().getTime()>=timeBeforeCheck.getTime())
-							reviewInvitationManager.save(invitation);
-					}
-					listenerRegistry.post(new PullRequestPendingApproval(request));
 				}
 			}
 		}
 	}
 
 	@Override
-	public boolean canIntegrate(PullRequest request) {
-		if (request.getStatus() != PENDING_INTEGRATE) {
-			return false;
-		} else {
-			IntegrationPreview integrationPreview = request.getIntegrationPreview();
-			return integrationPreview != null && integrationPreview.getIntegrated() != null;
-		}
-	}
-
-	@Override
 	public IntegrationPreview previewIntegration(PullRequest request) {
 		IntegrationPreview preview = request.getLastIntegrationPreview();
-		if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
+		if (request.isOpen() && !request.isMerged() && (preview == null || preview.isObsolete(request))) {
 			int priority = RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY;			
-			batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(priority));
+			if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
+				doAfterCommit(new Runnable() {
+
+					@Override
+					public void run() {
+						batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(priority));
+					}
+					
+				});
+			} else {
+				batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(priority));
+			}
 			return null;
 		} else {
 			return preview;
@@ -526,10 +506,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						PullRequest request = load(requestId);
 						try {
 							IntegrationPreview preview = request.getLastIntegrationPreview();
-							if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
+							if (request.isOpen() && !request.isMerged() && (preview == null || preview.isObsolete(request))) {
 								logger.info("Calculating integration preview of pull request #{} in repository '{}'...", 
 										request.getNumber(), request.getTargetDepot());
-								String requestHead = request.getLatestUpdate().getHeadCommitHash();
+								String requestHead = request.getHeadCommitHash();
 								String targetHead = request.getTarget().getObjectName();
 								Depot targetDepot = request.getTargetDepot();
 								preview = new IntegrationPreview(targetHead, requestHead, request.getIntegrationStrategy(), null);
@@ -568,13 +548,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 									}
 								}
 								dao.persist(request);
-	
-								if (request.getStatus() == PENDING_INTEGRATE 
-										&& preview.getIntegrated() != null
-										&& request.getAssignee() == null) {
-									integrate(request, "Integrated automatically by GitPlex");
-								}
-								
+
 								listenerRegistry.post(new IntegrationPreviewCalculated(request));
 								logger.info("Integration preview of pull request #{} in repository '{}' is calculated.", 
 										request.getNumber(), request.getTargetDepot());						
@@ -611,39 +585,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		String branch = GitUtils.ref2branch(event.getRefName());
 		if (branch != null) {
 			DepotAndBranch depotAndBranch = new DepotAndBranch(event.getDepot(), branch);
-			if (!event.getNewCommit().equals(ObjectId.zeroId())) {
-				Criterion criterion = Restrictions.and(ofOpen(), ofSource(depotAndBranch));
-				for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
-					if (event.getDepot().getObjectId(request.getBaseCommitHash(), false) != null) {
-						updateIfNecessary(request, true);
-						if (request.isMerged()) {
-							closeAsIntegrated(request, true, null);
-						} else {
-							checkAsync(request);
-						}
-					} else {
-						logger.error("Unable to update pull request #{} due to unexpected source repository.", request.getNumber());
-					}
-				}
-
-				depotAndBranch = new DepotAndBranch(event.getDepot(), branch);								
-				criterion = Restrictions.and(ofOpen(), ofTarget(depotAndBranch));
-				for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) { 
-					if (request.getSourceDepot().getObjectId(request.getBaseCommitHash(), false) != null)
-						onTargetBranchUpdate(request);
-					else
-						logger.error("Unable to update pull request #{} due to unexpected target repository.", request.getNumber());
-				}
-			} else {
-				Criterion criterion = Restrictions.and(
-						ofOpen(), 
-						Restrictions.or(ofSource(depotAndBranch), ofTarget(depotAndBranch)));
-				for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
-					if (request.getTargetDepot().equals(event.getDepot()) && request.getTargetBranch().equals(branch)) 
-						discard(request, "Target branch is deleted.");
-					else
-						discard(request, "Source branch is deleted.");
-				}
+			Criterion criterion = Restrictions.and(
+					ofOpen(), 
+					Restrictions.or(ofSource(depotAndBranch), ofTarget(depotAndBranch)));
+			for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
+				check(request);
 			}
 		}
 	}
@@ -690,62 +636,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public void checkSanity() {
-		logger.info("Checking sanity of pull requests...");
-		
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(ofOpen());
-		for (PullRequest request: findAll(criteria)) {
-			Depot sourceDepot = request.getSourceDepot();
-			if (sourceDepot == null) {
-				discard(request, "Source repository is deleted.");
-			} else if (sourceDepot.isValid()) {
-				String baseCommitHash = request.getBaseCommitHash();
-				
-				// only modifies pull request status if source repository is the repository we
-				// previously worked with. This avoids disaster of closing all pull requests
-				// if repository storage points to a different location by mistake
-				if (sourceDepot.getObjectId(baseCommitHash, false) != null) { 
-					String sourceHead = request.getSource().getObjectName(false);
-					if (sourceHead == null) { 
-						discard(request, "Source branch is deleted.");
-					} else {
-						updateIfNecessary(request, false);
-						if (request.isMerged()) {
-							closeAsIntegrated(request, true, null);
-						} else {
-							checkAsync(request);
-						}
-					}
-				} else {
-					logger.error("Unable to update pull request #{} due to unexpected source repository", request.getNumber());
-				}
-			}
-
-			if (request.isOpen()) {
-				Depot targetDepot = request.getTargetDepot();
-				if (targetDepot.isValid()) {
-					String baseCommitHash = request.getBaseCommitHash();
-					
-					// only modifies pull request status if target repository is the repository we
-					// previously worked with. This avoids disaster of closing all pull requests
-					// if repository storage points to a different location by mistake
-					if (targetDepot.getObjectId(baseCommitHash, false) != null) {
-						String targetHead = request.getTarget().getObjectName(false);
-						if (targetHead == null)
-							discard(request, "Target branch is deleted.");
-						else 
-							onTargetBranchUpdate(request);
-					} else {
-						logger.error("Unable to update pull request #{} due to unexpected target repository", request.getNumber());
-					}
-				}
-			}
-		}
-	}
-
-	@Sessional
-	@Override
 	public int countOpen(Depot depot) {
 		EntityCriteria<PullRequest> criteria = newCriteria();
 		criteria.add(PullRequest.CriterionHelper.ofOpen());
@@ -780,6 +670,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		checkAsync(event.getRequest());
 	}
 	
+	@Listen
+	public void on(IntegrationPreviewCalculated event) {
+		checkAsync(event.getRequest());
+	}
+	
 	@Transactional
 	@Listen
 	public void on(PullRequestApproved event) {
@@ -804,39 +699,33 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		checkAsync(event.getRequest());
 	}
 	
+	private Runnable newCheckRunnable(Long requestId, Subject subject) {
+		return new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+			        ThreadContext.bind(subject);
+					check(load(requestId));
+				} catch (Exception e) {
+					logger.error("Error checking pull request", e);
+				} finally {
+					ThreadContext.unbindSubject();
+				}
+			}
+	
+		};		
+	}
+	
 	@Sessional
-	private void checkAsync(PullRequest request) {
+	protected void checkAsync(PullRequest request) {
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
 		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-			doUnitOfWorkAfterCommitAsync(new Runnable() {
-	
-				@Override
-				public void run() {
-					try {
-				        ThreadContext.bind(subject);
-						check(load(requestId));
-					} finally {
-						ThreadContext.unbindSubject();
-					}
-				}
-		
-			});
+			doUnitOfWorkAsyncAfterCommit(newCheckRunnable(requestId, subject));
 		} else {
-			executorService.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-				        ThreadContext.bind(subject);
-						check(load(requestId));
-					} finally {
-						ThreadContext.unbindSubject();
-					}
-				}
-				
-			});
+			unitOfWork.doAsync(newCheckRunnable(requestId, subject));
 		}
 	}
-
+	
 }

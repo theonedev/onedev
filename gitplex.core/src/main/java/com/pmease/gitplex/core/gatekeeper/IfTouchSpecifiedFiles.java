@@ -76,8 +76,8 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			try (TreeWalk treeWalk = new TreeWalk(depot.getRepository())) {
-				treeWalk.addTree(depot.getRevCommit(oldCommit));
-				treeWalk.addTree(depot.getRevCommit(newCommit));
+				treeWalk.addTree(depot.getRevCommit(oldCommit).getTree());
+				treeWalk.addTree(depot.getRevCommit(newCommit).getTree());
 				while (treeWalk.next()) {
 					if (matches(treeWalk.getPathString()))
 						return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));

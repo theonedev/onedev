@@ -246,7 +246,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	/**
 	 * Get commits belonging to this update, reversely ordered by commit traversing. The list of commit will remain 
 	 * unchanged even if tip of target branch changes. This assumption is key to our caching of code comment to
-	 * to pull request relations. Check {@link DefaultCodeCommentRelationManager#findAllCodeComments(PullRequest)} for
+	 * to pull request relations. Check {@link DefaultCodeCommentRelationManager#findCodeComments(PullRequest)} for
 	 * details
 	 * 
 	 * @return
@@ -271,8 +271,6 @@ public class PullRequestUpdate extends AbstractEntity {
 				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getMergeCommitHash())));
 				
 				revWalk.forEach(c->commits.add(c));
-				if (commits.isEmpty())
-					commits.add(headCommit);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

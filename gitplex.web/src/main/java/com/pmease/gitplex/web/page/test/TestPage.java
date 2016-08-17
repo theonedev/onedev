@@ -1,11 +1,10 @@
 package com.pmease.gitplex.web.page.test;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.model.Model;
+import org.apache.wicket.markup.html.link.Link;
 
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -15,17 +14,15 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Form<?> form = new Form<Void>("form");
-		form.add(new TextField<String>("name", Model.of("")));
-		form.add(new AjaxButton("submit") {
+		add(new Link<Void>("link") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			public void onClick() {
+				PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(1L);
+				request.getLatestUpdate();
 			}
 			
 		});
-		add(form);
 	}
 
 }

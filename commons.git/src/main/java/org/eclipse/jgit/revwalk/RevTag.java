@@ -45,8 +45,12 @@
 
 package org.eclipse.jgit.revwalk;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
@@ -162,7 +166,7 @@ public class RevTag extends RevObject {
 
 		int p = pos.value += 4; // "tag "
 		final int nameEnd = RawParseUtils.nextLF(rawTag, p) - 1;
-		tagName = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
+		tagName = RawParseUtils.decode(UTF_8, rawTag, p, nameEnd);
 
 		if (walk.isRetainBody())
 			buffer = rawTag;
@@ -207,12 +211,12 @@ public class RevTag extends RevObject {
 	 * @return decoded tag message as a string. Never null.
 	 */
 	public final String getFullMessage() {
-		final byte[] raw = buffer;
-		final int msgB = RawParseUtils.tagMessage(raw, 0);
-		if (msgB < 0)
+		byte[] raw = buffer;
+		int msgB = RawParseUtils.tagMessage(raw, 0);
+		if (msgB < 0) {
 			return ""; //$NON-NLS-1$
-		final Charset enc = RawParseUtils.parseEncoding(raw);
-		return RawParseUtils.decode(enc, raw, msgB, raw.length);
+		}
+		return RawParseUtils.decode(guessEncoding(), raw, msgB, raw.length);
 	}
 
 	/**
@@ -231,17 +235,26 @@ public class RevTag extends RevObject {
 	 *         multiple lines. Embedded LFs are converted to spaces.
 	 */
 	public final String getShortMessage() {
-		final byte[] raw = buffer;
-		final int msgB = RawParseUtils.tagMessage(raw, 0);
-		if (msgB < 0)
+		byte[] raw = buffer;
+		int msgB = RawParseUtils.tagMessage(raw, 0);
+		if (msgB < 0) {
 			return ""; //$NON-NLS-1$
+		}
 
-		final Charset enc = RawParseUtils.parseEncoding(raw);
-		final int msgE = RawParseUtils.endOfParagraph(raw, msgB);
-		String str = RawParseUtils.decode(enc, raw, msgB, msgE);
-		if (RevCommit.hasLF(raw, msgB, msgE))
+		int msgE = RawParseUtils.endOfParagraph(raw, msgB);
+		String str = RawParseUtils.decode(guessEncoding(), raw, msgB, msgE);
+		if (RevCommit.hasLF(raw, msgB, msgE)) {
 			str = StringUtils.replaceLineBreaksWithSpace(str);
+		}
 		return str;
+	}
+
+	private Charset guessEncoding() {
+		try {
+			return RawParseUtils.parseEncoding(buffer);
+		} catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
+			return UTF_8;
+		}
 	}
 
 	/**

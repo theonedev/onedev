@@ -251,9 +251,8 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 						revWalk.forEach(c->commits.add(c));
 						/* 
 						 * Add the merge base commit to make the revision graph understandable, 
-						 * note that we can not get merge commit object by calling parseCommit
-						 * in current revWalk as it has been marked as uninteresting and this 
-						 * will make the commit object incomplete
+						 * note that we can not get merge commit object in current revWalk as 
+						 * it has been marked and this will make the commit object incomplete
 						 */
 						commits.add(getDepot().getRevCommit(mergeBase));
 					} else {

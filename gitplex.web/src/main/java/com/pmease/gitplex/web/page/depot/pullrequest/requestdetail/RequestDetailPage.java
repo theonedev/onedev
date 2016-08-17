@@ -51,8 +51,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -100,8 +98,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends PullRequestPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(RequestDetailPage.class);
-	
 	protected IModel<PullRequest> requestModel;
 	
 	private boolean editingTitle;
@@ -694,21 +690,9 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				String actionName = operation.name().toLowerCase();
-
 				PullRequest request = getPullRequest();
-				try {
-					operation.operate(request, noteInput.getModelObject());
-					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
-				} catch (Exception e) {
-					if (e.getMessage() != null) {
-						error("Unable to " + actionName + ": " + e.getMessage());
-						logger.error("Error " + actionName, e);
-					} else {
-						error("Unable to " + actionName + ": check log for details");
-					}
-					target.add(operationsContainer);
-				} 
+				operation.operate(request, noteInput.getModelObject());
+				setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 			}
 
 		}.add(AttributeModifier.replace("value", new AbstractReadOnlyModel<String>() {
@@ -896,7 +880,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 			@Override
 			public List<String> getObject() {
-				return getPullRequest().checkGates(false).getReasons();
+				return getPullRequest().checkGates(false).getReasons();					
 			}
 			
 		}) {

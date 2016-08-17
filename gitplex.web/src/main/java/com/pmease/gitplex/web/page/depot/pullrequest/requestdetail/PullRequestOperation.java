@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail;
 
+import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_INTEGRATE;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
@@ -26,11 +28,12 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			if (!SecurityUtils.getSubject().isPermitted(
-					ObjectPermission.ofDepotWrite(request.getTargetDepot()))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(request.getTargetDepot()))
+					|| request.getStatus() != PENDING_INTEGRATE) {
 				return false;
 			} else {
-				return GitPlex.getInstance(PullRequestManager.class).canIntegrate(request);
+				IntegrationPreview integrationPreview = request.getIntegrationPreview();
+				return integrationPreview != null && integrationPreview.getIntegrated() != null;
 			}
 		}
 
@@ -170,7 +173,7 @@ public enum PullRequestOperation {
 			return request.getSourceDepot() != null 
 					&& request.getSource().getObjectName(false) == null 
 					&& SecurityUtils.canModify(request) 
-					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), ObjectId.zeroId(), ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()));
+					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), ObjectId.zeroId(), ObjectId.fromString(request.getHeadCommitHash()));
 		}
 
 	};

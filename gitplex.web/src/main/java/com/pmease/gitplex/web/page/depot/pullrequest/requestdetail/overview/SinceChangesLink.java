@@ -48,7 +48,7 @@ public class SinceChangesLink extends BookmarkablePageLink<Void> {
 		PullRequest request = requestModel.getObject();
 		RequestChangesPage.State state = new RequestChangesPage.State();
 		state.oldCommit = oldCommitModel.getObject();
-		state.newCommit = request.getLatestUpdate().getHeadCommitHash();
+		state.newCommit = request.getHeadCommitHash();
 		return RequestChangesPage.paramsOf(request, state);
 	}
 
@@ -72,7 +72,7 @@ public class SinceChangesLink extends BookmarkablePageLink<Void> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!oldCommitModel.getObject().equals(requestModel.getObject().getLatestUpdate().getHeadCommitHash()));
+		setVisible(!oldCommitModel.getObject().equals(requestModel.getObject().getHeadCommitHash()));
 	}
 
 	@Override

@@ -340,7 +340,7 @@ public class GitUtils {
         		}
     		}
     		inserter.flush();
-    		return headCommit;
+    		return headCommit.copy();
     	} catch (IOException e) {
     		throw new RuntimeException(e);
 		}

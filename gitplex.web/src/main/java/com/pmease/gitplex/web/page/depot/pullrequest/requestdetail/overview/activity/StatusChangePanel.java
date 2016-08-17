@@ -16,7 +16,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
@@ -126,14 +126,14 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						try {
 							if (getStatusChange().getVersion() != lastVersion)
-								throw new StaleObjectStateException(PullRequestStatusChange.class.getName(), getStatusChange().getId());
+								throw new StaleStateException("");
 							getStatusChange().setNote(input.getModelObject());
 							GitPlex.getInstance(PullRequestStatusChangeManager.class).save(getStatusChange());
 	
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);
 							target.add(viewer);
-						} catch (StaleObjectStateException e) {
+						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
 						}

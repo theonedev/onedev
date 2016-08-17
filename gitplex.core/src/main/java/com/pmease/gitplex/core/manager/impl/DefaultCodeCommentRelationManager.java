@@ -1,12 +1,12 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -74,7 +74,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 	 */
 	@Transactional
 	@Override
-	public List<CodeComment> findAllCodeComments(PullRequest request) {
+	public List<CodeComment> findCodeComments(PullRequest request) {
 		if (request.getCodeCommentRelations().size() < PullRequest.MAX_CODE_COMMENTS) {
 			Collection<String> relatedComments = new HashSet<>();
 			for (CodeCommentRelation relation: request.getCodeCommentRelations()) {
@@ -117,19 +117,16 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 					}
 				}
 			}
-			
 		}
-		
-		List<CodeComment> comments = new ArrayList<>();
-		for (CodeCommentRelation relation: request.getCodeCommentRelations()) {
-			comments.add(relation.getComment());
-		}
-		comments.sort(CodeComment::compareTo);
-		Collections.reverse(comments);		
-		
+		List<CodeComment> comments = request.getCodeCommentRelations()
+				.stream()
+				.map(CodeCommentRelation::getComment)
+				.sorted(CodeComment::compareTo)
+				.collect(Collectors.toList());
+		Collections.reverse(comments);
 		return comments;
 	}
-
+	
 	@Transactional
 	@Override
 	public void save(CodeCommentRelation entity) {

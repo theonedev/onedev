@@ -192,7 +192,6 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 				user.getDisplayName(), body);
 	}
 	
-	@Transactional
 	private void makeContributorsWatching(PullRequestUpdate update) {
 		// we use a name-email pair to filter off duplicate person as equals method of PersonIdent also takes 
 		// "when" field into account

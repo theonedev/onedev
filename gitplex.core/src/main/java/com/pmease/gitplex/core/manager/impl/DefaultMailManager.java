@@ -12,11 +12,14 @@ import javax.inject.Singleton;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.bootstrap.Bootstrap;
+import com.pmease.commons.hibernate.Sessional;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.Listen;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.Account;
@@ -42,18 +45,30 @@ public class DefaultMailManager implements MailManager {
 	
 	private final UrlManager urlManager;
 	
+	private final Dao dao;
+	
 	@Inject
-	public DefaultMailManager(ConfigManager configManager, ExecutorService executorService,
+	public DefaultMailManager(Dao dao, ConfigManager configManager, ExecutorService executorService,
 			MarkdownManager markdownManager, UrlManager urlManager) {
+		this.dao = dao;
 		this.configManager = configManager;
 		this.executorService = executorService;
 		this.markdownManager = markdownManager;
 		this.urlManager = urlManager;
 	}
-	
+
+	@Sessional
 	@Override
 	public void sendMailAsync(Collection<Account> toList, String subject, String body) {
-		executorService.execute(new Runnable() {
+		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
+			dao.doAsyncAfterCommit(newSendMailRunnable(toList, subject, body));
+		} else {
+			executorService.execute(newSendMailRunnable(toList, subject, body));
+		}
+	}
+	
+	private Runnable newSendMailRunnable(Collection<Account> toList, String subject, String body) {
+		return new Runnable() {
 
 			@Override
 			public void run() {
@@ -64,7 +79,7 @@ public class DefaultMailManager implements MailManager {
 				}		
 			}
 			
-		});
+		};
 	}
 
 	@Override
@@ -172,5 +187,5 @@ public class DefaultMailManager implements MailManager {
 				+ "-- Sent by GitPlex", 
 				user.getDisplayName(), body);
 	}
-	
+
 }

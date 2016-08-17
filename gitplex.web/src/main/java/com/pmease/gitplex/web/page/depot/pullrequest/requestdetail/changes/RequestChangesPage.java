@@ -100,7 +100,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			state.oldCommit = getPullRequest().getBaseCommitHash();
 		state.newCommit = params.get(PARAM_NEW_COMMIT).toString();
 		if (state.newCommit == null)
-			state.newCommit = getPullRequest().getLatestUpdate().getHeadCommitHash();
+			state.newCommit = getPullRequest().getHeadCommitHash();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
@@ -288,7 +288,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 					oldName = GitUtils.abbreviateSHA(state.oldCommit);
 
 				String newName;
-				if (state.newCommit.equals(getPullRequest().getLatestUpdate().getHeadCommitHash())) {
+				if (state.newCommit.equals(getPullRequest().getHeadCommitHash())) {
 					newName = "head";
 				} else {
 					newName = GitUtils.abbreviateSHA(state.newCommit);
@@ -306,7 +306,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				state.oldCommit = getPullRequest().getBaseCommitHash();
-				state.newCommit = getPullRequest().getLatestUpdate().getHeadCommitHash();
+				state.newCommit = getPullRequest().getHeadCommitHash();
 				target.add(head);
 				newRevisionDiff(target);
 				pushState(target);
@@ -316,7 +316,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!state.oldCommit.equals(getPullRequest().getBaseCommitHash()) 
-						|| !state.newCommit.equals(getPullRequest().getLatestUpdate().getHeadCommitHash()));
+						|| !state.newCommit.equals(getPullRequest().getHeadCommitHash()));
 			}
 			
 		});

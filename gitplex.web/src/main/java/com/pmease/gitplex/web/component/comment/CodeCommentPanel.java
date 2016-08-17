@@ -30,7 +30,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
@@ -250,7 +250,7 @@ public abstract class CodeCommentPanel extends Panel {
 						try {
 							CodeComment comment = getComment();
 							if (comment.getVersion() != lastVersion)
-								throw new StaleObjectStateException(CodeComment.class.getName(), comment.getId());
+								throw new StaleStateException("");
 							comment.setTitle(titleInput.getModelObject());
 							comment.setContent(contentInput.getModelObject());
 							GitPlex.getInstance(CodeCommentManager.class).save(comment);
@@ -258,7 +258,7 @@ public abstract class CodeCommentPanel extends Panel {
 							fragment.replaceWith(commentContainer);
 							target.add(commentContainer);
 							onSaveComment(target, comment);
-						} catch (StaleObjectStateException e) {
+						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
 						}
@@ -474,7 +474,7 @@ public abstract class CodeCommentPanel extends Panel {
 						try {
 							CodeCommentActivity activity = identity.getActivity();
 							if (activity.getVersion() != lastVersion)
-								throw new StaleObjectStateException("", "");
+								throw new StaleStateException("");
 							
 							if (identity.clazz == CodeCommentReply.class) {
 								CodeCommentReply reply = (CodeCommentReply) activity;
@@ -488,7 +488,7 @@ public abstract class CodeCommentPanel extends Panel {
 							WebMarkupContainer activityContainer = newActivityContainer(componentId, identity.getActivity());
 							fragment.replaceWith(activityContainer);
 							target.add(activityContainer);
-						} catch (StaleObjectStateException e) {
+						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
 						}

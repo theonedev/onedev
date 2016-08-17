@@ -149,7 +149,7 @@ public class DefaultDao implements Dao, Serializable {
 	}
 
 	@Override
-	public void doAfterCommitAsync(Runnable runnable) {
+	public void doAsyncAfterCommit(Runnable runnable) {
 		doAfterCommit(new Runnable() {
 
 			@Override
@@ -161,7 +161,7 @@ public class DefaultDao implements Dao, Serializable {
 	}
 	
 	@Override
-	public void doUnitOfWorkAfterCommitAsync(Runnable runnable) {
+	public void doUnitOfWorkAsyncAfterCommit(Runnable runnable) {
 		doAfterCommit(new Runnable() {
 
 			@Override

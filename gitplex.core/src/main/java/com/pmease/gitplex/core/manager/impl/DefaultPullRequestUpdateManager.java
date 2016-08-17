@@ -52,7 +52,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 	
 	@Transactional
 	@Override
-	public void save(PullRequestUpdate update, boolean callListeners) {
+	public void save(PullRequestUpdate update, boolean independent) {
 		PullRequest request = update.getRequest();
 		
 		String sourceHead = request.getSource().getObjectName();
@@ -74,7 +74,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			GitUtils.updateRef(refUpdate);
 		}
 
-		if (callListeners) {
+		if (independent) {
 			PullRequestUpdated event = new PullRequestUpdated(update);
 			listenerRegistry.post(event);
 			request.setLastEvent(event);

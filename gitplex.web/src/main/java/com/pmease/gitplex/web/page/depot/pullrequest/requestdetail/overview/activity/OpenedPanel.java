@@ -14,7 +14,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
@@ -121,14 +121,14 @@ class OpenedPanel extends GenericPanel<PullRequest> {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						try {
 							if (getPullRequest().getVersion() != lastVersion)
-								throw new StaleObjectStateException(PullRequest.class.getName(), getPullRequest().getId());
+								throw new StaleStateException("");
 							getPullRequest().setDescription(input.getModelObject());
 							GitPlex.getInstance(Dao.class).persist(getPullRequest());
 	
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);
 							target.add(viewer);
-						} catch (StaleObjectStateException e) {
+						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
 						}

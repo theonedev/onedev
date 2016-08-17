@@ -487,6 +487,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					Subject subject = SecurityUtils.getSubject();
 					
 					Long depotId = depot.getId();
+					ObjectId oldCommitId = oldCommit.copy();
+					ObjectId newCommitId = newCommit.copy();
 					GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
 						@Override
@@ -494,8 +496,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							ThreadContext.bind(subject);
 							try {
 								Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
-								depot.cacheObjectId(branch, newCommit.copy());
-								RefUpdated event = new RefUpdated(depot, refName, oldCommit.copy(), newCommit.copy());
+								depot.cacheObjectId(branch, oldCommitId);
+								RefUpdated event = new RefUpdated(depot, refName, oldCommitId, newCommitId);
 								GitPlex.getInstance(ListenerRegistry.class).post(event);
 							} finally {
 								ThreadContext.unbindSubject();
@@ -562,6 +564,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 						Long depotId = depot.getId();
 						Subject subject = SecurityUtils.getSubject();
+						ObjectId oldCommitId = oldCommit.copy();
+						ObjectId newCommitId = newCommit.copy();
 						GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
 							@Override
@@ -569,8 +573,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 								ThreadContext.bind(subject);
 								try {
 									Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
-									depot.cacheObjectId(branch, newCommit.copy());
-									RefUpdated event = new RefUpdated(depot, refName, oldCommit.copy(), newCommit.copy());
+									depot.cacheObjectId(branch, newCommitId);
+									RefUpdated event = new RefUpdated(depot, refName, oldCommitId, newCommitId);
 									GitPlex.getInstance(ListenerRegistry.class).post(event);
 								} finally {
 									ThreadContext.unbindSubject();

@@ -59,7 +59,6 @@ import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestInfoManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
@@ -81,8 +80,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     
     private final CodeCommentInfoManager codeCommentInfoManager;
    
-    private final PullRequestManager pullRequestManager;
-    
     private final TeamAuthorizationManager teamAuthorizationManager;
     
     private final String gitReceiveHook;
@@ -96,8 +93,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     @Inject
     public DefaultDepotManager(Dao dao, AccountManager userManager, CodeCommentInfoManager codeCommentInfoManager,
     		TeamAuthorizationManager teamAuthorizationManager, PullRequestInfoManager pullRequestInfoManager,
-    		StorageManager storageManager, CommitInfoManager commitInfoManager, 
-    		PullRequestManager pullRequestManager, ListenerRegistry listenerRegistry) {
+    		StorageManager storageManager, CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry) {
     	super(dao);
     	
         this.storageManager = storageManager;
@@ -106,7 +102,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
         this.teamAuthorizationManager = teamAuthorizationManager;
         this.commitInfoManager = commitInfoManager;
         this.codeCommentInfoManager = codeCommentInfoManager;
-        this.pullRequestManager = pullRequestManager;
         this.listenerRegistry = listenerRegistry;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
@@ -357,8 +352,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	        pullRequestInfoManager.collect(depot);
 	        codeCommentInfoManager.collect(depot);
 		}
-		
-		pullRequestManager.checkSanity();
 	}
 
 	@Listen

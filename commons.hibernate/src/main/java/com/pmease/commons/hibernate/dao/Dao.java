@@ -96,9 +96,9 @@ public interface Dao {
 
 	void doAfterCommit(Runnable runnable);
 	
-	void doAfterCommitAsync(Runnable runnable);
+	void doAsyncAfterCommit(Runnable runnable);
 	
-	void doUnitOfWorkAfterCommitAsync(Runnable runnable);
+	void doUnitOfWorkAsyncAfterCommit(Runnable runnable);
 	
 	Session getSession();
 	

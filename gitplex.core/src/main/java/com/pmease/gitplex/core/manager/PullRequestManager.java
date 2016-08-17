@@ -29,8 +29,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	@Nullable
 	PullRequest find(String uuid);
     
-    boolean canIntegrate(PullRequest request);
-    
     /**
      * Integrate specified pull request.
      * 
@@ -76,8 +74,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	void deleteSourceBranch(PullRequest request, @Nullable String note);
 	
 	void restoreSourceBranch(PullRequest request, @Nullable String note);
-	
-	void checkSanity();
 	
 	int countOpen(Depot depot);
 }

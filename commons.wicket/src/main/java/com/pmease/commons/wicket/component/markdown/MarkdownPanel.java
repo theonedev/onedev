@@ -16,7 +16,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
@@ -77,10 +77,10 @@ public class MarkdownPanel extends GenericPanel<String> {
 				
 				try {
 					if (editSupport.getVersion() != lastVersion)
-						throw new StaleObjectStateException("unknown", "unknown");
+						throw new StaleStateException("");
 					editSupport.setContent(newMarkdown);
 					target.add(feedback); // clear the feedback
-				} catch (StaleObjectStateException e) {
+				} catch (StaleStateException e) {
 					warn("Some one changed the content you are editing. The content has now been "
 							+ "reloaded, please try again.");
 					target.add(MarkdownPanel.this);

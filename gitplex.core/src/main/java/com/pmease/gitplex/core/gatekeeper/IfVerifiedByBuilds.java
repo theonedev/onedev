@@ -85,7 +85,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			if (commit == null) 
 				return failed(Lists.newArrayList("Can not build against integration result due to conflicts"));
 		} else {
-			commit = request.getLatestUpdate().getHeadCommitHash();
+			commit = request.getHeadCommitHash();
 		}
 
 		PullRequestVerificationManager verificationManager = GitPlex.getInstance(PullRequestVerificationManager.class);

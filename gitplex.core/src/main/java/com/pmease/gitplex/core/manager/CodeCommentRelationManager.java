@@ -12,6 +12,6 @@ public interface CodeCommentRelationManager extends EntityManager<CodeCommentRel
 	/**
 	 * Get code comments related to specified pull request, ordered by id descendantly
 	 */
-	List<CodeComment> findAllCodeComments(PullRequest request);
+	List<CodeComment> findCodeComments(PullRequest request);
 	
 }

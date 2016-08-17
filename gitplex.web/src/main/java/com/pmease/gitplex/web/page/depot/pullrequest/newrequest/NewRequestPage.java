@@ -217,7 +217,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 				PullRequest request = getPullRequest();
 				List<RevCommit> commits = new ArrayList<>();
 				try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
-					ObjectId headId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
+					ObjectId headId = ObjectId.fromString(request.getHeadCommitHash());
 					revWalk.markStart(revWalk.parseCommit(headId));
 					ObjectId baseId = ObjectId.fromString(request.getBaseCommitHash());
 					revWalk.markUninteresting(revWalk.parseCommit(baseId));
@@ -349,7 +349,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			protected Depot load() {
 				Depot depot = source.getDepot();
 				depot.cacheObjectId(source.getRevision(), 
-						ObjectId.fromString(getPullRequest().getLatestUpdate().getHeadCommitHash()));
+						ObjectId.fromString(getPullRequest().getHeadCommitHash()));
 				return depot;
 			}
 			
@@ -489,7 +489,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 
 			@Override
 			protected List<String> load() {
-				return getPullRequest().checkGates(false).getReasons();
+				return getPullRequest().checkGates(false).getReasons();					
 			}
 			
 		}) {
@@ -711,7 +711,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.mark = mark;
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
-		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
+		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getHeadCommitHash());
 		state.pathFilter = pathFilter;
 		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 		state.whitespaceOption = whitespaceOption;
@@ -743,7 +743,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 		mark = comment.getCommentPos();
 		state.commentId = comment.getId();
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
-		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
+		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getHeadCommitHash());
 		state.pathFilter = pathFilter;
 		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 		state.whitespaceOption = whitespaceOption;
