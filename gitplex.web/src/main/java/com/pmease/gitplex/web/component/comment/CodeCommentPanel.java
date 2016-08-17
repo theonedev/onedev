@@ -629,11 +629,11 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 
 			@Override
-			protected void onInitialRenderDetach() {
-				Account user = SecurityUtils.getAccount();
-				if (user != null) 
-					GitPlex.getInstance(VisitInfoManager.class).visit(user, getComment());
-				super.onInitialRenderDetach();
+			public void detach(Component component) {
+				if (isOnConnect() && SecurityUtils.getAccount() != null) {
+					GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), getComment());
+				}
+				super.detach(component);
 			}
 			
 		});

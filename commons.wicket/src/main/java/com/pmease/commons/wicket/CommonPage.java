@@ -137,7 +137,4 @@ public abstract class CommonPage extends WebPage {
 		return new ArrayList<>();
 	}
 
-	public void afterInitialWebSocketRender() {
-		
-	}
 }

@@ -124,26 +124,6 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	}
 
 	@Override
-	public void onConnect(WebSocketConnection connection) {
-		/* 
-		 * re-render interesting parts upon websocket connecting after a page is opened, 
-		 * this is necessary in case some web socket render request is sent between the 
-		 * gap of opening a page and a websocket connection is established. For instance
-		 * when someone creates a pull request, the server will re-render integration 
-		 * preview section of the page after preview is calculated and this may happen 
-		 * before the web socket connection is established. Requiring the page to 
-		 * re-render the integration preview section after connecting will make it 
-		 * displaying correctly    
-		 */
-		synchronized (connection) {
-			try {
-				connection.sendMessage(INITIAL_RENDER_CALLBACK);
-			} catch (IOException e) {
-			}
-		}
-	}
-	
-	@Override
 	public void start() {
 		scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
 

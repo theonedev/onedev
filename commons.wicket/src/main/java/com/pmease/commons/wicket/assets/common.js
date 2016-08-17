@@ -373,12 +373,15 @@ pmease.commons = {
 	websocket: {
 		setupCallback: function() {
 			Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
-				if (message == "InitialRenderCallback" || message == "RenderCallback")
+				if (message == "RenderCallback")
 					Wicket.WebSocket.send(message);
 				else if (message == "ErrorMessage")
 					$("#websocket-error").show();
 			});
-		},
+			Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
+				Wicket.WebSocket.send("ConnectCallback");
+			});
+		}
 	},
 
 	history: {

@@ -65,7 +65,6 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRegion;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
@@ -288,10 +287,10 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 
 			@Override
-			protected void onInitialRenderDetach() {
-				Account user = SecurityUtils.getAccount();
-				if (user != null) 
-					GitPlex.getInstance(VisitInfoManager.class).visit(user, getPullRequest());
+			public void detach(Component component) {
+				if (isOnConnect() && SecurityUtils.getAccount() != null) 
+					GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), getPullRequest());
+				super.detach(component);
 			}
 
 		});

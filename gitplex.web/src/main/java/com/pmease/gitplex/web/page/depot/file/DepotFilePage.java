@@ -512,6 +512,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	    			applyState(target, state);
 	    			pushState(target);
 	    			resizeWindow(target);
+					// fix the issue that sometimes indexing indicator of new commit does not disappear 
+	    			target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 				}
 
 				@Override
@@ -590,6 +592,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 						applyState(target, state);
 						pushState(target);
 						resizeWindow(target);
+						// fix the issue that sometimes indexing indicator of new commit does not disappear 
+		    			target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

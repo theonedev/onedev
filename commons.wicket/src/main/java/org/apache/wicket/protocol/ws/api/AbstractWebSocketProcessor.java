@@ -215,13 +215,6 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 				RequestCycle requestCycle = createRequestCycle(requestMapper, webResponse);
 				ThreadContext.setRequestCycle(requestCycle);
 
-				if (message instanceof TextMessage) {
-					TextMessage textMessage = (TextMessage) message;
-					if (textMessage.getText().equals(WebSocketManager.INITIAL_RENDER_CALLBACK)) {
-						requestCycle.setMetaData(WebSocketManager.INITIAL_RENDER, true);
-					}
-				}
-
 				ThreadContext.setApplication(application);
 
 				Session session;

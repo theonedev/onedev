@@ -11,7 +11,7 @@ import com.pmease.gitplex.search.CommitIndexed;
 public class CommitIndexedBroadcaster {
 
 	private final WebSocketManager webSocketManager;
-
+	
 	@Inject
 	public CommitIndexedBroadcaster(WebSocketManager webSocketManager) {
 		this.webSocketManager = webSocketManager;
@@ -20,7 +20,7 @@ public class CommitIndexedBroadcaster {
 	@Listen
 	public void on(CommitIndexed event) {
 		CommitIndexedRegion region = new CommitIndexedRegion(event.getDepot().getId(), event.getCommitId());
-		webSocketManager.render(region, null);
+		webSocketManager.renderAsync(region, null);
 	}
 
 }
