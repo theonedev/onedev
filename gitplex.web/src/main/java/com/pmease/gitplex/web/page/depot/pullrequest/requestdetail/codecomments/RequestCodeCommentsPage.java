@@ -27,8 +27,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage implements CodeCo
 		filterOption = new CodeCommentFilter(params);
 		
 		for (CodeComment comment: getPullRequest().getCodeComments()) {
-			if (comment.getCommentPos().getPath() != null) 
-				commentedFiles.add(comment.getCommentPos().getPath());
+			commentedFiles.add(comment.getCommentPos().getPath());
 		}
 		commentedFiles.sort((file1, file2)->Paths.get(file1).compareTo(Paths.get(file2)));
 	}

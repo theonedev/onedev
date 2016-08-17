@@ -110,7 +110,8 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getCompareContext(getComment()).equals(getComment().getCompareContext()));
+				setVisible(!getCompareContext(getComment()).equals(getComment().getCompareContext()) 
+						&& !getComment().getCommentPos().getCommit().equals(getComment().getCompareContext().getCompareCommit()));
 			}
 
 			@Override
@@ -325,7 +326,8 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getCompareContext(getComment()).equals(identity.getActivity().getCompareContext()));
+				setVisible(!getCompareContext(getComment()).equals(identity.getActivity().getCompareContext())
+						&& !getComment().getCommentPos().getCommit().equals(identity.getActivity().getCompareContext().getCompareCommit()));
 			}
 
 			@Override
