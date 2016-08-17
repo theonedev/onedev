@@ -5,18 +5,26 @@
 #repo-branches>.list>.head>.base {
 	width: 240px;
 }
+#repo-branches>.list>table .actions {
+	margin-left: 16px;
+}
+#repo-branches>.list>table .actions>.btn {
+	display: none;
+}
+#repo-branches>.list>table>tbody>tr:hover .actions>.btn {
+	display: inline;
+}
+#repo-branches>.list>table .actions>* {
+	margin-right: 8px;
+}
+#repo-branches>.list>table .actions a {
+	color: #333;
+}
+#repo-branches>.list>table .actions>span {
+	color: #999;
+}
 #repo-branches>.list>table td {
 	white-space: nowrap;
-}
-#repo-branches>.list>table td.actions {
-	width: 1%;
-	padding-top: 12px;
-}
-#repo-branches>.list>table td.actions .fa.fa-times {
-	color: red; margin-left: 8px;
-}
-#repo-branches>.list>table td.actions span.fa.fa-times {
-	color: #888;
 }
 #repo-branches>.list>table td.behind {
 	padding-right: 0;

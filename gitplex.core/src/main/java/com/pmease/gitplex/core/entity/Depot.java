@@ -478,6 +478,12 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		return defaultBranch.orNull();
 	}
 	
+	public void setDefaultBranch(String defaultBranchName) {
+		RefUpdate refUpdate = updateRef("HEAD");
+		GitUtils.linkRef(refUpdate, GitUtils.branch2ref(defaultBranchName));
+		defaultBranch = null;
+	}
+	
 	private Blob readBlob(ObjectLoader objectLoader, BlobIdent ident) {
 		long blobSize = objectLoader.getSize();
 		if (blobSize > MAX_READ_BLOB_SIZE) {

@@ -423,6 +423,113 @@ public class DepotBranchesPage extends DepotPage {
 				link.add(new Label("name", branch));
 				item.add(link);
 				
+				WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
+				item.add(actionsContainer.setOutputMarkupId(true));
+				
+				actionsContainer.add(new AjaxLink<Void>("unwatchRequests") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						BranchWatch watch = branchWatchesModel.getObject().get(branch);
+						if (watch != null) {
+							GitPlex.getInstance(BranchWatchManager.class).delete(watch);
+							branchWatchesModel.getObject().remove(branch);
+						}
+						target.add(actionsContainer);
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getLoginUser() != null && branchWatchesModel.getObject().containsKey(branch));
+					}
+
+				});
+				actionsContainer.add(new AjaxLink<Void>("watchRequests") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						BranchWatch watch = new BranchWatch();
+						watch.setDepot(getDepot());
+						watch.setBranch(branch);
+						watch.setUser(getLoginUser());
+						GitPlex.getInstance(BranchWatchManager.class).save(watch);
+						target.add(actionsContainer);
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getLoginUser() != null && !branchWatchesModel.getObject().containsKey(branch));
+					}
+
+				});
+
+				AjaxLink<Void> deleteLink;
+				actionsContainer.add(deleteLink = new AjaxLink<Void>("delete") {
+
+					
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this branch?"));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						getDepot().deleteBranch(branch);
+						if (branch.equals(baseBranch)) {
+							baseBranch = getDepot().getDefaultBranch();
+							target.add(baseChoice);
+						}
+						target.add(pagingNavigator);
+						target.add(branchesContainer);
+						target.add(noBranchesContainer);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+
+						RefInfo ref = item.getModelObject();
+						if (!getDepot().getDefaultBranch().equals(branch) 
+								&& SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getRef().getObjectId(), ObjectId.zeroId())) {
+							setVisible(true);
+							PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
+							PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
+							setEnabled(aheadOpen == null && behindOpen == null);
+						} else {
+							setVisible(false);
+						}
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						configure();
+						if (!isEnabled())
+							tag.setName("span");
+					}
+					
+				});
+				
+				actionsContainer.add(new AjaxLink<Void>("makeDefault") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						getDepot().setDefaultBranch(branch);
+						target.add(branchesContainer);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canManage(getDepot()) 
+								&& !branch.equals(getDepot().getDefaultBranch()));
+					}
+					
+				});
+				
 				RevCommit lastCommit = getDepot().getRevCommit(ref.getRef().getObjectId());
 
 				PageParameters params = CommitDetailPage.paramsOf(getDepot(), lastCommit.name());
@@ -567,92 +674,11 @@ public class DepotBranchesPage extends DepotPage {
 					
 				});
 
-				final WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
-				item.add(actionsContainer.setOutputMarkupId(true));
-				
-				actionsContainer.add(new AjaxLink<Void>("unwatchRequests") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						BranchWatch watch = branchWatchesModel.getObject().get(branch);
-						if (watch != null) {
-							GitPlex.getInstance(BranchWatchManager.class).delete(watch);
-							branchWatchesModel.getObject().remove(branch);
-						}
-						target.add(actionsContainer);
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getLoginUser() != null && branchWatchesModel.getObject().containsKey(branch));
-					}
-
-				});
-				actionsContainer.add(new AjaxLink<Void>("watchRequests") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						BranchWatch watch = new BranchWatch();
-						watch.setDepot(getDepot());
-						watch.setBranch(branch);
-						watch.setUser(getLoginUser());
-						GitPlex.getInstance(BranchWatchManager.class).save(watch);
-						target.add(actionsContainer);
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getLoginUser() != null && !branchWatchesModel.getObject().containsKey(branch));
-					}
-
-				});
-
-				AjaxLink<Void> deleteLink;
-				actionsContainer.add(deleteLink = new AjaxLink<Void>("delete") {
-
-					
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this branch?"));
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						getDepot().deleteBranch(branch);
-						if (branch.equals(baseBranch)) {
-							baseBranch = getDepot().getDefaultBranch();
-							target.add(baseChoice);
-						}
-						target.add(pagingNavigator);
-						target.add(branchesContainer);
-						target.add(noBranchesContainer);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						RefInfo ref = item.getModelObject();
-						if (!getDepot().getDefaultBranch().equals(branch) 
-								&& SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getRef().getObjectId(), ObjectId.zeroId())) {
-							setVisible(true);
-							PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
-							PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
-							setEnabled(aheadOpen == null && behindOpen == null);
-						} else {
-							setVisible(false);
-						}
-					}
-					
-				});
 				PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
 				PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
 				if (aheadOpen != null || behindOpen != null) {
 					String hint = "This branch can not be deleted as there are <br>pull request opening against it."; 
-					deleteLink.add(new TooltipBehavior(Model.of(hint), new TooltipConfig().withPlacement(Placement.left)));
+					deleteLink.add(new TooltipBehavior(Model.of(hint), new TooltipConfig().withPlacement(Placement.right)));
 					deleteLink.add(AttributeAppender.append("data-html", "true"));
 				}
 			}
