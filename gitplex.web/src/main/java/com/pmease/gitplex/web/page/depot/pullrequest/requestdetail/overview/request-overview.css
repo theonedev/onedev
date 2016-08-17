@@ -314,3 +314,6 @@
 #request-detail .info .reviewers .review-result {
 	top: -4px;
 }
+#request-detail .info .manage .help-block {
+	margin-bottom: 12px;
+}

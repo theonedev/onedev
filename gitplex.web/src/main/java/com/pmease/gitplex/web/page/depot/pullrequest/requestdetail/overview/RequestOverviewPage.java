@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -21,6 +22,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -34,6 +36,7 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.ConfirmOnClick;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.gitplex.core.GitPlex;
@@ -370,6 +373,33 @@ public class RequestOverviewPage extends RequestDetailPage {
 		add(newAssigneeContainer());
 		add(newReviewersContainer());
 		add(newWatchContainer());
+		add(newManageContainer());
+	}
+	
+	private WebMarkupContainer newManageContainer() {
+		WebMarkupContainer container = new WebMarkupContainer("manage");
+		container.setVisible(SecurityUtils.canModify(getPullRequest()));
+		container.add(new Link<Void>("synchronize") {
+
+			@Override
+			public void onClick() {
+				GitPlex.getInstance(PullRequestManager.class).check(getPullRequest());
+				Session.get().success("Pull request is synchronized");
+			}
+			
+		});
+		container.add(new Link<Void>("delete") {
+
+			@Override
+			public void onClick() {
+				PullRequest request = getPullRequest();
+				GitPlex.getInstance(PullRequestManager.class).delete(request);
+				Session.get().success("Pull request #" + request.getNumber() + " is deleted");
+				setResponsePage(RequestListPage.class, RequestListPage.paramsOf(getDepot()));
+			}
+			
+		}.add(new ConfirmOnClick("Do you really want to delete this pull request?")));
+		return container;
 	}
 
 	private WebMarkupContainer newIntegrationStrategyContainer() {
