@@ -96,7 +96,7 @@ public class MarkdownPanel extends GenericPanel<String> {
 				
 				CharSequence callbackFunc = getCallbackFunction(
 						explicit("taskStartIndex"), explicit("taskChecked"));
-				String script = String.format("pmease.commons.initMarkdownViewer($('#%s>.md-preview'), %s);", 
+				String script = String.format("pmease.commons.initMarkdownPanel($('#%s>.markdown-panel>.md-preview'), %s);", 
 						getMarkupId(true), editSupport!=null?callbackFunc:"undefined");
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}

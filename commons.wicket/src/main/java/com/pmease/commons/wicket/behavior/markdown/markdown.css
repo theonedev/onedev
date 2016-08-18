@@ -95,3 +95,9 @@
 .md-fullscreen-mode textarea {
 	max-height: inherit;
 }
+.md-nooverflow .btn, .md-nooverflow .form-control {
+	z-index: 0 !important;
+}
+.md-control-fullscreen, .exit-fullscreen {
+	display: none;
+}

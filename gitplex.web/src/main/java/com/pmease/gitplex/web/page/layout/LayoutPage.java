@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -137,7 +138,15 @@ public abstract class LayoutPage extends BasePage {
 		Account user = getLoginUser();
 		boolean signedIn = user != null;
 
-		head.add(new BookmarkablePageLink<Void>("login", LoginPage.class).setVisible(!signedIn));
+		head.add(new Link<Void>("login") {
+
+			@Override
+			public void onClick() {
+				throw new RestartResponseAtInterceptPageException(LoginPage.class);
+			}
+			
+		}.setVisible(!signedIn));
+		
 		head.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
 		head.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
 		if (user != null) {

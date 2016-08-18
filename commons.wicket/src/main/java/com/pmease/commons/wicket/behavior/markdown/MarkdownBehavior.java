@@ -65,7 +65,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			String script = String.format(""
 					+ "var $preview=$('#%s~.md-preview');"
 					+ "$preview.html('%s');"
-					+ "pmease.commons.initMarkdownViewer($preview);",
+					+ "pmease.commons.initMarkdownPanel($preview);",
 					getComponent().getMarkupId(), StringEscapeUtils.escapeEcmaScript(preview));
 			target.appendJavaScript(script);
 		} else if (type.equals("emojiQuery")){
