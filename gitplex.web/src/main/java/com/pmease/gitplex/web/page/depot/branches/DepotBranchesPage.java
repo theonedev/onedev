@@ -137,7 +137,7 @@ public class DepotBranchesPage extends DepotPage {
 				compareIds.add(ref.getRef().getObjectId());
 			}
 
-			Ref baseRef = getDepot().getRefs(Constants.R_HEADS).get(getBaseBranch());
+			Ref baseRef = getDepot().getRefs(Constants.R_HEADS).get(baseBranch);
 			Preconditions.checkNotNull(baseRef);
 			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
 			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
@@ -202,7 +202,7 @@ public class DepotBranchesPage extends DepotPage {
 		protected Map<String, PullRequest> load() {
 			Map<String, PullRequest> requests = new HashMap<>();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
+			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), baseBranch);
 			for (PullRequest request: pullRequestManager.findAllOpenTo(depotAndBranch, getDepot())) 
 				requests.put(request.getSource().getBranch(), request);
 			return requests;
@@ -217,7 +217,7 @@ public class DepotBranchesPage extends DepotPage {
 		protected Map<String, PullRequest> load() {
 			Map<String, PullRequest> requests = new HashMap<>();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
+			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), baseBranch);
 			for (PullRequest request: pullRequestManager.findAllOpenFrom(depotAndBranch, getDepot())) 
 				requests.put(request.getTarget().getBranch(), request);
 			return requests;
@@ -250,6 +250,8 @@ public class DepotBranchesPage extends DepotPage {
 		super(params);
 		
 		baseBranch = params.get(PARAM_BASE).toString();
+		if (baseBranch == null)
+			baseBranch = Preconditions.checkNotNull(getDepot().getDefaultBranch());
 		
 		if (getDepot().getDefaultBranch() == null) 
 			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
@@ -267,7 +269,7 @@ public class DepotBranchesPage extends DepotPage {
 
 			@Override
 			public String getObject() {
-				return getBaseBranch();
+				return baseBranch;
 			}
 
 			@Override
@@ -588,7 +590,7 @@ public class DepotBranchesPage extends DepotPage {
 						} else {
 							RevisionComparePage.State state = new RevisionComparePage.State();
 							state.leftSide = new DepotAndBranch(getDepot(), branch);
-							state.rightSide = new DepotAndBranch(getDepot(), getBaseBranch());
+							state.rightSide = new DepotAndBranch(getDepot(), baseBranch);
 							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state); 
 							setResponsePage(RevisionComparePage.class, params);
 						}
@@ -648,7 +650,7 @@ public class DepotBranchesPage extends DepotPage {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
 							RevisionComparePage.State state = new RevisionComparePage.State();
-							state.leftSide = new DepotAndBranch(getDepot(), getBaseBranch());
+							state.leftSide = new DepotAndBranch(getDepot(), baseBranch);
 							state.rightSide = new DepotAndBranch(getDepot(), branch);
 							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
 							setResponsePage(RevisionComparePage.class, params);
@@ -708,13 +710,6 @@ public class DepotBranchesPage extends DepotPage {
 		noBranchesContainer.setOutputMarkupPlaceholderTag(true);
 	}
 	
-	private String getBaseBranch() {
-		if (baseBranch != null)
-			return baseBranch;
-		else
-			return getDepot().getDefaultBranch();
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -756,7 +751,7 @@ public class DepotBranchesPage extends DepotPage {
 
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getDepot(), baseBranch);
-		CharSequence url = RequestCycle.get().urlFor(RevisionComparePage.class, params);
+		CharSequence url = RequestCycle.get().urlFor(DepotBranchesPage.class, params);
 		pushState(target, url.toString(), baseBranch);
 	}
 	
