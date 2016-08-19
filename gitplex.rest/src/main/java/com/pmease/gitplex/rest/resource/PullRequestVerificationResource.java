@@ -17,7 +17,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
@@ -27,7 +26,7 @@ import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestVerificationManager;
-import com.pmease.gitplex.core.security.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Path("/pull_request_verifications")
 @Consumes(MediaType.WILDCARD)
@@ -53,7 +52,7 @@ public class PullRequestVerificationResource {
     @Path("/{id}")
     public PullRequestVerification get(@PathParam("id") Long id) {
     	PullRequestVerification verification  = dao.load(PullRequestVerification.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(verification.getRequest().getTargetDepot())))
+    	if (!SecurityUtils.canRead(verification.getRequest().getTargetDepot()))
     		throw new UnauthorizedException();
     	return verification;
     }
@@ -75,8 +74,7 @@ public class PullRequestVerificationResource {
 		List<PullRequestVerification> verifications = dao.findAll(criteria);
 		
     	for (PullRequestVerification verification: verifications) {
-    		if (!SecurityUtils.getSubject().isPermitted(
-    				ObjectPermission.ofDepotRead(verification.getRequest().getTargetDepot()))) {
+    		if (!SecurityUtils.canRead(verification.getRequest().getTargetDepot())) {
     			throw new UnauthorizedException("Unauthorized access to verification " 
     					+ verification.getRequest() + "/" + verification.getId());
     		}
@@ -89,7 +87,7 @@ public class PullRequestVerificationResource {
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
     	PullRequestVerification verification = dao.load(PullRequestVerification.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(verification.getRequest().getTargetDepot())))
+    	if (!SecurityUtils.canWrite(verification.getRequest().getTargetDepot()))
     		throw new UnauthorizedException();
     	
     	verificationManager.delete(verification);
@@ -97,7 +95,7 @@ public class PullRequestVerificationResource {
 
     @POST
     public Long save(@NotNull @Valid PullRequestVerification verification) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(verification.getRequest().getTargetDepot())))
+    	if (!SecurityUtils.canWrite(verification.getRequest().getTargetDepot()))
     		throw new UnauthorizedException();
     	
     	verification.setUser(accountManager.getCurrent());

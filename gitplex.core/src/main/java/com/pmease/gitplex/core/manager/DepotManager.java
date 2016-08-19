@@ -18,18 +18,7 @@ public interface DepotManager extends EntityManager<Depot> {
 
 	@Nullable Depot find(String depotFQN);
 
-	/**
-	 * Fork specified repository as specified user.
-	 * 
-	 * @param depot
-	 * 			repository to be forked
-	 * @param user
-	 * 			user forking the repository
-	 * @return
-	 * 			newly forked repository. If the repository has already been forked, return the 
-	 * 			repository forked previously
-	 */
-	Depot fork(Depot depot, Account user);
+	void fork(Depot from, Depot to);
 	
 	/**
 	 * Save specified depot. Note that oldName and oldAccountId should not be 

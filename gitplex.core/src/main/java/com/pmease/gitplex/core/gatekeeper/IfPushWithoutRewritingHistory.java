@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.gatekeeper;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -30,7 +31,7 @@ public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
 	@Override
 	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
-			if (depot.isMergedInto(oldCommit.name(), newCommit.name()))
+			if (GitUtils.isMergedInto(depot.getRepository(), oldCommit, newCommit))
 				return passed(Lists.newArrayList("Push operation does not rewrite history"));
 			else
 				return failed(Lists.newArrayList("Push operation rewrites history"));

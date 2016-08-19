@@ -40,8 +40,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.pmease.commons.git.command.CalcMergeBaseCommand;
+import com.pmease.commons.git.command.CloneCommand;
+import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
 import com.pmease.commons.git.exception.RefUpdateException;
+import com.pmease.commons.util.FileUtils;
 
 public class GitUtils {
 	
@@ -268,9 +272,31 @@ public class GitUtils {
 		} 			
     }
 
+	public static ObjectId getMergeBase(Repository repository1, ObjectId commit1, 
+			Repository repository2, ObjectId commit2, String fetchRef) {
+		if (repository1.getDirectory()!=null && repository1.getDirectory().equals(repository2.getDirectory())) {
+			return GitUtils.getMergeBase(repository1, commit1, commit2);
+		} else {
+			File tempDir = FileUtils.createTempDir();
+			try {
+				new CloneCommand(tempDir).from(repository1.getDirectory().getAbsolutePath()).bare(true).shared(true).call();
+				new FetchCommand(tempDir).from(repository2.getDirectory().getAbsolutePath()).refspec(fetchRef).call();
+				return ObjectId.fromString(new CalcMergeBaseCommand(tempDir).rev1(commit1.name()).rev2(commit2.name()).call());
+			} finally {
+				FileUtils.deleteDir(tempDir);
+			}
+		}
+	}
+	
     public static boolean isMergedInto(Repository repository, ObjectId base, ObjectId tip) {
 		try (RevWalk revWalk = new RevWalk(repository)) {
-			return revWalk.isMergedInto(revWalk.parseCommit(base), revWalk.parseCommit(tip));
+			RevCommit baseCommit;
+			try {
+				baseCommit = revWalk.parseCommit(base);
+			} catch (MissingObjectException e) {
+				return false;
+			}
+			return revWalk.isMergedInto(baseCommit, revWalk.parseCommit(tip));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} 			

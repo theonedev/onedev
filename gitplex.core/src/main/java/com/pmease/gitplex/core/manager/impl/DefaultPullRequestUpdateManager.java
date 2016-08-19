@@ -55,22 +55,26 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 	public void save(PullRequestUpdate update, boolean independent) {
 		PullRequest request = update.getRequest();
 		
-		String sourceHead = request.getSource().getObjectName();
-
 		dao.persist(update);
 		
+		ObjectId updateHeadId = ObjectId.fromString(update.getHeadCommitHash());
 		if (!request.getTargetDepot().equals(request.getSourceDepot())) {
 			try {
 				request.getTargetDepot().git().fetch()
 						.setRemote(request.getSourceDepot().getDirectory().getAbsolutePath())
-						.setRefSpecs(new RefSpec(request.getSourceRef() + ":" + update.getHeadRef()))
+						.setRefSpecs(new RefSpec(GitUtils.branch2ref(request.getSourceBranch()) + ":" + update.getHeadRef()))
 						.call();
+				if (!request.getTargetDepot().getObjectId(update.getHeadRef()).equals(updateHeadId)) {
+					RefUpdate refUpdate = request.getTargetDepot().updateRef(update.getHeadRef());
+					refUpdate.setNewObjectId(updateHeadId);
+					GitUtils.updateRef(refUpdate);
+				}
 			} catch (Exception e) {
 				Throwables.propagate(e);
 			}
 		} else {
 			RefUpdate refUpdate = request.getTargetDepot().updateRef(update.getHeadRef());
-			refUpdate.setNewObjectId(ObjectId.fromString(sourceHead));
+			refUpdate.setNewObjectId(updateHeadId);
 			GitUtils.updateRef(refUpdate);
 		}
 

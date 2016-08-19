@@ -14,7 +14,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
@@ -22,7 +21,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.security.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Path("/pull_requests")
 @Consumes(MediaType.WILDCARD)
@@ -46,7 +45,7 @@ public class PullRequestResource {
     public PullRequest get(@PathParam("id") Long id) {
     	PullRequest request = dao.load(PullRequest.class, id);
     	
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(request.getTargetDepot())))
+    	if (!SecurityUtils.canRead(request.getTargetDepot()))
     		throw new UnauthorizedException();
     	
     	return request;
@@ -90,7 +89,7 @@ public class PullRequestResource {
 		List<PullRequest> requests = dao.findAll(criteria);
 		
 		for (PullRequest request: requests) {
-	    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(request.getTarget().getDepot())))
+	    	if (!SecurityUtils.canRead(request.getTarget().getDepot()))
 	    		throw new UnauthorizedException("Unauthorized access to pull request " + request.getTarget() + "/" + request.getId());
 		}
 		return requests;

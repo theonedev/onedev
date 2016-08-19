@@ -9,6 +9,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -19,7 +20,6 @@ import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewManager;
-import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
@@ -28,8 +28,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(request.getTargetDepot()))
-					|| request.getStatus() != PENDING_INTEGRATE) {
+			if (!SecurityUtils.canWrite(request.getTargetDepot()) || request.getStatus() != PENDING_INTEGRATE) {
 				return false;
 			} else {
 				IntegrationPreview integrationPreview = request.getIntegrationPreview();
@@ -126,9 +125,8 @@ public enum PullRequestOperation {
 			}
 			
 			// now check if source branch is integrated into target branch
-			String sourceHead = request.getSource().getObjectName();
-			return request.getTargetDepot().getObjectId(sourceHead, false) == null 
-					|| !request.getTargetDepot().isMergedInto(sourceHead, request.getTarget().getObjectName());
+			return !GitUtils.isMergedInto(request.getTargetDepot().getRepository(), 
+					request.getSource().getObjectId(), request.getTarget().getObjectId());
 		}
 
 		@Override

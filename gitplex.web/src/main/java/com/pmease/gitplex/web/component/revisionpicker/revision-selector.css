@@ -17,6 +17,7 @@ div.revision-selector .nav-tabs>li.active>a {
 }
 div.revision-selector {
 	padding: 12px;
+	min-width: 260px;
 }
 div.revision-selector ul.items {
 	margin-bottom: 0;

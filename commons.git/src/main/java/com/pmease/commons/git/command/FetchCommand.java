@@ -37,6 +37,7 @@ public class FetchCommand extends GitCommand<Void> {
 	    
 		Commandline cmd = cmd().addArgs("fetch");
 		cmd.addArgs(from);
+		cmd.addArgs("--force");
 		
 		for (String each: refspec)
 			cmd.addArgs(each);

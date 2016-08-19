@@ -150,7 +150,7 @@ public class Account extends AbstractUser implements ProtectedObject {
     
     private transient Map<Account, OrganizationMembership> organizationMembersMap;
     
-    @Editable(name="Login Name", order=100)
+    @Editable(name="Account Name", order=100)
 	@AccountName
 	@NotEmpty
 	@Override

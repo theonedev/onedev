@@ -23,12 +23,9 @@ public class IfSubmitWithGerritStylePatch extends AbstractGateKeeper {
 	
 	@Override
 	protected GateCheckResult doCheckRequest(PullRequest request) {
-		String branchHead = request.getBaseCommitHash();
-		String requestHead = request.getHeadCommitHash();
-		Depot depot = request.getTargetDepot();
-		try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
-			RevCommit requestHeadCommit = revWalk.parseCommit(depot.getObjectId(requestHead));
-			RevCommit branchHeadCommit = revWalk.parseCommit(depot.getObjectId(branchHead));
+		try (RevWalk revWalk = new RevWalk(request.getWorkDepot().getRepository())) {
+			RevCommit requestHeadCommit = revWalk.parseCommit(ObjectId.fromString(request.getHeadCommitHash()));
+			RevCommit branchHeadCommit = revWalk.parseCommit(ObjectId.fromString(request.getBaseCommitHash()));
 			if (RevWalkUtils.count(revWalk, requestHeadCommit, branchHeadCommit) > 1) {
 				return failed(Lists.newArrayList("Please squash/rebase your commits"));
 			} else {

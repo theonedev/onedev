@@ -421,8 +421,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	 * 			comparable repositories of current repository, with current repository also 
 	 * 			included in the collection
 	 */
-	public List<Depot> findAffinals() {
-		List<Depot> affinals = new ArrayList<Depot>();
+	public Collection<Depot> findAffinals() {
+		Collection<Depot> affinals = new ArrayList<Depot>();
 		Depot forkRoot = findForkRoot();
 		if (forkRoot != null) {
 			affinals.add(forkRoot);
@@ -431,12 +431,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			affinals.add(this);
 			affinals.addAll(findForkDescendants());
 		}
-		affinals.sort((repo1, repo2) -> {
-			if (repo1.getAccount().equals(repo2.getAccount()))
-				return repo1.getName().compareTo(repo2.getName());
-			else
-				return repo1.getAccount().getName().compareTo(repo2.getAccount().getName());
-		});
 		return affinals;
 	}
 	
@@ -447,14 +441,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		return repository;
 	}
 	
-	public RevCommit getMergeBase(String commit1, String commit2) {
-		return GitUtils.getMergeBase(getRepository(), getObjectId(commit1), getObjectId(commit2));
-	}
-	
-	public boolean isMergedInto(String base, String tip) {
-		return GitUtils.isMergedInto(getRepository(), getObjectId(base), getObjectId(tip));
-	}
-
 	public String getUrl() {
 		return GitPlex.getInstance(ConfigManager.class).getSystemSetting().getServerUrl() + "/" + getFQN();
 	}

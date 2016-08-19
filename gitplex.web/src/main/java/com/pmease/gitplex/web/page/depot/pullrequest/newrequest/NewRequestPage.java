@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.depot.pullrequest.newrequest;
 import static com.pmease.gitplex.core.entity.PullRequest.Status.INTEGRATED;
 import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_UPDATE;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,12 +37,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.command.CalcMergeBaseCommand;
-import com.pmease.commons.git.command.CloneCommand;
-import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.WhitespaceOption;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -154,13 +149,6 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			pullRequest.setSource(source);
 			pullRequest.setSubmitter(currentUser);
 			
-			PullRequestUpdate update = new PullRequestUpdate();
-			pullRequest.addUpdate(update);
-			update.setRequest(pullRequest);
-			update.setHeadCommitHash(source.getObjectName());
-			update.setMergeCommitHash(GitUtils.getMergeBase(target.getDepot().getRepository(), 
-					target.getObjectId(), ObjectId.fromString(update.getHeadCommitHash())).name());
-			
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);
 			Preconditions.checkState(!strategies.isEmpty());
@@ -172,30 +160,25 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			else
 				pullRequest.setAssignee(getDepot().getAccount());
 
-			if (target.getDepot().equals(source.getDepot())) {
-				pullRequest.setBaseCommitHash(GitUtils.getMergeBase(target.getDepot().getRepository(), target.getObjectId(), source.getObjectId()).name());			
-				if (target.getDepot().isMergedInto(source.getObjectName(), target.getObjectName())) {
-					CloseInfo closeInfo = new CloseInfo();
-					closeInfo.setCloseDate(new Date());
-					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-					pullRequest.setCloseInfo(closeInfo);
-				}
-			} else {
-				File tempDir = FileUtils.createTempDir();
-				try {
-					new CloneCommand(tempDir).bare(true).shared(true).from(target.getDepot().getDirectory().getAbsolutePath()).call();
-					new FetchCommand(tempDir).from(source.getDepot().getDirectory().getAbsolutePath()).refspec(source.getBranch()).call();
-					pullRequest.setBaseCommitHash(new CalcMergeBaseCommand(tempDir).rev1(target.getObjectName()).rev2(source.getObjectName()).call());			
-				} finally {
-					FileUtils.deleteDir(tempDir);
-				}
-				if (pullRequest.getBaseCommitHash().equals(source.getObjectName())) {
-					CloseInfo closeInfo = new CloseInfo();
-					closeInfo.setCloseDate(new Date());
-					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-					pullRequest.setCloseInfo(closeInfo);
-				}
+			ObjectId baseCommitId = GitUtils.getMergeBase(
+					target.getDepot().getRepository(), target.getObjectId(), 
+					source.getDepot().getRepository(), source.getObjectId(), 
+					source.getBranch());
+			
+			pullRequest.setBaseCommitHash(baseCommitId.name());
+			if (pullRequest.getBaseCommitHash().equals(source.getObjectName())) {
+				CloseInfo closeInfo = new CloseInfo();
+				closeInfo.setCloseDate(new Date());
+				closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+				pullRequest.setCloseInfo(closeInfo);
 			}
+
+			PullRequestUpdate update = new PullRequestUpdate();
+			pullRequest.addUpdate(update);
+			update.setRequest(pullRequest);
+			update.setHeadCommitHash(source.getObjectName());
+			update.setMergeCommitHash(pullRequest.getBaseCommitHash());
+			
 			requestModel = Model.of(pullRequest);
 		} else {
 			Long requestId = pullRequest.getId();
@@ -216,7 +199,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			protected List<RevCommit> load() {
 				PullRequest request = getPullRequest();
 				List<RevCommit> commits = new ArrayList<>();
-				try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
+				try (RevWalk revWalk = new RevWalk(source.getDepot().getRepository())) {
 					ObjectId headId = ObjectId.fromString(request.getHeadCommitHash());
 					revWalk.markStart(revWalk.parseCommit(headId));
 					ObjectId baseId = ObjectId.fromString(request.getBaseCommitHash());
@@ -242,7 +225,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 
 		setOutputMarkupId(true);
 		
-		add(new AffinalBranchPicker("target", getDepot().getId(), target.getBranch()) {
+		add(new AffinalBranchPicker("target", target.getDepotId(), target.getBranch()) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String branch) {
@@ -252,7 +235,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			
 		});
 		
-		add(new AffinalBranchPicker("source", getDepot().getId(), source.getBranch()) {
+		add(new AffinalBranchPicker("source", source.getDepotId(), source.getBranch()) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String branch) {

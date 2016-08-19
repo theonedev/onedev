@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.AbstractGitTest;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
@@ -96,7 +97,8 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("4", "", "dev:4");
 
-        request.setBaseCommitHash(depot.getMergeBase("dev~2", "master").name());
+        Repository repository = depot.getRepository();
+        request.setBaseCommitHash(GitUtils.getMergeBase(repository, repository.resolve("dev~2"), repository.resolve("master")).name());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);
@@ -136,7 +138,8 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("d2", "", "d2");
 
-        request.setBaseCommitHash(depot.getMergeBase("master", "dev").name());
+        Repository repository = depot.getRepository();
+        request.setBaseCommitHash(GitUtils.getMergeBase(repository, repository.resolve("master"), repository.resolve("dev")).name());
 
         PullRequestUpdate update1 = new PullRequestUpdate();
         update1.setId(1L);

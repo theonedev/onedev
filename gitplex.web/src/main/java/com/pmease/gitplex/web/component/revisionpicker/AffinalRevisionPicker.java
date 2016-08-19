@@ -37,7 +37,7 @@ public abstract class AffinalRevisionPicker extends Panel {
 				return getDepot();
 			}
 			
-		}, revision) {
+		}, revision, RevisionMode.CAN_SELECT_REV) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {

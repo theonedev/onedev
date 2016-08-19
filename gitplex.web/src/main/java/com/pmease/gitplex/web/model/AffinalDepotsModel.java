@@ -1,16 +1,16 @@
 package com.pmease.gitplex.web.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.security.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 public class AffinalDepotsModel extends LoadableDetachableModel<Collection<Depot>> {
@@ -24,7 +24,7 @@ public class AffinalDepotsModel extends LoadableDetachableModel<Collection<Depot
 	@Override
 	protected Collection<Depot> load() {
 		Depot depot = GitPlex.getInstance(Dao.class).load(Depot.class, repoId);;
-		List<Depot> affinals = depot.findAffinals();
+		List<Depot> affinals = new ArrayList<>(depot.findAffinals());
 		affinals.remove(depot);
 		if (depot.getForkedFrom() != null)
 			affinals.remove(depot.getForkedFrom());
@@ -38,7 +38,7 @@ public class AffinalDepotsModel extends LoadableDetachableModel<Collection<Depot
 			affinals.add(0, depot.getForkedFrom());
 		affinals.add(0, depot);
 		for (Iterator<Depot> it = affinals.iterator(); it.hasNext();) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(it.next())))
+			if (!SecurityUtils.canRead(it.next()))
 				it.remove();
 		}
 		return affinals;

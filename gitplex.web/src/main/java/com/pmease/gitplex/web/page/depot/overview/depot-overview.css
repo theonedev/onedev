@@ -11,6 +11,7 @@
 .depot.overview>.head>.title {
 	font-size: 20px; 
 	font-weight: bold;	
+	margin-bottom: 4px;
 }
 .depot.overview>.head>.subtitle, .depot.overview>.head>.subtitle a {
 	color: #777;
@@ -24,7 +25,7 @@
 	border-radius: 4px;
 	background: #F5F5F5;
 }
-.depot.overview>.metrics a {
+.depot.overview>.metrics>a, .depot.overview>.metrics>span {
 	font-size: 18px;
 	color: #444;
 	margin-right: 20px;
@@ -35,16 +36,7 @@
 .depot.overview>.clone input {
 	background: white;
 }
-.depot.overview>.readme {
-	border: 1px solid #DDD;
-	border-radius: 4px;
+
+.modal-content>.fork-options {
 	padding: 20px;
-}
-.depot.overview>.readme>.head {
-	font-size: 18px;
-	font-weight: bold;
-	border-bottom: 1px solid #DDD;
-	margin: -20px -20px 20px -20px;
-	padding: 8px 16px;
-	background: #F5F5F5;
 }

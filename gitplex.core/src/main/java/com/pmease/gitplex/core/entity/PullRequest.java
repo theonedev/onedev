@@ -362,6 +362,13 @@ public class PullRequest extends AbstractEntity {
 		return GitUtils.branch2ref(getSourceBranch());
 	}
 	
+	public Depot getWorkDepot() {
+		if (isNew()) 
+			return getSourceDepot();
+		else
+			return getTargetDepot();
+	}
+	
 	public String getBaseCommitHash() {
 		return baseCommitHash;
 	}
@@ -591,7 +598,8 @@ public class PullRequest extends AbstractEntity {
 
 			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = getSortedUpdates().get(i);
-				if (!getTargetDepot().isMergedInto(update.getHeadCommitHash(), getTarget().getObjectName()))
+				ObjectId headCommitId = ObjectId.fromString(update.getHeadCommitHash());
+				if (!GitUtils.isMergedInto(getTargetDepot().getRepository(), headCommitId, getTarget().getObjectId()))
 					effectiveUpdates.add(update);
 				else 
 					break;
@@ -983,7 +991,7 @@ public class PullRequest extends AbstractEntity {
 	
 	public boolean isMerged() {
 		if (merged == null) 
-			merged = getTargetDepot().isMergedInto(getHeadCommitHash(), getTarget().getObjectName());
+			merged = GitUtils.isMergedInto(getTargetDepot().getRepository(), ObjectId.fromString(getHeadCommitHash()), getTarget().getObjectId());
 		return merged;
 	}
 	

@@ -144,7 +144,8 @@ public class PullRequestUpdate extends AbstractEntity {
 	public Collection<String> getChangedFiles() {
 		if (changedFiles == null) {
 			changedFiles = new HashSet<>();
-			Repository repository = getRequest().getTargetDepot().getRepository();
+			
+			Repository repository = getRequest().getWorkDepot().getRepository();
 			try (	RevWalk revWalk = new RevWalk(repository);
 					TreeWalk treeWalk = new TreeWalk(repository)) {
 				RevCommit mergeCommit = revWalk.parseCommit(ObjectId.fromString(getMergeCommitHash()));
@@ -256,9 +257,8 @@ public class PullRequestUpdate extends AbstractEntity {
 		if (commits == null) {
 			commits = new ArrayList<>();
 			
-			try (RevWalk revWalk = new RevWalk(getRequest().getTargetDepot().getRepository())) {
-				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash()));
-				revWalk.markStart(headCommit);
+			try (RevWalk revWalk = new RevWalk(getRequest().getWorkDepot().getRepository())) {
+				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
 				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
 				
 				/*
@@ -280,7 +280,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public RevCommit getHeadCommit() {
-		return request.getTargetDepot().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
+		return request.getWorkDepot().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
 	}
 	
 }

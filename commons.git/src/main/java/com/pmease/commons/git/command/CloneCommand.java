@@ -19,6 +19,8 @@ public class CloneCommand extends GitCommand<Void> {
 	
 	private boolean shared;
 	
+	private boolean mirror;
+	
 	private boolean noCheckout;
 	
 	private String branch;
@@ -34,6 +36,11 @@ public class CloneCommand extends GitCommand<Void> {
 	
 	public CloneCommand bare(boolean bare) {
 		this.bare = bare;
+		return this;
+	}
+	
+	public CloneCommand mirror(boolean mirror) {
+		this.mirror = mirror;
 		return this;
 	}
 	
@@ -59,6 +66,8 @@ public class CloneCommand extends GitCommand<Void> {
 		Commandline cmd = cmd().addArgs("clone");
 		if (bare)
 			cmd.addArgs("--bare");
+		if (mirror)
+			cmd.addArgs("--mirror");
 		if (shared) 
 			cmd.addArgs("--shared");
 		if (noCheckout) 

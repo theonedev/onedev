@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.page.depot.compare;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,11 +31,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import com.pmease.commons.git.command.CalcMergeBaseCommand;
-import com.pmease.commons.git.command.CloneCommand;
-import com.pmease.commons.git.command.FetchCommand;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -188,7 +184,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		 * repository  
 		 */
 		if (!state.compareWithMergeBase && !state.leftSide.getDepot().equals(state.rightSide.getDepot())) {
-			throw new IllegalArgumentException("Can only compare with merge base when compare across repositories");
+			throw new IllegalArgumentException("Can only compare with common ancestor when different repositories are involved");
 		}
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
@@ -215,20 +211,8 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 
 			@Override
 			protected ObjectId load() {
-				Depot leftDepot = state.leftSide.getDepot();
-				Depot rightDepot = state.rightSide.getDepot();
-				if (!leftDepot.equals(rightDepot)) {
-					File tempDir = FileUtils.createTempDir();
-					try {
-						new CloneCommand(tempDir).from(leftDepot.getDirectory().getAbsolutePath()).bare(true).shared(true).call();
-						new FetchCommand(tempDir).from(rightDepot.getDirectory().getAbsolutePath()).refspec(state.rightSide.getRevision()).call();
-						return ObjectId.fromString(new CalcMergeBaseCommand(tempDir).rev1(leftCommitId.name()).rev2(rightCommitId.name()).call());
-					} finally {
-						FileUtils.deleteDir(tempDir);
-					}
-				} else {
-					return leftDepot.getMergeBase(state.leftSide.getRevision(), state.rightSide.getRevision());
-				}
+				return GitUtils.getMergeBase(state.leftSide.getDepot().getRepository(), leftCommitId, 
+						state.rightSide.getDepot().getRepository(), rightCommitId, state.rightSide.getRevision());
 			}
 			
 		};
@@ -240,8 +224,8 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				List<RevCommit> commits = new ArrayList<>();
 				Depot rightDepot = state.rightSide.getDepot();
 				
-				try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
-					ObjectId mergeBase = mergeBaseModel.getObject();
+				ObjectId mergeBase = mergeBaseModel.getObject();
+				try (RevWalk revWalk = new RevWalk(state.rightSide.getDepot().getRepository())) {
 					if (rightDepot.equals(state.leftSide.getDepot()) 
 							&& !state.compareWithMergeBase 
 							&& !mergeBase.equals(leftCommitId)) {
@@ -257,7 +241,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 						commits.add(getDepot().getRevCommit(mergeBase));
 					} else {
 						revWalk.markStart(revWalk.parseCommit(rightCommitId));
-						revWalk.markUninteresting(revWalk.parseCommit(leftCommitId));
+						revWalk.markUninteresting(revWalk.parseCommit(mergeBase));
 						revWalk.forEach(c->commits.add(c));
 					}
 				} catch (IOException e) {
@@ -330,7 +314,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		String tooltip;
 		if (!state.leftSide.getDepot().equals(state.rightSide.getDepot())) {
 			checkBox.add(AttributeAppender.append("disabled", "disabled"));
-			tooltip = "Can only compare with common ancestor when compare across different repositories";
+			tooltip = "Can only compare with common ancestor when different repositories are involved";
 		} else {
 			tooltip = "Check this to compare \"right side\" with common ancestor of left and right";
 		}

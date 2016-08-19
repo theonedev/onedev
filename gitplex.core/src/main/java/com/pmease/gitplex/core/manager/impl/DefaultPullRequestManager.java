@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
@@ -31,6 +32,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.RefSpec;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
@@ -230,10 +232,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		Account user = accountManager.getCurrent();
 
-		closeAsIntegrated(request, false, note);
-
-		ObjectId integratedCommitId = ObjectId.fromString(integrated);
-		RevCommit integratedCommit = request.getTargetDepot().getRevCommit(integratedCommitId);
+		ObjectId integratedId = ObjectId.fromString(integrated);
+		RevCommit integratedCommit = request.getTargetDepot().getRevCommit(integratedId);
 		
 		Depot targetDepot = request.getTargetDepot();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
@@ -242,25 +242,42 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				&& !integratedCommit.getFullMessage().equals(request.getCommitMessage())) {
 			try (	RevWalk revWalk = new RevWalk(targetDepot.getRepository());
 					ObjectInserter inserter = targetDepot.getRepository().newObjectInserter()) {
-				RevCommit commit = revWalk.parseCommit(ObjectId.fromString(integrated));
 		        CommitBuilder newCommit = new CommitBuilder();
-		        newCommit.setAuthor(commit.getAuthorIdent());
+		        newCommit.setAuthor(integratedCommit.getAuthorIdent());
 		        newCommit.setCommitter(user.asPerson());
 		        newCommit.setMessage(request.getCommitMessage());
-		        newCommit.setTreeId(commit.getTree());
-		        newCommit.setParentIds(commit.getParents());
-		        integrated = inserter.insert(newCommit).name();
+		        newCommit.setTreeId(integratedCommit.getTree());
+		        newCommit.setParentIds(integratedCommit.getParents());
+		        integratedId = inserter.insert(newCommit);
+		        integrated = integratedId.name();
 		        inserter.flush();
 			} catch (Exception e) {
 				Throwables.propagate(e);
 			}
+	        preview = new IntegrationPreview(preview.getTargetHead(), preview.getRequestHead(), 
+	        		preview.getIntegrationStrategy(), integrated);
+	        request.setLastIntegrationPreview(preview);
+			RefUpdate refUpdate = targetDepot.updateRef(request.getIntegrateRef());
+			refUpdate.setNewObjectId(integratedId);
+			GitUtils.updateRef(refUpdate);
 		}
 		
-		integratedCommitId = ObjectId.fromString(integrated);
+		closeAsIntegrated(request, false, note);
+
 		if (strategy == REBASE_SOURCE_ONTO_TARGET || strategy == MERGE_WITH_SQUASH) {
 			Depot sourceDepot = request.getSourceDepot();
+			if (!sourceDepot.equals(targetDepot)) {
+				try {
+					sourceDepot.git().fetch()
+						.setRemote(targetDepot.getDirectory().getAbsolutePath())
+						.setRefSpecs(new RefSpec(request.getIntegrateRef()))
+						.call();
+				} catch (GitAPIException e) {
+					throw new RuntimeException(e);
+				}
+			} 
 			RefUpdate refUpdate = sourceDepot.updateRef(request.getSourceRef());
-			refUpdate.setNewObjectId(integratedCommitId);
+			refUpdate.setNewObjectId(integratedId);
 			ObjectId requestHeadId = ObjectId.fromString(preview.getRequestHead());
 			refUpdate.setExpectedOldObjectId(requestHeadId);
 			refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
@@ -269,8 +286,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			checkUpdate(request, false);
 
 			Long requestId = request.getId();
+			ObjectId newSourceHeadId = integratedId;
 			Subject subject = SecurityUtils.getSubject();
-			ObjectId newCommitId = integratedCommitId;
 			doUnitOfWorkAsyncAfterCommit(new Runnable() {
 
 				@Override
@@ -278,9 +295,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					ThreadContext.bind(subject);
 					try {
 						PullRequest request = load(requestId);
-						request.getSourceDepot().cacheObjectId(request.getSourceRef(), newCommitId);
+						request.getSourceDepot().cacheObjectId(request.getSourceRef(), newSourceHeadId);
 						listenerRegistry.post(new RefUpdated(
-								request.getSourceDepot(), request.getSourceRef(), requestHeadId, newCommitId));
+								request.getSourceDepot(), request.getSourceRef(), requestHeadId, newSourceHeadId));
 					} finally {
 						ThreadContext.unbindSubject();
 					}
@@ -295,12 +312,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		refUpdate.setRefLogIdent(user.asPerson());
 		refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
 		refUpdate.setExpectedOldObjectId(targetHeadId);
-		refUpdate.setNewObjectId(integratedCommitId);
+		refUpdate.setNewObjectId(integratedId);
 		GitUtils.updateRef(refUpdate);
 		
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
-		ObjectId newCommitId = integratedCommitId;
+		ObjectId newTargetHeadId = integratedId;
 		doUnitOfWorkAsyncAfterCommit(new Runnable() {
 
 			@Override
@@ -308,9 +325,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				ThreadContext.bind(subject);
 				try {
 					PullRequest request = load(requestId);
-					request.getTargetDepot().cacheObjectId(request.getTargetRef(), newCommitId);
+					request.getTargetDepot().cacheObjectId(request.getTargetRef(), newTargetHeadId);
 					listenerRegistry.post(new RefUpdated(request.getTargetDepot(), targetRef, 
-								ObjectId.fromString(preview.getTargetHead()), newCommitId));
+								targetHeadId, newTargetHeadId));
 				} finally {
 					ThreadContext.unbindSubject();
 				}
@@ -424,8 +441,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestUpdate update = new PullRequestUpdate();
 			update.setRequest(request);
 			update.setHeadCommitHash(request.getSource().getObjectName());
-			update.setMergeCommitHash(GitUtils.getMergeBase(request.getTargetDepot().getRepository(), 
-					request.getTarget().getObjectId(), ObjectId.fromString(update.getHeadCommitHash())).name());
+			ObjectId mergeBase = GitUtils.getMergeBase(
+					request.getTargetDepot().getRepository(), request.getTarget().getObjectId(), 
+					request.getSourceDepot().getRepository(), request.getSource().getObjectId(), 
+					request.getSourceBranch());
+			update.setMergeCommitHash(mergeBase.name());
 			request.addUpdate(update);
 			pullRequestUpdateManager.save(update, independent);
 		}
@@ -515,7 +535,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 								preview = new IntegrationPreview(targetHead, requestHead, request.getIntegrationStrategy(), null);
 								request.setLastIntegrationPreview(preview);
 								String integrateRef = request.getIntegrateRef();
-								if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetDepot.isMergedInto(targetHead, requestHead)) {
+								ObjectId requestHeadId = ObjectId.fromString(requestHead);
+								ObjectId targetHeadId = ObjectId.fromString(targetHead);
+								if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY 
+										&& GitUtils.isMergedInto(targetDepot.getRepository(), targetHeadId, requestHeadId)) {
 									preview.setIntegrated(requestHead);
 									RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
 									refUpdate.setNewObjectId(ObjectId.fromString(requestHead));
@@ -523,8 +546,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 								} else {
 									PersonIdent user = accountManager.getRoot().asPerson();
 									ObjectId integrated;
-									ObjectId requestHeadId = ObjectId.fromString(requestHead);
-									ObjectId targetHeadId = ObjectId.fromString(targetHead);
 									if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
 										integrated = GitUtils.rebase(targetDepot.getRepository(), targetHeadId, requestHeadId, user);
 									} else if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {

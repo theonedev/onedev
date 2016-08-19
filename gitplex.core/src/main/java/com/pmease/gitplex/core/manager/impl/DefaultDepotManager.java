@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -169,7 +167,11 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		}
     	}
     	
-        doAfterCommit(new Runnable() {
+        doAfterCommit(newAfterCommitRunnable(depot, isNew));
+    }
+    
+    private Runnable newAfterCommitRunnable(Depot depot, boolean isNew) {
+    	return new Runnable() {
 
 			@Override
 			public void run() {
@@ -185,7 +187,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 				}
 			}
         	
-        });
+        };    	
     }
 
     @Transactional
@@ -267,41 +269,12 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 
     @Transactional
 	@Override
-	public Depot fork(Depot depot, Account user) {
-		if (depot.getAccount().equals(user))
-			return depot;
-		
-		Depot forked = null;
-		for (Depot each: user.getDepots()) {
-			if (depot.equals(each.getForkedFrom())) {
-				forked = each;
-				break;
-			}
-		}
-		if (forked == null) {
-			Set<String> existingNames = new HashSet<>();
-			for (Depot each: user.getDepots()) 
-				existingNames.add(each.getName());
-			
-			forked = new Depot();
-			forked.setAccount(user);
-			forked.setForkedFrom(depot);
-			if (existingNames.contains(depot.getName())) {
-				int suffix = 1;
-				while (existingNames.contains(depot.getName() + "_" + suffix))
-					suffix++;
-				forked.setName(depot.getName() + "_" + suffix);
-			} else {
-				forked.setName(depot.getName());
-			}
-
-			dao.persist(forked);
-
-            FileUtils.cleanDir(forked.getDirectory());
-            new CloneCommand(forked.getDirectory()).bare(true).from(depot.getDirectory().getAbsolutePath()).call();
-		}
-		
-		return forked;
+	public void fork(Depot from, Depot to) {
+    	boolean isNew = to.isNew();
+    	save(to);
+        FileUtils.cleanDir(to.getDirectory());
+        new CloneCommand(to.getDirectory()).mirror(true).from(from.getDirectory().getAbsolutePath()).call();
+        doAfterCommit(newAfterCommitRunnable(to, isNew));
 	}
 
 	private void checkSanity(Depot depot) {
