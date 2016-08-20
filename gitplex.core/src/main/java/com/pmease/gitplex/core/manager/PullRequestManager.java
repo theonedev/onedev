@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.pmease.commons.hibernate.dao.EntityManager;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
@@ -28,6 +29,9 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
 	@Nullable
 	PullRequest find(String uuid);
+	
+	@Nullable
+	PullRequest findLatest(Depot depot, Account submitter);
     
     /**
      * Integrate specified pull request.
@@ -76,4 +80,5 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	void restoreSourceBranch(PullRequest request, @Nullable String note);
 	
 	int countOpen(Depot depot);
+	
 }

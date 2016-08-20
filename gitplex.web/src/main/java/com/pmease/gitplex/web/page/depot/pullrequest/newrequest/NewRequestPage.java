@@ -116,10 +116,20 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 		if (getDepot().getDefaultBranch() == null) 
 			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 
-		if (params.get("target").toString() != null) {
-			target = new DepotAndBranch(params.get("target").toString());
+		Account currentUser = getLoginUser();
+		if (currentUser == null)
+			throw new RestartResponseAtInterceptPageException(LoginPage.class);
+
+		PullRequest prevRequest = null;
+		String targetParam = params.get("target").toString();
+		String sourceParam = params.get("source").toString();
+		if (targetParam != null) {
+			target = new DepotAndBranch(targetParam);
 		} else {
-			if (getDepot().getForkedFrom() != null) {
+			prevRequest = GitPlex.getInstance(PullRequestManager.class).findLatest(getDepot(), getLoginUser());
+			if (prevRequest != null && prevRequest.getTarget().getObjectId(false) != null) {
+				target = prevRequest.getTarget();
+			} else if (getDepot().getForkedFrom() != null) {
 				target = new DepotAndBranch(getDepot().getForkedFrom(), 
 						getDepot().getForkedFrom().getDefaultBranch());
 			} else {
@@ -127,21 +137,25 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			}
 		}
 		
-		if (params.get("source").toString() != null) {
-			source = new DepotAndBranch(params.get("source").toString());
+		if (sourceParam != null) {
+			source = new DepotAndBranch(sourceParam);
 		} else {
-			if (getDepot().getForkedFrom() != null) {
+			if (prevRequest == null)
+				prevRequest = GitPlex.getInstance(PullRequestManager.class).findLatest(getDepot(), getLoginUser());
+			if (prevRequest != null && prevRequest.getSource().getObjectId(false) != null) {
+				source = prevRequest.getSource();
+			} else if (getDepot().getForkedFrom() != null) {
 				source = new DepotAndBranch(getDepot(), getDepot().getDefaultBranch());
 			} else {
 				source = new DepotAndBranch(getDepot(), getDepot().getDefaultBranch());
 			}
 		}
 
-		Account currentUser = getLoginUser();
-		if (currentUser == null)
-			throw new RestartResponseAtInterceptPageException(LoginPage.class);
-		
-		PullRequest pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
+		PullRequest pullRequest;
+		if (prevRequest != null && source.equals(prevRequest.getSource()) && target.equals(prevRequest.getTarget()) && prevRequest.isOpen())
+			pullRequest = prevRequest;
+		else
+			pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
 		
 		if (pullRequest == null) {
 			pullRequest = new PullRequest();

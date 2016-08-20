@@ -1,8 +1,6 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofOpen;
-import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofSource;
-import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofTarget;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.*;
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
@@ -35,6 +33,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RefSpec;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
@@ -621,7 +620,18 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		return find(EntityCriteria.of(PullRequest.class)
 				.add(ofTarget(target)).add(ofSource(source)).add(ofOpen()));
 	}
-
+	
+	@Sessional
+	@Override
+	public PullRequest findLatest(Depot depot, Account submitter) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(ofOpen());
+		criteria.add(Restrictions.or(ofSourceDepot(depot), ofTargetDepot(depot)));
+		criteria.add(ofSubmitter(submitter));
+		criteria.addOrder(Order.desc("id"));
+		return find(criteria);
+	}
+	
 	@Sessional
 	@Override
 	public Collection<PullRequest> findAllOpenTo(DepotAndBranch target, @Nullable Depot sourceDepot) {
@@ -748,5 +758,5 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			unitOfWork.doAsync(newCheckRunnable(requestId, subject));
 		}
 	}
-	
+
 }

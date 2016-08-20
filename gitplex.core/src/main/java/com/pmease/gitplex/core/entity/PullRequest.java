@@ -350,8 +350,13 @@ public class PullRequest extends AbstractEntity {
 		this.sourceBranch = sourceBranch;
 	}
 
+	@Nullable
 	public DepotAndBranch getSource() {
-		return new DepotAndBranch(getSourceDepot(), getSourceBranch());
+		Depot sourceDepot = getSourceDepot();
+		if (sourceDepot != null)
+			return new DepotAndBranch(sourceDepot, getSourceBranch());
+		else
+			return null;
 	}
 	
 	public String getTargetRef() {
