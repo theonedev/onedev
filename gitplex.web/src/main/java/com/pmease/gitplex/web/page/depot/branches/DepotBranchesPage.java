@@ -17,7 +17,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -52,9 +51,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.BranchWatch;
@@ -74,11 +71,13 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SortOption;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
@@ -467,28 +466,51 @@ public class DepotBranchesPage extends DepotPage {
 
 				});
 
-				AjaxLink<Void> deleteLink;
-				actionsContainer.add(deleteLink = new AjaxLink<Void>("delete") {
-
-					
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this branch?"));
-					}
+				actionsContainer.add(new ModalLink("delete") {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						getDepot().deleteBranch(branch);
-						if (branch.equals(baseBranch)) {
-							baseBranch = getDepot().getDefaultBranch();
-							target.add(baseChoice);
+					protected Component newContent(String id) {
+						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", DepotBranchesPage.this);
+						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+						if (!pullRequestManager.findAllOpen(new DepotAndBranch(getDepot(), branch)).isEmpty()) {
+							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", DepotBranchesPage.this);
+							SearchOption searchOption = new SearchOption();
+							searchOption.setStatus(Status.OPEN);
+							searchOption.setBranch(branch);
+							PageParameters params = RequestListPage.paramsOf(getDepot(), searchOption, new SortOption());
+							bodyFrag.add(new BookmarkablePageLink<Void>("openRequests", RequestListPage.class, params));
+							bodyFrag.add(new Label("branch", branch));
+							fragment.add(bodyFrag);
+						} else {
+							fragment.add(new Label("body", "You selected to delete branch " + branch));
 						}
-						target.add(pagingNavigator);
-						target.add(branchesContainer);
-						target.add(noBranchesContainer);
-					}
+						fragment.add(new AjaxLink<Void>("delete") {
 
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								getDepot().deleteBranch(branch);
+								if (branch.equals(baseBranch)) {
+									baseBranch = getDepot().getDefaultBranch();
+									target.add(baseChoice);
+								}
+								target.add(pagingNavigator);
+								target.add(branchesContainer);
+								target.add(noBranchesContainer);
+								close(target);
+							}
+							
+						});
+						fragment.add(new AjaxLink<Void>("cancel") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								close(target);
+							}
+							
+						});
+						return fragment;
+					}
+					
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
@@ -497,22 +519,11 @@ public class DepotBranchesPage extends DepotPage {
 						if (!getDepot().getDefaultBranch().equals(branch) 
 								&& SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getRef().getObjectId(), ObjectId.zeroId())) {
 							setVisible(true);
-							PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
-							PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
-							setEnabled(aheadOpen == null && behindOpen == null);
 						} else {
 							setVisible(false);
 						}
 					}
 
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						configure();
-						if (!isEnabled())
-							tag.setName("span");
-					}
-					
 				});
 				
 				actionsContainer.add(new AjaxLink<Void>("makeDefault") {
@@ -675,14 +686,6 @@ public class DepotBranchesPage extends DepotPage {
 					}
 					
 				});
-
-				PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
-				PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
-				if (aheadOpen != null || behindOpen != null) {
-					String hint = "This branch can not be deleted as there are <br>pull request opening against it."; 
-					deleteLink.add(new TooltipBehavior(Model.of(hint), new TooltipConfig().withPlacement(Placement.right)));
-					deleteLink.add(AttributeAppender.append("data-html", "true"));
-				}
 			}
 			
 		});

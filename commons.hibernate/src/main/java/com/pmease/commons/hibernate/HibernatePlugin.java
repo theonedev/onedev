@@ -7,14 +7,18 @@ public class HibernatePlugin extends AbstractPlugin {
 
 	private final PersistService persistService;
 	
+	private final IdManager idManager;
+	
 	@Inject
-	public HibernatePlugin(PersistService persistService) {
+	public HibernatePlugin(PersistService persistService, IdManager idManager) {
 		this.persistService = persistService;
+		this.idManager = idManager;
 	}
 
 	@Override
 	public void start() {
 		persistService.start();
+		idManager.init();
 	}
 
 	@Override

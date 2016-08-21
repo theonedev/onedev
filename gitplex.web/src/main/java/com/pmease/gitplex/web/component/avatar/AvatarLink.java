@@ -36,23 +36,17 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	
 	private final TooltipConfig tooltipConfig;
 	
-	public AvatarLink(String id, @Nullable Account user) {
+	public AvatarLink(String id, Account user) {
 		this(id, user, null);
 	}
 	
-	public AvatarLink(String id, @Nullable Account account, @Nullable TooltipConfig tooltipConfig) {
+	public AvatarLink(String id, Account account, @Nullable TooltipConfig tooltipConfig) {
 		super(id, AccountOverviewPage.class);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		if (account != null) {
-			accountId = account.getId();
-			params = AccountPage.paramsOf(account);
-			name = account.getDisplayName();
-		} else {
-			accountId = null;
-			params = new PageParameters();
-			name = "Unknown";
-		}
+		accountId = account.getId();
+		params = AccountPage.paramsOf(account);
+		name = account.getDisplayName();
 		url = avatarManager.getAvatarUrl(account);
 		this.tooltipConfig = tooltipConfig;
 	}
@@ -108,7 +102,8 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	@Override
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
-		if (params.isEmpty())
+		configure();
+		if (!isEnabled())
 			tag.setName("span");
 	}
 	
@@ -123,9 +118,7 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (params.isEmpty()) {
-			setEnabled(false);
-		}
+		setEnabled(!params.isEmpty());
 		setEscapeModelStrings(false);
 		
 		if (tooltipConfig != null)

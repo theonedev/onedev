@@ -52,6 +52,7 @@ import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Type;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -189,7 +190,7 @@ public class RequestListPage extends PullRequestPage {
 
 					@Override
 					public String getLabel() {
-						return "All closed requests";
+						return "Open requests targeting this repository";
 					}
 
 					@Override
@@ -199,7 +200,37 @@ public class RequestListPage extends PullRequestPage {
 							@Override
 							public void onClick() {
 								searchOption = new SearchOption();
-								searchOption.setStatus(Status.CLOSED);
+								searchOption.setType(Type.TARGETING);
+								searchOption.setStatus(Status.OPEN);
+								
+								setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+							}
+							
+						};
+					}
+					
+				});
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getIconClass() {
+						return null;
+					}
+
+					@Override
+					public String getLabel() {
+						return "Open requests originating from this repository";
+					}
+
+					@Override
+					public AbstractLink newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								searchOption = new SearchOption();
+								searchOption.setType(Type.ORIGINATING);
+								searchOption.setStatus(Status.OPEN);
 								
 								setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 							}
@@ -302,20 +333,26 @@ public class RequestListPage extends PullRequestPage {
 				fragment.add(new RequestStatusPanel("status", rowModel, false));
 				fragment.add(new AccountLink("submitter", rowModel.getObject().getSubmitter()));
 				fragment.add(new BranchLink("target", request.getTarget()));
-				fragment.add(new BranchLink("source", request.getSource()));
+				if (request.getSource() != null) 
+					fragment.add(new BranchLink("source", request.getSource()));
+				else
+					fragment.add(new Label("source").setVisible(false));
+					
 				fragment.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 				
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (request.getLastEvent() != null) {
-					lastEventContainer.add(new AccountLink("user", request.getLastEvent().getUser())
-							.setVisible(request.getLastEvent().getUser()!=null));
+					if (request.getLastEvent().getUser() != null)
+						lastEventContainer.add(new AccountLink("user", request.getLastEvent().getUser()));
+					else
+						lastEventContainer.add(new WebMarkupContainer("user").setVisible(false));
 					String description = EditableUtils.getName(request.getLastEvent().getType());
 					lastEventContainer.add(new Label("description", description));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getLastEvent().getDate())));
 				} else {
-					lastEventContainer.add(new AccountLink("user", (Account)null));
-					lastEventContainer.add(new Label("description"));
-					lastEventContainer.add(new Label("date"));
+					lastEventContainer.add(new WebMarkupContainer("user"));
+					lastEventContainer.add(new WebMarkupContainer("description"));
+					lastEventContainer.add(new WebMarkupContainer("date"));
 					lastEventContainer.setVisible(false);
 				}
 				fragment.add(lastEventContainer);

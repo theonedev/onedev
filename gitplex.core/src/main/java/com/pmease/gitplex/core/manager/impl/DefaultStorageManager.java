@@ -1,28 +1,55 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.loader.Listen;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStarting;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 
 @Singleton
 public class DefaultStorageManager implements StorageManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultStorageManager.class);
+	
+	private static final String DELETE_MARK = "to_be_deleted_when_gitplex_is_restarted";
+	
+	private final Dao dao;
+	
     private final ConfigManager configManager;
     
     @Inject
-    public DefaultStorageManager(ConfigManager configManager) {
+    public DefaultStorageManager(Dao dao, ConfigManager configManager) {
+    	this.dao = dao;
         this.configManager = configManager;
     }
 
-    private File getDepotDir(Depot depot) {
+    private File getStorageDir() {
     	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-        File depotDir = new File(storageDir, "repositories/" + depot.getId());
+    	FileUtils.createDir(storageDir);
+    	return storageDir;
+    }
+    
+    private File getDepotsDir() {
+    	File depotsDir = new File(getStorageDir(), "repositories");
+    	FileUtils.createDir(depotsDir);
+    	return depotsDir;
+    }
+    
+    private File getDepotDir(Depot depot) {
+        File depotDir = new File(getDepotsDir(), String.valueOf(depot.getId()));
         FileUtils.createDir(depotDir);
         return depotDir;
     }
@@ -55,4 +82,31 @@ public class DefaultStorageManager implements StorageManager {
         return attachmentDir;
 	}
 
+	@Listen
+	public void on(SystemStarting event) {
+        for (File depotDir: getDepotsDir().listFiles()) {
+        	if (new File(depotDir, DELETE_MARK).exists()) { 
+        		logger.info("Deleting directory marked for deletion: " + depotDir);
+        		FileUtils.deleteDir(depotDir);
+        	}
+        }
+	}
+
+	@Transactional
+	@Listen
+	public void on(DepotDeleted event) {
+		dao.doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					new File(getDepotDir(event.getDepot()), DELETE_MARK).createNewFile();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
+	}
+	
 }

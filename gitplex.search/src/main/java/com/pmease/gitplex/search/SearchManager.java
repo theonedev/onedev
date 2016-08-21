@@ -23,5 +23,4 @@ public interface SearchManager {
 	List<QueryHit> search(Depot depot, ObjectId commit, BlobQuery query) 
 			throws InterruptedException, TooGeneralQueryException;
 	
-	void closeSearcher(Depot depot);
 }

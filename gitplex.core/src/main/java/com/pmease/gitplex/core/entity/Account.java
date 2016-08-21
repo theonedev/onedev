@@ -87,7 +87,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@Version
 	private long version;
 	
-	@OneToMany(mappedBy="user")
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<OrganizationMembership> organizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="organization", cascade=CascadeType.REMOVE)
@@ -109,15 +109,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> requestReferences = new ArrayList<>();
 	
-	@OneToMany(mappedBy="submitter")
-	private Collection<PullRequest> submittedRequests = new ArrayList<>();
-	
-	@OneToMany(mappedBy="assignee")
-	private Collection<PullRequest> assignedRequests = new ArrayList<>();
-	
-	@OneToMany(mappedBy="closeInfo.closedBy")
-	private Collection<PullRequest> closedRequests = new ArrayList<>();
-	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
 	
@@ -137,10 +128,19 @@ public class Account extends AbstractUser implements ProtectedObject {
     private Collection<PullRequestNotification> requestNotifications = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestStatusChange> requestActivities = new ArrayList<>();
+    private Collection<PullRequestStatusChange> requestStatusChanges = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<CodeCommentStatusChange> commentActivities = new ArrayList<>();
+    private Collection<PullRequestComment> requestComments = new ArrayList<>();
+    
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<CodeComment> codeComments = new ArrayList<>();
+    
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<CodeCommentStatusChange> codeCommentStatusChanges = new ArrayList<>();
+    
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<CodeCommentReply> codeCommentReplies = new ArrayList<>();
     
     private transient Collection<TeamAuthorization> allTeamAuthorizationsInOrganization;
     
@@ -285,66 +285,12 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.definedTeams = definedTeams;
 	}
 
-	/**
-	 * Get pull requests submitted by this user.
-	 * 
-	 * @return
-	 *			collection of pull requests submitted by this user
-	 */
-	public Collection<PullRequest> getSubmittedRequests() {
-		return submittedRequests;
-	}
-
-	public void setSubmittedRequests(Collection<PullRequest> submittedRequests) {
-		this.submittedRequests = submittedRequests;
-	}
-
-    public Collection<PullRequest> getAssignedRequests() {
-		return assignedRequests;
-	}
-
-	public void setAssignedRequests(Collection<PullRequest> assignedRequests) {
-		this.assignedRequests = assignedRequests;
-	}
-
-	public Collection<PullRequest> getClosedRequests() {
-		return closedRequests;
-	}
-
-	public void setClosedRequests(Collection<PullRequest> closedRequests) {
-		this.closedRequests = closedRequests;
-	}
-
-	public Collection<BranchWatch> getBranchWatches() {
-		return branchWatches;
-	}
-
-	public void setBranchWatches(Collection<BranchWatch> branchWatches) {
-		this.branchWatches = branchWatches;
-	}
-
 	public Collection<PullRequestNotification> getRequestNotifications() {
 		return requestNotifications;
 	}
 
 	public void setRequestNotifications(Collection<PullRequestNotification> requestNotifications) {
 		this.requestNotifications = requestNotifications;
-	}
-
-	public Collection<PullRequestStatusChange> getRequestActivities() {
-		return requestActivities;
-	}
-
-	public void setRequestActivities(Collection<PullRequestStatusChange> requestActivities) {
-		this.requestActivities = requestActivities;
-	}
-
-	public Collection<CodeCommentStatusChange> getCommentActivities() {
-		return commentActivities;
-	}
-
-	public void setCommentActivities(Collection<CodeCommentStatusChange> commentActivities) {
-		this.commentActivities = commentActivities;
 	}
 
 	@Override

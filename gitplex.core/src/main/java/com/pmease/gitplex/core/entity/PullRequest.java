@@ -40,7 +40,9 @@ import org.hibernate.criterion.Restrictions;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.jackson.ExternalView;
 import com.pmease.commons.lang.diff.WhitespaceOption;
@@ -146,6 +148,7 @@ public class PullRequest extends AbstractEntity {
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private Account submitter;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -276,14 +279,13 @@ public class PullRequest extends AbstractEntity {
 	 * Get the user submitting the pull request.
 	 * 
 	 * @return
-	 * 			the user submitting the pull request, or <tt>null</tt> if unknown
+	 * 			the user submitting the pull request
 	 */
-	@Nullable
 	public Account getSubmitter() {
 		return submitter;
 	}
 
-	public void setSubmitter(@Nullable Account submitter) {
+	public void setSubmitter(Account submitter) {
 		this.submitter = submitter;
 	}
 
@@ -501,7 +503,7 @@ public class PullRequest extends AbstractEntity {
 			if (result instanceof Pending || result instanceof Blocking) { 
 				return Status.PENDING_APPROVAL;
 			} else if (result instanceof Failed) { 
-				return Status.PENDING_INTEGRATE;
+				return Status.PENDING_UPDATE;
 			} else {
 				return Status.PENDING_INTEGRATE;
 			}
@@ -510,7 +512,23 @@ public class PullRequest extends AbstractEntity {
 	
 	public GateCheckResult checkGates(boolean recheck) {
 		if (recheck || gateResult == null) {
-			gateResult = getTargetDepot().getGateKeeper().checkRequest(this);
+			Long requestId = getId();
+			try {
+				gateResult = getTargetDepot().getGateKeeper().checkRequest(this);
+			} catch (ObjectNotExistException e) {
+				// in case target/source branch is deleted but the pull request is not closed
+				// for some reason, we call check again to make sure they will be closed
+				GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+						pullRequestManager.check(pullRequestManager.load(requestId));
+					}
+					
+				});
+				throw e;
+			}
 		}
 		return gateResult;
 	}
@@ -678,9 +696,7 @@ public class PullRequest extends AbstractEntity {
 				lastChoices.add(invitation.getUser());
 		}
 		
-		// submitter is not preferred
-		if (getSubmitter() != null)
-			lastChoices.add(getSubmitter());
+		lastChoices.add(getSubmitter());
 		
 		List<Account> firstPickList = new ArrayList<>();
 		List<Account> lastPickList = new ArrayList<>();
@@ -783,7 +799,7 @@ public class PullRequest extends AbstractEntity {
 			Depot depot = getTargetDepot();
 			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
 				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
-				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getTarget().getObjectName())));
+				revWalk.markUninteresting(revWalk.parseCommit(getTarget().getObjectId()));
 				revWalk.forEach(c->pendingCommits.add(c));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -803,7 +819,7 @@ public class PullRequest extends AbstractEntity {
 			mergedCommits = new HashSet<>();
 			Depot depot = getTargetDepot();
 			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
-				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getTarget().getObjectName())));
+				revWalk.markStart(revWalk.parseCommit(getTarget().getObjectId(false)));
 				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
 				revWalk.forEach(c->mergedCommits.add(c));
 			} catch (IOException e) {

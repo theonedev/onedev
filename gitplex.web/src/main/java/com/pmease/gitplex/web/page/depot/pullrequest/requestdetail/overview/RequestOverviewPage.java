@@ -617,12 +617,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 		
 		Fragment assigneeContainer;
 		Account assignee = request.getAssignee();
-		Account currentUser = getLoginUser();
-		boolean canChangeAssignee = request.isOpen() 
-				&& (currentUser != null && currentUser.equals(request.getSubmitter()) 
-					|| SecurityUtils.canManage(getDepot()));
+		boolean canChangeAssignee = request.isOpen() && SecurityUtils.canModify(request);
 		if (assignee != null) {
-			
 			if (canChangeAssignee) {
 				assigneeContainer = new Fragment("assignee", "assigneeEditFrag", this);			
 				assigneeContainer.add(new WebMarkupContainer("help").add(new TooltipBehavior(Model.of(ASSIGNEE_HELP))));

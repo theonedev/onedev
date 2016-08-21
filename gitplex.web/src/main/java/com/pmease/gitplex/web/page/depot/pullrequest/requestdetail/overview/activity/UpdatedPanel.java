@@ -142,12 +142,14 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					
 				}, commit.name(), null));
 				
-				if (getUpdate().getRequest().getMergedCommits().contains(commit)) {
-					item.add(AttributeAppender.append("class", " integrated"));
-					item.add(AttributeAppender.append("title", "This commit has been integrated"));
-				} else if (!getUpdate().getRequest().getPendingCommits().contains(commit)) {
-					item.add(AttributeAppender.append("class", " rebased"));
-					item.add(AttributeAppender.append("title", "This commit has been rebased"));
+				if (getUpdate().getRequest().getTarget().getObjectId(false) != null) {
+					if (getUpdate().getRequest().getMergedCommits().contains(commit)) {
+						item.add(AttributeAppender.append("class", " integrated"));
+						item.add(AttributeAppender.append("title", "This commit has been integrated"));
+					} else if (!getUpdate().getRequest().getPendingCommits().contains(commit)) {
+						item.add(AttributeAppender.append("class", " rebased"));
+						item.add(AttributeAppender.append("title", "This commit has been rebased"));
+					}
 				}
 				
 			}

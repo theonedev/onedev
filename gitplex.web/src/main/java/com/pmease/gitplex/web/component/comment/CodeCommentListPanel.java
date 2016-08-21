@@ -37,7 +37,6 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -178,13 +177,15 @@ public abstract class CodeCommentListPanel extends Panel {
 				if (comment.getLastEvent() != null) {
 					String description = EditableUtils.getName(comment.getLastEvent().getType());
 					lastEventContainer.add(new Label("description", description));
-					lastEventContainer.add(new AccountLink("user", comment.getLastEvent().getUser())
-							.setVisible(comment.getLastEvent().getUser()!=null));
+					if (comment.getLastEvent().getUser() != null)
+						lastEventContainer.add(new AccountLink("user", comment.getLastEvent().getUser()));
+					else
+						lastEventContainer.add(new WebMarkupContainer("user").setVisible(false));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(comment.getLastEvent().getDate())));
 				} else {
-					lastEventContainer.add(new Label("description"));
-					lastEventContainer.add(new AccountLink("user", (Account)null));
-					lastEventContainer.add(new Label("date"));
+					lastEventContainer.add(new WebMarkupContainer("description"));
+					lastEventContainer.add(new WebMarkupContainer("user"));
+					lastEventContainer.add(new WebMarkupContainer("date"));
 					lastEventContainer.setVisible(false);
 				}
 				fragment.add(lastEventContainer);

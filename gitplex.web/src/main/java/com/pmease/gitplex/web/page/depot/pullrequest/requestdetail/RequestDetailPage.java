@@ -345,7 +345,10 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		});
 		
 		if (request.getStatus() == Status.INTEGRATED) {
-			statusAndBranchesContainer.add(new AccountLink("user", request.getCloseInfo().getClosedBy())); 
+			if (request.getCloseInfo().getClosedBy() != null)
+				statusAndBranchesContainer.add(new AccountLink("user", request.getCloseInfo().getClosedBy())); 
+			else
+				statusAndBranchesContainer.add(new WebMarkupContainer("user").setVisible(false)); 
 			
 			int commitCount = 0;
 			for (PullRequestUpdate update: request.getUpdates())

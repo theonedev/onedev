@@ -32,6 +32,7 @@ public class PullRequestStatusChange extends AbstractEntity {
 	private Class<? extends PullRequestStatusChangeEvent> eventType;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private Account user;
 	
 	@Column(nullable=false)

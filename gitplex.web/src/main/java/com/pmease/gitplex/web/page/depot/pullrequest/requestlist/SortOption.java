@@ -21,6 +21,10 @@ public class SortOption implements Serializable {
 	
 	private final boolean ascending;
 	
+	public SortOption() {
+		this("submitDate", false);
+	}
+	
 	public SortOption(String propertyName, boolean ascending) {
 		this.propertyName = propertyName;
 		this.ascending = ascending;

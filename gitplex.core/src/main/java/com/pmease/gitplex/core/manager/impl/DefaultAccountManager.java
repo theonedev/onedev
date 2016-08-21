@@ -100,32 +100,32 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     @Transactional
     @Override
 	public void delete(Account account) {
-    	Query query = getSession().createQuery("update PullRequest set submitter=null where submitter=:submitter");
-    	query.setParameter("submitter", account);
-    	query.executeUpdate();
-
-    	query = getSession().createQuery("update PullRequest set lastEvent.user=null where lastEvent.user=:lastEventUser");
+    	Query query = getSession().createQuery("update PullRequest set lastEvent.user=null where lastEvent.user=:lastEventUser");
     	query.setParameter("lastEventUser", account);
     	query.executeUpdate();
 
-    	for (PullRequest request: account.getAssignedRequests()) {
+    	query = getSession().createQuery("from PullRequest where assignee=:assignee");
+    	query.setParameter("assignee", account);
+
+    	for (Object each: query.list()) {
+    		PullRequest request = (PullRequest) each;
     		request.setAssignee(request.getTargetDepot().getAccount());
-    		pullRequestManager.changeAssignee(request);
+    		pullRequestManager.save(request);
     	}
     	
     	query = getSession().createQuery("update PullRequest set closeInfo.closedBy=null where closeInfo.closedBy=:closedBy");
     	query.setParameter("closedBy", account);
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequestComment set user=null where user=:user");
-    	query.setParameter("user", account);
-    	query.executeUpdate();
-    	
-    	query = getSession().createQuery("update CodeComment set user=null where user=:user");
-    	query.setParameter("user", account);
-    	query.executeUpdate();
+    	query = getSession().createQuery("from PullRequest where submitter=:submitter");
+    	query.setParameter("submitter", account);
 
-    	query = getSession().createQuery("update CodeComment set lastEventUser=null where lastEventUser=:user");
+    	for (Object each: query.list()) {
+    		PullRequest request = (PullRequest) each;
+    		pullRequestManager.delete(request);
+    	}
+    	
+    	query = getSession().createQuery("update CodeComment set lastEvent.user=null where lastEvent.user=:user");
     	query.setParameter("user", account);
     	query.executeUpdate();
     	

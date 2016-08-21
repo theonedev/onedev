@@ -38,6 +38,7 @@ public class HibernateModule extends AbstractPluginModule {
 		bind(SessionFactory.class).toProvider(DefaultPersistService.class);
 		bind(UnitOfWork.class).to(DefaultUnitOfWork.class);
 		bind(Session.class).toProvider(DefaultUnitOfWork.class);
+		bind(IdManager.class).to(DefaultIdManager.class);
 		
 		bind(Dao.class).to(DefaultDao.class);
 		

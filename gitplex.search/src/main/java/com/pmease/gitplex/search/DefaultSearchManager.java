@@ -30,8 +30,11 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Throwables;
+import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.Listen;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
 import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -42,10 +45,13 @@ public class DefaultSearchManager implements SearchManager {
 
 	private final StorageManager storageManager;
 	
+	private final Dao dao;
+	
 	private final Map<Long, SearcherManager> searcherManagers = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultSearchManager(StorageManager storageManager) {
+	public DefaultSearchManager(Dao dao, StorageManager storageManager) {
+		this.dao = dao;
 		this.storageManager = storageManager;
 	}
 	
@@ -150,19 +156,28 @@ public class DefaultSearchManager implements SearchManager {
 		}
 	}
 
-	@Override
-	public void closeSearcher(Depot depot) {
-		synchronized (searcherManagers) {
-			SearcherManager searcherManager = searcherManagers.get(depot.getId());
-			if (searcherManager != null) {
-				try {
-					searcherManager.close();
-				} catch (IOException e) {
-					Throwables.propagate(e);
+	@Transactional
+	@Listen
+	public void on(DepotDeleted event) {
+		Long depotId = event.getDepot().getId();
+		dao.doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				synchronized (searcherManagers) {
+					SearcherManager searcherManager = searcherManagers.get(depotId);
+					if (searcherManager != null) {
+						try {
+							searcherManager.close();
+						} catch (IOException e) {
+							Throwables.propagate(e);
+						}
+						searcherManagers.remove(depotId);
+					}
 				}
-				searcherManagers.remove(depot.getId());
 			}
-		}
+			
+		});
 	}
 
 	@Listen

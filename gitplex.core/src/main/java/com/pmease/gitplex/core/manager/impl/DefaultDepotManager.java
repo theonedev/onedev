@@ -57,7 +57,6 @@ import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestInfoManager;
-import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
@@ -68,8 +67,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	
 	private final ListenerRegistry listenerRegistry;
 	
-    private final StorageManager storageManager;
-    
     private final AccountManager userManager;
     
     private final CommitInfoManager commitInfoManager;
@@ -91,10 +88,9 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     @Inject
     public DefaultDepotManager(Dao dao, AccountManager userManager, CodeCommentInfoManager codeCommentInfoManager,
     		TeamAuthorizationManager teamAuthorizationManager, PullRequestInfoManager pullRequestInfoManager,
-    		StorageManager storageManager, CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry) {
+    		CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry) {
     	super(dao);
     	
-        this.storageManager = storageManager;
         this.userManager = userManager;
         this.pullRequestInfoManager = pullRequestInfoManager;
         this.teamAuthorizationManager = teamAuthorizationManager;
@@ -183,7 +179,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 				}
 				if (isNew) {
 		    		checkSanity(depot);
-					commitInfoManager.collect(depot);
 				}
 			}
         	
@@ -222,8 +217,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 				}
 				getRepository(depot).close();
 				repositoryCache.remove(depot.getId());
-				
-		        FileUtils.deleteDir(storageManager.getGitDir(depot));
 			}
 			
 		});
@@ -279,7 +272,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 
 	private void checkSanity(Depot depot) {
 		logger.info("Checking sanity of repository '{}'...", depot);
-
 		File gitDir = depot.getDirectory();
 		if (depot.getDirectory().exists() && !GitUtils.isValid(gitDir)) {
         	logger.warn("Directory '" + gitDir + "' is not a valid git repository, removing...");

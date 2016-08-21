@@ -206,26 +206,24 @@ public class DefaultPullRequestNotificationManager extends AbstractEntityManager
 	@Listen
 	public void on(PullRequestPendingUpdate event) {
 		PullRequest request = event.getRequest();
-		if (request.getSubmitter() != null) {
-			PullRequestNotification task = new PullRequestNotification();
-			task.setRequest(request);
-			task.setUser(request.getSubmitter());
-			task.setTask(UPDATE);
-			EntityCriteria<PullRequestNotification> criteria = EntityCriteria.of(PullRequestNotification.class);
-			criteria.add(Restrictions.eq("request", task.getRequest()))
-					.add(Restrictions.eq("user", task.getUser()))
-					.add(Restrictions.eq("task", task.getTask()));
-			if (find(criteria) == null) {
-				save(task);
-				String subject = String.format("New commits are expected in pull request #%d (%s)", 
-						request.getNumber(), request.getTitle());
-				String url = urlManager.urlFor(request);
-				String body = String.format("Next commits are expected for next round of review in pull request #%d (%s).<br>"
-						+ "Please visit <a href='%s'>%s</a> for details",
-						request.getNumber(), request.getTitle(), url, url);
-				mailManager.sendMailAsync(Sets.newHashSet(request.getSubmitter()), subject, 
-						decorate(request.getSubmitter(), body));
-			}
+		PullRequestNotification task = new PullRequestNotification();
+		task.setRequest(request);
+		task.setUser(request.getSubmitter());
+		task.setTask(UPDATE);
+		EntityCriteria<PullRequestNotification> criteria = EntityCriteria.of(PullRequestNotification.class);
+		criteria.add(Restrictions.eq("request", task.getRequest()))
+				.add(Restrictions.eq("user", task.getUser()))
+				.add(Restrictions.eq("task", task.getTask()));
+		if (find(criteria) == null) {
+			save(task);
+			String subject = String.format("New commits are expected in pull request #%d (%s)", 
+					request.getNumber(), request.getTitle());
+			String url = urlManager.urlFor(request);
+			String body = String.format("Next commits are expected for next round of review in pull request #%d (%s).<br>"
+					+ "Please visit <a href='%s'>%s</a> for details",
+					request.getNumber(), request.getTitle(), url, url);
+			mailManager.sendMailAsync(Sets.newHashSet(request.getSubmitter()), subject, 
+					decorate(request.getSubmitter(), body));
 		}
 	}
 

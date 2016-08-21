@@ -21,10 +21,10 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+	@GenericGenerator(name="entity_id", strategy="com.pmease.commons.hibernate.IdGenerator")
+	@GeneratedValue(generator="entity_id") 	
 	private Long id;
-
+	
 	public Long getId() {
 		return id;
 	}

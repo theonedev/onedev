@@ -54,6 +54,7 @@ public class CodeComment extends AbstractEntity {
 	private Depot depot;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private Account user;
 
 	@Column(nullable=false)

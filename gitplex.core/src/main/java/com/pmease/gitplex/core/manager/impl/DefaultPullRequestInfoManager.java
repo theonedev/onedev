@@ -142,14 +142,22 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager {
 		});		
 	}
 
+	@Transactional
 	@Listen
 	public void on(DepotDeleted event) {
-		synchronized (envs) {
-			Environment env = envs.remove(event.getDepot().getId());
-			if (env != null)
-				env.close();
-		}
-		FileUtils.deleteDir(getInfoDir(event.getDepot()));
+		Long depotId = event.getDepot().getId();
+		dao.doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				synchronized (envs) {
+					Environment env = envs.remove(depotId);
+					if (env != null)
+						env.close();
+				}
+			}
+			
+		});
 	}
 	
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {

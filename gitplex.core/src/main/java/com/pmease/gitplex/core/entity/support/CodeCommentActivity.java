@@ -25,6 +25,7 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 	private CodeComment comment;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private Account user;
 
 	@Column(nullable=false)

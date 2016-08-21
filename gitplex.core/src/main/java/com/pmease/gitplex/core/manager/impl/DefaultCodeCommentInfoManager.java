@@ -146,18 +146,25 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager {
 		});		
 	}
 
+	@Transactional
 	@Listen
 	public void on(DepotDeleted event) {
-		Depot depot = event.getDepot();
-		synchronized (envs) {
-			Environment env = envs.remove(depot.getId());
-			if (env != null)
-				env.close();
-		}
-		filesCache.remove(depot.getId());
-		FileUtils.deleteDir(getInfoDir(depot));
+		Long depotId = event.getDepot().getId();
+		dao.doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				filesCache.remove(depotId);
+				synchronized (envs) {
+					Environment env = envs.remove(depotId);
+					if (env != null)
+						env.close();
+				}
+			}
+			
+		});
 	}
-	
+		
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
 		if (byteIterable != null)
 			return Arrays.copyOf(byteIterable.getBytesUnsafe(), byteIterable.getLength());

@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import javax.validation.Validator;
 
 import com.google.common.collect.Sets;
+import com.pmease.commons.hibernate.IdManager;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.ManualConfig;
@@ -31,13 +32,16 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final ConfigManager configManager;
 	
+	private final IdManager idManager;
+	
 	private final Validator validator;
 	
 	@Inject
-	public DefaultDataManager(AccountManager accountManager, ConfigManager configManager, Validator validator) {
+	public DefaultDataManager(IdManager idManager, AccountManager accountManager, ConfigManager configManager, Validator validator) {
 		this.accountManager = accountManager;
 		this.configManager = configManager;
 		this.validator = validator;
+		this.idManager = idManager;
 	}
 	
 	@SuppressWarnings("serial")
@@ -45,11 +49,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
-		Account rootUser = accountManager.get(Account.ADMINISTRATOR_ID);		
-		if (rootUser == null) {
-			rootUser = new Account();
-			rootUser.setId(Account.ADMINISTRATOR_ID);
-			manualConfigs.add(new ManualConfig("Create Administator Account", rootUser, 
+		Account administrator = accountManager.get(Account.ADMINISTRATOR_ID);		
+		if (administrator == null) {
+			administrator = new Account();
+			administrator.setId(Account.ADMINISTRATOR_ID);
+			manualConfigs.add(new ManualConfig("Create Administator Account", administrator, 
 					Sets.newHashSet("description", "defaultPrivilege")) {
 
 				@Override
@@ -60,6 +64,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 				@Override
 				public void complete() {
 					accountManager.save((Account) getSetting(), null);
+					idManager.init(Account.class);
 				}
 				
 			});

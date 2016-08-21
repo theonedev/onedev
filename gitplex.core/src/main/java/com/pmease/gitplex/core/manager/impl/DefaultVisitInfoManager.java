@@ -11,6 +11,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.pmease.commons.hibernate.Transactional;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.Listen;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.entity.Account;
@@ -23,6 +25,8 @@ import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
+import com.pmease.gitplex.core.event.depot.DepotDeleted;
+import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
@@ -55,8 +59,11 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	
 	private final StorageManager storageManager;
 	
+	private final Dao dao;
+	
 	@Inject
-	public DefaultVisitInfoManager(StorageManager storageManager) {
+	public DefaultVisitInfoManager(Dao dao, StorageManager storageManager) {
+		this.dao = dao;
 		this.storageManager = storageManager;
 	}
 	
@@ -250,6 +257,32 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	@Listen
 	public void on(PullRequestStatusChangeEvent event) {
 		visit(event.getUser(), event.getRequest());
+	}
+
+	@Transactional
+	@Listen
+	public void on(DepotDeleted event) {
+		Long depotId = event.getDepot().getId();
+		dao.doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				synchronized (envs) {
+					Environment env = envs.remove(depotId);
+					if (env != null)
+						env.close();
+				}
+			}
+			
+		});
+	}
+	
+	@Listen
+	public void on(SystemStopping event) {
+		synchronized (envs) {
+			for (Environment env: envs.values())
+				env.close();
+		}
 	}
 
 	static class StringByteIterable extends ArrayByteIterable {

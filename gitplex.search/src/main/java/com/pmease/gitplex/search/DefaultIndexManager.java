@@ -61,9 +61,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
@@ -71,12 +69,11 @@ import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.loader.Listen;
 import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.util.ContentDetector;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.Prioritized;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.event.RefUpdated;
-import com.pmease.gitplex.core.event.depot.DepotDeleted;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.support.BatchWorker;
 import com.pmease.gitplex.core.manager.support.IndexResult;
@@ -96,27 +93,24 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final BatchWorkManager batchWorkManager;
 	
-	private final SearchManager searchManager;
-	
 	private final Extractors extractors; 
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final Dao dao;
+	private final DepotManager depotManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
 	public DefaultIndexManager(ListenerRegistry listenerRegistry, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, Extractors extractors, 
-			UnitOfWork unitOfWork, Dao dao, SearchManager searchManager) {
+			BatchWorkManager batchWorkManager, Extractors extractors, UnitOfWork unitOfWork, 
+			DepotManager depotManager) {
 		this.listenerRegistry = listenerRegistry;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.extractors = extractors;
 		this.unitOfWork = unitOfWork;
-		this.dao = dao;
-		this.searchManager = searchManager;
+		this.depotManager = depotManager;
 	}
 
 	private String getCommitIndexVersion(final IndexSearcher searcher, AnyObjectId commitId) throws IOException {
@@ -317,7 +311,7 @@ public class DefaultIndexManager implements IndexManager {
 
 					@Override
 					public Void call() throws Exception {
-						Depot depot = dao.load(Depot.class, depotId);
+						Depot depot = depotManager.load(depotId);
 						IndexWork indexWork = (IndexWork) works.iterator().next();
 						index(depot, indexWork.getCommitId());
 						return null;
@@ -402,13 +396,6 @@ public class DefaultIndexManager implements IndexManager {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Transactional
-	@Listen
-	public void on(DepotDeleted event) {
-		searchManager.closeSearcher(event.getDepot());
-		FileUtils.deleteDir(storageManager.getIndexDir(event.getDepot()));
 	}
 
 	@Listen

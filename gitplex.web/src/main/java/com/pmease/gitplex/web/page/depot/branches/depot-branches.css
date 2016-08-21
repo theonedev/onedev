@@ -14,14 +14,9 @@
 #repo-branches>.list>table>tbody>tr:hover .actions>.btn {
 	display: inline;
 }
-#repo-branches>.list>table .actions>* {
+#repo-branches>.list>table .actions>a {
 	margin-right: 8px;
-}
-#repo-branches>.list>table .actions a {
 	color: #333;
-}
-#repo-branches>.list>table .actions>span {
-	color: #999;
 }
 #repo-branches>.list>table td {
 	white-space: nowrap;
@@ -90,4 +85,8 @@
 	top: 250px; 
 	z-index: 100; 
 	display: none;
+}
+
+.confirm-delete-branch>.modal-body {
+	font-size: 16px;
 }

@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page.depot.pullrequest.requestlist;
 
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.*;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,14 +12,17 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.annotation.Editable;
-import com.pmease.gitplex.core.annotation.BranchChoice;
 import com.pmease.gitplex.core.annotation.AccountChoice;
+import com.pmease.gitplex.core.annotation.BranchChoice;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 
 @SuppressWarnings("serial")
 @Editable
 public class SearchOption implements Serializable {
+	
+	private static final String PARAM_TYPE = "type";
 	
 	private static final String PARAM_STATUS = "status";
 	
@@ -25,7 +30,7 @@ public class SearchOption implements Serializable {
 	
 	private static final String PARAM_SUBMITTER = "submitter";
 	
-	private static final String PARAM_TARGET = "target";
+	private static final String PARAM_BRANCH = "branch";
 	
 	private static final String PARAM_TITLE = "title";
 	
@@ -33,7 +38,11 @@ public class SearchOption implements Serializable {
 	
 	private static final String PARAM_END_DATE = "end";
 	
+	public enum Type {TARGETING, ORIGINATING, ALL};
+	
 	public enum Status {OPEN, CLOSED, ALL};
+	
+	private Type type = Type.ALL;
 	
 	private Status status = Status.OPEN;
 
@@ -41,7 +50,7 @@ public class SearchOption implements Serializable {
 	
 	private String submitterName;
 	
-	private String targetBranch;
+	private String branch;
 	
 	private String title;
 	
@@ -49,6 +58,17 @@ public class SearchOption implements Serializable {
 	
 	private Date endDate;
 	
+	@Editable(order=50, description="'TARGETING' represents pull requests targeting current repository, "
+			+ "while 'ORIGINATING' represents pull requests originating from current repository")
+	@NotNull
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
 	@Editable(order=100)
 	@NotNull
 	public Status getStatus() {
@@ -79,14 +99,14 @@ public class SearchOption implements Serializable {
 		this.submitterName = submitterName;
 	}
 
-	@Editable(order=400)
+	@Editable(order=400, description="Target branch for incoming request, or source branch for outgoing request")
 	@BranchChoice
-	public String getTargetBranch() {
-		return targetBranch;
+	public String getBranch() {
+		return branch;
 	}
 
-	public void setTargetBranch(String targetBranch) {
-		this.targetBranch = targetBranch;
+	public void setBranch(String branch) {
+		this.branch = branch;
 	}
 
 	@Editable(order=500, name="Title Containing")
@@ -120,7 +140,11 @@ public class SearchOption implements Serializable {
 	}
 	
 	public SearchOption(PageParameters params) {
-		String value = params.get(PARAM_STATUS).toString();
+		String value = params.get(PARAM_TYPE).toString();
+		if (value != null)
+			type = Type.valueOf(value);
+		
+		value = params.get(PARAM_STATUS).toString();
 		if (value != null)
 			status = Status.valueOf(value);
 		
@@ -128,7 +152,7 @@ public class SearchOption implements Serializable {
 		
 		submitterName = params.get(PARAM_SUBMITTER).toString();
 		
-		targetBranch = params.get(PARAM_TARGET).toString();
+		branch = params.get(PARAM_BRANCH).toString();
 		title = params.get(PARAM_TITLE).toString();
 		
 		value = params.get(PARAM_BEGIN_DATE).toString();
@@ -142,7 +166,23 @@ public class SearchOption implements Serializable {
 
 	public EntityCriteria<PullRequest> getCriteria(Depot depot) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(Restrictions.eq("targetDepot", depot));
+		if (type == Type.TARGETING) { 
+			if (branch != null)
+				criteria.add(ofTarget(new DepotAndBranch(depot, branch)));
+			else
+				criteria.add(ofTargetDepot(depot));
+		} else if (type == Type.ORIGINATING) {
+			if (branch != null)
+				criteria.add(ofSource(new DepotAndBranch(depot, branch)));
+			else
+				criteria.add(ofSourceDepot(depot));
+		} else if (branch != null) {
+			criteria.add(Restrictions.or(
+					ofTarget(new DepotAndBranch(depot, branch)), 
+					ofSource(new DepotAndBranch(depot, branch))));
+		} else {
+			criteria.add(Restrictions.or(ofTargetDepot(depot), ofSourceDepot(depot)));
+		}
 		
 		if (status == Status.OPEN) 
 			criteria.add(PullRequest.CriterionHelper.ofOpen());
@@ -155,8 +195,6 @@ public class SearchOption implements Serializable {
 		if (assigneeName != null) {
 			criteria.createCriteria("assignee").add(Restrictions.eq("name", assigneeName));
 		}
-		if (targetBranch != null)
-			criteria.add(Restrictions.eq("targetBranch", targetBranch));
 		if (title != null)
 			criteria.add(Restrictions.ilike("title", "%" + title + "%"));
 		if (beginDate != null)
@@ -167,13 +205,14 @@ public class SearchOption implements Serializable {
 	}
 	
 	public void fillPageParams(PageParameters params) {
+		params.set(PARAM_TYPE, type.name());
 		params.set(PARAM_STATUS, status.name());
 		if (assigneeName != null)
 			params.set(PARAM_ASSIGNEE, assigneeName);
 		if (submitterName != null)
 			params.set(PARAM_SUBMITTER, submitterName);
-		if (targetBranch != null)
-			params.set(PARAM_TARGET, targetBranch);
+		if (branch != null)
+			params.set(PARAM_BRANCH, branch);
 		if (title != null)
 			params.set(PARAM_TITLE, title);
 		if (beginDate != null)

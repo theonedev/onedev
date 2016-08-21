@@ -1,12 +1,12 @@
 package com.pmease.gitplex.web.component;
 
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
-import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
@@ -29,8 +29,16 @@ public class BranchLink extends BookmarkablePageLink<Void> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setEnabled(SecurityUtils.canRead(depotAndBranch.getDepot()) 
-				&& depotAndBranch.getObjectName(false) != null);
+		setEnabled(depotAndBranch.getObjectName(false) != null);
+	}
+
+	@Override
+	protected void onComponentTag(ComponentTag tag) {
+		super.onComponentTag(tag);
+		configure();
+		if (!isEnabled()) {
+			tag.setName("span");
+		}
 	}
 
 	@Override

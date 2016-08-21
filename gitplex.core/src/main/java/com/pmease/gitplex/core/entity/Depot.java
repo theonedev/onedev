@@ -33,6 +33,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TagCommand;
@@ -165,6 +167,9 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	@OneToMany(mappedBy="depot", cascade=CascadeType.REMOVE)
 	private Collection<UserAuthorization> authorizedUsers = new ArrayList<>();
+	
+	@OneToMany(mappedBy="depot", cascade=CascadeType.REMOVE)
+	private Collection<CodeComment> comments = new ArrayList<>();
 	
 	private transient Repository repository;
 	
@@ -788,19 +793,26 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
     public void deleteBranch(String branch) {
     	String refName = GitUtils.branch2ref(branch);
-    	ObjectId commitId = getRevCommit(refName).getId();
+    	ObjectId commitId = getObjectId(refName);
     	try {
 			git().branchDelete().setForce(true).setBranchNames(branch).call();
 		} catch (Exception e) {
 			Throwables.propagate(e);
 		}
+    	
+    	Subject subject = SecurityUtils.getSubject();
     	GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
 			@Override
 			public void run() {
-				Depot depot = GitPlex.getInstance(DepotManager.class).load(getId());
-				GitPlex.getInstance(ListenerRegistry.class).post(
-						new RefUpdated(depot, refName, commitId, ObjectId.zeroId()));
+				ThreadContext.bind(subject);
+				try {
+					Depot depot = GitPlex.getInstance(DepotManager.class).load(getId());
+					GitPlex.getInstance(ListenerRegistry.class).post(
+							new RefUpdated(depot, refName, commitId, ObjectId.zeroId()));
+				} finally {
+					ThreadContext.unbindSubject();
+				}
 			}
     		
     	});
@@ -839,13 +851,19 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
+    	Subject subject = SecurityUtils.getSubject();
     	GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
 			@Override
 			public void run() {
-				Depot depot = GitPlex.getInstance(DepotManager.class).load(getId());
-				GitPlex.getInstance(ListenerRegistry.class).post(
-						new RefUpdated(depot, refName, commitId, ObjectId.zeroId()));
+				ThreadContext.bind(subject);
+				try {
+					Depot depot = GitPlex.getInstance(DepotManager.class).load(getId());
+					GitPlex.getInstance(ListenerRegistry.class).post(
+							new RefUpdated(depot, refName, commitId, ObjectId.zeroId()));
+				} finally {
+					ThreadContext.unbindSubject();
+				}
 			}
     		
     	});

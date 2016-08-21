@@ -23,11 +23,9 @@ public class IfSubmittedBySpecifiedTeam extends TeamAwareGateKeeper {
     }
 
 	private GateCheckResult checkSubmitter(Account user, Account organization) {
-		if (user != null) {
-	    	Collection<Account> members = getTeamMembers(organization);
-			if (members.contains(user)) {
-				return passed(Lists.newArrayList("Submitted by a member of team " + getTeamName()));
-			}
+    	Collection<Account> members = getTeamMembers(organization);
+		if (members.contains(user)) {
+			return passed(Lists.newArrayList("Submitted by a member of team " + getTeamName()));
 		}
 		return failed(Lists.newArrayList("Not submitted by a member of team " + getTeamName()));
 	}
