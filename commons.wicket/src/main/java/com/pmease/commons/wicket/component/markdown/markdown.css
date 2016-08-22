@@ -1,3 +1,6 @@
+.md-preview {
+	overflow: auto;
+}
 .md-preview .emoji {
 	width: 20px; 
 	height: 20px;

@@ -33,6 +33,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.hibernate.StaleStateException;
 
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
@@ -793,7 +794,7 @@ public abstract class CodeCommentPanel extends Panel {
 		final Long id;
 		
 		ActivityIdentity(CodeCommentActivity activity) {
-			this.clazz = activity.getClass();
+			this.clazz = ClassUtils.unproxy(activity.getClass());
 			this.id = activity.getId();
 		}
 

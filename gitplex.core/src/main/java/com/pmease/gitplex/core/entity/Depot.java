@@ -128,6 +128,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	@Column(nullable=false)
 	private String name;
 	
+	@Lob
+	@Column(nullable=false, length=65535)
 	private String description;
 	
 	private boolean publicRead;

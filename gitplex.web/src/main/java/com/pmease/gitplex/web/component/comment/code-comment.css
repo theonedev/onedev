@@ -36,6 +36,7 @@
 }
 .code-comment>.section>.detail>.head .activity {
 	font-size: 12px;
+	margin-top: 2px;
 	color: #999;
 }
 .code-comment>.section>.detail>.head .compare-context {
@@ -53,6 +54,9 @@
 .code-comment>.section>.detail>.body .no-note {
 	font-style: italic;
 	margin-bottom: 10px;
+}
+.code-comment>.section>.detail>.foot {
+	margin-top: 4px;
 }
 .code-comment>.section>.detail>.foot a {
 	font-size: 12px;

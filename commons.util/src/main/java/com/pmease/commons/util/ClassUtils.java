@@ -120,10 +120,11 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 			return locator.getClassLoader().getResourceAsStream(locator.getPackage().getName().replace(".", "/") + "/" + path);
 	}
 
-	public static Class<?> unproxy(Class<?> clazz) {
-		Class<?> superClass = clazz;
+	@SuppressWarnings("unchecked")
+	public static <T> Class<T> unproxy(Class<T> clazz) {
+		Class<T> superClass = clazz;
 		while (ProxyFactory.isProxyClass(superClass))
-			superClass = clazz.getSuperclass();
+			superClass = (Class<T>) clazz.getSuperclass();
 		return superClass;
 	}
 }
