@@ -91,7 +91,7 @@ pmease.commons.markdown = {
 			           }
 		           }, {
 		        	   name: "cmdURL2",
-		        	   title: "Image",
+		        	   title: "Attachment",
 		               hotkey: 'Ctrl+L',
 		               icon: "fa fa-link",
 		               callback: function(e){

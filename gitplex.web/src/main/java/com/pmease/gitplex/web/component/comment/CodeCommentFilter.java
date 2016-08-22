@@ -130,7 +130,7 @@ public class CodeCommentFilter implements Serializable {
 			String pathQuery = path.replace('*', '%');
 			if (pathQuery.endsWith("/"))
 				pathQuery += "%";
-			criteria.add(Restrictions.ilike("path", pathQuery));
+			criteria.add(Restrictions.ilike("commentPos.path", pathQuery));
 		}
 		if (title != null)
 			criteria.add(Restrictions.ilike("title", "%" + title + "%"));

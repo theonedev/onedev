@@ -85,8 +85,6 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 		PullRequest request = event.getRequest();
 		Account user = event.getUser();
 		
-		Collection<Account> mentionUsers = new HashSet<>();
-		
 		/*
 		 * verification is often performed automatically by robots (such as CI system), and it does not make
 		 * sense to make them watching the pull request
@@ -105,7 +103,13 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 			makeContributorsWatching(request.getLatestUpdate());
 		} else if (event instanceof PullRequestAssigned) {
 			watch(request, request.getAssignee(), "You are set to watch this pull request as you are assigned to integrate it.");
-		} else if (event instanceof MarkdownAware) {
+		} else if (event instanceof PullRequestUpdated) {
+			PullRequestUpdated updated = (PullRequestUpdated) event;
+			makeContributorsWatching(updated.getUpdate());
+		}
+
+		Collection<Account> mentionUsers = new HashSet<>();
+		if (event instanceof MarkdownAware) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			if (markdown != null) {
@@ -115,11 +119,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 					watch(request, mention, "You are set to watch this pull request as you are mentioned in code comment.");
 				}
 			}
-		} else if (event instanceof PullRequestUpdated) {
-			PullRequestUpdated updated = (PullRequestUpdated) event;
-			makeContributorsWatching(updated.getUpdate());
-		}
-		
+		} 		
 		Collection<Account> watchUsers = new HashSet<>();
 		
 		for (PullRequestWatch watch: request.getWatches()) {
@@ -139,6 +139,8 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 			}
 		}
 
+		// mentioned users will be receiving email separately, so we do not need to notify
+		// them here
 		watchUsers.removeAll(mentionUsers);
 
 		if ((event instanceof PullRequestOpened || event instanceof PullRequestAssigned) 

@@ -77,11 +77,9 @@
 	padding: 10px 0;
 }
 
-#request-detail div.activity, #request-detail div.activity a {
+#request-detail div.activity>.head, #request-detail div.activity>.head a,
+#request-detail div.activity>.body>.actions a {
 	color: #999; 
-}
-#request-detail div.activity>div.body {
-	color: #444; 
 }
 
 #request-detail div.activity .operations>* {
