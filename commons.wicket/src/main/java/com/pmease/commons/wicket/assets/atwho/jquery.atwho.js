@@ -219,11 +219,15 @@ App = (function() {
       return;
     }
     switch (e.keyCode) {
-      case KEY_CODE.ESC:
-        e.preventDefault();
+    // comment out below so that atWho only gets closed in keyup event of 
+    // ESC, so that we can check atWho's presence in ESC keydown event of 
+    // modal dialog
+      /*case KEY_CODE.ESC:
+        e.preventDefault();        
         view.hide(e);
         this.$inputor.data("ignoreEsc", true);
         break;
+        */
       case KEY_CODE.UP:
         e.preventDefault();
         view.prev();
