@@ -88,7 +88,6 @@ import com.pmease.gitplex.web.component.depotfile.editsave.EditSavePanel;
 import com.pmease.gitplex.web.component.depotfile.fileedit.FileEditPanel;
 import com.pmease.gitplex.web.component.depotfile.filelist.FileListPanel;
 import com.pmease.gitplex.web.component.depotfile.filenavigator.FileNavigator;
-import com.pmease.gitplex.web.component.revisionpicker.RevisionMode;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
@@ -683,7 +682,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
-		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, depotModel, blobIdent.revision, RevisionMode.CAN_CREATE_REF) {
+		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, depotModel, blobIdent.revision, true) {
 
 			@Override
 			protected String getRevisionUrl(String revision) {

@@ -20,23 +20,23 @@ public abstract class RevisionPicker extends DropdownLink {
 	
 	private String revision;
 	
-	private final RevisionMode mode;
+	private final boolean canCreateRef;
 	
-	public RevisionPicker(String id, IModel<Depot> depotModel, String revision, RevisionMode mode) {
+	public RevisionPicker(String id, IModel<Depot> depotModel, String revision, boolean canCreateRef) {
 		super(id);
 		
 		this.depotModel = depotModel;
 		this.revision = revision;
-		this.mode = mode;
+		this.canCreateRef = canCreateRef;
 	}
 	
 	public RevisionPicker(String id, IModel<Depot> depotModel, String revision) {
-		this(id, depotModel, revision, RevisionMode.CAN_INPUT_REV);
+		this(id, depotModel, revision, false);
 	}
 
 	@Override
 	protected Component newContent(String id) {
-		return new RevisionSelector(id, depotModel, revision, mode) {
+		return new RevisionSelector(id, depotModel, revision, canCreateRef) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {

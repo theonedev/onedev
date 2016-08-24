@@ -177,7 +177,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 			ObjectId baseCommitId = GitUtils.getMergeBase(
 					target.getDepot().getRepository(), target.getObjectId(), 
 					source.getDepot().getRepository(), source.getObjectId(), 
-					source.getBranch());
+					GitUtils.branch2ref(source.getBranch()));
 			
 			pullRequest.setBaseCommitHash(baseCommitId.name());
 			if (pullRequest.getBaseCommitHash().equals(source.getObjectName())) {

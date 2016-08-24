@@ -73,8 +73,6 @@ public abstract class RevisionSelector extends Panel {
 	private final boolean canCreateBranch;
 	
 	private final boolean canCreateTag;
-	
-	private final boolean canInputRev;
 
 	private boolean branchesActive;
 	
@@ -119,15 +117,14 @@ public abstract class RevisionSelector extends Panel {
 		target.focusComponent(revField);
 	}
 
-	public RevisionSelector(String id, IModel<Depot> depotModel, @Nullable String revision, RevisionMode mode) {
+	public RevisionSelector(String id, IModel<Depot> depotModel, @Nullable String revision, boolean canCreateRef) {
 		super(id);
 		
-		Preconditions.checkArgument(revision!=null || mode != RevisionMode.CAN_CREATE_REF);
+		Preconditions.checkArgument(revision!=null || !canCreateRef);
 	
 		this.depotModel = depotModel;
-		this.revision = revision;	
-		canInputRev = mode != RevisionMode.CAN_SELECT_REV;
-		if (mode == RevisionMode.CAN_CREATE_REF) {
+		this.revision = revision;		
+		if (canCreateRef) {
 			Depot depot = depotModel.getObject();
 			ObjectId commitId = depot.getRevCommit(revision);
 			canCreateBranch = SecurityUtils.canPushRef(depot, Constants.R_HEADS, ObjectId.zeroId(), commitId);						
@@ -148,11 +145,11 @@ public abstract class RevisionSelector extends Panel {
 	}
 	
 	public RevisionSelector(String id, IModel<Depot> depotModel, @Nullable String revision) {
-		this(id, depotModel, revision, RevisionMode.CAN_INPUT_REV);
+		this(id, depotModel, revision, false);
 	}
 
 	public RevisionSelector(String id, IModel<Depot> depotModel) {
-		this(id, depotModel, null, RevisionMode.CAN_INPUT_REV);
+		this(id, depotModel, null, false);
 	}
 	
 	@Override
@@ -166,17 +163,13 @@ public abstract class RevisionSelector extends Panel {
 			protected String load() {
 				if (branchesActive) {
 					if (canCreateBranch) {
-						return "Find/create branch, or input revision";
-					} else if (canInputRev) {
-						return "Find branch, or input revision";
+						return "Find or create branch";
 					} else {
 						return "Find branch";
 					}
 				} else {
 					if (canCreateTag) {
-						return "Find/create tag, or input revision";
-					} else if (canInputRev) {
-						return "Find tag, or input revision";
+						return "Find or create tag";
 					} else {
 						return "Find tag";
 					}
@@ -316,7 +309,7 @@ public abstract class RevisionSelector extends Panel {
 				if (itemValues.size() < count && ref.toLowerCase().contains(revInput))
 					itemValues.add(ref);
 			}
-			if (itemValues.size() < count && !found && canInputRev) {
+			if (itemValues.size() < count && !found) {
 				Depot depot = depotModel.getObject();
 				try {
 					if (depot.getRepository().resolve(revInput) != null) {

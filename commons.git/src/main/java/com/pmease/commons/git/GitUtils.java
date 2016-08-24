@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -46,11 +47,12 @@ import com.pmease.commons.git.command.FetchCommand;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
 import com.pmease.commons.git.exception.RefUpdateException;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.LockUtils;
 
 public class GitUtils {
 	
 	public static final Pattern PATTERN_HASH = Pattern.compile("[a-z0-9]{40}");
-    
+	
     public static final int SHORT_SHA_LENGTH = 8;
     
     public static boolean isHash(String sha) {
@@ -273,14 +275,33 @@ public class GitUtils {
     }
 
 	public static ObjectId getMergeBase(Repository repository1, ObjectId commit1, 
-			Repository repository2, ObjectId commit2, String fetchRef) {
+			Repository repository2, ObjectId commit2, @Nullable String fetchRef) {
 		if (repository1.getDirectory()!=null && repository1.getDirectory().equals(repository2.getDirectory())) {
 			return GitUtils.getMergeBase(repository1, commit1, commit2);
 		} else {
 			File tempDir = FileUtils.createTempDir();
 			try {
 				new CloneCommand(tempDir).from(repository1.getDirectory().getAbsolutePath()).bare(true).shared(true).call();
-				new FetchCommand(tempDir).from(repository2.getDirectory().getAbsolutePath()).refspec(fetchRef).call();
+				if (fetchRef != null) {
+					new FetchCommand(tempDir).from(repository2.getDirectory().getAbsolutePath()).refspec(fetchRef).call();
+				} else {
+					LockUtils.call("repository-fetch:" + repository2.getDirectory(), new Callable<Void>() {
+
+						@Override
+						public Void call() throws Exception {
+							try {
+								RefUpdate refUpdate = repository2.updateRef("refs/temp/fetch");
+								refUpdate.setNewObjectId(commit2);
+								updateRef(refUpdate);
+								new FetchCommand(tempDir).from(repository2.getDirectory().getAbsolutePath()).refspec(refUpdate.getName()).call();
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+							return null;
+						}
+						
+					});
+				}
 				return ObjectId.fromString(new CalcMergeBaseCommand(tempDir).rev1(commit1.name()).rev2(commit2.name()).call());
 			} finally {
 				FileUtils.deleteDir(tempDir);

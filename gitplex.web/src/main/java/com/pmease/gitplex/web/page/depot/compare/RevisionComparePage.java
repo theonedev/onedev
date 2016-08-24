@@ -28,6 +28,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
@@ -211,8 +212,16 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 
 			@Override
 			protected ObjectId load() {
-				return GitUtils.getMergeBase(state.leftSide.getDepot().getRepository(), leftCommitId, 
-						state.rightSide.getDepot().getRepository(), rightCommitId, state.rightSide.getRevision());
+				try {
+					Ref ref = state.rightSide.getDepot().getRepository().findRef(state.rightSide.getRevision());
+					String refName = ref!=null?ref.getName():null;
+					return GitUtils.getMergeBase(
+							state.leftSide.getDepot().getRepository(), leftCommitId, 
+							state.rightSide.getDepot().getRepository(), rightCommitId, 
+							refName);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 			
 		};

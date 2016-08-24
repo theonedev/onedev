@@ -443,7 +443,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			ObjectId mergeBase = GitUtils.getMergeBase(
 					request.getTargetDepot().getRepository(), request.getTarget().getObjectId(), 
 					request.getSourceDepot().getRepository(), request.getSource().getObjectId(), 
-					request.getSourceBranch());
+					GitUtils.branch2ref(request.getSourceBranch()));
 			update.setMergeCommitHash(mergeBase.name());
 			request.addUpdate(update);
 			pullRequestUpdateManager.save(update, independent);
