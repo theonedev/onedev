@@ -185,18 +185,18 @@
 	position: absolute;
 	z-index: 10000;
 	font-size: 13px;
-	background-color: infobackground; 
-	border: 1px solid infotext;
+	background-color: #FBFCC5; 
+	border: 1px solid black;
 	border-radius: 4px; 
-	color: infotext; 
+	color: black; 
 	padding: 8px;
 }
 
 .diff-tokentooltip {
-	background-color: infobackground; 
+	background-color: #FBFCC5; 
 	border: 1px solid black;
 	border-radius: 4px; 
-	color: infotext; 
+	color: black; 
 	font-family: monospace; 
 	font-size: 10pt; 
 	overflow: auto; 

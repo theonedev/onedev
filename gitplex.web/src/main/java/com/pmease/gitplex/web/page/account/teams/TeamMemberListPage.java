@@ -27,6 +27,8 @@ import org.json.JSONWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -42,8 +44,6 @@ import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceRefer
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.members.MemberListPage;
 import com.pmease.gitplex.web.page.account.members.MemberTeamListPage;
-import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Response;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -173,7 +173,7 @@ public class TeamMemberListPage extends TeamPage {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				response.render(JavaScriptHeaderItem.forReference(AccountChoiceResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(new AccountChoiceResourceReference()));
 			}
 			
 			@Override

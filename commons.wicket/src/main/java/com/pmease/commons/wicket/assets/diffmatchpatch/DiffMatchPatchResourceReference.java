@@ -6,9 +6,7 @@ public class DiffMatchPatchResourceReference extends JavaScriptResourceReference
 
 	private static final long serialVersionUID = 1L;
 
-	public static final DiffMatchPatchResourceReference INSTANCE = new DiffMatchPatchResourceReference();
-	
-	private DiffMatchPatchResourceReference() {
+	public DiffMatchPatchResourceReference() {
 		super(DiffMatchPatchResourceReference.class, "diff_match_patch.js");
 	}
 

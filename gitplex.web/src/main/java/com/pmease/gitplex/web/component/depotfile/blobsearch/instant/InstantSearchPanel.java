@@ -12,7 +12,6 @@ import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -29,16 +28,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
-import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
@@ -189,13 +183,6 @@ public abstract class InstantSearchPanel extends Panel {
 			@Override
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
-				response.render(JavaScriptHeaderItem.forReference(ScrollIntoViewResourceReference.INSTANCE));
-				response.render(JavaScriptHeaderItem.forReference(DoneEventsResourceReference.INSTANCE));
-				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-
-				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(InstantSearchPanel.class, "instant-search.js")));
-				
 				String script = String.format(
 						"gitplex.blobInstantSearch.init('%s', %s);", 
 						searchField.getMarkupId(), 
@@ -353,9 +340,7 @@ public abstract class InstantSearchPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(InstantSearchPanel.class, "instant-search.css")));
+		response.render(JavaScriptHeaderItem.forReference(new InstantSearchResourceReference()));
 	}
 
 	@Override

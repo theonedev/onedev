@@ -31,7 +31,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
@@ -52,8 +51,8 @@ import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Type;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Type;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -423,8 +422,7 @@ public class RequestListPage extends PullRequestPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RequestListPage.class, "request-list.css")));
+		response.render(CssHeaderItem.forReference(new RequestListResourceReference()));
 	}
 
 	public static PageParameters paramsOf(Depot depot, SearchOption searchOption, SortOption sortOption) {

@@ -15,7 +15,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.gitplex.core.entity.Depot;
@@ -208,8 +207,7 @@ public class IntegrationPreviewPage extends RequestDetailPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(IntegrationPreviewPage.class, "integration-preview.css")));
+		response.render(CssHeaderItem.forReference(new IntegrationPreviewResourceReference()));
 	}
 
 	public static class State implements Serializable {

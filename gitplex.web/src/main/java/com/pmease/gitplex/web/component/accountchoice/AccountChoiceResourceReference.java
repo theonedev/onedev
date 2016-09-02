@@ -1,26 +1,24 @@
 package com.pmease.gitplex.web.component.accountchoice;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-public class AccountChoiceResourceReference extends JavaScriptResourceReference {
+import com.pmease.gitplex.web.page.base.BaseDependentResourceReference;
+
+public class AccountChoiceResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final AccountChoiceResourceReference INSTANCE = new AccountChoiceResourceReference();
-	
-	private AccountChoiceResourceReference() {
+	public AccountChoiceResourceReference() {
 		super(AccountChoiceResourceReference.class, "account-choice.js");
 	}
 
 	@Override
 	public List<HeaderItem> getDependencies() {
-		List<HeaderItem> dependencies = new ArrayList<>();
+		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(CssHeaderItem.forReference(
 				new CssResourceReference(AccountChoiceResourceReference.class, "account-choice.css")));
 		return dependencies;

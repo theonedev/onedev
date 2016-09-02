@@ -41,7 +41,7 @@
 	margin-left: 18px;
 }
 .input-error-mark {
+    background: url(wave.png) repeat-x bottom;
 	position: absolute;
-    background: url(wave.png) bottom repeat-x;
     z-index: 100000;
 }

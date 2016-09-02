@@ -19,7 +19,6 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -27,8 +26,6 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.crypt.Base64;
 
@@ -37,12 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.commons.wicket.CommonPage;
-import com.pmease.commons.wicket.assets.atwho.AtWhoResourceReference;
-import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
-import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
-import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.component.markdown.MarkdownResourceReference;
+import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
 public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
@@ -184,20 +176,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(MarkdownBehavior.class, "bootstrap-markdown.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(MarkdownBehavior.class, "bootstrap-markdown.min.css")));
-		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(AtWhoResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(HighlightResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(MarkdownBehavior.class, "markdown.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(MarkdownBehavior.class, "markdown.css")));
-		response.render(JavaScriptHeaderItem.forReference(MarkdownResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
 		
 		String encodedAttachmentSupport;
 		AttachmentSupport attachmentSupport = getAttachmentSupport();

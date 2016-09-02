@@ -27,4 +27,4 @@ pmease.commons.modal = {
 		$modal.modal("hide").parent().remove();
 	}
 	
-}
+};

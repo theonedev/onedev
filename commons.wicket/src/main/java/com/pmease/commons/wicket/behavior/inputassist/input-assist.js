@@ -184,4 +184,4 @@ pmease.commons.inputassist = {
 			$dropdown.find(".help>.completion").empty().append("Press 'tab' to complete first item");
 		}
 	}
-}
+};

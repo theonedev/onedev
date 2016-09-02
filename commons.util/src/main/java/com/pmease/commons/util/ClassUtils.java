@@ -4,17 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import javassist.util.proxy.ProxyFactory;
 
 import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
+
+import javassist.util.proxy.ProxyFactory;
 
 public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 	
@@ -24,21 +25,21 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 	 * 
 	 * @param superClass 
 	 * 			super class (or interface) to match. 
-	 * @param packageLocator 
+	 * @param packageScope 
 	 * 			find sub classes in the same package as this class. Package will be searched recursively.
 	 * @return collection of sub classes (not include the super class)
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Collection<Class<? extends T>> findSubClasses(Class<T> superClass, Class<?> packageLocator) {
+	public static <T> List<Class<? extends T>> findSubClasses(Class<T> superClass, Class<?> packageScope) {
 		Preconditions.checkNotNull(superClass);
-		Preconditions.checkNotNull(packageLocator);
+		Preconditions.checkNotNull(packageScope);
 		
-		Collection<Class<? extends T>> classes = new HashSet<Class<? extends T>>();
+		List<Class<? extends T>> classes = new ArrayList<Class<? extends T>>();
 		
-		File location = new File(packageLocator.getProtectionDomain()
+		File location = new File(packageScope.getProtectionDomain()
 				.getCodeSource().getLocation().getFile());
 		if (location.isFile()) {
-			String packagePath = packageLocator.getPackage().getName().replace('.', '/') + "/";
+			String packagePath = packageScope.getPackage().getName().replace('.', '/') + "/";
 			JarFile jarFile = null;
 			try {
 				jarFile = new JarFile(location);
@@ -50,7 +51,7 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 						className = StringUtils.substringBeforeLast(className, ".");
 						Class<T> clazz;
 						try {
-							clazz = (Class<T>) packageLocator.getClassLoader().loadClass(className);
+							clazz = (Class<T>) packageScope.getClassLoader().loadClass(className);
 						} catch (ClassNotFoundException e) {
 							throw new RuntimeException(e);
 						}
@@ -69,7 +70,7 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 				}
 			}
 		} else {
-			String packagePath = packageLocator.getPackage().getName().replace('.', File.separatorChar);
+			String packagePath = packageScope.getPackage().getName().replace('.', File.separatorChar);
 			File packageDir = new File(location, packagePath);
 			if (packageDir.exists()) {
 				for (File file: FileUtils.listFiles(packageDir, "**/*.class")) {
@@ -77,11 +78,11 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 					try {
 						String relativePath = PathUtils.parseRelative(file.getAbsolutePath(), 
 								packageDir.getAbsolutePath());
-						String className = packageLocator.getPackage().getName() + 
+						String className = packageScope.getPackage().getName() + 
 								StringUtils.substringBeforeLast(relativePath.replace('/', '.'), ".");
 						ClassLoader classLoader = superClass.getClassLoader();
 						if (classLoader == null)
-							classLoader = packageLocator.getClassLoader();
+							classLoader = packageScope.getClassLoader();
 						Preconditions.checkNotNull(classLoader);
 						clazz = (Class<T>) classLoader.loadClass(className);
 					} catch (ClassNotFoundException e) {
@@ -95,6 +96,7 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 						packageDir.getAbsolutePath());
 			}
 		}
+		classes.sort(Comparator.comparing(Class::getName));
 		return classes;
 	}
 	
@@ -102,10 +104,10 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 		return !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());		
 	}
 	
-	public static <T> Collection<Class<? extends T>> findImplementations(Class<T> abstractClass, Class<?> packageLocator) {
-		Collection<Class<? extends T>> implementations = new HashSet<Class<? extends T>>();
+	public static <T> List<Class<? extends T>> findImplementations(Class<T> abstractClass, Class<?> packageScope) {
+		List<Class<? extends T>> implementations = new ArrayList<Class<? extends T>>();
 		
-		for (Class<? extends T> each: findSubClasses(abstractClass, packageLocator)) {
+		for (Class<? extends T> each: findSubClasses(abstractClass, packageScope)) {
 			if (isConcrete(each))
 				implementations.add(each);
 		}

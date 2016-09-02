@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownHover;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
@@ -59,7 +58,7 @@ public class ReviewResultIcon extends WebComponent {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(ReviewResultIcon.class, "review-result.css")));
+		response.render(CssHeaderItem.forReference(new ReviewResultResourceReference()));
 	}
 
 }

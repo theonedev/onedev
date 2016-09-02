@@ -7,10 +7,10 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.manager.TeamManager;
-import com.vaynberg.wicket.select2.ChoiceProvider;
 
 public abstract class AbstractTeamChoiceProvider extends ChoiceProvider<Team> {
 

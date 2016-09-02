@@ -15,7 +15,7 @@ public class ViewStateAwareBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		
-		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new URIResourceReference()));
 		String script = String.format(""
 				+ "var viewState = pmease.commons.history.getViewState();"
 				+ "if (viewState) {"

@@ -69,4 +69,4 @@ pmease.commons.floating = {
 		$floating.remove();
 	}
 	
-}
+};

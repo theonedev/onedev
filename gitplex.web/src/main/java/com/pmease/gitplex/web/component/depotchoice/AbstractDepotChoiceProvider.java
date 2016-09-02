@@ -8,10 +8,10 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.vaynberg.wicket.select2.ChoiceProvider;
 
 @SuppressWarnings("serial")
 public abstract class AbstractDepotChoiceProvider extends ChoiceProvider<Depot> {

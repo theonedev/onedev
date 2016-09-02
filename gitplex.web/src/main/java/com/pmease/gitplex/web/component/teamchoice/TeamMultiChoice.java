@@ -30,7 +30,7 @@ public class TeamMultiChoice extends Select2MultiChoice<Team> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(TeamChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new TeamChoiceResourceReference()));
 	}
 
 }

@@ -16,7 +16,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.entity.Account;
@@ -104,8 +103,7 @@ public abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorizat
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				GreaterPrivilegesPanel.class, "greater-privileges.css")));
+		response.render(CssHeaderItem.forReference(new GreaterPrivilegesResourceReference()));
 	}
 	
 	protected abstract void onClose(AjaxRequestTarget target);

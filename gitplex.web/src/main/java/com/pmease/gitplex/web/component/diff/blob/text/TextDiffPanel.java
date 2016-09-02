@@ -16,7 +16,6 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -31,8 +30,6 @@ import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
@@ -54,8 +51,6 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.RangeUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.assets.hover.HoverResourceReference;
-import com.pmease.commons.wicket.assets.selectionpopover.SelectionPopoverResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -77,8 +72,6 @@ import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.util.DateUtils;
-
-import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel implements SourceAware {
@@ -385,14 +378,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(HoverResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(SelectionPopoverResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(TextDiffPanel.class, "text-diff.js")));
-		response.render(CssHeaderItem.forReference(
-				new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
+		response.render(JavaScriptHeaderItem.forReference(new TextDiffResourceReference()));
 		
 		String jsonOfOldCommentInfos;
 		String jsonOfNewCommentInfos;

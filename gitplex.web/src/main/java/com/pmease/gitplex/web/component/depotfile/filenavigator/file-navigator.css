@@ -1,11 +1,11 @@
 .subtree-dropdown-trigger {
-	background: url("arrow-right.png") no-repeat center top 3px; 
+	background: url(arrow-right.png) no-repeat center top 3px;
 	width: 16px; 
 	height: 20px; 
 	display: block;
 }
 .subtree-dropdown-trigger:hover, .subtree-dropdown-trigger.dropdown-open {
-	background-image: url("arrow-down.png");
+	background-image: url(arrow-down.png);
 }	
 .subtree-dropdown {
 	padding: 8px 24px 8px 4px; 

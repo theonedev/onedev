@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
-import com.vaynberg.wicket.select2.Response;
 
 public class MemberChoiceProvider extends AccountChoiceProvider {
 

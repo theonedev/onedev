@@ -18,7 +18,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.entity.Account;
@@ -119,9 +118,7 @@ public abstract class OrganizationSelector extends GenericPanel<Account> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(OrganizationSelector.class, "organization-selector.css")));
+		response.render(CssHeaderItem.forReference(new OrganizationSelectorResourceReference()));
 	}
 	
 	protected abstract void onSelect(AjaxRequestTarget target, Account organization);

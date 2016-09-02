@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -80,8 +79,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(AccountLayoutPage.class, "account.css")));
+		response.render(CssHeaderItem.forReference(new AccountResourceReference()));
 	}
 
 }

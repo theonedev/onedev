@@ -25,7 +25,6 @@ import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -46,8 +45,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,11 +65,6 @@ import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
-import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.assets.hover.HoverResourceReference;
-import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
-import com.pmease.commons.wicket.assets.selectionpopover.SelectionPopoverResourceReference;
 import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
@@ -882,17 +874,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(SelectionPopoverResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(HoverResourceReference.INSTANCE));
-		
-		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
-		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(SourceViewPanel.class, "source-view.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(SourceViewPanel.class, "source-view.css")));
+		response.render(JavaScriptHeaderItem.forReference(new SourceViewResourceReference()));
 		
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		

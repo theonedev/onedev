@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
@@ -126,8 +125,7 @@ public class LoginPage extends BasePage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(LoginPage.class, "login.css")));
+		response.render(CssHeaderItem.forReference(new LoginResourceReference()));
 	}
 
 }

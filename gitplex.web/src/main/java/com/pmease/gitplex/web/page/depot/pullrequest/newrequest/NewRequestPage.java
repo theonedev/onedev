@@ -30,7 +30,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -681,8 +680,7 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(NewRequestPage.class, "new-request.css")));
+		response.render(CssHeaderItem.forReference(new NewRequestResourceReference()));
 	}
 
 	@Override

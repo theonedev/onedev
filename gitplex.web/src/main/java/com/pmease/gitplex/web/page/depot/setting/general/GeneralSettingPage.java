@@ -16,6 +16,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.component.modal.ModalPanel;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
@@ -32,7 +33,6 @@ import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteDepotModal;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
-import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
 public class GeneralSettingPage extends DepotSettingPage {

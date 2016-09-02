@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -110,8 +109,7 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(Avatar.class, "avatar.css")));
+		response.render(CssHeaderItem.forReference(new AvatarResourceReference()));
 	}
 	
 	@Override

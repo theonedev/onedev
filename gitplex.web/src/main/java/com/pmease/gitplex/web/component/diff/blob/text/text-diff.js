@@ -905,4 +905,4 @@ gitplex.textdiff = {
 			gitplex.textdiff.scroll($container, mark);
 		}, 100);
 	}
-}
+};

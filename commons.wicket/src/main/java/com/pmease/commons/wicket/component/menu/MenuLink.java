@@ -6,7 +6,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
@@ -52,9 +51,7 @@ public abstract class MenuLink extends DropdownLink {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(MenuLink.class, "menu.css")));
+		response.render(CssHeaderItem.forReference(new MenuResourceReference()));
 	}
 
 	protected abstract List<MenuItem> getMenuItems();

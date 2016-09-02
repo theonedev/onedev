@@ -17,7 +17,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -32,8 +31,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
@@ -470,10 +467,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(RequestChangesPage.class, "request-changes.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RequestChangesPage.class, "request-changes.css")));
+		response.render(JavaScriptHeaderItem.forReference(new RequestChangesResourceReference()));
 	}
 
 	@Override

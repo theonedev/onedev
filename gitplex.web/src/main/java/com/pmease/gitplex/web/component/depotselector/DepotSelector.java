@@ -11,7 +11,6 @@ import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -27,11 +26,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.pmease.commons.wicket.behavior.InputChangeBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -175,13 +170,7 @@ public abstract class DepotSelector extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(ScrollIntoViewResourceReference.INSTANCE));
-		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(DepotSelector.class, "depot-selector.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(DepotSelector.class, "depot-selector.css")));
+		response.render(JavaScriptHeaderItem.forReference(new DepotSelectorResourceReference()));
 	}
 	
 	protected abstract void onSelect(AjaxRequestTarget target, Depot depot);

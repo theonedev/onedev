@@ -14,13 +14,13 @@ import org.json.JSONWriter;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.util.ReflectionUtils;
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
 public class StringListPropertyEditor extends PropertyEditor<List<String>> {

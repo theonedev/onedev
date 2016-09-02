@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
@@ -51,8 +50,7 @@ public class HashAndCodePanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				HashAndCodePanel.class, "hash-and-code.css")));
+		response.render(CssHeaderItem.forReference(new HashAndCodeResourceReference()));
 	}
 
 	@Override

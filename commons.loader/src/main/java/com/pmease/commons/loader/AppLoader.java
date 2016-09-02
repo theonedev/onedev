@@ -13,15 +13,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import javassist.ClassClassPath;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.bytecode.SignatureAttribute.ClassSignature;
-import javassist.bytecode.SignatureAttribute.ClassType;
-import javassist.bytecode.SignatureAttribute.TypeArgument;
-import javassist.bytecode.SignatureAttribute.TypeParameter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,17 +21,25 @@ import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Modules.OverriddenModuleBuilder;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.Startable;
+import com.pmease.commons.util.DependencyUtils;
 import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.util.dependency.DependencyHelper;
+
+import javassist.ClassClassPath;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtConstructor;
+import javassist.bytecode.SignatureAttribute.ClassSignature;
+import javassist.bytecode.SignatureAttribute.ClassType;
+import javassist.bytecode.SignatureAttribute.TypeArgument;
+import javassist.bytecode.SignatureAttribute.TypeParameter;
 
 public class AppLoader implements Startable {
 
@@ -73,8 +72,10 @@ public class AppLoader implements Startable {
 		
 		OverriddenModuleBuilder builder = Modules.override(new AppLoaderModule());
 		
-		for (Module module: DependencyHelper.sortDependencies(loadPluginModules()))
-			builder = Modules.override(builder.with(module));
+		Map<String, AbstractPluginModule> modules = loadPluginModules();
+		for (String id: DependencyUtils.sortDependencies(modules)) {
+			builder = Modules.override(builder.with(modules.get(id)));
+		}
 		
 		injector = Guice.createInjector(builder.with(new AbstractModule() {
 

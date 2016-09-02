@@ -423,9 +423,13 @@ gitplex.commitgraph = {
 		
 	}
 };
-$(window).resize(function(e) {
-	e.stopPropagation();
-	$(".commit-graph").each(function() {
-		gitplex.commitgraph.drawGraph($(this));
-	});
-});		
+$(function() {
+	if ($(".commit-graph").length != 0) {
+		$(window).resize(function(e) {
+			e.stopPropagation();
+			$(".commit-graph").each(function() {
+				gitplex.commitgraph.drawGraph($(this));
+			});
+		});		
+	}
+});

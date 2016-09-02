@@ -19,7 +19,6 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 
@@ -171,9 +170,8 @@ public class CommitListPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(CommitGraphResourceReference.INSTANCE));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(CommitListPanel.class, "commit-list.css")));
+		response.render(JavaScriptHeaderItem.forReference(new CommitGraphResourceReference()));
+		response.render(CssHeaderItem.forReference(new CommitListResourceReference()));
 		
 		String jsonOfCommits = CommitGraphUtils.asJSON(commitsModel.getObject());
 		String script = String.format("gitplex.commitgraph.render('%s', %s);", container.getMarkupId(), jsonOfCommits);

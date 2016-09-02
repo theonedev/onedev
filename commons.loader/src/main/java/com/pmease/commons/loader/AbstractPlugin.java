@@ -59,7 +59,7 @@ public abstract class AbstractPlugin implements Plugin {
 	}
 
 	@Override
-	public final Set<String> getDependencyIds() {
+	public final Set<String> getDependencies() {
 		return Collections.unmodifiableSet(dependencyIds);
 	}
 

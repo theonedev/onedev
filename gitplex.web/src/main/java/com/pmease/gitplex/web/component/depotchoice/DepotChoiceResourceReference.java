@@ -1,14 +1,12 @@
 package com.pmease.gitplex.web.component.depotchoice;
 
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import com.pmease.gitplex.web.page.base.BaseDependentResourceReference;
 
-public class DepotChoiceResourceReference extends JavaScriptResourceReference {
+public class DepotChoiceResourceReference extends BaseDependentResourceReference {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final DepotChoiceResourceReference INSTANCE = new DepotChoiceResourceReference();
-	
-	private DepotChoiceResourceReference() {
+	public DepotChoiceResourceReference() {
 		super(DepotChoiceResourceReference.class, "depot-choice.js");
 	}
 

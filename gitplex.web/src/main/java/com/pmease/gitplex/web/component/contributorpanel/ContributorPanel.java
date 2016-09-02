@@ -5,7 +5,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.gitplex.web.component.AccountLink;
@@ -47,8 +46,7 @@ public class ContributorPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				ContributorPanel.class, "contributor.css")));
+		response.render(CssHeaderItem.forReference(new ContributorResourceReference()));
 	}
 
 }

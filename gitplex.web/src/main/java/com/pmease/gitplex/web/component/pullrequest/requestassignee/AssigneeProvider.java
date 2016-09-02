@@ -12,6 +12,8 @@ import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -21,8 +23,6 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Response;
 
 public class AssigneeProvider extends ChoiceProvider<Assignee> {
 

@@ -10,6 +10,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
@@ -17,7 +18,6 @@ import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.vaynberg.wicket.select2.Response;
 
 public class AdministrativeAccountChoiceProvider extends AbstractAccountChoiceProvider {
 

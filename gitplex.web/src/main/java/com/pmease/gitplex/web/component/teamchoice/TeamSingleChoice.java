@@ -34,7 +34,7 @@ public class TeamSingleChoice extends Select2Choice<Team> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(TeamChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new TeamChoiceResourceReference()));
 	}
 	
 }

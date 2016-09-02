@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -63,8 +62,7 @@ public abstract class DepotSettingPage extends DepotPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				DepotSettingPage.class, "depot-setting.css")));
+		response.render(CssHeaderItem.forReference(new DepotSettingResourceReference()));
 		String script = String.format(""
 				+ "var $depotSetting = $('#depot-setting');"
 				+ "$depotSetting.find('>table').height($depotSetting.parent().outerHeight());");

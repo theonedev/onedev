@@ -91,7 +91,8 @@ gitplex.revisionDiff = {
 			$body.scrollTop($body[0].scrollHeight);
 		}, 0);
 	}
-}
+};
 $(function() {
-	$(window).on("scroll resize", gitplex.revisionDiff.reposition);	
-})
+	if ($(".revision-diff>.body>.detail").length != 0)
+		$(window).on("scroll resize", gitplex.revisionDiff.reposition);	
+});

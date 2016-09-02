@@ -23,4 +23,4 @@ gitplex.blobView = function(containerId) {
 		    $content.scrollTop(viewState.scroll.top);
 		}
 	});
-}
+};

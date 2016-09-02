@@ -5,7 +5,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 @SuppressWarnings("serial")
 public class CommitHashPanel extends Panel {
@@ -28,8 +27,7 @@ public class CommitHashPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(CommitHashPanel.class, "commit-hash.css")));
+		response.render(CssHeaderItem.forReference(new CommitHashResourceReference()));
 	}
 
 }

@@ -22,4 +22,4 @@ pmease.commons.initMarkdownPanel = function($preview, taskCallback) {
 			$this.prepend("<a href='#" + anchorName + "' class='permalink'><i class='fa fa-link'></i></a>");
 		}
 	});
-}
+};

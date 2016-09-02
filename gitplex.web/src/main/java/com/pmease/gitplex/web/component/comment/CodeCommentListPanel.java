@@ -28,7 +28,6 @@ import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -283,8 +282,7 @@ public abstract class CodeCommentListPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				CodeCommentListPanel.class, "code-comment-list.css")));
+		response.render(CssHeaderItem.forReference(new CodeCommentListResourceReference()));
 	}
 
 	@Nullable

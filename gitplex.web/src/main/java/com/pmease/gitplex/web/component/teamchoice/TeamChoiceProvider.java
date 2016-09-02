@@ -7,12 +7,12 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.web.Constants;
-import com.vaynberg.wicket.select2.Response;
 
 public class TeamChoiceProvider extends AbstractTeamChoiceProvider {
 

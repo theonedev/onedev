@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.modal.ModalLink;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -46,7 +47,6 @@ import com.pmease.gitplex.web.component.greaterprivilege.GreaterPrivilegesPanel;
 import com.pmease.gitplex.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotTeamListPage;
-import com.vaynberg.wicket.select2.Response;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -226,7 +226,7 @@ public class TeamDepotListPage extends TeamPage {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				response.render(JavaScriptHeaderItem.forReference(DepotChoiceResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(new DepotChoiceResourceReference()));
 			}
 			
 		});

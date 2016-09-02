@@ -43,17 +43,16 @@ gitplex.symboltooltip = {
 			};
 			$symbol.on("mouseout mousedown mouseup", onSymbolMouseOutOrUpOrDown);
 			
-			if (container.tooltip) {
-				if (container.tooltip.symbolEl == symbolEl)
-					return;
-				else 
-					gitplex.symboltooltip.removeTooltip(container);
-			}
-
 			showTimer = setTimeout(function() {
-				if (container.tooltip || !$symbol.is(":visible")) 
+				if (!$symbol.is(":visible")) 
 					return;
-				
+				if (container.tooltip) {
+					if (container.tooltip.symbolEl == symbolEl)
+						return;
+					else 
+						gitplex.symboltooltip.removeTooltip(container);
+				}
+
 				var $tooltip = $("<div class='symbol-tooltip' id='" + containerId 
 						+ "-symbol-tooltip'><img src=" + ajaxIndicatorUrl + "></img></div>");
 				container.tooltip = $tooltip[0];
@@ -96,7 +95,7 @@ gitplex.symboltooltip = {
 			container.tooltip = null;
 		}
 	}
-}
+};
 
 $(function() {
 	$(window).scroll(function() {
@@ -104,4 +103,4 @@ $(function() {
 			gitplex.symboltooltip.removeTooltip(this);
 		});
 	});
-})
+});

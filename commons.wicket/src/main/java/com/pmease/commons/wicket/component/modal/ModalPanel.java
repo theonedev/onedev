@@ -9,9 +9,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.CommonPage;
+import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
 public abstract class ModalPanel extends Panel {
@@ -63,8 +62,7 @@ public abstract class ModalPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 
-				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(ModalPanel.class, "modal.js")));
+				response.render(JavaScriptHeaderItem.forReference(new ModalResourceReference()));
 				
 				String script = String.format("pmease.commons.modal.init('%s', %s);", 
 						getMarkupId(true), getCallbackFunction());

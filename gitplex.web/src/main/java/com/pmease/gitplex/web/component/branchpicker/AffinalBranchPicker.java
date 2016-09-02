@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
@@ -80,8 +79,7 @@ public abstract class AffinalBranchPicker extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				AffinalBranchPicker.class, "branch-picker.css")));
+		response.render(CssHeaderItem.forReference(new BranchPickerResourceReference()));
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, Depot depot, String branch);

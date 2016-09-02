@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.pmease.commons.git.Blob;
@@ -143,7 +142,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(BlobDiffPanel.class, "blob-diff.css")));
+		response.render(CssHeaderItem.forReference(new BlobDiffResourceReference()));
 	}
 
 	protected void onDetach() {

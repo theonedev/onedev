@@ -43,4 +43,4 @@ gitplex.requestChanges = {
 			onIndexChanged();
 		});
 	}
-}
+};

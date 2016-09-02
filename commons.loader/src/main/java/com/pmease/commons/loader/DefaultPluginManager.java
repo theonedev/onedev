@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.pmease.commons.util.dependency.DependencyHelper;
+import com.pmease.commons.util.DependencyUtils;
 
 @Singleton
 public class DefaultPluginManager implements PluginManager {
@@ -32,10 +32,11 @@ public class DefaultPluginManager implements PluginManager {
 		for (Plugin plugin: plugins)
 			pluginMap.put(plugin.getId(), plugin);
 		
-		for (Plugin plugin: DependencyHelper.sortDependencies(pluginMap)) {
+		for (String id: DependencyUtils.sortDependencies(pluginMap)) {
 			// make sure the plugin map is in sorted order.
-			pluginMap.remove(plugin.getId());
-			pluginMap.put(plugin.getId(), plugin);
+			Plugin plugin = pluginMap.get(id);
+			pluginMap.remove(id);
+			pluginMap.put(id, plugin);
 		}
 		
 		this.executorService = executorService;

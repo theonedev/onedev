@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -48,8 +47,7 @@ public class ContributorAvatars extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new JavaScriptResourceReference(
-				ContributorAvatars.class, "avatar.css")));
+		response.render(CssHeaderItem.forReference(new AvatarResourceReference()));
 	}
 
 }

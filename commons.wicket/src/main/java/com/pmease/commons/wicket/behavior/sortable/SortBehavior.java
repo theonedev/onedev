@@ -144,7 +144,7 @@ public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
 		response.render(OnLoadHeaderItem.forScript(getSortScript()));
 	}
 	

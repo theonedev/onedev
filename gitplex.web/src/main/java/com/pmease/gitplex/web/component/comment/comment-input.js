@@ -36,4 +36,4 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
         insertTpl: '#${requestNumber}', 
         limit: atWhoLimit
     });		
-}
+};

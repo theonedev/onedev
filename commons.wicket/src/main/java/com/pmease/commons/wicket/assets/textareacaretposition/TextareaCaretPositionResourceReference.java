@@ -6,9 +6,7 @@ public class TextareaCaretPositionResourceReference extends JavaScriptResourceRe
 
 	private static final long serialVersionUID = 1L;
 
-	public static final TextareaCaretPositionResourceReference INSTANCE = new TextareaCaretPositionResourceReference();
-	
-	private TextareaCaretPositionResourceReference() {
+	public TextareaCaretPositionResourceReference() {
 		super(TextareaCaretPositionResourceReference.class, "textarea-caret-position.js");
 	}
 

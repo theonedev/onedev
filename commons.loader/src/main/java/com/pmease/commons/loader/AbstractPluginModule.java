@@ -12,9 +12,9 @@ import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import com.pmease.commons.util.ClassUtils;
-import com.pmease.commons.util.dependency.Dependency;
+import com.pmease.commons.util.DependencyAware;
 
-public abstract class AbstractPluginModule extends AbstractModule implements Dependency {
+public abstract class AbstractPluginModule extends AbstractModule implements DependencyAware<String> {
 
 	private String pluginId;
 	
@@ -91,7 +91,7 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 				}
 
 				@Override
-				public Set<String> getDependencyIds() {
+				public Set<String> getDependencies() {
 					return pluginDependencies;
 				}
 
@@ -149,7 +149,7 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 	}
 
 	@Override
-	public Set<String> getDependencyIds() {
+	public Set<String> getDependencies() {
 		return pluginDependencies;
 	}
 	

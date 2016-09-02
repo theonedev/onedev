@@ -22,4 +22,4 @@ pmease.commons.highlight = function($container) {
 		    }
 		}
 	});
-}
+};

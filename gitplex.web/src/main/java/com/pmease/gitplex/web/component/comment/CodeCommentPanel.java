@@ -29,7 +29,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.hibernate.StaleStateException;
 
 import com.pmease.commons.hibernate.dao.Dao;
@@ -645,8 +644,7 @@ public abstract class CodeCommentPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				CodeCommentPanel.class, "code-comment.css")));
+		response.render(CssHeaderItem.forReference(new CodeCommentResourceReference()));
 	}
 
 	private void onAddReply(AjaxRequestTarget target, boolean changeStatus) {

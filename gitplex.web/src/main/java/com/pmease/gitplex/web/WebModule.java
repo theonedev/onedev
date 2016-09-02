@@ -13,6 +13,7 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.commons.markdown.extensionpoint.MarkdownExtension;
 import com.pmease.commons.wicket.AbstractWicketConfig;
+import com.pmease.commons.wicket.ResourcePackScopeContribution;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.websocket.DefaultWebSocketManager;
 import com.pmease.commons.wicket.websocket.WebSocketManager;
@@ -80,6 +81,14 @@ public class WebModule extends AbstractPluginModule {
 			@Override
 			public Collection<HtmlTransformer> getHtmlTransformers() {
 				return Lists.newArrayList(new MentionTransformer(), new PullRequestTransformer());
+			}
+			
+		});
+		contribute(ResourcePackScopeContribution.class, new ResourcePackScopeContribution() {
+			
+			@Override
+			public Collection<Class<?>> getResourcePackScopes() {
+				return Lists.newArrayList(WebModule.class);
 			}
 			
 		});

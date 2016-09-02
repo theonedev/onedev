@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.Submodule;
@@ -51,7 +50,7 @@ public class GitLinkPanel extends BlobViewPanel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(GitLinkPanel.class, "git-link.css")));
+		response.render(CssHeaderItem.forReference(new GitLinkResourceReference()));
 	}
 
 }

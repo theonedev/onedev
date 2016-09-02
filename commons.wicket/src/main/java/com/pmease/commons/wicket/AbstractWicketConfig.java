@@ -1,6 +1,8 @@
 package com.pmease.commons.wicket;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Application;
@@ -28,6 +30,9 @@ import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.util.IProvider;
 
 import com.pmease.commons.bootstrap.Bootstrap;
+import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.wicket.page.CommonPage;
+import com.pmease.commons.wicket.resourcebundle.PackageResourceBundler;
 import com.pmease.commons.wicket.websocket.WebSocketManager;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
@@ -46,7 +51,6 @@ public abstract class AbstractWicketConfig extends WebApplication {
 	protected void init() {
 		super.init();
 
-		getResourceSettings().getCachingStrategy();
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);
@@ -121,7 +125,12 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			
 		});
 		
-		// getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
+		List<Class<?>> resourcePackScopes = new ArrayList<>();
+		for (ResourcePackScopeContribution contribution: AppLoader.getExtensions(ResourcePackScopeContribution.class)) {
+			resourcePackScopes.addAll(contribution.getResourcePackScopes());
+		}
+		
+		new PackageResourceBundler(WicketModule.class, resourcePackScopes.toArray(new Class<?>[resourcePackScopes.size()])).install(this);
 	}
 
 	@Override

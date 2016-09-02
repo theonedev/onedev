@@ -202,4 +202,4 @@ gitplex.fileedit = {
 		}
 		$(window).resize();
 	}
-}
+};

@@ -10,6 +10,7 @@ import javax.inject.Provider;
 import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
@@ -97,7 +98,11 @@ public class JettyPlugin extends AbstractPlugin {
          */
         contextHandler.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 
-        server.setHandler(contextHandler);
+        GzipHandler gzipHandler = new GzipHandler();
+		gzipHandler.setIncludedMimeTypes("text/css", "application/javascript", "text/javascript");
+		gzipHandler.setHandler(contextHandler);
+
+        server.setHandler(gzipHandler);
 
         for (ServerConfigurator configurator: serverConfiguratorsProvider.get()) 
         	configurator.configure(server);

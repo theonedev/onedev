@@ -8,7 +8,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -18,8 +17,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -34,8 +31,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
-import com.pmease.commons.wicket.assets.diffmatchpatch.DiffMatchPatchResourceReference;
 import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
@@ -209,13 +204,7 @@ public abstract class FileEditPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(DiffMatchPatchResourceReference.INSTANCE));
-		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(FileEditPanel.class, "file-edit.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(FileEditPanel.class, "file-edit.css")));
+		response.render(JavaScriptHeaderItem.forReference(new FileEditResourceReference()));
 		
 		String viewState = RequestCycle.get().getMetaData(DepotFilePage.VIEW_STATE_KEY);
 		

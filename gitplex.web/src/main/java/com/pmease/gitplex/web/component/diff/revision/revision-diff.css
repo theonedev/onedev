@@ -117,7 +117,7 @@
 
 .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
 	position: absolute;
-    background: #EEE url("vgrabber.png") no-repeat scroll right center;
+	background: #EEE url(vgrabber.png) no-repeat scroll right center;
     cursor: e-resize;
     width: 3px;
     right: 0;

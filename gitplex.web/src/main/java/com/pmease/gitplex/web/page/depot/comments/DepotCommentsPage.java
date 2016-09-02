@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -71,7 +70,7 @@ public class DepotCommentsPage extends DepotPage implements CodeCommentAware {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(DepotCommentsPage.class, "depot-comments.css")));
+		response.render(CssHeaderItem.forReference(new DepotCommentsResourceReference()));
 	}
 
 }

@@ -115,7 +115,7 @@
 	border-top: 1px solid #CCC;
 }
 #repo-file>.search-result>.ui-resizable-handle {
-    background: #EEE url("hgrabber.png") no-repeat scroll center top;
+	background: #EEE url(hgrabber.png) no-repeat scroll center top;
     cursor: n-resize;
     height: 4px;
 }

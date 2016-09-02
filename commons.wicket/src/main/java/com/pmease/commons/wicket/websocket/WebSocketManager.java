@@ -2,7 +2,7 @@ package com.pmease.commons.wicket.websocket;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.wicket.CommonPage;
+import com.pmease.commons.wicket.page.CommonPage;
 
 public interface WebSocketManager {
 	

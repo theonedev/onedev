@@ -10,14 +10,11 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +25,6 @@ import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.RangeUtils;
-import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
-import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
-import com.pmease.commons.wicket.assets.textareacaretposition.TextareaCaretPositionResourceReference;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.AlignTarget;
 import com.pmease.commons.wicket.component.floating.ComponentTarget;
@@ -189,15 +182,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 
-		response.render(JavaScriptHeaderItem.forReference(ScrollIntoViewResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(TextareaCaretPositionResourceReference.INSTANCE));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(AssistPanel.class, "input-assist.css")));
-		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(InputAssistBehavior.class, "input-assist.js")));
+		response.render(JavaScriptHeaderItem.forReference(new InputAssistResourceReference()));
 		
 		String script = String.format("pmease.commons.inputassist.init('%s', %s);", 
 				getComponent().getMarkupId(true), 

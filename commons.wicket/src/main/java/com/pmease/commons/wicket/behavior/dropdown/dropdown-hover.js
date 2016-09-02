@@ -67,4 +67,4 @@ pmease.commons.dropdownhover = {
 		$trigger.removeClass("dropdown-open");
 		$trigger.data("dropdown", null);
 	}
-}
+};

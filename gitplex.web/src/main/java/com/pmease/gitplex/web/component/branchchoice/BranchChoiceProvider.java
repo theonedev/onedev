@@ -12,10 +12,10 @@ import org.json.JSONWriter;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
-import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
 public class BranchChoiceProvider extends ChoiceProvider<String> {

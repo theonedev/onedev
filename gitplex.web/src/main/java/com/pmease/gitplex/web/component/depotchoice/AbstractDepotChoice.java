@@ -34,7 +34,7 @@ public class AbstractDepotChoice extends Select2Choice<Depot> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(DepotChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new DepotChoiceResourceReference()));
 	}
 	
 }

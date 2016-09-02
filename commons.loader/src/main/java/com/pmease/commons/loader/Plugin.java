@@ -2,9 +2,9 @@ package com.pmease.commons.loader;
 
 import java.util.Set;
 
-import com.pmease.commons.util.dependency.Dependency;
+import com.pmease.commons.util.DependencyAware;
 
-public interface Plugin extends Dependency {
+public interface Plugin extends DependencyAware<String> {
 	
 	String getId();
 
@@ -16,7 +16,7 @@ public interface Plugin extends Dependency {
 
 	String getDescription();
 
-	Set<String> getDependencyIds();
+	Set<String> getDependencies();
 
 	/**
 	 * This function will be called before starting other plugins depending on this plugin.

@@ -1,31 +1,29 @@
 package com.pmease.commons.wicket.component.markdown;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
+import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
+import com.pmease.commons.wicket.page.CommonDependentResourceReference;
 
-@SuppressWarnings("serial")
-public class MarkdownResourceReference extends JavaScriptResourceReference {
+public class MarkdownResourceReference extends CommonDependentResourceReference {
 
-	public static final MarkdownResourceReference INSTANCE = new MarkdownResourceReference();
-	
-	private MarkdownResourceReference() {
+	private static final long serialVersionUID = 1L;
+
+	public MarkdownResourceReference() {
 		super(MarkdownResourceReference.class, "markdown.js");
 	}
 
 	@Override
 	public List<HeaderItem> getDependencies() {
-		List<HeaderItem> dependencies = new ArrayList<>();
-		dependencies.add(JavaScriptHeaderItem.forReference(HighlightResourceReference.INSTANCE));		
+		List<HeaderItem> dependencies = super.getDependencies();
+		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));		
 		dependencies.add(CssHeaderItem.forReference(
-				new CssResourceReference(MarkdownPanel.class, "markdown.css")));
+				new CssResourceReference(MarkdownResourceReference.class, "markdown.css")));
 		return dependencies;
 	}
 

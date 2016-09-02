@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
@@ -120,8 +119,7 @@ public class CommitMessagePanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(CommitMessagePanel.class, "commit-message.css")));
+		response.render(CssHeaderItem.forReference(new CommitMessageResourceReference()));
 	}
 
 	@Override

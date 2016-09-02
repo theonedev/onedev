@@ -24,6 +24,8 @@ import org.json.JSONWriter;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -36,8 +38,6 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.teamchoice.TeamChoiceResourceReference;
 import com.pmease.gitplex.web.page.account.teams.TeamMemberListPage;
-import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
 public class MemberTeamListPage extends MemberPage {
@@ -146,7 +146,7 @@ public class MemberTeamListPage extends MemberPage {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				response.render(JavaScriptHeaderItem.forReference(TeamChoiceResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(new TeamChoiceResourceReference()));
 			}
 			
 			@Override

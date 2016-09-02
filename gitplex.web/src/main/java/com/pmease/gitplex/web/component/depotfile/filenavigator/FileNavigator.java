@@ -36,7 +36,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -537,7 +536,7 @@ public abstract class FileNavigator extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(FileNavigator.class, "file-navigator.css")));
+		response.render(CssHeaderItem.forReference(new FileNavigatorResourceReference()));
 		
 		if (context.getBlobIdent().isTree()) {
 			String script = String.format("$('#%s input[type=text]').focus();", getMarkupId());

@@ -40,4 +40,4 @@ gitplex.editsave = {
 		$editSave.data("pathChanged", !equalsOldPath);
 		gitplex.editsave.updateSubmitBtnState($editSave);
 	}
-}
+};

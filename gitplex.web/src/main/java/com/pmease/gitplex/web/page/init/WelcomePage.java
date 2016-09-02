@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.init;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.web.page.account.overview.NewDepotPage;
 import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
@@ -31,8 +30,7 @@ public class WelcomePage extends LayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(ServerInitPage.class, "welcome.css")));
+		response.render(CssHeaderItem.forReference(new WelcomeResourceReference()));
 	}
 	
 }

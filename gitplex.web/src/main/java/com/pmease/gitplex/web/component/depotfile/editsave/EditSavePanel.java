@@ -12,7 +12,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -24,8 +23,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -372,10 +369,7 @@ public abstract class EditSavePanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(EditSavePanel.class, "edit-save.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(EditSavePanel.class, "edit-save.css")));
+		response.render(JavaScriptHeaderItem.forReference(new EditSaveResourceReference()));
 		
 		String script = String.format("gitplex.editsave.init('%s');", getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));

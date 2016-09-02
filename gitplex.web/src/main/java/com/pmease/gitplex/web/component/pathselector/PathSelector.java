@@ -22,7 +22,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -175,8 +174,7 @@ public abstract class PathSelector extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(PathSelector.class, "path-selector.css")));
+		response.render(CssHeaderItem.forReference(new PathSelectorResourceReference()));
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);

@@ -24,6 +24,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -43,7 +44,6 @@ import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorDepotListPage;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
-import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
 public class DepotCollaboratorListPage extends DepotSettingPage {
@@ -173,7 +173,7 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				response.render(JavaScriptHeaderItem.forReference(AccountChoiceResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(new AccountChoiceResourceReference()));
 			}
 			
 		});

@@ -48,7 +48,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
@@ -922,8 +921,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RequestDetailPage.class, "request-detail.css")));
+		response.render(CssHeaderItem.forReference(new RequestDetailResourceReference()));
 	}
 	
 	private class RequestTab extends PageTab {

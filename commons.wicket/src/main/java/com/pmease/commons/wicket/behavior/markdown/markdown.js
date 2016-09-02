@@ -338,4 +338,4 @@ pmease.commons.markdown = {
 			}
 		})
 	}
-}
+};

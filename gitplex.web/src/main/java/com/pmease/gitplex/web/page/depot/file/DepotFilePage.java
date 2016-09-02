@@ -22,7 +22,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -34,8 +33,6 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
@@ -52,8 +49,6 @@ import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.loader.ListenerRegistry;
-import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.component.modal.ModalLink;
@@ -728,13 +723,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
-		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(DepotFilePage.class, "depot-file.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(DepotFilePage.class, "depot-file.css")));
+		response.render(JavaScriptHeaderItem.forReference(new DepotFileResourceReference()));
 	}
 
 	public static PageParameters paramsOf(Depot depot, CodeComment comment) {

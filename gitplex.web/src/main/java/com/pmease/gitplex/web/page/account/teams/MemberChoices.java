@@ -31,7 +31,7 @@ public class MemberChoices extends Select2MultiChoice<Account> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(AccountChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new AccountChoiceResourceReference()));
 	}
 
 }

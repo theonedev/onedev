@@ -4,17 +4,13 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.CommonPage;
-import com.pmease.commons.wicket.assets.align.AlignResourceReference;
+import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
 public abstract class FloatingPanel extends Panel {
@@ -55,11 +51,7 @@ public abstract class FloatingPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 
-				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(FloatingPanel.class, "floating.js")));
-				response.render(CssHeaderItem.forReference(
-						new CssResourceReference(FloatingPanel.class, "floating.css")));
-				response.render(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(new FloatingResourceReference()));
 				
 				String script = String.format("pmease.commons.floating.init('%s', {target:%s, placement:%s}, %s);", 
 						getMarkupId(true), alignTarget, placement, getCallbackFunction());

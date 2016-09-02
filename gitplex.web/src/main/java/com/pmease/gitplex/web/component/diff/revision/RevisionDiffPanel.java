@@ -28,7 +28,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -49,8 +48,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -73,8 +70,6 @@ import com.pmease.commons.util.Range;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
@@ -1377,12 +1372,7 @@ public class RevisionDiffPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(RevisionDiffPanel.class, "revision-diff.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
+		response.render(JavaScriptHeaderItem.forReference(new RevisionDiffResourceReference()));
 	}
 	
 	private CompareContext getCompareContext(String commitHash) {

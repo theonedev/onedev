@@ -4,8 +4,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 
-import com.vaynberg.wicket.select2.ChoiceProvider;
-
 @SuppressWarnings("serial")
 public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
 

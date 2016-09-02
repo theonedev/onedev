@@ -6,4 +6,4 @@ gitplex.commitdetail = {
 		else 
 			$refs.parent().remove();
 	}
-}
+};

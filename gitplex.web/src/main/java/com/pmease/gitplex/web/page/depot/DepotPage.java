@@ -11,7 +11,6 @@ import javax.servlet.http.Cookie;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -25,13 +24,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -170,11 +166,7 @@ public abstract class DepotPage extends AccountPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(DepotPage.class, "depot.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(DepotPage.class, "depot.css")));
+		response.render(JavaScriptHeaderItem.forReference(new DepotResourceReference()));
 	}
 
 	@Override

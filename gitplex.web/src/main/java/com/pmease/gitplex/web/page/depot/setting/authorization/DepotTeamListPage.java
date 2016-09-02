@@ -25,6 +25,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.modal.ModalLink;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -43,7 +44,6 @@ import com.pmease.gitplex.web.component.teamchoice.TeamChoiceResourceReference;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.page.account.teams.TeamDepotListPage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
-import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
 public class DepotTeamListPage extends DepotSettingPage {
@@ -172,7 +172,7 @@ public class DepotTeamListPage extends DepotSettingPage {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				response.render(JavaScriptHeaderItem.forReference(TeamChoiceResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(new TeamChoiceResourceReference()));
 			}
 			
 		});

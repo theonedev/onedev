@@ -92,7 +92,7 @@ public class MarkdownPanel extends GenericPanel<String> {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
-				response.render(JavaScriptHeaderItem.forReference(MarkdownResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
 				
 				CharSequence callbackFunc = getCallbackFunction(
 						explicit("taskStartIndex"), explicit("taskChecked"));

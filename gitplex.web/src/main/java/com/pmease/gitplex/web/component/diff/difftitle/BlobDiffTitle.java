@@ -4,7 +4,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.pmease.commons.git.BlobChange;
@@ -44,7 +43,7 @@ public class BlobDiffTitle extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(BlobDiffTitle.class, "diff-title.css")));
+		response.render(CssHeaderItem.forReference(new DiffTitleResourceReference()));
 	}
 
 }

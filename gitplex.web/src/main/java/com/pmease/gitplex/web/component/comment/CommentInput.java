@@ -15,7 +15,6 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -113,8 +112,7 @@ public abstract class CommentInput extends TextArea<String> {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
-				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(CommentInput.class, "comment-input.js")));
+				response.render(JavaScriptHeaderItem.forReference(new CommentInputResourceReference()));
 				String script = String.format("gitplex.comment('%s', %s, %s);", 
 						component.getMarkupId(true), ATWHO_LIMIT,
 						getCallbackFunction(CallbackParameter.explicit("type"), CallbackParameter.explicit("param")));

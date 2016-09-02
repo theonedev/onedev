@@ -52,4 +52,4 @@ gitplex.filelist = {
 			}
 		});
 	}
-}
+};

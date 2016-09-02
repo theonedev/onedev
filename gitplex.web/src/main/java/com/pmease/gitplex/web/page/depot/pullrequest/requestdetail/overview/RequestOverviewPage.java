@@ -31,7 +31,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Preconditions;
@@ -737,8 +736,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RequestOverviewPage.class, "request-overview.css")));
+		response.render(CssHeaderItem.forReference(new RequestOverviewResourceReference()));
 	}
 	
 }

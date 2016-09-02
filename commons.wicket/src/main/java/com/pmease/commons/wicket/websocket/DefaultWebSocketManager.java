@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.wicket.CommonPage;
+import com.pmease.commons.wicket.page.CommonPage;
 
 @Singleton
 public class DefaultWebSocketManager implements WebSocketManager {

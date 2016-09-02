@@ -36,4 +36,4 @@ gitplex.depotSelector = {
 			$container.find(".depots").scrollIntoView("li.depot.active", 30, 8);
 		});
 	}
-}
+};

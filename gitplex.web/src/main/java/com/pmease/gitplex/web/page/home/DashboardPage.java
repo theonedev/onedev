@@ -18,7 +18,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -204,8 +203,7 @@ public class DashboardPage extends LayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(DashboardPage.class, "dashboard.css")));
+		response.render(CssHeaderItem.forReference(new DashboardResourceReference()));
 	}
 
 	@Override

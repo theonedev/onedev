@@ -9,7 +9,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.ComponentTarget;
@@ -100,8 +99,7 @@ public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(DropdownHover.class, "dropdown-hover.js")));
+		response.render(JavaScriptHeaderItem.forReference(new DropdownHoverResourceReference()));
 		String script = String.format("pmease.commons.dropdownhover.init('%s', %s, %s);", 
 				getComponent().getMarkupId(true), hoverDelay, getCallbackFunction());
 		response.render(OnDomReadyHeaderItem.forScript(script));

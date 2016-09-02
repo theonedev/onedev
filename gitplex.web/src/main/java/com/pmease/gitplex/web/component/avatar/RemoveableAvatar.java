@@ -8,7 +8,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -61,8 +60,7 @@ public abstract class RemoveableAvatar extends AjaxLink<Account> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RemoveableAvatar.class, "avatar.css")));
+		response.render(CssHeaderItem.forReference(new AvatarResourceReference()));
 	}
 	
 }

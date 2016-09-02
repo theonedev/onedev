@@ -29,7 +29,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.validation.IErrorMessageSource;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
@@ -455,8 +454,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(AdvancedSearchPanel.class, "advanced-search.css")));
+		response.render(CssHeaderItem.forReference(new AdvancedSearchResourceReference()));
 	}
 
 	protected abstract void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);

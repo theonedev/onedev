@@ -40,7 +40,7 @@
 .source-view>.comment>.ui-resizable-handle {
 	position: absolute;
 	border-right: 1px solid #CCC;
-    background: #EEE url("vgrabber.png") no-repeat scroll right center;
+	background: #EEE url(vgrabber.png) no-repeat scroll right center;
     cursor: e-resize;
     width: 4px;
     right: 0;
@@ -68,7 +68,7 @@
 .source-view>.outline>.ui-resizable-handle {
 	position: absolute;
 	border-left: 1px solid #CCC;
-    background: #EEE url("vgrabber.png") no-repeat scroll left center;
+	background: #EEE url(vgrabber.png) no-repeat scroll left center;
     cursor: w-resize;
     width: 4px;
     left: 0;
@@ -142,9 +142,9 @@
 	position: absolute;
 	z-index: 10000;
 	font-size: 13px;
-	background-color: infobackground; 
-	border: 1px solid infotext;
+	background-color: #FBFCC5; 
+	border: 1px solid black;
 	border-radius: 4px; 
-	color: infotext; 
+	color: black; 
 	padding: 8px;
 }

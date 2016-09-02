@@ -26,7 +26,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -495,8 +494,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RevisionComparePage.class, "revision-compare.css")));
+		response.render(CssHeaderItem.forReference(new RevisionCompareResourceReference()));
 	}
 
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {

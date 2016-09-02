@@ -4,8 +4,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
 import com.pmease.commons.wicket.component.select2.Select2Choice;
-import com.vaynberg.wicket.select2.ChoiceProvider;
 
 @SuppressWarnings("serial")
 public class BranchSingleChoice extends Select2Choice<String> {
@@ -36,7 +36,7 @@ public class BranchSingleChoice extends Select2Choice<String> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(BranchChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new BranchChoiceResourceReference()));
 	}
 	
 }

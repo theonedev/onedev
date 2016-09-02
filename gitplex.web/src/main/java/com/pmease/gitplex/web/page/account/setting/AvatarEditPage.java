@@ -15,7 +15,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.lang.Bytes;
 
 import com.pmease.commons.util.FileUtils;
@@ -107,8 +106,7 @@ public class AvatarEditPage extends AccountSettingPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(AvatarEditPage.class, "avatar-edit.css")));
+		response.render(CssHeaderItem.forReference(new AvatarEditResourceReference()));
 	}
 
 	@Override

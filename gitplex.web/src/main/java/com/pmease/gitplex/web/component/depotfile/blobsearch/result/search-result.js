@@ -14,4 +14,4 @@ gitplex.searchresult = {
 		else
 			return true;
 	}
-}
+};

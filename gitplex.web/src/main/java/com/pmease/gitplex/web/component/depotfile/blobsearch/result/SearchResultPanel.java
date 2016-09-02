@@ -13,7 +13,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -25,12 +24,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.entity.support.TextRange;
@@ -517,13 +513,7 @@ public abstract class SearchResultPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		// to be used by ConfirmSwitchFileListener
-		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
-		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(SearchResultPanel.class, "search-result.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(SearchResultPanel.class, "search-result.css")));
+		response.render(JavaScriptHeaderItem.forReference(new SearchResultResourceReference()));
 	}
 
 	private static class ActiveIndex {

@@ -2,8 +2,6 @@ package com.pmease.commons.wicket.component.select2;
 
 import java.util.List;
 
-import com.vaynberg.wicket.select2.Response;
-
 public class ResponseFiller<T> {
 	
 	private Response<T> response;

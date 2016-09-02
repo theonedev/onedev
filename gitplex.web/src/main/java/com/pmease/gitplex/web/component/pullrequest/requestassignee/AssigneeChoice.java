@@ -4,9 +4,9 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
+import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
@@ -54,7 +54,7 @@ public class AssigneeChoice extends Select2Choice<Assignee> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(AccountChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(new AccountChoiceResourceReference()));
 	}
 
 }

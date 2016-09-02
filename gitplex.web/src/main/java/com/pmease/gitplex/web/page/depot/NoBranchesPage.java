@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
@@ -33,7 +32,7 @@ public class NoBranchesPage extends DepotPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(NoBranchesPage.class, "no-branches.css")));
+		response.render(CssHeaderItem.forReference(new NoBranchesResourceReference()));
 	}
 
 	@Override

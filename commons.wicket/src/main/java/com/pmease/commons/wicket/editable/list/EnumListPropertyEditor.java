@@ -18,6 +18,8 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.pmease.commons.util.WordUtils;
+import com.pmease.commons.wicket.component.select2.ChoiceProvider;
+import com.pmease.commons.wicket.component.select2.Response;
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.ErrorContext;
@@ -25,8 +27,6 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.annotation.ExcludeValues;
-import com.vaynberg.wicket.select2.ChoiceProvider;
-import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings({"serial", "unchecked", "rawtypes"})
 public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {

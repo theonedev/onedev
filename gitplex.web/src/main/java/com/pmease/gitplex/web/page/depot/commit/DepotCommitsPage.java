@@ -33,7 +33,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -523,10 +522,8 @@ public class DepotCommitsPage extends DepotPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(CommitGraphResourceReference.INSTANCE));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(DepotCommitsPage.class, "depot-commits.css")));
-		
+		response.render(JavaScriptHeaderItem.forReference(new CommitGraphResourceReference()));
+		response.render(CssHeaderItem.forReference(new DepotCommitsResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript(renderCommitGraph()));
 	}
 	

@@ -6,9 +6,7 @@ public class URIResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final URIResourceReference INSTANCE = new URIResourceReference();
-	
-	private URIResourceReference() {
+	public URIResourceReference() {
 		super(URIResourceReference.class, "URI.js");
 	}
 
