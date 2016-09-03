@@ -18,6 +18,9 @@ gitplex.revisionDiff = {
 		gitplex.revisionDiff.reposition();
 	},
 	reposition: function(e) {
+		if ($(".revision-diff>.body>.detail").length == 0)
+			return;
+		
 		if (e) {
 			e.stopPropagation();
 			if (e.target && $(e.target).hasClass("ui-resizable"))
@@ -93,6 +96,5 @@ gitplex.revisionDiff = {
 	}
 };
 $(function() {
-	if ($(".revision-diff>.body>.detail").length != 0)
-		$(window).on("scroll resize", gitplex.revisionDiff.reposition);	
+	$(window).on("scroll resize", gitplex.revisionDiff.reposition);	
 });

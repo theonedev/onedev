@@ -498,5 +498,3 @@ $(window).load(function() {
 $(window).on("beforeunload", function() {
 	$(".autofit:visible").first().trigger("storeViewState");	
 });
-
-console.log("nanade");

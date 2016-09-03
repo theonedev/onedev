@@ -424,12 +424,12 @@ gitplex.commitgraph = {
 	}
 };
 $(function() {
-	if ($(".commit-graph").length != 0) {
-		$(window).resize(function(e) {
-			e.stopPropagation();
-			$(".commit-graph").each(function() {
-				gitplex.commitgraph.drawGraph($(this));
-			});
-		});		
-	}
+	$(window).resize(function(e) {
+		if ($(".commit-graph").length == 0)
+			return;
+		e.stopPropagation();
+		$(".commit-graph").each(function() {
+			gitplex.commitgraph.drawGraph($(this));
+		});
+	});		
 });
