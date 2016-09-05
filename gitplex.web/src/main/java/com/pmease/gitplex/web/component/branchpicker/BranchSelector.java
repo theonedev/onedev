@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
@@ -28,6 +27,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.behavior.InputChangeBehavior;
 import com.pmease.gitplex.core.entity.Depot;
 
@@ -42,7 +42,7 @@ public abstract class BranchSelector extends Panel {
 	
 	private String branchInput;
 	
-	private AbstractDefaultAjaxBehavior keyBehavior;
+	private AbstractPostAjaxBehavior keyBehavior;
 	
 	private TextField<String> branchField;
 
@@ -70,7 +70,7 @@ public abstract class BranchSelector extends Panel {
 		branchField.setOutputMarkupId(true);
 		add(branchField);
 		
-		keyBehavior = new AbstractDefaultAjaxBehavior() {
+		keyBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {

@@ -5,7 +5,6 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -21,6 +20,7 @@ import org.hibernate.StaleStateException;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -60,7 +60,7 @@ public class MarkdownPanel extends GenericPanel<String> {
 			}
 		}).setEscapeModelStrings(false));
 
-		add(new AbstractDefaultAjaxBehavior() {
+		add(new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {

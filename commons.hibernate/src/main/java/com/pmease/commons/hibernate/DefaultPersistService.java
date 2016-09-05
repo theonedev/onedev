@@ -76,8 +76,14 @@ public class DefaultPersistService implements PersistService, Provider<SessionFa
 
 	@Override
 	public SessionFactory get() {
-		Preconditions.checkNotNull(sessionFactory, "Persist service is either not started or is not configured.");
+		if (sessionFactory == null)
+			throw new RuntimeException("Persist service is either not started or is not configured.");
 		return sessionFactory;
+	}
+
+	@Override
+	public boolean isReady() {
+		return sessionFactory != null;
 	}
 
 }

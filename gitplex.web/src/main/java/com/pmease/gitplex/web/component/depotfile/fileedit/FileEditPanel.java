@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.component.depotfile.fileedit;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
@@ -31,6 +30,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
@@ -60,9 +60,9 @@ public abstract class FileEditPanel extends Panel {
 	
 	private final TextRange mark;
 	
-	private AbstractDefaultAjaxBehavior previewBehavior;
+	private AbstractPostAjaxBehavior previewBehavior;
 	
-	private AbstractDefaultAjaxBehavior saveBehavior;
+	private AbstractPostAjaxBehavior saveBehavior;
 	
 	private EditSavePanel editSavePanel;
 	
@@ -84,7 +84,7 @@ public abstract class FileEditPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		previewBehavior = new AbstractDefaultAjaxBehavior() {
+		previewBehavior = new AbstractPostAjaxBehavior() {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -139,7 +139,7 @@ public abstract class FileEditPanel extends Panel {
 		};
 		add(new WebMarkupContainer("previewLink").add(previewBehavior));
 		
-		saveBehavior = new AbstractDefaultAjaxBehavior() {
+		saveBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {

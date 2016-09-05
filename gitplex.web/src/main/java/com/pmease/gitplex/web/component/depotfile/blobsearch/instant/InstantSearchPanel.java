@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -33,6 +32,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
@@ -135,7 +135,7 @@ public abstract class InstantSearchPanel extends Panel {
 		super.onInitialize();
 
 		searchField = new TextField<>("input");
-		searchField.add(new AbstractDefaultAjaxBehavior() {
+		searchField.add(new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {

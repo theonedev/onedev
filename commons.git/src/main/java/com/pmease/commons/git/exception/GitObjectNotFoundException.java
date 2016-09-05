@@ -1,10 +1,10 @@
 package com.pmease.commons.git.exception;
 
-public class ObjectAlreadyExistException extends GitException {
+public class GitObjectNotFoundException extends GitException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ObjectAlreadyExistException(String message) {
+	public GitObjectNotFoundException(String message) {
 		super(message);
 	}
 

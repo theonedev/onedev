@@ -1,7 +1,9 @@
 package com.pmease.gitplex.web;
 
+import java.util.Set;
+
+import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.Application;
@@ -17,16 +19,23 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 
-import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitplex.web.mapper.UrlMapper;
 import com.pmease.gitplex.web.page.error.BaseErrorPage;
-import com.pmease.gitplex.web.page.error.NotFoundErrorPage;
+import com.pmease.gitplex.web.page.error.UnexpectedExceptionPage;
+import com.pmease.gitplex.web.page.error.ExpectedExceptionPage;
 import com.pmease.gitplex.web.page.home.DashboardPage;
 
 @Singleton
 public class WicketConfig extends AbstractWicketConfig {
+	
+	private final Set<ExpectedExceptionContribution> expectedExceptionContributions;
+	
+	@Inject
+	public WicketConfig(Set<ExpectedExceptionContribution> expectedExceptionContributions) {
+		this.expectedExceptionContributions = expectedExceptionContributions;
+	}
 	
 	public static WicketConfig get() {
 		return (WicketConfig) Application.get();
@@ -81,15 +90,15 @@ public class WicketConfig extends AbstractWicketConfig {
 
 	@Override
 	protected Page mapExceptions(Exception e) {
-		EntityNotFoundException entityNotFoundException = ExceptionUtils.find(e, EntityNotFoundException.class);
-		if (entityNotFoundException != null)
-			return new NotFoundErrorPage(entityNotFoundException.getMessage());
+		for (ExpectedExceptionContribution contribution: expectedExceptionContributions) {
+			for (Class<? extends Exception> expectedExceptionClass: contribution.getExpectedExceptionClasses()) {
+				Exception expectedException = ExceptionUtils.find(e, expectedExceptionClass);
+				if (expectedException != null)
+					return new ExpectedExceptionPage(expectedException);
+			}
+		}
 		
-		ObjectNotExistException objectNotExistException = ExceptionUtils.find(e, ObjectNotExistException.class);
-		if (objectNotExistException != null)
-			return new NotFoundErrorPage(objectNotExistException.getMessage());
-		
-		return super.mapExceptions(e);
+		return new UnexpectedExceptionPage(e);
 	}
 	
 }

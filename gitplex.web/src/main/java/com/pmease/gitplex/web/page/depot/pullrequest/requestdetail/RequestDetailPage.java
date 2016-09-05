@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.wicket.AttributeModifier;
@@ -110,7 +112,11 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 			@Override
 			protected PullRequest load() {
-				return Preconditions.checkNotNull(GitPlex.getInstance(PullRequestManager.class).find(getDepot(), params.get("request").toLong()));
+				Long requestNumber = params.get("request").toLong();
+				PullRequest request = GitPlex.getInstance(PullRequestManager.class).find(getDepot(), requestNumber);
+				if (request == null)
+					throw new EntityNotFoundException("Unable to find request #" + requestNumber + " in repository " + getDepot());
+				return request;
 			}
 			
 		};

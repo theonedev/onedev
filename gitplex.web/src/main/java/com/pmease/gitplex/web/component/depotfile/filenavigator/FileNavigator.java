@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -315,6 +316,59 @@ public abstract class FileNavigator extends Panel {
 		
 		if (callback == null) {
 			add(new MenuLink("fileMenu") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
+						
+						@Override
+						public CharSequence getSuccessHandler(Component component) {
+							return null;
+						}
+						
+						@Override
+						public CharSequence getPrecondition(Component component) {
+							return null;
+						}
+						
+						@Override
+						public CharSequence getInitHandler(Component component) {
+							return null;
+						}
+						
+						@Override
+						public CharSequence getFailureHandler(Component component) {
+							return null;
+						}
+						
+						@Override
+						public CharSequence getDoneHandler(Component component) {
+							return null;
+						}
+						
+						@Override
+						public CharSequence getCompleteHandler(Component component) {
+							return null;
+						}
+						
+						@Override
+						public CharSequence getBeforeSendHandler(Component component) {
+							return null;
+						}
+						
+						@Override
+						public CharSequence getBeforeHandler(Component component) {
+							return "$('.autofit:visible').first().trigger('storeViewState');";
+						}
+						
+						@Override
+						public CharSequence getAfterHandler(Component component) {
+							return null;
+						}
+						
+					});
+				}
 
 				@Override
 				protected List<MenuItem> getMenuItems() {

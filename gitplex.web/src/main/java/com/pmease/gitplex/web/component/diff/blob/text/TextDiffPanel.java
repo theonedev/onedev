@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -51,6 +50,7 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.RangeUtils;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -92,7 +92,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private Component symbolTooltip;
 	
-	private AbstractDefaultAjaxBehavior callbackBehavior;
+	private AbstractPostAjaxBehavior callbackBehavior;
 	
 	private transient List<MarkAwareDiffBlock> diffBlocks;
 	
@@ -223,7 +223,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			
 		}).setEscapeModelStrings(false));
 		
-		add(callbackBehavior = new AbstractDefaultAjaxBehavior() {
+		add(callbackBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {

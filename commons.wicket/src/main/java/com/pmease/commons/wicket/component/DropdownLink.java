@@ -3,6 +3,7 @@ package com.pmease.commons.wicket.component;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -59,6 +60,8 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 		super.updateAjaxAttributes(attributes);
 
+		attributes.setMethod(Method.POST);
+		
 		String script = String.format(""
 				+ "return {mouseX: $('#%s').data('mouseX'), mouseY: $('#%s').data('mouseY')};", 
 				getMarkupId(), getMarkupId());
@@ -72,9 +75,9 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 		if (dropdown == null || dropdown.getParent() == null) { 
 			AlignTarget alignFloatingWith;
 			if (alignTargetMouse) {
-				int mouseX = RequestCycle.get().getRequest().getRequestParameters()
+				int mouseX = RequestCycle.get().getRequest().getPostParameters()
 						.getParameterValue("mouseX").toInt();
-				int mouseY = RequestCycle.get().getRequest().getRequestParameters()
+				int mouseY = RequestCycle.get().getRequest().getPostParameters()
 						.getParameterValue("mouseY").toInt();
 				alignFloatingWith = RectTarget.ofMouse(mouseX, mouseY);
 			} else { 

@@ -34,7 +34,7 @@ public abstract class ViewStateAwareAjaxLink<T> extends PreventDefaultAjaxLink<T
 
 	@Override
 	public final void onClick(AjaxRequestTarget target) {
-		String value = RequestCycle.get().getRequest().getRequestParameters()
+		String value = RequestCycle.get().getRequest().getPostParameters()
 				.getParameterValue("view_state").toString();
 		if (StringUtils.isNotBlank(value))
 			onClick(target, value);

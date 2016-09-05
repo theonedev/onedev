@@ -1,11 +1,12 @@
 package com.pmease.commons.wicket.behavior.testform;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
+
 @SuppressWarnings("serial")
-public abstract class TestFormBehavior extends AbstractDefaultAjaxBehavior {
+public abstract class TestFormBehavior extends AbstractPostAjaxBehavior {
 
 	@Override
 	protected void respond(AjaxRequestTarget target) {

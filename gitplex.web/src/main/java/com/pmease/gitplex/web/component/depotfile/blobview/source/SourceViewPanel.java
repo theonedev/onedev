@@ -15,7 +15,6 @@ import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -65,6 +64,7 @@ import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
@@ -131,7 +131,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private SymbolTooltipPanel symbolTooltip;
 	
-	private AbstractDefaultAjaxBehavior ajaxBehavior;
+	private AbstractPostAjaxBehavior ajaxBehavior;
 	
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
@@ -167,7 +167,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 			@Override
 			public AbstractLink newLink(String id) {
-				AbstractLink link = new AjaxLink<Void>(id) {
+				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>(id) {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -178,8 +178,17 @@ public class SourceViewPanel extends BlobViewPanel {
 						target.appendJavaScript(script);
 						context.onBlameChange(target, blamed);									
 					}
-					
+
 				};
+				PageParameters params;
+				DepotFilePage.State state = new DepotFilePage.State();
+				state.blobIdent = context.getBlobIdent();
+				if (context.getMode() != Mode.BLAME)
+					state.mode = Mode.BLAME;
+				state.mark = context.getMark();
+				params = DepotFilePage.paramsOf(context.getDepot(), state);
+				CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
+				link.add(AttributeAppender.replace("href", url.toString()));
 				link.add(new ViewStateAwareBehavior());
 				return link;
 			}
@@ -473,11 +482,11 @@ public class SourceViewPanel extends BlobViewPanel {
 		}
 		add(commentContainer);
 		
-		add(ajaxBehavior = new AbstractDefaultAjaxBehavior() {
+		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				
 				switch(params.getParameterValue("action").toString()) {
 				case "showBlameMessage":

@@ -2,7 +2,6 @@ package com.pmease.commons.wicket.behavior.sortable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -11,8 +10,9 @@ import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 
-public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
+public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 
 	private static final long serialVersionUID = 1L;
 

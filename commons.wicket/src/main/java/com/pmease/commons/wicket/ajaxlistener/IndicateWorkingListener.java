@@ -1,11 +1,12 @@
 package com.pmease.commons.wicket.ajaxlistener;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
+
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 
 /**
  * Show global ajax loading indicator right away instead of using a timer. 
@@ -36,7 +37,7 @@ public class IndicateWorkingListener implements IAjaxCallListener {
 	@Override
 	public CharSequence getBeforeSendHandler(Component component) {
 		IRequestHandler handler = new ResourceReferenceRequestHandler(
-				AbstractDefaultAjaxBehavior.INDICATOR);
+				AbstractPostAjaxBehavior.INDICATOR);
 		CharSequence url = RequestCycle.get().urlFor(handler);
 		return String.format(""
 				+ "$('#%s-working-indicator').remove(); "

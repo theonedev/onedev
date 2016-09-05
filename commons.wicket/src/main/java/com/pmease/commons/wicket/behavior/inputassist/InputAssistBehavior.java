@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -25,13 +24,14 @@ import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.RangeUtils;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.AlignTarget;
 import com.pmease.commons.wicket.component.floating.ComponentTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
-public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
+public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 	static final int PAGE_SIZE = 25;
 	

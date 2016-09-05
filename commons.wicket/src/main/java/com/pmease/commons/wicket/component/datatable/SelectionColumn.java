@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.WicketAjaxJQueryResourceReference;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
@@ -26,6 +25,8 @@ import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
+
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 
 /**
  * Add this column to the wicket DataTable component so that user can select row of the 
@@ -104,7 +105,7 @@ public class SelectionColumn<T, S> implements IStyledColumn<T, S> {
 
 			}.setOutputMarkupId(true));
 
-			add(new AbstractDefaultAjaxBehavior() {
+			add(new AbstractPostAjaxBehavior() {
 
 				@Override
 				protected void respond(AjaxRequestTarget target) {
@@ -180,7 +181,7 @@ public class SelectionColumn<T, S> implements IStyledColumn<T, S> {
 
 			}.setOutputMarkupId(true));
 
-			add(new AbstractDefaultAjaxBehavior() {
+			add(new AbstractPostAjaxBehavior() {
 
 				@Override
 				protected void respond(final AjaxRequestTarget target) {

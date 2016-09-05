@@ -12,10 +12,10 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.junit.Test;
 
-import com.pmease.commons.git.exception.NotFileException;
-import com.pmease.commons.git.exception.NotTreeException;
-import com.pmease.commons.git.exception.ObjectAlreadyExistException;
-import com.pmease.commons.git.exception.ObjectNotExistException;
+import com.pmease.commons.git.exception.NotGitFileException;
+import com.pmease.commons.git.exception.NotGitTreeException;
+import com.pmease.commons.git.exception.GitObjectAlreadyExistsException;
+import com.pmease.commons.git.exception.GitObjectNotFoundException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
 
 public class FileEditTest extends AbstractGitTest {
@@ -64,7 +64,7 @@ public class FileEditTest extends AbstractGitTest {
 		try {
 			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test delete");
 			assertTrue("An ObjectNotExistException should be thrown", false);
-		} catch (ObjectNotExistException e) {
+		} catch (GitObjectNotFoundException e) {
 		}
 	}
 	
@@ -114,7 +114,7 @@ public class FileEditTest extends AbstractGitTest {
 		try {
 			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
 			assertTrue("A NotFileException should be thrown", false);
-		} catch (NotFileException e) {
+		} catch (NotGitFileException e) {
 		}
 	}
 	
@@ -137,7 +137,7 @@ public class FileEditTest extends AbstractGitTest {
 		try {
 			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
 			assertTrue("A NotTreeException should be thrown", false);
-		} catch (NotTreeException e) {
+		} catch (NotGitTreeException e) {
 		}
 	}
 	
@@ -200,7 +200,7 @@ public class FileEditTest extends AbstractGitTest {
 		try {
 			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
 			assertTrue("An ObjectAlreadyExistException should be thrown", false);
-		} catch (ObjectAlreadyExistException e) {
+		} catch (GitObjectAlreadyExistsException e) {
 		}
 	}
 	

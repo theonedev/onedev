@@ -40,7 +40,7 @@ import org.hibernate.criterion.Restrictions;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.exception.ObjectNotExistException;
+import com.pmease.commons.git.exception.GitObjectNotFoundException;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -515,7 +515,7 @@ public class PullRequest extends AbstractEntity {
 			Long requestId = getId();
 			try {
 				gateResult = getTargetDepot().getGateKeeper().checkRequest(this);
-			} catch (ObjectNotExistException e) {
+			} catch (GitObjectNotFoundException e) {
 				// in case target/source branch is deleted but the pull request is not closed
 				// for some reason, we call check again to make sure they will be closed
 				GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {

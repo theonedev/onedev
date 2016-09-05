@@ -36,8 +36,8 @@ import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.FileEdit;
 import com.pmease.commons.git.PathAndContent;
-import com.pmease.commons.git.exception.NotTreeException;
-import com.pmease.commons.git.exception.ObjectAlreadyExistException;
+import com.pmease.commons.git.exception.NotGitTreeException;
+import com.pmease.commons.git.exception.GitObjectAlreadyExistsException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.gitplex.core.GitPlex;
@@ -224,7 +224,7 @@ public abstract class EditSavePanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				String viewState = RequestCycle.get().getRequest().getRequestParameters()
+				String viewState = RequestCycle.get().getRequest().getPostParameters()
 						.getParameterValue("view_state").toString();
 				RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
 
@@ -296,12 +296,12 @@ public abstract class EditSavePanel extends Panel {
 							} catch (IOException e2) {
 								throw new RuntimeException(e2);
 							}
-						} catch (ObjectAlreadyExistException e) {
+						} catch (GitObjectAlreadyExistsException e) {
 							EditSavePanel.this.error("A file with same name already exists. "
 									+ "Please choose a different name and try again.");
 							target.add(feedback);
 							break;
-						} catch (NotTreeException e) {
+						} catch (NotGitTreeException e) {
 							EditSavePanel.this.error("A file exists where you’re trying to create a subdirectory. "
 									+ "Choose a new path and try again..");
 							target.add(feedback);

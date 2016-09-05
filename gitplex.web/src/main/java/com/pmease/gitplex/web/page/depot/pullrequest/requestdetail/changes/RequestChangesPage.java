@@ -10,7 +10,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -36,6 +35,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.websocket.WebSocketManager;
 import com.pmease.commons.wicket.websocket.WebSocketRegion;
@@ -223,11 +223,11 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			
 			@Override
 			protected Component newContent(String id) {
-				AbstractDefaultAjaxBehavior callbackBehavior = new AbstractDefaultAjaxBehavior() {
+				AbstractPostAjaxBehavior callbackBehavior = new AbstractPostAjaxBehavior() {
 					
 					@Override
 					protected void respond(AjaxRequestTarget target) {
-						IRequestParameters params = RequestCycle.get().getRequest().getRequestParameters();
+						IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 						state.oldCommit = params.getParameterValue("oldCommit").toString();
 						state.newCommit = params.getParameterValue("newCommit").toString();
 						target.add(head);

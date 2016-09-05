@@ -15,7 +15,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
@@ -34,10 +33,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
-public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
+public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 
 	protected static final int ATWHO_LIMIT = 5;
 	

@@ -1,0 +1,50 @@
+html.error, body.error {
+	background: #FCC;
+}
+body.error .center-box {
+	width: 75%;
+	padding: 20px;
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+body.error .center-box>div {
+	margin-bottom: 20px;
+}
+
+body.error .center-box>.title {
+	font-size: 24px;
+	font-weight: bold;
+}
+
+body.error .center-box .detail>.head {
+	font-size: 20px;
+	margin-bottom: 20px;
+}
+body.error .center-box .detail>.body {
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	font-family: monospace;
+}
+
+body.error .center-box textarea {
+	height: 800px;
+}
+
+body.error form .actions {
+	margin-bottom: 20px;
+}
+body.error td.name {
+	font-weight: bold;
+	color: #444;
+}
+body.error form .error {
+	margin-top: 8px;
+	color: #A00;	
+	display: none;
+}
+
+body.error .caption {
+	font-size: 16px;
+	font-weight: bold;
+}

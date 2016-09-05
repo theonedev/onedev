@@ -17,9 +17,12 @@ public class HibernateFilter implements Filter {
 	
 	private final UnitOfWork unitOfWork;
 	
+	private final PersistService persistService;
+	
 	@Inject
-	public HibernateFilter(UnitOfWork unitOfWork) {
+	public HibernateFilter(UnitOfWork unitOfWork, PersistService persistService) {
 		this.unitOfWork = unitOfWork;
+		this.persistService = persistService;
 	}
 	
 	public void destroy() {
@@ -27,11 +30,15 @@ public class HibernateFilter implements Filter {
 
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
-		unitOfWork.begin();
-		try {
+		if (persistService.isReady()) {
+			unitOfWork.begin();
+			try {
+				chain.doFilter(request, response);
+			} finally {
+				unitOfWork.end();
+			}
+		} else {
 			chain.doFilter(request, response);
-		} finally {
-			unitOfWork.end();
 		}
 	}
 

@@ -1,10 +1,10 @@
 package com.pmease.commons.git.exception;
 
-public class NotTreeException extends GitException {
+public class NotGitTreeException extends GitException {
 
 	private static final long serialVersionUID = 1L;
 
-	public NotTreeException(String message) {
+	public NotGitTreeException(String message) {
 		super(message);
 	}
 	

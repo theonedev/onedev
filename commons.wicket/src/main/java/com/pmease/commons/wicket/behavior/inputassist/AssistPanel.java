@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -17,6 +16,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.util.Range;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {
@@ -56,7 +56,7 @@ class AssistPanel extends Panel {
 		for (String hint: hints) 
 			hintsView.add(new Label(hintsView.newChildId(), hint).setEscapeModelStrings(false));
 		
-		add(new AbstractDefaultAjaxBehavior() {
+		add(new AbstractPostAjaxBehavior() {
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {

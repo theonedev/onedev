@@ -73,8 +73,8 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.git.Submodule;
-import com.pmease.commons.git.exception.NotFileException;
-import com.pmease.commons.git.exception.ObjectNotExistException;
+import com.pmease.commons.git.exception.NotGitFileException;
+import com.pmease.commons.git.exception.GitObjectNotFoundException;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.loader.AppLoader;
@@ -515,7 +515,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	 * @return
 	 * 			blob of specified blob ident
 	 * @throws
-	 * 			ObjectNotExistException if blob of specified ident can not be found in repository 
+	 * 			GitObjectNotFoundException if blob of specified ident can not be found in repository 
 	 * 			
 	 */
 	public Blob getBlob(BlobIdent blobIdent) {
@@ -532,18 +532,18 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 					if (blobIdent.isGitLink()) {
 						String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
 						if (url == null)
-							throw new ObjectNotExistException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
+							throw new GitObjectNotFoundException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
 						String hash = treeWalk.getObjectId(0).name();
 						blob = new Blob(blobIdent, new Submodule(url, hash).toString().getBytes());
 					} else if (blobIdent.isTree()) {
-						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
+						throw new NotGitFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
 						ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 						blob = readBlob(objectLoader, blobIdent);
 					}
 					getBlobCache().put(blobIdent, blob);
 				} else {
-					throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path + "' in revision '" + blobIdent.revision + "'");
+					throw new GitObjectNotFoundException("Unable to find blob path '" + blobIdent.path + "' in revision '" + blobIdent.revision + "'");
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -561,7 +561,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 				return objectLoader.openStream();
 			} else {
-				throw new ObjectNotExistException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
+				throw new GitObjectNotFoundException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -591,7 +591,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			objectIdCache.put(revision, optional);
 		}
 		if (mustExist && !optional.isPresent())
-			throw new ObjectNotExistException("Unable to find object '" + revision + "'");
+			throw new GitObjectNotFoundException("Unable to find object '" + revision + "'");
 		return optional.orNull();
 	}
 	
@@ -734,7 +734,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			commit = null;
 		}
 		if (mustExist && commit == null)
-			throw new ObjectNotExistException("Unable to find commit: " + revision);
+			throw new GitObjectNotFoundException("Unable to find commit: " + revision);
 		else
 			return commit;
 	}
@@ -748,7 +748,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		try (RevWalk revWalk = new RevWalk(getRepository())) {
 			RevCommit commit = GitUtils.parseCommit(revWalk, revId);
 			if (mustExist && commit == null)
-				throw new ObjectNotExistException("Unable to find commit: " + revId.name());
+				throw new GitObjectNotFoundException("Unable to find commit: " + revId.name());
 			else
 				return commit;
 		}

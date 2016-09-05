@@ -212,11 +212,12 @@ pmease.commons = {
 		}
 	},
 	setupAutoSize: function() {
-		autosize($("textarea"));
+		var selector = "textarea:not(.no-autosize)";
+		autosize($(selector));
 		$(document).on("elementReplaced", function(event, componentId) {
 			var $component = $("#" + componentId);
-			var $textarea = $component.find("textarea");
-			if ($component.is("textarea"))
+			var $textarea = $component.find(selector);
+			if ($component.is(selector))
 				$textarea = $textarea.add($component);
 			autosize($textarea);
 		});

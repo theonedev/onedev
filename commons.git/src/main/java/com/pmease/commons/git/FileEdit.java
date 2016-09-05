@@ -24,10 +24,10 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.pmease.commons.git.exception.NotFileException;
-import com.pmease.commons.git.exception.NotTreeException;
-import com.pmease.commons.git.exception.ObjectAlreadyExistException;
-import com.pmease.commons.git.exception.ObjectNotExistException;
+import com.pmease.commons.git.exception.NotGitFileException;
+import com.pmease.commons.git.exception.NotGitTreeException;
+import com.pmease.commons.git.exception.GitObjectAlreadyExistsException;
+import com.pmease.commons.git.exception.GitObjectNotFoundException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
 
 public class FileEdit implements Serializable {
@@ -69,7 +69,7 @@ public class FileEdit implements Serializable {
 						entries.add(new TreeFormatterEntry(name, newFileMode, blobId));
 					}
 				} else if (name.equals(currentNewPath)) {
-					throw new ObjectAlreadyExistException("Path already exist: " + treeWalk.getPathString());
+					throw new GitObjectAlreadyExistsException("Path already exist: " + treeWalk.getPathString());
 				} else if (currentOldPath != null && currentOldPath.startsWith(name + "/")) {
 					TreeWalk childTreeWalk = TreeWalk.forPath(treeWalk.getObjectReader(), treeWalk.getPathString(), revTree);
 					Preconditions.checkNotNull(childTreeWalk);
@@ -88,7 +88,7 @@ public class FileEdit implements Serializable {
 						entries.add(new TreeFormatterEntry(name, FileMode.TREE, childTreeId));
 				} else if (currentNewPath != null && currentNewPath.startsWith(name + "/")) {
 					if ((treeWalk.getFileMode(0).getBits() & FileMode.TYPE_TREE) == 0)
-						throw new NotTreeException("Path does not represent a tree: " + treeWalk.getPathString());
+						throw new NotGitTreeException("Path does not represent a tree: " + treeWalk.getPathString());
 					newPathFound = true;
 					TreeWalk childTreeWalk = TreeWalk.forPath(treeWalk.getObjectReader(), 
 							treeWalk.getPathString(), revTree);
@@ -162,9 +162,9 @@ public class FileEdit implements Serializable {
 	 * 			if expected old commit id of the ref does not equal to 
 	 * 			expectedOldCommitId, or if expectedOldCommitId is specified as <tt>null</tt> and 
 	 * 			ref exists  
-	 * @throws ObjectNotExistException 
+	 * @throws GitObjectNotFoundException 
 	 * 			if file to delete does not exist when oldPath!=null&&newFile==null 
-	 * @throws ObjectAlreadyExistException 
+	 * @throws GitObjectAlreadyExistsException 
 	 * 			if added/renamed file already exists when newFile!=null && (oldPath==null || !oldPath.equals(newFile.getPath()))
 	 * 			 
 	 */
@@ -190,11 +190,11 @@ public class FileEdit implements Serializable {
 			if (oldPath != null) {
 				TreeWalk oldPathTreeWalk = TreeWalk.forPath(repository, oldPath, revTree);
 				if (oldPathTreeWalk == null)
-					throw new ObjectNotExistException("Path not exist: " + oldPath);
+					throw new GitObjectNotFoundException("Path not exist: " + oldPath);
 				newFileMode = oldPathTreeWalk.getFileMode(0);
 				
 				if ((newFileMode.getBits() & FileMode.TYPE_FILE) == 0)
-					throw new NotFileException("Path does not represent a file: " + oldPath);
+					throw new NotGitFileException("Path does not represent a file: " + oldPath);
 			} else {
 				newFileMode = FileMode.REGULAR_FILE;
 			}

@@ -3,19 +3,19 @@ package com.pmease.commons.wicket.behavior.dropdown;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.ComponentTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
-public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
+public abstract class DropdownHover extends AbstractPostAjaxBehavior {
 
 	private static final int DEFAULT_HOVER_DELAY = 350;
 	

@@ -9,7 +9,6 @@ import java.util.Collection;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -30,6 +29,7 @@ import org.apache.wicket.util.time.Duration;
 import org.eclipse.jetty.server.SessionManager;
 
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketManager;
 import com.pmease.commons.wicket.websocket.WebSocketRegion;
 
@@ -55,7 +55,7 @@ public abstract class CommonPage extends WebPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AbstractDefaultAjaxBehavior() {
+		add(new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -89,8 +89,8 @@ public abstract class CommonPage extends WebPage {
 		sessionFeedback.setOutputMarkupId(true);
 		
 		int sessionTimeout = AppLoader.getInstance(SessionManager.class).getMaxInactiveInterval();
-		add(new WebMarkupContainer("keepSessionAlive").add(
-				new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
+		add(new WebMarkupContainer("keepSessionAlive")
+				.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
 		
 		add(rootComponents = new RepeatingView("rootComponents"));
 	}

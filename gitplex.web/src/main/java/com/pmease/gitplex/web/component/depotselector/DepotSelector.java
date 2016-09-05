@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -27,6 +26,7 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.behavior.InputChangeBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -89,7 +89,7 @@ public abstract class DepotSelector extends Panel {
 			}
 			
 		});
-		searchField.add(new AbstractDefaultAjaxBehavior() {
+		searchField.add(new AbstractPostAjaxBehavior() {
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {

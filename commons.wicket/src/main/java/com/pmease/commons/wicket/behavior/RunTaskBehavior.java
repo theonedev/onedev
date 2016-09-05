@@ -1,10 +1,9 @@
 package com.pmease.commons.wicket.behavior;
 
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 @SuppressWarnings("serial")
-public abstract class RunTaskBehavior extends AbstractDefaultAjaxBehavior {
+public abstract class RunTaskBehavior extends AbstractPostAjaxBehavior {
 
 	@Override
 	protected void respond(AjaxRequestTarget target) {

@@ -17,7 +17,6 @@ import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -45,10 +44,11 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Objects;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.exception.ObjectNotExistException;
+import com.pmease.commons.git.exception.GitObjectNotFoundException;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.loader.ListenerRegistry;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.component.modal.ModalLink;
@@ -169,7 +169,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				RevTree revTree = commit.getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(getDepot().getRepository(), blobIdent.path, revTree);
 				if (treeWalk == null) {
-					throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path
+					throw new GitObjectNotFoundException("Unable to find blob path '" + blobIdent.path
 							+ "' in revision '" + blobIdent.revision + "'");
 				}
 				blobIdent.mode = treeWalk.getRawMode(0);
@@ -420,7 +420,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				
 				@Override
 				public Component getLoadingComponent(String markupId) {
-					IRequestHandler handler = new ResourceReferenceRequestHandler(AbstractDefaultAjaxBehavior.INDICATOR);
+					IRequestHandler handler = new ResourceReferenceRequestHandler(AbstractPostAjaxBehavior.INDICATOR);
 					String html = "<img src='" + RequestCycle.get().urlFor(handler) + "' class='loading'/> Loading latest commit...";
 					return new Label(markupId, html).setEscapeModelStrings(false);
 				}

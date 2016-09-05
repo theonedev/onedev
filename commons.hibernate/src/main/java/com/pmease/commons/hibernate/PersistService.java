@@ -5,4 +5,7 @@ public interface PersistService {
 	void start();
 	
 	void stop();
+	
+	boolean isReady();
+	
 }

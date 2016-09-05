@@ -1,7 +1,6 @@
 package com.pmease.commons.wicket.component.modal;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -10,6 +9,7 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.page.CommonPage;
 
 @SuppressWarnings("serial")
@@ -50,7 +50,7 @@ public abstract class ModalPanel extends Panel {
 		else if (size == Size.SMALL)
 			dialog.add(AttributeAppender.append("class", "modal-sm"));
 		
-		add(new AbstractDefaultAjaxBehavior() {
+		add(new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {

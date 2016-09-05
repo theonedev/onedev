@@ -3,20 +3,14 @@ package com.pmease.gitplex.web.page.error;
 import java.io.Serializable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.request.http.WebResponse;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public abstract class BaseErrorPage extends BasePage {
-	
-	protected abstract int getErrorCode();
-	
-	@Override
-	protected void configureResponse(final WebResponse response) {
-		super.configureResponse(response);
-		response.setStatus(getErrorCode());
-	}
 	
 	@Override
 	public boolean isErrorPage() {
@@ -27,6 +21,13 @@ public abstract class BaseErrorPage extends BasePage {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		target.appendJavaScript("location.reload();");
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new ErrorPageResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("$('html,body').addClass('error');"));
 	}
 	
 }

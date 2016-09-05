@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -44,6 +43,7 @@ import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.pmease.commons.wicket.behavior.InputChangeBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.modal.ModalPanel;
@@ -188,7 +188,7 @@ public abstract class RevisionSelector extends Panel {
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
 		
-		add(new AbstractDefaultAjaxBehavior() {
+		add(new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {

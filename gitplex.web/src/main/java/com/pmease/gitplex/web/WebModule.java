@@ -2,12 +2,20 @@ package com.pmease.gitplex.web;
 
 import java.util.Collection;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.apache.wicket.Application;
+import org.apache.wicket.core.request.mapper.StalePageException;
+import org.apache.wicket.protocol.http.PageExpiredException;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.hibernate.ObjectNotFoundException;
+import org.hibernate.StaleStateException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.pegdown.Parser;
 import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.git.exception.GitException;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
@@ -31,6 +39,8 @@ import com.pmease.gitplex.web.editable.EditSupportLocator;
 import com.pmease.gitplex.web.websocket.CodeCommentChangeBroadcaster;
 import com.pmease.gitplex.web.websocket.CommitIndexedBroadcaster;
 import com.pmease.gitplex.web.websocket.PullRequestChangeBroadcaster;
+
+import jersey.repackaged.com.google.common.collect.Sets;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -89,6 +99,17 @@ public class WebModule extends AbstractPluginModule {
 			@Override
 			public Collection<Class<?>> getResourcePackScopes() {
 				return Lists.newArrayList(WebModule.class);
+			}
+			
+		});
+		contribute(ExpectedExceptionContribution.class, new ExpectedExceptionContribution() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
+				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
+						ObjectNotFoundException.class, StaleStateException.class,  
+						GitException.class, PageExpiredException.class, StalePageException.class);
 			}
 			
 		});
