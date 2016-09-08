@@ -85,7 +85,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 			@Override
 			protected String load() {
-				if (hasError(false))
+				if (hasErrors(false))
 					return " has-error";
 				else
 					return "";

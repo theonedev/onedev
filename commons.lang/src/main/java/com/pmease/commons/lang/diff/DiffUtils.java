@@ -235,6 +235,16 @@ public class DiffUtils {
 		return mapLines(diff(oldLines, newLines));
 	}
 	
+	public static <T> int getNewLineAround(List<T> oldLines, List<T> newLines, int oldLine) {
+		Map<Integer, Integer> lineMap = mapLines(oldLines, newLines);
+		for (int line=oldLine; line>=0; line--) {
+			Integer newLine = lineMap.get(line);
+			if (newLine != null)
+				return newLine;
+		}
+		return 0;
+	}	
+	
 	public static <T> Map<Integer, Integer> mapLines(List<DiffBlock<T>> diffBlocks) {
 		Map<Integer, Integer> lineMapping = new HashMap<Integer, Integer>();
 		for (DiffBlock<T> diffBlock: diffBlocks) {

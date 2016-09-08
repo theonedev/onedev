@@ -163,7 +163,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 
 	@Sessional
     @Override
-    public Account find(String userName) {
+    public Account findByName(String userName) {
     	idLock.readLock().lock();
     	try {
     		Long id = nameToId.get(userName);
@@ -176,6 +176,21 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	}
     }
 
+	@Sessional
+    @Override
+    public Account findByEmail(String email) {
+    	idLock.readLock().lock();
+    	try {
+    		Long id = emailToId.get(email);
+    		if (id != null)
+    			return load(id);
+    		else
+    			return null;
+    	} finally {
+    		idLock.readLock().unlock();
+    	}
+    }
+	
     @Sessional
     @Override
     public Account find(PersonIdent person) {

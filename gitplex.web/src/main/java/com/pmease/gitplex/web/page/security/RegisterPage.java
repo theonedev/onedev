@@ -43,13 +43,19 @@ public class RegisterPage extends BasePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = userManager.find(account.getName());
+				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+				Account accountWithSameName = accountManager.findByName(account.getName());
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
-				} else {
-					userManager.save(account, null);
+				} 
+				Account accountWithSameEmail = accountManager.findByEmail(account.getEmail());
+				if (accountWithSameEmail != null) {
+					editor.getErrorContext(new PathSegment.Property("email"))
+							.addError("This email has already been used by another account.");
+				} 
+				if (!editor.hasErrors(true)) {
+					accountManager.save(account, null);
 					Session.get().success("New account registered");
 					SecurityUtils.getSubject().runAs(account.getPrincipals());
 					setResponsePage(AvatarEditPage.class, AccountPage.paramsOf(account));

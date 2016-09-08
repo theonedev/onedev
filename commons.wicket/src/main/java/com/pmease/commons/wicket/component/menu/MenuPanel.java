@@ -6,7 +6,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -40,7 +39,7 @@ abstract class MenuPanel extends Panel {
 				MenuItem menuItem  = item.getModelObject();
 				if (menuItem != null) {
 					Fragment fragment = new Fragment("content", "contentFrag", MenuPanel.this);
-					AbstractLink link = menuItem.newLink("link");
+					WebMarkupContainer link = menuItem.newLink("link");
 					Component icon = new WebMarkupContainer("icon");
 					String iconClass = menuItem.getIconClass();
 					if (iconClass != null) {

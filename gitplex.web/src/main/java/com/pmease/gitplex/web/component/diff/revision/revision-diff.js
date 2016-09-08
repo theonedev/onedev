@@ -14,6 +14,7 @@ gitplex.revisionDiff = {
 				$diffStatsToggle.addClass("expanded");
 				Cookies.set(cookieName, "yes", {expires: Infinity});
 			}
+			gitplex.revisionDiff.reposition();
 		});
 		gitplex.revisionDiff.reposition();
 	},
@@ -30,15 +31,18 @@ gitplex.revisionDiff = {
 		var $detail = $(".revision-diff>.body>.detail");
 		var $comment = $detail.children(".comment");
 		var $diffs = $detail.children(".diffs");
+		var windowHeight;
 		if ($comment.is(":visible")) {
+			windowHeight = $(window).height();
 			$detail.css("padding-left", $comment.outerWidth(true));
-			
+			var scrollLeft = $(window).scrollLeft();
 			var scrollTop = $(window).scrollTop();
-			var commentOffset = scrollTop - $diffs.offset().top;
-			if (commentOffset > 0) {
-				$comment.css("top", commentOffset);
-			} else {
+			$comment.css("left", $detail.offset().left - scrollLeft);
+			var topOffset = $diffs.offset().top - scrollTop;
+			if (topOffset <= 0) {
 				$comment.css("top", 0);
+			} else {
+				$comment.css("top", topOffset);
 			}
 			var $lastDiff = $diffs.children().last();
 			var commentHeight;
@@ -47,8 +51,7 @@ gitplex.revisionDiff = {
 			} else {
 				commentHeight = $diffs.offset().top + $diffs.height() - scrollTop;
 			}
-			var windowHeight = $(window).height();
-			var minCommentHeight = windowHeight - 100;
+			var minCommentHeight = windowHeight-52;
 			if (commentHeight < minCommentHeight)
 				commentHeight = minCommentHeight;
 			else if (commentHeight > windowHeight)
@@ -58,10 +61,11 @@ gitplex.revisionDiff = {
 			var $commentHead = $comment.find(">.content>.head");
 			$comment.find(">.content>.body").outerHeight(commentHeight-2-$commentHead.outerHeight());
 		} else {
+			windowHeight = 0;
 			$detail.css("padding-left", "0");
 		}
 		var diffsHeight = $diffs.outerHeight();
-		$detail.height(commentHeight>diffsHeight?commentHeight:diffsHeight);
+		$detail.height(windowHeight>diffsHeight?windowHeight:diffsHeight);
 	},
 	initComment: function() {
 		var $comment = $(".revision-diff>.body>.detail>.comment");

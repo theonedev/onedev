@@ -76,6 +76,8 @@ public class CodeComment extends AbstractEntity {
 	@Embedded
 	private CompareContext compareContext;
 	
+	private String branchRef;
+	
 	private boolean resolved;
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
@@ -192,6 +194,15 @@ public class CodeComment extends AbstractEntity {
 
 	public void setResolved(boolean resolved) {
 		this.resolved = resolved;
+	}
+
+	@Nullable
+	public String getBranchRef() {
+		return branchRef;
+	}
+
+	public void setBranchRef(String branchRef) {
+		this.branchRef = branchRef;
 	}
 
 	public LastEvent getLastEvent() {

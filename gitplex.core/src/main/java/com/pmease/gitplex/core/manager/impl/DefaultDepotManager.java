@@ -227,7 +227,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     @Sessional
     @Override
     public Depot find(String accountName, String depotName) {
-    	Account user = userManager.find(accountName);
+    	Account user = userManager.findByName(accountName);
     	if (user != null)
     		return find(user, depotName);
     	else
@@ -253,7 +253,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     @Override
     public Depot find(String depotFQN) {
     	String userName = StringUtils.substringBefore(depotFQN, Depot.FQN_SEPARATOR);
-    	Account user = userManager.find(userName);
+    	Account user = userManager.findByName(userName);
     	if (user != null)
     		return find(user, StringUtils.substringAfter(depotFQN, Depot.FQN_SEPARATOR));
     	else

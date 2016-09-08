@@ -102,7 +102,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 	@Override
 	protected void respond(AjaxRequestTarget target) {
-		IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+		IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 		String inputContent = params.getParameterValue("input").toString();
 		Integer inputCaret = params.getParameterValue("caret").toOptionalInteger();
 

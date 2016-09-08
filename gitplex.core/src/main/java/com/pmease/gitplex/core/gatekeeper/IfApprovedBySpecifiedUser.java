@@ -37,7 +37,7 @@ public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
 
     @Override
     public GateCheckResult doCheckRequest(PullRequest request) {
-        Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).find(userName));
+        Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
 
         PullRequestReview.Result result = user.checkReviewSince(request.getReferentialUpdate());
         if (result == null) {

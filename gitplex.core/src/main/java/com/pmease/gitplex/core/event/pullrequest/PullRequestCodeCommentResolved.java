@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.event.pullrequest;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.CodeCommentStatusChange;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.event.MarkdownAware;
 
 @Editable(name="resolved code comment")
 public class PullRequestCodeCommentResolved extends PullRequestChangeEvent implements MarkdownAware {

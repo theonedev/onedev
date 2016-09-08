@@ -39,7 +39,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -320,8 +319,6 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 		});
 		
 		add(newCommitsPanel());
-
-		add(new BackToTop("backToTop"));
 	}
 	
 	private Component newCommitsPanel() {

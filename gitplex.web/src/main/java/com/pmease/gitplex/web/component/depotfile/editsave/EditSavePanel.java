@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -36,8 +37,8 @@ import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.FileEdit;
 import com.pmease.commons.git.PathAndContent;
-import com.pmease.commons.git.exception.NotGitTreeException;
 import com.pmease.commons.git.exception.GitObjectAlreadyExistsException;
+import com.pmease.commons.git.exception.NotGitTreeException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.gitplex.core.GitPlex;
@@ -72,6 +73,8 @@ public abstract class EditSavePanel extends Panel {
 	private String detailCommitMessage;
 	
 	private BlobChange change;
+	
+	private boolean saveInProgress;
 	
 	public EditSavePanel(String id, IModel<Depot> depotModel, String refName, 
 			@Nullable String oldPath, @Nullable PathAndContent newFile, 
@@ -199,7 +202,7 @@ public abstract class EditSavePanel extends Panel {
 			
 		}));
 		
-		form.add(new AjaxButton("save") {
+		AjaxButton saveButton = new AjaxButton("save") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -216,106 +219,43 @@ public abstract class EditSavePanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 
-				if (fileEdit.getOldPath() != null && fileEdit.getNewFile() != null)
+				if (saveInProgress || (fileEdit.getOldPath() != null && fileEdit.getNewFile() != null))
 					tag.put("disabled", "disabled");
 			}
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-
-				String viewState = RequestCycle.get().getRequest().getPostParameters()
-						.getParameterValue("view_state").toString();
-				RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
-
-				change = null;
-				
-				PathAndContent newFile = fileEdit.getNewFile();
-				if (newFile != null && StringUtils.isBlank(newFile.getPath())) {
-					EditSavePanel.this.error("Please specify file name.");
-					target.add(feedback);
-				} else {
-					String commitMessage = summaryCommitMessage;
-					if (StringUtils.isBlank(commitMessage))
-						commitMessage = getDefaultCommitMessage();
-					if (StringUtils.isNotBlank(detailCommitMessage))
-						commitMessage += "\n\n" + detailCommitMessage;
-					Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).getCurrent());
-
-					Repository repository = depotModel.getObject().getRepository();
-					ObjectId newCommitId = null;
-					while(newCommitId == null) {
-						try {
-							newCommitId = fileEdit.commit(repository, refName, 
-									prevCommitId, prevCommitId, user.asPerson(), commitMessage);
-						} catch (ObsoleteCommitException e) {
-							currentCommitId = e.getOldCommitId();
-							try (RevWalk revWalk = new RevWalk(repository)) {
-								RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
-								RevCommit currentCommit = revWalk.parseCommit(currentCommitId);
-								prevCommitId = currentCommitId;
-
-								String oldPath = fileEdit.getOldPath();
-								if (oldPath != null) {
-									TreeWalk treeWalk = TreeWalk.forPath(repository, oldPath, 
-											prevCommit.getTree().getId(), currentCommit.getTree().getId());
-									if (treeWalk != null) {
-										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
-												|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
-											// mark changed if original file exists and content or mode has been modified
-											// by others
-											if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-												if (newFile != null) {
-													fileEdit = new FileEdit(null, newFile);
-													change = getChange(treeWalk, prevCommit, currentCommit);
-													break;
-												} else {
-													newCommitId = currentCommitId;
-													break;
-												}
-											} else {
-												change = getChange(treeWalk, prevCommit, currentCommit);
-												break;
-											}
-										}
-									}
-								}
-								if (newFile != null && !newFile.getPath().equals(oldPath)) { 
-									TreeWalk treeWalk = TreeWalk.forPath(repository, newFile.getPath(), 
-											prevCommit.getTree().getId(), currentCommit.getTree().getId());
-									if (treeWalk != null) {
-										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
-												|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
-											// if added/renamed file exists and content or mode has been modified 
-											// by others
-											change = getChange(treeWalk, prevCommit, currentCommit);
-											break;
-										}
-									}
-								} 
-							} catch (IOException e2) {
-								throw new RuntimeException(e2);
-							}
-						} catch (GitObjectAlreadyExistsException e) {
-							EditSavePanel.this.error("A file with same name already exists. "
-									+ "Please choose a different name and try again.");
-							target.add(feedback);
-							break;
-						} catch (NotGitTreeException e) {
-							EditSavePanel.this.error("A file exists where you’re trying to create a subdirectory. "
-									+ "Choose a new path and try again..");
-							target.add(feedback);
-							break;
-						}
-					}
-					if (newCommitId != null)
-						onCommitted(target, prevCommitId, newCommitId);
-					else
-						newChangedContainer(target);
-				}
+				save(target, feedback, false);
 			}
 			
-		});
+		};
+		saveButton.setOutputMarkupId(true);
+		form.add(saveButton);
+		
+		form.add(new AjaxButton("saveAndDiff") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+
+				if (saveInProgress || (fileEdit.getOldPath() != null && fileEdit.getNewFile() != null))
+					tag.put("disabled", "disabled");
+				if (saveInProgress)
+					tag.put("value", "Please wait...");
+			}
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				save(target, feedback, true);
+				saveInProgress = true;
+				target.add(this);
+				target.add(saveButton);
+				target.appendJavaScript("pmease.commons.form.markClean($('form'));");
+			}
+			
+		}.setOutputMarkupId(true));
 		
 		form.add(new AjaxLink<Void>("cancel") {
 
@@ -333,6 +273,98 @@ public abstract class EditSavePanel extends Panel {
 		});
 
 		setOutputMarkupId(true);
+	}
+	
+	private void save(AjaxRequestTarget target, FeedbackPanel feedback, boolean showDiff) {
+		String viewState = RequestCycle.get().getRequest().getPostParameters()
+				.getParameterValue("view_state").toString();
+		RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
+
+		change = null;
+		
+		PathAndContent newFile = fileEdit.getNewFile();
+		if (newFile != null && StringUtils.isBlank(newFile.getPath())) {
+			EditSavePanel.this.error("Please specify file name.");
+			target.add(feedback);
+		} else {
+			String commitMessage = summaryCommitMessage;
+			if (StringUtils.isBlank(commitMessage))
+				commitMessage = getDefaultCommitMessage();
+			if (StringUtils.isNotBlank(detailCommitMessage))
+				commitMessage += "\n\n" + detailCommitMessage;
+			Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).getCurrent());
+
+			Repository repository = depotModel.getObject().getRepository();
+			ObjectId newCommitId = null;
+			while(newCommitId == null) {
+				try {
+					newCommitId = fileEdit.commit(repository, refName, 
+							prevCommitId, prevCommitId, user.asPerson(), commitMessage);
+				} catch (ObsoleteCommitException e) {
+					currentCommitId = e.getOldCommitId();
+					try (RevWalk revWalk = new RevWalk(repository)) {
+						RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
+						RevCommit currentCommit = revWalk.parseCommit(currentCommitId);
+						prevCommitId = currentCommitId;
+
+						String oldPath = fileEdit.getOldPath();
+						if (oldPath != null) {
+							TreeWalk treeWalk = TreeWalk.forPath(repository, oldPath, 
+									prevCommit.getTree().getId(), currentCommit.getTree().getId());
+							if (treeWalk != null) {
+								if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
+										|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
+									// mark changed if original file exists and content or mode has been modified
+									// by others
+									if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
+										if (newFile != null) {
+											fileEdit = new FileEdit(null, newFile);
+											change = getChange(treeWalk, prevCommit, currentCommit);
+											break;
+										} else {
+											newCommitId = currentCommitId;
+											break;
+										}
+									} else {
+										change = getChange(treeWalk, prevCommit, currentCommit);
+										break;
+									}
+								}
+							}
+						}
+						if (newFile != null && !newFile.getPath().equals(oldPath)) { 
+							TreeWalk treeWalk = TreeWalk.forPath(repository, newFile.getPath(), 
+									prevCommit.getTree().getId(), currentCommit.getTree().getId());
+							if (treeWalk != null) {
+								if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
+										|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
+									// if added/renamed file exists and content or mode has been modified 
+									// by others
+									change = getChange(treeWalk, prevCommit, currentCommit);
+									break;
+								}
+							}
+						} 
+					} catch (IOException e2) {
+						throw new RuntimeException(e2);
+					}
+				} catch (GitObjectAlreadyExistsException e) {
+					EditSavePanel.this.error("A file with same name already exists. "
+							+ "Please choose a different name and try again.");
+					target.add(feedback);
+					break;
+				} catch (NotGitTreeException e) {
+					EditSavePanel.this.error("A file exists where you’re trying to create a subdirectory. "
+							+ "Choose a new path and try again..");
+					target.add(feedback);
+					break;
+				}
+			}
+			if (newCommitId != null)
+				onCommitted(target, prevCommitId, newCommitId, showDiff);
+			else
+				newChangedContainer(target);
+		}
 	}
 	
 	private BlobChange getChange(TreeWalk treeWalk, RevCommit oldCommit, RevCommit newCommit) {
@@ -375,7 +407,7 @@ public abstract class EditSavePanel extends Panel {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
-	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId);
+	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId, boolean showDiff);
 	
 	public void onNewPathChange(AjaxRequestTarget target) {
 		String script = String.format("gitplex.editsave.onPathChange('%s', '%s', %b);", 

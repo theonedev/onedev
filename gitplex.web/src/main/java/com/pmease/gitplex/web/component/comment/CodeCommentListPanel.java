@@ -39,12 +39,14 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.comments.CodeCommentPage;
+import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -137,7 +139,12 @@ public abstract class CodeCommentListPanel extends Panel {
 				if (request != null) {
 					setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, comment));
 				} else {
-					setResponsePage(CodeCommentPage.class, CodeCommentPage.paramsOf(depot, comment));
+					CompareContext compareContext = comment.getLastCompareContext();
+					if (!compareContext.getCompareCommit().equals(comment.getCommentPos().getCommit())) {
+						setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, comment));
+					} else {
+						setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot, comment));
+					}
 				}				
 			}
 			

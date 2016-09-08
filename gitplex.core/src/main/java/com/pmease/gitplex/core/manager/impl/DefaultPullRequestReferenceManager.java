@@ -15,7 +15,7 @@ import com.pmease.commons.loader.Listen;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReference;
-import com.pmease.gitplex.core.event.pullrequest.MarkdownAware;
+import com.pmease.gitplex.core.event.MarkdownAware;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestReferenceManager;

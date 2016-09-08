@@ -73,8 +73,8 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.git.Submodule;
-import com.pmease.commons.git.exception.NotGitFileException;
 import com.pmease.commons.git.exception.GitObjectNotFoundException;
+import com.pmease.commons.git.exception.NotGitFileException;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.loader.AppLoader;
@@ -720,6 +720,24 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			refCache.put(revision, optional);
 		}
 		return optional.orNull();
+	}
+	
+	@Nullable
+	public Ref getBranchRef(String revision) {
+		Ref ref = getRef(revision);
+		if (ref != null && ref.getName().startsWith(Constants.R_HEADS))
+			return ref;
+		else
+			return null;
+	}
+	
+	@Nullable
+	public Ref getTagRef(String revision) {
+		Ref ref = getRef(revision);
+		if (ref != null && ref.getName().startsWith(Constants.R_TAGS))
+			return ref;
+		else
+			return null;
 	}
 	
 	@Nullable

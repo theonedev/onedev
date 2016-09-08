@@ -104,7 +104,7 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 
 			@Override
 			protected String load() {
-				if (hasError(true))
+				if (hasErrors(true))
 					return " has-error";
 				else
 					return "";

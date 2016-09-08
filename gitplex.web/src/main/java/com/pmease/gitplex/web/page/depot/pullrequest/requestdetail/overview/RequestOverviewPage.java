@@ -65,7 +65,7 @@ import com.pmease.gitplex.web.component.pullrequest.reviewresult.ReviewResultIco
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentRemoved;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.RequestCommentDeleted;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.CommentedActivity;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.OpenedActivity;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.activity.ReferencedActivity;
@@ -116,8 +116,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 				
-				if (event.getPayload() instanceof CommentRemoved) {
-					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
+				if (event.getPayload() instanceof RequestCommentDeleted) {
+					RequestCommentDeleted commentRemoved = (RequestCommentDeleted) event.getPayload();
 					remove();
 					commentRemoved.getPartialPageRequestHandler().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
 				} 

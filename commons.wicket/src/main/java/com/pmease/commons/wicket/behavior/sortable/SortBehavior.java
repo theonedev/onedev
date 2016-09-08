@@ -113,13 +113,13 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 
 	@Override
 	protected void respond(AjaxRequestTarget target) {
-		int fromList = RequestCycle.get().getRequest().getQueryParameters()
+		int fromList = RequestCycle.get().getRequest().getPostParameters()
 				.getParameterValue("fromList").toInt();
-		int fromItem = RequestCycle.get().getRequest().getQueryParameters()
+		int fromItem = RequestCycle.get().getRequest().getPostParameters()
 				.getParameterValue("fromItem").toInt();
-		int toList = RequestCycle.get().getRequest().getQueryParameters()
+		int toList = RequestCycle.get().getRequest().getPostParameters()
 				.getParameterValue("toList").toInt();
-		int toItem = RequestCycle.get().getRequest().getQueryParameters()
+		int toItem = RequestCycle.get().getRequest().getPostParameters()
 				.getParameterValue("toItem").toInt();
 		if (fromList != toList || fromItem != toItem) {
 			onSort(target, new SortPosition(fromList, fromItem), new SortPosition(toList, toItem));

@@ -45,6 +45,7 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -451,7 +452,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		}.setOutputMarkupId(true));
 		
 		commentContainer.setOutputMarkupPlaceholderTag(true);
-		if (context.getOpenComment() != null) {
+		if (context.getOpenComment() != null && context.getOpenComment().getCommentPos().getCommit().equals(context.getCommit().name())) {
 			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, context.getOpenComment().getId()) {
 
 				@Override
@@ -580,8 +581,11 @@ public class SourceViewPanel extends BlobViewPanel {
 							comment.setUser(SecurityUtils.getAccount());
 							comment.getCommentPos().setRange(mark);
 							comment.setCompareContext(getCompareContext());
+							Ref branchRef = context.getDepot().getBranchRef(context.getBlobIdent().revision);									
+							if (branchRef != null)
+								comment.setBranchRef(branchRef.getName());
 							
-							GitPlex.getInstance(CodeCommentManager.class).save(comment);
+							GitPlex.getInstance(CodeCommentManager.class).save(comment, context.getPullRequest());
 							
 							CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
@@ -602,7 +606,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 								@Override
 								protected PullRequest getPullRequest() {
-									return null;
+									return getContext().getPullRequest();
 								}
 								
 							};

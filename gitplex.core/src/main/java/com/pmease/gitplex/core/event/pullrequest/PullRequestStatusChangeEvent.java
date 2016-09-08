@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.event.MarkdownAware;
 
 public abstract class PullRequestStatusChangeEvent extends PullRequestChangeEvent implements MarkdownAware {
 

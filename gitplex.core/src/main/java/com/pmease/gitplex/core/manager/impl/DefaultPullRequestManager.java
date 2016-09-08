@@ -1,6 +1,11 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.*;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofOpen;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofSource;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofSourceDepot;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofSubmitter;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofTarget;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofTargetDepot;
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
 import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;

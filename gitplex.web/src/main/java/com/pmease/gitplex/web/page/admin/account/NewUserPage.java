@@ -30,13 +30,19 @@ public class NewUserPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = userManager.find(user.getName());
+				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+				Account accountWithSameName = accountManager.findByName(user.getName());
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
-				} else {
-					userManager.save(user, null);
+				} 
+				Account accountWithSameEmail = accountManager.findByEmail(user.getEmail());
+				if (accountWithSameEmail != null) {
+					editor.getErrorContext(new PathSegment.Property("email"))
+							.addError("This email has already been used by another account.");
+				} 
+				if (!editor.hasErrors(true)){
+					accountManager.save(user, null);
 					Session.get().success("New user account created");
 					setResponsePage(AccountListPage.class);
 				}

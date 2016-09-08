@@ -183,7 +183,7 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				GitPlex.getInstance(PullRequestCommentManager.class).delete(getComment());
-				send(CommentedPanel.this, Broadcast.BUBBLE, new CommentRemoved(target, getComment()));
+				send(CommentedPanel.this, Broadcast.BUBBLE, new RequestCommentDeleted(target));
 			}
 			
 			@Override

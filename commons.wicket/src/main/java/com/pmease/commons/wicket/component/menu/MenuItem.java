@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 
 public abstract class MenuItem implements Serializable {
 	
@@ -15,6 +15,6 @@ public abstract class MenuItem implements Serializable {
 	
 	public abstract String getLabel();
 	
-	public abstract AbstractLink newLink(String id);
+	public abstract WebMarkupContainer newLink(String id);
 	
 }

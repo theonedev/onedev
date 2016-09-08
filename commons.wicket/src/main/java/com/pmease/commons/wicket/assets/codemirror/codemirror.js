@@ -53,8 +53,14 @@ pmease.commons.codemirror = {
 	    }
 
 	    if (viewState) {
-	    	if (viewState.cursor)
+	    	if (viewState.cursor) {
 	    		cm.setCursor(viewState.cursor);
+	    		if (!viewState.scroll) {
+	    			var h = cm.getScrollInfo().clientHeight;
+	    			var coords = cm.charCoords({line: viewState.cursor.line, ch: 0}, "local");
+	    			cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
+	    		}
+	    	}
 	    	if (viewState.scroll) {
 	    		// use a timeout to make sure we scroll after possible viewport resize
 	    		setTimeout(function() {

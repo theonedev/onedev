@@ -7,11 +7,11 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
@@ -50,24 +50,19 @@ public class DepotAndRevision implements Serializable {
 	}
 	
 	@Nullable
-	public Ref getRef() {
-		return getDepot().getRef(getRevision());
-	}
-	
-	@Nullable
 	public String getBranch() {
-		Ref ref = getRef();
-		if (ref != null && ref.getName().startsWith(Constants.R_HEADS))
-			return ref.getName().substring(Constants.R_HEADS.length());
+		Ref branchRef = getDepot().getBranchRef(getRevision());
+		if (branchRef != null)
+			return GitUtils.ref2branch(branchRef.getName());
 		else
 			return null;
 	}
 	
 	@Nullable
 	public String getTag() {
-		Ref ref = getRef();
-		if (ref != null && ref.getName().startsWith(Constants.R_TAGS))
-			return ref.getName().substring(Constants.R_TAGS.length());
+		Ref tagRef = getDepot().getTagRef(getRevision());
+		if (tagRef != null)
+			return GitUtils.ref2tag(tagRef.getName());
 		else
 			return null;
 	}

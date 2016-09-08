@@ -52,7 +52,7 @@ public class ForgetPage extends BasePage {
 					@Override
 					protected TestResult test() {
 						AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-						Account user = userManager.find(bean.getUserName());
+						Account user = userManager.findByName(bean.getUserName());
 						if (user != null) {
 							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 							if (configManager.getMailSetting() != null) {

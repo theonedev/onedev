@@ -36,8 +36,11 @@ public class WebUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(CodeComment comment) {
-		return urlFor(comment.getDepot()) + "/comments/" + comment.getId();
+	public String urlFor(CodeComment comment, PullRequest request) {
+		String url = urlFor(comment.getDepot()) + "/comments/" + comment.getId();
+		if (request != null)
+			url += "?request=" + request.getId();
+		return url;
 	}
 
 }

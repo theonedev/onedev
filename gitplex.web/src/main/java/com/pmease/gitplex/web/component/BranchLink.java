@@ -1,11 +1,14 @@
 package com.pmease.gitplex.web.component;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -16,13 +19,18 @@ public class BranchLink extends BookmarkablePageLink<Void> {
 	private final DepotAndBranch depotAndBranch;
 	
 	public BranchLink(String id, DepotAndBranch depotAndBranch) {
-		super(id, DepotFilePage.class, getPageParams(depotAndBranch));
+		this(id, depotAndBranch, null);
+	}
+	
+	public BranchLink(String id, DepotAndBranch depotAndBranch, @Nullable PullRequest request) {
+		super(id, DepotFilePage.class, getPageParams(depotAndBranch, request));
 		this.depotAndBranch = depotAndBranch;
 	}
 	
-	private static PageParameters getPageParams(DepotAndBranch depotAndBranch) {
+	private static PageParameters getPageParams(DepotAndBranch depotAndBranch, @Nullable PullRequest request) {
 		DepotFilePage.State state = new DepotFilePage.State();
 		state.blobIdent.revision = depotAndBranch.getBranch();
+		state.requestId = PullRequest.idOf(request);
 		return DepotFilePage.paramsOf(depotAndBranch.getDepot(), state);
 	}
 

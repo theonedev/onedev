@@ -25,12 +25,17 @@ import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.event.mention.AccountMentionedInCodeComment;
-import com.pmease.gitplex.core.event.mention.AccountMentionedInPullRequest;
+import com.pmease.gitplex.core.event.MarkdownAware;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentEvent;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.util.markdown.MentionParser;
 
 @Singleton
 public class DefaultMailManager implements MailManager {
@@ -148,35 +153,46 @@ public class DefaultMailManager implements MailManager {
 	}
 
 	@Listen
-	public void on(AccountMentionedInPullRequest event) {
-		PullRequest request = event.getRequest();
-		Account user = event.getUser();
-		String subject = String.format("You are mentioned in pull request #%d (%s)", 
-				request.getNumber(), request.getTitle());
-		String url = urlManager.urlFor(request);
-		String body = String.format("%s."
-				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
-				+ "<p style='margin: 16px 0;'>"
-				+ "For details, please visit <a href='%s'>%s</a>", 
-				subject, markdownManager.escape(event.getMarkdown()), url, url);
-		
-		sendMailAsync(Sets.newHashSet(user), subject, decorate(user, body));
+	public void on(PullRequestChangeEvent event) {
+		if (event instanceof PullRequestOpened 
+				|| event instanceof PullRequestCommented
+				|| event instanceof PullRequestStatusChangeEvent) {
+			String markdown = ((MarkdownAware) event).getMarkdown();
+			if (markdown != null) {
+				for (Account user: new MentionParser().parseMentions(markdownManager.parse(markdown))) {
+					PullRequest request = event.getRequest();
+					String subject = String.format("You are mentioned in pull request #%d (%s)", 
+							request.getNumber(), request.getTitle());
+					String url = urlManager.urlFor(request);
+					String body = String.format("%s."
+							+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
+							+ "<p style='margin: 16px 0;'>"
+							+ "For details, please visit <a href='%s'>%s</a>", 
+							subject, markdownManager.escape(markdown), url, url);
+					
+					sendMailAsync(Sets.newHashSet(user), subject, decorate(user, body));
+				}
+			}
+		}
 	}
 
 	@Listen
-	public void on(AccountMentionedInCodeComment event) {
-		Account user = event.getUser();
-		CodeComment comment = event.getComment();
-		String subject = String.format("You are mentioned in code comment #%d (%s)", 
-				comment.getId(), comment.getTitle());
-		String url = urlManager.urlFor(comment);
-		String body = String.format("%s."
-				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
-				+ "<p style='margin: 16px 0;'>"
-				+ "For details, please visit <a href='%s'>%s</a>", 
-				subject, markdownManager.escape(event.getMarkdown()), url, url);
-		
-		sendMailAsync(Sets.newHashSet(user), subject, decorate(user, body));
+	public void on(CodeCommentEvent event) {
+		if (event.getMarkdown() != null) {
+			for (Account user: new MentionParser().parseMentions(markdownManager.parse(event.getMarkdown()))) {
+				CodeComment comment = event.getComment();
+				String subject = String.format("You are mentioned in code comment #%d (%s)", 
+						comment.getId(), comment.getTitle());
+				String url = urlManager.urlFor(comment, event.getRequest());
+				String body = String.format("%s."
+						+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
+						+ "<p style='margin: 16px 0;'>"
+						+ "For details, please visit <a href='%s'>%s</a>", 
+						subject, markdownManager.escape(event.getMarkdown()), url, url);
+				
+				sendMailAsync(Sets.newHashSet(user), subject, decorate(user, body));
+			}
+		}
 	}
 
 	private String decorate(Account user, String body) {

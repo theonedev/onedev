@@ -28,6 +28,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.StaleStateException;
 
@@ -631,11 +632,10 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 
 			@Override
-			public void detach(Component component) {
-				if (isOnConnect() && SecurityUtils.getAccount() != null) {
+			protected void onEndInitialRequest(RequestCycle cycle) {
+				if (SecurityUtils.getAccount() != null) {
 					GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), getComment());
 				}
-				super.detach(component);
 			}
 			
 		});
@@ -712,7 +712,7 @@ public abstract class CodeCommentPanel extends Panel {
 					statusChange.setDate(date);
 					statusChange.setNote(contentInput.getModelObject());
 
-					GitPlex.getInstance(CodeCommentManager.class).changeStatus(statusChange);				
+					GitPlex.getInstance(CodeCommentManager.class).changeStatus(statusChange, getPullRequest());				
 					onStatusChanged(target, fragment, statusChange);
 					onSaveComment(target, getComment());
 				} else {
@@ -722,7 +722,7 @@ public abstract class CodeCommentPanel extends Panel {
 					reply.setUser(user);
 					reply.setContent(contentInput.getModelObject());
 					reply.setCompareContext(compareContext);
-					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
+					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply, getPullRequest(), true);
 					onReplyAdded(target, fragment, reply);
 				}
 			}

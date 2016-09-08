@@ -93,7 +93,7 @@ public abstract class DepotSelector extends Panel {
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				Long id = params.getParameterValue("id").toLong();
 				onSelect(target, GitPlex.getInstance(DepotManager.class).load(id));
 			}

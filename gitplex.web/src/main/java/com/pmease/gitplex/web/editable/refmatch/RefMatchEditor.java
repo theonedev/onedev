@@ -42,7 +42,7 @@ public class RefMatchEditor extends PropertyEditor<String> {
 
 			@Override
 			protected String load() {
-				if (hasError(true))
+				if (hasErrors(true))
 					return " has-error";
 				else
 					return "";

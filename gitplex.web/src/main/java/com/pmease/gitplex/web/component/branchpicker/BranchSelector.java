@@ -74,7 +74,7 @@ public abstract class BranchSelector extends Panel {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				String key = params.getParameterValue("key").toString();
 				
 				if (key.equals("return")) {

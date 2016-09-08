@@ -47,7 +47,7 @@ public abstract class BasePage extends CommonPage {
 	
 	public void unauthorized() {
 		if (getLoginUser() != null) 
-			throw new UnauthorizedException();
+			throw new UnauthorizedException("You are not allowed to perform this operation");
 		else 
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 	}

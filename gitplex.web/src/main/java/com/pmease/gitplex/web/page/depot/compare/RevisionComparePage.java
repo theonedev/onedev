@@ -34,7 +34,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -103,7 +102,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	
 	private IModel<PullRequest> requestModel;
 	
-	private IModel<ObjectId> mergeBaseModel;
+	private ObjectId mergeBase;
 
 	private State state = new State();
 	
@@ -207,23 +206,16 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			
 		};
 
-		mergeBaseModel = new LoadableDetachableModel<ObjectId>() {
-
-			@Override
-			protected ObjectId load() {
-				try {
-					Ref ref = state.rightSide.getDepot().getRepository().findRef(state.rightSide.getRevision());
-					String refName = ref!=null?ref.getName():null;
-					return GitUtils.getMergeBase(
-							state.leftSide.getDepot().getRepository(), leftCommitId, 
-							state.rightSide.getDepot().getRepository(), rightCommitId, 
-							refName);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		};
+		try {
+			Ref ref = state.rightSide.getDepot().getRepository().findRef(state.rightSide.getRevision());
+			String refName = ref!=null?ref.getName():null;
+			mergeBase = GitUtils.getMergeBase(
+					state.leftSide.getDepot().getRepository(), leftCommitId, 
+					state.rightSide.getDepot().getRepository(), rightCommitId, 
+					refName).copy();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		
 		commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
@@ -232,7 +224,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				List<RevCommit> commits = new ArrayList<>();
 				Depot rightDepot = state.rightSide.getDepot();
 				
-				ObjectId mergeBase = mergeBaseModel.getObject();
 				try (RevWalk revWalk = new RevWalk(state.rightSide.getDepot().getRepository())) {
 					if (rightDepot.equals(state.leftSide.getDepot()) 
 							&& !state.compareWithMergeBase 
@@ -295,7 +286,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!mergeBaseModel.equals(leftCommitId));
+				setVisible(!mergeBase.equals(leftCommitId));
 			}
 			
 		};
@@ -395,7 +386,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				
 				if (state.leftSide.getBranch()!=null && state.rightSide.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();
-					setVisible(request == null && !mergeBaseModel.getObject().equals(rightCommitId));
+					setVisible(request == null && !mergeBase.equals(rightCommitId));
 				} else {
 					setVisible(false);
 				}
@@ -487,8 +478,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		add(tabbable = new Tabbable("tabs", tabs));
 
 		newTabPanel(null);
-		
-		add(new BackToTop("backToTop"));
 	}
 	
 	@Override
@@ -571,13 +560,13 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			
 			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
 					new Model<PullRequest>(null), 
-					state.compareWithMergeBase?mergeBaseModel.getObject().name():state.leftSide.getRevision(), 
+					state.compareWithMergeBase?mergeBase.name():state.leftSide.getRevision(), 
 					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
 			break;
 		default:
 			tabPanel = new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel);
 			
-			if (!mergeBaseModel.equals(leftCommitId) && !state.compareWithMergeBase) {
+			if (!mergeBase.equals(leftCommitId) && !state.compareWithMergeBase) {
 				tabPanel.add(AttributeAppender.append("class", "with-merge-base"));
 			}
 			break;
@@ -611,7 +600,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
-		mergeBaseModel.detach();
 		commitsModel.detach();
 
 		super.onDetach();
@@ -675,7 +663,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	public String getMarkUrl(CommentPos mark) {
 		State markState = new State();
 		markState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
-				state.compareWithMergeBase?mergeBaseModel.getObject().name():leftCommitId.name());
+				state.compareWithMergeBase?mergeBase.name():leftCommitId.name());
 		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
 		markState.mark = mark;
 		markState.pathFilter = state.pathFilter;
@@ -689,7 +677,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	public String getCommentUrl(CodeComment comment) {
 		State commentState = new State();
 		commentState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
-				state.compareWithMergeBase?mergeBaseModel.getObject().name():leftCommitId.name());
+				state.compareWithMergeBase?mergeBase.name():leftCommitId.name());
 		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
 		commentState.mark = comment.getCommentPos();
 		commentState.commentId = comment.getId();

@@ -41,7 +41,7 @@ public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {
 		if (getModelObject() != null) {
 			AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
 			for (String accountName: getModelObject()) {
-				Account account = accountManager.find(accountName);
+				Account account = accountManager.findByName(accountName);
 				if (account != null)
 					accounts.add(account);
 			}

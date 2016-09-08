@@ -1,14 +1,17 @@
 package com.pmease.commons.hibernate;
 
+import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
+import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
+import org.hibernate.type.Type;
 
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
@@ -67,8 +70,34 @@ public class HibernateModule extends AbstractPluginModule {
 	    }, sessionInterceptor);
 	    
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
-	    
 	    contribute(ServletConfigurator.class, HibernateServletConfigurator.class);
+	    
+	    contribute(PersistListener.class, new PersistListener() {
+			
+			@Override
+			public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
+					throws CallbackException {
+				return false;
+			}
+			
+			@Override
+			public boolean onLoad(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
+					throws CallbackException {
+				return false;
+			}
+			
+			@Override
+			public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
+					String[] propertyNames, Type[] types) throws CallbackException {
+				return false;
+			}
+			
+			@Override
+			public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
+					throws CallbackException {
+			}
+		});
+	    
 	}
 
 	@Override

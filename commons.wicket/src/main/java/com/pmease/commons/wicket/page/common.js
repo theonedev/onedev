@@ -340,21 +340,6 @@ pmease.commons = {
 		}
 	},
 	
-	backToTop: function(backToTop) {
-		var $backToTop = $(backToTop);
-        $backToTop.hide();
-        $(window).scroll(function(){
-        	if ($(window).scrollTop()>500)
-        		$backToTop.fadeIn(1000);
-        	else
-        		$backToTop.fadeOut(1000);
-        });
-        $backToTop.click(function(){
-        	$("body, html").animate({scrollTop:0}, 700);
-        	return false;
-        });
-	},
-	
 	choiceFormatter: {
 		id: {
 			formatSelection: function(choice) {
@@ -496,6 +481,11 @@ $(function() {
 $(window).load(function() {
 	pmease.commons.history.setVisited();
 });
+
+// disable this as calling replaceState in beforeunload also affects state of 
+// the page to be loaded
+/* 
 $(window).on("beforeunload", function() {
 	$(".autofit:visible").first().trigger("storeViewState");	
 });
+*/

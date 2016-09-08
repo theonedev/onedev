@@ -64,7 +64,7 @@ public class MarkdownPanel extends GenericPanel<String> {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				int taskStartIndex = params.getParameterValue("taskStartIndex").toInt();
 				boolean taskChecked = params.getParameterValue("taskChecked").toBoolean();
 				String markdown = getModelObject();

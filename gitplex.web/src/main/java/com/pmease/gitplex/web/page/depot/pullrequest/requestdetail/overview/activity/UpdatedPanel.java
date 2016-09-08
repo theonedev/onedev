@@ -140,6 +140,13 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 						return getUpdate().getRequest().getTargetDepot();
 					}
 					
+				}, new AbstractReadOnlyModel<PullRequest>() {
+
+					@Override
+					public PullRequest getObject() {
+						return getUpdate().getRequest();
+					}
+					
 				}, commit.name(), null));
 				
 				if (getUpdate().getRequest().getTarget().getObjectId(false) != null) {

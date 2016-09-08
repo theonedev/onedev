@@ -26,6 +26,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -47,9 +48,9 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
@@ -57,6 +58,8 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
+import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobNameChangeCallback;
@@ -472,97 +475,111 @@ public abstract class FileNavigator extends Panel {
 						});
 					}
 
-					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
-							&& context.isOnBranch() 
-							&& SecurityUtils.canModify(context.getDepot(), file.revision, path)) {
-						changeItems.add(new MenuItem() {
-
-							@Override
-							public String getIconClass() {
-								return "fa-pencil";
-							}
-
-							@Override
-							public String getLabel() {
-								return "Edit";
-							}
-
-							@Override
-							public AbstractLink newLink(String id) {
-								AbstractLink link = new ViewStateAwareAjaxLink<Void>(id) {
-
+					if (file.isFile() && SecurityUtils.canModify(context.getDepot(), file.revision, path)) {
+						CodeComment comment = context.getOpenComment();
+						if (context.isOnBranch() 
+								|| comment != null && comment.getBranchRef() != null && context.getDepot().getObjectId(comment.getBranchRef(), false) != null) {
+							if (context.getDepot().getBlob(file).getText() != null) {
+								changeItems.add(new MenuItem() {
+		
 									@Override
-									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-										super.updateAjaxAttributes(attributes);
-										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+									public String getIconClass() {
+										return "fa-pencil";
 									}
-									
+		
 									@Override
-									public void onClick(AjaxRequestTarget target, String viewState) {
-										close();
-										RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
-										context.onEdit(target);
+									public String getLabel() {
+										return "Edit";
 									}
-								};
-								
-								PageParameters params;
-								DepotFilePage.State state = new DepotFilePage.State();
-								state.blobIdent = context.getBlobIdent();
-								state.mode = Mode.EDIT;
-								state.mark = context.getMark();
-								params = DepotFilePage.paramsOf(context.getDepot(), state);
-								CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
-								link.add(AttributeAppender.replace("href", url.toString()));
-								link.add(new ViewStateAwareBehavior());
-								return link;
+		
+									@Override
+									public WebMarkupContainer newLink(String id) {
+										if (context.isOnBranch()) {
+											AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>(id) {
+		
+												@Override
+												protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+													super.updateAjaxAttributes(attributes);
+													attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+												}
+												
+												@Override
+												public void onClick(AjaxRequestTarget target, String viewState) {
+													close();
+													RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
+													context.onEdit(target);
+												}
+											};
+											link.add(AttributeAppender.append("title", "Edit on branch " + context.getBlobIdent().revision));
+											return link;
+										} else {
+											CodeComment comment = Preconditions.checkNotNull(context.getOpenComment());
+											PageParameters params;
+											DepotFilePage.State state = new DepotFilePage.State();
+											state.blobIdent.revision = GitUtils.ref2branch(context.getOpenComment().getBranchRef());
+											state.blobIdent.path = context.getBlobIdent().path;
+											state.commentId = comment.getId();
+											state.requestId = PullRequest.idOf(context.getPullRequest());
+											state.mode = Mode.EDIT;
+											params = DepotFilePage.paramsOf(context.getDepot(), state);
+											Link<Void> link = new BookmarkablePageLink<Void>(id, DepotFilePage.class, params);
+											link.add(AttributeAppender.append("title", "Edit on branch " + state.blobIdent.revision));
+											return link;
+										}
+									}
+								});
 							}
 							
-						});
+							changeItems.add(new MenuItem() {
+
+								@Override
+								public String getIconClass() {
+									return "fa-trash";
+								}
+
+								@Override
+								public String getLabel() {
+									return "Delete";
+								}
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									if (context.isOnBranch()) {
+										AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>(id) {
+
+											@Override
+											protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+												super.updateAjaxAttributes(attributes);
+												attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+											}
+											
+											@Override
+											public void onClick(AjaxRequestTarget target) {
+												close();
+												context.onDelete(target);
+											}
+
+										};
+										link.add(AttributeAppender.append("title", "Delete from branch " + context.getBlobIdent().revision));
+										return link;
+									} else {
+										DepotFilePage.State state = new DepotFilePage.State();
+										state.blobIdent.revision = GitUtils.ref2branch(context.getOpenComment().getBranchRef());
+										state.blobIdent.path = context.getBlobIdent().path;
+										state.commentId = comment.getId();
+										state.requestId = PullRequest.idOf(context.getPullRequest());
+										state.mode = Mode.DELETE;
+										PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
+										Link<Void> link = new BookmarkablePageLink<Void>(id, DepotFilePage.class, params);
+										link.add(AttributeAppender.append("title", "Delete from branch " + state.blobIdent.revision));
+										return link;
+									}
+								}
+								
+							});
+						} 
 					}
 
-					if (file.isFile() && context.isOnBranch() 
-							&& SecurityUtils.canModify(context.getDepot(), file.revision, path)) {
-						changeItems.add(new MenuItem() {
-
-							@Override
-							public String getIconClass() {
-								return "fa-trash";
-							}
-
-							@Override
-							public String getLabel() {
-								return "Delete";
-							}
-
-							@Override
-							public AbstractLink newLink(String id) {
-								AbstractLink link = new PreventDefaultAjaxLink<Void>(id) {
-
-									@Override
-									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-										super.updateAjaxAttributes(attributes);
-										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-									}
-									
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										close();
-										context.onDelete(target);
-									}
-
-								};
-								DepotFilePage.State state = new DepotFilePage.State();
-								state.blobIdent = context.getBlobIdent();
-								state.mode = Mode.EDIT;
-								PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
-								CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
-								link.add(AttributeAppender.replace("href", url.toString()));
-								return link;
-							}
-							
-						});
-					} 
-					
 					List<MenuItem> customItems = context.getMenuItems(this);
 					
 					List<MenuItem> menuItems = new ArrayList<>(generalItems);

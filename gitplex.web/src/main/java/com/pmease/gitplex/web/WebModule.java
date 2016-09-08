@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Application;
 import org.apache.wicket.core.request.mapper.StalePageException;
 import org.apache.wicket.protocol.http.PageExpiredException;
@@ -108,7 +109,7 @@ public class WebModule extends AbstractPluginModule {
 			@Override
 			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
 				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
-						ObjectNotFoundException.class, StaleStateException.class,  
+						ObjectNotFoundException.class, StaleStateException.class, UnauthorizedException.class, 
 						GitException.class, PageExpiredException.class, StalePageException.class);
 			}
 			

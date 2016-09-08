@@ -42,7 +42,17 @@ public interface AccountManager extends EntityManager<Account> {
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable Account find(String accountName);
+	@Nullable Account findByName(String accountName);
+	
+	/**
+	 * Find user of specified name.
+	 * <p>
+	 * @param accountName
+	 * 			name of the user
+	 * @return
+	 * 			matching user, or <tt>null</tt> if not found 
+	 */
+	@Nullable Account findByEmail(String email);
 	
 	/**
 	 * Find user by person

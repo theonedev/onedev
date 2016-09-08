@@ -15,12 +15,15 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -67,6 +70,7 @@ import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.BlobCommentSupport;
+import com.pmease.gitplex.web.component.diff.revision.CodeCommentToggled;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
@@ -151,13 +155,20 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		
+		if (event.getPayload() instanceof CodeCommentToggled) {
+			CodeCommentToggled codeCommentToggled = (CodeCommentToggled) event.getPayload();
+			newActions(codeCommentToggled.getPartialPageRequestHandler());
+		} 
+	}
+	
+	private void newActions(IPartialPageRequestHandler target) {
+		WebMarkupContainer actions = new WebMarkupContainer("actions");
+		actions.setOutputMarkupId(true);
 
-		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
-		add(new BlobDiffTitle("title", change));
-
-		add(new AjaxLink<Void>("blameFile") {
+		actions.add(new AjaxLink<Void>("blameFile") {
 
 			@Override
 			protected void onConfigure() {
@@ -185,35 +196,93 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			
 		})).setOutputMarkupId(true));
 		
-		DepotFilePage.State viewState = new DepotFilePage.State();
-		viewState.blobIdent = change.getBlobIdent();
-		PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), viewState);
-		add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
-		
+		Depot depot = depotModel.getObject();
 		PullRequest request = requestModel.getObject();
-		if (change.getType() != ChangeType.DELETE 
-				&& request != null 
-				&& request.getSourceDepot() != null 
-				&& change.getBlobIdent().revision.equals(request.getSource().getObjectName(false))) { 
-			// we are on pull request head and pull request source branch exists, so we edit source branch instead
-			DepotFilePage.State editState = new DepotFilePage.State();
-			editState.blobIdent.revision = request.getSourceBranch();
-			editState.blobIdent.path = change.getPath();
-			editState.mode = Mode.EDIT;
-			params = DepotFilePage.paramsOf(request.getSourceDepot(), editState);
-			add(new BookmarkablePageLink<Void>("editFile", DepotFilePage.class, params));
-		} else if (change.getType() != ChangeType.DELETE 
-				&& depotModel.getObject().getRefs(org.eclipse.jgit.lib.Constants.R_HEADS).containsKey(change.getBlobIdent().revision)) {
-			// we are on a branch 
-			DepotFilePage.State editState = new DepotFilePage.State();
-			editState.blobIdent = change.getBlobIdent();
-			editState.mode = Mode.EDIT;
-			params = DepotFilePage.paramsOf(depotModel.getObject(), editState);
-			add(new BookmarkablePageLink<Void>("editFile", DepotFilePage.class, params));
+		CodeComment comment;
+		if (markSupport != null && markSupport.getOpenComment() != null) {
+			comment = markSupport.getOpenComment();
 		} else {
-			add(new WebMarkupContainer("editFile").setVisible(false));
+			comment = null;
 		}
+		DepotFilePage.State viewState = new DepotFilePage.State();
+		if (request != null)
+			viewState.requestId = request.getId();
+		if (comment != null)
+			viewState.commentId = comment.getId();
+		viewState.blobIdent = change.getBlobIdent();
+		
+		PageParameters params = DepotFilePage.paramsOf(depot, viewState);
+		actions.add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
+		
+		String title = null;
+		params = null;
+		if (change.getType() != ChangeType.DELETE) {
+			if (request != null) {
+				if (request.getSourceDepot() != null 
+						&& request.getSource().getObjectName(false) != null
+						&& SecurityUtils.canWrite(request.getSourceDepot())) { 
+					// we are on pull request head and pull request source branch exists, so we edit source branch instead
+					DepotFilePage.State editState = new DepotFilePage.State();
+					editState.blobIdent.revision = request.getSourceBranch();
+					editState.blobIdent.path = change.getPath();
+					editState.mode = Mode.EDIT;
+					editState.requestId = request.getId();
+					if (comment != null)
+						editState.commentId = comment.getId();
+					params = DepotFilePage.paramsOf(request.getSourceDepot(), editState);
+					title = "Edit on source branch";
+				}
+			} else if (SecurityUtils.canWrite(depot)) {
+				if (depot.getBranchRef(change.getBlobIdent().revision) != null) {
+					// we are on a branch 
+					DepotFilePage.State editState = new DepotFilePage.State();
+					editState.blobIdent = change.getBlobIdent();
+					editState.mode = Mode.EDIT;
+					if (comment != null)
+						editState.commentId = comment.getId();
+					params = DepotFilePage.paramsOf(depot, editState);
+					title = "Edit on branch " + change.getBlobIdent().revision;
+				} else if (comment != null 
+						&& comment.getBranchRef() != null 
+						&& depot.getObjectId(comment.getBranchRef(), false) != null) {
+					// we are viewing a code comment, so we can edit referenced branch of the comment instead
+					DepotFilePage.State editState = new DepotFilePage.State();
+					editState.blobIdent.revision = GitUtils.ref2branch(comment.getBranchRef()); 
+					editState.blobIdent.path = change.getPath();
+					editState.mode = Mode.EDIT;
+					editState.commentId = comment.getId();
+					params = DepotFilePage.paramsOf(depot, editState);
+					title = "Edit on branch " + editState.blobIdent.revision;
+				}				
+			}  
+		}
+		
+		if (params != null) {
+			Link<Void> editLink = new BookmarkablePageLink<Void>("editFile", DepotFilePage.class, params);
+			if (title != null)
+				editLink.add(AttributeAppender.append("title", title));
+			actions.add(editLink);
+		} else {
+			actions.add(new WebMarkupContainer("editFile").setVisible(false));
+		}
+		
+		if (target != null) {
+			replace(actions);
+			target.add(actions);
+		} else {
+			add(actions);
+		}
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 
+		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
+		add(new BlobDiffTitle("title", change));
+
+		newActions(null);
+		
 		add(new Label("diffLines", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -227,7 +296,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				switch (params.getParameterValue("action").toString()) {
 				case "showBlameMessage": 
 					String tooltipId = params.getParameterValue("param1").toString();

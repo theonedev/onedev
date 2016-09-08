@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.event.pullrequest;
+package com.pmease.gitplex.core.event;
 
 import javax.annotation.Nullable;
 

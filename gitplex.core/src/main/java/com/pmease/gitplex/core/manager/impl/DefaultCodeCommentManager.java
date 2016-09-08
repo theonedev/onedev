@@ -86,10 +86,10 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 	@Transactional
 	@Override
-	public void save(CodeComment comment) {
+	public void save(CodeComment comment, PullRequest request) {
 		CodeCommentCreated event;
 		if (comment.isNew()) {
-			event = new CodeCommentCreated(comment);
+			event = new CodeCommentCreated(comment, request);
 		} else {
 			event = null;
 		}
@@ -130,16 +130,16 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 	@Transactional
 	@Override
-	public void changeStatus(CodeCommentStatusChange statusChange) {
+	public void changeStatus(CodeCommentStatusChange statusChange, PullRequest request) {
 		statusChange.getComment().setResolved(statusChange.isResolved());
 		
 		codeCommentStatusChangeManager.save(statusChange);
 		
 		CodeCommentEvent event;
 		if (statusChange.isResolved()) {
-			event = new CodeCommentResolved(statusChange);
+			event = new CodeCommentResolved(statusChange, request);
 		} else {
-			event = new CodeCommentUnresolved(statusChange);
+			event = new CodeCommentUnresolved(statusChange, request);
 		}
 		listenerRegistry.post(event);
 		statusChange.getComment().setLastEvent(event);

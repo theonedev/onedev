@@ -71,11 +71,17 @@ public class ProfileEditPage extends AccountSettingPage {
 				
 				Account account = getAccount();
 				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = accountManager.find(account.getName());
+				Account accountWithSameName = accountManager.findByName(account.getName());
 				if (accountWithSameName != null && !accountWithSameName.equals(account)) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
-				} else {
+				} 
+				Account accountWithSameEmail = accountManager.findByEmail(account.getEmail());
+				if (accountWithSameEmail != null && !accountWithSameEmail.equals(account)) {
+					editor.getErrorContext(new PathSegment.Property("email"))
+							.addError("This email has already been used by another account.");
+				} 
+				if (!editor.hasErrors(true)) {
 					accountManager.save(account, oldName);
 					Session.get().success("Profile has been updated");
 					setResponsePage(ProfileEditPage.class, AccountPage.paramsOf(account));

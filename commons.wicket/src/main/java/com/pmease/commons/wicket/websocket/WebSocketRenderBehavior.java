@@ -1,21 +1,17 @@
 package com.pmease.commons.wicket.websocket;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.protocol.ws.api.message.TextMessage;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 @SuppressWarnings("serial")
 public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 
-	static final MetaDataKey<Boolean> ON_CONNECT = new MetaDataKey<Boolean>() {
-
-		private static final long serialVersionUID = 1L;
-		
-	}; 
-	
 	private Component component;
 	
 	@Override
@@ -41,19 +37,57 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 			 * re-render the integration preview section after connecting will make it 
 			 * displaying correctly    
 			 */
-			RequestCycle.get().setMetaData(ON_CONNECT, true);
+			RequestCycle.get().getListeners().add(new IRequestCycleListener() {
+				
+				@Override
+				public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
+				}
+				
+				@Override
+				public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
+				}
+				
+				@Override
+				public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
+				}
+				
+				@Override
+				public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
+				}
+				
+				@Override
+				public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
+				}
+				
+				@Override
+				public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+					return null;
+				}
+				
+				@Override
+				public void onEndRequest(RequestCycle cycle) {
+					WebSocketRenderBehavior.this.onEndInitialRequest(cycle);
+				}
+				
+				@Override
+				public void onDetach(RequestCycle cycle) {
+				}
+				
+				@Override
+				public void onBeginRequest(RequestCycle cycle) {
+				}
+				
+			});
 			onRender(handler);
 		} 
  
 	}
+	
+	protected void onEndInitialRequest(RequestCycle cycle) {
+	}
 
 	public Component getComponent() {
 		return component;
-	}
-	
-	public boolean isOnConnect() {
-		Boolean onConnect = RequestCycle.get().getMetaData(ON_CONNECT);
-		return onConnect != null && onConnect.booleanValue();
 	}
 	
 	protected abstract void onRender(WebSocketRequestHandler handler);

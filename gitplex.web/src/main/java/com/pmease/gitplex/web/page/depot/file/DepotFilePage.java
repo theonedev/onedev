@@ -33,7 +33,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -42,10 +41,12 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Objects;
+import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.GitObjectNotFoundException;
 import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
@@ -58,10 +59,15 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.support.CommentPos;
+import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.SearchManager;
@@ -86,8 +92,11 @@ import com.pmease.gitplex.web.component.depotfile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
+import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.websocket.CodeCommentChangedRegion;
 import com.pmease.gitplex.web.websocket.CommitIndexedRegion;
+import com.pmease.gitplex.web.websocket.PullRequestChangedRegion;
 
 @SuppressWarnings("serial")
 public class DepotFilePage extends DepotPage implements BlobViewContext {
@@ -100,11 +109,13 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private static class ViewStateKey extends MetaDataKey<String> {
 	};
 	
-	public static final ViewStateKey VIEW_STATE_KEY = new ViewStateKey();		
+	public static final ViewStateKey VIEW_STATE_KEY = new ViewStateKey();	
 	
 	private static final String PARAM_REVISION = "revision";
 	
 	private static final String PARAM_PATH = "path";
+	
+	private static final String PARAM_REQUEST = "request";
 	
 	private static final String PARAM_COMMENT = "comment";
 	
@@ -133,6 +144,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private TextRange mark;
 	
 	private Mode mode;
+	
+	private Long requestId;
 	
 	private Long commentId;
 	
@@ -185,9 +198,9 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			mode = Mode.valueOf(modeStr.toUpperCase());
 		mark = TextRange.of(params.get(PARAM_MARK).toString());
 		
-		String commentIdStr = params.get(PARAM_COMMENT).toString();
-		if (commentIdStr != null)
-			commentId = Long.valueOf(commentIdStr);
+		commentId = params.get(PARAM_COMMENT).toOptionalLong();
+		
+		requestId = params.get(PARAM_REQUEST).toOptionalLong();
 		
 		queryHits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
 		if (queryHits != null) { 
@@ -206,8 +219,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			}
 		}
 		
-		RequestCycle.get().setMetaData(VIEW_STATE_KEY, params.get(PARAM_VIEW_STATE).toString());
-		
 		if (mode == Mode.EDIT || mode == Mode.DELETE) {
 			if (!isOnBranch()) 
 				throw new RuntimeException("Files can only be edited on branch");
@@ -218,6 +229,36 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			if (!SecurityUtils.canModify(getDepot(), blobIdent.revision, path))
 				unauthorized();
 		}
+		
+		String viewStateStr = params.get(PARAM_VIEW_STATE).toString();
+		if (viewStateStr == null) {
+			CodeComment comment = getOpenComment();
+			if (comment != null) {
+				int cursorLine;
+				CommentPos commentPos = comment.getCommentPos();
+				try {
+					if (commentPos.getCommit().equals(resolvedRevision.name())) {
+						cursorLine = commentPos.getRange().getBeginLine();
+					} else {
+						BlobIdent commentBlobIdent = new BlobIdent(
+								commentPos.getCommit(), commentPos.getPath(), FileMode.TYPE_FILE);
+						Blob blob = getDepot().getBlob(commentBlobIdent);
+						List<String> oldLines = new ArrayList<>();
+						for (String line: blob.getText().getLines()) {
+							oldLines.add(comment.getCompareContext().getWhitespaceOption().process(line));
+						}
+						List<String> newLines = new ArrayList<>();
+						for (String line: getDepot().getBlob(blobIdent).getText().getLines()) {
+							newLines.add(comment.getCompareContext().getWhitespaceOption().process(line));
+						}
+						cursorLine = DiffUtils.getNewLineAround(oldLines, newLines, commentPos.getRange().getBeginLine());
+					}
+					viewStateStr = String.format("{\"cursor\":{\"line\":%d, \"ch\":0}}", cursorLine);
+				} catch (GitObjectNotFoundException e) {
+				}
+			}
+		}
+		RequestCycle.get().setMetaData(VIEW_STATE_KEY, viewStateStr);		
 	}
 	
 	@Override
@@ -361,6 +402,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			return null;
 	}
 	
+	@Override
+	public PullRequest getPullRequest() {
+		if (requestId != null)
+			return GitPlex.getInstance(PullRequestManager.class).load(requestId);
+		else
+			return null;
+	}
+	
 	private void newFileNavigator(@Nullable AjaxRequestTarget target) {
 		final BlobNameChangeCallback callback;
 
@@ -471,7 +520,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							getDepot().getObjectId(blobIdent.revision), mark) {
  
 				@Override
-				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
+				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit, boolean showDiff) {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
 					depot.cacheObjectId(branch, newCommit);
@@ -501,12 +550,16 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 						
 					});
 
-		    		State state = getState();
-	    			state.blobIdent = committed;
-	    			state.mode = null;
-	    			applyState(target, state);
-	    			pushState(target);
-	    			resizeWindow(target);
+					if (showDiff) {
+						showDiff(target, oldCommitId, newCommitId);
+					} else {
+			    		State state = getState();
+		    			state.blobIdent = committed;
+		    			state.mode = null;
+		    			applyState(target, state);
+		    			pushState(target);
+		    			resizeWindow(target);
+					}
 					// fix the issue that sometimes indexing indicator of new commit does not disappear 
 	    			target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 				}
@@ -542,7 +595,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					null, getDepot().getObjectId(blobIdent.revision), cancelListener) {
 
 				@Override
-				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
+				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit, boolean showDiff) {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
 					depot.cacheObjectId(branch, newCommit);
@@ -580,13 +633,17 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							
 						});
 						
-						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
-						State state = getState();
-						state.blobIdent = parentBlobIdent;
-						state.mode = null;
-						applyState(target, state);
-						pushState(target);
-						resizeWindow(target);
+						if (showDiff) {
+							showDiff(target, oldCommitId, newCommitId);
+						} else {
+							BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
+							State state = getState();
+							state.blobIdent = parentBlobIdent;
+							state.mode = null;
+							applyState(target, state);
+							pushState(target);
+							resizeWindow(target);
+						}
 						// fix the issue that sometimes indexing indicator of new commit does not disappear 
 		    			target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 					} catch (IOException e) {
@@ -615,6 +672,55 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 	}
 	
+	private void showDiff(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId) {
+		Depot depot = depotModel.getObject();
+		PullRequest request = getPullRequest();
+		CodeComment comment = getOpenComment();
+		if (request != null) {
+			RequestChangesPage.State state = new RequestChangesPage.State();
+			state.newCommit = newCommitId.name();
+			if (comment != null) {
+				state.oldCommit = comment.getCommentPos().getCommit();
+				state.commentId = comment.getId();
+				state.mark = comment.getCommentPos();
+				state.pathFilter = comment.getCompareContext().getPathFilter();
+				state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
+			} else {
+				state.oldCommit = oldCommitId.name();
+			}
+			get(FILE_VIEWER_ID).add(new WebSocketRenderBehavior() {
+				
+				@Override
+				protected void onRender(WebSocketRequestHandler handler) {
+					PullRequest request = getPullRequest();
+					for (PullRequestUpdate update: request.getUpdates()) {
+						if (update.getHeadCommitHash().equals(newCommitId.name())) {
+							setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
+							break;
+						}
+					}
+				}
+				
+			});
+		} else if (comment != null) {
+			RevisionComparePage.State state = new RevisionComparePage.State();
+			state.commentId = comment.getId();
+			state.pathFilter = comment.getCompareContext().getPathFilter();
+			state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
+			state.mark = comment.getCommentPos();
+			state.leftSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
+			state.rightSide = new DepotAndRevision(depot, newCommitId.name());
+			state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+			setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, state));
+		} else {
+			RevisionComparePage.State state = new RevisionComparePage.State();
+			state.leftSide = new DepotAndRevision(depot, oldCommitId.name());
+			state.rightSide = new DepotAndRevision(depot, newCommitId.name());
+			state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+			setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, state));
+		}
+	}
+	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getDepot(), getState());
 		CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
@@ -627,6 +733,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		state.mark = mark;
 		state.mode = mode;
 		state.commentId = commentId;
+		state.requestId = requestId;
 		return state;
 	}
 	
@@ -646,12 +753,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		mark = state.mark;
 		mode = state.mode;
 		commentId = state.commentId;
+		requestId = state.requestId;
 		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 	}
 	
 	private void onSelect(AjaxRequestTarget target, String revision) {
 		State state = getState();
 		state.blobIdent.revision = revision;
+		state.requestId = null;
 		state.commentId = null;
 		state.mode = null;
 		state.mark = null;
@@ -744,6 +853,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			params.set(PARAM_PATH, state.blobIdent.path);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
+		if (state.requestId != null)
+			params.set(PARAM_REQUEST, state.requestId);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mode != null)
@@ -824,6 +935,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	public String getMarkUrl(TextRange mark) {
 		State state = getState();
 		state.blobIdent.revision = resolvedRevision.name();
+		state.requestId = null;
 		state.commentId = null;
 		state.mark = mark;
 		PageParameters params = paramsOf(getDepot(), state);		
@@ -928,7 +1040,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	@Override
 	public boolean isOnBranch() {
-		return getDepot().getRefs(Constants.R_HEADS).containsKey(blobIdent.revision);
+		return getDepot().getBranchRef(blobIdent.revision) != null;
 	}
 
 	@Override
@@ -956,9 +1068,11 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		List<WebSocketRegion> regions = new ArrayList<>();
+		regions.add(new CommitIndexedRegion(getDepot().getId(), commitId));
 		if (commentId != null)
 			regions.add(new CodeCommentChangedRegion(commentId));
-		regions.add(new CommitIndexedRegion(getDepot().getId(), commitId));
+		if (requestId != null)
+			regions.add(new PullRequestChangedRegion(requestId));
 		return regions;
 	}
 
@@ -966,6 +1080,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		private static final long serialVersionUID = 1L;
 
+		public Long requestId;
+		
 		public Long commentId;
 		
 		public BlobIdent blobIdent = new BlobIdent();

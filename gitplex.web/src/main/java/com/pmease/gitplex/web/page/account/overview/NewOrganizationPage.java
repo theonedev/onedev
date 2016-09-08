@@ -52,7 +52,7 @@ public class NewOrganizationPage extends AccountLayoutPage {
 				
 				Account organization = membership.getOrganization();
 				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = accountManager.find(organization.getName());
+				Account accountWithSameName = accountManager.findByName(organization.getName());
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");

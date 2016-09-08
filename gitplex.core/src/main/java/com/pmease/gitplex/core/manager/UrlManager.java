@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager;
 
+import javax.annotation.Nullable;
+
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -13,6 +15,6 @@ public interface UrlManager {
 	
 	String urlFor(PullRequest request);
 	
-	String urlFor(CodeComment comment);
+	String urlFor(CodeComment comment, @Nullable PullRequest request);
 
 }

@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.event.pullrequest;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.PullRequestComment;
+import com.pmease.gitplex.core.event.MarkdownAware;
 
 @Editable(name="commented")
 public class PullRequestCommented extends PullRequestChangeEvent implements MarkdownAware {

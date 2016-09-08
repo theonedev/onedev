@@ -49,6 +49,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
@@ -58,7 +59,6 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -118,7 +118,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 					throw new EntityNotFoundException("Unable to find request #" + requestNumber + " in repository " + getDepot());
 				return request;
 			}
-			
+
 		};
 
 	}
@@ -282,8 +282,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		
-		add(new BackToTop("backToTop"));
-		
 		add(new WebSocketRenderBehavior() {
 			
 			@Override
@@ -292,10 +290,9 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 
 			@Override
-			public void detach(Component component) {
-				if (isOnConnect() && SecurityUtils.getAccount() != null) 
+			protected void onEndInitialRequest(RequestCycle cycle) {
+				if (SecurityUtils.getAccount() != null) 
 					GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), getPullRequest());
-				super.detach(component);
 			}
 
 		});
@@ -369,7 +366,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget()));
 		if (request.getSourceDepot() != null) {
-			statusAndBranchesContainer.add(new BranchLink("source", request.getSource()));
+			statusAndBranchesContainer.add(new BranchLink("source", request.getSource(), request));
 		} else {
 			statusAndBranchesContainer.add(new Label("source", "unknown") {
 

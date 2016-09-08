@@ -318,7 +318,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 			}
 
 			@Override
-			public boolean hasError(boolean recursive) {
+			public boolean hasErrors(boolean recursive) {
 				for (FeedbackMessage message: getFeedbackMessages()) {
 					if (message.getMessage().toString().startsWith(messagePrefix)) {
 						return true;
@@ -327,7 +327,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 				
 				if (recursive) {
 					for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
-						if (propertyEditor.hasError(true))
+						if (propertyEditor.hasErrors(true))
 							return true;
 					}
 				} 

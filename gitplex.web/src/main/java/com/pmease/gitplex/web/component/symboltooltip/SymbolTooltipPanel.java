@@ -180,7 +180,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				revision = params.getParameterValue("revision").toString();
 				symbol = params.getParameterValue("symbol").toString();
 				if (symbol.startsWith("@"))
