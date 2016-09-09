@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +19,6 @@ import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -30,14 +27,10 @@ import com.pmease.commons.wicket.page.CommonPage;
 @Singleton
 public class DefaultWebSocketManager implements WebSocketManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultWebSocketManager.class);
-	
 	private final Application application;
 	
 	private final Dao dao;
 	
-	private final ExecutorService executorService;
-
 	private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 	
 	private final WebSocketPolicy webSocketPolicy;
@@ -47,11 +40,9 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	private final IWebSocketConnectionRegistry connectionRegistry = new SimpleWebSocketConnectionRegistry();
 
 	@Inject
-	public DefaultWebSocketManager(Application application, Dao dao,
-			ExecutorService executorService, WebSocketPolicy webSocketPolicy) {
+	public DefaultWebSocketManager(Application application, Dao dao, WebSocketPolicy webSocketPolicy) {
 		this.application = application;
 		this.dao = dao;
-		this.executorService = executorService;
 		this.webSocketPolicy = webSocketPolicy;
 	}
 	
@@ -70,43 +61,33 @@ public class DefaultWebSocketManager implements WebSocketManager {
 
 	@Sessional
 	@Override
-	public void renderAsync(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
+	public void render(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
 		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-			dao.doAsyncAfterCommit(new Runnable() {
+			dao.doAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-					render(region, sourcePageKey);
+					doRender(region, sourcePageKey);
 				}
 				
 			});
 		} else {
-			executorService.execute(new Runnable() {
-	
-				@Override
-				public void run() {
-					render(region, sourcePageKey);
-				}
-				
-			});
+			doRender(region, sourcePageKey);
 		}
 	}
 	
-	@Override
-	public void render(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
-		try {
-			for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
-				synchronized (connection) {
-					PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
-					if (connection.isOpen() 
-							&& (sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
-							&& containsRegion(connection, region)) {
-						connection.sendMessage(RENDER_CALLBACK);
-					}
+	private void doRender(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
+		for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
+			PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
+			if (connection.isOpen() 
+					&& (sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
+					&& containsRegion(connection, region)) {
+				try {
+					connection.sendMessage(RENDER_CALLBACK);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
 			}
-		} catch (Exception e) {
-			logger.error("Error sending websocket message", e);
 		}
 	}
 	
@@ -130,13 +111,11 @@ public class DefaultWebSocketManager implements WebSocketManager {
 			@Override
 			public void run() {
 				for (IWebSocketConnection connection: new SimpleWebSocketConnectionRegistry().getConnections(application)) {
-					synchronized (connection) {
-						if (connection.isOpen()) {
-							try {
-								connection.sendMessage(WebSocketManager.KEEP_ALIVE);
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
+					if (connection.isOpen()) {
+						try {
+							connection.sendMessage(WebSocketManager.KEEP_ALIVE);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
 						}
 					}
 				}

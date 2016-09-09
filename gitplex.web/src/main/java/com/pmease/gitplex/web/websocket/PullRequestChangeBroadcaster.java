@@ -24,7 +24,7 @@ public class PullRequestChangeBroadcaster {
 		PullRequestChangedRegion region = new PullRequestChangedRegion(event.getRequest().getId());
 		PageKey sourcePageKey = WicketUtils.getPageKey();
 			
-		webSocketManager.renderAsync(region, sourcePageKey);
+		webSocketManager.render(region, sourcePageKey);
 	}
 
 }

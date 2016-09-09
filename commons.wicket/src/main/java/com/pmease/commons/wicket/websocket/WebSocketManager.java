@@ -20,8 +20,6 @@ public interface WebSocketManager {
 	
 	void render(WebSocketRegion region, @Nullable PageKey sourcePageKey);
 	
-	void renderAsync(WebSocketRegion region, @Nullable PageKey sourcePageKey);
-	
 	void start();
 	
 	void stop();

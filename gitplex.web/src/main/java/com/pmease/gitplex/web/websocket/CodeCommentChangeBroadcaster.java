@@ -23,7 +23,7 @@ public class CodeCommentChangeBroadcaster {
 	public void on(CodeCommentEvent event) {
 		CodeCommentChangedRegion region = new CodeCommentChangedRegion(event.getComment().getId());
 		PageKey sourcePageKey = WicketUtils.getPageKey();
-		webSocketManager.renderAsync(region, sourcePageKey);
+		webSocketManager.render(region, sourcePageKey);
 	}
 		
 }

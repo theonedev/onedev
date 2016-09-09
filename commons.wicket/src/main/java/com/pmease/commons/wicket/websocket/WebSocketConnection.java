@@ -73,7 +73,7 @@ public class WebSocketConnection extends AbstractWebSocketConnection
 	{
 		checkClosed();
 
-		session.getRemote().sendString(message);
+		session.getRemote().sendStringByFuture(message);
 		return this;
 	}
 
@@ -84,7 +84,7 @@ public class WebSocketConnection extends AbstractWebSocketConnection
 		checkClosed();
 
 		ByteBuffer buf = ByteBuffer.wrap(message, offset, length);
-		session.getRemote().sendBytes(buf);
+		session.getRemote().sendBytesByFuture(buf);
 		return this;
 	}
 
