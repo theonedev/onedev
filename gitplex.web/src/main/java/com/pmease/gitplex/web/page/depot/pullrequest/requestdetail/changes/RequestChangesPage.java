@@ -72,6 +72,8 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	
 	private static final String PARAM_MARK = "mark";
 	
+	private static final String PARAM_ANCHOR = "anchor";
+	
 	private State state = new State();
 	
 	private WebMarkupContainer head;
@@ -103,6 +105,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = CommentPos.of(params.get(PARAM_MARK).toString());
+		state.anchor = params.get(PARAM_ANCHOR).toString();
 	}
 	
 	private int getCommitIndex(String commitHash) {
@@ -334,7 +337,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		return paramsOf(request, state);
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, CodeComment comment) {
+	public static PageParameters paramsOf(PullRequest request, CodeComment comment, @Nullable String anchor) {
 		PullRequest.ComparingInfo comparingInfo = null;
 		for (int i=comment.getActivities().size()-1; i>=0; i--) {
 			CodeCommentActivity activity = comment.getActivities().get(i);
@@ -352,6 +355,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		state.newCommit = comparingInfo.getNewCommit();
 		state.pathFilter = comparingInfo.getPathFilter();
 		state.whitespaceOption = comparingInfo.getWhitespaceOption();
+		state.anchor = anchor;
 		return paramsOf(request, state);
 	}
 	
@@ -372,6 +376,8 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
+		if (state.anchor != null)
+			params.set(PARAM_ANCHOR, state.anchor);
 		return params;
 	}
 	
@@ -476,6 +482,11 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 
 	@Override
+	public String getAnchor() {
+		return state.anchor;
+	}
+
+	@Override
 	public String getMarkUrl(CommentPos mark) {
 		State markState = new State();
 		markState.mark = mark;
@@ -562,6 +573,9 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		
 		@Nullable
 		public CommentPos mark;
+		
+		@Nullable
+		public String anchor;
 		
 	}
 

@@ -64,6 +64,8 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange.Type;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.support.CloseInfo;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
@@ -72,22 +74,11 @@ import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.event.depot.DepotDeleted;
 import com.pmease.gitplex.core.event.pullrequest.IntegrationPreviewCalculated;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestAssigned;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestDiscarded;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestIntegrated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingApproval;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingIntegration;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingUpdate;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestReopened;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewDeleted;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationDeleted;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationFailed;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationSucceeded;
-import com.pmease.gitplex.core.event.pullrequest.SourceBranchDeleted;
-import com.pmease.gitplex.core.event.pullrequest.SourceBranchRestored;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
@@ -97,6 +88,7 @@ import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
+import com.pmease.gitplex.core.manager.PullRequestStatusChangeManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.support.BatchWorker;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -127,6 +119,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final BatchWorkManager batchWorkManager;
 	
+	private final PullRequestStatusChangeManager pullRequestStatusChangeManager;
+	
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@Inject
@@ -134,7 +128,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
 			PullRequestNotificationManager notificationManager, MarkdownManager markdownManager, 
 			BatchWorkManager batchWorkManager, ListenerRegistry listenerRegistry,
-			UnitOfWork unitOfWork) {
+			UnitOfWork unitOfWork, PullRequestStatusChangeManager pullRequestStatusChangeManager) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -143,6 +137,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
 		this.listenerRegistry = listenerRegistry;
+		this.pullRequestStatusChangeManager = pullRequestStatusChangeManager;
 	}
 	
 	@Transactional
@@ -173,9 +168,16 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				Throwables.propagate(e);
 			}
 			request.getSourceDepot().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
-			SourceBranchRestored event = new SourceBranchRestored(request, accountManager.getCurrent(), note); 
-			listenerRegistry.post(event);
-			request.setLastEvent(event);
+			
+			PullRequestStatusChange statusChange = new PullRequestStatusChange();
+			statusChange.setDate(new Date());
+			statusChange.setNote(note);
+			statusChange.setRequest(request);
+			statusChange.setType(Type.SOURCE_BRANCH_RESTORED);
+			statusChange.setUser(accountManager.getCurrent());
+			pullRequestStatusChangeManager.save(statusChange);
+			
+			request.setLastEvent(statusChange);
 			save(request);
 		}
 	}
@@ -187,9 +189,16 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		if (request.getSource().getObjectName(false) != null) {
 			request.getSource().delete();
-			SourceBranchDeleted event = new SourceBranchDeleted(request, accountManager.getCurrent(), note); 
-			listenerRegistry.post(event);
-			request.setLastEvent(event);
+			
+			PullRequestStatusChange statusChange = new PullRequestStatusChange();
+			statusChange.setDate(new Date());
+			statusChange.setNote(note);
+			statusChange.setRequest(request);
+			statusChange.setType(Type.SOURCE_BRANCH_DELETED);
+			statusChange.setUser(accountManager.getCurrent());
+			pullRequestStatusChangeManager.save(statusChange);
+			
+			request.setLastEvent(statusChange);
 			save(request);
 		}
 	}
@@ -199,9 +208,16 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void reopen(PullRequest request, String note) {
 		Account user = accountManager.getCurrent();
 		request.setCloseInfo(null);
-		PullRequestReopened event = new PullRequestReopened(request, user, note);
-		listenerRegistry.post(event);
-		request.setLastEvent(event);
+
+		PullRequestStatusChange statusChange = new PullRequestStatusChange();
+		statusChange.setDate(new Date());
+		statusChange.setNote(note);
+		statusChange.setRequest(request);
+		statusChange.setType(Type.REOPENED);
+		statusChange.setUser(user);
+		pullRequestStatusChangeManager.save(statusChange);
+
+		request.setLastEvent(statusChange);
 		save(request);
 		checkAsync(request);
 	}
@@ -210,16 +226,23 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
  	public void discard(PullRequest request, String note) {
 		Account user = accountManager.getCurrent();
+		Date date = new Date();
 		
 		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setCloseDate(new Date());
+		closeInfo.setCloseDate(date);
 		closeInfo.setClosedBy(user);
 		closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
 		
-		PullRequestDiscarded event = new PullRequestDiscarded(request, user, note);
-		listenerRegistry.post(event);
-		request.setLastEvent(event);
+		PullRequestStatusChange statusChange = new PullRequestStatusChange();
+		statusChange.setDate(date);
+		statusChange.setNote(note);
+		statusChange.setRequest(request);
+		statusChange.setType(Type.DISCARDED);
+		statusChange.setUser(user);
+		pullRequestStatusChangeManager.save(statusChange);
+
+		request.setLastEvent(statusChange);
 		save(request);
 	}
 	
@@ -382,7 +405,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		GitUtils.updateRef(refUpdate);
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
-			pullRequestUpdateManager.save(update);
+			pullRequestUpdateManager.save(update, false);
 		}
 		
 		for (PullRequestReviewInvitation invitation: request.getReviewInvitations())
@@ -413,30 +436,45 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void changeAssignee(PullRequest request) {
 		if (request.isOpen()) {
 			String note = request.getAssignee().getDisplayName() + " is expected to integrate the pull request";
-			PullRequestAssigned event = new PullRequestAssigned(request, accountManager.getCurrent(), note); 
-			listenerRegistry.post(event);
-			request.setLastEvent(event);
+
+			PullRequestStatusChange statusChange = new PullRequestStatusChange();
+			statusChange.setDate(new Date());
+			statusChange.setNote(note);
+			statusChange.setRequest(request);
+			statusChange.setType(Type.ASSIGNED);
+			statusChange.setUser(accountManager.getCurrent());
+			pullRequestStatusChangeManager.save(statusChange);
+
+			request.setLastEvent(statusChange);
 		}
 		save(request);
 	}
 
 	private void closeAsIntegrated(PullRequest request, boolean dueToMerged, String note) {
 		Account user = accountManager.getCurrent();
+		Date date = new Date();
 		
 		if (dueToMerged)
 			request.setLastIntegrationPreview(null);
 		
 		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setCloseDate(new Date());
+		closeInfo.setCloseDate(date);
 		closeInfo.setClosedBy(user);
 		closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
 		request.setCloseInfo(closeInfo);
 		
 		if (dueToMerged)
 			note = "Source branch is already merged to target branch by some one";
-		PullRequestIntegrated event = new PullRequestIntegrated(request, user, note);
-		listenerRegistry.post(event);
-		request.setLastEvent(event);
+		
+		PullRequestStatusChange statusChange = new PullRequestStatusChange();
+		statusChange.setDate(date);
+		statusChange.setNote(note);
+		statusChange.setRequest(request);
+		statusChange.setType(Type.INTEGRATED);
+		statusChange.setUser(user);
+		pullRequestStatusChangeManager.save(statusChange);
+		request.setLastEvent(statusChange);
+		
 		save(request);
 	}
 
@@ -697,41 +735,17 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 
 	@Listen
-	public void on(PullRequestVerificationSucceeded event) {
-		checkAsync(event.getRequest());
-	}
-
-	@Listen
-	public void on(PullRequestVerificationFailed event) {
-		checkAsync(event.getRequest());
+	public void on(PullRequestStatusChangeEvent event) {
+		Type type =  event.getStatusChange().getType();
+		if (type == Type.APPROVED || type == Type.DISAPPROVED || type == Type.REVIEW_DELETED
+				|| type == Type.VERIFICATION_DELETED || type == Type.VERIFICATION_SUCCEEDED
+				|| type == Type.VERIFICATION_FAILED) {
+			checkAsync(event.getRequest());
+		}
 	}
 	
 	@Listen
 	public void on(IntegrationPreviewCalculated event) {
-		checkAsync(event.getRequest());
-	}
-	
-	@Transactional
-	@Listen
-	public void on(PullRequestApproved event) {
-		checkAsync(event.getRequest());
-	}
-	
-	@Transactional
-	@Listen
-	public void on(PullRequestDisapproved event) {
-		checkAsync(event.getRequest());
-	}
-	
-	@Transactional
-	@Listen
-	public void on(PullRequestVerificationDeleted event) {
-		checkAsync(event.getRequest());
-	}
-
-	@Transactional
-	@Listen
-	public void on(PullRequestReviewDeleted event) {
 		checkAsync(event.getRequest());
 	}
 	

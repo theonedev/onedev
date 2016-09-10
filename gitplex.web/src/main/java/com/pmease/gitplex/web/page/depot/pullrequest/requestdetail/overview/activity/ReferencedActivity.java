@@ -39,4 +39,9 @@ public class ReferencedActivity implements PullRequestActivity {
 		return getReference().getDate();
 	}
 
+	@Override
+	public String getAnchor() {
+		return null;
+	}
+
 }

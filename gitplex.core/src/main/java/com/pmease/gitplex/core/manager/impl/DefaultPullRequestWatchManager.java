@@ -23,20 +23,17 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.BranchWatch;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange.Type;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.event.MarkdownAware;
 import com.pmease.gitplex.core.event.pullrequest.IntegrationPreviewCalculated;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestAssigned;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewInvitationChanged;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestUpdated;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationFailed;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationRunning;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationSucceeded;
-import com.pmease.gitplex.core.event.pullrequest.SourceBranchDeleted;
-import com.pmease.gitplex.core.event.pullrequest.SourceBranchRestored;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.MailManager;
@@ -77,9 +74,19 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 	@Transactional
 	@Listen
 	public void on(PullRequestChangeEvent event) {
-		if (event instanceof IntegrationPreviewCalculated || event instanceof SourceBranchDeleted 
-				|| event instanceof SourceBranchRestored || event instanceof PullRequestVerificationRunning) {
+		if (event instanceof IntegrationPreviewCalculated || event instanceof PullRequestVerificationRunning) {
 			return;
+		}
+		String eventType;
+		Type statusChangeType = null;
+		if (event instanceof PullRequestStatusChangeEvent) {
+			statusChangeType = ((PullRequestStatusChangeEvent) event).getStatusChange().getType();
+			eventType = statusChangeType.getName();
+			if (statusChangeType == Type.SOURCE_BRANCH_DELETED || statusChangeType == Type.SOURCE_BRANCH_RESTORED) {
+				return;
+			}
+		} else {
+			eventType = EditableUtils.getName(event.getClass());
 		}
 		
 		PullRequest request = event.getRequest();
@@ -89,9 +96,9 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 		 * verification is often performed automatically by robots (such as CI system), and it does not make
 		 * sense to make them watching the pull request
 		 */
-		if (user != null && !(event instanceof PullRequestVerificationSucceeded) && !(event instanceof PullRequestVerificationFailed)) {
+		if (user != null && statusChangeType != Type.VERIFICATION_SUCCEEDED && statusChangeType != Type.VERIFICATION_FAILED) {
 			watch(request, user, 
-					"You've set to watch this pull request as you've " + EditableUtils.getName(event.getClass()));
+					"You've set to watch this pull request as you've " + eventType);
 		}
 		if (event instanceof PullRequestOpened) {
 			if (request.getAssignee() != null)
@@ -101,7 +108,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 						"You are set to watch this pull request as you are watching the target branch.");
 			}
 			makeContributorsWatching(request.getLatestUpdate());
-		} else if (event instanceof PullRequestAssigned) {
+		} else if (statusChangeType == Type.ASSIGNED) {
 			watch(request, request.getAssignee(), "You are set to watch this pull request as you are assigned to integrate it.");
 		} else if (event instanceof PullRequestUpdated) {
 			PullRequestUpdated updated = (PullRequestUpdated) event;
@@ -129,7 +136,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 				} else {
 					Date visitDate = visitInfoManager.getVisitDate(watch.getUser(), request);
 					if (visitDate == null || visitDate.getTime()<request.getLastEvent().getDate().getTime()) {
-						if (request.getLastEvent().getType() != event.getClass()) { 
+						if (!request.getLastEvent().getType().equals(eventType)) { 
 							watchUsers.add(watch.getUser());
 						} 
 					} else {
@@ -143,7 +150,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 		// them here
 		watchUsers.removeAll(mentionUsers);
 
-		if ((event instanceof PullRequestOpened || event instanceof PullRequestAssigned) 
+		if ((event instanceof PullRequestOpened || statusChangeType == Type.ASSIGNED) 
 				&& request.getAssignee() != null
 				&& !request.getAssignee().equals(event.getUser())) {
 			watchUsers.remove(request.getAssignee());
@@ -171,14 +178,14 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 						request.getNumber(), request.getTitle(), url, url);
 			} else {
 				subject = String.format("New activity in pull request #%d (%s) - %s", 
-						request.getNumber(), request.getTitle(), EditableUtils.getName(event.getClass())); 
+						request.getNumber(), request.getTitle(), eventType); 
 				body = String.format("Dear Users,"
 						+ "<p style='margin: 16px 0;'>There is new activity in pull request #%d (%s) - %s "
 						+ "<p style='margin: 16px 0;'>Visit <a href='%s'>%s</a> for details."
 						+ "<p style='margin: 16px 0;'>-- Sent by GitPlex"
 						+ "<p style='margin: 16px 0; font-size: 12px; color: #888;'>"
 						+ "You receive this email as you are watching the pull request.",
-						request.getNumber(), request.getTitle(), EditableUtils.getName(event.getClass()), url, url);
+						request.getNumber(), request.getTitle(), eventType, url, url);
 			}
 			mailManager.sendMailAsync(watchUsers, subject, body);
 		}

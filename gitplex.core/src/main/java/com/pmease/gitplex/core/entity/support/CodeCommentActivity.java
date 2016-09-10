@@ -81,6 +81,10 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 		return new ComparingInfo(getComment().getCommentPos().getCommit(), getCompareContext());
 	}
 
+	public String getAnchor() {
+		return getClass().getSimpleName() + "-" + getId();
+	}
+	
 	public abstract String getNote();
 	
 }

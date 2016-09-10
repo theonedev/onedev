@@ -139,24 +139,3 @@
 	margin: 12px;
 }
 
-.request-commit-selector {
-	margin-bottom: 0;
-}
-.request-commit-selector a {
-	text-decoration: none;
-	display: block;
-	color: #333;
-	padding: 4px 8px;
-	white-space: nowrap;
-	font-family: monospace;
-}
-.request-commit-selector a:hover {
-	background: #F2F2F2;
-}
-.request-commit-selector a.commented {
-	background: white;
-	cursor: default;
-}
-.request-commit-selector a .hash, .request-commit-selector .icon {
-	color: #666;
-}

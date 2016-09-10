@@ -38,7 +38,7 @@ class ReviewResultTooltip extends GenericPanel<PullRequestReview> {
 		
 		add(new Label("description", description));
 		
-		add(new Link<Void>("delete") {
+		add(new Link<Void>("withdraw") {
 
 			@Override
 			protected void onConfigure() {

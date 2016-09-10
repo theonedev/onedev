@@ -754,4 +754,9 @@ public class NewRequestPage extends PullRequestPage implements CommentSupport {
 		this.mark = mark;
 	}
 
+	@Override
+	public String getAnchor() {
+		return null;
+	}
+
 }

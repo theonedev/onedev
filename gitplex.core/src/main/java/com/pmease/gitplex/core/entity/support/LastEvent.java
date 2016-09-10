@@ -20,17 +20,17 @@ public class LastEvent implements Serializable {
 	@JoinColumn(name="LAST_EVENT_USER")
 	private Account user;
 
-	@Column(name="LAST_EVENT_DESC")
-	private Class<?> type;
+	@Column(name="LAST_EVENT_TYPE")
+	private String type;
 
 	@Column(name="LAST_EVENT_DATE")
 	private Date date;
 
-	public Class<?> getType() {
+	public String getType() {
 		return type;
 	}
 
-	public void setType(Class<?> type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 

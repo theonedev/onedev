@@ -307,6 +307,7 @@ public abstract class CodeCommentPanel extends Panel {
 		ActivityIdentity identity = new ActivityIdentity(activity);
 		Fragment activityContainer = new Fragment(componentId, "viewFrag", this, Model.of(identity));
 		activityContainer.setOutputMarkupId(true);
+		activityContainer.setMarkupId(activity.getAnchor());
 		
 		activityContainer.add(new AvatarLink("userAvatar", activity.getUser()));
 		activityContainer.add(new AccountLink("userName", activity.getUser()));

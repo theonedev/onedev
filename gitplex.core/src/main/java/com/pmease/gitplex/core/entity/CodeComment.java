@@ -24,6 +24,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
 import com.pmease.gitplex.core.entity.support.CommentPos;
@@ -216,7 +217,7 @@ public class CodeComment extends AbstractEntity {
 	public void setLastEvent(CodeCommentEvent event) {
 		LastEvent lastEvent = new LastEvent();
 		lastEvent.setDate(event.getDate());
-		lastEvent.setType(event.getClass());
+		lastEvent.setType(EditableUtils.getName(event.getClass()));
 		lastEvent.setUser(event.getUser());
 		setLastEvent(lastEvent);
 	}

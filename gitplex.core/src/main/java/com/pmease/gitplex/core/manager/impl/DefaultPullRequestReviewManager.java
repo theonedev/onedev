@@ -15,18 +15,16 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReview;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange.Type;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewDeleted;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewManager;
+import com.pmease.gitplex.core.manager.PullRequestStatusChangeManager;
 
 @Singleton
 public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullRequestReview> implements PullRequestReviewManager {
@@ -35,16 +33,16 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 
 	private final PullRequestManager pullRequestManager;
 	
-	private final ListenerRegistry listenerRegistry;
+	private final PullRequestStatusChangeManager pullRequestStatusChangeManager;
 	
 	@Inject
 	public DefaultPullRequestReviewManager(Dao dao, AccountManager accountManager, PullRequestManager pullRequestManager, 
-			ListenerRegistry listenerRegistry) {
+			PullRequestStatusChangeManager pullRequestStatusChangeManager) {
 		super(dao);
 		
 		this.accountManager = accountManager;
 		this.pullRequestManager = pullRequestManager;
-		this.listenerRegistry = listenerRegistry;
+		this.pullRequestStatusChangeManager = pullRequestStatusChangeManager;
 	}
 
 	@Sessional
@@ -58,21 +56,29 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 	@Transactional
 	@Override
 	public void review(PullRequest request, PullRequestReview.Result result, String note) {
+		Account user = accountManager.getCurrent();
+		Date date = new Date();
+		
 		PullRequestReview review = new PullRequestReview();
 		review.setUpdate(request.getLatestUpdate());
 		review.setResult(result);
-		review.setUser(accountManager.getCurrent());
-		review.setDate(new Date());
+		review.setUser(user);
+		review.setDate(date);
 		save(review);	
-		
-		PullRequestChangeEvent event;
+
+		PullRequestStatusChange statusChange = new PullRequestStatusChange();
+		statusChange.setDate(date);
+		statusChange.setNote(note);
+		statusChange.setRequest(request);
 		if (result == PullRequestReview.Result.APPROVE) {
-			event = new PullRequestApproved(review, note);
+			statusChange.setType(Type.APPROVED);
 		} else {
-			event = new PullRequestDisapproved(review, note);
+			statusChange.setType(Type.DISAPPROVED);
 		}
-		listenerRegistry.post(event);
-		request.setLastEvent(event);
+		statusChange.setUser(user);
+		pullRequestStatusChangeManager.save(statusChange);
+		
+		request.setLastEvent(statusChange);
 		pullRequestManager.save(request);
 	}
 
@@ -80,10 +86,18 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 	@Override
 	public void delete(PullRequestReview entity) {
 		super.delete(entity);
-		PullRequestReviewDeleted event = new PullRequestReviewDeleted(entity, accountManager.getCurrent(), null); 
-		listenerRegistry.post(event);
-		event.getRequest().setLastEvent(event);
-		pullRequestManager.save(event.getRequest());
+		
+		PullRequest request = entity.getUpdate().getRequest();
+		
+		PullRequestStatusChange statusChange = new PullRequestStatusChange();
+		statusChange.setDate(new Date());
+		statusChange.setRequest(request);
+		statusChange.setType(Type.REVIEW_DELETED);
+		statusChange.setUser(accountManager.getCurrent());
+		pullRequestStatusChangeManager.save(statusChange);
+		
+		request.setLastEvent(statusChange);
+		pullRequestManager.save(request);
 	}
 
 	@Sessional

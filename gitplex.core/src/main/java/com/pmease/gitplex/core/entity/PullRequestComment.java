@@ -82,4 +82,8 @@ public class PullRequestComment extends AbstractEntity {
 		return request.getTargetDepot();
 	}
 
+	public String getAnchor() {
+		return getClass().getSimpleName() + "-" + getId();
+	}
+	
 }

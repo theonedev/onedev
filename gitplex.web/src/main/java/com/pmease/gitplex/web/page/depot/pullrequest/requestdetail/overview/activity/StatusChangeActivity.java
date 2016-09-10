@@ -39,5 +39,10 @@ public class StatusChangeActivity implements PullRequestActivity {
 	public Date getDate() {
 		return getStatusChange().getDate();
 	}
-	
+
+	@Override
+	public String getAnchor() {
+		return getStatusChange().getAnchor();
+	}
+
 }

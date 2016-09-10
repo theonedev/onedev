@@ -3,10 +3,9 @@ package com.pmease.gitplex.core.manager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.loader.Listen;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.PullRequestStatusChange;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.manager.PullRequestStatusChangeManager;
@@ -15,21 +14,18 @@ import com.pmease.gitplex.core.manager.PullRequestStatusChangeManager;
 public class DefaultPullRequestStatusChangeManager extends AbstractEntityManager<PullRequestStatusChange> 
 		implements PullRequestStatusChangeManager {
 
+	private final ListenerRegistry listenerRegistry;
+	
 	@Inject
-	public DefaultPullRequestStatusChangeManager(Dao dao) {
+	public DefaultPullRequestStatusChangeManager(Dao dao, ListenerRegistry listenerRegistry) {
 		super(dao);
+		this.listenerRegistry = listenerRegistry;
 	}
 
-	@Transactional
-	@Listen
-	public void on(PullRequestStatusChangeEvent event) {
-		PullRequestStatusChange statusChange = new PullRequestStatusChange();
-		statusChange.setRequest(event.getRequest());
-		statusChange.setDate(event.getDate());
-		statusChange.setEventType(event.getClass());
-		statusChange.setUser(event.getUser());
-		statusChange.setNote(event.getNote());
-		save(statusChange);
+	@Override
+	public void save(PullRequestStatusChange statusChange) {
+		dao.persist(statusChange);
+		listenerRegistry.post(new PullRequestStatusChangeEvent(statusChange));
 	}
-
+	
 }

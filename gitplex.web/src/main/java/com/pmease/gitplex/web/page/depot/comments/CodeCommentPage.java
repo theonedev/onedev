@@ -19,16 +19,20 @@ public class CodeCommentPage extends DepotPage {
 	private static final String PARAM_COMMENT = "comment";
 	
 	private static final String PARAM_REQUEST = "request";
+	
+	private static final String PARAM_ANCHOR = "anchor";
 
 	public CodeCommentPage(PageParameters params) {
 		super(params);
 
 		Long requestId = params.get(PARAM_REQUEST).toOptionalLong();
 		Long commentId = params.get(PARAM_COMMENT).toLong();
+		String anchor = params.get(PARAM_ANCHOR).toString();
+		
 		CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(commentId);
 		for (CodeCommentRelation relation: comment.getRelations()) {
 			if (relation.getRequest().getId().equals(requestId)) {
-				params = RequestChangesPage.paramsOf(relation.getRequest(), comment);
+				params = RequestChangesPage.paramsOf(relation.getRequest(), comment, anchor);
 				throw new RestartResponseException(RequestChangesPage.class, params);
 			}
 		} 
@@ -36,11 +40,11 @@ public class CodeCommentPage extends DepotPage {
 		if (!compareContext.getCompareCommit().equals(comment.getCommentPos().getCommit())) {
 			throw new RestartResponseException(
 					RevisionComparePage.class, 
-					RevisionComparePage.paramsOf(getDepot(), comment));
+					RevisionComparePage.paramsOf(getDepot(), comment, anchor));
 		} else {
 			throw new RestartResponseException(
 					DepotFilePage.class, 
-					DepotFilePage.paramsOf(getDepot(), comment));
+					DepotFilePage.paramsOf(getDepot(), comment, anchor));
 		}
 	}
 

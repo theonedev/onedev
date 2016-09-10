@@ -13,7 +13,6 @@ import javax.persistence.Version;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 
 @Entity
 @DynamicUpdate
@@ -21,6 +20,40 @@ public class PullRequestStatusChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public enum Type {
+		APPROVED("approved", "fa fa-thumbs-o-up"),
+		DISAPPROVED("disapproved", "fa fa-thumbs-o-down"),
+		ASSIGNED("assigned", "fa fa-user"),
+		DISCARDED("discarded", "fa fa-ban"),
+		INTEGRATED("integrated", "fa fa-check"),
+		REOPENED("reopened", "fa fa-repeat"),
+		REVIEW_DELETED("deleted review", "fa fa-times"),
+		VERIFICATION_DELETED("deleted verification", "fa fa-times"),
+		VERIFICATION_FAILED("completed verification (failed)", "fa fa-thumbs-o-down"),
+		VERIFICATION_SUCCEEDED("completed verification (successful)", "fa fa-thumbs-o-up"),
+		SOURCE_BRANCH_DELETED("deleted source branch", "fa fa-times"),
+		SOURCE_BRANCH_RESTORED("restored source branch", "fa fa-repeat"),
+		;
+
+		private final String name;
+		
+		private final String iconClass;
+		
+		Type(String name, String iconClass) {
+			this.name = name;
+			this.iconClass = iconClass;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public String getIconClass() {
+			return iconClass;
+		}
+		
+	}
+	
 	@Version
 	private long version;
 	
@@ -29,7 +62,7 @@ public class PullRequestStatusChange extends AbstractEntity {
 	private PullRequest request;
 	
 	@Column(nullable=false)
-	private Class<? extends PullRequestStatusChangeEvent> eventType;
+	private Type type;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -48,12 +81,12 @@ public class PullRequestStatusChange extends AbstractEntity {
 		this.request = request;
 	}
 
-	public Class<? extends PullRequestStatusChangeEvent> getEventType() {
-		return eventType;
+	public Type getType() {
+		return type;
 	}
 
-	public void setEventType(Class<? extends PullRequestStatusChangeEvent> eventType) {
-		this.eventType = eventType;
+	public void setType(Type type) {
+		this.type = type;
 	}
 
 	public String getNote() {
@@ -85,8 +118,8 @@ public class PullRequestStatusChange extends AbstractEntity {
 		return version;
 	}
 
-	public void setVersion(long version) {
-		this.version = version;
+	public String getAnchor() {
+		return getClass().getSimpleName() + "-" + getId();
 	}
 	
 }

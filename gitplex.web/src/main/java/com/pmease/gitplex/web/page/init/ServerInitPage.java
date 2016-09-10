@@ -52,7 +52,7 @@ public class ServerInitPage extends BasePage {
 					WebSession.get().logout();
 					Account root = GitPlex.getInstance(AccountManager.class).getRoot();
 					SecurityUtils.getSubject().runAs(root.getPrincipals());
-					setResponsePage(WelcomePage.class);
+					throw new RestartResponseException(WelcomePage.class);
 				}
 				
 			});

@@ -20,18 +20,15 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.Listen;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestReview;
-import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.entity.PullRequestNotification;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestAssigned;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestDiscarded;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestIntegrated;
+import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange.Type;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingApproval;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingIntegration;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingUpdate;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewInvitationChanged;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestUpdated;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
@@ -70,36 +67,6 @@ public class DefaultPullRequestNotificationManager extends AbstractEntityManager
 		query.executeUpdate();
 	}
 
-	@Transactional
-	@Listen
-	public void on(PullRequestAssigned event) {
-		PullRequest request = event.getRequest();
-		Preconditions.checkNotNull(request.getAssignee());
-		
-		if (request.getStatus() == PENDING_INTEGRATE) {  
-			Query query = getSession().createQuery("delete from PullRequestNotification "
-					+ "where request=:request and task=:task and user!=:user");
-			query.setParameter("request", request);
-			query.setParameter("task", INTEGRATE);
-			query.setParameter("user", request.getAssignee());
-			query.executeUpdate();
-			
-			requestIntegration(request);
-		}
-	}
-
-	@Transactional
-	@Listen
-	public void on(PullRequestIntegrated event) {
-		onClosed(event.getRequest());
-	}
-
-	@Transactional
-	@Listen
-	public void on(PullRequestDiscarded event) {
-		onClosed(event.getRequest());
-	}
-	
 	private void onClosed(PullRequest request) {
 		Query query = getSession().createQuery("delete from PullRequestNotification "
 				+ "where request=:request");
@@ -229,21 +196,35 @@ public class DefaultPullRequestNotificationManager extends AbstractEntityManager
 
 	@Transactional
 	@Listen
-	public void on(PullRequestApproved event) {
-		onReviewed(event.getReview());
-	}
-
-	@Transactional
-	@Listen
-	public void on(PullRequestDisapproved event) {
-		onReviewed(event.getReview());
+	public void on(PullRequestStatusChangeEvent event) {
+		PullRequestStatusChange statusChange = event.getStatusChange();
+		Type type = statusChange.getType();
+		if (type == Type.APPROVED ||  type == Type.DISAPPROVED) {
+			onReviewed(statusChange);
+		} else if (type == Type.ASSIGNED) {
+			PullRequest request = event.getRequest();
+			Preconditions.checkNotNull(request.getAssignee());
+			
+			if (request.getStatus() == PENDING_INTEGRATE) {  
+				Query query = getSession().createQuery("delete from PullRequestNotification "
+						+ "where request=:request and task=:task and user!=:user");
+				query.setParameter("request", request);
+				query.setParameter("task", INTEGRATE);
+				query.setParameter("user", request.getAssignee());
+				query.executeUpdate();
+				
+				requestIntegration(request);
+			}
+		} else if (type == Type.INTEGRATED || type == Type.DISCARDED) {
+			onClosed(event.getRequest());
+		}
 	}
 	
-	private void onReviewed(PullRequestReview review) {
+	private void onReviewed(PullRequestStatusChange statusChange) {
 		Query query = getSession().createQuery("delete from PullRequestNotification "
 				+ "where request=:request and user=:user and task=:task");
-		query.setParameter("request", review.getUpdate().getRequest());
-		query.setParameter("user", review.getUser());
+		query.setParameter("request", statusChange.getRequest());
+		query.setParameter("user", statusChange.getUser());
 		query.setParameter("task", REVIEW);
 		query.executeUpdate();
 	}

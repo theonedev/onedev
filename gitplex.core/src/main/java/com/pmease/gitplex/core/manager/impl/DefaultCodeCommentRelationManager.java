@@ -152,7 +152,9 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 			if (request != null && request.getRequestComparingInfo(comment.getComparingInfo()) != null) {
 				PullRequestCodeCommented pullRequestCodeCommented = new PullRequestCodeCommented(request, comment); 
 				listenerRegistry.post(pullRequestCodeCommented);
+				
 				request.setLastEvent(pullRequestCodeCommented);
+				
 				pullRequestManager.save(request);
 				
 				visitInfoManager.visit(comment.getUser(), request);

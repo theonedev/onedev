@@ -1,6 +1,6 @@
 gitplex.sourceview = {
 	init: function(fileContent, filePath, openComment, mark, symbolTooltipId, 
-			revision, blameInfos, comments, markCallback, viewState, loggedIn) {
+			revision, blameInfos, comments, markCallback, viewState, loggedIn, anchor) {
 		var cm;
 		
 		var $sourceView = $(".source-view");
@@ -164,6 +164,14 @@ gitplex.sourceview = {
 				repositionCommentPopovers(cm);
 			}
 		});
+		if (anchor) {
+			var $anchor = $("#"+anchor);
+			if ($anchor.length != 0) {
+				setTimeout(function() {
+					$anchor.closest(".code-comment").parent().scrollIntoView($anchor);
+				}, 10);
+			}
+		} 
 	},
 	initComment: function() {
 		var $sourceView = $(".source-view");

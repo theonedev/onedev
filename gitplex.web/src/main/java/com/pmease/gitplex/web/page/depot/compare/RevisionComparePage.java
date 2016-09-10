@@ -90,6 +90,8 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	
 	private static final String PARAM_MARK = "mark";
 	
+	private static final String PARAM_ANCHOR = "anchor";
+	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
 	private static final String PARAM_BLAME_FILE = "blame-file";
@@ -112,10 +114,11 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	
 	private Tabbable tabbable;
 	
-	public static PageParameters paramsOf(Depot depot, CodeComment comment) {
+	public static PageParameters paramsOf(Depot depot, CodeComment comment, @Nullable String anchor) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.commentId = comment.getId();
 		state.mark = comment.getCommentPos();
+		state.anchor = anchor;
 		state.compareWithMergeBase = false;
 		CompareContext compareContext = comment.getLastCompareContext();
 		if (compareContext.isLeftSide()) {
@@ -146,12 +149,14 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
+		if (state.anchor != null)
+			params.set(PARAM_ANCHOR, state.anchor);
 		if (state.tabPanel != null)
 			params.set(PARAM_TAB, state.tabPanel.name());
 		return params;
 	}
 
-	public RevisionComparePage(final PageParameters params) {
+	public RevisionComparePage(PageParameters params) {
 		super(params);
 		
 		if (getDepot().getDefaultBranch() == null) 
@@ -192,6 +197,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = CommentPos.of(params.get(PARAM_MARK).toString());
+		state.anchor = params.get(PARAM_ANCHOR).toString();
 		
 		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
 		
@@ -637,6 +643,9 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		@Nullable
 		public CommentPos mark;
 		
+		@Nullable
+		public String anchor;
+		
 		public State() {
 		}
 		
@@ -649,6 +658,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			blameFile = state.blameFile;
 			commentId = state.commentId;
 			mark = state.mark;
+			anchor = state.anchor;
 			tabPanel = state.tabPanel;
 		}
 		
@@ -657,6 +667,11 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	@Override
 	public CommentPos getMark() {
 		return state.mark;
+	}
+	
+	@Override
+	public String getAnchor() {
+		return state.anchor;
 	}
 
 	@Override
@@ -729,5 +744,5 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			regions.add(new CodeCommentChangedRegion(state.commentId));
 		return regions;
 	}
-	
+
 }

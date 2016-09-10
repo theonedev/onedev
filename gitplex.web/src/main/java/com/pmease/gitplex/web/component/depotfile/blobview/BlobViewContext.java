@@ -29,6 +29,9 @@ public interface BlobViewContext extends Serializable {
 	@Nullable
 	TextRange getMark();
 	
+	@Nullable
+	String getAnchor();
+	
 	void onMark(AjaxRequestTarget target, TextRange mark);
 	
 	String getMarkUrl(TextRange mark);

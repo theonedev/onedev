@@ -19,9 +19,11 @@ import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.ListenerRegistry;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestUpdated;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -81,7 +83,11 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 		if (independent) {
 			PullRequestUpdated event = new PullRequestUpdated(update);
 			listenerRegistry.post(event);
-			request.setLastEvent(event);
+			
+			LastEvent lastEvent = new LastEvent();
+			lastEvent.setDate(event.getDate());
+			lastEvent.setType(EditableUtils.getName(event.getClass()));
+			request.setLastEvent(lastEvent);
 			pullRequestManager.save(request);
 		}
 	}

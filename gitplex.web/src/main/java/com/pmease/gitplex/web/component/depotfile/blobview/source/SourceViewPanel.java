@@ -78,7 +78,6 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.core.entity.support.CompareContext;
-import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -86,13 +85,12 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
+import com.pmease.gitplex.web.component.comment.comparecontext.CompareContextPanel;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
-import com.pmease.gitplex.web.component.revisionpicker.RevisionSelector;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
-import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -312,30 +310,22 @@ public class SourceViewPanel extends BlobViewPanel {
 
 			@Override
 			protected Component newContent(String id) {
-				return new RevisionSelector(id, new AbstractReadOnlyModel<Depot>() {
+				CompareContext compareContext = context.getOpenComment().getCompareContext();
+				return new CompareContextPanel(id, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
-					public Depot getObject() {
-						return context.getDepot();
+					public PullRequest getObject() {
+						return context.getPullRequest();
 					}
 					
-				}) {
-					
+				}, new AbstractReadOnlyModel<CodeComment>() {
+
 					@Override
-					protected void onSelect(AjaxRequestTarget target, String revision) {
-						RevisionComparePage.State state = new RevisionComparePage.State();
-						CodeComment comment = context.getOpenComment();
-						state.commentId = comment.getId();
-						state.mark = comment.getCommentPos();
-						state.compareWithMergeBase = false;
-						state.leftSide = new DepotAndRevision(context.getDepot(), comment.getCommentPos().getCommit());
-						state.rightSide = new DepotAndRevision(context.getDepot(), revision);
-						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-						PageParameters params = RevisionComparePage.paramsOf(context.getDepot(), state);
-						setResponsePage(RevisionComparePage.class, params);
+					public CodeComment getObject() {
+						return context.getOpenComment();
 					}
 					
-				};
+				}, Model.of(compareContext.getPathFilter()), Model.of(compareContext.getWhitespaceOption()));
 			}
 			
 		});
@@ -923,7 +913,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				explicit("param3"), explicit("param4"));
 		String viewState = RequestCycle.get().getMetaData(DepotFilePage.VIEW_STATE_KEY);
 		String script = String.format("gitplex.sourceview.init('%s', '%s', %s, %s, '%s', '%s', "
-				+ "%s, %s, %s, %s, %s);", 
+				+ "%s, %s, %s, %s, %s, %s);", 
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				context.getOpenComment()!=null?getJsonOfComment(context.getOpenComment()):"undefined",
@@ -934,7 +924,8 @@ public class SourceViewPanel extends BlobViewPanel {
 				jsonOfCommentInfos,
 				callback, 
 				viewState!=null?"JSON.parse('"+viewState+"')":"undefined", 
-				SecurityUtils.getAccount()!=null);
+				SecurityUtils.getAccount()!=null, 
+				context.getAnchor()!=null?"'"+context.getAnchor()+"'":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

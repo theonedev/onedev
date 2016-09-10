@@ -13,6 +13,8 @@ public interface CommentSupport extends Serializable {
 	
 	@Nullable CommentPos getMark();
 	
+	@Nullable String getAnchor();
+	
 	void onMark(AjaxRequestTarget target, CommentPos mark);
 	
 	String getMarkUrl(CommentPos mark);

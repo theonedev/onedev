@@ -115,7 +115,7 @@ public class WebModule extends AbstractPluginModule {
 			
 		});
 
-		bind(UrlManager.class).to(WebUrlManager.class);
+		bind(UrlManager.class).to(WicketUrlManager.class);
 		bind(CodeCommentChangeBroadcaster.class);
 		bind(PullRequestChangeBroadcaster.class);
 	}

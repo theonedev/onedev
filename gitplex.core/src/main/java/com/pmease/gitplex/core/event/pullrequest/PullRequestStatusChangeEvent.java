@@ -1,30 +1,24 @@
 package com.pmease.gitplex.core.event.pullrequest;
 
-import java.util.Date;
-
-import javax.annotation.Nullable;
-
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
 import com.pmease.gitplex.core.event.MarkdownAware;
 
-public abstract class PullRequestStatusChangeEvent extends PullRequestChangeEvent implements MarkdownAware {
+public class PullRequestStatusChangeEvent extends PullRequestChangeEvent implements MarkdownAware {
 
-	private final String note;
+	private final PullRequestStatusChange statusChange;
 	
-	public PullRequestStatusChangeEvent(PullRequest request, Account user, Date date, @Nullable String note) {
-		super(request, user, date);
-		this.note = note;
+	public PullRequestStatusChangeEvent(PullRequestStatusChange statusChange) {
+		super(statusChange.getRequest(), statusChange.getUser(), statusChange.getDate());
+		this.statusChange = statusChange;
 	}
 
-	@Nullable
-	public String getNote() {
-		return note;
+	public PullRequestStatusChange getStatusChange() {
+		return statusChange;
 	}
 
 	@Override
 	public String getMarkdown() {
-		return getNote();
+		return statusChange.getNote();
 	}
 
 }

@@ -40,4 +40,9 @@ public class OpenedActivity implements PullRequestActivity {
 		return getRequest().getSubmitDate();
 	}
 
+	@Override
+	public String getAnchor() {
+		return null;
+	}
+
 }

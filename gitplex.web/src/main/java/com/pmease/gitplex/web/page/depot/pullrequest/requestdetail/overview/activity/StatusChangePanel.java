@@ -22,7 +22,6 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.markdown.MarkdownEditSupport;
 import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
-import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -178,18 +177,18 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 		PullRequestStatusChange statusChange = getModelObject();
 		
 		WebMarkupContainer container = new WebMarkupContainer("statusChange");
-		String activityName = EditableUtils.getName(statusChange.getEventType());
+		String activityName = statusChange.getType().getName();
 		container.add(AttributeAppender.append("class", "activity " + activityName.replace(" ", "-").toLowerCase()));
 		
 		WebMarkupContainer icon = new WebMarkupContainer("icon");
 		container.add(icon);
-		String iconClass = EditableUtils.getIcon(statusChange.getEventType());
+		String iconClass = statusChange.getType().getIconClass();
 		if (iconClass != null)
 			icon.add(AttributeAppender.append("class", iconClass));
 		
 		container.add(new AvatarLink("userAvatar", statusChange.getUser(), null));
 		container.add(new AccountLink("userName", statusChange.getUser()));
-		container.add(new Label("eventName", EditableUtils.getName(statusChange.getEventType())));
+		container.add(new Label("eventName", statusChange.getType().getName()));
 		container.add(new Label("eventDate", DateUtils.formatAge(statusChange.getDate())));
 		container.add(new SinceChangesLink("changes", new LoadableDetachableModel<PullRequest>() {
 

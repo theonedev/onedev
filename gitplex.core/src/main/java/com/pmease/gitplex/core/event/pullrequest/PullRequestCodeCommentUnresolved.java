@@ -6,12 +6,12 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.event.MarkdownAware;
 
 @Editable(name="Unresolved code comment")
-public class PullRequestCodeCommentUnresolved extends PullRequestChangeEvent implements MarkdownAware {
+public class PullRequestCodeCommentUnresolved extends PullRequestCodeCommentEvent implements MarkdownAware {
 
 	private final CodeCommentStatusChange statusChange;
 	
 	public PullRequestCodeCommentUnresolved(PullRequest request, CodeCommentStatusChange statusChange) {
-		super(request, statusChange.getUser(), statusChange.getDate());
+		super(request, statusChange.getUser(), statusChange.getDate(), statusChange.getComment());
 		this.statusChange = statusChange;
 	}
 

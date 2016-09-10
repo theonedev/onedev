@@ -1,5 +1,5 @@
 gitplex.revisionDiff = {
-	init: function() {
+	init: function(anchor) {
 		var cookieName = "revisionDiff.showDiffStats";
 		var $body = $(".revision-diff>.body");
 		var $diffStats = $body.children(".diff-stats");
@@ -17,6 +17,18 @@ gitplex.revisionDiff = {
 			gitplex.revisionDiff.reposition();
 		});
 		gitplex.revisionDiff.reposition();
+		if (anchor) {
+			var $anchor = $("#"+anchor);
+			if ($anchor.length != 0) {
+				setTimeout(function() {
+					var detailOffset = $(".revision-diff>.body>.detail").offset().top;
+					if ($(window).scrollTop() <= detailOffset) {
+						$(window).scrollTop(detailOffset);
+					} 
+					$anchor.closest(".code-comment").parent().scrollIntoView($anchor);
+				}, 10);
+			}
+		} 
 	},
 	reposition: function(e) {
 		if ($(".revision-diff>.body>.detail").length == 0)

@@ -7,7 +7,9 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.ListenerRegistry;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.entity.PullRequestComment;
+import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -43,7 +45,12 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 		if (notifyListeners && isNew) {
 			PullRequestCommented event = new PullRequestCommented(comment);
 			listenerRegistry.post(event);
-			comment.getRequest().setLastEvent(event);
+			
+			LastEvent lastEvent = new LastEvent();
+			lastEvent.setDate(event.getDate());
+			lastEvent.setType(EditableUtils.getName(event.getClass()));
+			lastEvent.setUser(event.getUser());
+			comment.getRequest().setLastEvent(lastEvent);
 			pullRequestManager.save(event.getRequest());
 		}
 	}

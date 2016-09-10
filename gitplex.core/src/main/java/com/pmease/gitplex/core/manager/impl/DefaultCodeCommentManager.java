@@ -2,7 +2,6 @@ package com.pmease.gitplex.core.manager.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -27,12 +26,11 @@ import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.CodeCommentStatusChange;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.support.LastEvent;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentEvent;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentReplied;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentResolved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentUnresolved;
@@ -157,11 +155,12 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 					new PullRequestCodeCommentReplied(request, reply);
 			listenerRegistry.post(pullRequestCodeCommentReplied);
 			request.setLastEvent(pullRequestCodeCommentReplied);
+			
 			pullRequestManager.save(request);
 		}
 		
 	}
-
+	
 	@Transactional
 	@Listen
 	public void on(CodeCommentResolved event) {
@@ -171,6 +170,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 					new PullRequestCodeCommentResolved(request, event.getStatusChange());
 			listenerRegistry.post(pullRequestCodeCommentResolved);
 			request.setLastEvent(pullRequestCodeCommentResolved);
+			
 			pullRequestManager.save(request);
 		}
 	}
@@ -178,20 +178,13 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Transactional
 	@Listen
 	public void on(CodeCommentUnresolved event) {
-		CodeComment comment = event.getComment();
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(new Date());
-		lastEvent.setType(event.getClass());
-		lastEvent.setUser(event.getUser());
-		comment.setLastEvent(lastEvent);
-		save(comment);
-		
 		for (CodeCommentRelation relation: event.getComment().getRelations()) {
 			PullRequest request = relation.getRequest();
 			PullRequestCodeCommentUnresolved pullRequestCodeCommentUnresolved =
 					new PullRequestCodeCommentUnresolved(request, event.getStatusChange());
 			listenerRegistry.post(pullRequestCodeCommentUnresolved);
 			request.setLastEvent(pullRequestCodeCommentUnresolved);
+			
 			pullRequestManager.save(request);
 		}
 	}

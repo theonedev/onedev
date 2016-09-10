@@ -27,6 +27,9 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.event.MarkdownAware;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentEvent;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
@@ -159,11 +162,17 @@ public class DefaultMailManager implements MailManager {
 				|| event instanceof PullRequestStatusChangeEvent) {
 			String markdown = ((MarkdownAware) event).getMarkdown();
 			if (markdown != null) {
+				String url;
+				if (event instanceof PullRequestCommented)
+					url = urlManager.urlFor(((PullRequestCommented)event).getComment());
+				else if (event instanceof PullRequestStatusChangeEvent) 
+					url = urlManager.urlFor(((PullRequestStatusChangeEvent)event).getStatusChange());
+				else 
+					url = urlManager.urlFor(event.getRequest());
 				for (Account user: new MentionParser().parseMentions(markdownManager.parse(markdown))) {
 					PullRequest request = event.getRequest();
 					String subject = String.format("You are mentioned in pull request #%d (%s)", 
 							request.getNumber(), request.getTitle());
-					String url = urlManager.urlFor(request);
 					String body = String.format("%s."
 							+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
 							+ "<p style='margin: 16px 0;'>"
@@ -181,9 +190,18 @@ public class DefaultMailManager implements MailManager {
 		if (event.getMarkdown() != null) {
 			for (Account user: new MentionParser().parseMentions(markdownManager.parse(event.getMarkdown()))) {
 				CodeComment comment = event.getComment();
-				String subject = String.format("You are mentioned in code comment #%d (%s)", 
-						comment.getId(), comment.getTitle());
-				String url = urlManager.urlFor(comment, event.getRequest());
+				String subject = String.format("You are mentioned in a code comment (%s)", 
+						comment.getTitle());
+				String url;
+				if (event instanceof CodeCommentResolved)
+					url = urlManager.urlFor(((CodeCommentResolved)event).getStatusChange(), event.getRequest());
+				else if (event instanceof CodeCommentUnresolved)
+					url = urlManager.urlFor(((CodeCommentUnresolved)event).getStatusChange(), event.getRequest());
+				else if (event instanceof CodeCommentReplied) 
+					url = urlManager.urlFor(((CodeCommentReplied)event).getReply(), event.getRequest());
+				else
+					url = urlManager.urlFor(comment, event.getRequest());
+					
 				String body = String.format("%s."
 						+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
 						+ "<p style='margin: 16px 0;'>"

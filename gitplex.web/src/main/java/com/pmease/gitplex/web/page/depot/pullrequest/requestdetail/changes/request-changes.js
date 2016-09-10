@@ -10,7 +10,7 @@ gitplex.requestChanges = {
 		function onIndexChanged() {
 			var $apply = $(".commits-selector>.head a"); 
 			if (fromIndexToApply != fromIndex || toIndexToApply != toIndex) {
-				$apply.show().off("click").click(function() {
+				$apply.removeAttr("disabled").off("click").click(function() {
 					var oldCommit;
 					if (fromIndexToApply == 0)
 						oldCommit = baseCommit;
@@ -20,7 +20,7 @@ gitplex.requestChanges = {
 					callback(oldCommit, newCommit);
 				});
 			} else {
-				$apply.hide();
+				$apply.attr("disabled", "disabled");
 			}
 			$commits.removeClass("selected").slice(fromIndexToApply, toIndexToApply+1).addClass("selected");
 		}

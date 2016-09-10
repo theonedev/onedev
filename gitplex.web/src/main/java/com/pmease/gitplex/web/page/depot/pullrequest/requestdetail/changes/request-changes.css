@@ -14,9 +14,6 @@
 	color: #666;
 }
 
-.commits-selector {
-	min-width: 520px;
-}
 .commits-selector>.head {
 	padding: 8px;
 	border-bottom: 1px solid #DDD;
@@ -25,7 +22,6 @@
 }
 .commits-selector>.head>a {
 	margin-left: 8px;
-	display: none;
 }
 .commits-selector ul {
 	margin-bottom: 0;

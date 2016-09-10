@@ -40,4 +40,9 @@ public class CommentedActivity implements PullRequestActivity {
 		return getComment().getDate();
 	}
 
+	@Override
+	public String getAnchor() {
+		return getComment().getAnchor();
+	}
+
 }

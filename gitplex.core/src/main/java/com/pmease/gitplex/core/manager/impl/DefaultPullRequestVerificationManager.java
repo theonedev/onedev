@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.Collection;
+import java.util.Date;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,15 +15,14 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange.Type;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.core.entity.PullRequestVerification.Status;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationDeleted;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationFailed;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationRunning;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestVerificationSucceeded;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.manager.PullRequestStatusChangeManager;
 import com.pmease.gitplex.core.manager.PullRequestVerificationManager;
 
 @Singleton
@@ -31,17 +31,21 @@ public class DefaultPullRequestVerificationManager extends AbstractEntityManager
 
 	private final AccountManager accountManager;
 	
-	private final ListenerRegistry listenerRegistry;
+	private final PullRequestStatusChangeManager pullRequestStatusChangeManager;
 	
 	private final PullRequestManager pullRequestManager;
 	
+	private final ListenerRegistry listenerRegistry;
+	
 	@Inject
 	public DefaultPullRequestVerificationManager(Dao dao, AccountManager accountManager, 
-			ListenerRegistry listenerRegistry, PullRequestManager pullRequestManager) {
+			PullRequestStatusChangeManager pullRequestStatusChangeManager, 
+			PullRequestManager pullRequestManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.accountManager = accountManager;
-		this.listenerRegistry = listenerRegistry;
+		this.pullRequestStatusChangeManager = pullRequestStatusChangeManager;
 		this.pullRequestManager = pullRequestManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	@Transactional
@@ -49,17 +53,26 @@ public class DefaultPullRequestVerificationManager extends AbstractEntityManager
 	public void save(PullRequestVerification entity) {
 		super.save(entity);
 		
-		PullRequestChangeEvent event;
-		if (entity.getStatus() == PullRequestVerification.Status.FAILED)
-			event = new PullRequestVerificationFailed(entity);
-		else if (entity.getStatus() == PullRequestVerification.Status.RUNNING)
-			event = new PullRequestVerificationRunning(entity);
-		else
-			event = new PullRequestVerificationSucceeded(entity);
-		if (entity.getStatus() != PullRequestVerification.Status.RUNNING) {
-			listenerRegistry.post(event);
-			event.getRequest().setLastEvent(event);
-			pullRequestManager.save(event.getRequest());
+		PullRequest request = entity.getRequest();
+		
+		if (entity.getStatus() == PullRequestVerification.Status.RUNNING) {
+			listenerRegistry.post(new PullRequestVerificationRunning(entity));
+		} else {
+			PullRequestStatusChange statusChange = new PullRequestStatusChange();
+			statusChange.setDate(new Date());
+			statusChange.setNote("configuration: " + entity.getConfiguration() + "\n"
+					+ "message: " + entity.getMessage());
+			statusChange.setRequest(request);
+			if (entity.getStatus() == PullRequestVerification.Status.FAILED)
+				statusChange.setType(Type.VERIFICATION_FAILED);
+			else
+				statusChange.setType(Type.VERIFICATION_SUCCEEDED);
+			statusChange.setRequest(request);
+			statusChange.setUser(entity.getUser());
+			pullRequestStatusChangeManager.save(statusChange);
+			
+			request.setLastEvent(statusChange);
+			pullRequestManager.save(request);
 		}
 	}
 
@@ -67,10 +80,19 @@ public class DefaultPullRequestVerificationManager extends AbstractEntityManager
 	@Override
 	public void delete(PullRequestVerification entity) {
 		super.delete(entity);
-		PullRequestVerificationDeleted event = new PullRequestVerificationDeleted(entity, accountManager.getCurrent()); 
-		listenerRegistry.post(event);
-		event.getRequest().setLastEvent(event);
-		pullRequestManager.save(event.getRequest());
+		
+		PullRequest request = entity.getRequest();
+		
+		PullRequestStatusChange statusChange = new PullRequestStatusChange();
+		statusChange.setDate(new Date());
+		statusChange.setNote("configuration: " + entity.getConfiguration());
+		statusChange.setRequest(request);
+		statusChange.setType(Type.VERIFICATION_DELETED);
+		statusChange.setUser(accountManager.getCurrent());
+		pullRequestStatusChangeManager.save(statusChange);
+		
+		request.setLastEvent(statusChange);
+		pullRequestManager.save(request);
 	}
 
 	@Sessional

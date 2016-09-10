@@ -14,7 +14,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -48,7 +47,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -65,7 +63,6 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.Range;
@@ -82,19 +79,16 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.core.entity.support.CompareContext;
-import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
+import com.pmease.gitplex.web.component.comment.comparecontext.CompareContextPanel;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.blob.SourceAware;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
-import com.pmease.gitplex.web.component.revisionpicker.RevisionSelector;
-import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -431,7 +425,10 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("gitplex.revisionDiff.init();"));
+				
+				String anchor = getAnchor();
+				String script = String.format("gitplex.revisionDiff.init(%s);", anchor!=null?"'"+anchor+"'":"undefined");
+				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		};
@@ -713,6 +710,11 @@ public class RevisionDiffPanel extends Panel {
 								return null;
 						}
 	
+						@Override
+						public String getAnchor() {
+							return RevisionDiffPanel.this.getAnchor();
+						}
+						
 						@Override
 						public String getMarkUrl(CommentPos mark) {
 							return commentSupport.getMarkUrl(mark);
@@ -1016,90 +1018,14 @@ public class RevisionDiffPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id) {
-				if (requestModel.getObject() != null) {
-					Fragment fragment = new Fragment(id, "requestCommitSelectorFrag", RevisionDiffPanel.this);
-					IModel<List<RevCommit>> commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
+				return new CompareContextPanel(id, requestModel, new AbstractReadOnlyModel<CodeComment>() {
 
-						@Override
-						protected List<RevCommit> load() {
-							List<RevCommit> commits = new ArrayList<>();
-							PullRequest request = requestModel.getObject();
-							commits.add(request.getBaseCommit());
-							commits.addAll(request.getCommits());
-							return commits;
-						}
-						
-					};
-					fragment.add(new ListView<RevCommit>("commits", commitsModel) {
-
-						@Override
-						protected void populateItem(ListItem<RevCommit> item) {
-							RevCommit commit = item.getModelObject();
-							AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									RequestChangesPage.State state = new RequestChangesPage.State();
-									CodeComment comment = getOpenComment();
-									state.commentId = comment.getId();
-									state.mark = comment.getCommentPos();
-									int index = commitsModel.getObject().stream().map(RevCommit::getName).collect(Collectors.toList())
-											.indexOf(comment.getCommentPos().getCommit());
-									int compareIndex = commitsModel.getObject().indexOf(commit);
-									if (index < compareIndex) {
-										state.oldCommit = comment.getCommentPos().getCommit();
-										state.newCommit = commit.name();
-									} else {
-										state.oldCommit = commit.name();
-										state.newCommit = comment.getCommentPos().getCommit();
-									}
-									state.pathFilter = pathFilterModel.getObject();
-									state.whitespaceOption = whitespaceOptionModel.getObject();
-									PageParameters params = RequestChangesPage.paramsOf(requestModel.getObject(), state);
-									setResponsePage(RequestChangesPage.class, params);
-								}
-								
-							};
-							link.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
-							link.add(new Label("subject", commit.getShortMessage()));
-							if (commit.name().equals(getOpenComment().getCommentPos().getCommit())) {
-								link.setEnabled(false);
-								link.add(AttributeAppender.append("class", "commented"));
-								link.add(new WebMarkupContainer("commented"));
-							} else {
-								link.add(new WebMarkupContainer("commented").setVisible(false));
-							}
-							item.add(link);
-						}
-						
-					});
-					return fragment;
-				} else {
-					return new RevisionSelector(id, new AbstractReadOnlyModel<Depot>() {
-
-						@Override
-						public Depot getObject() {
-							return getOpenComment().getDepot();
-						}
-						
-					}) {
-						
-						@Override
-						protected void onSelect(AjaxRequestTarget target, String revision) {
-							RevisionComparePage.State state = new RevisionComparePage.State();
-							CodeComment comment = getOpenComment();
-							state.commentId = comment.getId();
-							state.mark = comment.getCommentPos();
-							state.compareWithMergeBase = false;
-							state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
-							state.rightSide = new DepotAndRevision(comment.getDepot(), revision);
-							state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-							PageParameters params = RevisionComparePage.paramsOf(comment.getDepot(), state);
-							setResponsePage(RevisionComparePage.class, params);
-						}
-						
-					};
-				}
+					@Override
+					public CodeComment getObject() {
+						return getOpenComment();
+					}
+					
+				}, pathFilterModel, whitespaceOptionModel);
 			}
 			
 		});
@@ -1324,6 +1250,15 @@ public class RevisionDiffPanel extends Panel {
 			}
 		}
 		return null;
+	}
+	
+	@Nullable
+	private String getAnchor() {
+		if (commentSupport != null) {
+			return commentSupport.getAnchor();
+		} else {
+			return null;
+		}
 	}
 	
 	@Nullable

@@ -46,17 +46,14 @@ import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.jackson.ExternalView;
 import com.pmease.commons.lang.diff.WhitespaceOption;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.support.CloseInfo;
 import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.entity.support.LastEvent;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentReplied;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentResolved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentUnresolved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommented;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentEvent;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
@@ -1016,19 +1013,21 @@ public class PullRequest extends AbstractEntity {
 		return merged;
 	}
 	
-	public void setLastEvent(PullRequestChangeEvent event) {
+	public void setLastEvent(PullRequestStatusChange statusChange) {
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(statusChange.getDate());
+		lastEvent.setType(statusChange.getType().getName());
+		lastEvent.setUser(statusChange.getUser());
+		setLastEvent(lastEvent);
+	}
+	
+	public void setLastEvent(PullRequestCodeCommentEvent event) {
 		LastEvent lastEvent = new LastEvent();
 		lastEvent.setDate(event.getDate());
-		lastEvent.setType(event.getClass());
+		lastEvent.setType(EditableUtils.getName(event.getClass()));
 		lastEvent.setUser(event.getUser());
 		setLastEvent(lastEvent);
-		
-		if (event instanceof PullRequestCodeCommented 
-				|| event instanceof PullRequestCodeCommentReplied 
-				|| event instanceof PullRequestCodeCommentResolved
-				|| event instanceof PullRequestCodeCommentUnresolved) {
-			setLastCodeCommentEventDate(event.getDate());
-		}
+		setLastCodeCommentEventDate(event.getDate());
 	}
 	
 	public static class ComparingInfo implements Serializable {

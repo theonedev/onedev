@@ -24,10 +24,10 @@ import com.pmease.commons.loader.Listen;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestStatusChange;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.event.lifecycle.SystemStarting;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestApproved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestDisapproved;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
@@ -245,18 +245,13 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 
 	@Transactional
 	@Listen
-	public void on(PullRequestApproved event) {
-		Account user = event.getReview().getUser();
-		user.setReviewEffort(user.getReviewEffort()+1);
-		save(user);
+	public void on(PullRequestStatusChangeEvent event) {
+		if (event.getStatusChange().getType() == PullRequestStatusChange.Type.APPROVED
+				|| event.getStatusChange().getType() == PullRequestStatusChange.Type.DISAPPROVED) {
+			Account user = event.getStatusChange().getUser();
+			user.setReviewEffort(user.getReviewEffort()+1);
+			save(user);
+		}
 	}
 
-	@Transactional
-	@Listen
-	public void on(PullRequestDisapproved event) {
-		Account user = event.getReview().getUser();
-		user.setReviewEffort(user.getReviewEffort()+1);
-		save(user);
-	}
-	
 }

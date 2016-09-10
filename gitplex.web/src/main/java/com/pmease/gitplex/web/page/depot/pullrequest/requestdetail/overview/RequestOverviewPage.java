@@ -124,8 +124,10 @@ public class RequestOverviewPage extends RequestDetailPage {
 			}
 			
 		};
-
 		row.setOutputMarkupId(true);
+		String anchor = activity.getAnchor();
+		if (anchor != null)
+			row.setMarkupId(anchor);
 		
 		if (row.get("content") == null) 
 			row.add(activity.render("content"));

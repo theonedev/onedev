@@ -34,7 +34,6 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.BeanContext;
-import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -137,13 +136,13 @@ public abstract class CodeCommentListPanel extends Panel {
 				
 				PullRequest request = getPullRequest();
 				if (request != null) {
-					setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, comment));
+					setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, comment, null));
 				} else {
 					CompareContext compareContext = comment.getLastCompareContext();
 					if (!compareContext.getCompareCommit().equals(comment.getCommentPos().getCommit())) {
-						setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, comment));
+						setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, comment, null));
 					} else {
-						setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot, comment));
+						setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot, comment, null));
 					}
 				}				
 			}
@@ -181,7 +180,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (comment.getLastEvent() != null) {
-					String description = EditableUtils.getName(comment.getLastEvent().getType());
+					String description = comment.getLastEvent().getType();
 					lastEventContainer.add(new Label("description", description));
 					if (comment.getLastEvent().getUser() != null)
 						lastEventContainer.add(new AccountLink("user", comment.getLastEvent().getUser()));

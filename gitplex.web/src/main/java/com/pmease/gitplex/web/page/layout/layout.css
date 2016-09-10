@@ -67,6 +67,9 @@ html, body {
 #main>.head>.account>.logged-out a {
 	font-size: 16px;
 }
+#main>.head>.account>.logged-out>a:FIRST-CHILD {
+	margin-right: 16px;
+}
 #main>.head>.account .avatar {
 	width: 32px;
 	height: 32px;

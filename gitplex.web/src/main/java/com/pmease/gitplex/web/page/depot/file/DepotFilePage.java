@@ -127,6 +127,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private static final String PARAM_MARK = "mark";
 	
+	private static final String PARAM_ANCHOR = "anchor";
+	
 	private static final String REVISION_PICKER_ID = "revisionPicker";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
@@ -142,6 +144,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private ObjectId resolvedRevision;
 	
 	private TextRange mark;
+	
+	private String anchor;
 	
 	private Mode mode;
 	
@@ -197,6 +201,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		if (modeStr != null)
 			mode = Mode.valueOf(modeStr.toUpperCase());
 		mark = TextRange.of(params.get(PARAM_MARK).toString());
+		anchor = params.get(PARAM_ANCHOR).toString();
 		
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		
@@ -732,6 +737,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		state.blobIdent = new BlobIdent(blobIdent);
 		state.mark = mark;
 		state.mode = mode;
+		state.anchor = anchor;
 		state.commentId = commentId;
 		state.requestId = requestId;
 		return state;
@@ -751,6 +757,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			blobIdent = new BlobIdent(state.blobIdent);
 		}
 		mark = state.mark;
+		anchor = state.anchor;
 		mode = state.mode;
 		commentId = state.commentId;
 		requestId = state.requestId;
@@ -835,13 +842,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		response.render(JavaScriptHeaderItem.forReference(new DepotFileResourceReference()));
 	}
 
-	public static PageParameters paramsOf(Depot depot, CodeComment comment) {
+	public static PageParameters paramsOf(Depot depot, CodeComment comment, @Nullable String anchor) {
 		DepotFilePage.State state = new DepotFilePage.State();
 		state.blobIdent.revision = comment.getCommentPos().getCommit();
 		state.blobIdent.path = comment.getCommentPos().getPath();
 		state.blobIdent.mode = FileMode.TYPE_FILE;
 		state.commentId = comment.getId();
 		state.mark = comment.getCommentPos().getRange();
+		state.anchor = anchor;
 		return paramsOf(depot, state);
 	}
 	
@@ -853,6 +861,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			params.set(PARAM_PATH, state.blobIdent.path);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
+		if (state.anchor != null)
+			params.set(PARAM_ANCHOR, state.anchor);
 		if (state.requestId != null)
 			params.set(PARAM_REQUEST, state.requestId);
 		if (state.commentId != null)
@@ -925,6 +935,11 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		return mark;
 	}
 
+	@Override
+	public String getAnchor() {
+		return anchor;
+	}
+	
 	@Override
 	public void onMark(AjaxRequestTarget target, TextRange mark) {
 		this.mark = mark;
@@ -1087,6 +1102,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		public BlobIdent blobIdent = new BlobIdent();
 		
 		public TextRange mark;
+		
+		public String anchor;
 		
 		public Mode mode;
 		

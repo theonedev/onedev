@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="requestFrag">
+	<ul class="compare-context list-unstyled">
+		<li wicket:id="commits">
+			<a wicket:id="link">
+				<span class="fa fa-ext fa-commit icon"></span> 
+				<span wicket:id="hash" class="hash"></span>
+				<span wicket:id="subject" class="subject"></span>
+				<span wicket:id="commented" class="fa fa-commenting" title="Comment is associated with this commit "></span>
+			</a>
+		</li>
+	</ul>
+	</wicket:fragment>
+</wicket:panel>

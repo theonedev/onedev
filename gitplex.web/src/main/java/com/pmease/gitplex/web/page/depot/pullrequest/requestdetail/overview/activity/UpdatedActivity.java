@@ -40,4 +40,9 @@ public class UpdatedActivity implements PullRequestActivity {
 		return getUpdate().getDate();
 	}
 
+	@Override
+	public String getAnchor() {
+		return null;
+	}
+
 }
