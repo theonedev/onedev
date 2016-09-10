@@ -31,7 +31,7 @@ $(window).load(function() {
 			// we should simply call $head.width() here, but the value is incorrect after maximize and restore
 			// window in IE and Chrome (maybe due to use of table in sidebar?), so we go with the complicate 
 			// approach of calculating the head width
-			var headWidth = $("#repository").width() - $("#repository>.sidebar>table>tbody>tr>td.nav").outerWidth();
+			var headWidth = $("#depot").width() - $("#depot>.sidebar>table>tbody>tr>td.nav").outerWidth();
 			
 			// below code moves file navigator to bottom if it is too wide
 			var maxWidth = headWidth - $revisionPicker.outerWidth() - 80;

@@ -38,7 +38,7 @@ import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.admin.account.AccountListPage;
 import com.pmease.gitplex.web.page.base.BasePage;
-import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
@@ -277,7 +277,7 @@ public abstract class LayoutPage extends BasePage {
 	}
 	
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
-		setResponsePage(DepotOverviewPage.class, DepotOverviewPage.paramsOf(depot));
+		setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
 	}
 
 	@Override

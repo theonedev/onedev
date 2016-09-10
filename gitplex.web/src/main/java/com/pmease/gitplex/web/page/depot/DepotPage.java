@@ -10,6 +10,7 @@ import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -28,6 +29,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -44,7 +46,7 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
+import com.pmease.gitplex.web.page.depot.moreinfo.MoreInfoPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
@@ -128,7 +130,6 @@ public abstract class DepotPage extends AccountPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new DepotTab(Model.of("Overview"), "fa fa-fw fa-list-alt", 0, DepotOverviewPage.class));
 		tabs.add(new DepotTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, DepotFilePage.class));
 		tabs.add(new DepotTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
 				DepotCommitsPage.class, CommitDetailPage.class));
@@ -159,7 +160,7 @@ public abstract class DepotPage extends AccountPage {
 		if (cookie != null && "yes".equals(cookie.getValue()))
 			sidebar.add(AttributeAppender.append("class", " mini"));
 		
-		sidebar.add(new Tabbable("repoTabs", tabs));
+		sidebar.add(new Tabbable("depotTabs", tabs));
 	}
 
 	@Override
@@ -193,10 +194,25 @@ public abstract class DepotPage extends AccountPage {
 		accountLink.add(new Label("accountName", getAccount().getName()));
 		fragment.add(accountLink);
 		
-		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", 
-				DepotOverviewPage.class, DepotOverviewPage.paramsOf(getDepot()));
-		repoLink.add(new Label("repoName", getDepot().getName()));
-		fragment.add(repoLink);
+		Link<Void> depotLink = new BookmarkablePageLink<>("depotLink", 
+				DepotFilePage.class, DepotFilePage.paramsOf(getDepot()));
+		depotLink.add(new Label("depotName", getDepot().getName()));
+		fragment.add(depotLink);
+		fragment.add(new DropdownLink("depotMoreInfo") {
+
+			@Override
+			protected Component newContent(String id) {
+				return new MoreInfoPanel(id, depotModel) {
+
+					@Override
+					protected void onPromptForkOption(AjaxRequestTarget target) {
+						close();
+					}
+					
+				};
+			}
+			
+		});
 		return fragment;
 	}
 

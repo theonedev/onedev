@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 import com.pmease.gitplex.web.component.accountchoice.AdministrativeAccountChoiceProvider;
-import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
 public class CreateDepotPage extends LayoutPage {
@@ -50,7 +50,7 @@ public class CreateDepotPage extends LayoutPage {
 				} else {
 					depotManager.save(depot, null, null);
 					Session.get().success("New repository created");
-					setResponsePage(DepotOverviewPage.class, DepotOverviewPage.paramsOf(depot));
+					setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
 				}
 			}
 			

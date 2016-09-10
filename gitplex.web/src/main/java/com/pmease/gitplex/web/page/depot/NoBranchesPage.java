@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
 public class NoBranchesPage extends DepotPage {
@@ -17,7 +17,7 @@ public class NoBranchesPage extends DepotPage {
 		super(params);
 		
 		if (getDepot().getDefaultBranch() != null)
-			throw new RestartResponseException(DepotOverviewPage.class, DepotOverviewPage.paramsOf(getDepot()));
+			throw new RestartResponseException(DepotFilePage.class, DepotFilePage.paramsOf(getDepot()));
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class NoBranchesPage extends DepotPage {
 
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
-		setResponsePage(DepotOverviewPage.class, DepotOverviewPage.paramsOf(depot));
+		setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
 	}
 	
 }

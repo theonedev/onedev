@@ -1,11 +1,19 @@
-#repository-head .separator {
-	margin: 0 6px;
+#depot-head .separator {
+	margin: 0 8px;
 }
-#repository-head .open a {
-	background: inherit;
+#depot-head .more-info {
+	background: #444;
+	padding: 0 8px;
+	border-radius: 4px;
+	font-size: 14px;
+	margin-top: 6px;
+	margin-left: 8px;
+}
+#depot-head .more-info:hover {
+	background: #777;
 }
 
-#repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
+#depot>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
 	display: block;
 	margin-top: -20px;
 	text-align: right;
@@ -16,29 +24,29 @@
 	color: #666;
 	height: 31px;
 }
-#repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
+#depot>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
 	color: #333;
 }
-#repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle>span:before {
+#depot>.sidebar>table>tbody>tr>td.nav>.mini-toggle>span:before {
 	font-family: "FontAwesome";
 	content: "\f100";
 }
-#repository>.sidebar>table>tbody>tr>td.mini.nav>.mini-toggle>span:before {
+#depot>.sidebar>table>tbody>tr>td.mini.nav>.mini-toggle>span:before {
 	content: "\f101";
 }
-#repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
+#depot>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
 	background: #EEE;
 }
-#repository>.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
+#depot>.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
 	width: 220px;
 }
-#repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
+#depot>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
 	width: auto;
 }
-#repository>.sidebar>table>tbody>tr>td.mini.nav {
+#depot>.sidebar>table>tbody>tr>td.mini.nav {
 	width: 40px;
 }
-#repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text,
-#repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.badge {
+#depot>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text,
+#depot>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.badge {
 	display: none;
 }

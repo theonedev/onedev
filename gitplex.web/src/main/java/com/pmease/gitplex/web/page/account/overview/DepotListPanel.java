@@ -25,7 +25,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -130,7 +130,7 @@ public class DepotListPanel extends GenericPanel<Account> {
 				Depot depot = item.getModelObject();
 
 				Link<Void> link = new BookmarkablePageLink<>("depotLink", 
-						DepotOverviewPage.class, DepotOverviewPage.paramsOf(depot)); 
+						DepotFilePage.class, DepotFilePage.paramsOf(depot)); 
 				link.add(new Label("depotName", depot.getName()));
 				item.add(link);
 						

@@ -1,6 +1,6 @@
 $(function() {
-	if ($("#repository").length != 0) {
-		var $nav = $("#repository>.sidebar>table>tbody>tr>td.nav");
+	if ($("#depot").length != 0) {
+		var $nav = $("#depot>.sidebar>table>tbody>tr>td.nav");
 		
 		function enableTooltip() {
 			$nav.find("li a").each(function() {

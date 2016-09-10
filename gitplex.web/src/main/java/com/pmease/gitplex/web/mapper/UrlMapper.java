@@ -39,7 +39,6 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
@@ -148,7 +147,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addDepotPages() {
-		add(new NoVersionMountedMapper("${account}/${depot}", DepotOverviewPage.class) {
+		add(new NoVersionMountedMapper("${account}/${depot}", DepotFilePage.class) {
 
 			@Override
 			public IRequestHandler mapRequest(Request request) {
