@@ -28,9 +28,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -283,23 +281,6 @@ public class SourceViewPanel extends BlobViewPanel {
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
-		head.add(new Label("title", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				CodeComment comment = context.getOpenComment();
-				return comment!=null?comment.getTitle():"";
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(context.getOpenComment() != null);
-			}
-			
-		});
 		head.add(new DropdownLink("context") {
 
 			@Override
@@ -508,10 +489,6 @@ public class SourceViewPanel extends BlobViewPanel {
 					
 					String uuid = UUID.randomUUID().toString();
 					
-					TextField<String> titleInput = new TextField<String>("title", Model.of(""));
-					titleInput.setRequired(true);
-					form.add(titleInput);
-					
 					CommentInput contentInput;
 					form.add(contentInput = new CommentInput("content", Model.of("")) {
 
@@ -565,7 +542,6 @@ public class SourceViewPanel extends BlobViewPanel {
 							comment.setCommentPos(new CommentPos());
 							comment.getCommentPos().setCommit(context.getCommit().name());
 							comment.getCommentPos().setPath(context.getBlobIdent().path);
-							comment.setTitle(titleInput.getModelObject());
 							comment.setContent(contentInput.getModelObject());
 							comment.setDepot(context.getDepot());
 							comment.setUser(SecurityUtils.getAccount());
@@ -798,7 +774,6 @@ public class SourceViewPanel extends BlobViewPanel {
 		CommentInfo commentInfo = new CommentInfo();
 		commentInfo.id = comment.getId();
 		commentInfo.mark = comment.getCommentPos().getRange();
-		commentInfo.title = comment.getTitle();
 
 		String jsonOfCommentInfo;
 		try {
@@ -894,7 +869,6 @@ public class SourceViewPanel extends BlobViewPanel {
 				CommentInfo commentInfo = new CommentInfo();
 				commentInfo.id = comment.getId();
 				commentInfo.mark = comment.getCommentPos().getRange();
-				commentInfo.title = comment.getTitle();
 				commentInfosAtLine.add(commentInfo);
 			}
 		}

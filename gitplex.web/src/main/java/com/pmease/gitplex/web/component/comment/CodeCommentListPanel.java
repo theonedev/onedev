@@ -33,6 +33,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
@@ -54,6 +55,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
+	private static final int TITLE_LEN = 100;
+	
 	private final IModel<CodeCommentFilter> filterOptionModel;
 	
 	public CodeCommentListPanel(String id, IModel<CodeCommentFilter> filterOptionModel) {
@@ -160,7 +163,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					}
 					
 				};
-				titleLink.add(new Label("label", comment.getTitle()));
+				titleLink.add(new Label("label", StringUtils.abbreviate(comment.getContent(), TITLE_LEN)));
 				fragment.add(titleLink);
 				fragment.add(new WebMarkupContainer("resolved").setVisible(comment.isResolved()));
 				fragment.add(new AccountLink("user", comment.getUser()));

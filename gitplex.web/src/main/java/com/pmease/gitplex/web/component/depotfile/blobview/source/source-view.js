@@ -260,7 +260,7 @@ gitplex.sourceview = {
 			for (var i in comments) {
 				var comment = comments[i];
 				var index = parseInt(i) + 1;
-				content += "<a class='comment-trigger' title='Click to show details of this comment'>" + comment.title + "</a>";
+				content += "<a class='comment-trigger' title='Click to show details of this comment'>#" + comment.id + "</a>";
 			}
 			$indicator.popover({
 				html: true, 

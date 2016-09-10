@@ -19,7 +19,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -196,9 +195,6 @@ public abstract class CodeCommentPanel extends Panel {
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				
-				TextField<String> titleInput = new TextField<String>("title", Model.of(getComment().getTitle()));
-				titleInput.setRequired(true);
-				form.add(titleInput);
 				CommentInput contentInput = new CommentInput("content", Model.of(getComment().getContent())) {
 
 					@Override
@@ -253,7 +249,6 @@ public abstract class CodeCommentPanel extends Panel {
 							CodeComment comment = getComment();
 							if (comment.getVersion() != lastVersion)
 								throw new StaleStateException("");
-							comment.setTitle(titleInput.getModelObject());
 							comment.setContent(contentInput.getModelObject());
 							GitPlex.getInstance(CodeCommentManager.class).save(comment);
 							WebMarkupContainer commentContainer = newCommentContainer();

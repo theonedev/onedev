@@ -46,7 +46,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 public class CodeComment extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	@Version
 	private long version;
 	
@@ -58,9 +58,6 @@ public class CodeComment extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Account user;
 
-	@Column(nullable=false)
-	private String title;
-	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private String content;
@@ -116,19 +113,10 @@ public class CodeComment extends AbstractEntity {
 		return version;
 	}
 
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	@Nullable
 	public String getContent() {
 		return content;
 	}
-
+	
 	public void setContent(String content) {
 		this.content = content;
 	}

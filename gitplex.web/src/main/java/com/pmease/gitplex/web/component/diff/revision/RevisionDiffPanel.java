@@ -746,9 +746,6 @@ public class RevisionDiffPanel extends Panel {
 							
 							String uuid = UUID.randomUUID().toString();
 							
-							TextField<String> titleInput = new TextField<String>("title", Model.of(""));
-							titleInput.setRequired(true);
-							form.add(titleInput);
 							CommentInput contentInput;
 							form.add(contentInput = new CommentInput("content", Model.of("")) {
 
@@ -804,7 +801,6 @@ public class RevisionDiffPanel extends Panel {
 									comment.setUser(SecurityUtils.getAccount());
 									comment.setCommentPos(commentPos);
 									comment.setCompareContext(getCompareContext(comment.getCommentPos().getCommit()));
-									comment.setTitle(titleInput.getModelObject());
 									comment.setContent(contentInput.getModelObject());
 									Ref branchRef = depot.getBranchRef(newRev);									
 									if (branchRef != null)
@@ -989,24 +985,6 @@ public class RevisionDiffPanel extends Panel {
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
-		
-		head.add(new Label("title", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				CodeComment comment = getOpenComment();
-				return comment!=null?comment.getTitle():"";
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getOpenComment() != null);
-			}
-			
-		});
 		
 		head.add(new DropdownLink("context") {
 

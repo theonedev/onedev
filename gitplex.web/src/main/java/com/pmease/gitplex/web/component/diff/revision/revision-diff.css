@@ -89,6 +89,9 @@
 	position: fixed;
 	z-index: 100;
 }
+.revision-diff>.body>.detail>.comment>.content>.head>a {
+	margin-right: 8px;
+}
 .revision-diff>.body>.detail>.comment>.content>.head .locate {
 	font-size: 20px;
 }

@@ -190,8 +190,7 @@ public class DefaultMailManager implements MailManager {
 		if (event.getMarkdown() != null) {
 			for (Account user: new MentionParser().parseMentions(markdownManager.parse(event.getMarkdown()))) {
 				CodeComment comment = event.getComment();
-				String subject = String.format("You are mentioned in a code comment (%s)", 
-						comment.getTitle());
+				String subject = "You are mentioned in a code comment";
 				String url;
 				if (event instanceof CodeCommentResolved)
 					url = urlManager.urlFor(((CodeCommentResolved)event).getStatusChange(), event.getRequest());

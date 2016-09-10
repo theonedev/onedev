@@ -9,8 +9,8 @@
 	top: 0;
 	left: 0;
 }
-.source-view>.comment>.content>.head .title {
-	margin-bottom: 8px;
+.source-view>.comment>.content>.head>a {
+	margin-right: 8px;
 }
 .source-view>.comment>.content>.head .context {
 	margin-top: -2px;

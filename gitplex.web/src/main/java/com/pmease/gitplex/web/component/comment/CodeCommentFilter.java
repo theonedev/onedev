@@ -29,8 +29,6 @@ public class CodeCommentFilter implements Serializable {
 	
 	private static final String PARAM_PATH = "path";
 	
-	private static final String PARAM_TITLE = "title";
-	
 	private static final String PARAM_BEFORE = "before";
 	
 	private static final String PARAM_AFTER = "after";
@@ -40,8 +38,6 @@ public class CodeCommentFilter implements Serializable {
 	private boolean unresolved;
 	
 	private String path;
-	
-	private String title;
 	
 	private Date before;
 	
@@ -64,15 +60,6 @@ public class CodeCommentFilter implements Serializable {
 
 	public void setUnresolved(boolean unresolved) {
 		this.unresolved = unresolved;
-	}
-
-	@Editable(order=400, name="Title containing", description="Show comments with title containing specified string")
-	public String getContent() {
-		return title;
-	}
-
-	public void setContent(String content) {
-		this.title = content;
 	}
 
 	@Editable(order=500, name="Commented path", description="Show comments on specified path")
@@ -110,7 +97,6 @@ public class CodeCommentFilter implements Serializable {
 		userName = params.get(PARAM_USER).toString();
 		unresolved = "yes".equals(params.get(PARAM_UNRESOLVED).toString());
 		path = params.get(PARAM_PATH).toString();
-		title = params.get(PARAM_TITLE).toString();
 		
 		String value = params.get(PARAM_BEFORE).toString();
 		if (value != null)
@@ -132,8 +118,6 @@ public class CodeCommentFilter implements Serializable {
 				pathQuery += "%";
 			criteria.add(Restrictions.ilike("commentPos.path", pathQuery));
 		}
-		if (title != null)
-			criteria.add(Restrictions.ilike("title", "%" + title + "%"));
 			
 		if (before != null)
 			criteria.add(Restrictions.le("createDate", before));
@@ -168,10 +152,6 @@ public class CodeCommentFilter implements Serializable {
 					}
 				}
 			}
-			if (title != null && !comment.getTitle().contains(title)) {
-				it.remove();
-				continue;
-			}
 			if (before != null && comment.getDate().getTime()>before.getTime()) {
 				it.remove();
 				continue;
@@ -188,8 +168,6 @@ public class CodeCommentFilter implements Serializable {
 			params.add(PARAM_USER, userName);
 		if (unresolved)
 			params.add(PARAM_UNRESOLVED, "yes");
-		if (title != null)
-			params.add(PARAM_TITLE, title);
 		if (path != null)
 			params.add(PARAM_PATH, path);
 		if (before != null)
