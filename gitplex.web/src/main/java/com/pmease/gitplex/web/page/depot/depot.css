@@ -9,7 +9,7 @@
 	margin-top: 6px;
 	margin-left: 8px;
 }
-#depot-head .more-info:hover {
+#depot-head .more-info:hover, #depot-head .more-info.dropdown-open {
 	background: #777;
 }
 

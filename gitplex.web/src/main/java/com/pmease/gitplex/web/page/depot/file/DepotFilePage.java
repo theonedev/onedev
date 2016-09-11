@@ -20,17 +20,14 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
-import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.eclipse.jgit.lib.FileMode;
@@ -49,9 +46,6 @@ import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.loader.ListenerRegistry;
-import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.pmease.commons.wicket.component.menu.MenuItem;
-import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.websocket.WebSocketManager;
 import com.pmease.commons.wicket.websocket.WebSocketRegion;
@@ -92,6 +86,7 @@ import com.pmease.gitplex.web.component.depotfile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
+import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.websocket.CodeCommentChangedRegion;
@@ -132,8 +127,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private static final String REVISION_PICKER_ID = "revisionPicker";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
-
-	private static final String CONTRIBUTION_ID = "contribution";
 
 	private static final String FILE_VIEWER_ID = "fileViewer";
 	
@@ -328,6 +321,19 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			}
 			
 		});
+
+		add(new Link<Void>("history") {
+
+			@Override
+			public void onClick() {
+				DepotCommitsPage.State state = new DepotCommitsPage.State();
+				state.setCompareWith(resolvedRevision.name());
+				if (blobIdent.path != null) 
+					state.setQuery(String.format("path(%s)", blobIdent.path));
+				setResponsePage(DepotCommitsPage.class, DepotCommitsPage.paramsOf(getDepot(), state));				
+			}
+			
+		});
 		
 		add(new ArchiveMenuLink("download", depotModel) {
 
@@ -366,7 +372,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			
 		});
 
-		newContributionPanel(null);
 		newFileViewer(null);
 
 		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
@@ -451,7 +456,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				mode = Mode.EDIT;
 				
 				newFileNavigator(target);
-				newContributionPanel(target);
 				newFileViewer(target);
 				
 				pushState(target);
@@ -464,42 +468,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			target.add(fileNavigator);
 		} else {
 			add(fileNavigator);
-		}
-	}
-	
-	private void newContributionPanel(@Nullable AjaxRequestTarget target) {
-		Component contributionPanel;
-		if (mode != Mode.EDIT) {
-			contributionPanel = new AjaxLazyLoadPanel(CONTRIBUTION_ID) {
-				
-				@Override
-				public Component getLoadingComponent(String markupId) {
-					IRequestHandler handler = new ResourceReferenceRequestHandler(AbstractPostAjaxBehavior.INDICATOR);
-					String html = "<img src='" + RequestCycle.get().urlFor(handler) + "' class='loading'/> Loading latest commit...";
-					return new Label(markupId, html).setEscapeModelStrings(false);
-				}
-	
-				@Override
-				protected void onComponentLoaded(Component component, AjaxRequestTarget target) {
-					super.onComponentLoaded(component, target);
-					resizeWindow(target);
-				}
-	
-				@Override
-				public Component getLazyLoadComponent(String markupId) {
-					return new ContributionPanel(markupId, depotModel, blobIdent);
-				}
-	
-			};
-		} else {
-			contributionPanel = new WebMarkupContainer(CONTRIBUTION_ID).setVisible(false);
-		}
-		contributionPanel.setOutputMarkupPlaceholderTag(true);
-		if (target != null) {
-			replace(contributionPanel);
-			target.add(contributionPanel);
-		} else {
-			add(contributionPanel);
 		}
 	}
 	
@@ -573,7 +541,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				protected void onCancel(AjaxRequestTarget target) {
 					mode = null;
 					newFileNavigator(target);
-					newContributionPanel(target);
 					newFileViewer(target);
 					pushState(target);
 					resizeWindow(target);
@@ -831,7 +798,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		target.add(revisionIndexing);
 		
-		newContributionPanel(target);
 		newFileViewer(target);
 	}
 	
@@ -988,7 +954,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 			
 			newFileNavigator(target);
-			newContributionPanel(target);
 			newFileViewer(target);
 			
 			resizeWindow(target);
@@ -1027,7 +992,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		mode = Mode.EDIT;
 		
 		newFileNavigator(target);
-		newContributionPanel(target);
 		newFileViewer(target);
 		pushState(target);
 		resizeWindow(target);
@@ -1059,6 +1023,12 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
+	public boolean isOnCommentBranch() {
+		CodeComment comment = getOpenComment();
+		return comment != null && comment.getBranchRef() != null && getDepot().getObjectId(comment.getBranchRef(), false) != null;		
+	}
+	
+	@Override
 	public RevCommit getCommit() {
 		return getDepot().getRevCommit(getBlobIdent().revision);
 	}
@@ -1066,18 +1036,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	@Override
 	protected boolean isFootVisible() {
 		return false;
-	}
-
-	@Override
-	public List<MenuItem> getMenuItems(MenuLink menuLink) {
-		if (mode != Mode.EDIT && mode != Mode.DELETE) {
-			Component fileViewer = get(FILE_VIEWER_ID);
-			if (fileViewer instanceof BlobViewPanel) {
-				BlobViewPanel blobViewPanel = (BlobViewPanel) fileViewer;
-				return blobViewPanel.getMenuItems(menuLink);
-			}
-		}
-		return new ArrayList<>();
 	}
 
 	@Override

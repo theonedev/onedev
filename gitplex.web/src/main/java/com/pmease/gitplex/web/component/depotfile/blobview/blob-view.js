@@ -1,11 +1,12 @@
 gitplex.blobView = function(containerId) {
 	var $blobView = $("#" + containerId + ">.blob-view");
-	var $content = $blobView.find(">.content");
+	var $head = $blobView.find(">.head");
+	var $body = $blobView.find(">.body");
 
 	$blobView.on("storeViewState", function(e) {
 		e.stopPropagation();
-		pmease.commons.history.setViewState({scroll:{left: $content.scrollLeft(), top: $content.scrollTop()}});
-		$content.find(".autofit:visible").first().trigger("storeViewState");
+		pmease.commons.history.setViewState({scroll:{left: $body.scrollLeft(), top: $body.scrollTop()}});
+		$body.find(".autofit:visible").first().trigger("storeViewState");
 	});
 	
 	$blobView.on("autofit", function(e, width, height) {
@@ -13,14 +14,15 @@ gitplex.blobView = function(containerId) {
 		$blobView.outerWidth(width);
 		$blobView.outerHeight(height);
 		
-		height = $blobView.height();
-		$content.outerWidth(width).outerHeight(height);
-		$content.find(".autofit:visible").first().trigger("autofit", [$content.width(), $content.height()]);
+		console.log($head.outerHeight());
+		height = $blobView.height()-$head.outerHeight();
+		$body.outerWidth(width).outerHeight(height);
+		$body.find(".autofit:visible").first().trigger("autofit", [$body.width(), $body.height()]);
 
 		var viewState = pmease.commons.history.getViewState();
 		if (viewState && viewState.scroll) {
-		    $content.scrollLeft(viewState.scroll.left);
-		    $content.scrollTop(viewState.scroll.top);
+		    $body.scrollLeft(viewState.scroll.left);
+		    $body.scrollTop(viewState.scroll.top);
 		}
 	});
 };

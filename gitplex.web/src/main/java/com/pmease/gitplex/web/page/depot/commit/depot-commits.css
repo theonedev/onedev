@@ -69,3 +69,6 @@
 	text-align: left;
 	border-bottom: 1px solid #EEE;
 }
+#repo-commits li.commit.compare-base {
+	background: #E8E8E8;
+}

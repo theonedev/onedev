@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff.revision;
+package com.pmease.gitplex.web.component.comment;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 

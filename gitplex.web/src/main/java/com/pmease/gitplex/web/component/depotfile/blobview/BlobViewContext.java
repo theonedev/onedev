@@ -10,8 +10,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.extractors.TokenPosition;
-import com.pmease.commons.wicket.component.menu.MenuItem;
-import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -40,6 +38,8 @@ public interface BlobViewContext extends Serializable {
 
 	boolean isOnBranch();
 	
+	boolean isOnCommentBranch();
+	
 	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos);
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
@@ -61,7 +61,5 @@ public interface BlobViewContext extends Serializable {
 	PullRequest getPullRequest();
 	
 	RevCommit getCommit();
-	
-	List<MenuItem> getMenuItems(MenuLink menuLink);
 	
 }

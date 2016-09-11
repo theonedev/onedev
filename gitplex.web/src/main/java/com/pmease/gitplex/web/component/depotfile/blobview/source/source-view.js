@@ -12,7 +12,7 @@ gitplex.sourceview = {
 		$sourceView.data("markCallback", markCallback);
 		
 		var $code = $sourceView.children(".code");
-		$sourceView.closest(".content").css("overflow", "visible");
+		$sourceView.closest(".scrollable").css("overflow", "visible");
 		
 		function repositionCommentPopovers() {
 			$(".comment-popover:visible").each(function() {
@@ -430,6 +430,7 @@ gitplex.sourceview = {
 	},
 	onToggleOutline: function() {
 		gitplex.sourceview.onLayoutChange();
+		$(".outline-toggle").toggleClass("active");
 	},
 	highlightCommentTrigger: function() {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
@@ -530,6 +531,7 @@ gitplex.sourceview = {
 	onBlame: function(blameInfos) {
 		gitplex.sourceview.blame(blameInfos);
 		gitplex.sourceview.onLayoutChange();
+		$(".blame-toggle").toggleClass("active");
 	},
 	scrollToCommentBottom: function() {
 		var $body = $(".source-view>.comment>.content>.body");

@@ -20,6 +20,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -30,7 +31,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -64,11 +64,8 @@ import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
-import com.pmease.commons.wicket.component.menu.MenuItem;
-import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
@@ -81,6 +78,7 @@ import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
+import com.pmease.gitplex.web.component.comment.CodeCommentToggled;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.comparecontext.CompareContextPanel;
@@ -148,79 +146,54 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 	
 	@Override
-	public List<MenuItem> getMenuItems(MenuLink menuLink) {
-		List<MenuItem> menuItems = new ArrayList<>();
-		menuItems.add(new MenuItem() {
-			
+	public WebMarkupContainer newAdditionalActions(String id) {
+		WebMarkupContainer actions = new Fragment(id, "actionsFrag", this);
+		actions.add(new PreventDefaultAjaxLink<Void>("blame") {
+
 			@Override
-			public String getIconClass() {
-				return context.getMode() == Mode.BLAME?"fa fa-check":null;
+			public void onClick(AjaxRequestTarget target) {
+				boolean blamed = (context.getMode() != Mode.BLAME);
+				String jsonOfBlameInfos = getJsonOfBlameInfos(blamed);
+				String script = String.format("gitplex.sourceview.onBlame(%s);", jsonOfBlameInfos);
+				target.appendJavaScript(script);
+				context.onBlameChange(target, blamed);									
 			}
 
-			@Override
-			public String getLabel() {
-				return "Blame";
-			}
+		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 			@Override
-			public AbstractLink newLink(String id) {
-				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>(id) {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						menuLink.close();
-						boolean blamed = (context.getMode() != Mode.BLAME);
-						String jsonOfBlameInfos = getJsonOfBlameInfos(blamed);
-						String script = String.format("gitplex.sourceview.onBlame(%s);", jsonOfBlameInfos);
-						target.appendJavaScript(script);
-						context.onBlameChange(target, blamed);									
-					}
-
-				};
-				PageParameters params;
-				DepotFilePage.State state = new DepotFilePage.State();
-				state.blobIdent = context.getBlobIdent();
-				if (context.getMode() != Mode.BLAME)
-					state.mode = Mode.BLAME;
-				state.mark = context.getMark();
-				params = DepotFilePage.paramsOf(context.getDepot(), state);
-				CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
-				link.add(AttributeAppender.replace("href", url.toString()));
-				link.add(new ViewStateAwareBehavior());
-				return link;
+			public String getObject() {
+				if (context.getMode() == Mode.BLAME)
+					return "active";
+				else
+					return "";
 			}
 			
-		});
+		})));
 		
 		if (!symbols.isEmpty()) {
-			menuItems.add(new MenuItem() {
+			actions.add(new AjaxLink<Void>("outline") {
 
 				@Override
-				public String getLabel() {
-					return "Outline";
-				}
-
-				@Override
-				public String getIconClass() {
-					return outlineContainer.isVisible()?"fa fa-check":null;
-				}
-
-				@Override
-				public AbstractLink newLink(String id) {
-					return new AjaxLink<Void>(id) {
-
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							menuLink.close();
-							toggleOutline(target);
-						}
-						
-					};
+				public void onClick(AjaxRequestTarget target) {
+					toggleOutline(target);
 				}
 				
-			});
-		} 
-		return menuItems;
+			}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+				@Override
+				public String getObject() {
+					if (outlineContainer.isVisible())
+						return "active";
+					else
+						return "";
+				}
+				
+			})));
+		} else {
+			actions.add(new WebMarkupContainer("outline").setVisible(false));
+		}
+		return actions;
 	}
 	
 	private void toggleOutline(AjaxRequestTarget target) {
@@ -377,6 +350,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				if (context.getOpenComment() != null) 
 					context.onCommentOpened(target, null);
 				target.appendJavaScript("gitplex.sourceview.onCloseComment();");
+				send(SourceViewPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 			}
 			
 		});
@@ -583,6 +557,7 @@ public class SourceViewPanel extends BlobViewPanel {
 									getJsonOfComment(comment));
 							target.appendJavaScript(script);
 							context.onCommentOpened(target, comment);
+							send(SourceViewPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 						}
 
 					});
@@ -625,6 +600,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					script = String.format("gitplex.sourceview.onOpenComment(%s);", getJsonOfComment(comment));
 					target.appendJavaScript(script);
 					context.onCommentOpened(target, comment);
+					send(SourceViewPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 					break;
 				}
 			}
@@ -796,6 +772,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				getJsonOfComment(comment));
 		target.appendJavaScript(script);
 		context.onCommentOpened(target, null);
+		send(SourceViewPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 	}
 	
 	private List<Symbol> getChildSymbols(@Nullable Symbol parentSymbol) {

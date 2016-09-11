@@ -1,3 +1,11 @@
-.blob-view>.content {
+.blob-view>.body {
 	overflow: auto;
+}
+.blob-view>.head {
+	border-bottom: 1px solid #BBB; 
+	padding: 6px 12px;
+	height: 36px;
+}
+.blob-view>.head>.actions>.btn-group:FIRST-CHILD {
+	margin-right: 4px;
 }

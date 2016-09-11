@@ -83,6 +83,7 @@ import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
+import com.pmease.gitplex.web.component.comment.CodeCommentToggled;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.comparecontext.CompareContextPanel;

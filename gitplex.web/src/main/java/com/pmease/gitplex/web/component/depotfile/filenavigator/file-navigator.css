@@ -15,18 +15,6 @@
 	color: #444; 
 	font-size: 13px;
 }
-.file-navigator em {
-	font-style: normal;
-}
 .file-navigator .add {
 	font-size: 18px;
-}
-.file-navigator span.add em {
-	color: #BBB;
-}
-.file-navigator .file-menu {
-	margin: 1px 0 0 4px;
-	font-size: 18px;
-	line-height: 16px;
-	color: #333;
 }

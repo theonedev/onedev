@@ -27,6 +27,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -361,7 +362,7 @@ public class DepotCommitsPage extends DepotPage {
 		item.add(AttributeAppender.append("class", " commit-item-" + commitIndex));
 	}
 	
-	private Component newCommitItem(String itemId, final int index) {
+	private Component newCommitItem(String itemId, int index) {
 		List<RevCommit> current = commitsModel.getObject().current;
 		RevCommit commit = current.get(index);
 		
@@ -434,14 +435,22 @@ public class DepotCommitsPage extends DepotPage {
 				}
 			}
 			if (state.getCompareWith() != null) {
-				RevisionComparePage.State state = new RevisionComparePage.State();
-				state.leftSide = new DepotAndRevision(getDepot(), commit.name());
-				state.rightSide = new DepotAndRevision(getDepot(), DepotCommitsPage.this.state.getCompareWith());
-				state.pathFilter = path;
-				state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+				RevisionComparePage.State compareState = new RevisionComparePage.State();
+				compareState.leftSide = new DepotAndRevision(getDepot(), commit.name());
+				compareState.rightSide = new DepotAndRevision(getDepot(), DepotCommitsPage.this.state.getCompareWith());
+				compareState.pathFilter = path;
+				compareState.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 				
-				PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
-				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
+				PageParameters params = RevisionComparePage.paramsOf(getDepot(), compareState);
+				Link<Void> compareLink = new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params);
+				if (state.getCompareWith().equals(commit.name())) {
+					compareLink.setEnabled(false);
+					compareLink.add(AttributeAppender.append("disabled", "disabled"));
+					compareLink.add(AttributeAppender.replace("title", ""));
+					item.add(AttributeAppender.append("class", "compare-base"));
+					item.add(AttributeAppender.append("title", "Base commit for comparison"));
+				}
+				item.add(compareLink);
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}
@@ -626,6 +635,8 @@ public class DepotCommitsPage extends DepotPage {
 				new ParseTreeWalker().walk(new RevListCommandFiller(command), parseTree);
 				if (command.revisions().isEmpty() && compareWith != null)
 					command.revisions(Lists.newArrayList(compareWith));
+			} else {
+				command.revisions(Lists.newArrayList(compareWith));
 			}
 		}
 		
