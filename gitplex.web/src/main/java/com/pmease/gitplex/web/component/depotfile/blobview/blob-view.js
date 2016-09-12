@@ -14,7 +14,6 @@ gitplex.blobView = function(containerId) {
 		$blobView.outerWidth(width);
 		$blobView.outerHeight(height);
 		
-		console.log($head.outerHeight());
 		height = $blobView.height()-$head.outerHeight();
 		$body.outerWidth(width).outerHeight(height);
 		$body.find(".autofit:visible").first().trigger("autofit", [$body.width(), $body.height()]);

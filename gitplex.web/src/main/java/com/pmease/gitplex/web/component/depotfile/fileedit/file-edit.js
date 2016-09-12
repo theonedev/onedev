@@ -1,5 +1,5 @@
 gitplex.fileedit = {
-	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, mark, viewState) {
+	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, mark, viewState, indentType, tabSize, lineWrapMode) {
 		var $container = $("#" + containerId);
 		var $fileEdit = $container.find(">.file-edit");
 		var $head = $fileEdit.find(">.head");
@@ -42,8 +42,10 @@ gitplex.fileedit = {
 				cm = CodeMirror($edit[0], {
 					value: fileContent, 
 					theme: "eclipse",
+					indentWithTabs: indentType == "Tabs",
 					lineNumbers: true,
-					lineWrapping: true,
+					lineWrapping: lineWrapMode == "Soft wrap",
+					tabSize: tabSize,
 					styleActiveLine: true,
 					styleSelectedText: true,
 					foldGutter: true,
@@ -201,5 +203,17 @@ gitplex.fileedit = {
 			$body.find(">div.save>.edit-save").trigger("contentEdit", [$fileEdit.data("contentChanged")]);
 		}
 		$(window).resize();
+	},
+	onIndentTypeChange: function(containerId, indentType) {
+		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
+		cm.setOption("indentWithTabs", indentType == "Tabs");
+	},
+	onLineWrapModeChange: function(containerId, lineWrapMode) {
+		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
+		cm.setOption("lineWrapping", lineWrapMode == "Soft wrap");
+	},
+	onTabSizeChange: function(containerId, tabSize) {
+		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
+		cm.setOption("tabSize", tabSize);
 	}
 };

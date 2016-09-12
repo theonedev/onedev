@@ -59,6 +59,10 @@ public abstract class BlobViewPanel extends Panel {
 		} 
 	}
 	
+	protected WebMarkupContainer newOptions(String id) {
+		return new WebMarkupContainer(id);
+	}
+	
 	protected WebMarkupContainer newAdditionalActions(String id) {
 		return new WebMarkupContainer(id);
 	}
@@ -151,6 +155,8 @@ public abstract class BlobViewPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(newOptions("options"));
+		
 		add(new ResourceLink<Void>("raw", new BlobResourceReference(), 
 				BlobResource.paramsOf(context.getDepot(), context.getBlobIdent())));
 		add(newAdditionalActions("additionalActions"));

@@ -39,6 +39,8 @@ import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.web.component.depotfile.editsave.EditSavePanel;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
+import com.pmease.gitplex.web.component.sourceformat.OptionChangeCallback;
+import com.pmease.gitplex.web.component.sourceformat.SourceFormatPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
@@ -65,6 +67,8 @@ public abstract class FileEditPanel extends Panel {
 	private AbstractPostAjaxBehavior saveBehavior;
 	
 	private EditSavePanel editSavePanel;
+	
+	private SourceFormatPanel sourceFormat;
 	
 	public FileEditPanel(String id, IModel<Depot> depotModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId, 
@@ -173,6 +177,35 @@ public abstract class FileEditPanel extends Panel {
 			
 		});
 		
+		add(sourceFormat = new SourceFormatPanel("sourceFormat", new OptionChangeCallback() {
+
+			@Override
+			public void onOptioneChange(AjaxRequestTarget target) {
+				String script = String.format("gitplex.fileedit.onIndentTypeChange('%s', '%s');", 
+						FileEditPanel.this.getMarkupId(), sourceFormat.getIndentType());
+				target.appendJavaScript(script);
+			}
+			
+		}, new OptionChangeCallback() {
+
+			@Override
+			public void onOptioneChange(AjaxRequestTarget target) {
+				String script = String.format("gitplex.fileedit.onTabSizeChange('%s', %s);", 
+						FileEditPanel.this.getMarkupId(), sourceFormat.getTabSize());
+				target.appendJavaScript(script);
+			}
+			
+		}, new OptionChangeCallback() {
+			
+			@Override
+			public void onOptioneChange(AjaxRequestTarget target) {
+				String script = String.format("gitplex.fileedit.onLineWrapModeChange('%s', '%s');", 
+						FileEditPanel.this.getMarkupId(), sourceFormat.getLineWrapMode());
+				target.appendJavaScript(script);
+			}
+			
+		}));
+		
 		add(new WebMarkupContainer(PREVIEW_ID).setOutputMarkupId(true));
 		
 		PathAndContent newFile = new PathAndContent() {
@@ -208,12 +241,15 @@ public abstract class FileEditPanel extends Panel {
 		
 		String viewState = RequestCycle.get().getMetaData(DepotFilePage.VIEW_STATE_KEY);
 		
-		String script = String.format("gitplex.fileedit.init('%s', '%s', '%s', %s, %s, %s, %s);", 
+		String script = String.format("gitplex.fileedit.init('%s', '%s', '%s', %s, %s, %s, %s, '%s', %s, '%s');", 
 				getMarkupId(), getNewPathParam(), StringEscapeUtils.escapeEcmaScript(content), 
 				previewBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				mark!=null?getJson(mark):"undefined",
-				viewState!=null?"JSON.parse('"+viewState+"')":"undefined");
+				viewState!=null?"JSON.parse('"+viewState+"')":"undefined", 
+				sourceFormat.getIndentType(), 
+				sourceFormat.getTabSize(), 
+				sourceFormat.getLineWrapMode());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

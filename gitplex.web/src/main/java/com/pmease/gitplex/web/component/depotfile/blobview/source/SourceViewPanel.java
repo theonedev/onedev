@@ -85,6 +85,8 @@ import com.pmease.gitplex.web.component.comment.comparecontext.CompareContextPan
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
+import com.pmease.gitplex.web.component.sourceformat.OptionChangeCallback;
+import com.pmease.gitplex.web.component.sourceformat.SourceFormatPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -124,6 +126,8 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private WebMarkupContainer outlineContainer;
 	
+	private SourceFormatPanel sourceFormat;
+	
 	private SymbolTooltipPanel symbolTooltip;
 	
 	private AbstractPostAjaxBehavior ajaxBehavior;
@@ -145,6 +149,28 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 	}
 	
+	@Override
+	protected WebMarkupContainer newOptions(String id) {
+		sourceFormat = new SourceFormatPanel(id, null, new OptionChangeCallback() {
+			
+			@Override
+			public void onOptioneChange(AjaxRequestTarget target) {
+				String script = String.format("gitplex.sourceview.onTabSizeChange(%s);", sourceFormat.getTabSize());
+				target.appendJavaScript(script);
+			}
+			
+		}, new OptionChangeCallback() {
+
+			@Override
+			public void onOptioneChange(AjaxRequestTarget target) {
+				String script = String.format("gitplex.sourceview.onLineWrapModeChange('%s');", sourceFormat.getLineWrapMode());
+				target.appendJavaScript(script);
+			}
+			
+		});
+		return sourceFormat;
+	}
+
 	@Override
 	public WebMarkupContainer newAdditionalActions(String id) {
 		WebMarkupContainer actions = new Fragment(id, "actionsFrag", this);
@@ -864,7 +890,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				explicit("param3"), explicit("param4"));
 		String viewState = RequestCycle.get().getMetaData(DepotFilePage.VIEW_STATE_KEY);
 		String script = String.format("gitplex.sourceview.init('%s', '%s', %s, %s, '%s', '%s', "
-				+ "%s, %s, %s, %s, %s, %s);", 
+				+ "%s, %s, %s, %s, %s, %s, %s, '%s');", 
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				context.getOpenComment()!=null?getJsonOfComment(context.getOpenComment()):"undefined",
@@ -876,7 +902,9 @@ public class SourceViewPanel extends BlobViewPanel {
 				callback, 
 				viewState!=null?"JSON.parse('"+viewState+"')":"undefined", 
 				SecurityUtils.getAccount()!=null, 
-				context.getAnchor()!=null?"'"+context.getAnchor()+"'":"undefined");
+				context.getAnchor()!=null?"'"+context.getAnchor()+"'":"undefined", 
+				sourceFormat.getTabSize(),
+				sourceFormat.getLineWrapMode());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

@@ -1,6 +1,6 @@
 gitplex.sourceview = {
 	init: function(fileContent, filePath, openComment, mark, symbolTooltipId, 
-			revision, blameInfos, comments, markCallback, viewState, loggedIn, anchor) {
+			revision, blameInfos, comments, markCallback, viewState, loggedIn, anchor, tabSize, lineWrapMode) {
 		var cm;
 		
 		var $sourceView = $(".source-view");
@@ -88,7 +88,8 @@ gitplex.sourceview = {
 					readOnly: pmease.commons.isDevice()?"nocursor":true,
 					theme: "eclipse",
 					lineNumbers: true,
-					lineWrapping: true,
+					lineWrapping: lineWrapMode == "Soft wrap",
+					tabSize: tabSize,
 					styleActiveLine: true,
 					styleSelectedText: true,
 					foldGutter: true,
@@ -536,5 +537,13 @@ gitplex.sourceview = {
 	scrollToCommentBottom: function() {
 		var $body = $(".source-view>.comment>.content>.body");
 		$body.scrollTop($body[0].scrollHeight);
+	},
+	onLineWrapModeChange: function(lineWrapMode) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		cm.setOption("lineWrapping", lineWrapMode == "Soft wrap");
+	},
+	onTabSizeChange: function(tabSize) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		cm.setOption("tabSize", tabSize);
 	}
 };

@@ -24,6 +24,9 @@
 	margin-top: 11px;
 	margin-left: 12px;
 }
+.file-edit>.head>.source-format {
+	margin: 8px 12px 0 0;
+}
 .file-edit>.body {
 	overflow: hidden;
 }

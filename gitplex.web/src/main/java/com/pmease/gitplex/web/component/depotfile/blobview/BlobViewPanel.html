@@ -1,18 +1,17 @@
 <wicket:panel>
 	<div class="blob-view autofit">
 		<div class="head clearfix">
-			<div class="pull-left formats">
-			</div>
-			<div class="pull-right actions">
-				<div class="btn-group">
-					<a wicket:id="raw" class="btn btn-default btn-xs"><i class="fa fa-file-o"></i> Raw</a>
-					<wicket:container wicket:id="additionalActions"></wicket:container>
-				</div>
+			<div class="pull-left actions">
 				<div wicket:id="changeActions" class="btn-group">
 					<a wicket:id="edit" class="btn btn-default btn-xs"><i class="fa fa-pencil"></i> Edit</a>
 					<a wicket:id="delete" class="btn btn-default btn-xs"><i class="fa fa-trash"></i> Delete</a>
 				</div>
+				<div class="btn-group">
+					<a wicket:id="raw" class="btn btn-default btn-xs"><i class="fa fa-file-o"></i> Raw</a>
+					<wicket:container wicket:id="additionalActions"></wicket:container>
+				</div>
 			</div>
+			<div wicket:id="options" class="pull-right options"></div>
 		</div>
 		<div class="body scrollable">
 			<wicket:child></wicket:child>
