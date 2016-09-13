@@ -1,21 +1,9 @@
 <wicket:extend>
 	<div class="gate-keeper-setting">
-		<div wicket:id="gateKeeperSetting">
-			<div wicket:id="gateKeepers">
-				<div wicket:id="gateKeeper"></div>
-			</div>
-			<div wicket:id="gateKeeperDropdownTrigger" class="well gate-keeper-add">Add Gate Keeper <i class="fa fa-lg fa-plus-circle"></i></div>
-		</div>
+		<div wicket:id="gateKeeper"></div>
 		<div class="help-block">
-			<h5>Define gate keepers to determine whether or not to accept a pull request or push operation. 
-			Gate keepers plays an important role in GitPlex, for instance, you may use it to:
-			</h5>
-			<ul>
-				<li>Control write access to certain branches or directories.</li>
-				<li>Require different user to approve different tree of the repository.</li>
-				<li>Have continuous integration system verifying the code before accepting 
-				the pull request.</li>
-			</ul> 
+			<i class="fa fa-info-circle"></i> Repository can only be modified if checking of defined gatekeeper is passed. Multiple gatekeepers can be 
+			combined together with various composite gatekeepers 
 		</div>
 	</div>
 </wicket:extend>

@@ -6,11 +6,11 @@ package com.pmease.gitplex.core.util;
  * as &quot;parent/child&quot;, it will match value &quot;parent/&quot;. 
  * A scenario using this matcher: 
  * <ol>
- * <li> A gate keeper is defined to require that all created tags should match 
+ * <li> A gatekeeper is defined to require that all created tags should match 
  * the format &quot;refs/tags/v*&quot;
- * <li> The tag creation link checks the gate keeper using ref value &quot;refs/tags/&quot;
+ * <li> The tag creation link checks the gatekeeper using ref value &quot;refs/tags/&quot;
  * to see if tag creation is allowed, and it matches meaning one can create tag
- * <li> User then input tag name, and this name will be matched again with the gate keeper
+ * <li> User then input tag name, and this name will be matched again with the gatekeeper
  * and if it does not starts with letter &quot;v&quot;, the tag creation will not be allowed
  * 
  * @author robin

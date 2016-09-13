@@ -18,10 +18,10 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.manager.PullRequestVerificationManager;
 
 @Editable(icon="fa-check-circle", order=1000,
-		description="This gate keeper will be satisfied if commit is verified successfully "
+		description="This gatekeeper will be satisfied if commit is verified successfully "
 				+ "by specified number of builds. To make this working, your CI system has to "
 				+ "be configured to build against GitPlex pull requests")
-public class IfVerifiedByBuilds extends AbstractGateKeeper {
+public class VerifiedByBuilds extends AbstractGateKeeper {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -32,7 +32,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	private boolean blockMode = true;
 	
 	@Editable(order=100, description="This specified number of builds has to be reported successful "
-			+ "for this gate keeper to be passed. Normally this number represents number of build "
+			+ "for this gatekeeper to be passed. Normally this number represents number of build "
 			+ "configurations setting up to verify the branch.")
 	@Min(1)
 	public int getLeastPassCount() {
@@ -52,7 +52,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		this.checkIntegrated = checkIntegrated;
 	}
 
-	@Editable(order=300, description="If this is checked, subsequent gate keepers will not be checked "
+	@Editable(order=300, description="If this is checked, subsequent gatekeepers will not be checked "
 			+ "while waiting for the build results. This can be used to only notify relevant voters "
 			+ "when the commit passes build.")
 	public boolean isBlockMode() {

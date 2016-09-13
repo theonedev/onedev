@@ -15,9 +15,9 @@ import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(order=100, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
-		"This gate keeper will be passed if the commit is approved by specified number of users "
+		"This gatekeeper will be passed if the commit is approved by specified number of users "
 		+ "from specified team")
-public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
+public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	

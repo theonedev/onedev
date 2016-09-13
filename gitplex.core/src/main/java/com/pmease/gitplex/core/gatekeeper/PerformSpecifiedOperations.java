@@ -17,9 +17,9 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(order=200, icon="fa-wrench", description=
-		"This gate keeper will be passed if one of specified operations is performed")
+		"This gatekeeper will be passed if one of specified operations is performed")
 @ClassValidating
-public class IfPerformSpecifiedOperations extends AbstractGateKeeper implements Validatable {
+public class PerformSpecifiedOperations extends AbstractGateKeeper implements Validatable {
 
 	private static final long serialVersionUID = 1L;
 	

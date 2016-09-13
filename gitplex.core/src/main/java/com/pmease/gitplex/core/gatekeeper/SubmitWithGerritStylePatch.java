@@ -14,10 +14,10 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
-@Editable(order=3000, icon="fa-ext fa-file-diff", description="This gate keeper will be passed if the pull request "
+@Editable(order=3000, icon="fa-ext fa-file-diff", description="This gatekeeper will be passed if the pull request "
 		+ "is submitted with gerrit style patch, that is, only one commit is submitted for review at "
 		+ "a time, and subsequent updates to the review should be done by amending previous commit")
-public class IfSubmitWithGerritStylePatch extends AbstractGateKeeper {
+public class SubmitWithGerritStylePatch extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	
