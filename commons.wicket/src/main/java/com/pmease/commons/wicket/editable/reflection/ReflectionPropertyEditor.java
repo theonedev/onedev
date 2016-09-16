@@ -55,7 +55,7 @@ public class ReflectionPropertyEditor extends PropertyEditor<Serializable> {
 					}
 				}
 				
-			}).add(new AjaxFormComponentUpdatingBehavior("onclick"){
+			}).add(new AjaxFormComponentUpdatingBehavior("click"){
 
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {

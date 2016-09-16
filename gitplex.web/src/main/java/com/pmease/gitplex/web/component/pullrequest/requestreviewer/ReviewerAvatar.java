@@ -62,13 +62,13 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		
 		if (nowInvited.contains(invitation.getUser())) {
 			getSession().warn("Reviewer '" + invitation.getUser().getDisplayName() 
-					+ "' is required by gate keeper and can not be removed");
+					+ "' is required by gatekeeper and can not be removed");
 		} else {
 			nowInvited.removeAll(prevInvited);
 			if (!nowInvited.isEmpty()) {
 				getSession().warn("Reviewer '" + invitation.getUser().getDisplayName() 
 						+ "' is removed and user '" + nowInvited.iterator().next().getDisplayName() 
-						+ "' is added as reviewer automatically to satisfy gate keeper requirement.");
+						+ "' is added as reviewer automatically to satisfy gatekeeper requirement.");
 			}
 		}
 		if (!request.isNew()) {

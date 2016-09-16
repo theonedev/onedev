@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -15,8 +16,9 @@ import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"g_referenced_id", "g_referencedBy_id"})
+@Table(
+		indexes={@Index(columnList="g_referenced_id"), @Index(columnList="g_referencedBy_id"), @Index(columnList="g_user_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_referenced_id", "g_referencedBy_id"})
 })
 @Entity
 public class PullRequestReference extends AbstractEntity {

@@ -12,8 +12,8 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(order=500, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
-		"This gate keeper will be passed if the commit is submitted by a member of specified team")
-public class IfSubmittedBySpecifiedTeam extends TeamAwareGateKeeper {
+		"This gatekeeper will be passed if the commit is submitted by a member of specified team")
+public class SubmittedBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	

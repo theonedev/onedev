@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -13,8 +14,9 @@ import javax.persistence.UniqueConstraint;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"g_request_id", "g_user_id", "task"})
+@Table(
+		indexes={@Index(columnList="g_request_id"), @Index(columnList="g_user_id"), @Index(columnList="task")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_request_id", "g_user_id", "task"})
 })
 public class PullRequestNotification extends AbstractEntity {
 

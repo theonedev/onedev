@@ -129,4 +129,13 @@ public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
 			superClass = (Class<T>) clazz.getSuperclass();
 		return superClass;
 	}
+	
+	public static boolean isSystemType(Class<?> type) {
+		return type.getName().startsWith("java") 
+			|| type.getName().startsWith("javax") 
+			|| type.isArray()
+			|| type.isPrimitive()
+			|| type.isEnum();
+	}
+	
 }

@@ -233,6 +233,13 @@ form>.test-feedback {
 	margin-top: 12px;
 }
 
+.value.editor.property>.bean.editor {
+	border-top: 1px dotted #BBB;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-bottom: 1px dotted #BBB;
+	padding-bottom: 4px;
+}
 .viewer .reflection>table>tbody>tr.name-omitted>td {
 	padding: 0;
 }

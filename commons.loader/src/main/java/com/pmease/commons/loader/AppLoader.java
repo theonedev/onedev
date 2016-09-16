@@ -63,8 +63,7 @@ public class AppLoader implements Startable {
 				throw new RuntimeException(e);
 			}
 		} else if (!tempDir.mkdir()) {
-			throw new RuntimeException("Can not create directory '" + 
-					tempDir.getAbsolutePath() + "'.");
+			throw new RuntimeException("Can not create directory '" + tempDir.getAbsolutePath() + "'.");
 		}
 		System.setProperty("java.io.tmpdir", tempDir.getAbsolutePath());
 		

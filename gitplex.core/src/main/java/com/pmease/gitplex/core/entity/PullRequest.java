@@ -72,8 +72,14 @@ import com.pmease.gitplex.core.security.SecurityUtils;
  * which can be updated from background thread.
  */
 @DynamicUpdate 
-@Table(indexes={@Index(columnList="title"), @Index(columnList="uuid"), @Index(columnList="numberStr"), @Index(columnList="noSpaceTitle")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetdepot_id", "number"})})
+@Table(
+		indexes={
+				@Index(columnList="title"), @Index(columnList="uuid"), 
+				@Index(columnList="numberStr"), @Index(columnList="noSpaceTitle"), 
+				@Index(columnList="number"), @Index(columnList="g_targetDepot_id"), 
+				@Index(columnList="g_sourceDepot_id"), @Index(columnList="g_submitter_id"), 
+				@Index(columnList="g_assignee_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetDepot_id", "number"})})
 public class PullRequest extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

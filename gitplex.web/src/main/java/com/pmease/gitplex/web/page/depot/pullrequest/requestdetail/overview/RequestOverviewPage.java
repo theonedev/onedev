@@ -83,7 +83,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 	
 	private static final String ASSIGNEE_HELP = "Assignee has write permission to the "
 			+ "repository and is resonsible for integrating the pull request into "
-			+ "target branch after it passes gate keeper check.";
+			+ "target branch after it passes gatekeeper check.";
 
 	private enum WatchStatus {
 		WATCHING("Watching"), 

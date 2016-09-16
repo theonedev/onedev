@@ -42,7 +42,8 @@ import com.pmease.gitplex.core.security.protectedobject.ProtectedObject;
 import com.pmease.gitplex.core.util.validation.AccountName;
 
 @Entity
-@Table(indexes={@Index(columnList="email"), @Index(columnList="fullName"), 
+@Table(indexes={
+		@Index(columnList="email"), @Index(columnList="fullName"), 
 		@Index(columnList="noSpaceName"), @Index(columnList="noSpaceFullName")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
@@ -82,7 +83,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
-	 * gate keepers and integration policies upon account renaming/deletion
+	 * gatekeepers and integration policies upon account renaming/deletion
 	 */
 	@Version
 	private long version;
@@ -218,7 +219,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 			+ "<li>None: No any permissions granted on repositories"
 			+ "<li>Read: Able to pull and browse repositories"
 			+ "<li>Write: Has full read privilege, and can also push to " 
-			+ "repositories unless gate keeper prevents")
+			+ "repositories unless gatekeeper prevents")
 	@ExcludeValues("ADMIN")
 	@NotNull
 	public DepotPrivilege getDefaultPrivilege() {

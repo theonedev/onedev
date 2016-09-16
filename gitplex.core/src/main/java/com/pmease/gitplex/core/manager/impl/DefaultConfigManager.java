@@ -14,19 +14,26 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.Config.Key;
 import com.pmease.gitplex.core.manager.ConfigManager;
+import com.pmease.gitplex.core.manager.DataManager;
+import com.pmease.gitplex.core.setting.BackupSetting;
 import com.pmease.gitplex.core.setting.MailSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
 public class DefaultConfigManager extends AbstractEntityManager<Config> implements ConfigManager {
 	
+	private final DataManager dataManager;
+	
 	private volatile Long systemSettingConfigId;
 	
 	private volatile Long mailSettingConfigId;
 	
+	private volatile Long backupSettingConfigId;
+	
 	@Inject
-	public DefaultConfigManager(Dao dao) {
+	public DefaultConfigManager(Dao dao, DataManager dataManager) {
 		super(dao);
+		this.dataManager = dataManager;
 	}
 
 	@Sessional
@@ -89,6 +96,33 @@ public class DefaultConfigManager extends AbstractEntityManager<Config> implemen
 		}
 		config.setSetting(mailSetting);
 		dao.persist(config);
+	}
+
+	@Sessional
+	@Override
+	public BackupSetting getBackupSetting() {
+        Config config;
+        if (backupSettingConfigId == null) {
+    		config = getConfig(Key.BACKUP);
+    		Preconditions.checkNotNull(config);
+    		backupSettingConfigId = config.getId();
+        } else {
+            config = load(backupSettingConfigId);
+        }
+        return (BackupSetting) config.getSetting();
+	}
+
+	@Transactional
+	@Override
+	public void saveBackupSetting(BackupSetting backupSetting) {
+		Config config = getConfig(Key.BACKUP);
+		if (config == null) {
+			config = new Config();
+			config.setKey(Key.BACKUP);
+		}
+		config.setSetting(backupSetting);
+		dao.persist(config);
+		dataManager.scheduleBackup(backupSetting);
 	}
 
 }

@@ -36,7 +36,7 @@ public abstract class GateCheckResult implements Serializable {
     	return this instanceof Ignored;
     }
     
-    public boolean allowIntegration() {
+    public boolean isPassedOrIgnored() {
     	return isPassed() || isIgnored();
     }
     

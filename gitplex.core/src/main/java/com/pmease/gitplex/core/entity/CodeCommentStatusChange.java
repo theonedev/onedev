@@ -1,12 +1,15 @@
 package com.pmease.gitplex.core.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
 
 @Entity
+@Table(indexes={@Index(columnList="g_comment_id"), @Index(columnList="g_user_id")})
 @DynamicUpdate 
 public class CodeCommentStatusChange extends CodeCommentActivity {
 

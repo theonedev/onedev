@@ -10,6 +10,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -376,6 +377,59 @@ public class ReflectionUtils {
 				return (Constructor<T>) constructor;
 		}
 		
+		return null;
+	}
+	
+	public static Class<?> getCollectionElementType(Type type) {
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType)type;
+			Type rawType = parameterizedType.getRawType();
+			if (rawType instanceof Class<?>) {
+				Class<?> rawClazz = (Class<?>) rawType;
+				if (Collection.class.isAssignableFrom(rawClazz)) {
+					Type elementType = parameterizedType.getActualTypeArguments()[0];
+					if (elementType instanceof Class<?>) 
+						return (Class<?>) elementType;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static Class<?> getMapKeyType(Type type) {
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType)type;
+			Type rawType = parameterizedType.getRawType();
+
+			if (rawType instanceof Class<?>) {
+				Class<?> rawClazz = (Class<?>) rawType;
+				if (Map.class.isAssignableFrom(rawClazz)) {
+					Type valueType = parameterizedType.getActualTypeArguments()[0];
+					if (valueType instanceof Class<?>) 
+						return (Class<?>) valueType;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static Class<?> getMapValueType(Type type) {
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType)type;
+			Type rawType = parameterizedType.getRawType();
+
+			if (rawType instanceof Class<?>) {
+				Class<?> rawClazz = (Class<?>) rawType;
+				if (Map.class.isAssignableFrom(rawClazz)) {
+					Type valueType = parameterizedType.getActualTypeArguments()[1];
+					if (valueType instanceof Class<?>) {
+						return (Class<?>) valueType;
+					} else if (valueType instanceof ParameterizedType) {
+						return (Class<?>) ((ParameterizedType)valueType).getRawType();
+					}
+				}
+			}
+		}
 		return null;
 	}
 	

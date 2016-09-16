@@ -31,6 +31,7 @@ public abstract class AdministrationPage extends LayoutPage {
 		tabs.add(new AdministrationTab("All Accounts", "fa fa-fw fa-users", AccountListPage.class, NewUserPage.class));
 		tabs.add(new AdministrationTab("System Setting", "fa fa-fw fa-sliders", SystemSettingPage.class));
 		tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
+		tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));
 		
 		add(new Tabbable("tabs", tabs));
 	}

@@ -15,14 +15,14 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 @Editable(name="Misc")
 public interface GateKeeper extends Serializable {
 	
-	String CATEGORY_BASIC = "Basic Gate Keepers";
+	String CATEGORY_BASIC = "Basic Gatekeepers";
 	
 	String CATEGORY_USER = "Check Approver/Submitter";
 	
-	String CATEGORY_COMPOSITION = "Gate Keeper Compositions";
+	String CATEGORY_COMPOSITION = "Gatekeeper Compositions";
 	
 	/**
-	 * Check the gate keeper against specified request. This is typically used to determine 
+	 * Check the gatekeeper against specified request. This is typically used to determine 
 	 * whether or not to accept a pull request. 
 	 * 
 	 * @param request

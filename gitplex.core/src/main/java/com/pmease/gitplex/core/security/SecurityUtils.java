@@ -96,11 +96,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		Account currentUser = getAccount();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotWrite(depot))	
-				&& depot.getGateKeeper().checkPush(currentUser, depot, refName, oldCommit, newCommit).isPassed();
+				&& depot.getGateKeeper().checkPush(currentUser, depot, refName, oldCommit, newCommit).isPassedOrIgnored();
 	}
 
 	public static boolean canModify(Depot depot, String branch, @Nullable String file) {
-		return canWrite(depot) && depot.getGateKeeper().checkFile(getAccount(), depot, branch, file).isPassed();
+		return canWrite(depot) && depot.getGateKeeper().checkFile(getAccount(), depot, branch, file).isPassedOrIgnored();
 	}
 	
 	public static boolean canManage(Account account) {

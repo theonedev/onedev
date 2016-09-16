@@ -69,7 +69,7 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
-		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);		
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);	
 		
 		for (ObjectMapperConfigurator each: configurators)
 			each.configure(mapper);

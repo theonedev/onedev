@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
 @Editable(name="And Composition", icon="fa-object-group", order=100, 
 		category=GateKeeper.CATEGORY_COMPOSITION, 
-		description="This gate keeper will be passed if all contained gate keepers are passed")
+		description="This gatekeeper will be passed if all contained child gatekeepers are passed")
 @Horizontal
 public class AndGateKeeper extends AndOrGateKeeper {
 

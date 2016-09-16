@@ -37,7 +37,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentRelationManager;
 
 @Entity
-@Table(indexes={@Index(columnList="uuid"), @Index(columnList="date")})
+@Table(indexes={@Index(columnList="g_request_id"), @Index(columnList="uuid"), @Index(columnList="date")})
 public class PullRequestUpdate extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

@@ -11,6 +11,7 @@ import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
+import com.pmease.commons.hibernate.migration.Migrator;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
@@ -84,6 +85,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultTeamMembershipManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVisitInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultWorkExecutor;
+import com.pmease.gitplex.core.migration.DataMigrator;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
@@ -99,6 +101,8 @@ public class CoreModule extends AbstractPluginModule {
 	@Override
 	protected void configure() {
 		super.configure();
+		
+		bind(Migrator.class).to(DataMigrator.class);
 		
 		bind(PhysicalNamingStrategy.class).toInstance(new PrefixedNamingStrategy("g_"));
 		

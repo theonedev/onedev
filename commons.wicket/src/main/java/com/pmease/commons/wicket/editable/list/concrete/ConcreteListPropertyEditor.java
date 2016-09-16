@@ -103,7 +103,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 					ConcreteListPropertyEditor.this.get("listEditor").setVisible(object);
 				}
 				
-			}).add(new AjaxFormComponentUpdatingBehavior("onclick") {
+			}).add(new AjaxFormComponentUpdatingBehavior("click") {
 				
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {

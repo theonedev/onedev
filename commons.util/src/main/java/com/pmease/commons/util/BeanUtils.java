@@ -1,11 +1,14 @@
 package com.pmease.commons.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.base.Preconditions;
 
@@ -26,6 +29,28 @@ public class BeanUtils {
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * Get declared fields in the whole class hierarchy.
+	 * If there are fields with the same name in super-class and sub-class, 
+	 * fields in the sub-class with be returned only.
+	 */
+	public static List<Field> getFields(Class<?> clazz) {
+		List<Field> fields = new ArrayList<Field>();
+		Set<String> existingNames = new HashSet<String>();
+		
+		Class<?> current = clazz;
+		while (current != null) {
+			for (Field field: current.getDeclaredFields()) {
+				if (!Modifier.isStatic(field.getModifiers()) && !existingNames.contains(field.getName())) {
+					fields.add(field);
+					existingNames.add(field.getName());
+				}
+			}
+			current = current.getSuperclass();
+		}
+		return fields;
 	}
 	
 	/**

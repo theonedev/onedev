@@ -108,7 +108,7 @@ abstract class CreateTagPanel extends Panel {
 					Account user = Preconditions.checkNotNull(SecurityUtils.getAccount());
 					GateCheckResult checkResult = depot.getGateKeeper().checkPush(user, 
 							depot, Constants.R_TAGS + tagName, ObjectId.zeroId(), commitId);
-					if (!checkResult.isPassed()) {
+					if (!checkResult.isPassedOrIgnored()) {
 						form.error(Joiner.on(", ").join(checkResult.getReasons()));
 						target.focusComponent(nameInput);
 						target.add(form);

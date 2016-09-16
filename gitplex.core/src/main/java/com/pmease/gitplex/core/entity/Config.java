@@ -22,7 +22,7 @@ public class Config extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Key {SYSTEM, MAIL, QOS};
+	public enum Key {SYSTEM, MAIL, BACKUP};
 	
 	@Column(nullable=false, unique=true)
 	private Key key;

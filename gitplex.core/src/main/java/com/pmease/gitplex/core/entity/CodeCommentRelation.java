@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -12,8 +13,9 @@ import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"g_request_id", "g_comment_id"})
+@Table(
+		indexes={@Index(columnList="g_request_id"), @Index(columnList="g_comment_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_request_id", "g_comment_id"})
 })
 @Entity
 public class CodeCommentRelation extends AbstractEntity {

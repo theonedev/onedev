@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -12,8 +13,9 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"g_team_id", "g_depot_id"})
+@Table(
+		indexes={@Index(columnList="g_team_id"), @Index(columnList="g_depot_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_team_id", "g_depot_id"})
 })
 public class TeamAuthorization extends AbstractEntity {
 

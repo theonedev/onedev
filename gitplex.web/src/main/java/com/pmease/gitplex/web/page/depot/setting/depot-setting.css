@@ -155,6 +155,7 @@
 .gate-keeper.panel {
 	border: 1px solid #BBBBBB;
 }
+
 .gate-keeper.panel>.panel-heading {
 	border-color: #BBBBBB;
 }
@@ -180,13 +181,11 @@
 .gate-keeper.panel .panel-body {
 	overflow:auto;
 }
-.gate-keeper td.ifthen.connector {
-	width:1px;
+.gate-keeper.panel table.ifthen>tbody>tr.if>td {
+	padding-bottom: 16px;
 }
-.gate-keeper td.ifthen.connector .fa {
-	margin: 0 6px 0 8px; 
-	color: #666666; 
-	font-size: 36px;
+.gate-keeper.panel table.ifthen>tbody>tr>td>div>div.panel {
+	margin-bottom: 0;
 }
 
 #depot-setting .authorization .list table td.actions {

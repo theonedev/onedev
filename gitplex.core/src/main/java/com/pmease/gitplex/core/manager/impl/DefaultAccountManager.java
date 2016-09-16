@@ -28,7 +28,6 @@ import com.pmease.gitplex.core.entity.PullRequestStatusChange;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.event.lifecycle.SystemStarting;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
-import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -68,9 +67,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
     				integrationPolicy.onAccountRename(oldName, account.getName());
     			}
-    			for (GateKeeper gateKeeper: depot.getGateKeepers()) {
-    				gateKeeper.onAccountRename(oldName, account.getName());
-    			}
+    			depot.getGateKeeper().onAccountRename(oldName, account.getName());
     		}
     	}
     	
@@ -139,10 +136,7 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 				if (it.next().onAccountDelete(account.getName()))
 					it.remove();
 			}
-			for (Iterator<GateKeeper> it = depot.getGateKeepers().iterator(); it.hasNext();) {
-				if (it.next().onAccountDelete(account.getName()))
-					it.remove();
-			}
+			depot.getGateKeeper().onAccountDelete(account.getName());
 		}
 		
 		doAfterCommit(new Runnable() {

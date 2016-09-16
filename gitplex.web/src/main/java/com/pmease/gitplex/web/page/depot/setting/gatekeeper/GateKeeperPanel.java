@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.util.ReflectionUtils;
@@ -25,8 +26,10 @@ import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.AndOrGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.gatekeeper.IfThenGateKeeper;
+import com.pmease.gitplex.core.gatekeeper.ConditionalGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.NotGateKeeper;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipBehavior;
 
 @SuppressWarnings("serial")
 abstract class GateKeeperPanel extends Panel {
@@ -84,7 +87,7 @@ abstract class GateKeeperPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this gate keeper?"));
+				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this gatekeeper?"));
 			}
 
 			@Override
@@ -112,7 +115,9 @@ abstract class GateKeeperPanel extends Panel {
 				}
 			}
 			
-		}.add(AttributeAppender.append("title", Model.of(gateKeeper.isEnabled()?"Disable this gate keeper":"Enable this gate keeper"))));
+		}.add(AttributeAppender.append("title", Model.of(gateKeeper.isEnabled()?"Disable this gatekeeper":"Enable this gatekeeper"))));
+		
+		container.add(new WebMarkupContainer("help").add(new TooltipBehavior(Model.of(EditableUtils.getDescription(gateKeeper.getClass())))));
 		
 		container.add(new WebMarkupContainer("editor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 		
@@ -250,12 +255,12 @@ abstract class GateKeeperPanel extends Panel {
 				fragment.add(new WebMarkupContainer("gateKeeperEditor").setVisible(false));
 			}
 			container.add(fragment);
-		} else if (clazz == IfThenGateKeeper.class) {
-			final IfThenGateKeeper ifThenGateKeeper = (IfThenGateKeeper) gateKeeper;
+		} else if (clazz == ConditionalGateKeeper.class) {
+			final ConditionalGateKeeper ifThenGateKeeper = (ConditionalGateKeeper) gateKeeper;
 			final Fragment fragment = new Fragment("content", "ifThenFrag", GateKeeperPanel.this);
 
 			if (ifThenGateKeeper.getIfGate() instanceof DefaultGateKeeper) {
-				fragment.add(new GateKeeperLink("ifTypeSelectorTrigger") {
+				fragment.add(new GateKeeperLink("ifGate") {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
@@ -289,12 +294,15 @@ abstract class GateKeeperPanel extends Panel {
 							};
 						}
 					}
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Define gatekeeper <i class='fa fa-plus-circle'></i>");
+					}
 					
-				});
-				fragment.add(new WebMarkupContainer("if").setVisible(false));
-				fragment.add(new WebMarkupContainer("ifEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));
+				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "well gate-keeper-add")));
 			} else {
-				fragment.add(new GateKeeperPanel("if", ifThenGateKeeper.getIfGate()) {
+				fragment.add(new GateKeeperPanel("ifGate", ifThenGateKeeper.getIfGate()) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
@@ -309,13 +317,11 @@ abstract class GateKeeperPanel extends Panel {
 					}
 					
 				});
-				fragment.add(new WebMarkupContainer("ifTypeSelectorTrigger").setVisible(false));
-				fragment.add(new WebMarkupContainer("ifTypeSelector").setVisible(false));
-				fragment.add(new WebMarkupContainer("ifEditor").setVisible(false));
 			}
+			fragment.add(new WebMarkupContainer("ifEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 			
 			if (ifThenGateKeeper.getThenGate() instanceof DefaultGateKeeper) {
-				fragment.add(new GateKeeperLink("thenTypeSelectorTrigger") {
+				fragment.add(new GateKeeperLink("thenGate") {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
@@ -350,12 +356,14 @@ abstract class GateKeeperPanel extends Panel {
 						}
 					}
 					
-				});
-				
-				fragment.add(new WebMarkupContainer("then").setVisible(false));
-				fragment.add(new WebMarkupContainer("thenEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Define gatekeeper <i class='fa fa-plus-circle'></i>");
+					}
+					
+				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "well gate-keeper-add")));
 			} else {
-				fragment.add(new GateKeeperPanel("then", ifThenGateKeeper.getThenGate()) {
+				fragment.add(new GateKeeperPanel("thenGate", ifThenGateKeeper.getThenGate()) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
@@ -370,10 +378,8 @@ abstract class GateKeeperPanel extends Panel {
 					}
 					
 				});
-				fragment.add(new WebMarkupContainer("thenTypeSelectorTrigger").setVisible(false));
-				fragment.add(new WebMarkupContainer("thenTypeSelector").setVisible(false));
-				fragment.add(new WebMarkupContainer("thenEditor").setVisible(false));
 			}
+			fragment.add(new WebMarkupContainer("thenEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 
 			container.add(fragment);
 		} else {

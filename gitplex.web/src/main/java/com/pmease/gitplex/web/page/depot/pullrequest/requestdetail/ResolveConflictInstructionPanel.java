@@ -69,7 +69,7 @@ class ResolveConflictInstructionPanel extends Panel {
 			fragment.add(differentRepoContainer);
 		} else if (user != null 
 						&& SecurityUtils.canWrite(targetDepot)
-						&& targetDepot.getGateKeeper().checkPush(user, request.getTargetDepot(), request.getTargetRef(), request.getTarget().getObjectId(), ObjectId.fromString(preview.getRequestHead())).allowIntegration()) {
+						&& targetDepot.getGateKeeper().checkPush(user, request.getTargetDepot(), request.getTargetRef(), request.getTarget().getObjectId(), ObjectId.fromString(preview.getRequestHead())).isPassedOrIgnored()) {
 			fragment = new Fragment("content", "mergeInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getDepot()));
 			fragment.add(new Label("destBranchNameForCheckout", request.getTargetBranch()));

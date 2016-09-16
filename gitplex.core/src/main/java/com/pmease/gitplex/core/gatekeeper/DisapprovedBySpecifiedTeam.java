@@ -15,11 +15,11 @@ import com.pmease.gitplex.core.entity.PullRequestReview;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
 @Editable(order=300, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
-		"This gate keeper will be passed if the commit gets specified number "
+		"This gatekeeper will be passed if the commit gets specified number "
 		+ "of disapprovals from specified team. It normally works together "
 		+ "with a NOT container to reject the pull request in case there are "
 		+ "disapprovals")
-public class IfDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
+public class DisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	

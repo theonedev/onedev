@@ -16,9 +16,13 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DefaultTaskScheduler implements TaskScheduler {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskScheduler.class);
 	
 	private Scheduler quartz;
 	
@@ -86,11 +90,13 @@ public class DefaultTaskScheduler implements TaskScheduler {
 
     public static class HelperTask implements Job {
 
-		public void execute(JobExecutionContext context)
-				throws JobExecutionException {
-			SchedulableTask task = (SchedulableTask) context.getTrigger()
-					.getJobDataMap().get("task");
-			task.execute();
+		public void execute(JobExecutionContext context) throws JobExecutionException {
+			SchedulableTask task = (SchedulableTask) context.getTrigger().getJobDataMap().get("task");
+			try {
+				task.execute();
+			} catch (Exception e) {
+				logger.error("Error executing scheduled task", e);
+			}
 		}
 		
 	}

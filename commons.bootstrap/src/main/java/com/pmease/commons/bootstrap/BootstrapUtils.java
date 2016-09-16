@@ -8,8 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class BootstrapUtils {
 	
@@ -64,7 +67,64 @@ public class BootstrapUtils {
 		}
 	}
 
-	/**
+    /**
+     * Zip specified directory recursively as specified file.
+     * @param dir
+     * @param file
+     */
+    public static void zip(File dir, File file) {
+    	try (OutputStream os = new FileOutputStream(file)) {
+    		zip(dir, os);
+    	} catch (IOException e) {
+    		throw new RuntimeException(e);
+		};
+    }
+    
+    /**
+     * Zip specified directory recursively as specified file.
+     * @param dir
+     * @param file
+     */
+    public static void zip(File dir, OutputStream os) {
+    	try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os, BUFFER_SIZE))) {
+			zos.setLevel(Deflater.DEFAULT_COMPRESSION);
+			zip(zos, dir, "");
+    	} catch (IOException e) {
+    		throw new RuntimeException(e);
+		}
+    }
+    
+    private static void zip(ZipOutputStream zos, File dir, String basePath) {
+		byte buffer[] = new byte[BUFFER_SIZE];
+		
+		try {
+			if (basePath.length() != 0)
+				zos.putNextEntry(new ZipEntry(basePath + "/"));
+
+			for (File file: dir.listFiles()) {
+				if (file.isDirectory()) {
+					if (basePath.length() != 0)
+						zip(zos, file, basePath + "/" + file.getName());
+					else
+						zip(zos, file, file.getName());
+				} else {
+					try (FileInputStream is = new FileInputStream(file)) {
+						if (basePath.length() != 0)
+							zos.putNextEntry(new ZipEntry(basePath + "/" + file.getName()));
+						else
+							zos.putNextEntry(new ZipEntry(file.getName()));
+						int len;
+					    while ((len = is.read(buffer)) > 0)
+					    	zos.write(buffer, 0, len);
+					}
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+    /**
 	 * Unzip files matching specified matcher from specified file to specified directory.
 	 * 
 	 * @param srcFile 

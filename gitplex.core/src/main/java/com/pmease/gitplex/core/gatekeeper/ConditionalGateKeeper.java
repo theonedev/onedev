@@ -13,11 +13,12 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
-@Editable(name="If...Then... Composition", order=300, icon="fa-object-group",  
+@Editable(name="Conditional Composition", order=300, icon="fa-object-group",  
 		category=GateKeeper.CATEGORY_COMPOSITION, 
-		description="If first gate keeper is passed, then go ahead to check second gate keeper")
+		description="If first gatekeeper is passed, then continue to check second gatekeeper; "
+				+ "otherwise consider the conditional composition as passed")
 @Horizontal
-public class IfThenGateKeeper extends CompositeGateKeeper {
+public class ConditionalGateKeeper extends CompositeGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	

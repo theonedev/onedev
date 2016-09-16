@@ -22,6 +22,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -87,7 +88,7 @@ import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.event.RefUpdated;
-import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
+import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DepotManager;
@@ -99,7 +100,9 @@ import com.pmease.gitplex.core.security.protectedobject.ProtectedObject;
 import com.pmease.gitplex.core.util.validation.DepotName;
 
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames={"g_account_id", "name"})})
+@Table(
+		indexes={@Index(columnList="g_forkedFrom_id"), @Index(columnList="g_account_id"), @Index(columnList="name")}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_account_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
 @Editable
@@ -139,14 +142,14 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
-	 * gate keepers and integration policies upon depot renaming/deletion
+	 * gatekeepers and integration policies upon depot renaming/deletion
 	 */
 	@Version
 	private long version;
 	
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<GateKeeper> gateKeepers = new ArrayList<>();
+	private GateKeeper gateKeeper = new DefaultGateKeeper();
 	
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -232,12 +235,12 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 	@NotNull
 	@Valid
-	public List<GateKeeper> getGateKeepers() {
-		return gateKeepers;
+	public GateKeeper getGateKeeper() {
+		return gateKeeper;
 	}
 
-	public void setGateKeepers(ArrayList<GateKeeper> gateKeepers) {
-		this.gateKeepers = gateKeepers;
+	public void setGateKeeper(GateKeeper gateKeeper) {
+		this.gateKeeper = gateKeeper;
 	}
 
 	@Valid
@@ -377,13 +380,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
         return true;
 	}
 	
-	public GateKeeper getGateKeeper() {
-		AndGateKeeper andGateKeeper = new AndGateKeeper();
-		for (GateKeeper each: getGateKeepers())
-			andGateKeeper.getGateKeepers().add(each);
-		return andGateKeeper;
-	}
-
 	/**
 	 * Find fork root of this repository. 
 	 * 

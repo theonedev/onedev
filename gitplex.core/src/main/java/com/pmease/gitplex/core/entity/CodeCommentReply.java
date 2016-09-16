@@ -2,7 +2,9 @@ package com.pmease.gitplex.core.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -14,6 +16,7 @@ import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
  * which can be updated from background thread.
  */
 @Entity
+@Table(indexes={@Index(columnList="g_comment_id"), @Index(columnList="g_user_id")})
 @DynamicUpdate 
 public class CodeCommentReply extends CodeCommentActivity {
 	

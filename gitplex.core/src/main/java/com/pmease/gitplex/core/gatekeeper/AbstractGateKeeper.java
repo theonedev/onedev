@@ -57,7 +57,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	/**
-	 * Check gate keeper against specified pull request without considering enable flag. This is 
+	 * Check gatekeeper against specified pull request without considering enable flag. This is 
 	 * typically used to determine whether or not to accept a pull request. 
 	 * 
 	 * @param request

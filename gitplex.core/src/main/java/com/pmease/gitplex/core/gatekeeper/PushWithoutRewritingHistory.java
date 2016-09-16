@@ -10,11 +10,11 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 
-@Editable(order=2000, icon="fa-ext fa-repo-lock", description="This gate keeper will be passed if the push "
+@Editable(order=2000, icon="fa-ext fa-repo-lock", description="This gatekeeper will be passed if the push "
 		+ "operation does not rewrite history of target branch. Rewriting history of public branches "
 		+ "is dangerous, and it happens when user forces a push without merging/rebasing with the "
 		+ "branch head")
-public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
+public class PushWithoutRewritingHistory extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	

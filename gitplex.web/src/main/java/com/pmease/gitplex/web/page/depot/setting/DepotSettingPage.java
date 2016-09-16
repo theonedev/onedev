@@ -52,7 +52,7 @@ public abstract class DepotSettingPage extends DepotPage {
 			 */
 			tabs.add(new DepotSettingTab("Collaborators", "fa fa-fw fa-user", DepotCollaboratorListPage.class));
 		}
-		tabs.add(new DepotSettingTab("Gate Keepers", "fa fa-fw fa-eye", GateKeeperPage.class));
+		tabs.add(new DepotSettingTab("Gatekeepers", "fa fa-fw fa-eye", GateKeeperPage.class));
 		tabs.add(new DepotSettingTab("Integration Policies", "fa fa-fw fa-puzzle-piece", IntegrationPolicyPage.class));
 		
 		add(new Tabbable("depotSettingTabs", tabs));

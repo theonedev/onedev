@@ -17,10 +17,10 @@ public class HibernateFilter implements Filter {
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final PersistService persistService;
+	private final PersistManager persistService;
 	
 	@Inject
-	public HibernateFilter(UnitOfWork unitOfWork, PersistService persistService) {
+	public HibernateFilter(UnitOfWork unitOfWork, PersistManager persistService) {
 		this.unitOfWork = unitOfWork;
 		this.persistService = persistService;
 	}

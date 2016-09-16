@@ -9,6 +9,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -25,7 +26,9 @@ import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.gitplex.core.util.validation.DepotName;
 
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames={"g_organization_id", "name"})})
+@Table(
+		indexes={@Index(columnList="g_organization_id"), @Index(columnList="name")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_organization_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Team extends AbstractEntity {

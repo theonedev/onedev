@@ -40,7 +40,9 @@ import com.pmease.gitplex.core.security.SecurityUtils;
  * which can be updated from background thread.
  */
 @Entity
-@Table(indexes={@Index(columnList="uuid"), @Index(columnList="commit"), 
+@Table(indexes={
+		@Index(columnList="g_depot_id"), @Index(columnList="g_user_id"),
+		@Index(columnList="uuid"), @Index(columnList="commit"), 
 		@Index(columnList="path"), @Index(columnList="compareCommit")})
 @DynamicUpdate 
 public class CodeComment extends AbstractEntity {

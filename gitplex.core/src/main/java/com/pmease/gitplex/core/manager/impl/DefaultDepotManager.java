@@ -51,7 +51,7 @@ import com.pmease.gitplex.core.event.depot.DepotTransferred;
 import com.pmease.gitplex.core.event.lifecycle.SystemStarted;
 import com.pmease.gitplex.core.event.lifecycle.SystemStarting;
 import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
-import com.pmease.gitplex.core.gatekeeper.GateKeeper;
+import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
@@ -144,10 +144,8 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     			for (IntegrationPolicy policy: each.getIntegrationPolicies()) {
     				policy.onDepotTransfer(depot, oldAccount);
     			}
-    			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-    				if (it.next().onDepotTransfer(each, depot, oldAccount))
-    					it.remove();
-    			}
+    			if (each.getGateKeeper().onDepotTransfer(each, depot, oldAccount))
+    				each.setGateKeeper(new DefaultGateKeeper());
     		}
     	}
     	if (oldName != null && !depot.getName().equals(oldName)) {
@@ -157,9 +155,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     			for (IntegrationPolicy integrationPolicy: each.getIntegrationPolicies()) {
     				integrationPolicy.onDepotRename(depot.getAccount(), oldName, depot.getName());
     			}
-    			for (GateKeeper gateKeeper: each.getGateKeepers()) {
-    				gateKeeper.onDepotRename(depot, oldName);
-    			}
+    			each.getGateKeeper().onDepotRename(depot, oldName);
     		}
     	}
     	
@@ -199,10 +195,8 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 				if (it.next().onDepotDelete(depot))
 					it.remove();
 			}
-			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-				if (it.next().onDepotDelete(depot))
-					it.remove();
-			}
+			if (each.getGateKeeper().onDepotDelete(depot))
+				each.setGateKeeper(new DefaultGateKeeper());
 		}
 
 		doAfterCommit(new Runnable() {
@@ -340,10 +334,8 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 							it.remove();
 					}
 				}
-				for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-					if (it.next().onRefDelete(event.getRefName()))
-						it.remove();
-				}
+				if (each.getGateKeeper().onRefDelete(event.getRefName()))
+					each.setGateKeeper(new DefaultGateKeeper());
 			}
 		}
 	}

@@ -20,8 +20,8 @@ import com.pmease.gitplex.core.util.ParentAwareMatcher;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Editable(order=300, icon="fa-file-text", description=
-		"This gate keeper will be passed if specified files are modified")
-public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
+		"This gatekeeper will be passed if specified files are modified")
+public class TouchSpecifiedFiles extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	

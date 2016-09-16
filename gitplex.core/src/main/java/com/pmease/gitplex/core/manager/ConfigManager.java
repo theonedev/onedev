@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Config;
+import com.pmease.gitplex.core.setting.BackupSetting;
 import com.pmease.gitplex.core.setting.MailSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
@@ -60,4 +61,22 @@ public interface ConfigManager extends EntityManager<Config> {
 	 */
 	void saveMailSetting(@Nullable MailSetting mailSetting);
 	
+	/**
+	 * Get backup setting.
+	 * <p>
+	 * @return
+	 * 			backup setting, or <tt>null</tt> if backup setting record exists but value is null
+	 * @throws 
+	 * 			RuntimeException if backup setting record is not found
+	 */
+	BackupSetting getBackupSetting();
+
+	/**
+	 * Save specified backup setting.
+	 * <p>
+	 * @param backupSetting
+	 * 			backup setting to be saved. Use <tt>null</tt> to clear the setting (but 
+	 * 			setting record will still be remained in database)
+	 */
+	void saveBackupSetting(@Nullable BackupSetting backupSetting);
 }

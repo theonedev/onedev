@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -10,8 +11,9 @@ import javax.persistence.UniqueConstraint;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"g_user_id", "g_organization_id"})
+@Table(
+		indexes={@Index(columnList="g_user_id"), @Index(columnList="g_organization_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_user_id", "g_organization_id"})
 })
 public class OrganizationMembership extends AbstractEntity {
 

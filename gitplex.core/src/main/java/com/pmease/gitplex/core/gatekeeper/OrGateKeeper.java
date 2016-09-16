@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
 @Editable(name="Or Composition", order=200, icon="fa-object-group", category=GateKeeper.CATEGORY_COMPOSITION,
-		description="This gate keeper will be passed if any of the contained gate keepers is passed")
+		description="This gatekeeper will be passed if any of the contained gatekeepers is passed")
 @Horizontal
 public class OrGateKeeper extends AndOrGateKeeper {
 
