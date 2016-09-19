@@ -5,11 +5,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.hibernate.metadata.ClassMetadata;
 
@@ -20,14 +18,14 @@ public class DefaultIdManager implements IdManager {
 
 	private final Dao dao;
 	
-	private final Provider<SessionFactory> sessionFactoryProvider;
+	private final PersistManager persistManager;
 	
 	private final Map<Class<?>, AtomicLong> nextIds = new HashMap<>();
 	
 	@Inject
-	public DefaultIdManager(Dao dao, Provider<SessionFactory> sessionFactoryProvider) {
+	public DefaultIdManager(Dao dao, PersistManager persistManager) {
 		this.dao = dao;
-		this.sessionFactoryProvider = sessionFactoryProvider;
+		this.persistManager = persistManager;
 	}
 
 	private long getMaxId(Class<?> entityClass) {
@@ -42,7 +40,7 @@ public class DefaultIdManager implements IdManager {
 	@Sessional
 	@Override
 	public void init() {
-		for (ClassMetadata metadata: sessionFactoryProvider.get().getAllClassMetadata().values()) {
+		for (ClassMetadata metadata: persistManager.getSessionFactory().getAllClassMetadata().values()) {
 			Class<?> entityClass = metadata.getMappedClass();
 			nextIds.put(entityClass, new AtomicLong(getMaxId(entityClass)+1));
 		}

@@ -43,6 +43,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     public void testResolveChangedFilesWhenThereIsNoMerge() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
+        request.setSourceDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "master:1");
@@ -83,6 +84,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     public void testResolveChangedFilesWhenThereIsMerge() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
+        request.setSourceDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("1", "", "master:1");
@@ -123,6 +125,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     public void testGetCommitsWhenTargetBranchIsMergedToSourceBranch() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
+        request.setSourceDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("0", "", "0");
@@ -171,6 +174,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     public void testGetCommitsWhenSourceBranchIsMergedToTargetBranch() throws Exception {
         PullRequest request = new PullRequest();
         request.setTargetDepot(depot);
+        request.setSourceDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("0", "", "0");

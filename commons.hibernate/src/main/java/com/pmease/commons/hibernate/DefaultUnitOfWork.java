@@ -5,21 +5,19 @@ import java.util.concurrent.ExecutorService;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.pmease.commons.util.ObjectReference;
 
 @Singleton
-public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
+public class DefaultUnitOfWork implements UnitOfWork {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUnitOfWork.class);
 	
-	private final Provider<SessionFactory> sessionFactoryProvider;
+	private final PersistManager persistManager;
 	
 	private final ExecutorService executorService;
 	
@@ -31,7 +29,7 @@ public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 
 				@Override
 				protected Session openObject() {
-					Session session = sessionFactoryProvider.get().openSession();
+					Session session = persistManager.getSessionFactory().openSession();
 					
 					// Session is supposed to be able to write only in transactional methods
 					session.setFlushMode(FlushMode.MANUAL);
@@ -50,31 +48,26 @@ public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 	};
 	
 	@Inject
-	public DefaultUnitOfWork(Provider<SessionFactory> sessionFactoryProvider, ExecutorService executorService) {
-		this.sessionFactoryProvider = sessionFactoryProvider;
+	public DefaultUnitOfWork(PersistManager persistManager, ExecutorService executorService) {
+		this.persistManager = persistManager;
 		this.executorService = executorService;
 	}
 
+	@Override
 	public void begin() {
 		sessionReferenceHolder.get().open();
 	}
 
+	@Override
 	public void end() {
 		sessionReferenceHolder.get().close();
 	}
 
-	public Session get() {
-		return getSession();
-	}
-
+	@Override
 	public Session getSession() {
 		return sessionReferenceHolder.get().get();
 	}
 	
-	public SessionFactory getSessionFactory() {
-		return sessionFactoryProvider.get();
-	}
-
 	@Override
 	public <T> T call(Callable<T> callable) {
 		begin();

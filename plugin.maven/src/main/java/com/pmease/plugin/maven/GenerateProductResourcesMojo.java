@@ -61,9 +61,9 @@ public class GenerateProductResourcesMojo extends AbstractMojo {
 		
 		PluginUtils.checkResolvedArtifacts(project, true);
 		
-    	File binDir = new File(project.getBuild().getDirectory(), PluginConstants.SANDBOX + "/bin");
-    	if (!binDir.exists())
-    		binDir.mkdirs();
+    	File bootDir = new File(project.getBuild().getDirectory(), PluginConstants.SANDBOX + "/boot");
+    	if (!bootDir.exists())
+    		bootDir.mkdirs();
 
     	Properties props = new Properties();
     	props.put("executables", executables);
@@ -76,9 +76,9 @@ public class GenerateProductResourcesMojo extends AbstractMojo {
     	for (Artifact artifact: PluginUtils.getBootstrapArtifacts(project, repoSystem, repoSession, remoteRepos))
     		bootstrapKeys.add(PluginUtils.getArtifactKey(artifact));
     	
-    	PluginUtils.writeObject(new File(binDir, PluginConstants.BOOTSTRAP_KEYS), bootstrapKeys);
+    	PluginUtils.writeObject(new File(bootDir, PluginConstants.BOOTSTRAP_KEYS), bootstrapKeys);
     	
-    	PluginUtils.writeClasspath(new File(binDir, PluginConstants.SYSTEM_CLASSPATH), project, 
+    	PluginUtils.writeClasspath(new File(bootDir, PluginConstants.SYSTEM_CLASSPATH), project, 
     			repoSystem, repoSession, remoteRepos);
     }
 

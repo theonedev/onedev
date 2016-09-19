@@ -27,7 +27,9 @@
                                 <unzip src="wrapper/wrapper-delta-pack-st.zip" dest="${project.build.outputDirectory}" overwrite="true"> 
                                     <regexpmapper from="^.*?/(.*)" to="\1"/> 
                                 </unzip>  
-                                <copy file="wrapper/wrapper.conf" tofile="${project.build.outputDirectory}/wrapper.conf"/> 
+                                <copy todir="${project.build.outputDirectory}/customization">
+                                	<fileset dir="wrapper/customization"></fileset>
+                                </copy>
                             </target> 
                         </configuration> 
                     </execution> 

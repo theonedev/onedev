@@ -186,16 +186,16 @@ public class PluginUtils {
 
 		// copy necessary library files to sandbox so that sandbox can 
 		// be executed from command line
-		File binDir = new File(sandboxDir, "bin");
+		File bootDir = new File(sandboxDir, "boot");
 		File libDir = new File(sandboxDir, "lib");
 
-		if (!binDir.exists())
-			binDir.mkdirs();
+		if (!bootDir.exists())
+			bootDir.mkdirs();
 		if (!libDir.exists())
 			libDir.mkdirs();
 		
 		Set<String> bootstrapKeys = (Set<String>) readObject(
-				new File(binDir, PluginConstants.BOOTSTRAP_KEYS));
+				new File(bootDir, PluginConstants.BOOTSTRAP_KEYS));
 
 		Set<Artifact> artifacts = new HashSet<Artifact>();
 		for (Artifact artifact: project.getArtifacts()) {
@@ -211,7 +211,7 @@ public class PluginUtils {
 
 			File destFile;
 			if (bootstrapKeys.contains(artifactKey))
-				destFile = new File(binDir, artifactKey);
+				destFile = new File(bootDir, artifactKey);
 			else
 				destFile = new File(libDir, artifactKey);
 			copyArtifact(artifact.getFile(), destFile, archiverManager);

@@ -16,8 +16,6 @@ import javax.persistence.Version;
 
 import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.collection.internal.PersistentBag;
@@ -28,6 +26,7 @@ import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
+import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.jackson.HibernateObjectMapperConfigurator;
@@ -38,6 +37,7 @@ import com.pmease.commons.jackson.ObjectMapperConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
+import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.ClassUtils;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -60,10 +60,7 @@ public class HibernateModule extends AbstractPluginModule {
 		bind(Properties.class).annotatedWith(Names.named("hibernate")).toProvider(Providers.<Properties>of(null));
 		bind(PhysicalNamingStrategy.class).to(PhysicalNamingStrategyStandardImpl.class);
 		
-		bind(PersistManager.class).to(DefaultPersistManager.class);
-		bind(SessionFactory.class).toProvider(DefaultPersistManager.class);
 		bind(UnitOfWork.class).to(DefaultUnitOfWork.class);
-		bind(Session.class).toProvider(DefaultUnitOfWork.class);
 		bind(IdManager.class).to(DefaultIdManager.class);
 		bind(Dao.class).to(DefaultDao.class);
 		
@@ -183,6 +180,12 @@ public class HibernateModule extends AbstractPluginModule {
 			
 		}).in(Singleton.class);
 		
+		if (AppLoader.COMMAND_RESTORE.equals(Bootstrap.getCommand()))
+			bind(PersistManager.class).to(DefaultRestoreManager.class);
+		else if (AppLoader.COMMAND_REAPPLY_DB_CONSTRAINTS.equals(Bootstrap.getCommand()))
+			bind(PersistManager.class).to(DefaultReapplyDBConstraintsManager.class);
+		else
+			bind(PersistManager.class).to(DefaultPersistManager.class);
 	}
 
 	@Override

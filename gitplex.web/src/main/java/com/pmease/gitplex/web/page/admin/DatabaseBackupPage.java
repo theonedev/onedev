@@ -52,7 +52,8 @@ public class DatabaseBackupPage extends AdministrationPage {
 					public void writeData(Attributes attributes) throws IOException {
 						File tempDir = FileUtils.createTempDir("backup");
 						try {
-							GitPlex.getInstance(PersistManager.class).exportData(tempDir, BackupSetting.BATCH_SIZE);
+							PersistManager persistManager = GitPlex.getInstance(PersistManager.class);
+							persistManager.exportData(tempDir, BackupSetting.BATCH_SIZE);
 							BootstrapUtils.zip(tempDir, attributes.getResponse().getOutputStream());
 						} finally {
 							FileUtils.deleteDir(tempDir);

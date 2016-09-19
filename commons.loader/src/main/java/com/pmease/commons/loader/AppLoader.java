@@ -43,6 +43,15 @@ import javassist.bytecode.SignatureAttribute.TypeParameter;
 
 public class AppLoader implements Startable {
 
+	// built-in command for database restore
+	public static final String COMMAND_RESTORE = "restore";
+	
+	// built-in command for database upgrade
+	public static final String COMMAND_UPGRADE = "upgrade";
+	
+	// built-in command for database constraint reapply
+	public static final String COMMAND_REAPPLY_DB_CONSTRAINTS = "reapply_db_constraints";
+	
 	private static final Logger logger = LoggerFactory.getLogger(AppLoader.class);
 
 	public static Injector injector;
@@ -62,7 +71,7 @@ public class AppLoader implements Startable {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-		} else if (!tempDir.mkdir()) {
+		} else if (!tempDir.mkdirs()) {
 			throw new RuntimeException("Can not create directory '" + tempDir.getAbsolutePath() + "'.");
 		}
 		System.setProperty("java.io.tmpdir", tempDir.getAbsolutePath());
@@ -90,7 +99,7 @@ public class AppLoader implements Startable {
 
 	@Override
 	public void stop() {
-		logger.info("Shutting down general executor...");
+		logger.info("Shutting down executor service...");
 		injector.getInstance(ExecutorService.class).shutdown();
 		
 		logger.info("Stopping plugin manager...");

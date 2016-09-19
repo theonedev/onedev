@@ -30,7 +30,7 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 
 	@Override
 	protected void configure() {
-		final Class<? extends Plugin> pluginClass = getPluginClass();
+		Class<? extends Plugin> pluginClass = getPluginClass();
 		if (pluginClass != null) {
 			contribute(Plugin.class, pluginClass);
 		    

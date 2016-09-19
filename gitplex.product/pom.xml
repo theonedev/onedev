@@ -34,8 +34,7 @@
 						<configuration>
 							<target>
 								<copy todir="${project.build.directory}/sandbox">
-									<fileset dir="system"
-										excludes="site/images/**, site/avatars/**, **/*.keystore" />
+									<fileset dir="system" excludes="site/images/**, site/avatars/**, **/*.keystore" />
 									<filterset>
 										<filter token="dbName" value="${project.artifactId}" />
 										<filter token="productName" value="${project.name}" />
@@ -85,8 +84,7 @@
 								<gant file="build/package.gant">
 									<definition name="buildDirectory" value="${project.build.directory}" />
 									<definition name="executables" value="${executables}" />
-									<definition name="packageName"
-										value="${project.artifactId}-${project.version}" />
+									<definition name="packageName" value="${project.artifactId}-${project.version}" />
 								</gant>
 							</target>
 						</configuration>
@@ -160,7 +158,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<executables>bin/*.sh, bin/wrapper-*</executables>
+		<executables>bin/*.sh, boot/wrapper-*</executables>
 		<bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>
 		<moduleClass>com.pmease.gitplex.product.ProductModule</moduleClass>
 		<aggregation>true</aggregation>

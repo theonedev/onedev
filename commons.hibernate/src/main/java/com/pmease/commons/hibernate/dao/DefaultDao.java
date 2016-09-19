@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -26,18 +25,15 @@ import com.pmease.commons.loader.ManagedSerializedForm;
 @SuppressWarnings("unchecked")
 public class DefaultDao implements Dao, Serializable {
 
-	private final Provider<Session> sessionProvider;
+	private final UnitOfWork unitOfWork;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	private final ExecutorService executorService;
 	
-	private final UnitOfWork unitOfWork;
-	
 	@Inject
-	public DefaultDao(Provider<Session> sessionProvider, UnitOfWork unitOfWork, 
-			ListenerRegistry listenerRegistry, ExecutorService executorService) {
-		this.sessionProvider = sessionProvider;
+	public DefaultDao(UnitOfWork unitOfWork, ListenerRegistry listenerRegistry, 
+			ExecutorService executorService) {
 		this.unitOfWork = unitOfWork;
 		this.listenerRegistry = listenerRegistry;
 		this.executorService = executorService;
@@ -72,7 +68,7 @@ public class DefaultDao implements Dao, Serializable {
 
 	@Override
 	public Session getSession() {
-		return sessionProvider.get();
+		return unitOfWork.getSession();
 	}
 
 	protected <T extends AbstractEntity> Class<T> unproxy(Session session, Class<T> entityClass) {

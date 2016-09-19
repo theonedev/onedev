@@ -88,7 +88,7 @@ public class CreateProductSandboxMojo extends AbstractMojo {
     			File buildDir = new File(project.getBuild().getDirectory());
     			File sandboxDir = new File(buildDir, PluginConstants.SANDBOX);
 
-    	    	File classpathFile = new File(sandboxDir, "bin/" + PluginConstants.SYSTEM_CLASSPATH);
+    	    	File classpathFile = new File(sandboxDir, "boot/" + PluginConstants.SYSTEM_CLASSPATH);
     	    	if (!classpathFile.exists()) {
     	    		if (artifact.getFile().isFile()) {
     	    			UnArchiver unArchiver;

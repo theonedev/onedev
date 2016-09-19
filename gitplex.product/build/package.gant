@@ -7,7 +7,7 @@ target(default:"package the product") {
 
 	File destFile = new File(buildDir, "${packageName}.zip");
 	zip(destfile: destFile) {
-		zipfileset(dir: sandboxDir, prefix: "${packageName}", excludes: "${executables}, bin/system.classpath")
+		zipfileset(dir: sandboxDir, prefix: "${packageName}", excludes: "${executables}, boot/system.classpath")
 		zipfileset(dir: sandboxDir, prefix: "${packageName}", includes: "${executables}", filemode: "755")
 	}
 }		

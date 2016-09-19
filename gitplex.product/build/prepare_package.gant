@@ -9,12 +9,12 @@ target(default:"prepare to package the product") {
 		jswLoc = extractTo
 	}
 	
-	File binDir = new File(sandboxDir, "bin")			
-	copy(todir: binDir) {
+	File binDir = new File(sandboxDir, "bin")
+	File bootDir = new File(sandboxDir, "boot")			
+	copy(todir: bootDir) {
 		fileset(dir: jswLoc.absolutePath + "/bin", includes: "wrapper-*")
 		fileset(dir: jswLoc.absolutePath + "/lib", includes: "libwrapper-*, *.dll, wrapper.jar")
 	}
-	copy(tofile: binDir.absolutePath + "/server.bat", file: jswLoc.absolutePath + "/src/bin/AppCommand.bat.in")
 	
 	filterset(id: "appFilterSet") {
 		filter(token: "app.name", value: "${productId}")
@@ -22,10 +22,85 @@ target(default:"prepare to package the product") {
 		filter(token: "app.description", value: "${productName}")
 		filter(token: "app.class", value: "${bootstrapClass}")
 	}
-	copy(tofile: binDir.absolutePath + "/server.sh", file: jswLoc.absolutePath + "/src/bin/sh.script.in") {
+	filterset(id: "batchCommandCommonFilterSet") {
+		filter(token: "set_fixed_command", value: "set _FIXED_COMMAND=console")
+	}
+	filterset(id: "shellScriptCommonFilterSet") {
+		filter(token: "set_fixed_command", value: "FIXED_COMMAND=console")
+		filter(token: "set_pass_through", value: "PASS_THROUGH=true")
+	}
+	
+	copy(tofile: binDir.absolutePath + "/server.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+		filterset() {
+			filter(token: "set_fixed_command", value: "")
+			filter(token: "properties_and_parameters", value: "--")
+		}
+	}
+	copy(tofile: binDir.absolutePath + "/restore.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+		filterset(refid: "batchCommandCommonFilterSet")
+		filterset() {
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Restore\" wrapper.name=${productId}_restore wrapper.displayname=\"${productName} Restore\" wrapper.description=\"${productName} Restore\" -- restore")
+		}
+	}
+	copy(tofile: binDir.absolutePath + "/upgrade.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+		filterset(refid: "batchCommandCommonFilterSet")
+		filterset() {
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Upgrade\" wrapper.name=${productId}_upgrade wrapper.displayname=\"${productName} Upgrade\" wrapper.description=\"${productName} Upgrade\" -- upgrade")
+		}
+	}
+	copy(tofile: binDir.absolutePath + "/reapply_db_constraints.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+		filterset(refid: "batchCommandCommonFilterSet")
+		filterset() {
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Reapply DB Constraints\" wrapper.name=${productId}_reapply_db_constraints wrapper.displayname=\"${productName} Reapply DB Constraints\" wrapper.description=\"${productName} Reapply DB Constraints\" -- reapply_db_constraints")
+		}
+	}
+	
+	copy(tofile: binDir.absolutePath + "/server.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
 		filterset(refid: "appFilterSet")
+		filterset() {
+			filter(token: "set_fixed_command", value: "")
+			filter(token: "set_pass_through", value: "")
+			filter(token: "properties_and_parameters", value: "--")
+		}
 	}	
-	copy(tofile: sandboxDir.absolutePath + "/conf/wrapper.conf", file: jswLoc.absolutePath + "/wrapper.conf") {
+	copy(tofile: binDir.absolutePath + "/restore.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+		filterset() {
+			filter(token: "app.name", value: "${productId}_restore")
+			filter(token: "app.long.name", value: "${productName} Restore")
+			filter(token: "app.description", value: "${productName} Restore")
+			filter(token: "app.class", value: "${bootstrapClass}")
+		}
+		filterset(refid: "shellScriptCommonFilterSet")
+		filterset() {
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Restore' wrapper.name=${productId}_restore wrapper.displayname='${productName} Restore' wrapper.description='${productName} Restore' -- restore")
+		}
+	}	
+	copy(tofile: binDir.absolutePath + "/upgrade.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+		filterset() {
+			filter(token: "app.name", value: "${productId}_upgrade")
+			filter(token: "app.long.name", value: "${productName} Upgrade")
+			filter(token: "app.description", value: "${productName} Upgrade")
+			filter(token: "app.class", value: "${bootstrapClass}")
+		}
+		filterset(refid: "shellScriptCommonFilterSet")
+		filterset() {
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Upgrade' wrapper.name=${productId}_upgrade wrapper.displayname='${productName} Upgrade' wrapper.description='${productName} Upgrade' -- upgrade")
+		}
+	}	
+	copy(tofile: binDir.absolutePath + "/reapply_db_constraints.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+		filterset() {
+			filter(token: "app.name", value: "${productId}_reapply_db_constraints")
+			filter(token: "app.long.name", value: "${productName} Reapply DB Constraints")
+			filter(token: "app.description", value: "${productName} Reapply DB Constraints")
+			filter(token: "app.class", value: "${bootstrapClass}")
+		}
+		filterset(refid: "shellScriptCommonFilterSet")
+		filterset() {
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Reapply DB Constraints' wrapper.name=${productId}_reapply_db_constraints wrapper.displayname='${productName} Reapply DB Constraints' wrapper.description='${productName} Reapply DB Constraints' -- reapply_db_constraints")
+		}
+	}	
+	
+	copy(tofile: sandboxDir.absolutePath + "/conf/wrapper.conf", file: jswLoc.absolutePath + "/customization/wrapper.conf") {
 		filterset(refid: "appFilterSet")
 	}	
 }		

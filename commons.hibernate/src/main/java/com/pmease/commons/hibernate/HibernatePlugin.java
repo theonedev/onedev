@@ -5,21 +5,21 @@ import com.pmease.commons.loader.AbstractPlugin;
 
 public class HibernatePlugin extends AbstractPlugin {
 
-	private final PersistManager persistService;
+	private final PersistManager persistManager;
 	
 	@Inject
-	public HibernatePlugin(PersistManager persistService) {
-		this.persistService = persistService;
+	public HibernatePlugin(PersistManager persistManager) {
+		this.persistManager = persistManager;
 	}
 
 	@Override
 	public void start() {
-		persistService.start();
+		persistManager.start();
 	}
 
 	@Override
 	public void stop() {
-		persistService.stop();
+		persistManager.stop();
 	}
 
 }

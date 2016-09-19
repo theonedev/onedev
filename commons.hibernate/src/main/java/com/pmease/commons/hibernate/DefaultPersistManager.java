@@ -50,10 +50,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.migration.MigrationHelper;
@@ -65,31 +63,27 @@ import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.util.FileUtils;
 
 @Singleton
-public class DefaultPersistManager implements PersistManager, Provider<SessionFactory> {
+public class DefaultPersistManager implements PersistManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPersistManager.class);
 	
-	private final Set<ModelProvider> modelProviders;
+	protected final Set<ModelProvider> modelProviders;
 
-	private final PhysicalNamingStrategy physicalNamingStrategy;
+	protected final PhysicalNamingStrategy physicalNamingStrategy;
 
-	private final Properties properties;
+	protected final Properties properties;
 	
-	private final Migrator migrator;
+	protected final Migrator migrator;
 	
-	private final Interceptor interceptor;
+	protected final Interceptor interceptor;
 	
-	private final IdManager idManager;
+	protected final IdManager idManager;
 	
-	private final Dao dao;
+	protected final Dao dao;
 	
-	private StandardServiceRegistry serviceRegistry;
+	protected final StandardServiceRegistry serviceRegistry;
 	
-	private Metadata metadata;
-	
-	private volatile SessionFactory sessionFactory;
-	
-	private String dbDataVersion;
+	protected volatile SessionFactory sessionFactory;
 	
 	@Inject
 	public DefaultPersistManager(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
@@ -102,6 +96,7 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 		this.interceptor = interceptor;
 		this.idManager = idManager;
 		this.dao = dao;
+		serviceRegistry = new StandardServiceRegistryBuilder().applySettings(properties).build();
 	}
 	
 	private boolean isMySQL() {
@@ -112,7 +107,7 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 		return properties.getProperty(PropertyNames.DIALECT).toLowerCase().contains("hsql");
 	}
 	
-	public void execute(List<String> sqls) {
+	protected void execute(List<String> sqls, boolean failOnError) {
     	Connection conn = null;
 		Statement stmt = null;
 		try {
@@ -120,7 +115,15 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 			stmt = conn.createStatement();
 			for (String sql: sqls) {
 				logger.debug("Executing sql: " + sql);
-				stmt.execute(sql);
+				if (failOnError) {
+					stmt.execute(sql);
+				} else {
+					try {
+						stmt.execute(sql);
+					} catch (Exception e) {
+						logger.error("Error executing sql", e);
+					}
+				}
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -140,22 +143,7 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 		}
 	}
 	
-	@Override
-	public void start() {
-		Preconditions.checkState(sessionFactory == null);
-
-		serviceRegistry = new StandardServiceRegistryBuilder().applySettings(properties).build();
-
-		dbDataVersion = readDbDataVersion();
-		
-		logger.info("Checking data version...");
-		String appDataVersion = MigrationHelper.getVersion(migrator.getClass());
-		if (dbDataVersion != null && !dbDataVersion.equals(appDataVersion)) {
-			throw new RuntimeException("Data version mismatch "
-					+ "(database data version: "+ dbDataVersion + ", application data version: "+ appDataVersion + "). "
-					+ "Please follow instructions in the upgrade guide to upgrade the database.");
-		}
-		
+	protected Metadata buildMetadata() {
 		MetadataSources metadataSources = new MetadataSources(serviceRegistry);
 		for (Class<? extends AbstractEntity> each: ClassUtils.findImplementations(AbstractEntity.class, AbstractEntity.class)) {
 			metadataSources.addAnnotatedClass(each);
@@ -166,7 +154,26 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 				metadataSources.addAnnotatedClass(modelClass);
 		}
 		
-		metadata = metadataSources.getMetadataBuilder().applyPhysicalNamingStrategy(physicalNamingStrategy).build();
+		return metadataSources.getMetadataBuilder().applyPhysicalNamingStrategy(physicalNamingStrategy).build();
+	}
+	
+	protected SessionFactory buildSessionFactory(Metadata metadata) {
+    	return metadata.getSessionFactoryBuilder().applyInterceptor(interceptor).build();
+	}
+	
+	@Override
+	public void start() {
+		String dbDataVersion = readDbDataVersion();
+		
+		logger.info("Checking data version...");
+		String appDataVersion = MigrationHelper.getVersion(migrator.getClass());
+		if (dbDataVersion != null && !dbDataVersion.equals(appDataVersion)) {
+			throw new RuntimeException("Data version mismatch "
+					+ "(database data version: "+ dbDataVersion + ", application data version: "+ appDataVersion + "). "
+					+ "Please upgrade the database.");
+		}
+		
+		Metadata metadata = buildMetadata();
 		
 		if (dbDataVersion == null) {
 			File tempFile = null;
@@ -179,7 +186,7 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 	        		if (shouldInclude(sql))
 	        			sqls.add(sql);
 	        	}
-	        	execute(sqls);
+	        	execute(sqls, true);
         	} catch (IOException e) {
         		throw new RuntimeException(e);
         	} finally {
@@ -187,7 +194,7 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
         			tempFile.delete();
         	}
 
-        	sessionFactory = metadata.getSessionFactoryBuilder().applyInterceptor(interceptor).build();
+        	sessionFactory = buildSessionFactory(metadata);
 
     		idManager.init();
 			
@@ -213,25 +220,12 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 	@Override
 	public void stop() {
 		if (sessionFactory != null) {
-			Preconditions.checkState(!sessionFactory.isClosed());
 			sessionFactory.close();
 			sessionFactory = null;
 		}
 	}
 
-	@Override
-	public SessionFactory get() {
-		if (sessionFactory == null)
-			throw new RuntimeException("Persist service is either not started or is not configured.");
-		return sessionFactory;
-	}
-
-	@Override
-	public boolean isReady() {
-		return sessionFactory != null;
-	}
-
-	private Connection getConnection() {
+	protected Connection getConnection() {
 		try {
 			Class.forName(properties.getProperty(PropertyNames.DRIVER_PROPNAME));
 	    	Connection conn = DriverManager.getConnection(
@@ -244,15 +238,10 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 		}
 	}
 
-	@Override
-	public String getDbDataVersion() {
-		return dbDataVersion;
-	}
-
 	private String getVersionTableName() {
 		JdbcEnvironment environment = serviceRegistry.getService(JdbcEnvironment.class);
 		Identifier identifier = Identifier.toIdentifier(VersionTable.class.getSimpleName());
-		return physicalNamingStrategy.toPhysicalTableName(identifier, environment).getText().toLowerCase();
+		return physicalNamingStrategy.toPhysicalTableName(identifier, environment).getText();
 	}
 	
 	private String getVersionFieldName() {
@@ -265,58 +254,41 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 		return physicalNamingStrategy.toPhysicalColumnName(identifier, environment).getText();
 	}
 	
-	private String readDbDataVersion() {
-    	Connection conn = null;
-		Statement stmt = null;
-		ResultSet resultset = null;
-		try {
-			conn = getConnection();
+	protected String readDbDataVersion() {
+		try (Connection conn = getConnection()) {
 			conn.setAutoCommit(false);
 			String versionTableName = getVersionTableName();
-			resultset = conn.getMetaData().getTables(null, null, versionTableName, null);
-			if (!resultset.next()) {
-				return null;
-			} else {
-				try {
-					logger.info("Version table found. Catalog: {}, Schema: {}, Name: {}, Type: {}", 
-							resultset.getString("TABLE_CAT"), resultset.getString("TABLE_SCHEM"), 
-							resultset.getString("TABLE_NAME"), resultset.getString("TABLE_TYPE"));
-				} catch (Exception e) {
+			boolean versionTableExists = false;
+			try (ResultSet resultset = conn.getMetaData().getTables(null, null, versionTableName.toUpperCase(), null)) {
+				if (resultset.next())
+					versionTableExists = true;
+			}
+			if (!versionTableExists) {
+				try (ResultSet resultset = conn.getMetaData().getTables(null, null, versionTableName.toLowerCase(), null)) {
+					if (resultset.next()) {
+						versionTableExists = true;
+					}
 				}
 			}
-			resultset.close();
-			stmt = conn.createStatement();
-			resultset = stmt.executeQuery("select " + getVersionColumnName() + " from " + versionTableName);
-			if (!resultset.next())
-				throw new RuntimeException("No data version found in database.");
-			String dataVersion = resultset.getString(1);
-			if (resultset.next())
-				throw new RuntimeException("Illegal data version format in database");
-			return dataVersion;
+			if (!versionTableExists) {
+				return null;
+			} else {
+				try (	Statement stmt = conn.createStatement();
+						ResultSet resultset = stmt.executeQuery("select " + getVersionColumnName() + " from " + versionTableName)) {
+					if (!resultset.next())
+						throw new RuntimeException("No data version found in database: this is normally caused "
+								+ "by unsuccessful restore/upgrade, please clean the database and try again");
+					String dataVersion = resultset.getString(1);
+					if (resultset.next())
+						throw new RuntimeException("Illegal data version format in database");
+					return dataVersion;
+				}
+			}
 		} catch (Throwable e) {
 			if (e.getMessage() != null && e.getMessage().contains("ORA-00942")) 
 				return null;
 			else
 				throw Throwables.propagate(e);
-		} finally {
-			if (resultset != null) {
-				try {
-					resultset.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 	}
 	
@@ -387,8 +359,12 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 		return false;
 	}
 
-	@Override
-	public List<Class<?>> getEntityTypes() {
+	/**
+	 * @return hibernate entity types ordered using foreign key dependency
+	 *         information. For example, Build type comes before Configuration
+	 *         type as it has Build has foreign key reference to Configuration.
+	 */
+	private List<Class<?>> getEntityTypes(SessionFactory sessionFactory) {
 		List<Class<?>> entityTypes = new ArrayList<>();
 		for (Iterator<String> it = sessionFactory.getAllClassMetadata().keySet().iterator(); it.hasNext();) {
 			String entityTypeName = (String) it.next();
@@ -428,38 +404,38 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 		return sorted;
 	}
 	
-	@Override
 	@Sessional
+	@Override
 	public void exportData(File exportDir, int batchSize) {
-		for (Class<?> entityType: getEntityTypes()) {
+		Session session = sessionFactory.openSession();
+		for (Class<?> entityType: getEntityTypes(sessionFactory)) {
 			logger.info("Exporting table '" + entityType.getSimpleName() + "'...");
 			
 			logger.info("Querying table ids...");
-
-			Criteria criteria = dao.getSession().createCriteria(entityType, "entity")
+			
+			Criteria criteria = session.createCriteria(entityType, "entity")
 					.setProjection(Projections.property("entity.id")).addOrder(Order.asc("id"));
 			@SuppressWarnings("unchecked")
 			List<Long> ids = criteria.list();
 			int count = ids.size();
 			
 			for (int i=0; i<count/batchSize; i++) {
-				exportEntity(entityType, ids, i*batchSize, batchSize, batchSize, exportDir);
+				exportEntity(session, entityType, ids, i*batchSize, batchSize, batchSize, exportDir);
 				// clear session to free memory
-				dao.getSession().clear();
+				session.clear();
 			}
 			
 			if (count%batchSize != 0) {
-				exportEntity(entityType, ids, count/batchSize*batchSize, count%batchSize, batchSize, exportDir);
+				exportEntity(session, entityType, ids, count/batchSize*batchSize, count%batchSize, batchSize, exportDir);
 			}
 			logger.info("");
 		}
-		
 	}
 
-	private void exportEntity(Class<?> entityType, List<Long> ids, int start, int count, int batchSize, File exportDir) {
+	private void exportEntity(Session session, Class<?> entityType, List<Long> ids, int start, int count, int batchSize, File exportDir) {
 		logger.info("Loading table rows ({}->{}) from database...", String.valueOf(start+1), (start + count));
 		
-		Query query = dao.getSession().createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId");
+		Query query = session.createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId");
 		query.setParameter("fromId", ids.get(start));
 		query.setParameter("toId", ids.get(start+count-1));
 		
@@ -485,7 +461,8 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 	 */
 	@Sessional
 	@Override
-	public void importData(File dataDir) {
+	public void importData(Metadata metadata, File dataDir) {
+		Session session = dao.getSession();
 		// check version
 		File versionFile = new File(dataDir, VersionTable.class.getSimpleName() + "s.xml");
 		VersionedDocument dom = readFile(versionFile);
@@ -497,76 +474,66 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 			throw new RuntimeException("Incorrect data format: no data version");
 		}
 		
-		if (versionElement.getText().equals(MigrationHelper.getVersion(migrator.getClass()))) {
+		if (!versionElement.getText().equals(MigrationHelper.getVersion(migrator.getClass()))) {
 			throw new RuntimeException("Data version mismatch");
 		}
 		
+		logger.info("Clearing database...");
+		dropAll(metadata);
+		
+		logger.info("Creating tables...");
+		createTables(metadata);
+        	
+		List<Class<?>> entityTypes = getEntityTypes(sessionFactory);
+		Collections.reverse(entityTypes);
+		for (Class<?> entityType: entityTypes) {
+			File[] dataFiles = dataDir.listFiles(new FilenameFilter() {
+
+				@Override
+				public boolean accept(File dir, String name) {
+					return name.startsWith(entityType.getSimpleName() + "s.xml");
+				}
+				
+			});
+			for (File file: dataFiles) {
+				try {
+					logger.info("Importing from data file '" + file.getName() + "'...");
+					session.beginTransaction();
+					dom = readFile(file);
+					for (Element element: dom.getRootElement().elements()) {
+						element.detach();
+						AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
+						session.replicate(entity, ReplicationMode.EXCEPTION);
+					}
+					session.flush();
+					session.clear();
+					session.getTransaction().commit();
+				} catch (Throwable e) {
+					session.getTransaction().rollback();
+					throw Throwables.propagate(e);
+				}
+			}
+		}	
+
+		logger.info("Applying foreign key constraints...");
+		
+		applyForeignKeyConstraints(metadata);
+	}
+
+	@Override
+	public void applyForeignKeyConstraints(Metadata metadata) {
 		File tempFile = null;
     	try {
-			logger.info("Clearing database...");
-			
-        	tempFile = File.createTempFile("schema", ".sql");
-        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
-        			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), metadata);
-        	List<String> sqls = new ArrayList<String>();
-        	for (String sql: FileUtils.readLines(tempFile)) {
-        		sqls.add(sql);
-        	}
-        	execute(sqls);
-		
         	tempFile = File.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
-        	sqls.clear();
+        	List<String> sqls = new ArrayList<>();
         	for (String sql: FileUtils.readLines(tempFile)) {
-        		if (shouldInclude(sql) && !isCreatingForeignKey(sql))
-        			sqls.add(sql);
-        	}
-        	execute(sqls);
-        	
-			List<Class<?>> entityTypes = getEntityTypes();
-			Collections.reverse(entityTypes);
-			for (Class<?> entityType: entityTypes) {
-				File[] dataFiles = dataDir.listFiles(new FilenameFilter() {
-	
-					@Override
-					public boolean accept(File dir, String name) {
-						return name.startsWith(entityType.getSimpleName() + "s.xml");
-					}
-					
-				});
-				for (File file: dataFiles) {
-					try {
-						logger.info("Importing from data file '" + file.getName() + "'...");
-						dao.getSession().beginTransaction();
-						dom = readFile(file);
-						for (Element element: dom.getRootElement().elements()) {
-							element.detach();
-							AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
-							dao.getSession().replicate(entity, ReplicationMode.EXCEPTION);
-						}
-						dao.getSession().flush();
-						dao.getSession().clear();
-						dao.getSession().getTransaction().commit();
-					} catch (Throwable e) {
-						dao.getSession().getTransaction().rollback();
-						throw Throwables.propagate(e);
-					}
-				}
-			}	
-	
-			logger.info("Applying foreign key constraints...");
-			
-        	tempFile = File.createTempFile("schema", ".sql");
-        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
-        			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
-        	sqls.clear();
-        	for (String sql: FileUtils.readLines(tempFile)) {
-        		if (isCreatingForeignKey(sql)) {
+        		if (isApplyingForeignKeyConstraints(sql)) {
         			sqls.add(sql);
         		}
         	}
-        	execute(sqls);
+        	execute(sqls, true);
     	} catch (IOException e) {
     		throw new RuntimeException(e);
     	} finally {
@@ -574,11 +541,75 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
     			tempFile.delete();
     	}
 	}
-
-	private boolean isCreatingForeignKey(String sql) {
+	
+	private void createTables(Metadata metadata) {
+		File tempFile = null;
+    	try {
+        	tempFile = File.createTempFile("schema", ".sql");
+        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
+        			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
+        	List<String> sqls = new ArrayList<>();
+        	for (String sql: FileUtils.readLines(tempFile)) {
+        		if (shouldInclude(sql) && !isApplyingForeignKeyConstraints(sql))
+        			sqls.add(sql);
+        	}
+        	execute(sqls, true);
+    	} catch (IOException e) {
+    		throw new RuntimeException(e);
+    	} finally {
+    		if (tempFile != null)
+    			FileUtils.deleteFile(tempFile);
+    	}
+	}
+	
+	@Override
+	public void dropForeignKeyConstraints(Metadata metadata) {
+		File tempFile = null;
+    	try {
+        	tempFile = File.createTempFile("schema", ".sql");
+        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
+        			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), metadata);
+        	List<String> sqls = new ArrayList<>();
+        	for (String sql: FileUtils.readLines(tempFile)) {
+        		if (isDroppingForeignKeyConstraints(sql))
+        			sqls.add(sql);
+        	}
+        	execute(sqls, false);
+    	} catch (IOException e) {
+    		throw new RuntimeException(e);
+    	} finally {
+    		if (tempFile != null)
+    			tempFile.delete();
+    	}
+	}
+	
+	private void dropAll(Metadata metadata) {
+		File tempFile = null;
+    	try {
+        	tempFile = File.createTempFile("schema", ".sql");
+        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
+        			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), metadata);
+        	List<String> sqls = new ArrayList<>();
+        	for (String sql: FileUtils.readLines(tempFile)) {
+        		sqls.add(sql);
+        	}
+        	execute(sqls, false);
+    	} catch (IOException e) {
+    		throw new RuntimeException(e);
+    	} finally {
+    		if (tempFile != null)
+    			tempFile.delete();
+    	}
+	}
+	
+	private boolean isApplyingForeignKeyConstraints(String sql) {
 		return sql.toLowerCase().contains(" foreign key ");
 	}
 
+	private boolean isDroppingForeignKeyConstraints(String sql) {
+		return sql.toLowerCase().contains(" drop constraint ");
+	}
+	
 	private boolean shouldInclude(String sql) {
 		// some databases will create index on foreign keys automatically, so 
 		// we skip creating indexes for those
@@ -587,6 +618,11 @@ public class DefaultPersistManager implements PersistManager, Provider<SessionFa
 		} else {
 			return !isMySQL() && !isHSQL();
 		}
+	}
+
+	@Override
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
 	}
 	
 }

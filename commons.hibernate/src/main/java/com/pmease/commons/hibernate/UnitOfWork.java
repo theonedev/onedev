@@ -19,7 +19,6 @@ package com.pmease.commons.hibernate;
 import java.util.concurrent.Callable;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 
 public interface UnitOfWork {
 
@@ -35,5 +34,4 @@ public interface UnitOfWork {
 	
 	Session getSession();
 	
-	SessionFactory getSessionFactory();
 }

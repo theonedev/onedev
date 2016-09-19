@@ -178,6 +178,11 @@ public class BootstrapUtils {
 	    }
 	} 	
 
+	public static boolean isWindows() {
+		String osName = System.getProperty("os.name");
+		return osName != null && osName.startsWith("Windows");
+	}
+	
 	public static boolean visitDir(File dir, FileVisitor visitor) {
 		if (!dir.exists())
 			throw new RuntimeException("Directory '" + dir.getAbsolutePath() + "' does not exist.");

@@ -8,13 +8,13 @@
 	</appender>
 	
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${installDir}/logs/server.log</file>
+		<file>${installDir}/logs/${bootstrapCommand}.log</file>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<pattern>%date %-5level [%thread] %logger{36} %msg%n</pattern>
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
 			<maxIndex>3</maxIndex>
-			<FileNamePattern>${installDir}/logs/server.log.%i</FileNamePattern>
+			<FileNamePattern>${installDir}/logs/${bootstrapCommand}.log.%i</FileNamePattern>
 		</rollingPolicy>
 		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
 			<MaxFileSize>250KB</MaxFileSize>
@@ -32,9 +32,10 @@
 	<logger name="org.reflections" level="WARN"></logger>
 	<logger name="org.apache.shiro.realm.AuthorizingRealm" level="WARN"></logger>
 	<logger name="jetbrains.exodus" level="WARN"></logger>
+	<logger name="com.zaxxer.hikari.HikariDataSource" level="ERROR"></logger>
 	<logger name="com.pmease" level="DEBUG"></logger>	
 	
-	<root level="INFO">
+	<root level="WARN">
 		<appender-ref ref="FILE" />
 		<appender-ref ref="CONSOLE" />
 	</root>
