@@ -2,6 +2,7 @@ package com.pmease.commons.schedule;
 
 import javax.inject.Inject;
 
+import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.loader.AbstractPlugin;
 
 public class SchedulePlugin extends AbstractPlugin {
@@ -15,12 +16,14 @@ public class SchedulePlugin extends AbstractPlugin {
 	
 	@Override
 	public void start() {
-		taskScheduler.start();
+		if (Bootstrap.command == null)
+			taskScheduler.start();
 	}
 
 	@Override
 	public void stop() {
-		taskScheduler.shutdown();
+		if (taskScheduler.isStarted())
+			taskScheduler.shutdown();
 	}
 
 }

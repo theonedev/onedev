@@ -10,4 +10,5 @@ public interface TaskScheduler {
 	
 	void shutdown();
 	
+	boolean isStarted();
 }

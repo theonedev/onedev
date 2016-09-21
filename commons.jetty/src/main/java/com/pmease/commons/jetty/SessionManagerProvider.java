@@ -9,16 +9,16 @@ import org.eclipse.jetty.server.SessionManager;
 @Singleton
 public class SessionManagerProvider implements Provider<SessionManager> {
 
-	private final JettyManager jettyManager;
+	private final JettyPlugin jettyPlugin;
 	
 	@Inject
-	public SessionManagerProvider(JettyManager jettyManager) {
-		this.jettyManager = jettyManager;
+	public SessionManagerProvider(JettyPlugin jettyPlugin) {
+		this.jettyPlugin = jettyPlugin;
 	}
 	
 	@Override
 	public SessionManager get() {
-		return jettyManager.getContextHandler().getSessionHandler().getSessionManager();
+		return jettyPlugin.getContextHandler().getSessionHandler().getSessionManager();
 	}
 
 }

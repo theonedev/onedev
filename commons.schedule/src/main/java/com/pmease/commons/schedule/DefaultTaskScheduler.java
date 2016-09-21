@@ -46,6 +46,15 @@ public class DefaultTaskScheduler implements TaskScheduler {
 	}
 	
 	@Override
+	public boolean isStarted() {
+		try {
+			return quartz.isStarted();
+		} catch (SchedulerException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@Override
 	public void start() {
 		try {
 			quartz.start();
@@ -54,6 +63,7 @@ public class DefaultTaskScheduler implements TaskScheduler {
 		}
 	}
 	
+	@Override
 	public synchronized String schedule(SchedulableTask task) {
         try {
 			JobDetail job = JobBuilder.newJob(HelperTask.class)
@@ -72,6 +82,7 @@ public class DefaultTaskScheduler implements TaskScheduler {
 		}
 	}
 	
+	@Override
 	public synchronized void unschedule(String taskId) {
 		try {
 			quartz.deleteJob(new JobKey(taskId));
@@ -80,6 +91,7 @@ public class DefaultTaskScheduler implements TaskScheduler {
 		}
 	}
 
+	@Override
 	public void shutdown() {
 		try {
 			quartz.shutdown();
@@ -90,6 +102,7 @@ public class DefaultTaskScheduler implements TaskScheduler {
 
     public static class HelperTask implements Job {
 
+    	@Override
 		public void execute(JobExecutionContext context) throws JobExecutionException {
 			SchedulableTask task = (SchedulableTask) context.getTrigger().getJobDataMap().get("task");
 			try {

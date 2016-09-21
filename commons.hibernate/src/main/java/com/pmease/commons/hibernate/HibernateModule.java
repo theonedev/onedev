@@ -27,6 +27,13 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 import com.pmease.commons.bootstrap.Bootstrap;
+import com.pmease.commons.bootstrap.Command;
+import com.pmease.commons.hibernate.command.ApplyDBConstraintsCommand;
+import com.pmease.commons.hibernate.command.CheckDataVersionCommand;
+import com.pmease.commons.hibernate.command.CleanCommand;
+import com.pmease.commons.hibernate.command.DBDialectCommand;
+import com.pmease.commons.hibernate.command.RestoreCommand;
+import com.pmease.commons.hibernate.command.UpgradeCommand;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.jackson.HibernateObjectMapperConfigurator;
@@ -37,7 +44,6 @@ import com.pmease.commons.jackson.ObjectMapperConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.ClassUtils;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -180,12 +186,26 @@ public class HibernateModule extends AbstractPluginModule {
 			
 		}).in(Singleton.class);
 		
-		if (AppLoader.COMMAND_RESTORE.equals(Bootstrap.getCommand()))
-			bind(PersistManager.class).to(DefaultRestoreManager.class);
-		else if (AppLoader.COMMAND_REAPPLY_DB_CONSTRAINTS.equals(Bootstrap.getCommand()))
-			bind(PersistManager.class).to(DefaultReapplyDBConstraintsManager.class);
-		else
+		if (Bootstrap.command != null) {
+			if (Command.RESTORE.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(RestoreCommand.class);
+			else if (Command.APPLY_DB_CONSTRAINTS.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(ApplyDBConstraintsCommand.class);
+			else if (Command.BACKUP.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(BackupCommand.class);
+			else if (Command.CHECK_DATA_VERSION.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(CheckDataVersionCommand.class);
+			else if (Command.UPGRADE.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(UpgradeCommand.class);
+			else if (Command.CLEAN.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(CleanCommand.class);
+			else if (Command.DB_DIALECT.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(DBDialectCommand.class);
+			else
+				bind(PersistManager.class).to(DefaultPersistManager.class);
+		} else {
 			bind(PersistManager.class).to(DefaultPersistManager.class);
+		}
 	}
 
 	@Override

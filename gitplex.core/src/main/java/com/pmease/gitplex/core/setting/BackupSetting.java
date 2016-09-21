@@ -1,20 +1,15 @@
 package com.pmease.gitplex.core.setting;
 
-import java.io.File;
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.UUID;
 
 import javax.validation.ConstraintValidatorContext;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.quartz.CronExpression;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.pmease.commons.bootstrap.Bootstrap;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.validation.ClassValidating;
+import com.pmease.commons.validation.Directory;
 import com.pmease.commons.validation.Validatable;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 
@@ -24,10 +19,6 @@ public class BackupSetting implements Serializable, Validatable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private final static Logger logger = LoggerFactory.getLogger(BackupSetting.class);
-	
-	public static final int BATCH_SIZE = 1000;
-
 	private String schedule;
 	
 	private String folder;
@@ -52,6 +43,7 @@ public class BackupSetting implements Serializable, Validatable {
 	@Editable(order=200, name="Backup Directory", description=
 		"Specify the directory to which the auto backup files will be stored. Non-absolute path " +
 		"will be considered to be relative to installation directory of GitPlex.")
+	@Directory(absolute=true, outsideOfInstallDir=true, writeable=true)
 	@NotEmpty
 	public String getFolder() {
 		return folder;
@@ -73,31 +65,6 @@ public class BackupSetting implements Serializable, Validatable {
 				hasErrors = true;
 			}
 		}
-		if (folder != null) {
-			File folder = new File(getFolder());
-			if (!folder.isAbsolute())
-				folder = new File(Bootstrap.installDir, getFolder());
-			if (!folder.exists()) {
-				context.buildConstraintViolationWithTemplate("Backup directory does not exist")
-						.addPropertyNode("folder").addConstraintViolation();
-				hasErrors = true;
-			} else {
-				// test file permission
-				File tempFile = new File(folder, UUID.randomUUID().toString());
-				try {
-					tempFile.createNewFile();
-					FileUtils.deleteFile(tempFile);
-				} catch (Exception e) {
-					logger.error("Error testing backup directory.", e);
-					context.buildConstraintViolationWithTemplate("Unable to create test file under backup directory. "
-							+ "Please make sure the user running GitPlex process has write permission to the backup directory.")
-							.addPropertyNode("folder").addConstraintViolation();
-					hasErrors = true;
-				}
-			}
-		}
-		if (hasErrors)
-			context.disableDefaultConstraintViolation();
 		return !hasErrors;
 	}
 

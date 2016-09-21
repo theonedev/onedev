@@ -5,6 +5,6 @@ import javax.inject.Singleton;
 import com.pmease.commons.hibernate.migration.Migrator;
 
 @Singleton
-public class DataMigrator implements Migrator {
+public class DatabaseMigrator implements Migrator {
 
 }

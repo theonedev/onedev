@@ -30,12 +30,8 @@
     <dependencies> 
         <dependency> 
             <groupId>com.pmease</groupId>  
-            <artifactId>commons.loader</artifactId>  
-            <version>1.0.31</version> 
-        </dependency>
-        <dependency>
-        	<groupId>org.hibernate</groupId>
-        	<artifactId>hibernate-validator</artifactId>
+            <artifactId>commons.hibernate</artifactId>  
+            <version>1.0.30</version> 
         </dependency>
     </dependencies>  
     <repositories> 

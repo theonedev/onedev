@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.BootstrapUtils;
 
 public class FileUtils extends org.apache.commons.io.FileUtils {
@@ -127,6 +128,33 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 		}
 	}
 
+	public static boolean isWritable(File dir) {
+		boolean dirExists = dir.exists();
+		File tempFile = null;
+		try {
+			FileUtils.createDir(dir);
+			tempFile = File.createTempFile("test", "test", dir);
+			return true;
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (tempFile != null)
+				tempFile.delete();
+			if (!dirExists)
+				deleteDir(dir);
+		}
+	}
+	
+	public static boolean isOutsideOfInstallDir(File dir) {
+		File normalizedDir;
+		try {
+			normalizedDir = dir.getCanonicalFile();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return !normalizedDir.toPath().startsWith(Bootstrap.installDir.toPath());
+	}
+	
     /**
      * Get default file encoding of underlying OS
      * @return
@@ -159,28 +187,6 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     	return files;
     }
 
-    public static File createTempDir(String prefix) {
-        File temp;
-
-        try {
-			temp = File.createTempFile(prefix, "");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-        if (!temp.delete())
-            throw new RuntimeException("Could not delete temp file: " + temp.getAbsolutePath());
-
-        if (!temp.mkdir())
-            throw new RuntimeException("Could not create temp directory: " + temp.getAbsolutePath());
-
-        return temp;    
-    }
-    
-    public static File createTempDir() {
-    	return createTempDir("temp");
-    }
-    
     /**
      * Delete directory if specified directory exists, or do nothing if the 
      * directory does not exist. 

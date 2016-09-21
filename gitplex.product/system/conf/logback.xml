@@ -3,18 +3,18 @@
 <configuration scan="true">
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+			<pattern>${logback.consoleLogPattern}</pattern>
 		</encoder>
 	</appender>
 	
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${installDir}/logs/${bootstrapCommand}.log</file>
+		<file>${logback.logFile}</file>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%date %-5level [%thread] %logger{36} %msg%n</pattern>
+			<pattern>${logback.fileLogPattern}</pattern>
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
 			<maxIndex>3</maxIndex>
-			<FileNamePattern>${installDir}/logs/${bootstrapCommand}.log.%i</FileNamePattern>
+			<FileNamePattern>${logback.logFile}.%i</FileNamePattern>
 		</rollingPolicy>
 		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
 			<MaxFileSize>250KB</MaxFileSize>
@@ -33,7 +33,7 @@
 	<logger name="org.apache.shiro.realm.AuthorizingRealm" level="WARN"></logger>
 	<logger name="jetbrains.exodus" level="WARN"></logger>
 	<logger name="com.zaxxer.hikari.HikariDataSource" level="ERROR"></logger>
-	<logger name="com.pmease" level="DEBUG"></logger>	
+	<logger name="com.pmease" level="INFO"></logger>	
 	
 	<root level="WARN">
 		<appender-ref ref="FILE" />

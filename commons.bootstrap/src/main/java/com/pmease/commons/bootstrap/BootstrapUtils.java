@@ -35,6 +35,28 @@ public class BootstrapUtils {
     	}
 	}
 	
+    public static File createTempDir(String prefix) {
+        File temp;
+
+        try {
+			temp = File.createTempFile(prefix, "");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+        if (!temp.delete())
+            throw new RuntimeException("Could not delete temp file: " + temp.getAbsolutePath());
+
+        if (!temp.mkdirs())
+            throw new RuntimeException("Could not create temp directory: " + temp.getAbsolutePath());
+
+        return temp;    
+    }
+    
+    public static File createTempDir() {
+    	return createTempDir("temp");
+    }
+    
 	public static void cleanDir(File dir) {
 		visitDir(dir, new FileVisitor() {
 
@@ -143,6 +165,10 @@ public class BootstrapUtils {
 	    }
 	} 	
 	
+	public static void unzip(File srcFile, File destDir) {
+		unzip(srcFile, destDir, null);
+	} 	
+
 	/**
 	 * Unzip files matching specified matcher from input stream to specified directory.
 	 * 

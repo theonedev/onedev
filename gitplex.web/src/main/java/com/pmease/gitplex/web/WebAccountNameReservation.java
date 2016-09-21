@@ -16,26 +16,26 @@ import org.eclipse.jetty.servlet.ServletMapping;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import com.pmease.commons.jetty.JettyManager;
+import com.pmease.commons.jetty.JettyPlugin;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 
 public class WebAccountNameReservation implements AccountNameReservation {
 
-	private final JettyManager jettyManager;
+	private final JettyPlugin jettyPlugin;
 	
 	private final WicketConfig webApp;
 	
 	@Inject
-	public WebAccountNameReservation(JettyManager jettyManager, WicketConfig webApp) {
-		this.jettyManager = jettyManager;
+	public WebAccountNameReservation(JettyPlugin jettyPlugin, WicketConfig webApp) {
+		this.jettyPlugin = jettyPlugin;
 		this.webApp = webApp;
 	}
 	
 	@Override
 	public Set<String> getReserved() {
 		Set<String> reserved = new HashSet<String>();
-		for (ServletMapping mapping: jettyManager.getContextHandler().getServletHandler().getServletMappings()) {
+		for (ServletMapping mapping: jettyPlugin.getContextHandler().getServletHandler().getServletMappings()) {
 			for (String pathSpec: mapping.getPathSpecs()) {
 				pathSpec = StringUtils.stripStart(pathSpec, "/");
 				pathSpec = StringUtils.substringBefore(pathSpec, "/");

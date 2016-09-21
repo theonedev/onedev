@@ -41,6 +41,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.pmease.commons.bootstrap.BootstrapUtils;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CloneCommand;
 import com.pmease.commons.git.command.FetchCommand;
@@ -279,7 +280,7 @@ public class GitUtils {
 		if (repository1.getDirectory()!=null && repository1.getDirectory().equals(repository2.getDirectory())) {
 			return GitUtils.getMergeBase(repository1, commit1, commit2);
 		} else {
-			File tempDir = FileUtils.createTempDir();
+			File tempDir = BootstrapUtils.createTempDir();
 			try {
 				new CloneCommand(tempDir).from(repository1.getDirectory().getAbsolutePath()).bare(true).shared(true).call();
 				if (fetchRef != null) {

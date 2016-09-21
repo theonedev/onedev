@@ -22,9 +22,15 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=DirectoryValidator.class) 
 public @interface Directory {
-	String message() default "Make sure the directory is valid and OS user running this program "
-			+ "has permission to write files into the directory.";
 
+	boolean writeable();
+	
+	boolean outsideOfInstallDir();
+	
+	boolean absolute();
+	
+	String message() default "Invalid directory";
+	
 	Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};

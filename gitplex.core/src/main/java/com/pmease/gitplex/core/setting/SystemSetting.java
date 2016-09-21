@@ -41,7 +41,7 @@ public class SystemSetting implements Serializable, Validatable {
 	}
 
 	@Editable(name="Storage Directory", order=100, description="Specify directory to store GitPlex data such as Git repositories.")
-	@Directory
+	@Directory(absolute=true, outsideOfInstallDir=true, writeable=true)
 	@NotEmpty
 	public String getStoragePath() {
 		return storagePath;

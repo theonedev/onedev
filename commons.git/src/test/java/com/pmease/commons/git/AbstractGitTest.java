@@ -14,6 +14,7 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.junit.Assert;
 import org.mockito.Mockito;
 
+import com.pmease.commons.bootstrap.BootstrapUtils;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppLoaderMocker;
@@ -29,7 +30,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 
 	@Override
 	protected void setup() {
-		gitDir = FileUtils.createTempDir();
+		gitDir = BootstrapUtils.createTempDir();
 		
 		try {
 			git = org.eclipse.jgit.api.Git.init().setBare(false).setDirectory(gitDir).call();

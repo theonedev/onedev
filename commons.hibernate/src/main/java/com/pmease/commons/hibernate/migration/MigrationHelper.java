@@ -123,8 +123,7 @@ public class MigrationHelper {
 					}
 				}
 				if (start == size) {
-					logger.warn("Can not find migrate method (migrator: {}, method: {})", 
-							current.getName(), "migrate" + version + "(Object)");
+					throw new RuntimeException("Can not find migrate method (migrator: " + current.getName() + ", method: " + "migrate" + version + ")"); 
 				} else {
 					start++;
 				}

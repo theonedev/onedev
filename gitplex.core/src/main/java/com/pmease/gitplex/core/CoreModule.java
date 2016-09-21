@@ -85,7 +85,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultTeamMembershipManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVisitInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultWorkExecutor;
-import com.pmease.gitplex.core.migration.DataMigrator;
+import com.pmease.gitplex.core.migration.DatabaseMigrator;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
@@ -102,7 +102,7 @@ public class CoreModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		bind(Migrator.class).to(DataMigrator.class);
+		bind(Migrator.class).to(DatabaseMigrator.class);
 		
 		bind(PhysicalNamingStrategy.class).toInstance(new PrefixedNamingStrategy("g_"));
 		

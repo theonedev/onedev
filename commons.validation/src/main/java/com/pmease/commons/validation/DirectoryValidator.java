@@ -8,35 +8,45 @@ import javax.validation.ConstraintValidatorContext;
 import com.pmease.commons.util.FileUtils;
 
 public class DirectoryValidator implements ConstraintValidator<Directory, String> {
+
+	private Directory annotation;
 	
 	public void initialize(Directory constaintAnnotation) {
+		annotation = constaintAnnotation;
 	}
 
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
-		if (value == null)
-			return true;
-
-		File dir = new File(value);
-		if (!dir.isAbsolute()) {
-			constraintContext.disableDefaultConstraintViolation();
-			constraintContext.buildConstraintViolationWithTemplate("Please specify an absolute directory.").addConstraintViolation();
-			return false;
-		}
-		
-		boolean dirExists = dir.exists();
-		File testFile = new File(dir, DirectoryValidator.class.getName() + ".test");
 		try {
-			FileUtils.createDir(dir);
-			FileUtils.touchFile(testFile);
+			if (value == null)
+				return true;
+
+			File dir = new File(value);
+			if (annotation.absolute()) {
+				if (!dir.isAbsolute()) {
+					constraintContext.disableDefaultConstraintViolation();
+					constraintContext.buildConstraintViolationWithTemplate("Please specify an absolute directory").addConstraintViolation();
+					return false;
+				}
+			}
+			if (annotation.writeable()) {
+				if (!FileUtils.isWritable(dir)) {
+					constraintContext.disableDefaultConstraintViolation();
+					constraintContext.buildConstraintViolationWithTemplate("Directory is not writeable").addConstraintViolation();
+					return false;
+				}
+			}
+			if (annotation.outsideOfInstallDir()) {
+				if (!FileUtils.isOutsideOfInstallDir(dir)) {
+					constraintContext.disableDefaultConstraintViolation();
+					constraintContext.buildConstraintViolationWithTemplate("Please specify a directory outside of the installation directory").addConstraintViolation();
+					return false;
+				}
+			}
 			return true;
 		} catch (Exception e) {
+			constraintContext.disableDefaultConstraintViolation();
+			constraintContext.buildConstraintViolationWithTemplate("Invalid directory").addConstraintViolation();
 			return false;
-		} finally {
-			if (testFile.exists())
-				FileUtils.deleteFile(testFile);
-			if (!dirExists)
-				FileUtils.deleteDir(dir);
 		}
-
 	}
 }

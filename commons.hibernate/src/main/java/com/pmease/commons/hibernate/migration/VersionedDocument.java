@@ -2,9 +2,12 @@ package com.pmease.commons.hibernate.migration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +15,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.ObjectUtils.Null;
 import org.dom4j.Branch;
@@ -36,6 +40,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.ClassUtils;
+import com.pmease.commons.util.FileUtils;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.core.util.HierarchicalStreams;
 import com.thoughtworks.xstream.io.xml.Dom4JReader;
@@ -374,6 +379,23 @@ public final class VersionedDocument implements Document, Externalizable {
 		}
 	}
 	
+	public void writeToFile(File file, boolean pretty) {
+		OutputStream os = null;
+		try {
+			os = new FileOutputStream(file);
+			OutputFormat format = new OutputFormat();
+			format.setIndent(pretty);
+			format.setNewlines(pretty);
+			format.setEncoding(Charsets.UTF_8.name());
+			XMLWriter writer = new XMLWriter(os, format);
+			writer.write(this);
+		} catch (Exception e) {
+			throw Throwables.propagate(e);
+		} finally {
+			IOUtils.closeQuietly(os);
+		}
+	}
+	
 	public static VersionedDocument fromXML(String xml) {
 		try {
 			return new VersionedDocument(new XPP3Reader().read(xml.toCharArray()));
@@ -382,6 +404,14 @@ public final class VersionedDocument implements Document, Externalizable {
 		}
 	}
 	
+	public static VersionedDocument fromFile(File file) {
+		try {
+			return fromXML(FileUtils.readFileToString(file, Charsets.UTF_8.name()));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public synchronized Document getWrapped() {
 		if (wrapped == null) {
 			wrapped = fromXML(Preconditions.checkNotNull(xml)).getWrapped();
@@ -477,6 +507,7 @@ public final class VersionedDocument implements Document, Externalizable {
 		getRootElement().addAttribute("revision", version);
 	}
 	
+	@Override
     public synchronized void writeExternal(ObjectOutput out) throws IOException {
     	if (wrapped != null)
     		out.writeObject(toXML(false));
@@ -484,6 +515,7 @@ public final class VersionedDocument implements Document, Externalizable {
     		out.writeObject(xml);
 	}
 
+	@Override
 	public synchronized void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		xml = Preconditions.checkNotNull((String) in.readObject());
 		wrapped = null;

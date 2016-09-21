@@ -34,21 +34,9 @@ public class Commandline  {
     
     private Map<String, String> environments = new HashMap<String, String>();
     
-    public Commandline(String command) {
-        String[] parts = StringUtils.parseQuoteTokens(command);
-        Preconditions.checkArgument(parts.length != 0, "Argument 'command' is invalid.");
-        
-        executable(parts[0]);
-        for (int i = 1; i < parts.length; i++) 
-            arguments.add(parts[i]);
-    }
-    
-    public Commandline executable(String executable) {
-    	Preconditions.checkArgument(StringUtils.isNotBlank(executable), "Argument 'executable' should not be empty.");
-    	
+    public Commandline(String executable) {
+    	Preconditions.checkNotNull(executable);
         this.executable = executable.replace('/', File.separatorChar).replace('\\', File.separatorChar);
-        
-        return this;
     }
     
     public Commandline arguments(List<String> arguments) {

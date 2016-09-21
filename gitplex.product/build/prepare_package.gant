@@ -42,16 +42,22 @@ target(default:"prepare to package the product") {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Restore\" wrapper.name=${productId}_restore wrapper.displayname=\"${productName} Restore\" wrapper.description=\"${productName} Restore\" -- restore")
 		}
 	}
+	copy(tofile: binDir.absolutePath + "/backup.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+		filterset(refid: "batchCommandCommonFilterSet")
+		filterset() {
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Backup\" wrapper.name=${productId}_backup wrapper.displayname=\"${productName} Backup\" wrapper.description=\"${productName} Backup\" -- backup")
+		}
+	}
 	copy(tofile: binDir.absolutePath + "/upgrade.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Upgrade\" wrapper.name=${productId}_upgrade wrapper.displayname=\"${productName} Upgrade\" wrapper.description=\"${productName} Upgrade\" -- upgrade")
 		}
 	}
-	copy(tofile: binDir.absolutePath + "/reapply_db_constraints.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+	copy(tofile: binDir.absolutePath + "/apply_db_constraints.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Reapply DB Constraints\" wrapper.name=${productId}_reapply_db_constraints wrapper.displayname=\"${productName} Reapply DB Constraints\" wrapper.description=\"${productName} Reapply DB Constraints\" -- reapply_db_constraints")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Apply DB Constraints\" wrapper.name=${productId}_apply_db_constraints wrapper.displayname=\"${productName} Apply DB Constraints\" wrapper.description=\"${productName} Apply DB Constraints\" -- apply_db_constraints")
 		}
 	}
 	
@@ -75,6 +81,18 @@ target(default:"prepare to package the product") {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Restore' wrapper.name=${productId}_restore wrapper.displayname='${productName} Restore' wrapper.description='${productName} Restore' -- restore")
 		}
 	}	
+	copy(tofile: binDir.absolutePath + "/backup.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+		filterset() {
+			filter(token: "app.name", value: "${productId}_backup")
+			filter(token: "app.long.name", value: "${productName} Backup")
+			filter(token: "app.description", value: "${productName} Backup")
+			filter(token: "app.class", value: "${bootstrapClass}")
+		}
+		filterset(refid: "shellScriptCommonFilterSet")
+		filterset() {
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Backup' wrapper.name=${productId}_backup wrapper.displayname='${productName} Backup' wrapper.description='${productName} Backup' -- backup")
+		}
+	}	
 	copy(tofile: binDir.absolutePath + "/upgrade.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
 		filterset() {
 			filter(token: "app.name", value: "${productId}_upgrade")
@@ -87,16 +105,16 @@ target(default:"prepare to package the product") {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Upgrade' wrapper.name=${productId}_upgrade wrapper.displayname='${productName} Upgrade' wrapper.description='${productName} Upgrade' -- upgrade")
 		}
 	}	
-	copy(tofile: binDir.absolutePath + "/reapply_db_constraints.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+	copy(tofile: binDir.absolutePath + "/apply_db_constraints.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
 		filterset() {
-			filter(token: "app.name", value: "${productId}_reapply_db_constraints")
-			filter(token: "app.long.name", value: "${productName} Reapply DB Constraints")
-			filter(token: "app.description", value: "${productName} Reapply DB Constraints")
+			filter(token: "app.name", value: "${productId}_apply_db_constraints")
+			filter(token: "app.long.name", value: "${productName} Apply DB Constraints")
+			filter(token: "app.description", value: "${productName} Apply DB Constraints")
 			filter(token: "app.class", value: "${bootstrapClass}")
 		}
 		filterset(refid: "shellScriptCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Reapply DB Constraints' wrapper.name=${productId}_reapply_db_constraints wrapper.displayname='${productName} Reapply DB Constraints' wrapper.description='${productName} Reapply DB Constraints' -- reapply_db_constraints")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Apply DB Constraints' wrapper.name=${productId}_apply_db_constraints wrapper.displayname='${productName} Apply DB Constraints' wrapper.description='${productName} Apply DB Constraints' -- apply_db_constraints")
 		}
 	}	
 	

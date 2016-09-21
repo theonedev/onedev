@@ -1,7 +1,6 @@
 package com.pmease.commons.loader;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Modules.OverriddenModuleBuilder;
-import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.Startable;
 import com.pmease.commons.util.DependencyUtils;
 import com.pmease.commons.util.ExceptionUtils;
@@ -43,15 +41,6 @@ import javassist.bytecode.SignatureAttribute.TypeParameter;
 
 public class AppLoader implements Startable {
 
-	// built-in command for database restore
-	public static final String COMMAND_RESTORE = "restore";
-	
-	// built-in command for database upgrade
-	public static final String COMMAND_UPGRADE = "upgrade";
-	
-	// built-in command for database constraint reapply
-	public static final String COMMAND_REAPPLY_DB_CONSTRAINTS = "reapply_db_constraints";
-	
 	private static final Logger logger = LoggerFactory.getLogger(AppLoader.class);
 
 	public static Injector injector;
@@ -63,19 +52,6 @@ public class AppLoader implements Startable {
 	
 	@Override
 	public void start() {
-        File tempDir = Bootstrap.getTempDir();
-		if (tempDir.exists()) {
-			logger.info("Cleaning temp directory...");
-			try {
-				FileUtils.cleanDirectory(tempDir);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else if (!tempDir.mkdirs()) {
-			throw new RuntimeException("Can not create directory '" + tempDir.getAbsolutePath() + "'.");
-		}
-		System.setProperty("java.io.tmpdir", tempDir.getAbsolutePath());
-		
 		logger.info("Initializing dependency injection container...");
 		
 		OverriddenModuleBuilder builder = Modules.override(new AppLoaderModule());

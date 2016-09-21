@@ -1,10 +1,8 @@
 package com.pmease.commons.hibernate;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,13 +19,11 @@ import java.util.Set;
 
 import javax.inject.Named;
 import javax.persistence.ManyToOne;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
-import org.apache.commons.io.IOUtils;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
-import org.dom4j.io.XPP3Reader;
 import org.hibernate.Criteria;
 import org.hibernate.Interceptor;
 import org.hibernate.Query;
@@ -49,7 +45,6 @@ import org.hibernate.tool.schema.TargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -65,6 +60,8 @@ import com.pmease.commons.util.FileUtils;
 @Singleton
 public class DefaultPersistManager implements PersistManager {
 
+	private static final int BACKUP_BATCH_SIZE = 1000;
+	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPersistManager.class);
 	
 	protected final Set<ModelProvider> modelProviders;
@@ -81,6 +78,8 @@ public class DefaultPersistManager implements PersistManager {
 	
 	protected final Dao dao;
 	
+	protected final Validator validator;
+	
 	protected final StandardServiceRegistry serviceRegistry;
 	
 	protected volatile SessionFactory sessionFactory;
@@ -88,7 +87,7 @@ public class DefaultPersistManager implements PersistManager {
 	@Inject
 	public DefaultPersistManager(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
 			@Named("hibernate") Properties properties, Migrator migrator, Interceptor interceptor, 
-			IdManager idManager, Dao dao) {
+			IdManager idManager, Dao dao, Validator validator) {
 		this.modelProviders = modelProviders;
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.properties = properties;
@@ -96,23 +95,17 @@ public class DefaultPersistManager implements PersistManager {
 		this.interceptor = interceptor;
 		this.idManager = idManager;
 		this.dao = dao;
+		this.validator = validator;
 		serviceRegistry = new StandardServiceRegistryBuilder().applySettings(properties).build();
 	}
 	
-	private boolean isMySQL() {
-		return properties.getProperty(PropertyNames.DIALECT).toLowerCase().contains("mysql");
-	}
-
-	private boolean isHSQL() {
-		return properties.getProperty(PropertyNames.DIALECT).toLowerCase().contains("hsql");
+	protected String getDialect() {
+		return properties.getProperty(PropertyNames.DIALECT);
 	}
 	
 	protected void execute(List<String> sqls, boolean failOnError) {
-    	Connection conn = null;
-		Statement stmt = null;
-		try {
-			conn = getConnection();
-			stmt = conn.createStatement();
+		try (	Connection conn = getConnection();
+				Statement stmt = conn.createStatement();) {
 			for (String sql: sqls) {
 				logger.debug("Executing sql: " + sql);
 				if (failOnError) {
@@ -126,20 +119,6 @@ public class DefaultPersistManager implements PersistManager {
 				}
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		} finally {
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 	}
 	
@@ -161,17 +140,23 @@ public class DefaultPersistManager implements PersistManager {
     	return metadata.getSessionFactoryBuilder().applyInterceptor(interceptor).build();
 	}
 	
-	@Override
-	public void start() {
+	protected String checkDataVersion(boolean allowEmptyDB) {
 		String dbDataVersion = readDbDataVersion();
-		
-		logger.info("Checking data version...");
+		if (!allowEmptyDB && dbDataVersion == null) {
+			logger.error("Database is not populated yet");
+			System.exit(1);
+		}
 		String appDataVersion = MigrationHelper.getVersion(migrator.getClass());
 		if (dbDataVersion != null && !dbDataVersion.equals(appDataVersion)) {
-			throw new RuntimeException("Data version mismatch "
-					+ "(database data version: "+ dbDataVersion + ", application data version: "+ appDataVersion + "). "
-					+ "Please upgrade the database.");
+			logger.error("Data version mismatch (app data version: {}, db data version: {})", appDataVersion, dbDataVersion);
+			System.exit(1);
 		}
+		return dbDataVersion;
+	}
+	
+	@Override
+	public void start() {
+		String dbDataVersion = checkDataVersion(true);
 		
 		Metadata metadata = buildMetadata();
 		
@@ -202,7 +187,7 @@ public class DefaultPersistManager implements PersistManager {
 			Transaction transaction = session.beginTransaction();
 			try {
 				VersionTable dataVersion = new VersionTable();
-				dataVersion.versionColumn = appDataVersion;
+				dataVersion.versionColumn = MigrationHelper.getVersion(migrator.getClass());
 				session.save(dataVersion);
 				session.flush();
 				transaction.commit();
@@ -292,10 +277,9 @@ public class DefaultPersistManager implements PersistManager {
 		}
 	}
 	
-	@Override
-	public void migrate(File dataDir) {
+	protected void migrateData(File dataDir) {
 		File versionFile = new File(dataDir, VersionTable.class.getSimpleName() + "s.xml");
-		VersionedDocument dom = readFile(versionFile);
+		VersionedDocument dom = VersionedDocument.fromFile(versionFile);
 		List<Element> elements = dom.getRootElement().elements();
 		if (elements.size() != 1)
 			throw new RuntimeException("Incorrect data format: illegal data version");
@@ -306,36 +290,10 @@ public class DefaultPersistManager implements PersistManager {
 		
 		if (MigrationHelper.migrate(versionElement.getText(), migrator, dataDir)) {
 			versionElement.setText(MigrationHelper.getVersion(migrator.getClass()));
-			writeFile(versionFile, dom, false);
+			dom.writeToFile(versionFile, false);
 		}		
 	}
 
-	private void writeFile(File file, VersionedDocument dom, boolean pretty) {
-		OutputStream os = null;
-		try {
-			os = new FileOutputStream(file);
-			OutputFormat format = new OutputFormat();
-			format.setIndent(pretty);
-			format.setNewlines(pretty);
-			format.setEncoding(Charsets.UTF_8.name());
-			XMLWriter writer = new XMLWriter(os, format);
-			writer.write(dom);
-		} catch (Exception e) {
-			throw Throwables.propagate(e);
-		} finally {
-			IOUtils.closeQuietly(os);
-		}
-	}
-	
-	private VersionedDocument readFile(File file) {
-		try {
-			char[] chars = FileUtils.readFileToString(file, Charsets.UTF_8.name()).toCharArray();
-			return new VersionedDocument(new XPP3Reader().read(chars));
-		} catch (Exception e) {
-			throw Throwables.propagate(e);
-		}
-	}
-	
 	/**
 	 * Determines whether or not entityType1 has transitive foreign key
 	 * dependency on entityType2.
@@ -404,6 +362,11 @@ public class DefaultPersistManager implements PersistManager {
 		return sorted;
 	}
 	
+	@Override
+	public void exportData(File exportDir) {
+		exportData(exportDir, BACKUP_BATCH_SIZE);
+	}
+	
 	@Sessional
 	@Override
 	public void exportData(File exportDir, int batchSize) {
@@ -452,7 +415,7 @@ public class DefaultPersistManager implements PersistManager {
 			fileName = entityType.getSimpleName() + "s.xml." + (start/batchSize + 1);
 		
 		logger.info("Writing resulting XML to file '" + fileName + "...");
-		writeFile(new File(exportDir, fileName), dom, true);
+		dom.writeToFile(new File(exportDir, fileName), true);
 	}
 
 	/*
@@ -463,27 +426,6 @@ public class DefaultPersistManager implements PersistManager {
 	@Override
 	public void importData(Metadata metadata, File dataDir) {
 		Session session = dao.getSession();
-		// check version
-		File versionFile = new File(dataDir, VersionTable.class.getSimpleName() + "s.xml");
-		VersionedDocument dom = readFile(versionFile);
-		List<Element> elements = dom.getRootElement().elements();
-		if (elements.size() != 1)
-			throw new RuntimeException("Incorrect data format: illegal data version");
-		Element versionElement = elements.iterator().next().element(getVersionFieldName());		
-		if (versionElement == null) {
-			throw new RuntimeException("Incorrect data format: no data version");
-		}
-		
-		if (!versionElement.getText().equals(MigrationHelper.getVersion(migrator.getClass()))) {
-			throw new RuntimeException("Data version mismatch");
-		}
-		
-		logger.info("Clearing database...");
-		dropAll(metadata);
-		
-		logger.info("Creating tables...");
-		createTables(metadata);
-        	
 		List<Class<?>> entityTypes = getEntityTypes(sessionFactory);
 		Collections.reverse(entityTypes);
 		for (Class<?> entityType: entityTypes) {
@@ -499,10 +441,16 @@ public class DefaultPersistManager implements PersistManager {
 				try {
 					logger.info("Importing from data file '" + file.getName() + "'...");
 					session.beginTransaction();
-					dom = readFile(file);
+					VersionedDocument dom = VersionedDocument.fromFile(file);
+					
 					for (Element element: dom.getRootElement().elements()) {
 						element.detach();
 						AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
+						for (ConstraintViolation<?> violation: validator.validate(entity)) {
+							String errorInfo = String.format("Error validating entity {entity class: %s, entity id: %d, entity property: %s, error message: %s}", 
+									entity.getClass(), entity.getId(), violation.getPropertyPath().toString(), violation.getMessage());
+							throw new RuntimeException(errorInfo);
+						}
 						session.replicate(entity, ReplicationMode.EXCEPTION);
 					}
 					session.flush();
@@ -514,14 +462,42 @@ public class DefaultPersistManager implements PersistManager {
 				}
 			}
 		}	
+	}
+	
+	protected void validateData(Metadata metadata, File dataDir) {
+		List<Class<?>> entityTypes = getEntityTypes(sessionFactory);
+		Collections.reverse(entityTypes);
+		for (Class<?> entityType: entityTypes) {
+			File[] dataFiles = dataDir.listFiles(new FilenameFilter() {
 
-		logger.info("Applying foreign key constraints...");
-		
-		applyForeignKeyConstraints(metadata);
+				@Override
+				public boolean accept(File dir, String name) {
+					return name.startsWith(entityType.getSimpleName() + "s.xml");
+				}
+				
+			});
+			for (File file: dataFiles) {
+				try {
+					logger.info("Validating data file '" + file.getName() + "'...");
+					VersionedDocument dom = VersionedDocument.fromFile(file);
+					
+					for (Element element: dom.getRootElement().elements()) {
+						element.detach();
+						AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
+						for (ConstraintViolation<?> violation: validator.validate(entity)) {
+							String errorInfo = String.format("Error validating entity {entity class: %s, entity id: %d, entity property: %s, error message: %s}", 
+									entity.getClass(), entity.getId(), violation.getPropertyPath().toString(), violation.getMessage());
+							throw new RuntimeException(errorInfo);
+						}
+					}
+				} catch (Throwable e) {
+					throw Throwables.propagate(e);
+				}
+			}
+		}	
 	}
 
-	@Override
-	public void applyForeignKeyConstraints(Metadata metadata) {
+	protected void applyConstraints(Metadata metadata) {
 		File tempFile = null;
     	try {
         	tempFile = File.createTempFile("schema", ".sql");
@@ -529,7 +505,7 @@ public class DefaultPersistManager implements PersistManager {
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
         	List<String> sqls = new ArrayList<>();
         	for (String sql: FileUtils.readLines(tempFile)) {
-        		if (isApplyingForeignKeyConstraints(sql)) {
+        		if (isApplyingConstraints(sql)) {
         			sqls.add(sql);
         		}
         	}
@@ -542,7 +518,7 @@ public class DefaultPersistManager implements PersistManager {
     	}
 	}
 	
-	private void createTables(Metadata metadata) {
+	protected void createTables(Metadata metadata) {
 		File tempFile = null;
     	try {
         	tempFile = File.createTempFile("schema", ".sql");
@@ -550,7 +526,7 @@ public class DefaultPersistManager implements PersistManager {
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
         	List<String> sqls = new ArrayList<>();
         	for (String sql: FileUtils.readLines(tempFile)) {
-        		if (shouldInclude(sql) && !isApplyingForeignKeyConstraints(sql))
+        		if (shouldInclude(sql) && !isApplyingConstraints(sql))
         			sqls.add(sql);
         	}
         	execute(sqls, true);
@@ -562,8 +538,7 @@ public class DefaultPersistManager implements PersistManager {
     	}
 	}
 	
-	@Override
-	public void dropForeignKeyConstraints(Metadata metadata) {
+	protected void dropConstraints(Metadata metadata) {
 		File tempFile = null;
     	try {
         	tempFile = File.createTempFile("schema", ".sql");
@@ -571,7 +546,7 @@ public class DefaultPersistManager implements PersistManager {
         			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), metadata);
         	List<String> sqls = new ArrayList<>();
         	for (String sql: FileUtils.readLines(tempFile)) {
-        		if (isDroppingForeignKeyConstraints(sql))
+        		if (isDroppingConstraints(sql))
         			sqls.add(sql);
         	}
         	execute(sqls, false);
@@ -583,7 +558,7 @@ public class DefaultPersistManager implements PersistManager {
     	}
 	}
 	
-	private void dropAll(Metadata metadata) {
+	protected void cleanDatabase(Metadata metadata) {
 		File tempFile = null;
     	try {
         	tempFile = File.createTempFile("schema", ".sql");
@@ -602,11 +577,11 @@ public class DefaultPersistManager implements PersistManager {
     	}
 	}
 	
-	private boolean isApplyingForeignKeyConstraints(String sql) {
+	private boolean isApplyingConstraints(String sql) {
 		return sql.toLowerCase().contains(" foreign key ");
 	}
 
-	private boolean isDroppingForeignKeyConstraints(String sql) {
+	private boolean isDroppingConstraints(String sql) {
 		return sql.toLowerCase().contains(" drop constraint ");
 	}
 	
@@ -616,7 +591,8 @@ public class DefaultPersistManager implements PersistManager {
 		if (!sql.toLowerCase().startsWith("create index") || !sql.toLowerCase().endsWith("_id)")) {
 			return true;
 		} else {
-			return !isMySQL() && !isHSQL();
+			String dialect = getDialect().toLowerCase();
+			return !dialect.contains("mysql") && !dialect.contains("hsql");
 		}
 	}
 

@@ -14,7 +14,6 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
-import com.pmease.gitplex.core.setting.BackupSetting;
 
 @SuppressWarnings("serial")
 public class DatabaseBackupPage extends AdministrationPage {
@@ -50,10 +49,10 @@ public class DatabaseBackupPage extends AdministrationPage {
 
 					@Override
 					public void writeData(Attributes attributes) throws IOException {
-						File tempDir = FileUtils.createTempDir("backup");
+						File tempDir = BootstrapUtils.createTempDir("backup");
 						try {
 							PersistManager persistManager = GitPlex.getInstance(PersistManager.class);
-							persistManager.exportData(tempDir, BackupSetting.BATCH_SIZE);
+							persistManager.exportData(tempDir);
 							BootstrapUtils.zip(tempDir, attributes.getResponse().getOutputStream());
 						} finally {
 							FileUtils.deleteDir(tempDir);

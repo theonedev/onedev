@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Handler;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -41,9 +43,10 @@ public class Bootstrap {
 	public static boolean sandboxMode;
 
 	public static boolean prodMode;
-
-	public static String[] args;
 	
+	@Nullable
+	public static Command command;
+
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		try {
@@ -83,7 +86,7 @@ public class Bootstrap {
 				boot(args);
 			}
 		} catch (Exception e) {
-			logger.error("Error bootstraping.", e);
+			e.printStackTrace();
 			System.exit(1);
 		}
 	}
@@ -112,152 +115,177 @@ public class Bootstrap {
 			throw new RuntimeException(e);
 		}
 
-		Bootstrap.args = args;
-		
-		if (getCommand() == null) {
-			getStatusDir().mkdir();
-			if (!getStatusDir().exists()) {
-				throw new RuntimeException("Unable to create directory: " + getStatusDir().getAbsolutePath());
-			}
-			
-			if (!sandboxMode) {
-				File serverRunningFile = getServerRunningFile();
-				if (serverRunningFile.exists()) 
-					throw new RuntimeException("Server is already running");
-				
-				try {
-					serverRunningFile.createNewFile();
-					serverRunningFile.deleteOnExit();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
+		if (args.length != 0) {
+			String[] commandArgs = new String[args.length-1];
+			System.arraycopy(args, 1, commandArgs, 0, commandArgs.length);
+			command = new Command(args[0], commandArgs);
+		} else {
+			command = null;
 		}
 
 		configureLogging();
 
-		logger.info("Launching application from '" + installDir.getAbsolutePath() + "'...");
-
-		libFiles = new ArrayList<File>();
-
-		File classpathFile = new File(installDir, "boot/system.classpath");
-		if (classpathFile.exists()) {
-			Map<String, File> systemClasspath = (Map<String, File>) BootstrapUtils.readObject(classpathFile);
-
-			Set<String> bootstrapKeys = (Set<String>) BootstrapUtils
-					.readObject(new File(installDir, "boot/bootstrap.keys"));
-			for (Map.Entry<String, File> entry : systemClasspath.entrySet()) {
-				if (!bootstrapKeys.contains(entry.getKey()))
-					libFiles.add(entry.getValue());
-			}
-		} else {
-			if (getLibCacheDir().exists()) {
-				BootstrapUtils.cleanDir(getLibCacheDir());
-			} else if (!getLibCacheDir().mkdir()) {
-				throw new RuntimeException(
-						"Failed to create lib cache directory '" + getLibCacheDir().getAbsolutePath() + "'");
-			}
-
-			for (File file : getLibDir().listFiles()) {
-				if (file.getName().endsWith(".jar"))
-					libFiles.add(file);
-				else if (file.getName().endsWith(".zip"))
-					BootstrapUtils.unzip(file, getLibCacheDir(), null);
-			}
-
-			for (File file : getLibCacheDir().listFiles()) {
-				if (file.getName().endsWith(".jar"))
-					libFiles.add(file);
-			}
-
-		}
-
-		// load our jars first so that we can override classes in third party
-		// jars if necessary.
-		libFiles.sort((file1, file2) -> {
-			Boolean result1 = file1.isDirectory() || file1.getName().startsWith("com.pmease");
-			Boolean result2 = file2.isDirectory() || file2.getName().startsWith("com.pmease");
-
-			return result2.compareTo(result1);
-		});
-
-		List<URL> urls = new ArrayList<URL>();
-
-		for (File file : libFiles) {
-			try {
-				urls.add(file.toURI().toURL());
-			} catch (MalformedURLException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		ClassLoader appClassLoader = new URLClassLoader(urls.toArray(new URL[0]), Bootstrap.class.getClassLoader()) {
-
-			private Map<String, CachedUrl> resourceCache = new ConcurrentHashMap<String, CachedUrl>();
-
-			@Override
-			protected Class<?> findClass(String name) throws ClassNotFoundException {
-				return super.findClass(name);
-			}
-
-			@Override
-			public Class<?> loadClass(String name) throws ClassNotFoundException {
-				return super.loadClass(name);
-			}
-
-			@Override
-			public URL findResource(String name) {
-				URL url;
-				CachedUrl cachedUrl = resourceCache.get(name);
-				if (cachedUrl == null) {
-					url = super.findResource(name);
-					resourceCache.put(name, new CachedUrl(url));
-				} else {
-					url = cachedUrl.getUrl();
-				}
-				return url;
-			}
-
-		};
-		ClassLoader originClassLoader = Thread.currentThread().getContextClassLoader();
-		Thread.currentThread().setContextClassLoader(appClassLoader);
-
 		try {
-			String appLoaderClassName = System.getProperty(APP_LOADER_PROPERTY_NAME);
-			if (appLoaderClassName == null)
-				appLoaderClassName = DEFAULT_APP_LOADER;
-
-			final Startable appLoader;
-			try {
-				Class<?> appLoaderClass = appClassLoader.loadClass(appLoaderClassName);
-				appLoader = (Startable) appLoaderClass.newInstance();
-				appLoader.start();
-			} catch (Exception e) {
-				throw BootstrapUtils.unchecked(e);
-			}
-
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-				public void run() {
+			if (command == null) {
+				getStatusDir().mkdirs();
+				if (!getStatusDir().exists()) {
+					throw new RuntimeException("Unable to create directory: " + getStatusDir().getAbsolutePath());
+				}
+				
+				if (!sandboxMode) {
+					File serverRunningFile = getServerRunningFile();
+					if (serverRunningFile.exists()) 
+						throw new RuntimeException("Server is already running");
+					
 					try {
-						appLoader.stop();
-					} catch (Exception e) {
-						throw BootstrapUtils.unchecked(e);
+						serverRunningFile.createNewFile();
+						serverRunningFile.deleteOnExit();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
 				}
+			}
+			
+	        File tempDir = Bootstrap.getTempDir();
+			if (tempDir.exists()) {
+				logger.info("Cleaning temp directory...");
+				BootstrapUtils.cleanDir(tempDir);
+			} else if (!tempDir.mkdirs()) {
+				throw new RuntimeException("Can not create directory '" + tempDir.getAbsolutePath() + "'.");
+			}
+			System.setProperty("java.io.tmpdir", tempDir.getAbsolutePath());
+
+			logger.info("Launching application from '" + installDir.getAbsolutePath() + "'...");
+
+			libFiles = new ArrayList<File>();
+
+			File classpathFile = new File(installDir, "boot/system.classpath");
+			if (classpathFile.exists()) {
+				Map<String, File> systemClasspath = (Map<String, File>) BootstrapUtils.readObject(classpathFile);
+
+				Set<String> bootstrapKeys = (Set<String>) BootstrapUtils
+						.readObject(new File(installDir, "boot/bootstrap.keys"));
+				for (Map.Entry<String, File> entry : systemClasspath.entrySet()) {
+					if (!bootstrapKeys.contains(entry.getKey()))
+						libFiles.add(entry.getValue());
+				}
+			} else {
+				File libCacheDir = BootstrapUtils.createTempDir("libcache");
+
+				for (File file : getLibDir().listFiles()) {
+					if (file.getName().endsWith(".jar"))
+						libFiles.add(file);
+					else if (file.getName().endsWith(".zip"))
+						BootstrapUtils.unzip(file, libCacheDir);
+				}
+				for (File file : getPluginsDir().listFiles()) {
+					if (file.getName().endsWith(".jar"))
+						libFiles.add(file);
+					else if (file.getName().endsWith(".zip"))
+						BootstrapUtils.unzip(file, libCacheDir);
+				}
+
+				for (File file : libCacheDir.listFiles()) {
+					if (file.getName().endsWith(".jar"))
+						libFiles.add(file);
+				}
+
+			}
+
+			// load our jars first so that we can override classes in third party
+			// jars if necessary.
+			libFiles.sort((file1, file2) -> {
+				Boolean result1 = file1.isDirectory() || file1.getName().startsWith("com.pmease");
+				Boolean result2 = file2.isDirectory() || file2.getName().startsWith("com.pmease");
+
+				return result2.compareTo(result1);
 			});
-		} finally {
-			Thread.currentThread().setContextClassLoader(originClassLoader);
+
+			List<URL> urls = new ArrayList<URL>();
+
+			for (File file : libFiles) {
+				try {
+					urls.add(file.toURI().toURL());
+				} catch (MalformedURLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			ClassLoader appClassLoader = new URLClassLoader(urls.toArray(new URL[0]), Bootstrap.class.getClassLoader()) {
+
+				private Map<String, CachedUrl> resourceCache = new ConcurrentHashMap<String, CachedUrl>();
+
+				@Override
+				protected Class<?> findClass(String name) throws ClassNotFoundException {
+					return super.findClass(name);
+				}
+
+				@Override
+				public Class<?> loadClass(String name) throws ClassNotFoundException {
+					return super.loadClass(name);
+				}
+
+				@Override
+				public URL findResource(String name) {
+					URL url;
+					CachedUrl cachedUrl = resourceCache.get(name);
+					if (cachedUrl == null) {
+						url = super.findResource(name);
+						resourceCache.put(name, new CachedUrl(url));
+					} else {
+						url = cachedUrl.getUrl();
+					}
+					return url;
+				}
+
+			};
+			ClassLoader originClassLoader = Thread.currentThread().getContextClassLoader();
+			Thread.currentThread().setContextClassLoader(appClassLoader);
+
+			try {
+				String appLoaderClassName = System.getProperty(APP_LOADER_PROPERTY_NAME);
+				if (appLoaderClassName == null)
+					appLoaderClassName = DEFAULT_APP_LOADER;
+
+				final Startable appLoader;
+				try {
+					Class<?> appLoaderClass = appClassLoader.loadClass(appLoaderClassName);
+					appLoader = (Startable) appLoaderClass.newInstance();
+					appLoader.start();
+				} catch (Exception e) {
+					throw BootstrapUtils.unchecked(e);
+				}
+
+				Runtime.getRuntime().addShutdownHook(new Thread() {
+					public void run() {
+						try {
+							appLoader.stop();
+						} catch (Exception e) {
+							throw BootstrapUtils.unchecked(e);
+						}
+					}
+				});
+			} finally {
+				Thread.currentThread().setContextClassLoader(originClassLoader);
+			}
+		} catch (Exception e) {
+			logger.error("Error booting application", e);
+			System.exit(1);
 		}
 	}
 
 	private static void configureLogging() {
 		// Set system properties so that they can be used in logback
 		// configuration file.
-		System.setProperty("installDir", installDir.getAbsolutePath());
-		if (getCommand() != null)
-			System.setProperty("bootstrapCommand", getCommand());
-		else
-			System.setProperty("bootstrapCommand", "server");
+		if (command != null) {
+			System.setProperty("logback.logFile", installDir.getAbsolutePath() + "/logs/" + command.getName() + ".log");
+			System.setProperty("logback.fileLogPattern", "%msg%n");			
+			System.setProperty("logback.consoleLogPattern", "%msg%n");
+		} else {
+			System.setProperty("logback.logFile", installDir.getAbsolutePath() + "/logs/server.log");
+			System.setProperty("logback.consoleLogPattern", "%d{HH:mm:ss,SSS} %-5level %logger{36} - %msg%n");			
+			System.setProperty("logback.fileLogPattern", "%date %-5level [%thread] %logger{36} %msg%n");
+		}
 
 		File configFile = new File(installDir, "conf/logback.xml");
 		System.setProperty(LOGBACK_CONFIG_FILE_PROPERTY_NAME, configFile.getAbsolutePath());
@@ -302,17 +330,10 @@ public class Bootstrap {
 	}
 
 	public static File getTempDir() {
-		if (args.length != 0) 
-			return new File(installDir, "temp/" + args[0]);
+		if (command != null) 
+			return new File(installDir, "temp/" + command.getName());
 		else
 			return new File(installDir, "temp/server");
-	}
-
-	public static File getLibCacheDir() {
-		if (args.length != 0) 
-			return new File(getLibDir(), ".cache/" + args[0]);
-		else
-			return new File(getLibDir(), ".cache/server");
 	}
 
 	public static File getConfDir() {
@@ -323,48 +344,10 @@ public class Bootstrap {
 		return new File(installDir, "site");
 	}
 	
-	/**
-	 * Get command being executed
-	 * @return
-	 * 			<tt>null</tt> if not executing a command
-	 */
-	public static String getCommand() {
-		if (args.length != 0)
-			return args[0];
-		else
-			return null;
+	public static File getPluginsDir() {
+		return new File(installDir, "plugins");
 	}
 	
-	/**
-	 * Get full name of command script
-	 * @return
-	 * 			<tt>null</tt> if not executing a command
-	 */
-	public static String getCommandFile() {
-		String command = getCommand();
-		if (command != null) {
-			if (BootstrapUtils.isWindows())
-				return command + ".bat";
-			else
-				return command + ".sh";
-		} else {
-			return null;
-		}
-	}
-	
-	/**
-	 * Get the directory to store intermediate files generated by the command
-	 * @return
-	 * 			<tt>null</tt> if not executing a command
-	 */
-	public static File getCommandDir() {
-		String command = getCommand();
-		if (command != null)
-			return new File(installDir, command);
-		else
-			return null;
-	}
-
 	private static class CachedUrl {
 		private final URL url;
 

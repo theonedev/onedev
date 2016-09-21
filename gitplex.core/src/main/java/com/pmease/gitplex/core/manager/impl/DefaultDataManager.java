@@ -195,7 +195,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void execute() {
-					File tempDir = null;
+					File tempDir = BootstrapUtils.createTempDir("backup");
 					try {
 						File backupDir = new File(backupSetting.getFolder());
 						if (!backupDir.isAbsolute()) 
@@ -203,8 +203,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 						if (!backupDir.exists()) {
 							throw new RuntimeException("Backup directory does not exist: " + backupDir.getAbsolutePath());
 						}
-						tempDir = FileUtils.createTempDir("backup");
-						persistManager.exportData(tempDir, BackupSetting.BATCH_SIZE);
+						persistManager.exportData(tempDir);
 						File backupFile = new File(backupDir, 
 								DateTimeFormat.forPattern(BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
 						BootstrapUtils.zip(tempDir, backupFile);
@@ -212,8 +211,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 						notifyBackupError(e);
 						throw Throwables.propagate(e);
 					} finally {
-						if (tempDir != null)
-							FileUtils.deleteDir(tempDir);
+						FileUtils.deleteDir(tempDir);
 					}
 				}
 

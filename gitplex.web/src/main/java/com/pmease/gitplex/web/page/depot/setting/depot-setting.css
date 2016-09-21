@@ -187,6 +187,9 @@
 .gate-keeper.panel table.ifthen>tbody>tr>td>div>div.panel {
 	margin-bottom: 0;
 }
+.not>div>.gate-keeper.panel {
+	margin-bottom: 0;
+}
 
 #depot-setting .authorization .list table td.actions {
 	width: 20%;
