@@ -7,9 +7,11 @@ import java.util.Set;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 
 import com.google.common.collect.Sets;
+import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.ModelProvider;
+import com.pmease.commons.hibernate.PersistManager;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
 import com.pmease.commons.hibernate.migration.Migrator;
 import com.pmease.commons.jetty.ServletConfigurator;
@@ -199,6 +201,9 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
+		
+		if (Bootstrap.command != null && Bootstrap.command.getName().equals("reset_admin_password"))
+			bind(PersistManager.class).to(ResetAdminPasswordCommand.class);
 	}
 	
 	@Override

@@ -14,10 +14,8 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
-import javax.inject.Named;
 import javax.persistence.ManyToOne;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -68,7 +66,7 @@ public class DefaultPersistManager implements PersistManager {
 
 	protected final PhysicalNamingStrategy physicalNamingStrategy;
 
-	protected final Properties properties;
+	protected final HibernateProperties properties;
 	
 	protected final Migrator migrator;
 	
@@ -86,7 +84,7 @@ public class DefaultPersistManager implements PersistManager {
 	
 	@Inject
 	public DefaultPersistManager(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
-			@Named("hibernate") Properties properties, Migrator migrator, Interceptor interceptor, 
+			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
 			IdManager idManager, Dao dao, Validator validator) {
 		this.modelProviders = modelProviders;
 		this.physicalNamingStrategy = physicalNamingStrategy;
@@ -100,7 +98,7 @@ public class DefaultPersistManager implements PersistManager {
 	}
 	
 	protected String getDialect() {
-		return properties.getProperty(PropertyNames.DIALECT);
+		return properties.getDialect();
 	}
 	
 	protected void execute(List<String> sqls, boolean failOnError) {
@@ -212,11 +210,9 @@ public class DefaultPersistManager implements PersistManager {
 
 	protected Connection getConnection() {
 		try {
-			Class.forName(properties.getProperty(PropertyNames.DRIVER_PROPNAME));
-	    	Connection conn = DriverManager.getConnection(
-	    			properties.getProperty(PropertyNames.URL_PROPNAME), 
-	    			properties.getProperty(PropertyNames.USER_PROPNAME), 
-	    			properties.getProperty(PropertyNames.PASSWORD_PROPNAME));
+			Class.forName(properties.getDriver());
+	    	Connection conn = DriverManager.getConnection(properties.getUrl(), 
+	    			properties.getUser(), properties.getPassword());
 	    	return conn;
 		} catch (Exception e) {
 			throw Throwables.propagate(e);

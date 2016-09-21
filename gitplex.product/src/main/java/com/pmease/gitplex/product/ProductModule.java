@@ -7,6 +7,7 @@ import org.hibernate.cfg.Environment;
 
 import com.google.inject.name.Names;
 import com.pmease.commons.bootstrap.Bootstrap;
+import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.jetty.ServerConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
@@ -20,13 +21,13 @@ public class ProductModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		Properties hibernateProps = FileUtils.loadProperties(
-				new File(Bootstrap.installDir, "conf/hibernate.properties"));
+		File file = new File(Bootstrap.installDir, "conf/hibernate.properties"); 
+		HibernateProperties hibernateProps = new HibernateProperties(FileUtils.loadProperties(file));
 		String url = hibernateProps.getProperty(Environment.URL);
 		hibernateProps.setProperty(Environment.URL, 
 				StringUtils.replace(url, "${installDir}", Bootstrap.installDir.getAbsolutePath()));
 		
-		bind(Properties.class).annotatedWith(Names.named("hibernate")).toInstance(hibernateProps);
+		bind(HibernateProperties.class).toInstance(hibernateProps);
 		
 		Properties serverProps = FileUtils.loadProperties(
 				new File(Bootstrap.installDir, "conf/server.properties")); 

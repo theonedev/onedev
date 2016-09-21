@@ -2,13 +2,11 @@ package com.pmease.commons.hibernate.command;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.validation.Validator;
 
@@ -22,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.DefaultPersistManager;
+import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.hibernate.IdManager;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -43,7 +42,7 @@ public class UpgradeCommand extends DefaultPersistManager {
 	
 	@Inject
 	public UpgradeCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
-			@Named("hibernate") Properties properties, Migrator migrator, Interceptor interceptor, 
+			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
 			IdManager idManager, Dao dao, Validator validator, PluginManager pluginManager) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
 		appName = pluginManager.getProduct().getName();

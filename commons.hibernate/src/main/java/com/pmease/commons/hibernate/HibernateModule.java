@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Properties;
 
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -24,8 +23,6 @@ import org.hibernate.type.Type;
 import com.google.common.collect.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
-import com.google.inject.name.Names;
-import com.google.inject.util.Providers;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.Command;
 import com.pmease.commons.hibernate.command.ApplyDBConstraintsCommand;
@@ -63,7 +60,6 @@ public class HibernateModule extends AbstractPluginModule {
 		// Use an optional binding here in case our client does not like to 
 		// start persist service provided by this plugin
 		bind(Interceptor.class).to(HibernateInterceptor.class);
-		bind(Properties.class).annotatedWith(Names.named("hibernate")).toProvider(Providers.<Properties>of(null));
 		bind(PhysicalNamingStrategy.class).to(PhysicalNamingStrategyStandardImpl.class);
 		
 		bind(UnitOfWork.class).to(DefaultUnitOfWork.class);

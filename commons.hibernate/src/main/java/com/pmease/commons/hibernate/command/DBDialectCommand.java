@@ -1,10 +1,8 @@
 package com.pmease.commons.hibernate.command;
 
-import java.util.Properties;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.validation.Validator;
 
@@ -13,6 +11,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 
 import com.pmease.commons.hibernate.DefaultPersistManager;
+import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.hibernate.IdManager;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -23,7 +22,7 @@ public class DBDialectCommand extends DefaultPersistManager {
 
 	@Inject
 	public DBDialectCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
-			@Named("hibernate") Properties properties, Migrator migrator, Interceptor interceptor, 
+			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
 			IdManager idManager, Dao dao, Validator validator) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
 	}

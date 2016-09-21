@@ -20,5 +20,5 @@ public interface PersistManager {
 	// This method should only be called by a bootstrap action. That is, when the 
 	// server is stopped. So it does not need an exclusive database lock.
 	void importData(Metadata metadata, File dataDir);
-	
+
 }

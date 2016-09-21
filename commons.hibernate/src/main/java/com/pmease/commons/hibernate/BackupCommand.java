@@ -1,11 +1,9 @@
 package com.pmease.commons.hibernate;
 
 import java.io.File;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.validation.Validator;
 
@@ -29,7 +27,7 @@ public class BackupCommand extends DefaultPersistManager {
 	
 	@Inject
 	public BackupCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
-			@Named("hibernate") Properties properties, Migrator migrator, Interceptor interceptor, 
+			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
 			IdManager idManager, Dao dao, Validator validator) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
 	}
