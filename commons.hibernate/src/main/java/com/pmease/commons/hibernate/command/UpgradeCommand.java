@@ -27,7 +27,7 @@ import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.migration.MigrationHelper;
 import com.pmease.commons.hibernate.migration.Migrator;
-import com.pmease.commons.loader.AppName;
+import com.pmease.commons.loader.PluginManager;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -44,9 +44,9 @@ public class UpgradeCommand extends DefaultPersistManager {
 	@Inject
 	public UpgradeCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
 			@Named("hibernate") Properties properties, Migrator migrator, Interceptor interceptor, 
-			IdManager idManager, Dao dao, Validator validator, @AppName String appName) {
+			IdManager idManager, Dao dao, Validator validator, PluginManager pluginManager) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
-		this.appName = appName;
+		appName = pluginManager.getProduct().getName();
 	}
 
 	protected Commandline buildCommandline(File upgradeDir, String command, String...commandArgs) {

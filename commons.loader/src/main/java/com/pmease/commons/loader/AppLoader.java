@@ -5,6 +5,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -91,6 +92,7 @@ public class AppLoader implements Startable {
 			Properties pluginProps = FileUtils.loadProperties(
 					new File(url.getFile()), "pmease-plugin.properties");
 			if (pluginProps != null) {
+				Properties productProps = FileUtils.loadProperties(new File(url.getFile()), "pmease-product.properties");
 				String pluginId = pluginProps.getProperty("id");
 				if (pluginModules.containsKey(pluginId))
 					throw new RuntimeException("More than one version of plugin '" + pluginId + "' is found.");
@@ -107,6 +109,8 @@ public class AppLoader implements Startable {
 						pluginModule.setPluginDescription(pluginProps.getProperty("description"));
 						pluginModule.setPluginVendor(pluginProps.getProperty("vendor"));
 						pluginModule.setPluginVersion(pluginProps.getProperty("version"));
+						pluginModule.setPluginDate(new Date(Long.valueOf(pluginProps.getProperty("date"))));
+						pluginModule.setProduct(productProps != null);
 						String dependenciesStr = pluginProps.getProperty("dependencies");
 						if (dependenciesStr != null)
 							pluginModule.setPluginDependencies(new HashSet<String>(StringUtils.splitAndTrim(dependenciesStr, ";")));
@@ -170,7 +174,6 @@ public class AppLoader implements Startable {
 		}
 	}
 	
-	
 	public static Collection<Object> getSingletons() {
 		if (AppLoader.singletons == null) {
 			Collection<Object> singletons = new ArrayList<>();
@@ -184,6 +187,10 @@ public class AppLoader implements Startable {
 		    AppLoader.singletons = singletons;
 		}
 		return AppLoader.singletons;
+	}
+	
+	public static Plugin getProduct() {
+		return getInstance(PluginManager.class).getProduct();
 	}
 	
 }

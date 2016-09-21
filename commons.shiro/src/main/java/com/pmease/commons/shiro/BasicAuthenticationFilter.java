@@ -22,7 +22,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.PathMatchingFilter;
 import org.apache.shiro.web.util.WebUtils;
 
-import com.pmease.commons.loader.AppName;
+import com.pmease.commons.loader.PluginManager;
 import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.util.StringUtils;
 
@@ -42,8 +42,8 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
     private final String appName;
 	
 	@Inject
-	public BasicAuthenticationFilter(@AppName String appName) {
-		this.appName = appName;
+	public BasicAuthenticationFilter(PluginManager pluginManager) {
+		appName = pluginManager.getProduct().getName();
 	}
 
     @Override

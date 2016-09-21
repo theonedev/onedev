@@ -8,14 +8,12 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 
-import com.google.inject.Key;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.loader.AppName;
 
 @Provider
 public class UnauthenticatedExceptionMapper implements ExceptionMapper<UnauthenticatedException> {
 	
-    private final String appName = AppLoader.injector.getInstance(Key.<String>get(String.class, AppName.class));
+    private final String appName = AppLoader.getProduct().getName();
 	
 	@Override
     public Response toResponse(UnauthenticatedException exception) {

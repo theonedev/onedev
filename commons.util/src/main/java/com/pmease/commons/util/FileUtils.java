@@ -17,6 +17,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.tools.ant.DirectoryScanner;
@@ -73,6 +75,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 	 * @return
 	 * 			Content of the property file. Null if not found.
 	 */
+	@Nullable
 	public static Properties loadProperties(File file, String path) {
 		if (file.isFile() && file.getName().endsWith(".jar")) {
 			ZipFile zip = null;

@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.loader.AppName;
 import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.InitStage;
@@ -44,22 +43,18 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private final ServerConfig serverConfig;
 	
-	private final String appName;
+	private final ListenerRegistry listenerRegistry;
 	
 	private volatile InitStage initStage;
 	
-	private final ListenerRegistry listenerRegistry;
-	
 	@Inject
 	public GitPlex(ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager,
-            AccountManager accountManager, ListenerRegistry listenerRegistry, @AppName String appName) {
+            AccountManager accountManager, ListenerRegistry listenerRegistry) {
 		this.configManager = configManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
 		this.accountManager = accountManager;
 		this.listenerRegistry = listenerRegistry;
-		
-		this.appName = appName;
 		
 		initStage = new InitStage("Server is Starting...");
 	}
@@ -108,10 +103,6 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 			serverUrl = "https://" + hostName + ":" + serverConfig.getSslConfig().getPort();
 
 		return StringUtils.stripEnd(serverUrl, "/");
-	}
-	
-	public String getAppName() {
-		return appName;
 	}
 	
 	/**

@@ -1,5 +1,6 @@
 package com.pmease.commons.loader;
 
+import java.util.Date;
 import java.util.Set;
 
 import com.pmease.commons.util.DependencyAware;
@@ -15,6 +16,10 @@ public interface Plugin extends DependencyAware<String> {
 	String getVersion();
 
 	String getDescription();
+	
+	Date getDate();
+	
+	boolean isProduct();
 
 	Set<String> getDependencies();
 

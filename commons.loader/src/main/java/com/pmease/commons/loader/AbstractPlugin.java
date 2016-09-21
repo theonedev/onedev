@@ -1,6 +1,7 @@
 package com.pmease.commons.loader;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,6 +16,10 @@ public abstract class AbstractPlugin implements Plugin {
 	private String version;
 	
 	private String description;
+	
+	private Date date;
+	
+	private boolean product;
 	
 	private Set<String> dependencyIds = new HashSet<String>();
 	
@@ -48,6 +53,22 @@ public abstract class AbstractPlugin implements Plugin {
 
 	public final void setVersion(String version) {
 		this.version = version;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public boolean isProduct() {
+		return product;
+	}
+
+	public void setProduct(boolean product) {
+		this.product = product;
 	}
 
 	public final String getDescription() {

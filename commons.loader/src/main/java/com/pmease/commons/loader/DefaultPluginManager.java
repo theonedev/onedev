@@ -80,6 +80,15 @@ public class DefaultPluginManager implements PluginManager {
 	}
 	
 	@Override
+	public Plugin getProduct() {
+		for (Plugin plugin: pluginMap.values()) {
+			if (plugin.isProduct())
+				return plugin;
+		}
+		throw new IllegalStateException();
+	}
+	
+	@Override
 	public Plugin getPlugin(String pluginId) {
 		if (pluginMap.containsKey(pluginId))
 			return pluginMap.get(pluginId);

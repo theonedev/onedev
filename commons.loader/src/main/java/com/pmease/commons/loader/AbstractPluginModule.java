@@ -1,5 +1,6 @@
 package com.pmease.commons.loader;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +26,10 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 	private String pluginName;
 	
 	private String pluginDescription;
+	
+	private Date pluginDate;
+	
+	private boolean product;
 	
 	private Set<String> pluginDependencies = new HashSet<String>();
 
@@ -55,6 +60,8 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 							plugin.setVendor(pluginVendor);
 							plugin.setVersion(pluginVersion);
 							plugin.setDescription(pluginDescription);
+							plugin.setProduct(product);
+							plugin.setDate(pluginDate);
 							plugin.setDependencyIds(pluginDependencies);
 						}
 						
@@ -91,6 +98,16 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 				}
 
 				@Override
+				public Date getDate() {
+					return pluginDate;
+				}
+				
+				@Override
+				public boolean isProduct() {
+					return product;
+				}
+
+				@Override
 				public Set<String> getDependencies() {
 					return pluginDependencies;
 				}
@@ -110,7 +127,7 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 				@Override
 				public void stop() {
 				}
-				
+
 			});
 		}
 	}
@@ -143,6 +160,14 @@ public abstract class AbstractPluginModule extends AbstractModule implements Dep
 		this.pluginDependencies = pluginDependencies;
 	}
 
+	public void setPluginDate(Date pluginDate) {
+		this.pluginDate = pluginDate;
+	}
+	
+	public void setProduct(boolean product) {
+		this.product = product;
+	}
+	
 	@Override
 	public String getId() {
 		return pluginId;

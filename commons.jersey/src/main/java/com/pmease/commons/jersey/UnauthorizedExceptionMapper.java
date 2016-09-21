@@ -9,14 +9,12 @@ import javax.ws.rs.ext.Provider;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
-import com.google.inject.Key;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.loader.AppName;
 
 @Provider
 public class UnauthorizedExceptionMapper implements ExceptionMapper<UnauthorizedException> {
 	
-    private final String appName = AppLoader.injector.getInstance(Key.<String>get(String.class, AppName.class));
+    private final String appName = AppLoader.getProduct().getName();
 	
 	@Override
     public Response toResponse(UnauthorizedException exception) {

@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.page.layout;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -20,6 +22,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.loader.Plugin;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.menu.MenuItem;
@@ -46,6 +50,8 @@ import com.pmease.gitplex.web.page.security.RegisterPage;
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
 
+	private static final String RELEASE_DATE_FORMAT = "yyyy-MM-dd";
+	
 	public LayoutPage() {
 	}
 	
@@ -232,6 +238,14 @@ public abstract class LayoutPage extends BasePage {
 		}
 		
 		add(new WebMarkupContainer("mainFoot") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				Plugin product = AppLoader.getProduct();
+				add(new Label("productVersion", product.getVersion()));
+				add(new Label("releaseDate", new SimpleDateFormat(RELEASE_DATE_FORMAT).format(product.getDate())));
+			}
 
 			@Override
 			protected void onConfigure() {

@@ -47,6 +47,7 @@ public class GeneratePluginResourcesMojo extends AbstractMojo {
     		props.put("vendor", project.getOrganization().getName());
     	props.put("id", project.getArtifact().getGroupId() + "." + project.getArtifact().getArtifactId());
     	props.put("version", project.getArtifact().getVersion());
+    	props.put("date", String.valueOf(System.currentTimeMillis()));
     	props.put("module", moduleClass);
 
     	StringBuffer buffer = new StringBuffer();

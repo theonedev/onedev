@@ -10,6 +10,8 @@ public interface PluginManager {
 	
 	Plugin getPlugin(String pluginId);
 	
+	Plugin getProduct();
+	
 	void start();
 	
 	void stop();

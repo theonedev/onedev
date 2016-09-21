@@ -16,8 +16,6 @@ public class AppLoaderModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bindConstant().annotatedWith(AppName.class).to("Application");
-
 		/*
 		 * Bind at least one implementation provider in order to prevent Guice from complaining of 
 		 * not bound when injecting Set<ImplementationProvider>
