@@ -321,6 +321,14 @@ public class UpgradeCommand extends DefaultPersistManager {
 		cleanAndCopy(Bootstrap.getBinDir(), new File(upgradeDir, "bin"));
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
+		for (File file: Bootstrap.getSiteLibDir().listFiles()) {
+			// end user may put some custom program files in site lib before upgrade, 
+			// to override site lib of old version
+			if (file.getName().endsWith(".jar") || file.getName().endsWith(".zip")) {
+				cleanAndCopy(Bootstrap.getSiteLibDir(), new File(upgradeDir, "site/lib"));
+				break;
+			}
+		}
 		try {
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
 					new File(upgradeDir, "conf/wrapper-license.conf"));
