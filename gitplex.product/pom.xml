@@ -163,4 +163,5 @@
 		<moduleClass>com.pmease.gitplex.product.ProductModule</moduleClass>
 		<aggregation>true</aggregation>
 	</properties>
+	<version>1.0-beta1</version>
 </project>
