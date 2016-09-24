@@ -42,7 +42,6 @@ import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.diff.MyersDiff;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
@@ -607,7 +606,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
 	    	diffFormatter.setRepository(getRepository());
 	    	diffFormatter.setDetectRenames(true);
-	    	diffFormatter.setDiffAlgorithm(MyersDiff.INSTANCE);
 	    	diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
 			AnyObjectId oldRevId = getObjectId(oldRev);
 			AnyObjectId newRevId = getObjectId(newRev);

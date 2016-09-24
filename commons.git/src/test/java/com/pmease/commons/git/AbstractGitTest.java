@@ -9,6 +9,8 @@ import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
+import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.junit.Assert;
@@ -37,6 +39,9 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 		} catch (IllegalStateException | GitAPIException e) {
 			throw new RuntimeException(e);
 		}
+		
+		git.getRepository().getConfig().setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, 
+				ConfigConstants.CONFIG_KEY_ALGORITHM, SupportedAlgorithm.HISTOGRAM);
 		
 		Mockito.when(AppLoader.getInstance(GitConfig.class)).thenReturn(new GitConfig() {
 

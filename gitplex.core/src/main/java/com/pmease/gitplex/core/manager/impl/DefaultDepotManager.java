@@ -16,7 +16,9 @@ import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.hibernate.Query;
@@ -116,6 +118,8 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     			if (repository == null) {
     				try {
 						repository = new FileRepository(depot.getDirectory());
+						repository.getConfig().setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, 
+								ConfigConstants.CONFIG_KEY_ALGORITHM, SupportedAlgorithm.HISTOGRAM);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
