@@ -108,6 +108,8 @@ public class Commandline  {
             	executable = new File(workingDir, executable + ".exe").getAbsolutePath();
             else if (new File(workingDir, executable + ".bat").isFile())
             	executable = new File(workingDir, executable + ".bat").getAbsolutePath();
+            else if (new File(workingDir, executable + ".cmd").isFile())
+            	executable = new File(workingDir, executable + ".cmd").getAbsolutePath();
         }
 
 		List<String> command = new ArrayList<String>();

@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -160,24 +159,21 @@ public class Bootstrap {
 			List<File> libFiles = new ArrayList<File>();
 			libFiles.addAll(getLibFiles(getSiteLibDir()));
 			
-			Map<String, File> systemClasspath;
 			File classpathFile = new File(installDir, "boot/system.classpath");
 			if (classpathFile.exists()) {
-				systemClasspath = (Map<String, File>) BootstrapUtils.readObject(classpathFile);
-			} else {
-				systemClasspath = new HashMap<>();
-			}
-			Set<String> bootstrapKeys = (Set<String>) BootstrapUtils
-					.readObject(new File(installDir, "boot/bootstrap.keys"));
-			for (Map.Entry<String, File> entry : systemClasspath.entrySet()) {
-				if (!bootstrapKeys.contains(entry.getKey())) {
-					libFiles.add(entry.getValue());
+				Map<String, File> systemClasspath = (Map<String, File>) BootstrapUtils.readObject(classpathFile);
+				Set<String> bootstrapKeys = (Set<String>) BootstrapUtils
+						.readObject(new File(installDir, "boot/bootstrap.keys"));
+				for (Map.Entry<String, File> entry : systemClasspath.entrySet()) {
+					if (!bootstrapKeys.contains(entry.getKey())) {
+						libFiles.add(entry.getValue());
+					}
 				}
-			}
-
-			for (File libFile: getLibFiles(getLibDir())) {
-				if (!systemClasspath.containsKey(libFile.getName()))
-					libFiles.add(libFile);
+				if (new File("system/lib").exists()) {
+					libFiles.addAll(getLibFiles(new File("system/lib")));
+				}
+			} else {
+				libFiles.addAll(getLibFiles(getLibDir()));
 			}
 
 			List<URL> urls = new ArrayList<URL>();

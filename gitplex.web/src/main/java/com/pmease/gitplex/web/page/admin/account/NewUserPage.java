@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.admin.account;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 
-import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
@@ -21,8 +20,7 @@ public class NewUserPage extends AdministrationPage {
 		
 		Account user = new Account();
 		
-		BeanEditor<?> editor = BeanContext.editBean("editor", user, 
-				Sets.newHashSet("defaultPrivilege", "description"));
+		BeanEditor<?> editor = BeanContext.editBean("editor", user, Account.getUserExcludeProperties());
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -44,7 +42,7 @@ public class NewUserPage extends AdministrationPage {
 				if (!editor.hasErrors(true)){
 					accountManager.save(user, null);
 					Session.get().success("New user account created");
-					setResponsePage(AccountListPage.class);
+					setResponsePage(UserListPage.class);
 				}
 			}
 			

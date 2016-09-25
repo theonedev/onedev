@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.ManyToOne;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -76,7 +74,7 @@ public class DefaultPersistManager implements PersistManager {
 	
 	protected final Dao dao;
 	
-	protected final Validator validator;
+	protected final EntityValidator validator;
 	
 	protected final StandardServiceRegistry serviceRegistry;
 	
@@ -85,7 +83,7 @@ public class DefaultPersistManager implements PersistManager {
 	@Inject
 	public DefaultPersistManager(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
-			IdManager idManager, Dao dao, Validator validator) {
+			IdManager idManager, Dao dao, EntityValidator validator) {
 		this.modelProviders = modelProviders;
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.properties = properties;
@@ -442,11 +440,6 @@ public class DefaultPersistManager implements PersistManager {
 					for (Element element: dom.getRootElement().elements()) {
 						element.detach();
 						AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
-						for (ConstraintViolation<?> violation: validator.validate(entity)) {
-							String errorInfo = String.format("Error validating entity {entity class: %s, entity id: %d, entity property: %s, error message: %s}", 
-									entity.getClass(), entity.getId(), violation.getPropertyPath().toString(), violation.getMessage());
-							throw new RuntimeException(errorInfo);
-						}
 						session.replicate(entity, ReplicationMode.EXCEPTION);
 					}
 					session.flush();
@@ -480,11 +473,7 @@ public class DefaultPersistManager implements PersistManager {
 					for (Element element: dom.getRootElement().elements()) {
 						element.detach();
 						AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
-						for (ConstraintViolation<?> violation: validator.validate(entity)) {
-							String errorInfo = String.format("Error validating entity {entity class: %s, entity id: %d, entity property: %s, error message: %s}", 
-									entity.getClass(), entity.getId(), violation.getPropertyPath().toString(), violation.getMessage());
-							throw new RuntimeException(errorInfo);
-						}
+						validator.validate(entity);
 					}
 				} catch (Throwable e) {
 					throw Throwables.propagate(e);
@@ -492,7 +481,7 @@ public class DefaultPersistManager implements PersistManager {
 			}
 		}	
 	}
-
+	
 	protected void applyConstraints(Metadata metadata) {
 		File tempFile = null;
     	try {

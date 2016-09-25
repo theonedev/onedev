@@ -1,11 +1,10 @@
-package com.pmease.commons.hibernate;
+package com.pmease.commons.hibernate.command;
 
 import java.io.File;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.Validator;
 
 import org.hibernate.Interceptor;
 import org.hibernate.boot.Metadata;
@@ -16,19 +15,24 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Throwables;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.BootstrapUtils;
+import com.pmease.commons.hibernate.DefaultPersistManager;
+import com.pmease.commons.hibernate.EntityValidator;
+import com.pmease.commons.hibernate.HibernateProperties;
+import com.pmease.commons.hibernate.IdManager;
+import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.migration.Migrator;
 import com.pmease.commons.util.FileUtils;
 
 @Singleton
-public class BackupCommand extends DefaultPersistManager {
+public class DefaultBackupCommand extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(BackupCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultBackupCommand.class);
 	
 	@Inject
-	public BackupCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
+	public DefaultBackupCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
-			IdManager idManager, Dao dao, Validator validator) {
+			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
 	}
 
@@ -44,6 +48,11 @@ public class BackupCommand extends DefaultPersistManager {
 		
 		if (backupFile.exists()) {
 			logger.error("Backup file already exists: {}", backupFile.getAbsolutePath());
+			System.exit(1);
+		}
+		
+		if (Bootstrap.getServerRunningFile().exists() && getDialect().toLowerCase().contains("hsql")) {
+			logger.error("Please stop server before backing up database");
 			System.exit(1);
 		}
 		

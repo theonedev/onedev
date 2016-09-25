@@ -11,7 +11,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.page.admin.account.AccountListPage;
+import com.pmease.gitplex.web.page.admin.account.UserListPage;
 import com.pmease.gitplex.web.page.admin.account.NewUserPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
@@ -28,10 +28,10 @@ public abstract class AdministrationPage extends LayoutPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new AdministrationTab("All Accounts", "fa fa-fw fa-users", AccountListPage.class, NewUserPage.class));
 		tabs.add(new AdministrationTab("System Setting", "fa fa-fw fa-sliders", SystemSettingPage.class));
 		tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
 		tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));
+		tabs.add(new AdministrationTab("User Management", "fa fa-fw fa-users", UserListPage.class, NewUserPage.class));
 		
 		add(new Tabbable("tabs", tabs));
 	}

@@ -1,7 +1,7 @@
 #administration.sidebar>table>tbody>tr>td.content {
 	padding: 20px;
 }
-.account.list .type {
+.account.list .email {
 	width: 20%;
 }
 .account.list .actions {

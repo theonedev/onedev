@@ -4,7 +4,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.Validator;
 
 import org.hibernate.Interceptor;
 import org.hibernate.boot.Metadata;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.DefaultPersistManager;
+import com.pmease.commons.hibernate.EntityValidator;
 import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.hibernate.IdManager;
 import com.pmease.commons.hibernate.ModelProvider;
@@ -33,7 +33,7 @@ public class ResetAdminPasswordCommand extends DefaultPersistManager {
 	public ResetAdminPasswordCommand(Set<ModelProvider> modelProviders, 
 			PhysicalNamingStrategy physicalNamingStrategy, HibernateProperties properties, 
 			Migrator migrator, Interceptor interceptor, IdManager idManager, Dao dao, 
-			Validator validator, AccountManager accountManager) {
+			EntityValidator validator, AccountManager accountManager) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, 
 				idManager, dao, validator);
 		this.accountManager = accountManager;

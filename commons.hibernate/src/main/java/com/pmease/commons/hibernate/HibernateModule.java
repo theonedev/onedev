@@ -25,12 +25,13 @@ import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.Command;
-import com.pmease.commons.hibernate.command.ApplyDBConstraintsCommand;
-import com.pmease.commons.hibernate.command.CheckDataVersionCommand;
-import com.pmease.commons.hibernate.command.CleanCommand;
-import com.pmease.commons.hibernate.command.DBDialectCommand;
-import com.pmease.commons.hibernate.command.RestoreCommand;
-import com.pmease.commons.hibernate.command.UpgradeCommand;
+import com.pmease.commons.hibernate.command.DefaultApplyDBConstraintsCommand;
+import com.pmease.commons.hibernate.command.DefaultBackupCommand;
+import com.pmease.commons.hibernate.command.DefaultCheckDataVersionCommand;
+import com.pmease.commons.hibernate.command.DefaultCleanCommand;
+import com.pmease.commons.hibernate.command.DefaultDBDialectCommand;
+import com.pmease.commons.hibernate.command.DefaultRestoreCommand;
+import com.pmease.commons.hibernate.command.DefaultUpgradeCommand;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.jackson.HibernateObjectMapperConfigurator;
@@ -65,6 +66,7 @@ public class HibernateModule extends AbstractPluginModule {
 		bind(UnitOfWork.class).to(DefaultUnitOfWork.class);
 		bind(IdManager.class).to(DefaultIdManager.class);
 		bind(Dao.class).to(DefaultDao.class);
+		bind(EntityValidator.class).to(DefaultEntityValidator.class);
 		
 	    TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 	    requestInjection(transactionInterceptor);
@@ -184,19 +186,19 @@ public class HibernateModule extends AbstractPluginModule {
 		
 		if (Bootstrap.command != null) {
 			if (Command.RESTORE.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(RestoreCommand.class);
+				bind(PersistManager.class).to(DefaultRestoreCommand.class);
 			else if (Command.APPLY_DB_CONSTRAINTS.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(ApplyDBConstraintsCommand.class);
+				bind(PersistManager.class).to(DefaultApplyDBConstraintsCommand.class);
 			else if (Command.BACKUP.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(BackupCommand.class);
+				bind(PersistManager.class).to(DefaultBackupCommand.class);
 			else if (Command.CHECK_DATA_VERSION.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(CheckDataVersionCommand.class);
+				bind(PersistManager.class).to(DefaultCheckDataVersionCommand.class);
 			else if (Command.UPGRADE.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(UpgradeCommand.class);
+				bind(PersistManager.class).to(DefaultUpgradeCommand.class);
 			else if (Command.CLEAN.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(CleanCommand.class);
+				bind(PersistManager.class).to(DefaultCleanCommand.class);
 			else if (Command.DB_DIALECT.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DBDialectCommand.class);
+				bind(PersistManager.class).to(DefaultDBDialectCommand.class);
 			else
 				bind(PersistManager.class).to(DefaultPersistManager.class);
 		} else {
