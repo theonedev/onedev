@@ -2,8 +2,8 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
-    <artifactId>gitplex.rest</artifactId>
-    <version>1.0.0</version>  
+    <artifactId>gitplex.rest</artifactId>  
+    <version>1.0.1</version>  
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
@@ -27,13 +27,13 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jersey</artifactId>  
-            <version>1.0.0</version> 
+            <version>1.0.1</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
-            <artifactId>gitplex.core</artifactId>
-            <version>1.0.31</version> 
-        </dependency>
+            <artifactId>gitplex.core</artifactId>  
+            <version>1.0.32</version> 
+        </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
@@ -53,6 +53,6 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.pmease.gitplex.rest.RestModule</moduleClass>
+        <moduleClass>com.pmease.gitplex.rest.RestModule</moduleClass> 
     </properties> 
 </project>

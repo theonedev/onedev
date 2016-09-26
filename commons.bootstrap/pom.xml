@@ -38,11 +38,11 @@
         <dependency> 
             <groupId>ch.qos.logback</groupId>  
             <artifactId>logback-classic</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.google.code.findbugs</groupId>  
+            <artifactId>jsr305</artifactId> 
         </dependency> 
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-		</dependency>
     </dependencies>  
     <repositories> 
         <repository> 
@@ -63,5 +63,6 @@
     </repositories>  
     <properties> 
         <bootstrap>true</bootstrap> 
-    </properties> 
+    </properties>  
+    <version>1.0.32</version>
 </project>
