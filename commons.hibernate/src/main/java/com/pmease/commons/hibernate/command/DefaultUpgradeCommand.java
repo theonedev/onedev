@@ -343,6 +343,10 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 		try {
 			FileUtils.cleanDir(destDir);
 			FileUtils.copyDirectory(srcDir, destDir);
+			for (File file: destDir.listFiles()) {
+				if (file.getName().endsWith(".sh"))
+					file.setExecutable(true);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
