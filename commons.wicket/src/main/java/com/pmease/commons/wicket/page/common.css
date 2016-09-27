@@ -101,6 +101,9 @@ a.wicket_orderDown:AFTER {
 .tree-content {
 	white-space: nowrap;
 }
+a.tree-junction {
+	text-decoration: none;
+}
 
 /* Tabs */
 .tabbable>.tab-content {

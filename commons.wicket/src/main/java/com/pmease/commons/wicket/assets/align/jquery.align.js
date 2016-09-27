@@ -187,6 +187,7 @@
         	
         	if (height < thisHeight)
         		$autoSize.outerHeight($autoSize.outerHeight()+height-thisHeight);
+        	$autoSize.outerHeight($autoSize.outerHeight()+2);
         	
         	if (width < thisWidth)
         		$autoSize.outerWidth($autoSize.outerWidth()+width-thisWidth);
