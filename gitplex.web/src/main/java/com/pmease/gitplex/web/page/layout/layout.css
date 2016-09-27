@@ -124,6 +124,9 @@ html, body {
 	font-size: 11px;
 	padding: 8px; 
 }
+#main>.foot>div {
+	white-space: nowrap;
+}
 section>.head {
 	font-size: 18px;
 	margin-bottom: 20px;
