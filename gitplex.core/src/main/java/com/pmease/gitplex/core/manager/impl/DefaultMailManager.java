@@ -16,29 +16,13 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.loader.Listen;
-import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.CodeComment;
-import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.event.MarkdownAware;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentEvent;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.setting.MailSetting;
-import com.pmease.gitplex.core.util.markdown.MentionParser;
 
 @Singleton
 public class DefaultMailManager implements MailManager {
@@ -47,22 +31,15 @@ public class DefaultMailManager implements MailManager {
 	
 	private final ConfigManager configManager;
 	
-	private final MarkdownManager markdownManager;
-
 	private final ExecutorService executorService;
-	
-	private final UrlManager urlManager;
 	
 	private final Dao dao;
 	
 	@Inject
-	public DefaultMailManager(Dao dao, ConfigManager configManager, ExecutorService executorService,
-			MarkdownManager markdownManager, UrlManager urlManager) {
+	public DefaultMailManager(Dao dao, ConfigManager configManager, ExecutorService executorService) {
 		this.dao = dao;
 		this.configManager = configManager;
 		this.executorService = executorService;
-		this.markdownManager = markdownManager;
-		this.urlManager = urlManager;
 	}
 
 	@Sessional
@@ -153,72 +130,6 @@ public class DefaultMailManager implements MailManager {
 	@Override
 	public void sendMail(Collection<Account> toList, String subject, String body) {
 		sendMail(configManager.getMailSetting(), toList, subject, body);
-	}
-
-	@Listen
-	public void on(PullRequestChangeEvent event) {
-		if (event instanceof PullRequestOpened 
-				|| event instanceof PullRequestCommented
-				|| event instanceof PullRequestStatusChangeEvent) {
-			String markdown = ((MarkdownAware) event).getMarkdown();
-			if (markdown != null) {
-				String url;
-				if (event instanceof PullRequestCommented)
-					url = urlManager.urlFor(((PullRequestCommented)event).getComment());
-				else if (event instanceof PullRequestStatusChangeEvent) 
-					url = urlManager.urlFor(((PullRequestStatusChangeEvent)event).getStatusChange());
-				else 
-					url = urlManager.urlFor(event.getRequest());
-				for (Account user: new MentionParser().parseMentions(markdownManager.parse(markdown))) {
-					PullRequest request = event.getRequest();
-					String subject = String.format("You are mentioned in pull request #%d (%s)", 
-							request.getNumber(), request.getTitle());
-					String body = String.format("%s."
-							+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
-							+ "<p style='margin: 16px 0;'>"
-							+ "For details, please visit <a href='%s'>%s</a>", 
-							subject, markdownManager.escape(markdown), url, url);
-					
-					sendMailAsync(Sets.newHashSet(user), subject, decorate(user, body));
-				}
-			}
-		}
-	}
-
-	@Listen
-	public void on(CodeCommentEvent event) {
-		if (event.getMarkdown() != null) {
-			for (Account user: new MentionParser().parseMentions(markdownManager.parse(event.getMarkdown()))) {
-				CodeComment comment = event.getComment();
-				String subject = "You are mentioned in a code comment";
-				String url;
-				if (event instanceof CodeCommentResolved)
-					url = urlManager.urlFor(((CodeCommentResolved)event).getStatusChange(), event.getRequest());
-				else if (event instanceof CodeCommentUnresolved)
-					url = urlManager.urlFor(((CodeCommentUnresolved)event).getStatusChange(), event.getRequest());
-				else if (event instanceof CodeCommentReplied) 
-					url = urlManager.urlFor(((CodeCommentReplied)event).getReply(), event.getRequest());
-				else
-					url = urlManager.urlFor(comment, event.getRequest());
-					
-				String body = String.format("%s."
-						+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
-						+ "<p style='margin: 16px 0;'>"
-						+ "For details, please visit <a href='%s'>%s</a>", 
-						subject, markdownManager.escape(event.getMarkdown()), url, url);
-				
-				sendMailAsync(Sets.newHashSet(user), subject, decorate(user, body));
-			}
-		}
-	}
-
-	private String decorate(Account user, String body) {
-		return String.format("Dear %s, "
-				+ "<p style='margin: 16px 0;'>"
-				+ "%s"
-				+ "<p style='margin: 16px 0;'>"
-				+ "-- Sent by GitPlex", 
-				user.getDisplayName(), body);
 	}
 
 }

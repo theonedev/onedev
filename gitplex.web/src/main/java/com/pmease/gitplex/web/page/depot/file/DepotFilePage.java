@@ -647,10 +647,10 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private void showDiff(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId) {
 		Depot depot = depotModel.getObject();
 		PullRequest request = getPullRequest();
-		CodeComment comment = getOpenComment();
 		if (request != null) {
 			RequestChangesPage.State state = new RequestChangesPage.State();
 			state.newCommit = newCommitId.name();
+			CodeComment comment = getOpenComment();
 			if (comment != null) {
 				state.oldCommit = comment.getCommentPos().getCommit();
 				state.commentId = comment.getId();

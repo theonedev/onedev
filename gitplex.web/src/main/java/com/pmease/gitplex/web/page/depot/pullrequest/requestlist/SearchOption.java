@@ -1,6 +1,9 @@
 package com.pmease.gitplex.web.page.depot.pullrequest.requestlist;
 
-import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.*;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofSource;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofSourceDepot;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofTarget;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofTargetDepot;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -22,7 +25,7 @@ import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 @Editable
 public class SearchOption implements Serializable {
 	
-	private static final String PARAM_TYPE = "type";
+	private static final String PARAM_DIRECTION = "direction";
 	
 	private static final String PARAM_STATUS = "status";
 	
@@ -38,11 +41,11 @@ public class SearchOption implements Serializable {
 	
 	private static final String PARAM_END_DATE = "end";
 	
-	public enum Type {TARGETING, ORIGINATING, ALL};
+	public enum Direction {INCOMING, OUTGOING, ALL};
 	
 	public enum Status {OPEN, CLOSED, ALL};
 	
-	private Type type = Type.ALL;
+	private Direction direction = Direction.ALL;
 	
 	private Status status = Status.OPEN;
 
@@ -58,15 +61,14 @@ public class SearchOption implements Serializable {
 	
 	private Date endDate;
 	
-	@Editable(order=50, description="'TARGETING' represents pull requests targeting current repository, "
-			+ "while 'ORIGINATING' represents pull requests originating from current repository")
+	@Editable(order=50)
 	@NotNull
-	public Type getType() {
-		return type;
+	public Direction getDirection() {
+		return direction;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setDirection(Direction direction) {
+		this.direction = direction;
 	}
 
 	@Editable(order=100)
@@ -140,9 +142,9 @@ public class SearchOption implements Serializable {
 	}
 	
 	public SearchOption(PageParameters params) {
-		String value = params.get(PARAM_TYPE).toString();
+		String value = params.get(PARAM_DIRECTION).toString();
 		if (value != null)
-			type = Type.valueOf(value);
+			direction = Direction.valueOf(value);
 		
 		value = params.get(PARAM_STATUS).toString();
 		if (value != null)
@@ -166,12 +168,12 @@ public class SearchOption implements Serializable {
 
 	public EntityCriteria<PullRequest> getCriteria(Depot depot) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		if (type == Type.TARGETING) { 
+		if (direction == Direction.INCOMING) { 
 			if (branch != null)
 				criteria.add(ofTarget(new DepotAndBranch(depot, branch)));
 			else
 				criteria.add(ofTargetDepot(depot));
-		} else if (type == Type.ORIGINATING) {
+		} else if (direction == Direction.OUTGOING) {
 			if (branch != null)
 				criteria.add(ofSource(new DepotAndBranch(depot, branch)));
 			else
@@ -205,7 +207,7 @@ public class SearchOption implements Serializable {
 	}
 	
 	public void fillPageParams(PageParameters params) {
-		params.set(PARAM_TYPE, type.name());
+		params.set(PARAM_DIRECTION, direction.name());
 		params.set(PARAM_STATUS, status.name());
 		if (assigneeName != null)
 			params.set(PARAM_ASSIGNEE, assigneeName);

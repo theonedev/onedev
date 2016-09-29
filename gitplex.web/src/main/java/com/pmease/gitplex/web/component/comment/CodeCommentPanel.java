@@ -708,7 +708,7 @@ public abstract class CodeCommentPanel extends Panel {
 					statusChange.setDate(date);
 					statusChange.setNote(contentInput.getModelObject());
 
-					GitPlex.getInstance(CodeCommentManager.class).changeStatus(statusChange, getPullRequest());				
+					GitPlex.getInstance(CodeCommentManager.class).changeStatus(statusChange);				
 					onStatusChanged(target, fragment, statusChange);
 					onSaveComment(target, getComment());
 				} else {
@@ -718,7 +718,7 @@ public abstract class CodeCommentPanel extends Panel {
 					reply.setUser(user);
 					reply.setContent(contentInput.getModelObject());
 					reply.setCompareContext(compareContext);
-					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply, getPullRequest(), true);
+					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply, true);
 					onReplyAdded(target, fragment, reply);
 				}
 			}
@@ -778,7 +778,6 @@ public abstract class CodeCommentPanel extends Panel {
 	
 	protected abstract CompareContext getCompareContext(CodeComment comment);
 	
-	@Nullable
 	protected abstract PullRequest getPullRequest();
 	
 	private static class ActivityIdentity implements Serializable {

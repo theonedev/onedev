@@ -18,16 +18,14 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentRelation;
-import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.support.CodeCommentActivity;
+import com.pmease.gitplex.core.event.codecomment.CodeCommentActivityEvent;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentResolved;
-import com.pmease.gitplex.core.event.codecomment.CodeCommentUnresolved;
 import com.pmease.gitplex.core.event.depot.DepotDeleted;
 import com.pmease.gitplex.core.event.lifecycle.SystemStopping;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCommentCreated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -202,11 +200,11 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 
 	@Listen
-	public void on(CodeCommentReplied event) {
-		CodeCommentReply reply = event.getReply();
-		visit(reply.getUser(), reply.getComment());
-		for (CodeCommentRelation relation: reply.getComment().getRelations()) {
-			visit(reply.getUser(), relation.getRequest());
+	public void on(CodeCommentActivityEvent event) {
+		CodeCommentActivity activity = event.getActivity();
+		visit(activity.getUser(), activity.getComment());
+		for (CodeCommentRelation relation: activity.getComment().getRelations()) {
+			visit(activity.getUser(), relation.getRequest());
 		}
 	}
 
@@ -215,22 +213,6 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 		visit(event.getComment().getUser(), event.getComment());
 	}
 
-	@Listen
-	public void on(CodeCommentResolved event) {
-		visit(event.getUser(), event.getComment());
-		for (CodeCommentRelation relation: event.getComment().getRelations()) {
-			visit(event.getUser(), relation.getRequest());
-		}
-	}
-	
-	@Listen
-	public void on(CodeCommentUnresolved event) {
-		visit(event.getUser(), event.getComment());
-		for (CodeCommentRelation relation: event.getComment().getRelations()) {
-			visit(event.getUser(), relation.getRequest());
-		}
-	}
-	
 	private byte[] longToBytes(long value) {
 	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
 	    buffer.putLong(value);
@@ -245,7 +227,7 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 	
 	@Listen
-	public void on(PullRequestCommented event) {
+	public void on(PullRequestCommentCreated event) {
 		visit(event.getComment().getUser(), event.getRequest());
 	}
 	

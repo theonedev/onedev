@@ -718,6 +718,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			state.commentId = comment.getId();
 		} else {
 			state.commentId = null;
+			state.mark = null;
 		}
 		pushState(target);
 		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);

@@ -25,7 +25,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.support.CompareContext;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentCreated;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommented;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentCreated;
 import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
@@ -134,7 +134,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 		CodeComment comment = entity.getComment();
 		if (entity.isNew() && (request.getLastEvent() == null 
 				|| comment.getDate().getTime()>request.getLastEvent().getDate().getTime())) {
-			PullRequestCodeCommented event = new PullRequestCodeCommented(request, comment); 
+			PullRequestCodeCommentCreated event = new PullRequestCodeCommentCreated(request, comment); 
 			listenerRegistry.post(event);
 			request.setLastEvent(event);
 			pullRequestManager.save(request);
@@ -147,10 +147,11 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 	public void on(CodeCommentCreated event) {
 		CodeComment comment = event.getComment();
 		ObjectId commitId = ObjectId.fromString(comment.getCommentPos().getCommit());
+		boolean found = false;
 		for (String uuid: pullRequestInfoManager.getRequests(comment.getDepot(), commitId)) {
 			PullRequest request = pullRequestManager.find(uuid);
 			if (request != null && request.getRequestComparingInfo(comment.getComparingInfo()) != null) {
-				PullRequestCodeCommented pullRequestCodeCommented = new PullRequestCodeCommented(request, comment); 
+				PullRequestCodeCommentCreated pullRequestCodeCommented = new PullRequestCodeCommentCreated(request, comment); 
 				listenerRegistry.post(pullRequestCodeCommented);
 				
 				request.setLastEvent(pullRequestCodeCommented);
@@ -163,8 +164,14 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 				relation.setComment(comment);
 				relation.setRequest(request);
 				save(relation);
+				found = true;
 			}
 		}
+		
+		if (!found) {
+			codeCommentManager.sendNotifications(event);
+		}
+		
 	}
 
 }

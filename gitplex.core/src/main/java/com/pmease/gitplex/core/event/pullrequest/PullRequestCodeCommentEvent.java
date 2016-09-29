@@ -1,17 +1,15 @@
 package com.pmease.gitplex.core.event.pullrequest;
 
-import java.util.Date;
-
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.event.MarkdownAware;
 
-public class PullRequestCodeCommentEvent extends PullRequestChangeEvent {
+public abstract class PullRequestCodeCommentEvent extends PullRequestChangeEvent implements MarkdownAware {
 
 	private final CodeComment comment;
 	
-	public PullRequestCodeCommentEvent(PullRequest request, Account user, Date date, CodeComment comment) {
-		super(request, user, date);
+	public PullRequestCodeCommentEvent(PullRequest request, CodeComment comment) {
+		super(request);
 		this.comment = comment;
 	}
 

@@ -549,7 +549,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							comment.getCommentPos().setRange(mark);
 							comment.setCompareContext(getCompareContext());
 							
-							GitPlex.getInstance(CodeCommentManager.class).save(comment, context.getPullRequest());
+							GitPlex.getInstance(CodeCommentManager.class).save(comment);
 							
 							CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 

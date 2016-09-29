@@ -8,7 +8,6 @@ import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.event.codecomment.CodeCommentReplied;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
@@ -30,11 +29,11 @@ public class DefaultCodeCommentReplyManager extends AbstractEntityManager<CodeCo
 
 	@Transactional
 	@Override
-	public void save(CodeCommentReply reply, PullRequest request, boolean callListeners) {
+	public void save(CodeCommentReply reply, boolean callListeners) {
 		boolean isNew = reply.isNew();
 		dao.persist(reply);
 		if (isNew && callListeners) {
-			CodeCommentReplied event = new CodeCommentReplied(reply, request); 
+			CodeCommentReplied event = new CodeCommentReplied(reply); 
 			listenerRegistry.post(event);
 			reply.getComment().setLastEvent(event);
 			codeCommentManager.save(reply.getComment());
@@ -44,7 +43,7 @@ public class DefaultCodeCommentReplyManager extends AbstractEntityManager<CodeCo
 	@Transactional
 	@Override
 	public void save(CodeCommentReply reply) {
-		save(reply, null, true);
+		save(reply, true);
 	}
 	
 }

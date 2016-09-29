@@ -492,6 +492,7 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 			state.mark = comment.getCommentPos();
 		} else {
 			state.commentId = null;
+			state.mark = null;
 		}
 		pushState(target);
 	}

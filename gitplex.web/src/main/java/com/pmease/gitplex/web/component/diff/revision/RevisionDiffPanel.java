@@ -810,7 +810,7 @@ public class RevisionDiffPanel extends Panel {
 									comment.setCompareContext(getCompareContext(comment.getCommentPos().getCommit()));
 									comment.setContent(contentInput.getModelObject());
 									
-									GitPlex.getInstance(CodeCommentManager.class).save(comment, requestModel.getObject());
+									GitPlex.getInstance(CodeCommentManager.class).save(comment);
 									
 									CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 

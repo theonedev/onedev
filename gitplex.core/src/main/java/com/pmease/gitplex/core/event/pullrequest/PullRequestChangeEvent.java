@@ -9,23 +9,13 @@ import com.pmease.gitplex.core.entity.PullRequest;
 
 public abstract class PullRequestChangeEvent extends PullRequestEvent {
 
-	private final Account user;
-	
-	private final Date date;
-	
-	public PullRequestChangeEvent(PullRequest request, @Nullable Account user, Date date) {
+	public PullRequestChangeEvent(PullRequest request) {
 		super(request);
-		this.user = user;
-		this.date = date;
 	}
 
 	@Nullable
-	public Account getUser() {
-		return user;
-	}
+	public abstract Account getUser();
 
-	public Date getDate() {
-		return date;
-	}
+	public abstract Date getDate();
 
 }

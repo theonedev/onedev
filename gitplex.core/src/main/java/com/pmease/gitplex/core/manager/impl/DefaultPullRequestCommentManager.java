@@ -10,7 +10,7 @@ import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.support.LastEvent;
-import com.pmease.gitplex.core.event.pullrequest.PullRequestCommented;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCommentCreated;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 
@@ -43,7 +43,7 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 		boolean isNew = comment.isNew();
 		dao.persist(comment);
 		if (notifyListeners && isNew) {
-			PullRequestCommented event = new PullRequestCommented(comment);
+			PullRequestCommentCreated event = new PullRequestCommentCreated(comment);
 			listenerRegistry.post(event);
 			
 			LastEvent lastEvent = new LastEvent();

@@ -3,25 +3,24 @@ package com.pmease.gitplex.core.event.codecomment;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.CodeCommentStatusChange;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentActivityEvent;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentUnresolved;
 
 @Editable(name="unresolved")
-public class CodeCommentUnresolved extends CodeCommentEvent {
+public class CodeCommentUnresolved extends CodeCommentActivityEvent {
 
-	private final CodeCommentStatusChange statusChange;
-	
-	public CodeCommentUnresolved(CodeCommentStatusChange statusChange, PullRequest request) {
-		super(statusChange.getComment(), statusChange.getUser(), statusChange.getDate(), request);
-		this.statusChange = statusChange;
+	public CodeCommentUnresolved(CodeCommentStatusChange statusChange) {
+		super(statusChange);
 	}
 
 	public CodeCommentStatusChange getStatusChange() {
-		return statusChange;
+		return (CodeCommentStatusChange) getActivity();
 	}
-
+	
 	@Override
-	public String getMarkdown() {
-		return statusChange.getNote();
+	public PullRequestCodeCommentActivityEvent getPullRequestCodeCommentActivityEvent(PullRequest request) {
+		return new PullRequestCodeCommentUnresolved(request, getStatusChange());
 	}
-
+	
 }
  

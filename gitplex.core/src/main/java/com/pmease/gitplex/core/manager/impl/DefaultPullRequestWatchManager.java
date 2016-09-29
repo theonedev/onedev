@@ -29,6 +29,9 @@ import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.event.MarkdownAware;
 import com.pmease.gitplex.core.event.pullrequest.IntegrationPreviewCalculated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestChangeEvent;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentActivityEvent;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentCreated;
+import com.pmease.gitplex.core.event.pullrequest.PullRequestCommentCreated;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestOpened;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestReviewInvitationChanged;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
@@ -125,8 +128,31 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 				for (Account mention: mentionUsers) {
 					watch(request, mention, "You are set to watch this pull request as you are mentioned in code comment.");
 				}
+
+				String url;
+				if (event instanceof PullRequestCommentCreated)
+					url = urlManager.urlFor(((PullRequestCommentCreated)event).getComment());
+				else if (event instanceof PullRequestStatusChangeEvent) 
+					url = urlManager.urlFor(((PullRequestStatusChangeEvent)event).getStatusChange());
+				else if (event instanceof PullRequestCodeCommentCreated)
+					url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment(), event.getRequest());
+				else if (event instanceof PullRequestCodeCommentActivityEvent)
+					url = urlManager.urlFor(((PullRequestCodeCommentActivityEvent)event).getActivity(), event.getRequest());
+				else 
+					url = urlManager.urlFor(event.getRequest());
+				
+				String subject = String.format("You are mentioned in pull request #%d (%s)", 
+						request.getNumber(), request.getTitle());
+				String body = String.format("%s."
+						+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
+						+ "<p style='margin: 16px 0;'>"
+						+ "For details, please visit <a href='%s'>%s</a>", 
+						subject, markdownManager.escape(markdown), url, url);
+				
+				mailManager.sendMailAsync(mentionUsers, subject, decorateBody(body));
 			}
 		} 		
+
 		Collection<Account> watchUsers = new HashSet<>();
 		
 		for (PullRequestWatch watch: request.getWatches()) {
@@ -146,8 +172,6 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 			}
 		}
 
-		// mentioned users will be receiving email separately, so we do not need to notify
-		// them here
 		watchUsers.removeAll(mentionUsers);
 
 		if ((event instanceof PullRequestOpened || statusChangeType == Type.ASSIGNED) 
@@ -160,7 +184,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 			String body = String.format("You are assigned with pull request #%d (%s).<br>"
 					+ "Please visit <a href='%s'>%s</a> for details.",
 					request.getNumber(), request.getTitle(), url, url);
-			mailManager.sendMailAsync(Sets.newHashSet(request.getAssignee()), subject, decorate(user, body));
+			mailManager.sendMailAsync(Sets.newHashSet(request.getAssignee()), subject, decorateBody(body));
 		}
 		
 		if (!watchUsers.isEmpty()) {
@@ -192,13 +216,12 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 		
 	}
 	
-	private String decorate(Account user, String body) {
-		return String.format("Dear %s, "
-				+ "<p style='margin: 16px 0;'>"
+	private String decorateBody(String body) {
+		return String.format(""
 				+ "%s"
 				+ "<p style='margin: 16px 0;'>"
 				+ "-- Sent by GitPlex", 
-				user.getDisplayName(), body);
+				body);
 	}
 	
 	private void makeContributorsWatching(PullRequestUpdate update) {

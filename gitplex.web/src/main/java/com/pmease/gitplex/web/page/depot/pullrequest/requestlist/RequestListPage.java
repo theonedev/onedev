@@ -51,7 +51,7 @@ import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Type;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Direction;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -198,7 +198,7 @@ public class RequestListPage extends PullRequestPage {
 							@Override
 							public void onClick() {
 								searchOption = new SearchOption();
-								searchOption.setType(Type.TARGETING);
+								searchOption.setDirection(Direction.INCOMING);
 								searchOption.setStatus(Status.OPEN);
 								
 								setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
@@ -227,7 +227,7 @@ public class RequestListPage extends PullRequestPage {
 							@Override
 							public void onClick() {
 								searchOption = new SearchOption();
-								searchOption.setType(Type.ORIGINATING);
+								searchOption.setDirection(Direction.OUTGOING);
 								searchOption.setStatus(Status.OPEN);
 								
 								setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));

@@ -1,6 +1,7 @@
 package com.pmease.gitplex.rest.resource;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -98,6 +99,7 @@ public class PullRequestVerificationResource {
     	if (!SecurityUtils.canWrite(verification.getRequest().getTargetDepot()))
     		throw new UnauthorizedException();
     	
+    	verification.setDate(new Date());
     	verification.setUser(accountManager.getCurrent());
     	verificationManager.save(verification);
     	
