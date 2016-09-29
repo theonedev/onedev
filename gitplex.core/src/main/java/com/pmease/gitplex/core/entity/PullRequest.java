@@ -1035,6 +1035,15 @@ public class PullRequest extends AbstractEntity {
 		setLastEvent(lastEvent);
 		setLastCodeCommentEventDate(event.getDate());
 	}
+
+	@Nullable
+	public ObjectId getSourceHead() {
+		DepotAndBranch depotAndBranch = getSource();
+		if (depotAndBranch != null)
+			return depotAndBranch.getObjectId(false);
+		else
+			return null;
+	}
 	
 	public static class ComparingInfo implements Serializable {
 		

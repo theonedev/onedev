@@ -16,7 +16,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -64,7 +63,6 @@ import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.comment.CodeCommentToggled;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.diff.blob.SourceAware;
 import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
@@ -154,16 +152,6 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		return blameInfo;
 	}
 
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		
-		if (event.getPayload() instanceof CodeCommentToggled) {
-			CodeCommentToggled codeCommentToggled = (CodeCommentToggled) event.getPayload();
-			newActions(codeCommentToggled.getPartialPageRequestHandler());
-		} 
-	}
-	
 	private void newActions(IPartialPageRequestHandler target) {
 		WebMarkupContainer actions = new WebMarkupContainer("actions");
 		actions.setOutputMarkupId(true);
@@ -242,18 +230,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 						editState.commentId = comment.getId();
 					params = DepotFilePage.paramsOf(depot, editState);
 					title = "Edit on branch " + change.getBlobIdent().revision;
-				} else if (comment != null 
-						&& comment.getBranchRef() != null 
-						&& depot.getObjectId(comment.getBranchRef(), false) != null) {
-					// we are viewing a code comment, so we can edit referenced branch of the comment instead
-					DepotFilePage.State editState = new DepotFilePage.State();
-					editState.blobIdent.revision = GitUtils.ref2branch(comment.getBranchRef()); 
-					editState.blobIdent.path = change.getPath();
-					editState.mode = Mode.EDIT;
-					editState.commentId = comment.getId();
-					params = DepotFilePage.paramsOf(depot, editState);
-					title = "Edit on branch " + editState.blobIdent.revision;
-				}				
+				}	
 			}  
 		}
 		
@@ -1060,12 +1037,14 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		String script = String.format("gitplex.textdiff.onCommentDeleted($('#%s'), %s);", 
 				getMarkupId(), getJsonOfComment(comment));
 		target.appendJavaScript(script);
+		mark(target, null);
 	}
 
 	@Override
 	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
 		String script = String.format("gitplex.textdiff.onCloseComment($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
+		mark(target, null);
 	}
 
 	@Override

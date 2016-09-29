@@ -30,8 +30,9 @@
 			<div wicket:id="tooManyFiles" class="alert alert-warning">Sorry we are unable to display all files as there are too many</div>
 			<ul wicket:id="diffStats" class="diff-stats list-unstyled">
 				<li wicket:id="diffStats" class="diff-stat clearfix">
-					<i wicket:id="icon" class="icon pull-left"></i>
+					<i wicket:id="icon" class="icon fa-fw pull-left"></i>
 					<a wicket:id="file" class="file pull-left"><span wicket:id="name"></span></a>
+					<span wicket:id="hasComments" class="fa fa-comments" title="There are comments on this file"></span>
 					<wicket:enclosure child="bar">
 					<span wicket:id="bar" class="bar pull-right"></span>
 					<span wicket:id="deletions" class="deletions pull-right"></span>

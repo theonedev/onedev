@@ -26,7 +26,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -52,7 +51,6 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Objects;
@@ -83,7 +81,6 @@ import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
-import com.pmease.gitplex.web.component.comment.CodeCommentToggled;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.comparecontext.CompareContextPanel;
@@ -647,7 +644,7 @@ public class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				String iconClass;
 				if (change.getType() == null) {
-					iconClass = " fa fa-square-o";
+					iconClass = " fa fa-file-text-o";
 				} else if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
 					iconClass = " fa-ext fa-diff-added";
 				else if (change.getType() == ChangeType.DELETE)
@@ -658,6 +655,8 @@ public class RevisionDiffPanel extends Panel {
 					iconClass = " fa-ext fa-diff-renamed";
 				
 				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
+
+				item.add(new WebMarkupContainer("hasComments").setVisible(!getComments(change).isEmpty()));
 				
 				WebMarkupContainer fileLink = new WebMarkupContainer("file");
 				fileLink.add(new Label("name", change.getPath()));
@@ -733,7 +732,6 @@ public class RevisionDiffPanel extends Panel {
 						@Override
 						public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
 							RevisionDiffPanel.this.onOpenComment(target, comment);
-							send(RevisionDiffPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 						}
 	
 						@Override
@@ -778,6 +776,14 @@ public class RevisionDiffPanel extends Panel {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									clearComment(target);
+									CommentPos mark = getMark();
+									if (mark != null) {
+										SourceAware sourceAware = getSourceAware(mark.getPath());
+										if (sourceAware != null) 
+											sourceAware.mark(target, null);
+										commentSupport.onMark(target, null);
+									}
+									
 									target.appendJavaScript("gitplex.revisionDiff.reposition();");
 								}
 								
@@ -803,9 +809,6 @@ public class RevisionDiffPanel extends Panel {
 									comment.setCommentPos(commentPos);
 									comment.setCompareContext(getCompareContext(comment.getCommentPos().getCommit()));
 									comment.setContent(contentInput.getModelObject());
-									Ref branchRef = depot.getBranchRef(newRev);									
-									if (branchRef != null)
-										comment.setBranchRef(branchRef.getName());
 									
 									GitPlex.getInstance(CodeCommentManager.class).save(comment, requestModel.getObject());
 									
@@ -841,7 +844,6 @@ public class RevisionDiffPanel extends Panel {
 
 									commentSupport.onCommentOpened(target, comment);
 									target.appendJavaScript("gitplex.revisionDiff.reposition();");
-									send(RevisionDiffPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 								}
 
 							});
@@ -866,18 +868,11 @@ public class RevisionDiffPanel extends Panel {
 							}  
 							commentSupport.onAddComment(target, commentPos);
 							target.appendJavaScript("gitplex.revisionDiff.reposition();");		
-							send(RevisionDiffPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 						}
 
 						@Override
 						public Collection<CodeComment> getComments() {
-							Collection<CodeComment> comments = new ArrayList<>();
-							for (CodeComment comment: commentsModel.getObject()) {
-								if (change.getPaths().contains(comment.getCommentPos().getPath())) {
-									comments.add(comment);
-								}
-							}
-							return comments;
+							return RevisionDiffPanel.this.getComments(change);
 						}
 
 						@Override
@@ -895,6 +890,16 @@ public class RevisionDiffPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
+	}
+	
+	private Collection<CodeComment> getComments(BlobChange change) {
+		Collection<CodeComment> comments = new ArrayList<>();
+		for (CodeComment comment: commentsModel.getObject()) {
+			if (change.getPaths().contains(comment.getCommentPos().getPath())) {
+				comments.add(comment);
+			}
+		}
+		return comments;
 	}
 
 	private void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
@@ -1095,15 +1100,6 @@ public class RevisionDiffPanel extends Panel {
 					commentSupport.onCommentOpened(target, null);
 				}
 				target.appendJavaScript("gitplex.revisionDiff.reposition();");
-				
-				CommentPos mark = getMark();
-				if (mark != null) {
-					SourceAware sourceAware = getSourceAware(mark.getPath());
-					if (sourceAware != null) {
-						sourceAware.mark(target, mark);
-					}
-				}
-				send(RevisionDiffPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 			}
 			
 		});
@@ -1274,7 +1270,6 @@ public class RevisionDiffPanel extends Panel {
 				sourceAware.mark(target, mark);
 			}
 		}
-		send(RevisionDiffPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 	}
 	
 	private void clearComment(AjaxRequestTarget target) {

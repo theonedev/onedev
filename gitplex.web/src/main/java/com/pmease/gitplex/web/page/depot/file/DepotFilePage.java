@@ -674,16 +674,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				}
 				
 			});
-		} else if (comment != null) {
-			RevisionComparePage.State state = new RevisionComparePage.State();
-			state.commentId = comment.getId();
-			state.pathFilter = comment.getCompareContext().getPathFilter();
-			state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
-			state.mark = comment.getCommentPos();
-			state.leftSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
-			state.rightSide = new DepotAndRevision(depot, newCommitId.name());
-			state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-			setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, state));
 		} else {
 			RevisionComparePage.State state = new RevisionComparePage.State();
 			state.leftSide = new DepotAndRevision(depot, oldCommitId.name());
@@ -1004,6 +994,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			mark = comment.getCommentPos().getRange();
 		} else {
 			commentId = null;
+			mark = null;
 		}
 		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 		pushState(target);
@@ -1022,12 +1013,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		return getDepot().getBranchRef(blobIdent.revision) != null;
 	}
 
-	@Override
-	public boolean isOnCommentBranch() {
-		CodeComment comment = getOpenComment();
-		return comment != null && comment.getBranchRef() != null && getDepot().getObjectId(comment.getBranchRef(), false) != null;		
-	}
-	
 	@Override
 	public RevCommit getCommit() {
 		return getDepot().getRevCommit(getBlobIdent().revision);

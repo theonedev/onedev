@@ -38,8 +38,6 @@ public interface BlobViewContext extends Serializable {
 
 	boolean isOnBranch();
 	
-	boolean isOnCommentBranch();
-	
 	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos);
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);

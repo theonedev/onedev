@@ -380,11 +380,8 @@ gitplex.sourceview = {
 		}
 		gitplex.sourceview.highlightCommentTrigger();				
 		gitplex.sourceview.onLayoutChange();
-
-		// make sure marked text is in view port after changing layout
-		var mark = $sourceView.data("mark");
-		if (mark) 
-			gitplex.sourceview.mark(mark, true);
+		
+		gitplex.sourceview.mark(undefined, false);
 	},
 	onLayoutChange: function() {
 		$sourceView = $('.source-view');
@@ -422,12 +419,7 @@ gitplex.sourceview = {
 		$sourceView.removeData("openComment");
 		gitplex.sourceview.highlightCommentTrigger();
 		gitplex.sourceview.onLayoutChange();
-		
-		// make sure marked text is in view port after layout change
-		var mark = $sourceView.data("mark");
-		if (mark) {
-			gitplex.sourceview.mark(mark, true);
-		}
+		gitplex.sourceview.mark(undefined, false);
 	},
 	onToggleOutline: function() {
 		gitplex.sourceview.onLayoutChange();
@@ -475,9 +467,14 @@ gitplex.sourceview = {
 		}
 	},
 	mark: function(mark, scroll) {
-		$(".source-view").data("mark", mark);
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		pmease.commons.codemirror.mark(cm, mark, scroll);
+		if (mark) {
+			$(".source-view").data("mark", mark);
+			pmease.commons.codemirror.mark(cm, mark, scroll);
+		} else {
+			$(".source-view").removeData("mark");
+			pmease.commons.codemirror.clearMark(cm);			
+		}
 	},
 	blame: function(blameInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		

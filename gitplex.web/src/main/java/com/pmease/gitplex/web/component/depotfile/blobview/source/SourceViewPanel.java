@@ -20,7 +20,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -43,7 +42,6 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -78,7 +76,6 @@ import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
-import com.pmease.gitplex.web.component.comment.CodeCommentToggled;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.comparecontext.CompareContextPanel;
@@ -238,9 +235,13 @@ public class SourceViewPanel extends BlobViewPanel {
 		target.appendJavaScript("gitplex.sourceview.onToggleOutline();");
 	}
 
-	public void mark(AjaxRequestTarget target, TextRange mark, boolean scroll) {
-		String script = String.format("gitplex.sourceview.mark(%s, %s);", 
-				getJson(mark), scroll);
+	public void mark(AjaxRequestTarget target, @Nullable TextRange mark, boolean scroll) {
+		String script;
+		if (mark != null) {
+			script = String.format("gitplex.sourceview.mark(%s, %s);", getJson(mark), scroll);
+		} else {
+			script = String.format("gitplex.sourceview.mark(undefined, false);");
+		}
 		target.appendJavaScript(script);
 	}
 	
@@ -376,7 +377,6 @@ public class SourceViewPanel extends BlobViewPanel {
 				if (context.getOpenComment() != null) 
 					context.onCommentOpened(target, null);
 				target.appendJavaScript("gitplex.sourceview.onCloseComment();");
-				send(SourceViewPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 			}
 			
 		});
@@ -520,6 +520,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							clearComment(target);
+							target.appendJavaScript("gitplex.sourceview.mark(undefined, false);");
 							target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
 						}
 						
@@ -547,9 +548,6 @@ public class SourceViewPanel extends BlobViewPanel {
 							comment.setUser(SecurityUtils.getAccount());
 							comment.getCommentPos().setRange(mark);
 							comment.setCompareContext(getCompareContext());
-							Ref branchRef = context.getDepot().getBranchRef(context.getBlobIdent().revision);									
-							if (branchRef != null)
-								comment.setBranchRef(branchRef.getName());
 							
 							GitPlex.getInstance(CodeCommentManager.class).save(comment, context.getPullRequest());
 							
@@ -583,7 +581,6 @@ public class SourceViewPanel extends BlobViewPanel {
 									getJsonOfComment(comment));
 							target.appendJavaScript(script);
 							context.onCommentOpened(target, comment);
-							send(SourceViewPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 						}
 
 					});
@@ -626,7 +623,6 @@ public class SourceViewPanel extends BlobViewPanel {
 					script = String.format("gitplex.sourceview.onOpenComment(%s);", getJsonOfComment(comment));
 					target.appendJavaScript(script);
 					context.onCommentOpened(target, comment);
-					send(SourceViewPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 					break;
 				}
 			}
@@ -798,7 +794,6 @@ public class SourceViewPanel extends BlobViewPanel {
 				getJsonOfComment(comment));
 		target.appendJavaScript(script);
 		context.onCommentOpened(target, null);
-		send(SourceViewPanel.this, Broadcast.BREADTH, new CodeCommentToggled(target));
 	}
 	
 	private List<Symbol> getChildSymbols(@Nullable Symbol parentSymbol) {

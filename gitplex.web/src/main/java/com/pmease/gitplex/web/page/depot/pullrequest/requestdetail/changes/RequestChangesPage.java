@@ -524,6 +524,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			state.mark = comment.getCommentPos();
 		} else {
 			state.commentId = null;
+			state.mark = null;
 		}
 		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 		pushState(target);
