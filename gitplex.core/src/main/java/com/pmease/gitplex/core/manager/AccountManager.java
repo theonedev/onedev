@@ -76,5 +76,5 @@ public interface AccountManager extends EntityManager<Account> {
 	List<Account> findAllUsers();
 	
 	List<Account> findAllOrganizations();
-	
+
 }

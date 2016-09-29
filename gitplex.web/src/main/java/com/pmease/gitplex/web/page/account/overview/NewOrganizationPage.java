@@ -16,8 +16,6 @@ import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 
-import jersey.repackaged.com.google.common.collect.Sets;
-
 @SuppressWarnings("serial")
 public class NewOrganizationPage extends AccountLayoutPage {
 
@@ -41,8 +39,7 @@ public class NewOrganizationPage extends AccountLayoutPage {
 		membership.setUser(getAccount());
 		membership.setOrganization(organization);
 		
-		BeanEditor<?> editor = BeanContext.editBean("editor", membership.getOrganization(), 
-				Sets.newHashSet("email", "password"));
+		BeanEditor<?> editor = BeanContext.editBean("editor", membership.getOrganization(), Account.getOrganizationExcludeProperties()); 
 		
 		Form<?> form = new Form<Void>("form") {
 

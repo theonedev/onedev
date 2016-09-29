@@ -110,17 +110,17 @@
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.hibernate</artifactId>
-			<version>1.0.30</version>
+			<version>1.0.31</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.wicket</artifactId>
-			<version>1.0.29</version>
+			<version>1.0.30</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jetty</artifactId>
-			<version>1.0.31</version>
+			<version>1.0.32</version>
 		</dependency>
 	</dependencies>
 

@@ -19,8 +19,6 @@ import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.base.BasePage;
 import com.pmease.gitplex.web.page.home.DashboardPage;
 
-import jersey.repackaged.com.google.common.collect.Sets;
-
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
 	
@@ -34,8 +32,7 @@ public class RegisterPage extends BasePage {
 		super.onInitialize();
 	
 		final Account account = new Account();
-		final BeanEditor<?> editor = BeanContext.editBean("editor", account, 
-				Sets.newHashSet("description", "defaultPrivilege"));
+		final BeanEditor<?> editor = BeanContext.editBean("editor", account, Account.getUserExcludeProperties());
 		
 		Form<?> form = new Form<Void>("form") {
 

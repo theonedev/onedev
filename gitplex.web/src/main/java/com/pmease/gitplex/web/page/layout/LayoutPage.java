@@ -40,7 +40,7 @@ import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.admin.account.AccountListPage;
+import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.base.BasePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.security.LoginPage;
@@ -137,7 +137,7 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("createNewDropdown").setVisible(false));
 		}
 		
-		head.add(new BookmarkablePageLink<Void>("administration", AccountListPage.class)
+		head.add(new BookmarkablePageLink<Void>("administration", SystemSettingPage.class)
 				.setVisible(SecurityUtils.canManageSystem()));
 		
 		Account user = getLoginUser();

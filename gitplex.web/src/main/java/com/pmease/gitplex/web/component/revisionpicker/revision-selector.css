@@ -20,7 +20,6 @@ div.revision-selector {
 }
 div.revision-selector ul.items {
 	margin-bottom: 0;
-	max-height: 400px;
 }
 div.revision-selector ul.items>li {
 	position: relative;

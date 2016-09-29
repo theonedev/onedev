@@ -10,6 +10,7 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.EntityValidator;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PersistManager;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
@@ -202,8 +203,12 @@ public class CoreModule extends AbstractPluginModule {
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 		
-		if (Bootstrap.command != null && Bootstrap.command.getName().equals("reset_admin_password"))
+		bind(EntityValidator.class).to(CoreEntityValidator.class);
+		
+		if (Bootstrap.command != null 
+				&& Bootstrap.command.getName().equals("reset_admin_password")) {
 			bind(PersistManager.class).to(ResetAdminPasswordCommand.class);
+		}
 	}
 	
 	@Override

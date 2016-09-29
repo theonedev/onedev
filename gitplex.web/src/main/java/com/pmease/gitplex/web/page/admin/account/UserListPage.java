@@ -1,12 +1,8 @@
 package com.pmease.gitplex.web.page.admin.account;
 
-import static com.pmease.gitplex.web.page.admin.account.TypeSelectionPanel.TYPE_ORGANIZATIOIN;
-import static com.pmease.gitplex.web.page.admin.account.TypeSelectionPanel.TYPE_USER;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -15,13 +11,11 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
@@ -38,10 +32,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class AccountListPage extends AdministrationPage {
+public class UserListPage extends AdministrationPage {
 
-	private String filterType;
-	
 	private PageableListView<Account> accountsView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
@@ -67,74 +59,6 @@ public class AccountListPage extends AdministrationPage {
 
 		});
 		
-		WebMarkupContainer filterContainer = new WebMarkupContainer("filter");
-		filterContainer.setOutputMarkupId(true);
-		add(filterContainer);
-		
-		filterContainer.add(new DropdownLink("selection") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						if (filterType == null)
-							return "Filter by account type";
-						else 
-							return filterType;
-					}
-					
-				}));
-			}
-
-			@Override
-			protected Component newContent(String id) {
-				return new TypeSelectionPanel(id, filterType) {
-
-					@Override
-					protected void onSelectUser(AjaxRequestTarget target) {
-						close();
-						filterType = TYPE_USER;
-						target.add(filterContainer);
-						target.add(accountsContainer);
-						target.add(pagingNavigator);
-						target.add(noAccountsContainer);
-					}
-
-					@Override
-					protected void onSelectOrganization(AjaxRequestTarget target) {
-						close();
-						filterType = TYPE_ORGANIZATIOIN;
-						target.add(filterContainer);
-						target.add(accountsContainer);
-						target.add(pagingNavigator);
-						target.add(noAccountsContainer);
-					}
-					
-				};
-			}
-		});
-		filterContainer.add(new AjaxLink<Void>("clear") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				filterType = null;
-				target.add(filterContainer);
-				target.add(accountsContainer);
-				target.add(pagingNavigator);
-				target.add(noAccountsContainer);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(filterType != null);
-			}
-			
-		});
-
 		add(new Link<Void>("addNew") {
 
 			@Override
@@ -168,15 +92,11 @@ public class AccountListPage extends AdministrationPage {
 			protected List<Account> load() {
 				List<Account> accounts = new ArrayList<>();
 				for (Account account: GitPlex.getInstance(AccountManager.class).findAll()) {
-					if (account.matches(searchField.getInput())) {
-						if (filterType == null 
-								|| filterType.equals(TYPE_USER) && !account.isOrganization() 
-								|| filterType.equals(TYPE_ORGANIZATIOIN) && account.isOrganization()) {
-							accounts.add(account);
-						}
+					if (account.matches(searchField.getInput()) && !account.isOrganization()) {
+						accounts.add(account);
 					}
 				}
-				accounts.sort((account1, account2) -> account1.getName().compareTo(account2.getName()));
+				accounts.sort((account1, account2) -> account1.getDisplayName().compareTo(account2.getDisplayName()));
 				return accounts;
 			}
 			
@@ -188,7 +108,7 @@ public class AccountListPage extends AdministrationPage {
 
 				item.add(new AvatarLink("avatarLink", item.getModelObject(), null));
 				item.add(new AccountLink("nameLink", item.getModelObject()));
-				item.add(new Label("type", account.isOrganization()?TYPE_ORGANIZATIOIN:TYPE_USER));
+				item.add(new Label("email", account.getEmail()));
 				
 				item.add(new Link<Void>("setting") {
 

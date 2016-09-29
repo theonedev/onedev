@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.JarFile;
 import java.util.logging.Handler;
 
 import javax.annotation.Nullable;
@@ -37,8 +38,6 @@ public class Bootstrap {
 	public static final String DEFAULT_APP_LOADER = "com.pmease.commons.loader.AppLoader";
 
 	public static File installDir;
-
-	public static List<File> libFiles;
 
 	public static boolean sandboxMode;
 
@@ -157,57 +156,46 @@ public class Bootstrap {
 
 			logger.info("Launching application from '" + installDir.getAbsolutePath() + "'...");
 
-			libFiles = new ArrayList<File>();
-
+			List<File> libFiles = new ArrayList<File>();
+			libFiles.addAll(getLibFiles(getSiteLibDir()));
+			
 			File classpathFile = new File(installDir, "boot/system.classpath");
 			if (classpathFile.exists()) {
 				Map<String, File> systemClasspath = (Map<String, File>) BootstrapUtils.readObject(classpathFile);
-
 				Set<String> bootstrapKeys = (Set<String>) BootstrapUtils
 						.readObject(new File(installDir, "boot/bootstrap.keys"));
 				for (Map.Entry<String, File> entry : systemClasspath.entrySet()) {
-					if (!bootstrapKeys.contains(entry.getKey()))
+					if (!bootstrapKeys.contains(entry.getKey())) {
 						libFiles.add(entry.getValue());
+					}
+				}
+				if (new File("system/lib").exists()) {
+					libFiles.addAll(getLibFiles(new File("system/lib")));
 				}
 			} else {
-				File libCacheDir = BootstrapUtils.createTempDir("libcache");
-
-				for (File file : getLibDir().listFiles()) {
-					if (file.getName().endsWith(".jar"))
-						libFiles.add(file);
-					else if (file.getName().endsWith(".zip"))
-						BootstrapUtils.unzip(file, libCacheDir);
-				}
-				for (File file : getPluginsDir().listFiles()) {
-					if (file.getName().endsWith(".jar"))
-						libFiles.add(file);
-					else if (file.getName().endsWith(".zip"))
-						BootstrapUtils.unzip(file, libCacheDir);
-				}
-
-				for (File file : libCacheDir.listFiles()) {
-					if (file.getName().endsWith(".jar"))
-						libFiles.add(file);
-				}
-
+				libFiles.addAll(getLibFiles(getLibDir()));
 			}
-
-			// load our jars first so that we can override classes in third party
-			// jars if necessary.
-			libFiles.sort((file1, file2) -> {
-				Boolean result1 = file1.isDirectory() || file1.getName().startsWith("com.pmease");
-				Boolean result2 = file2.isDirectory() || file2.getName().startsWith("com.pmease");
-
-				return result2.compareTo(result1);
-			});
 
 			List<URL> urls = new ArrayList<URL>();
 
+			// load our jars first so that we can override classes in third party
+			// jars if necessary.
 			for (File file : libFiles) {
-				try {
-					urls.add(file.toURI().toURL());
-				} catch (MalformedURLException e) {
-					throw new RuntimeException(e);
+				if (isPriorityLib(file)) {
+					try {
+						urls.add(file.toURI().toURL());
+					} catch (MalformedURLException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+			for (File file : libFiles) {
+				if (!isPriorityLib(file)) {
+					try {
+						urls.add(file.toURI().toURL());
+					} catch (MalformedURLException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			}
 
@@ -274,6 +262,35 @@ public class Bootstrap {
 		}
 	}
 
+	private static boolean isPriorityLib(File lib) {
+		String entryName = "pmease-artifact.properties";
+		if (lib.isDirectory()) {
+			return new File(lib, entryName).exists();
+		} else {
+			try (JarFile jarFile = new JarFile(lib)) {
+				return jarFile.getJarEntry(entryName) != null;
+			} catch (IOException e) {
+				throw new RuntimeException(lib.getAbsolutePath() + e);
+			} 
+		}
+	}
+	
+	private static List<File> getLibFiles(File libDir) {
+		List<File> libFiles = new ArrayList<>();
+		File libCacheDir = BootstrapUtils.createTempDir("libcache");
+		for (File file : libDir.listFiles()) {
+			if (file.getName().endsWith(".jar"))
+				libFiles.add(file);
+			else if (file.getName().endsWith(".zip"))
+				BootstrapUtils.unzip(file, libCacheDir);
+		}
+		for (File file : libCacheDir.listFiles()) {
+			if (file.getName().endsWith(".jar"))
+				libFiles.add(file);
+		}
+		return libFiles;
+	}
+	
 	private static void configureLogging() {
 		// Set system properties so that they can be used in logback
 		// configuration file.
@@ -327,6 +344,10 @@ public class Bootstrap {
 
 	public static File getLibDir() {
 		return new File(installDir, "lib");
+	}
+	
+	public static File getSiteLibDir() {
+		return new File(getSiteDir(), "lib");
 	}
 
 	public static File getTempDir() {

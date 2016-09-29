@@ -4,13 +4,13 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.Validator;
 
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 
 import com.pmease.commons.hibernate.DefaultPersistManager;
+import com.pmease.commons.hibernate.EntityValidator;
 import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.hibernate.IdManager;
 import com.pmease.commons.hibernate.ModelProvider;
@@ -18,12 +18,12 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.migration.Migrator;
 
 @Singleton
-public class DBDialectCommand extends DefaultPersistManager {
+public class DefaultDBDialectCommand extends DefaultPersistManager {
 
 	@Inject
-	public DBDialectCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
+	public DefaultDBDialectCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
-			IdManager idManager, Dao dao, Validator validator) {
+			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
 	}
 

@@ -635,7 +635,7 @@ public class DepotCommitsPage extends DepotPage {
 				new ParseTreeWalker().walk(new RevListCommandFiller(command), parseTree);
 				if (command.revisions().isEmpty() && compareWith != null)
 					command.revisions(Lists.newArrayList(compareWith));
-			} else {
+			} else if (compareWith != null) {
 				command.revisions(Lists.newArrayList(compareWith));
 			}
 		}

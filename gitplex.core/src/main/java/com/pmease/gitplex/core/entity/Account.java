@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -25,6 +26,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.commons.util.StringUtils;
@@ -416,5 +418,13 @@ public class Account extends AbstractUser implements ProtectedObject {
 			return getDisplayName().compareTo(account.getDisplayName());
 		}
 	}
+
+	public static Set<String> getOrganizationExcludeProperties() {
+		return Sets.newHashSet("email", "password");
+	}
 	
+	public static Set<String> getUserExcludeProperties() {
+		return Sets.newHashSet("defaultPrivilege", "description");
+	}
+
 }

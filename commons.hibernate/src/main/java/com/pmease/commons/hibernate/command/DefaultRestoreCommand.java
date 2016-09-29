@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.Validator;
 
 import org.hibernate.Interceptor;
 import org.hibernate.boot.Metadata;
@@ -17,6 +16,7 @@ import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.bootstrap.BootstrapUtils;
 import com.pmease.commons.bootstrap.Command;
 import com.pmease.commons.hibernate.DefaultPersistManager;
+import com.pmease.commons.hibernate.EntityValidator;
 import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.hibernate.IdManager;
 import com.pmease.commons.hibernate.ModelProvider;
@@ -25,14 +25,14 @@ import com.pmease.commons.hibernate.migration.Migrator;
 import com.pmease.commons.util.FileUtils;
 
 @Singleton
-public class RestoreCommand extends DefaultPersistManager {
+public class DefaultRestoreCommand extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(RestoreCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultRestoreCommand.class);
 	
 	@Inject
-	public RestoreCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
+	public DefaultRestoreCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
-			IdManager idManager, Dao dao, Validator validator) {
+			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
 	}
 

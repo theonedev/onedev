@@ -7,7 +7,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.Validator;
 
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.DefaultPersistManager;
+import com.pmease.commons.hibernate.EntityValidator;
 import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.hibernate.IdManager;
 import com.pmease.commons.hibernate.ModelProvider;
@@ -25,14 +25,14 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.migration.Migrator;
 
 @Singleton
-public class ApplyDBConstraintsCommand extends DefaultPersistManager {
+public class DefaultApplyDBConstraintsCommand extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(ApplyDBConstraintsCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultApplyDBConstraintsCommand.class);
 	
 	@Inject
-	public ApplyDBConstraintsCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
+	public DefaultApplyDBConstraintsCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
-			IdManager idManager, Dao dao, Validator validator) {
+			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
 	}
 

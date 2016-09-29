@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.Validator;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.hibernate.Interceptor;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.DefaultPersistManager;
+import com.pmease.commons.hibernate.EntityValidator;
 import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.hibernate.IdManager;
 import com.pmease.commons.hibernate.ModelProvider;
@@ -32,18 +32,18 @@ import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.LineConsumer;
 
 @Singleton
-public class UpgradeCommand extends DefaultPersistManager {
+public class DefaultUpgradeCommand extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(UpgradeCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultUpgradeCommand.class);
 	
 	private static final String BACKUP_DATETIME_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 	
 	private final String appName;
 	
 	@Inject
-	public UpgradeCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
+	public DefaultUpgradeCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
-			IdManager idManager, Dao dao, Validator validator, PluginManager pluginManager) {
+			IdManager idManager, Dao dao, EntityValidator validator, PluginManager pluginManager) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
 		appName = pluginManager.getProduct().getName();
 	}
@@ -321,6 +321,14 @@ public class UpgradeCommand extends DefaultPersistManager {
 		cleanAndCopy(Bootstrap.getBinDir(), new File(upgradeDir, "bin"));
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
+		for (File file: Bootstrap.getSiteLibDir().listFiles()) {
+			// end user may put some custom program files in site lib before upgrade, 
+			// to override site lib of old version
+			if (file.getName().endsWith(".jar") || file.getName().endsWith(".zip")) {
+				cleanAndCopy(Bootstrap.getSiteLibDir(), new File(upgradeDir, "site/lib"));
+				break;
+			}
+		}
 		try {
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
 					new File(upgradeDir, "conf/wrapper-license.conf"));
@@ -335,6 +343,10 @@ public class UpgradeCommand extends DefaultPersistManager {
 		try {
 			FileUtils.cleanDir(destDir);
 			FileUtils.copyDirectory(srcDir, destDir);
+			for (File file: destDir.listFiles()) {
+				if (file.getName().endsWith(".sh"))
+					file.setExecutable(true);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

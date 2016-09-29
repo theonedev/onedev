@@ -26,23 +26,23 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.31</version> 
+            <version>1.0.32</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
-            <artifactId>jetty-server</artifactId>  
+            <artifactId>jetty-server</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
-            <artifactId>jetty-servlets</artifactId>  
+            <artifactId>jetty-servlets</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
-            <artifactId>jetty-servlet</artifactId>  
+            <artifactId>jetty-servlet</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty.websocket</groupId>  
-            <artifactId>websocket-server</artifactId>  
+            <artifactId>websocket-server</artifactId> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -63,6 +63,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass>  
-    </properties> 
+        <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass> 
+    </properties>  
+    <version>1.0.32</version>
 </project>
