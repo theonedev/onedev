@@ -10,7 +10,6 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.util.StringUtils;
 
 import com.pmease.commons.wicket.editable.BeanContext;
-import com.pmease.commons.wicket.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
@@ -30,7 +29,7 @@ public class AccountEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
         Method propertyGetter = propertyDescriptor.getPropertyGetter();
         AccountChoice accountChoice = propertyGetter.getAnnotation(AccountChoice.class);
         if (accountChoice != null) {

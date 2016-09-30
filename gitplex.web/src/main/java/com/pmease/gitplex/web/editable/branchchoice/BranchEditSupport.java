@@ -11,12 +11,11 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.util.StringUtils;
 
 import com.pmease.commons.wicket.editable.BeanContext;
-import com.pmease.commons.wicket.editable.DefaultPropertyDescriptor;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
-import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.gitplex.core.annotation.BranchChoice;
@@ -31,7 +30,7 @@ public class BranchEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 		Method propertyGetter = propertyDescriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(BranchChoice.class) != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 

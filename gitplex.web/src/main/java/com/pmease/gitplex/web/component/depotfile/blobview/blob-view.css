@@ -9,3 +9,9 @@
 .blob-view>.head>.actions>.btn-group:FIRST-CHILD {
 	margin-right: 8px;
 }
+.blob-view>.head>.actions {
+	margin-left: 16px;
+}
+.blob-view>.head>.options {
+	margin-top: 1px;
+}

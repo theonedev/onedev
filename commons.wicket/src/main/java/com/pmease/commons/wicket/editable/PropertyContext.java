@@ -10,7 +10,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")
-public abstract class PropertyContext<T> extends DefaultPropertyDescriptor {
+public abstract class PropertyContext<T> extends PropertyDescriptor {
 
 	public PropertyContext(Class<?> beanClass, String propertyName) {
 		super(beanClass, propertyName);

@@ -439,11 +439,11 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		public State(PageParameters params) {
 			revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
 			compareWith = params.get(PARAM_COMPARE_WITH).toString();
-			whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
+			whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 			pathFilter = params.get(PARAM_PATH_FILTER).toString();
 			blameFile = params.get(PARAM_BLAME_FILE).toString();
 			commentId = params.get(PARAM_COMMENT).toOptionalLong();
-			mark = CommentPos.of(params.get(PARAM_MARK).toString());
+			mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
 		}
 		
 	}

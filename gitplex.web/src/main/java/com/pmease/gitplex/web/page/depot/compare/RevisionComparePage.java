@@ -193,10 +193,10 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
-		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = CommentPos.of(params.get(PARAM_MARK).toString());
+		state.mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
 		state.anchor = params.get(PARAM_ANCHOR).toString();
 		
 		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());

@@ -58,9 +58,9 @@ import com.pmease.gitplex.web.websocket.PullRequestChangedRegion;
 @SuppressWarnings("serial")
 public class RequestChangesPage extends RequestDetailPage implements CommentSupport {
 
-	private static final String PARAM_OLD_COMMIT = "old-commit";
+	public static final String PARAM_OLD_COMMIT = "old-commit";
 	
-	private static final String PARAM_NEW_COMMIT = "new-commit";
+	public static final String PARAM_NEW_COMMIT = "new-commit";
 	
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
@@ -68,7 +68,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	
 	private static final String PARAM_BLAME_FILE = "blame-file";
 	
-	private static final String PARAM_COMMENT = "comment";
+	public static final String PARAM_COMMENT = "comment";
 	
 	private static final String PARAM_MARK = "mark";
 	
@@ -102,9 +102,9 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			state.newCommit = getPullRequest().getHeadCommitHash();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
-		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = CommentPos.of(params.get(PARAM_MARK).toString());
+		state.mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
 		state.anchor = params.get(PARAM_ANCHOR).toString();
 	}
 	
@@ -535,6 +535,10 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		state.mark = mark;
 		pushState(target);
 	}
+	
+	public State getState() {
+		return state;
+	}
 
 	@Override
 	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
@@ -556,7 +560,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;
-
+		
 		public String oldCommit;
 		
 		public String newCommit;
@@ -577,7 +581,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		
 		@Nullable
 		public String anchor;
-		
+
 	}
 
 }

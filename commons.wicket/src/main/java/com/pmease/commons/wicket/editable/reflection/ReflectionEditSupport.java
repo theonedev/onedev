@@ -11,11 +11,10 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanDescriptor;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.BeanViewer;
-import com.pmease.commons.wicket.editable.DefaultPropertyDescriptor;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
-import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.commons.wicket.editable.annotation.Editable;
@@ -53,7 +52,7 @@ public class ReflectionEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 		Class<?> propertyClass = propertyDescriptor.getPropertyClass();
 		if (propertyClass.getAnnotation(Editable.class) != null && ClassUtils.isConcrete(propertyClass)) {
 			return new PropertyContext<Serializable>(propertyDescriptor) {

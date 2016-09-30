@@ -292,14 +292,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			protected Component newContent(String id) {
 				CompareContext compareContext = context.getOpenComment().getCompareContext();
-				return new CompareContextPanel(id, new AbstractReadOnlyModel<PullRequest>() {
-
-					@Override
-					public PullRequest getObject() {
-						return context.getPullRequest();
-					}
-					
-				}, new AbstractReadOnlyModel<CodeComment>() {
+				return new CompareContextPanel(id, Model.of((PullRequest)null), new AbstractReadOnlyModel<CodeComment>() {
 
 					@Override
 					public CodeComment getObject() {
@@ -570,7 +563,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 								@Override
 								protected PullRequest getPullRequest() {
-									return getContext().getPullRequest();
+									return null;
 								}
 								
 							};

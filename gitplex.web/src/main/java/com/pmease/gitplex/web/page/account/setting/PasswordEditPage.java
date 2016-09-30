@@ -10,7 +10,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
+import com.pmease.commons.wicket.editable.BeanDescriptor;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
@@ -63,7 +63,7 @@ public class PasswordEditPage extends AccountSettingPage {
 		}));
 	}
 
-	private static class PasswordDescriptor extends DefaultBeanDescriptor {
+	private static class PasswordDescriptor extends BeanDescriptor {
 
 		public PasswordDescriptor() {
 			super(Account.class);

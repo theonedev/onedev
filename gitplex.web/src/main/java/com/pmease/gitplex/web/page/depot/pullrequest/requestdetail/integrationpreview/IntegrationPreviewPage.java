@@ -40,7 +40,7 @@ public class IntegrationPreviewPage extends RequestDetailPage {
 		super(params);
 
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
-		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 	}
 	

@@ -29,7 +29,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
 import com.pmease.commons.wicket.behavior.sortable.SortPosition;
-import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
+import com.pmease.commons.wicket.editable.BeanDescriptor;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
@@ -52,7 +52,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 
 		propertyContexts = new ArrayList<>();
 		
-		for (PropertyDescriptor each: new DefaultBeanDescriptor(elementClass).getPropertyDescriptors()) {
+		for (PropertyDescriptor each: new BeanDescriptor(elementClass).getPropertyDescriptors()) {
 			propertyContexts.add(PropertyContext.of(each));
 		}
 

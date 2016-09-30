@@ -80,7 +80,7 @@ public enum WhitespaceOption {
 	
 	public abstract String process(String line);
 	
-	public static WhitespaceOption of(@Nullable String name) {
+	public static WhitespaceOption ofNullableName(@Nullable String name) {
 		if (name != null) {
 			return valueOf(name.toUpperCase());
 		} else {

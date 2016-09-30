@@ -71,25 +71,22 @@ public class CommentPos implements Serializable {
 			return commit;
 	}
 	
-	public static CommentPos fromString(String str) {
-		String commit = StringUtils.substringBefore(str, ":");
-		String path = null;
-		TextRange mark = null;
-		String pathAndMark = StringUtils.substringAfter(str, ":");
-		if (pathAndMark.length() != 0) {
-			path = StringUtils.substringBefore(pathAndMark, ":");
-			String markStr = StringUtils.substringAfter(pathAndMark, ":");
-			if (markStr.length() != 0)
-				mark = new TextRange(markStr);
-		}
-		return new CommentPos(commit, path, mark);
-	}
-	
-	public static CommentPos of(@Nullable String str) {
-		if (str != null)
-			return fromString(str);
-		else
+	public static CommentPos fromString(@Nullable String str) {
+		if (str != null) {
+			String commit = StringUtils.substringBefore(str, ":");
+			String path = null;
+			TextRange mark = null;
+			String pathAndMark = StringUtils.substringAfter(str, ":");
+			if (pathAndMark.length() != 0) {
+				path = StringUtils.substringBefore(pathAndMark, ":");
+				String markStr = StringUtils.substringAfter(pathAndMark, ":");
+				if (markStr.length() != 0)
+					mark = new TextRange(markStr);
+			}
+			return new CommentPos(commit, path, mark);
+		} else {
 			return null;
+		}
 	}
 	
 	@Override

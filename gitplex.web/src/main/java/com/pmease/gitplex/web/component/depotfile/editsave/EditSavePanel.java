@@ -221,26 +221,6 @@ public abstract class EditSavePanel extends Panel {
 
 				if (saveInProgress || (fileEdit.getOldPath() != null && fileEdit.getNewFile() != null))
 					tag.put("disabled", "disabled");
-			}
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				save(target, feedback, false);
-			}
-			
-		};
-		saveButton.setOutputMarkupId(true);
-		form.add(saveButton);
-		
-		form.add(new AjaxButton("saveAndDiff") {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-
-				if (saveInProgress || (fileEdit.getOldPath() != null && fileEdit.getNewFile() != null))
-					tag.put("disabled", "disabled");
 				if (saveInProgress)
 					tag.put("value", "Please wait...");
 			}
@@ -248,14 +228,15 @@ public abstract class EditSavePanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				save(target, feedback, true);
+				save(target, feedback);
 				saveInProgress = true;
 				target.add(this);
-				target.add(saveButton);
 				target.appendJavaScript("pmease.commons.form.markClean($('form'));");
 			}
 			
-		}.setOutputMarkupId(true));
+		};
+		saveButton.setOutputMarkupId(true);
+		form.add(saveButton);
 		
 		form.add(new AjaxLink<Void>("cancel") {
 
@@ -275,7 +256,7 @@ public abstract class EditSavePanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private void save(AjaxRequestTarget target, FeedbackPanel feedback, boolean showDiff) {
+	private void save(AjaxRequestTarget target, FeedbackPanel feedback) {
 		String viewState = RequestCycle.get().getRequest().getPostParameters()
 				.getParameterValue("view_state").toString();
 		RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
@@ -361,7 +342,7 @@ public abstract class EditSavePanel extends Panel {
 				}
 			}
 			if (newCommitId != null)
-				onCommitted(target, prevCommitId, newCommitId, showDiff);
+				onCommitted(target, prevCommitId, newCommitId);
 			else
 				newChangedContainer(target);
 		}
@@ -407,7 +388,7 @@ public abstract class EditSavePanel extends Panel {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
-	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId, boolean showDiff);
+	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId);
 	
 	public void onNewPathChange(AjaxRequestTarget target) {
 		String script = String.format("gitplex.editsave.onPathChange('%s', '%s', %b);", 

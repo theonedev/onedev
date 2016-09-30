@@ -8,11 +8,10 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.wicket.editable.BeanContext;
-import com.pmease.commons.wicket.editable.DefaultPropertyDescriptor;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
-import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.commons.wicket.editable.annotation.Editable;
@@ -27,7 +26,7 @@ public class PolymorphicEditSuport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptpr = new DefaultPropertyDescriptor(beanClass, propertyName);
+		PropertyDescriptor propertyDescriptpr = new PropertyDescriptor(beanClass, propertyName);
 		Class<?> propertyClass = propertyDescriptpr.getPropertyClass();
 		if (propertyClass.getAnnotation(Editable.class) != null && !ClassUtils.isConcrete(propertyClass)) {
 			return new PropertyContext<Serializable>(propertyDescriptpr) {

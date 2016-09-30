@@ -47,7 +47,8 @@ import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.moreinfo.MoreInfoPanel;
-import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
@@ -139,7 +140,7 @@ public abstract class DepotPage extends AccountPage {
 				0, DepotTagsPage.class));
 		
 		tabs.add(new DepotTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-				0, RequestListPage.class, PullRequestPage.class));
+				0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class));
 		
 		tabs.add(new DepotTab(Model.of("Code Comments"), "fa fa-fw fa-commenting", 
 				0, DepotCommentsPage.class, DepotCommentsPage.class));

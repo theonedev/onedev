@@ -12,7 +12,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.ClassUtils;
 
 @SuppressWarnings("serial")
-public abstract class BeanContext<T> extends DefaultBeanDescriptor {
+public abstract class BeanContext<T> extends BeanDescriptor {
 	
 	public BeanContext(Class<?> beanClass, Set<String> excludeProperties) {
 		super(beanClass, excludeProperties);

@@ -1,26 +1,102 @@
 package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public interface PropertyDescriptor extends Serializable {
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.pmease.commons.util.BeanUtils;
+
+public class PropertyDescriptor implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	private final Class<?> beanClass;
 	
-	Class<?> getBeanClass();
+	private final String propertyName;
 	
-	String getPropertyName();
+	private transient Method propertyGetter;
 	
-	Method getPropertyGetter();
+	private transient Method propertySetter;
 	
-	Method getPropertySetter();
+	public PropertyDescriptor(Class<?> beanClass, String propertyName) {
+		this.beanClass = beanClass;
+		this.propertyName = propertyName;
+	}
 	
-	Class<?> getPropertyClass();
+	public PropertyDescriptor(Method propertyGetter) {
+		this.beanClass = propertyGetter.getDeclaringClass();
+		this.propertyName = BeanUtils.getPropertyName(propertyGetter);
+		this.propertyGetter = propertyGetter;
+	}
 	
-	Object getPropertyValue(Object bean);
+	public PropertyDescriptor(Method propertyGetter, Method propertySetter) {
+		this.beanClass = propertyGetter.getDeclaringClass();
+		this.propertyName = BeanUtils.getPropertyName(propertyGetter);
+		this.propertyGetter = propertyGetter;
+		this.propertySetter = propertySetter;
+	}
+
+	public PropertyDescriptor(PropertyDescriptor propertyDescriptor) {
+		this.beanClass = propertyDescriptor.getBeanClass();
+		this.propertyName = propertyDescriptor.getPropertyName();
+		this.propertyGetter = propertyDescriptor.getPropertyGetter();
+		this.propertySetter = propertyDescriptor.getPropertySetter();
+	}
 	
-	boolean isPropertyRequired();
+	public Class<?> getBeanClass() {
+		return beanClass;
+	}
+
+	public String getPropertyName() {
+		return propertyName;
+	}
+
+	public Method getPropertyGetter() {
+		if (propertyGetter == null)
+			propertyGetter = BeanUtils.getGetter(beanClass, propertyName);
+		return propertyGetter;
+	}
 	
-	void setPropertyValue(Object bean, Object propertyValue);
-	
-	void copyProperty(Object fromBean, Object toBean);
-	
+	public Method getPropertySetter() {
+		if (propertySetter == null)
+			propertySetter = BeanUtils.getSetter(getPropertyGetter());
+		return propertySetter;
+	}
+
+	public void copyProperty(Object fromBean, Object toBean) {
+		setPropertyValue(toBean, getPropertyValue(fromBean));
+	}
+
+	public Object getPropertyValue(Object bean) {
+		try {
+			return getPropertyGetter().invoke(bean);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void setPropertyValue(Object bean, Object propertyValue) {
+		try {
+			getPropertySetter().invoke(bean, propertyValue);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public Class<?> getPropertyClass() {
+		return getPropertyGetter().getReturnType();
+	}
+
+	public boolean isPropertyRequired() {
+		return propertyGetter.getReturnType().isPrimitive()
+				|| propertyGetter.getAnnotation(NotNull.class) != null 
+				|| propertyGetter.getAnnotation(NotEmpty.class) != null
+				|| propertyGetter.getAnnotation(Size.class) != null && propertyGetter.getAnnotation(Size.class).min()>=1;
+	}
+
 }

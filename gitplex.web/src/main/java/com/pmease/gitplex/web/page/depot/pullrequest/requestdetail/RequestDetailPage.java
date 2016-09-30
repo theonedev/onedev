@@ -84,7 +84,6 @@ import com.pmease.gitplex.web.component.pullrequest.verificationstatus.Verificat
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
@@ -96,8 +95,10 @@ import com.pmease.gitplex.web.websocket.PullRequestChangedRegion;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public abstract class RequestDetailPage extends PullRequestPage {
+public abstract class RequestDetailPage extends DepotPage {
 
+	public static final String PARAM_REQUEST = "request";
+	
 	protected IModel<PullRequest> requestModel;
 	
 	private boolean editingTitle;
@@ -112,7 +113,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 			@Override
 			protected PullRequest load() {
-				Long requestNumber = params.get("request").toLong();
+				Long requestNumber = params.get(PARAM_REQUEST).toLong();
 				PullRequest request = GitPlex.getInstance(PullRequestManager.class).find(getDepot(), requestNumber);
 				if (request == null)
 					throw new EntityNotFoundException("Unable to find request #" + requestNumber + " in repository " + getDepot());
@@ -366,7 +367,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget()));
 		if (request.getSourceDepot() != null) {
-			statusAndBranchesContainer.add(new BranchLink("source", request.getSource(), request));
+			statusAndBranchesContainer.add(new BranchLink("source", request.getSource()));
 		} else {
 			statusAndBranchesContainer.add(new Label("source", "unknown") {
 

@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
+import com.pmease.commons.wicket.editable.BeanDescriptor;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
@@ -28,7 +28,7 @@ public class ConcreteListPropertyViewer extends Panel {
 		super(id);
 		
 		elementPropertyContexts = new ArrayList<>();
-		for (PropertyDescriptor propertyDescriptor: new DefaultBeanDescriptor(elementClass).getPropertyDescriptors()) {
+		for (PropertyDescriptor propertyDescriptor: new BeanDescriptor(elementClass).getPropertyDescriptors()) {
 			elementPropertyContexts.add(PropertyContext.of(propertyDescriptor));
 		}
 		

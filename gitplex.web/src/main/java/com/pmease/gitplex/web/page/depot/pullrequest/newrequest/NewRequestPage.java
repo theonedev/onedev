@@ -68,9 +68,9 @@ import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoi
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
 import com.pmease.gitplex.web.model.ReviewersModel;
+import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
-import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
@@ -79,7 +79,7 @@ import com.pmease.gitplex.web.page.security.LoginPage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends PullRequestPage implements CommentSupport {
+public class NewRequestPage extends DepotPage implements CommentSupport {
 
 	private static final String TAB_PANEL_ID = "tabPanel";
 	

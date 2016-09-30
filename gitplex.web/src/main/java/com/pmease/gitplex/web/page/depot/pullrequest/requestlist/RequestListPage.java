@@ -47,17 +47,16 @@ import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.requeststatus.RequestStatusPanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Direction;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
-public class RequestListPage extends PullRequestPage {
+public class RequestListPage extends DepotPage {
 
 	private static final Map<SortOption, String> sortNames = new LinkedHashMap<>();
 	

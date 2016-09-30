@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
@@ -56,7 +57,6 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.support.CommentPos;
-import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
@@ -87,7 +87,6 @@ import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
-import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.pmease.gitplex.web.websocket.CodeCommentChangedRegion;
 import com.pmease.gitplex.web.websocket.CommitIndexedRegion;
@@ -110,7 +109,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private static final String PARAM_PATH = "path";
 	
-	private static final String PARAM_REQUEST = "request";
+	private static final String PARAM_REQUEST_COMPARE_INFO = "request_compare_info";
 	
 	private static final String PARAM_COMMENT = "comment";
 	
@@ -142,7 +141,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private Mode mode;
 	
-	private Long requestId;
+	private RequestCompareInfo requestCompareInfo;
 	
 	private Long commentId;
 	
@@ -198,7 +197,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		
-		requestId = params.get(PARAM_REQUEST).toOptionalLong();
+		requestCompareInfo = RequestCompareInfo.fromString(params.get(PARAM_REQUEST_COMPARE_INFO).toString());
 		
 		queryHits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
 		if (queryHits != null) { 
@@ -412,14 +411,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			return null;
 	}
 	
-	@Override
-	public PullRequest getPullRequest() {
-		if (requestId != null)
-			return GitPlex.getInstance(PullRequestManager.class).load(requestId);
-		else
-			return null;
-	}
-	
 	private void newFileNavigator(@Nullable AjaxRequestTarget target) {
 		final BlobNameChangeCallback callback;
 
@@ -493,7 +484,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							getDepot().getObjectId(blobIdent.revision), mark) {
  
 				@Override
-				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit, boolean showDiff) {
+				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
 					depot.cacheObjectId(branch, newCommit);
@@ -523,8 +514,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 						
 					});
 
-					if (showDiff) {
-						showDiff(target, oldCommitId, newCommitId);
+					if (requestCompareInfo != null) {
+						showRequestChanges(target, oldCommitId, newCommitId);
 					} else {
 			    		State state = getState();
 		    			state.blobIdent = committed;
@@ -539,11 +530,17 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 				@Override
 				protected void onCancel(AjaxRequestTarget target) {
-					mode = null;
-					newFileNavigator(target);
-					newFileViewer(target);
-					pushState(target);
-					resizeWindow(target);
+					if (requestCompareInfo != null) {
+						PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(requestCompareInfo.requestId);
+						PageParameters params = RequestChangesPage.paramsOf(request, requestCompareInfo.compareState);
+						setResponsePage(RequestChangesPage.class, params);
+					} else {
+						mode = null;
+						newFileNavigator(target);
+						newFileViewer(target);
+						pushState(target);
+						resizeWindow(target);
+					}
 				}
 				
 			};
@@ -554,11 +551,17 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 				@Override
 				public void onCancel(AjaxRequestTarget target) {
-					mode = null;
-					newFileViewer(target);
-					
-					pushState(target);
-					resizeWindow(target);
+					if (requestCompareInfo != null) {
+						PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(requestCompareInfo.requestId);
+						PageParameters params = RequestChangesPage.paramsOf(request, requestCompareInfo.compareState);
+						setResponsePage(RequestChangesPage.class, params);
+					} else {
+						mode = null;
+						newFileViewer(target);
+						
+						pushState(target);
+						resizeWindow(target);
+					}
 				}
 				
 			};
@@ -567,7 +570,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					null, getDepot().getObjectId(blobIdent.revision), cancelListener) {
 
 				@Override
-				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit, boolean showDiff) {
+				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
 					depot.cacheObjectId(branch, newCommit);
@@ -605,8 +608,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							
 						});
 						
-						if (showDiff) {
-							showDiff(target, oldCommitId, newCommitId);
+						if (requestCompareInfo != null) {
+							showRequestChanges(target, oldCommitId, newCommitId);
 						} else {
 							BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
 							State state = getState();
@@ -644,43 +647,29 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 	}
 	
-	private void showDiff(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId) {
-		Depot depot = depotModel.getObject();
-		PullRequest request = getPullRequest();
-		if (request != null) {
-			RequestChangesPage.State state = new RequestChangesPage.State();
-			state.newCommit = newCommitId.name();
-			CodeComment comment = getOpenComment();
-			if (comment != null) {
-				state.oldCommit = comment.getCommentPos().getCommit();
-				state.commentId = comment.getId();
-				state.mark = comment.getCommentPos();
-				state.pathFilter = comment.getCompareContext().getPathFilter();
-				state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
-			} else {
-				state.oldCommit = oldCommitId.name();
-			}
-			get(FILE_VIEWER_ID).add(new WebSocketRenderBehavior() {
-				
-				@Override
-				protected void onRender(WebSocketRequestHandler handler) {
-					PullRequest request = getPullRequest();
-					for (PullRequestUpdate update: request.getUpdates()) {
-						if (update.getHeadCommitHash().equals(newCommitId.name())) {
-							setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
-							break;
-						}
+	private void showRequestChanges(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId) {
+		RequestChangesPage.State state = SerializationUtils.clone(requestCompareInfo.compareState);
+		state.newCommit = newCommitId.name();
+		if (state.commentId != null) {
+			CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
+			state.oldCommit = comment.getCommentPos().getCommit();
+		} else {
+			state.oldCommit = oldCommitId.name();
+		}
+		get(FILE_VIEWER_ID).add(new WebSocketRenderBehavior() {
+			
+			@Override
+			protected void onRender(WebSocketRequestHandler handler) {
+				PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(requestCompareInfo.requestId);
+				for (PullRequestUpdate update: request.getUpdates()) {
+					if (update.getHeadCommitHash().equals(newCommitId.name())) {
+						setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
+						break;
 					}
 				}
-				
-			});
-		} else {
-			RevisionComparePage.State state = new RevisionComparePage.State();
-			state.leftSide = new DepotAndRevision(depot, oldCommitId.name());
-			state.rightSide = new DepotAndRevision(depot, newCommitId.name());
-			state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-			setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, state));
-		}
+			}
+			
+		});
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
@@ -696,7 +685,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		state.mode = mode;
 		state.anchor = anchor;
 		state.commentId = commentId;
-		state.requestId = requestId;
+		state.requestCompareInfo = requestCompareInfo;
 		return state;
 	}
 	
@@ -717,14 +706,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		anchor = state.anchor;
 		mode = state.mode;
 		commentId = state.commentId;
-		requestId = state.requestId;
+		requestCompareInfo = state.requestCompareInfo;
 		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 	}
 	
 	private void onSelect(AjaxRequestTarget target, String revision) {
 		State state = getState();
 		state.blobIdent.revision = revision;
-		state.requestId = null;
+		state.requestCompareInfo = null;
 		state.commentId = null;
 		state.mode = null;
 		state.mark = null;
@@ -819,8 +808,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			params.set(PARAM_MARK, state.mark.toString());
 		if (state.anchor != null)
 			params.set(PARAM_ANCHOR, state.anchor);
-		if (state.requestId != null)
-			params.set(PARAM_REQUEST, state.requestId);
+		if (state.requestCompareInfo != null)
+			params.set(PARAM_REQUEST_COMPARE_INFO, state.requestCompareInfo.toString());
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mode != null)
@@ -906,7 +895,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	public String getMarkUrl(TextRange mark) {
 		State state = getState();
 		state.blobIdent.revision = resolvedRevision.name();
-		state.requestId = null;
+		state.requestCompareInfo = null;
 		state.commentId = null;
 		state.mark = mark;
 		PageParameters params = paramsOf(getDepot(), state);		
@@ -1029,8 +1018,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		regions.add(new CommitIndexedRegion(getDepot().getId(), commitId));
 		if (commentId != null)
 			regions.add(new CodeCommentChangedRegion(commentId));
-		if (requestId != null)
-			regions.add(new PullRequestChangedRegion(requestId));
+		if (requestCompareInfo != null)
+			regions.add(new PullRequestChangedRegion(requestCompareInfo.requestId));
 		return regions;
 	}
 
@@ -1038,8 +1027,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		private static final long serialVersionUID = 1L;
 
-		public Long requestId;
-		
 		public Long commentId;
 		
 		public BlobIdent blobIdent = new BlobIdent();
@@ -1049,6 +1036,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		public String anchor;
 		
 		public Mode mode;
+		
+		public RequestCompareInfo requestCompareInfo;
 		
 		public transient String query;
 		

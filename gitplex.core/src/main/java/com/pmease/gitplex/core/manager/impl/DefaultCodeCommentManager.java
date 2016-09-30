@@ -185,11 +185,12 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Override
 	public void sendNotifications(CodeCommentEvent event) {
 		if (event.getMarkdown() != null) {
+			CodeComment comment = event.getComment();
 			Collection<Account> mentionedUsers = new HashSet<>();
 			for (Account user: new MentionParser().parseMentions(markdownManager.parse(event.getMarkdown()))) {
 				mentionedUsers.add(user);
 			}
-			String subject = "You are mentioned in a code comment";
+			String subject = "You are mentioned in a code comment on file " + comment.getCommentPos().getPath();
 			String url;
 			if (event instanceof CodeCommentCreated)
 				url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
@@ -205,7 +206,6 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			mailManager.sendMailAsync(mentionedUsers, subject, decorateBody(subject + "." + content));
 			
 			Collection<Account> involvedUsers = new HashSet<>();
-			CodeComment comment = event.getComment();
 			RevCommit commit = comment.getDepot().getRevCommit(ObjectId.fromString(comment.getCommentPos().getCommit()));
 			
 			Account author = accountManager.find(commit.getAuthorIdent());
@@ -216,7 +216,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			involvedUsers.removeAll(mentionedUsers);
 			involvedUsers.remove(event.getUser());
 			
-			subject = "You are involved in a code comment";			
+			subject = "You are involved in a code comment on file " + comment.getCommentPos().getPath();			
 			mailManager.sendMailAsync(involvedUsers, subject, decorateBody(subject + "." + content));
 		}
 	}

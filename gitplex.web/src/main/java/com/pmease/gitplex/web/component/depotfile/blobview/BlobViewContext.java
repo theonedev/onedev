@@ -12,7 +12,6 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.search.hit.QueryHit;
 
@@ -54,9 +53,6 @@ public interface BlobViewContext extends Serializable {
 	
 	@Nullable
 	CodeComment getOpenComment();
-	
-	@Nullable
-	PullRequest getPullRequest();
 	
 	RevCommit getCommit();
 	
