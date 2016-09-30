@@ -241,7 +241,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				};
 				editLink.add(AttributeAppender.append("title", "Edit on branch " + change.getBlobIdent().revision));
 				actions.add(editLink);
-			}  
+			} else {
+				actions.add(new WebMarkupContainer("editFile").setVisible(false));
+			}
 		} else {
 			actions.add(new WebMarkupContainer("editFile").setVisible(false));
 		}

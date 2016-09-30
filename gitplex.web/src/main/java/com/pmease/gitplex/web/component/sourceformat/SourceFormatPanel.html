@@ -1,7 +1,19 @@
 <wicket:panel>
 	<div class="source-format">
-		<select wicket:id="indentType" class="indent-type"></select>
-		<select wicket:id="tabSize" class="tab-size"></select>
-		<select wicket:id="lineWrapMode" class="line-wrap-mode"></select>
+		<wicket:enclosure child="indentType">
+		<div class="pull-left indent-type">
+			<select wicket:id="indentType" class="form-control"></select>
+		</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="tabSize">
+		<div class="pull-left tab-size">
+			<select wicket:id="tabSize" class="form-control"></select>
+		</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="lineWrapMode">
+		<div class="pull-left line-wrap-mode">
+			<select wicket:id="lineWrapMode" class="form-control"></select>
+		</div>
+		</wicket:enclosure>
 	</div>
 </wicket:panel>

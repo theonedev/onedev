@@ -4,14 +4,16 @@
 .blob-view>.head {
 	border-bottom: 1px solid #BBB; 
 	padding: 6px 12px;
-	height: 36px;
 }
-.blob-view>.head>.actions>.btn-group:FIRST-CHILD {
-	margin-right: 8px;
+.blob-view>.head>.info {
+	color: #666;
+}
+.blob-view>.head>.info .separator {
+	color: #BBB;	
 }
 .blob-view>.head>.actions {
-	margin-left: 16px;
+	white-space: nowrap;
 }
-.blob-view>.head>.options {
-	margin-top: 1px;
+.blob-view>.head>.actions>div {
+	margin-left: 12px;
 }

@@ -11,12 +11,15 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
@@ -112,6 +115,44 @@ public abstract class BlobViewPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new Label("lines", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return context.getDepot().getBlob(context.getBlobIdent()).getText().getLines().size() + " lines";
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(context.getDepot().getBlob(context.getBlobIdent()).getText() != null);
+			}
+			
+		});
+		
+		add(new Label("charset", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return context.getDepot().getBlob(context.getBlobIdent()).getText().getCharset().displayName();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(context.getDepot().getBlob(context.getBlobIdent()).getText() != null);
+			}
+			
+		});
+		
+		add(new Label("size", FileUtils.byteCountToDisplaySize(context.getDepot().getBlob(context.getBlobIdent()).getSize())));
+		
 		add(newOptions("options"));
 		
 		add(new ResourceLink<Void>("raw", new BlobResourceReference(), 

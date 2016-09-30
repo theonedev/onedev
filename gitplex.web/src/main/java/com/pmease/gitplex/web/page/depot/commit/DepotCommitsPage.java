@@ -27,7 +27,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -442,15 +441,7 @@ public class DepotCommitsPage extends DepotPage {
 				compareState.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 				
 				PageParameters params = RevisionComparePage.paramsOf(getDepot(), compareState);
-				Link<Void> compareLink = new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params);
-				if (state.getCompareWith().equals(commit.name())) {
-					compareLink.setEnabled(false);
-					compareLink.add(AttributeAppender.append("disabled", "disabled"));
-					compareLink.add(AttributeAppender.replace("title", ""));
-					item.add(AttributeAppender.append("class", "compare-base"));
-					item.add(AttributeAppender.append("title", "Base commit for comparison"));
-				}
-				item.add(compareLink);
+				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}

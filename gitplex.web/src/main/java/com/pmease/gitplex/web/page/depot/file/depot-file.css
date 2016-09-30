@@ -62,6 +62,10 @@
 	font-size: 16px;
 	vertical-align: bottom;
 }
+#repo-file>.head>.operations .fa-commit {
+	font-size: 18px;
+	vertical-align: middle;
+}
 #repo-file>.head>.operations input {
 	border-radius: 0;
 	border-color: #BBB;

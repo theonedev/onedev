@@ -1,6 +1,9 @@
 .source-format select {
-	margin-left: 8px;
-	border: 1px solid #BBB;
 	color: #444;
-	border-radius: 2px;
+	height: 22px;
+	padding: 0;
+	border-radius: 3px;
+}
+.source-format>div {
+	margin-left: 8px;
 }

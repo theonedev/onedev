@@ -17,4 +17,6 @@
 }
 .file-navigator .add {
 	font-size: 18px;
+	line-height: 20px;
+	vertical-align: middle;
 }
