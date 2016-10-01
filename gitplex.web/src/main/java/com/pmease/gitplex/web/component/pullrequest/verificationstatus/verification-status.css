@@ -1,5 +1,14 @@
 .verification-status {
-	cursor: pointer;
+	text-decoration: none !important;
+}
+.verification-status span.successful {
+	color: #5CB85C;
+}
+.verification-status span.failed {
+	color: #D9534F;
+}
+.verification-status span.running {
+	color: #F0AD4E;
 }
 
 table.verifications td {

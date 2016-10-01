@@ -48,7 +48,7 @@ public abstract class VerificationStatusPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DropdownLink link =  new DropdownLink("link") {
+		DropdownLink link = new DropdownLink("link") {
 
 			@Override
 			protected Component newContent(String id) {
