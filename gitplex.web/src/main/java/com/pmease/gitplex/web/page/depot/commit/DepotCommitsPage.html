@@ -33,12 +33,20 @@
 			</div>
 			<div wicket:id="contribution"></div>
 		</div>
-		<wicket:enclosure>
-		<div class="pull-right">
-			<a wicket:id="compare" class="compare btn btn-xs btn-default" title="Compare"><i class="fa fa-ext fa-file-diff"></i></a>
+		<div class="pull-right actions">
+			<span class="btn-group">
+				<a wicket:id="browseCode" title="Browse code" class="btn btn-sm btn-default"><i class="fa fa-file-text-o"></i></a>
+				<wicket:enclosure>
+				<a wicket:id="compare" class="compare btn-sm btn btn-default" title="Compare with base revision"><i class="fa fa-ext fa-file-diff"></i></a>
+				</wicket:enclosure>
+			</span>
 		</div>
-		</wicket:enclosure>
-		<div wicket:id="hashAndCode" class="pull-right"></div>
+		<div class="pull-right hash">
+			<span class="btn-group">
+				<a wicket:id="hashLink" class="btn btn-sm btn-default"><span wicket:id="hash"></span></a>
+				<a wicket:id="copyHash" class="btn btn-sm btn-default"><i class="fa fa-clipboard"></i></a>
+			</span>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="dateFrag">
 		<i class="fa fa-calendar"></i> <span wicket:id="date"></span>

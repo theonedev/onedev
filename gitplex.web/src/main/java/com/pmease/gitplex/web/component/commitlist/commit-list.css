@@ -10,10 +10,8 @@
 .commit-list>div>ul .label {
 	margin: 3px 0 0 4px;
 }
-.commit-list>div>ul .hash-and-code {
-	text-align: right;
-	margin-top: 10px;
-	white-space: nowrap;
+.commit-list>div>ul .browse {
+	margin-left: 8px;
 }
 .commit-list>div>ul a {
 	color: #555;

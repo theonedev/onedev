@@ -141,3 +141,6 @@ input.search {
 	margin-left: 8px;
 }
 
+.hash {
+	font-family: monospace;
+}

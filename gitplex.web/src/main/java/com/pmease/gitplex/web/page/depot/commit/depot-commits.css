@@ -19,14 +19,6 @@
 #repo-commits>.body .label {
 	margin: 3px 0 0 4px;
 }
-#repo-commits>.body .hash-and-code {
-	text-align: right;
-	margin-top: 10px;
-	white-space: nowrap;
-}
-#repo-commits>.body .compare {
-	margin: 10px 0 0 8px;
-}
 #repo-commits>.body a {
 	color: #555;
 }
@@ -47,11 +39,14 @@
 #repo-commits>.body li.commit .contribution {
 	font-size: 12px;
 }
-#repo-commits>.body li.commit .compare {
-	color: #888;
-}
 #repo-commits>.body .message-and-labels {
 	margin-bottom: 4px;
+}
+#repo-commits>.body .actions {
+	margin-left: 8px;
+}
+#repo-commits>.body .actions .compare {
+	color: #777;
 }
 #repo-commits>.body>.list {
 	margin-bottom: 0;

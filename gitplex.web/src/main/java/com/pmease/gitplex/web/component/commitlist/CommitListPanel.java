@@ -11,6 +11,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -19,9 +21,15 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 
+import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
@@ -29,8 +37,9 @@ import com.pmease.gitplex.web.component.commitgraph.CommitGraphResourceReference
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphUtils;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
-import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.model.CommitRefsModel;
+import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
 public class CommitListPanel extends Panel {
@@ -133,7 +142,20 @@ public class CommitListPanel extends Panel {
 					
 					fragment.add(new ContributorPanel("contribution", 
 							commit.getAuthorIdent(), commit.getCommitterIdent(), true));
-					fragment.add(new HashAndCodePanel("hashAndCode", depotModel, commit.name()));
+
+					CommitDetailPage.State commitState = new CommitDetailPage.State();
+					commitState.revision = commit.name();
+					PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), commitState);
+					Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+					fragment.add(hashLink);
+					hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
+					fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
+
+					DepotFilePage.State browseState = new DepotFilePage.State();
+					browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
+					params = DepotFilePage.paramsOf(depotModel.getObject(), browseState);
+					fragment.add(new BookmarkablePageLink<Void>("browseCode", DepotFilePage.class, params));
+					
 					item.add(AttributeAppender.append("class", "commit clearfix commit-item-" + itemIndex++));
 				} else {
 					fragment = new Fragment("commit", "dateFrag", CommitListPanel.this);

@@ -30,10 +30,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.lang.diff.WhitespaceOption;
@@ -50,7 +52,6 @@ import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
 import com.pmease.gitplex.web.component.createtag.CreateTagLink;
 import com.pmease.gitplex.web.component.diff.revision.CommentSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
-import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -109,7 +110,10 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		
 		add(new Label("text", getCommit().getShortMessage()));
 		
-		add(new HashAndCodePanel("hashAndCode", depotModel, getCommit().getId().name()));
+		DepotFilePage.State browseState = new DepotFilePage.State();
+		browseState.blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
+		PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), browseState);
+		add(new BookmarkablePageLink<Void>("browseCode", DepotFilePage.class, params));
 		
 		add(new CreateBranchLink("createBranch", depotModel, state.revision) {
 
@@ -198,6 +202,7 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent(), true));
+		add(new Label("commitHash", getCommit().name()));
 
 		newParentsContainer(null);
 

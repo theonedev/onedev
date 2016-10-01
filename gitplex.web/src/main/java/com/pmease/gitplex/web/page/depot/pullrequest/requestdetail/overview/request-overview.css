@@ -149,7 +149,7 @@
 #request-detail .activities tr.activity>.content>.update td {
 	padding: 4px 0;
 }
-#request-detail .activities tr.activity>.content>.update td.status {
+#request-detail .activities tr.activity>.content>.update td.hash-and-status {
 	width: 120px;
 }
 #request-detail .update+.update>td.content>div {

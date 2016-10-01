@@ -12,12 +12,13 @@
 #commit-detail>.info>.message {
 	background: #F9F9F9;
 	border-bottom: 1px dashed #BBB;
-	padding: 12px;
+	padding: 8px 12px;
 	border-radius: 4px 4px 0 0;
 }
 #commit-detail>.info>.message>.subject>.pull-left {
 	font-size: 17px;
 	font-weight: bold;
+	padding-top: 2px;
 	color: #555;
 }
 #commit-detail>.info>.message>.subject>.pull-right {
@@ -65,7 +66,13 @@
 #commit-detail>.info>.contribution-and-parents .contributor-avatars {
 	margin-right: 4px;
 }
-#commit-detail>.info>.contribution-and-parents>.parents label {
+#commit-detail>.info>.contribution-and-parents .commit {
+	margin: 7px 20px 0 20px;
+}
+#commit-detail>.info>.contribution-and-parents .hash {
+	color: #444;
+}
+#commit-detail>.info>.contribution-and-parents label {
 	color: #666;
 	font-weight: normal;
 	margin-right: 8px;

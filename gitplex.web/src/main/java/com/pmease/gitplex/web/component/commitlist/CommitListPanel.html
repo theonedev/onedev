@@ -19,7 +19,13 @@
 			</div>
 			<div wicket:id="contribution"></div>
 		</div>
-		<div wicket:id="hashAndCode" class="pull-right"></div>
+		<div class="pull-right">
+			<span class="btn-group">
+				<a wicket:id="hashLink" class="hash btn btn-sm btn-default"><span wicket:id="hash"></span></a>
+				<a wicket:id="copyHash" class="btn btn-sm btn-default"><i class="fa fa-clipboard"></i></a>
+			</span>
+			<a wicket:id="browseCode" title="Browse code" class="browse btn btn-default btn-sm"><i class="fa fa-file-text-o"></i></a>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="dateFrag">
 		<i class="fa fa-calendar"></i> <span wicket:id="date"></span>

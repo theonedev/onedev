@@ -5,7 +5,10 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -13,8 +16,13 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
@@ -22,8 +30,9 @@ import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
+import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -133,14 +142,18 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 
 				});
 				
-				item.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Depot>() {
+				CommitDetailPage.State commitState = new CommitDetailPage.State();
+				commitState.revision = commit.name();
+				PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), commitState);
+				Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+				item.add(hashLink);
+				hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
+				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 
-					@Override
-					public Depot getObject() {
-						return getUpdate().getRequest().getTargetDepot();
-					}
-					
-				}, commit.name(), null));
+				DepotFilePage.State browseState = new DepotFilePage.State();
+				browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
+				params = DepotFilePage.paramsOf(depotModel.getObject(), browseState);
+				item.add(new BookmarkablePageLink<Void>("browseCode", DepotFilePage.class, params));
 				
 				if (getUpdate().getRequest().getTarget().getObjectId(false) != null) {
 					if (getUpdate().getRequest().getMergedCommits().contains(commit)) {

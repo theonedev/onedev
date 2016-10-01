@@ -5,10 +5,10 @@
 				<div class="subject clearfix">
 					<div wicket:id="text" class="pull-left"></div>
 					<div class="btn-group pull-right">
-						<a wicket:id="createBranch" title="Branch from this commit" class="btn btn-default btn-xs"><i class="fa fa-code-fork"></i></a>
-						<a wicket:id="createTag" title="Tag this commit" class="btn btn-default btn-xs"><i class="fa fa-tag"></i></a>
+						<a wicket:id="browseCode" title="browse code" class="btn btn-default btn-sm"><i class="fa fa-file-text-o"></i></a>
+						<a wicket:id="createBranch" title="Branch from this commit" class="btn btn-default btn-sm"><i class="fa fa-code-fork"></i></a>
+						<a wicket:id="createTag" title="Tag this commit" class="btn btn-default btn-sm"><i class="fa fa-tag"></i></a>
 					</div>
-					<div wicket:id="hashAndCode" class="pull-right"></div>
 				</div>
 				<pre wicket:id="detail" class="detail"></pre>
 			</div>
@@ -22,7 +22,7 @@
 					<wicket:enclosure child="parent">
 						<div class="single">
 							<label>1 parent</label>  
-							<a wicket:id="parent" class="parent"><span wicket:id="label"></span></a>
+							<a wicket:id="parent" class="parent hash"><span wicket:id="label"></span></a>
 						</div>
 					</wicket:enclosure>
 					<wicket:enclosure child="parents">
@@ -34,6 +34,9 @@
 							</div>
 						</div>
 					</wicket:enclosure>
+				</div>
+				<div class="commit pull-right">
+					<label>commit</label> <span wicket:id="commitHash" class="hash"></span>
 				</div>
 			</div>
 		</div>

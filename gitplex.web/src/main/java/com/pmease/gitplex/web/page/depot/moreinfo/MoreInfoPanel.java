@@ -18,6 +18,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.Constants;
 
+import com.pmease.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.commons.wicket.component.modal.ModalLink;
@@ -62,6 +63,7 @@ public abstract class MoreInfoPanel extends Panel {
 		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getDepot()));
 		add(new TextField<String>("cloneUrl", cloneUrlModel));
+		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
 		
 		if (getDepot().getDescription() != null) {
 			add(new MarkdownPanel("description", Model.of(getDepot().getDescription()), null));
