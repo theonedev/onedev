@@ -1,10 +1,8 @@
 package com.pmease.gitplex.product;
 
 import java.io.File;
-import java.util.Properties;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.pmease.commons.bootstrap.Bootstrap;
@@ -15,6 +13,16 @@ import com.pmease.gitplex.core.setting.SslConfig;
 @Singleton
 public class DefaultServerConfig implements ServerConfig {
 
+	private static final String PROP_HTTPPORT = "httpPort";
+	
+	private static final String PROP_HTTPSPORT = "httpsPort";
+	
+	private static final String PROP_KEYSTOREPATH = "keystorePath";
+	
+	private static final String PROP_KEYSTOREPASSWORD = "keystorePassword";
+	
+	private static final String PROP_KEYSTOREKEYPASSWORD = "keystoreKeyPassword";
+	
 	private int httpPort;
 	
 	private int sessionTimeout;
@@ -22,30 +30,30 @@ public class DefaultServerConfig implements ServerConfig {
 	private SslConfig sslConfig;
 	
 	@Inject
-	public DefaultServerConfig(@Named("server") Properties props) {
-		String httpPortStr = props.getProperty("httpPort");
+	public DefaultServerConfig(ServerProperties props) {
+		String httpPortStr = props.getProperty(PROP_HTTPPORT);
 		if (StringUtils.isNotBlank(httpPortStr)) 
 			httpPort = Integer.parseInt(httpPortStr.trim());
 		
-		String httpsPortStr = props.getProperty("httpsPort");
+		String httpsPortStr = props.getProperty(PROP_HTTPSPORT);
 		
 		if (StringUtils.isNotBlank(httpsPortStr)) {
 			SslConfigBean sslConfigBean = new SslConfigBean();
 			sslConfigBean.setPort(Integer.parseInt(httpsPortStr.trim()));
 			
-			String keystorePath = props.getProperty("sslKeystorePath");
+			String keystorePath = props.getProperty(PROP_KEYSTOREPATH);
 			if (StringUtils.isBlank(keystorePath))
 				keystorePath = "sample.keystore";
 			else
 				keystorePath = keystorePath.trim();
 			
-			String keystorePassword = props.getProperty("sslKeystorePassword");
+			String keystorePassword = props.getProperty(PROP_KEYSTOREPASSWORD);
 			if (StringUtils.isBlank(keystorePassword))
 				keystorePassword = "123456";
 			else
 				keystorePassword = keystorePassword.trim();
 			
-			String keystoreKeyPassword = props.getProperty("sslKeystoreKeyPassword");
+			String keystoreKeyPassword = props.getProperty(PROP_KEYSTOREKEYPASSWORD);
 			if (StringUtils.isBlank(keystoreKeyPassword))
 				keystoreKeyPassword = "123456";
 			else
