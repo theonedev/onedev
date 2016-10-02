@@ -79,4 +79,5 @@ public interface ConfigManager extends EntityManager<Config> {
 	 * 			setting record will still be remained in database)
 	 */
 	void saveBackupSetting(@Nullable BackupSetting backupSetting);
+	
 }

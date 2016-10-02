@@ -35,7 +35,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphResourceReference;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphUtils;
-import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.model.CommitRefsModel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
@@ -129,7 +129,7 @@ public class CommitListPanel extends Panel {
 					fragment.add(new ContributorAvatars("avatar", 
 							commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-					fragment.add(new CommitMessagePanel("message", depotModel, item.getModel()));
+					fragment.add(new ExpandableCommitMessagePanel("message", depotModel, item.getModel()));
 
 					RepeatingView labelsView = new RepeatingView("labels");
 

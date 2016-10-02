@@ -29,7 +29,7 @@ import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
-import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -84,7 +84,7 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					}
 					
 				};
-				item.add(new CommitMessagePanel("message", depotModel, item.getModel()));
+				item.add(new ExpandableCommitMessagePanel("message", depotModel, item.getModel()));
 
 				IModel<PullRequest> requestModel = new AbstractReadOnlyModel<PullRequest>() {
 

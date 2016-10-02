@@ -47,6 +47,7 @@ import com.pmease.gitplex.core.entity.support.CommentPos;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
+import com.pmease.gitplex.web.component.commitmessage.CommitMessageLabel;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
 import com.pmease.gitplex.web.component.createtag.CreateTagLink;
@@ -108,7 +109,7 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("text", getCommit().getShortMessage()));
+		add(new CommitMessageLabel("text", depotModel, Model.of(getCommit().getShortMessage())));
 		
 		DepotFilePage.State browseState = new DepotFilePage.State();
 		browseState.blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
@@ -135,7 +136,7 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		
 		String message = GitUtils.getDetailMessage(getCommit());
 		if (message != null) {
-			add(new Label("detail", message));
+			add(new CommitMessageLabel("detail", depotModel, Model.of(message)));
 		} else {
 			add(new WebMarkupContainer("detail").setVisible(false));
 		}

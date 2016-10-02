@@ -21,6 +21,8 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
+import com.pmease.gitplex.core.commitmessagetransform.CommitMessageTransformer;
+import com.pmease.gitplex.core.commitmessagetransform.PatternCommitMessageTransformer;
 import com.pmease.gitplex.core.entity.EntityLocator;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.AttachmentManager;
@@ -160,6 +162,8 @@ public class CoreModule extends AbstractPluginModule {
 				return GitConfig.class;
 			}
 		});
+		
+		contribute(CommitMessageTransformer.class, PatternCommitMessageTransformer.class);
 		
 		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
