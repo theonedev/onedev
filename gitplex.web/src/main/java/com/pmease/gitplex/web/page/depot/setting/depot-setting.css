@@ -213,6 +213,6 @@
 	float: left;
 	margin-right: 4px;
 }
-#depot-setting .commit-message-transform .help-block {
+#depot-setting .commit-message-transform>.help-block {
 	margin-top: 20px;
 }
