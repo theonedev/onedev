@@ -51,6 +51,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
+import com.pmease.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.BranchWatch;
@@ -62,7 +63,7 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
-import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
+import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
@@ -74,7 +75,6 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SortOption;
-import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -423,109 +423,7 @@ public class DepotBranchesPage extends DepotPage {
 				link.add(new Label("name", branch));
 				item.add(link);
 				
-				WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
-				item.add(actionsContainer.setOutputMarkupId(true));
-				
-				actionsContainer.add(new AjaxLink<Void>("unwatchRequests") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						BranchWatch watch = branchWatchesModel.getObject().get(branch);
-						if (watch != null) {
-							GitPlex.getInstance(BranchWatchManager.class).delete(watch);
-							branchWatchesModel.getObject().remove(branch);
-						}
-						target.add(actionsContainer);
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getLoginUser() != null && branchWatchesModel.getObject().containsKey(branch));
-					}
-
-				});
-				actionsContainer.add(new AjaxLink<Void>("watchRequests") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						BranchWatch watch = new BranchWatch();
-						watch.setDepot(getDepot());
-						watch.setBranch(branch);
-						watch.setUser(getLoginUser());
-						GitPlex.getInstance(BranchWatchManager.class).save(watch);
-						target.add(actionsContainer);
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getLoginUser() != null && !branchWatchesModel.getObject().containsKey(branch));
-					}
-
-				});
-
-				actionsContainer.add(new ModalLink("delete") {
-
-					@Override
-					protected Component newContent(String id) {
-						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", DepotBranchesPage.this);
-						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-						if (!pullRequestManager.findAllOpen(new DepotAndBranch(getDepot(), branch)).isEmpty()) {
-							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", DepotBranchesPage.this);
-							SearchOption searchOption = new SearchOption();
-							searchOption.setStatus(Status.OPEN);
-							searchOption.setBranch(branch);
-							PageParameters params = RequestListPage.paramsOf(getDepot(), searchOption, new SortOption());
-							bodyFrag.add(new BookmarkablePageLink<Void>("openRequests", RequestListPage.class, params));
-							bodyFrag.add(new Label("branch", branch));
-							fragment.add(bodyFrag);
-						} else {
-							fragment.add(new Label("body", "You selected to delete branch " + branch));
-						}
-						fragment.add(new AjaxLink<Void>("delete") {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								getDepot().deleteBranch(branch);
-								if (branch.equals(baseBranch)) {
-									baseBranch = getDepot().getDefaultBranch();
-									target.add(baseChoice);
-								}
-								target.add(pagingNavigator);
-								target.add(branchesContainer);
-								target.add(noBranchesContainer);
-								close(target);
-							}
-							
-						});
-						fragment.add(new AjaxLink<Void>("cancel") {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								close(target);
-							}
-							
-						});
-						return fragment;
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						RefInfo ref = item.getModelObject();
-						if (!getDepot().getDefaultBranch().equals(branch) 
-								&& SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getRef().getObjectId(), ObjectId.zeroId())) {
-							setVisible(true);
-						} else {
-							setVisible(false);
-						}
-					}
-
-				});
-				
-				actionsContainer.add(new AjaxLink<Void>("makeDefault") {
+				item.add(new AjaxLink<Void>("makeDefault") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -542,16 +440,6 @@ public class DepotBranchesPage extends DepotPage {
 					
 				});
 				
-				RevCommit lastCommit = getDepot().getRevCommit(ref.getRef().getObjectId());
-
-				PageParameters params = CommitDetailPage.paramsOf(getDepot(), lastCommit.name());
-				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
-				link.add(new Label("shortMessage", lastCommit.getShortMessage()));
-				item.add(link);
-				
-				item.add(new CommitHashPanel("commitHash", lastCommit.name()));
-				item.add(new Label("age", DateUtils.formatAge(lastCommit.getCommitterIdent().getWhen())));
-				
 				item.add(new WebMarkupContainer("default") {
 
 					@Override
@@ -561,6 +449,19 @@ public class DepotBranchesPage extends DepotPage {
 					}
 					
 				});
+				
+				RevCommit lastCommit = getDepot().getRevCommit(ref.getRef().getObjectId());
+				PageParameters params = CommitDetailPage.paramsOf(getDepot(), lastCommit.name());
+
+				link = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+				link.add(new Label("hash", GitUtils.abbreviateSHA(lastCommit.name())));
+				item.add(link);
+				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(lastCommit.name()))));
+				
+				item.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent(), true));
+				link = new BookmarkablePageLink<Void>("messageLink", CommitDetailPage.class, params);
+				link.add(new Label("message", lastCommit.getShortMessage()));
+				item.add(link);
 				
 				AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
 				
@@ -685,6 +586,109 @@ public class DepotBranchesPage extends DepotPage {
 					}
 					
 				});
+				
+				WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
+				item.add(actionsContainer.setOutputMarkupId(true));
+				
+				actionsContainer.add(new AjaxLink<Void>("unwatchRequests") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						BranchWatch watch = branchWatchesModel.getObject().get(branch);
+						if (watch != null) {
+							GitPlex.getInstance(BranchWatchManager.class).delete(watch);
+							branchWatchesModel.getObject().remove(branch);
+						}
+						target.add(actionsContainer);
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getLoginUser() != null && branchWatchesModel.getObject().containsKey(branch));
+					}
+
+				});
+				actionsContainer.add(new AjaxLink<Void>("watchRequests") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						BranchWatch watch = new BranchWatch();
+						watch.setDepot(getDepot());
+						watch.setBranch(branch);
+						watch.setUser(getLoginUser());
+						GitPlex.getInstance(BranchWatchManager.class).save(watch);
+						target.add(actionsContainer);
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getLoginUser() != null && !branchWatchesModel.getObject().containsKey(branch));
+					}
+
+				});
+
+				actionsContainer.add(new ModalLink("delete") {
+
+					@Override
+					protected Component newContent(String id) {
+						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", DepotBranchesPage.this);
+						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+						if (!pullRequestManager.findAllOpen(new DepotAndBranch(getDepot(), branch)).isEmpty()) {
+							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", DepotBranchesPage.this);
+							SearchOption searchOption = new SearchOption();
+							searchOption.setStatus(Status.OPEN);
+							searchOption.setBranch(branch);
+							PageParameters params = RequestListPage.paramsOf(getDepot(), searchOption, new SortOption());
+							bodyFrag.add(new BookmarkablePageLink<Void>("openRequests", RequestListPage.class, params));
+							bodyFrag.add(new Label("branch", branch));
+							fragment.add(bodyFrag);
+						} else {
+							fragment.add(new Label("body", "You selected to delete branch " + branch));
+						}
+						fragment.add(new AjaxLink<Void>("delete") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								getDepot().deleteBranch(branch);
+								if (branch.equals(baseBranch)) {
+									baseBranch = getDepot().getDefaultBranch();
+									target.add(baseChoice);
+								}
+								target.add(pagingNavigator);
+								target.add(branchesContainer);
+								target.add(noBranchesContainer);
+								close(target);
+							}
+							
+						});
+						fragment.add(new AjaxLink<Void>("cancel") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								close(target);
+							}
+							
+						});
+						return fragment;
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+
+						RefInfo ref = item.getModelObject();
+						if (!getDepot().getDefaultBranch().equals(branch) 
+								&& SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getRef().getObjectId(), ObjectId.zeroId())) {
+							setVisible(true);
+						} else {
+							setVisible(false);
+						}
+					}
+
+				});
+								
 			}
 			
 		});

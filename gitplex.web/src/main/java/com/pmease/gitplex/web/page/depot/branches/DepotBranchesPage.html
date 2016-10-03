@@ -17,20 +17,20 @@
 			<table wicket:id="branches" class="table table-hover table-condensed">
 				<tr wicket:id="branches">
 					<td class="detail">
-						<a wicket:id="branchLink" class="name"><span wicket:id="name"></span></a> <span class="label label-default" wicket:id="default">default</span>
-						<span wicket:id="actions" class="actions">
-						<a wicket:id="unwatchRequests" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye"></i></a>
-						<a wicket:id="watchRequests" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i></a>
-						<a wicket:id="delete" title="Delete this branch"><i class="fa fa-trash"></i></a>
-						<a wicket:id="makeDefault" class="btn btn-xs btn-default">make default</a>
-						</span>
+						<div class="branch">
+							<a wicket:id="branchLink" class="name"><span wicket:id="name"></span></a>
+							<span class="label label-default" wicket:id="default">default</span>
+							<span class="btn-group">
+								<a wicket:id="makeDefault" class="make-default btn btn-xs btn-default"><i class="fa fa-check"></i> make default</a>
+							</span>
+						</div>
 						<div class="commit">
-							<i class="fa fa-ext fa-commit"></i> 
-							<span wicket:id="commitHash"></span> 
-							<span class="middot"></span>
-							<a wicket:id="commitLink"><span wicket:id="shortMessage"></span></a>
-							<span class="middot"></span>
-							<span wicket:id="age"></span>						
+							<span class="btn-group">
+								<a wicket:id="hashLink" class="hash btn btn-default btn-xs"><span wicket:id="hash"></span></a>
+								<a wicket:id="copyHash" class="btn btn-default btn-xs"><i class="fa fa-clipboard"></i></a>
+							</span>
+							<span wicket:id="contributor"></span>
+							<a wicket:id="messageLink" class="message"><span wicket:id="message"></span></a>
 						</div>
 					</td>
 					<td class="behind behind-ahead">
@@ -48,6 +48,13 @@
 							</div>
 							<div class="bar" wicket:id="aheadBar"></div>
 						</div>
+					</td>
+					<td wicket:id="actions" class="actions">
+						<span class="btn-group">
+							<a wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye"></i></a>
+							<a wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i></a>
+							<a wicket:id="delete" class="btn btn-default" title="Delete this branch"><i class="fa fa-trash"></i></a>
+						</span>
 					</td>
 				</tr>
 			</table>		

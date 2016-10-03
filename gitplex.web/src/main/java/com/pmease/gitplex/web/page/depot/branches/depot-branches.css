@@ -5,21 +5,29 @@
 #repo-branches>.list>.head>.base {
 	width: 240px;
 }
-#repo-branches>.list>table .actions {
-	margin-left: 16px;
-}
-#repo-branches>.list>table .actions>.btn {
+#repo-branches>.list>table .branch .make-default {
 	display: none;
 }
-#repo-branches>.list>table>tbody>tr:hover .actions>.btn {
+#repo-branches>.list>table>tbody>tr:hover .branch .make-default {
 	display: inline;
 }
-#repo-branches>.list>table .actions>a {
-	margin-right: 8px;
-	color: #333;
+#repo-branches>.list>table td.detail>.branch {
+	height: 24px;
 }
-#repo-branches>.list>table td {
-	white-space: nowrap;
+#repo-branches>.list>table td.detail>.branch>.name {
+	font-weight: bold;
+	font-size: 16px;
+	color: #555;
+	margin-right: 8px;
+}
+#repo-branches>.list>table td.detail>.commit {
+	margin: 8px 0;
+}
+#repo-branches>.list>table td.detail>.commit>* {
+	margin-right: 4px;
+}
+#repo-branches>.list>table td.detail>.commit>.message {
+	color: #666;
 }
 #repo-branches>.list>table td.behind {
 	padding-right: 0;
@@ -33,13 +41,13 @@
 #repo-branches>.list>table td.behind-ahead div.text {
 	margin: 0 8px;
 }
-#repo-branches>.list>table td.behind-ahead em {
-	font-style: normal;
-	color: #666;
-}
 #repo-branches>.list>table td.behind-ahead {
 	font-size: 13px;
 	padding-top: 12px;
+	width: 20%;
+}
+#repo-branches>.list>table td.behind-ahead a {
+	color: #555;
 }
 #repo-branches>.list>table .bar {
 	height: 6px;
@@ -64,21 +72,12 @@
 	border-radius: 2px;
 	vertical-align: middle;
 }
-#repo-branches>.list>table td.detail a.name {
-	font-weight: bold;
-	font-size: 16px;
+
+#repo-branches>.list>table td.actions {
+	text-align: right;
+	width: 90px;
 }
-#repo-branches>.list>table td.detail .commit {
-	margin: 8px 0;
-	font-size: 12px;
-	color: #666;
-}
-#repo-branches>.list>table td.detail .commit .fa {
-	color: #666;
-}
-#repo-branches>.list>table td.detail input.commit-hash {
-	border: 1px dotted #999;
-}
+
 #searching-branches {
 	position: absolute; 
 	left: 50%; 
