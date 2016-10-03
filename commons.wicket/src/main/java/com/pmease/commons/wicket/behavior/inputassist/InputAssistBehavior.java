@@ -103,69 +103,78 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-		String inputContent = params.getParameterValue("input").toString();
-		Integer inputCaret = params.getParameterValue("caret").toOptionalInteger();
+		String type = params.getParameterValue("type").toString();
+		if (type.equals("tab")) {
+			String script = String.format("pmease.commons.inputassist.onTab('%s');", getComponent().getMarkupId());
+			target.appendJavaScript(script);
+		} else if (type.equals("close")) {
+			if (dropdown != null)
+				dropdown.close();
+		} else {
+			String inputContent = params.getParameterValue("input").toString();
+			Integer inputCaret = params.getParameterValue("caret").toOptionalInteger();
 
-		Preconditions.checkArgument(inputContent.indexOf('\r') == -1);
-		
-		List<Range> errors = getErrors(inputContent);
-		if (errors == null)
-			errors = new ArrayList<>();
-		List<Range> normalizedErrors = normalizeErrors(inputContent, errors);
-		String json;
-		try {
-			json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(normalizedErrors);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-		String script = String.format("pmease.commons.inputassist.markErrors('%s', %s);", 
-				getComponent().getMarkupId(), json);
-		target.appendJavaScript(script);
-		
-		if (inputCaret != null) {
-			final InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
-			final List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret), PAGE_SIZE);
-			if (!suggestions.isEmpty()) {
-				int anchor = getAnchor(inputContent.substring(0, inputCaret));
-				if (dropdown == null) {
-					dropdown = new FloatingPanel(target, new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0)) {
+			Preconditions.checkArgument(inputContent.indexOf('\r') == -1);
+			
+			List<Range> errors = getErrors(inputContent);
+			if (errors == null)
+				errors = new ArrayList<>();
+			List<Range> normalizedErrors = normalizeErrors(inputContent, errors);
+			String json;
+			try {
+				json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(normalizedErrors);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+			String script = String.format("pmease.commons.inputassist.markErrors('%s', %s);", 
+					getComponent().getMarkupId(), json);
+			target.appendJavaScript(script);
+			
+			if (inputCaret != null) {
+				final InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
+				final List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret), PAGE_SIZE);
+				if (!suggestions.isEmpty()) {
+					int anchor = getAnchor(inputContent.substring(0, inputCaret));
+					if (dropdown == null) {
+						dropdown = new FloatingPanel(target, new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0)) {
 
-						@Override
-						protected Component newContent(String id) {
-							return new AssistPanel(id, InputAssistBehavior.this, inputStatus, 
-									suggestions, getHints(inputStatus));
-						}
+							@Override
+							protected Component newContent(String id) {
+								return new AssistPanel(id, InputAssistBehavior.this, inputStatus, 
+										suggestions, getHints(inputStatus));
+							}
 
-						@Override
-						protected void onClosed() {
-							super.onClosed();
-							dropdown = null;
-						}
+							@Override
+							protected void onClosed() {
+								super.onClosed();
+								dropdown = null;
+							}
+							
+						};
+						script = String.format("pmease.commons.inputassist.assistOpened('%s', '%s');", 
+								getComponent().getMarkupId(), dropdown.getMarkupId());
+						target.appendJavaScript(script);
+					} else {
+						Component content = dropdown.getContent();
+						Component newContent = new AssistPanel(content.getId(), InputAssistBehavior.this, 
+								inputStatus, suggestions, getHints(inputStatus));
+						content.replaceWith(newContent);
+						target.add(newContent);
+
+						AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
+						script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
+						target.prependJavaScript(script);
 						
-					};
-					script = String.format("pmease.commons.inputassist.assistOpened('%s', '%s');", 
-							getComponent().getMarkupId(), dropdown.getMarkupId());
-					target.appendJavaScript(script);
-				} else {
-					Component content = dropdown.getContent();
-					Component newContent = new AssistPanel(content.getId(), InputAssistBehavior.this, 
-							inputStatus, suggestions, getHints(inputStatus));
-					content.replaceWith(newContent);
-					target.add(newContent);
-
-					AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
-					script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
-					target.prependJavaScript(script);
-					
-					script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s');", 
-							getComponent().getMarkupId(), dropdown.getMarkupId());
-					target.appendJavaScript(script);
+						script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s');", 
+								getComponent().getMarkupId(), dropdown.getMarkupId());
+						target.appendJavaScript(script);
+					}
+				} else if (dropdown != null) {
+					dropdown.close();
 				}
 			} else if (dropdown != null) {
 				dropdown.close();
 			}
-		} else if (dropdown != null) {
-			dropdown.close();
 		}
 	}
 	
@@ -186,7 +195,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		
 		String script = String.format("pmease.commons.inputassist.init('%s', %s);", 
 				getComponent().getMarkupId(true), 
-				getCallbackFunction(explicit("input"), explicit("caret")));
+				getCallbackFunction(explicit("type"), explicit("input"), explicit("caret")));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
