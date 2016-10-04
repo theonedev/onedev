@@ -77,37 +77,37 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.32</version> 
+            <version>1.0.33</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.validation</artifactId>  
-            <version>1.0.1</version> 
+            <version>1.0.2</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.shiro</artifactId>  
-            <version>1.0.31</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.jetty</artifactId>  
             <version>1.0.32</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
+            <artifactId>commons.jetty</artifactId>  
+            <version>1.0.33</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
             <artifactId>commons.hibernate</artifactId>  
-            <version>1.0.31</version> 
+            <version>1.0.32</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.markdown</artifactId>  
-            <version>1.0.1</version> 
+            <version>1.0.2</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.antlr</artifactId>  
-            <version>1.0.1</version> 
+            <version>1.0.2</version> 
         </dependency> 
     </dependencies>  
     <properties> 
@@ -131,6 +131,5 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories>  
-    <version>1.0.30</version> 
+    </repositories> 
 </project>

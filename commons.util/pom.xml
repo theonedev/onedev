@@ -50,7 +50,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.bootstrap</artifactId>  
-            <version>1.0.32</version> 
+            <version>1.0.33</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.commons</groupId>  
@@ -111,5 +111,5 @@
             <url>http://artifact.pmease.com/</url> 
         </repository> 
     </repositories>  
-    <version>1.0.32</version>
+    <version>1.0.33</version> 
 </project>
