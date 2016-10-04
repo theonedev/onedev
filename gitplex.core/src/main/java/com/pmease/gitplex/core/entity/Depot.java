@@ -229,6 +229,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		this.publicRead = publicRead;
 	}
 
+	@Nullable
 	@Valid
 	public CommitMessageTransformSetting getCommitMessageTransformSetting() {
 		return commitMessageTransformSetting;
