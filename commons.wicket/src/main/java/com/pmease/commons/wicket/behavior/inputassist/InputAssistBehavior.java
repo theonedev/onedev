@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -37,13 +35,6 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	
 	private FloatingPanel dropdown;
 	
-	@Override
-	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-		super.updateAjaxAttributes(attributes);
-		
-		attributes.setChannel(new AjaxChannel(AjaxChannel.DEFAULT_NAME, AjaxChannel.Type.DROP));
-	}
-
 	@Override
 	protected void onBind() {
 		super.onBind();
