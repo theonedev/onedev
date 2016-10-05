@@ -131,5 +131,6 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories> 
+    </repositories>  
+    <version>1.0.32</version>
 </project>
