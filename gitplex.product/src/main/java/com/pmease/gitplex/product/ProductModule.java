@@ -1,11 +1,9 @@
 package com.pmease.gitplex.product;
 
 import java.io.File;
-import java.util.Properties;
 
 import org.hibernate.cfg.Environment;
 
-import com.google.inject.name.Names;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.HibernateProperties;
 import com.pmease.commons.jetty.ServerConfigurator;
@@ -29,9 +27,9 @@ public class ProductModule extends AbstractPluginModule {
 		
 		bind(HibernateProperties.class).toInstance(hibernateProps);
 		
-		Properties serverProps = FileUtils.loadProperties(
-				new File(Bootstrap.installDir, "conf/server.properties")); 
-		bind(Properties.class).annotatedWith(Names.named("server")).toInstance(serverProps);
+		file = new File(Bootstrap.installDir, "conf/server.properties");
+		ServerProperties serverProps = new ServerProperties(FileUtils.loadProperties(file)); 
+		bind(ServerProperties.class).toInstance(serverProps);
 		
 		bind(ServerConfig.class).to(DefaultServerConfig.class);
 

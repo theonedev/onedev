@@ -1,5 +1,7 @@
 package com.pmease.commons.wicket;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Page;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.Url;
@@ -16,13 +18,22 @@ public class WicketUtils {
 			return RequestCycle.get().getUrlRenderer().renderContextRelativeUrl(url);
 	}
 	
-	public static PageKey getPageKey() {
+	@Nullable
+	public static Page getPage() {
 		if (RequestCycle.get() != null && RequestCycle.get().getActiveRequestHandler() instanceof IPageRequestHandler) {
-			IPageRequestHandler handler = (IPageRequestHandler) RequestCycle.get().getActiveRequestHandler();					
-			return new PageKey((Page) handler.getPage());
+			return (Page) ((IPageRequestHandler) RequestCycle.get().getActiveRequestHandler()).getPage();	
 		} else {
 			return null;
 		}
+	}
+
+	@Nullable
+	public static PageKey getPageKey() {
+		Page page = getPage();
+		if (page != null)
+			return new PageKey(page);
+		else
+			return null;
 	}
 	
 }

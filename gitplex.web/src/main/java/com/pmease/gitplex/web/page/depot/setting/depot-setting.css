@@ -208,3 +208,11 @@
 	font-size: 13px;
 	margin-bottom: 20px;
 }
+
+#depot-setting .commit-message-transform>label {
+	float: left;
+	margin-right: 4px;
+}
+#depot-setting .commit-message-transform>.help-block {
+	margin-top: 20px;
+}

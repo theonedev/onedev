@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import com.pmease.commons.jetty.ServerConfigurator;
 import com.pmease.gitplex.core.setting.ServerConfig;
@@ -31,14 +31,13 @@ public class ProductConfigurator implements ServerConfigurator {
 
 		SslConfig sslConfig = serverConfig.getSslConfig();
 		if (sslConfig != null) {
-			ServerConnector connector = new ServerConnector(server);
-			connector.setPort(sslConfig.getPort());
+			SslContextFactory sslContextFactory = new SslContextFactory();
+			sslContextFactory.setKeyStorePath(sslConfig.getKeystorePath());
+			sslContextFactory.setKeyStorePassword(sslConfig.getKeystorePassword());
+			sslContextFactory.setKeyManagerPassword(sslConfig.getKeystoreKeyPassword());
 			
-			SslConnectionFactory sslConnectionFactory = new SslConnectionFactory();
-			sslConnectionFactory.getSslContextFactory().setKeyStorePath(sslConfig.getKeystorePath());
-			sslConnectionFactory.getSslContextFactory().setKeyStorePassword(sslConfig.getKeystorePassword());
-			sslConnectionFactory.getSslContextFactory().setKeyManagerPassword(sslConfig.getKeystoreKeyPassword());
-			connector.addConnectionFactory(sslConnectionFactory);
+			ServerConnector connector = new ServerConnector(server, sslContextFactory);
+			connector.setPort(sslConfig.getPort());
 			
 			server.addConnector(connector);
 		}

@@ -27,9 +27,9 @@
                                 <unzip src="wrapper/wrapper-delta-pack-st.zip" dest="${project.build.outputDirectory}" overwrite="true"> 
                                     <regexpmapper from="^.*?/(.*)" to="\1"/> 
                                 </unzip>  
-                                <copy todir="${project.build.outputDirectory}/customization">
-                                	<fileset dir="wrapper/customization"></fileset>
-                                </copy>
+                                <copy todir="${project.build.outputDirectory}/customization"> 
+                                    <fileset dir="wrapper/customization"/> 
+                                </copy> 
                             </target> 
                         </configuration> 
                     </execution> 
@@ -53,5 +53,6 @@
             </snapshots>  
             <url>http://artifact.pmease.com/</url> 
         </repository> 
-    </repositories> 
+    </repositories>  
+    <version>1.0.32</version>
 </project>

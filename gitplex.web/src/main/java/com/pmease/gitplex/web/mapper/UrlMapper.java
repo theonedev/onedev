@@ -49,6 +49,7 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotTeamListPage;
+import com.pmease.gitplex.web.page.depot.setting.commitmessagetransform.CommitMessageTransformPage;
 import com.pmease.gitplex.web.page.depot.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
@@ -189,6 +190,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new DepotMapper("${account}/${depot}/settings/effective-privilege", DepotEffectivePrivilegePage.class));
 		add(new DepotMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
 		add(new DepotMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));
+		add(new DepotMapper("${account}/${depot}/settings/commit-message-transform", CommitMessageTransformPage.class));
 		
 		add(new DepotMapper("${account}/${depot}/no-branches", NoBranchesPage.class));
 	}

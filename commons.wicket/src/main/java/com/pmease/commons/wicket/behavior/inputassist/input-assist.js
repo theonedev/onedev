@@ -15,7 +15,7 @@ pmease.commons.inputassist = {
 				$input.data("prevValue", value);
 				$input.data("prevCaret", caret);
 				if ($input.is(":focus") && e.keyCode != 27 && e.keyCode != 13) // ignore esc, enter
-					callback(value, caret, 1);
+					callback("input", value, caret);
 			}
 			if (value.trim().length == 0)
 				pmease.commons.inputassist.markErrors(inputId, []);
@@ -26,7 +26,7 @@ pmease.commons.inputassist = {
 				var caret = $input.caret();
 				$input.data("prevValue", value);
 				$input.data("prevCaret", caret);
-				callback(value, caret, 1);
+				callback("input", value, caret);
 			}
 			$input.off("focus", onFocus);
 		}
@@ -94,7 +94,7 @@ pmease.commons.inputassist = {
 					$input.data("update")($active);
 					return false;
 				} else {
-					pmease.commons.floating.close($dropdown, true);
+					callback("close");
 				}
 			}
 		});
@@ -102,16 +102,27 @@ pmease.commons.inputassist = {
 		$input.bind("keydown", "tab", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				var $active = $dropdown.find("tr.active");
-				if ($active.length != 0) 
-					$input.data("update")($active);
-				else 
-					$input.data("update")($dropdown.find("tr").first());
+				// perform this via callback in order not to select unwanted result
+				// due to slow update of ajax searching result
+				callback("tab");
 				return false;
 			}
 		});
 		
-		callback($input.val());		
+		callback("input", $input.val());		
+	},
+	
+	onTab: function(inputId) {
+		var $input = $("#" + inputId);
+		var $dropdown = $input.data("dropdown");
+		if ($dropdown) {
+			var $active = $dropdown.find("tr.active");
+			if ($active.length != 0) 
+				$input.data("update")($active);
+			else 
+				$input.data("update")($dropdown.find("tr").first());
+			return false;
+		}
 	},
 	
 	markErrors: function(inputId, errors) {

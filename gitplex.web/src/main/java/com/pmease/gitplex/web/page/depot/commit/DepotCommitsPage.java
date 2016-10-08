@@ -61,7 +61,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphResourceReference;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphUtils;
-import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.model.CommitRefsModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -376,7 +376,7 @@ public class DepotCommitsPage extends DepotPage {
 			item = new Fragment(itemId, "commitFrag", this);
 			item.add(new ContributorAvatars("avatar", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-			item.add(new CommitMessagePanel("message", depotModel, new LoadableDetachableModel<RevCommit>() {
+			item.add(new ExpandableCommitMessagePanel("message", depotModel, new LoadableDetachableModel<RevCommit>() {
 
 				@Override
 				protected RevCommit load() {

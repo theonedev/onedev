@@ -3,7 +3,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>gitplex.web</artifactId>  
-    <version>1.0.1</version>  
+    <version>1.0.3</version>  
     <parent> 
         <groupId>com.pmease</groupId>  
         <artifactId>parent.general</artifactId>  
@@ -31,22 +31,22 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.core</artifactId>  
-            <version>1.0.32</version> 
+            <version>1.0.34</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.wicket</artifactId>  
-            <version>1.0.30</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.pmease</groupId>  
-            <artifactId>commons.jetty</artifactId>  
             <version>1.0.32</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
+            <artifactId>commons.jetty</artifactId>  
+            <version>1.0.33</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.pmease</groupId>  
             <artifactId>gitplex.rest</artifactId>  
-            <version>1.0.1</version> 
+            <version>1.0.3</version> 
         </dependency>  
         <!-- JERSEY CLIENT -->  
         <dependency> 
@@ -72,7 +72,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.search</artifactId>  
-            <version>1.0.1</version> 
+            <version>1.0.3</version> 
         </dependency> 
     </dependencies>  
     <repositories> 

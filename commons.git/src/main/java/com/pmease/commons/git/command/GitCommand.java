@@ -74,7 +74,7 @@ public abstract class GitCommand<V> implements Callable<V> {
 			GitVersion gitVersion = new GitVersion(version[0]);
 			
 			if (gitVersion.isOlderThan(new GitVersion(MIN_VERSION)))
-				return "Git version of '" + gitExe + "' is " + gitVersion + ". GitPlex requires at least " + MIN_VERSION;
+				return "Version of git is " + gitVersion + ". GitPlex requires at least " + MIN_VERSION;
 			
 			return null;
 			

@@ -32,7 +32,7 @@ public abstract class AccountSettingPage extends AccountLayoutPage {
 		tabs.add(new AccountTab("Avatar", "", 0, AvatarEditPage.class));
 		
 		if (!getAccount().isOrganization())
-			tabs.add(new AccountTab("Password", "", 0, PasswordEditPage.class));
+			tabs.add(new AccountTab("Change Password", "", 0, PasswordEditPage.class));
 		
 		add(new Tabbable("accountSettingTabs", tabs));
 	}

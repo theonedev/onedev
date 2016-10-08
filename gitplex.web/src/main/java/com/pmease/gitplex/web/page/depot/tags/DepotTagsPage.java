@@ -42,13 +42,14 @@ import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
+import com.pmease.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.archivemenulink.ArchiveMenuLink;
-import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
+import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
@@ -284,10 +285,17 @@ public class DepotTagsPage extends DepotPage {
 				}
 
 				RevCommit commit = (RevCommit) ref.getPeeledObj();
-				item.add(new CommitHashPanel("hash", commit.name()));
 				PageParameters params = CommitDetailPage.paramsOf(getDepot(), commit.name());
-				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
-				link.add(new Label("shortMessage", commit.getShortMessage()));
+				
+				link = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+				link.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
+				item.add(link);
+				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
+				
+				item.add(new ContributorPanel("contributor", commit.getAuthorIdent(), commit.getCommitterIdent(), true));
+				
+				link = new BookmarkablePageLink<Void>("messageLink", CommitDetailPage.class, params);
+				link.add(new Label("message", commit.getShortMessage()));
 				item.add(link);
 				
 				item.add(new ArchiveMenuLink("download", depotModel) {

@@ -93,10 +93,10 @@ public class PropertyDescriptor implements Serializable {
 	}
 
 	public boolean isPropertyRequired() {
-		return propertyGetter.getReturnType().isPrimitive()
-				|| propertyGetter.getAnnotation(NotNull.class) != null 
-				|| propertyGetter.getAnnotation(NotEmpty.class) != null
-				|| propertyGetter.getAnnotation(Size.class) != null && propertyGetter.getAnnotation(Size.class).min()>=1;
+		return getPropertyGetter().getReturnType().isPrimitive()
+				|| getPropertyGetter().getAnnotation(NotNull.class) != null 
+				|| getPropertyGetter().getAnnotation(NotEmpty.class) != null
+				|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
 	}
 
 }

@@ -85,6 +85,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.support.CommitMessageTransformSetting;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.event.RefUpdated;
 import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
@@ -136,6 +137,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	private boolean publicRead;
 
+	@Lob
+	@Column(length=65535)
+	private CommitMessageTransformSetting commitMessageTransformSetting;
+	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
 	
@@ -222,6 +227,16 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 	public void setPublicRead(boolean publicRead) {
 		this.publicRead = publicRead;
+	}
+
+	@Nullable
+	@Valid
+	public CommitMessageTransformSetting getCommitMessageTransformSetting() {
+		return commitMessageTransformSetting;
+	}
+
+	public void setCommitMessageTransformSetting(CommitMessageTransformSetting commitMessageTransformSetting) {
+		this.commitMessageTransformSetting = commitMessageTransformSetting;
 	}
 
 	public String getUUID() {

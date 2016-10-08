@@ -1,21 +1,19 @@
 package com.pmease.gitplex.web.page.account.setting;
 
-import java.io.Serializable;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.wicket.editable.BeanDescriptor;
-import com.pmease.commons.wicket.editable.PropertyDescriptor;
-import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
+import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 
 @SuppressWarnings("serial")
@@ -30,52 +28,34 @@ public class PasswordEditPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		PasswordEditBean bean = new PasswordEditBean();
+		
+		Set<String> excludedProperties = new HashSet<>();
+		
+		// in case administrator changes password for non-adminsitrator user, we do not 
+		// ask for old password
+		if (SecurityUtils.getAccount().isAdministrator() && !getAccount().isAdministrator()) 
+			excludedProperties.add("oldPassword");
+		
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-
+				getAccount().setPassword(bean.getNewPassword());
 				GitPlex.getInstance(AccountManager.class).save(getAccount(), null);
 				Session.get().success("Password has been changed");
+
+				bean.setOldPassword(null);
+				replace(BeanContext.editBean("editor", bean, excludedProperties));
 			}
-			
+
 		};
 		add(form);
 		
-		PasswordDescriptor descriptor = new PasswordDescriptor();
-		form.add(new ReflectionBeanEditor("editor", descriptor, new IModel<Serializable>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Serializable getObject() {
-				return getAccount();
-			}
-
-			@Override
-			public void setObject(Serializable object) {
-				descriptor.copyProperties(object, getAccount());
-			}
-			
-		}));
+		form.add(BeanContext.editBean("editor", bean, excludedProperties));
 	}
-
-	private static class PasswordDescriptor extends BeanDescriptor {
-
-		public PasswordDescriptor() {
-			super(Account.class);
-			
-			for (Iterator<PropertyDescriptor> it = propertyDescriptors.iterator(); it.hasNext();) {
-				if (!it.next().getPropertyName().equals("password"))
-					it.remove();
-			}
-		}
-		
-	}
-
+	
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Account account) {
 		if (account.isOrganization())

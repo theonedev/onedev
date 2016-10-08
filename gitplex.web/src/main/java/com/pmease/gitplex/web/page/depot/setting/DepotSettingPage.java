@@ -15,6 +15,7 @@ import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotTeamListPage;
+import com.pmease.gitplex.web.page.depot.setting.commitmessagetransform.CommitMessageTransformPage;
 import com.pmease.gitplex.web.page.depot.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
@@ -52,6 +53,7 @@ public abstract class DepotSettingPage extends DepotPage {
 			 */
 			tabs.add(new DepotSettingTab("Collaborators", "fa fa-fw fa-user", DepotCollaboratorListPage.class));
 		}
+		tabs.add(new DepotSettingTab("Commit Message Transform", "fa fa-fw fa-exchange", CommitMessageTransformPage.class));
 		tabs.add(new DepotSettingTab("Gatekeepers", "fa fa-fw fa-eye", GateKeeperPage.class));
 		tabs.add(new DepotSettingTab("Integration Policies", "fa fa-fw fa-puzzle-piece", IntegrationPolicyPage.class));
 		

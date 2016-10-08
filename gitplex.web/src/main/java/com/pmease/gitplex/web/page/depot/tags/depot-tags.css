@@ -6,12 +6,16 @@
 	white-space: nowrap;
 }
 #repo-tags .tag a.name {
+	color: #444;
 	font-weight: bold;
 	font-size: 16px;
 }
 #repo-tags .annotated {
-	color: #666;
+	color: #999;
 	font-size: 12px;
+}
+#repo-tags .annotated a {
+	color: #666;
 }
 #repo-tags .annotated .ellipsis-expander {
 	margin-left: 4px;
@@ -21,24 +25,10 @@
 	border: none;
 	font-size: 12px;
 	background: none;
-	margin: -8px 0;
-}
-#repo-tags .commit input {
-	border: 1px dotted #999;	
+	margin: 0 0 -4px 0;
 }
 #repo-tags>.list>table td.actions {
-	width: 1%;
 	text-align: right;
-}
-#repo-tags>.list>table td.actions .fa.fa-times {
-	color: red;
-}
-#repo-tags>.list>table td.actions .fa.fa-download {
-	font-size: 15px;
-	vertical-align: middle;
-}
-#repo-tags>.list>table td.actions span.fa.fa-times {
-	color: #888;
 }
 #repo-tags>.list>table td.detail>div, 
 #repo-tags>.list>table td.detail>div .name a {
@@ -47,4 +37,10 @@
 }
 #repo-tags>.list>table td.detail .commit {
 	margin: 8px 0;
+}
+#repo-tags>.list>table td.detail .commit>* {
+	margin-right: 4px;
+}
+#repo-tags>.list>table td.detail .commit>.message {
+	color: #666;
 }
