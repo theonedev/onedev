@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
@@ -76,6 +77,8 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			try (TreeWalk treeWalk = new TreeWalk(depot.getRepository())) {
+				treeWalk.setFilter(TreeFilter.ANY_DIFF);
+				treeWalk.setRecursive(true);
 				treeWalk.addTree(depot.getRevCommit(oldCommit).getTree());
 				treeWalk.addTree(depot.getRevCommit(newCommit).getTree());
 				while (treeWalk.next()) {
