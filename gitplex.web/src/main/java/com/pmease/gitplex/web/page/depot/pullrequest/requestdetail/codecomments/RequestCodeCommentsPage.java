@@ -19,17 +19,12 @@ public class RequestCodeCommentsPage extends RequestDetailPage implements CodeCo
 
 	private final CodeCommentFilter filterOption;
 	
-	private final List<String> commentedFiles = new ArrayList<>();
+	private List<String> commentedFiles;
 	
 	public RequestCodeCommentsPage(PageParameters params) {
 		super(params);
-		
+
 		filterOption = new CodeCommentFilter(params);
-		
-		for (CodeComment comment: getPullRequest().getCodeComments()) {
-			commentedFiles.add(comment.getCommentPos().getPath());
-		}
-		commentedFiles.sort((file1, file2)->Paths.get(file1).compareTo(Paths.get(file2)));
 	}
 
 	@Override
@@ -66,6 +61,18 @@ public class RequestCodeCommentsPage extends RequestDetailPage implements CodeCo
 
 	@Override
 	public List<String> getCommentedFiles() {
+		if (commentedFiles == null) {
+			/*
+			 * Lazy initializing the commentedFiles as otherwise it may result in recursive initialization as
+			 * getPullRequest().getCodeComments() can save CodeCommentRelation which again triggering 
+			 * instantiation of RequestCodeComments in PullRequestChangeBroadcaster when calling WicketUtils.getPage()
+			 */
+			commentedFiles = new ArrayList<>();
+			for (CodeComment comment: getPullRequest().getCodeComments()) {
+				commentedFiles.add(comment.getCommentPos().getPath());
+			}
+			commentedFiles.sort((file1, file2)->Paths.get(file1).compareTo(Paths.get(file2)));
+		}
 		return commentedFiles;
 	}
 
