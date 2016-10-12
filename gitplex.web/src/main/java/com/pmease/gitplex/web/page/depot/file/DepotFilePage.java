@@ -650,6 +650,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private void showRequestChanges(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId) {
 		RequestChangesPage.State state = SerializationUtils.clone(requestCompareInfo.compareState);
 		state.newCommit = newCommitId.name();
+		state.pathFilter = null;
 		if (state.commentId != null) {
 			CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
 			state.oldCommit = comment.getCommentPos().getCommit();

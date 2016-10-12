@@ -299,7 +299,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						return context.getOpenComment();
 					}
 					
-				}, Model.of(compareContext.getPathFilter()), Model.of(compareContext.getWhitespaceOption()));
+				}, Model.of(compareContext.getWhitespaceOption()));
 			}
 			
 		});

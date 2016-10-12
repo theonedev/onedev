@@ -1009,7 +1009,7 @@ public class RevisionDiffPanel extends Panel {
 						return getOpenComment();
 					}
 					
-				}, pathFilterModel, whitespaceOptionModel);
+				}, whitespaceOptionModel);
 			}
 			
 		});

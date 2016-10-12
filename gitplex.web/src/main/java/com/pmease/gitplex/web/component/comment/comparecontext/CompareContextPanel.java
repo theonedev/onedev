@@ -38,16 +38,13 @@ public class CompareContextPanel extends Panel {
 	
 	private final IModel<CodeComment> commentModel;
 	
-	private final IModel<String> pathFilterModel;
-	
 	private final IModel<WhitespaceOption> whitespaceOptionModel;
 	
 	public CompareContextPanel(String id, IModel<PullRequest> requestModel, IModel<CodeComment> commentModel, 
-			IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel) {
+			IModel<WhitespaceOption> whitespaceOptionModel) {
 		super(id);
 		this.requestModel = requestModel;
 		this.commentModel = commentModel;
-		this.pathFilterModel = pathFilterModel;
 		this.whitespaceOptionModel = whitespaceOptionModel;
 	}
 
@@ -95,7 +92,6 @@ public class CompareContextPanel extends Panel {
 								state.oldCommit = commit.name();
 								state.newCommit = comment.getCommentPos().getCommit();
 							}
-							state.pathFilter = pathFilterModel.getObject();
 							state.whitespaceOption = whitespaceOptionModel.getObject();
 							PageParameters params = RequestChangesPage.paramsOf(requestModel.getObject(), state);
 							setResponsePage(RequestChangesPage.class, params);
@@ -153,7 +149,6 @@ public class CompareContextPanel extends Panel {
 	protected void onDetach() {
 		commentModel.detach();
 		requestModel.detach();
-		pathFilterModel.detach();
 		whitespaceOptionModel.detach();
 		
 		super.onDetach();
