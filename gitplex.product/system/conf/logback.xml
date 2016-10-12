@@ -16,9 +16,7 @@
 			<maxIndex>3</maxIndex>
 			<FileNamePattern>${logback.logFile}.%i</FileNamePattern>
 		</rollingPolicy>
-		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-			<MaxFileSize>5M</MaxFileSize>
-		</triggeringPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy"/>
 	</appender>
 	
 	<logger name="org.apache.wicket" level="WARN" />
