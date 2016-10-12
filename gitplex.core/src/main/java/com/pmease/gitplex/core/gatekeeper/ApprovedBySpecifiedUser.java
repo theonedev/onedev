@@ -53,12 +53,14 @@ public class ApprovedBySpecifiedUser extends AbstractGateKeeper {
 
 	@Override
 	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
-    	return pending(Lists.newArrayList("Need approval from " + user.getName())); 
+        Account approveUser = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
+    	return pending(Lists.newArrayList("Need approval from " + approveUser.getDisplayName())); 
 	}
 
 	@Override
 	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-    	return pending(Lists.newArrayList("Need approval from " + user.getName())); 
+        Account approveUser = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
+    	return pending(Lists.newArrayList("Need approval from " + approveUser.getDisplayName())); 
 	}
 
 	@Override
