@@ -33,8 +33,8 @@
 
 #request-detail>.summary>div {
 	border-bottom: 1px dotted #BBB; 
-	margin-bottom: 12px; 
-	padding-bottom: 8px;
+	margin-bottom: 16px; 
+	padding-bottom: 12px;
 }
 #request-detail>.summary>div:last-child {
 	border-bottom: none; 
@@ -56,9 +56,18 @@
 #request-detail>.summary>.note {
 	font-size: 16px;
 } 
+#request-detail>.summary>.note.with-status-reasons {
+	font-size: 16px;
+	border-bottom: none;
+	margin-bottom: 0;
+} 
+
 #request-detail>.summary>.status-reasons ul {
 	margin-bottom: 0; 
 	padding-left: 16px;
+} 
+#request-detail>.summary>.status-reasons ul>li {
+	margin-left: 22px;
 } 
 
 #request-detail>.summary kbd {

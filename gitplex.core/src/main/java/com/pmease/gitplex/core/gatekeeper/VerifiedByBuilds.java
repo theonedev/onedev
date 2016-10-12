@@ -31,9 +31,9 @@ public class VerifiedByBuilds extends AbstractGateKeeper {
 	
 	private boolean blockMode = true;
 	
-	@Editable(order=100, description="This specified number of builds has to be reported successful "
+	@Editable(order=100, description="This specifies number of builds has to be reported successful "
 			+ "for this gatekeeper to be passed. Normally this number represents number of build "
-			+ "configurations setting up to verify the branch.")
+			+ "configurations setting up to verify the code.")
 	@Min(1)
 	public int getLeastPassCount() {
 		return leastPassCount;

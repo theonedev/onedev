@@ -21,13 +21,12 @@
 			<div wicket:id="discardedNote">
 				<i class="fa fa-info-circle"></i> This pull request has been discarded.
 			</div>
-			<div wicket:id="pendingUpdateNote" class="note">
+			<div wicket:id="pendingUpdateNote" class="note with-status-reasons">
 				<i class="fa fa-exclamation-triangle"></i> This pull request does not pass gatekeeper 
 				checks below, and needs to be updated with new commits.
 			</div>
-			<div wicket:id="pendingApprovalNote" class="note">
-				<i class="fa fa-exclamation-triangle"></i> This pull request needs to be approved before it can 
-				be integrated.
+			<div wicket:id="pendingApprovalNote" class="note with-status-reasons">
+				<i class="fa fa-exclamation-triangle"></i> This pull request needs to be approved/verified as below:
 			</div>
 			<div wicket:id="integratedNote" class="integrated-note">
 				<div wicket:id="fastForwarded">
