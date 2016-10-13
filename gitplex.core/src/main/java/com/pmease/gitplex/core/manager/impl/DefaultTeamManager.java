@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Iterator;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -13,7 +15,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
+import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.TeamManager;
 
 @Singleton
@@ -29,7 +31,9 @@ public class DefaultTeamManager extends AbstractEntityManager<Team> implements T
 	public void save(Team team, String oldName) {
 		if (oldName != null && !oldName.equals(team.getName())) {
 			for (Depot depot: team.getOrganization().getDepots()) {
-				depot.getGateKeeper().onTeamRename(oldName, team.getName());
+				for (GateKeeper gateKeeper: depot.getGateKeepers()) {
+					gateKeeper.onTeamRename(oldName, team.getName());
+				}
 			}
 		}
 		dao.persist(team);
@@ -39,8 +43,10 @@ public class DefaultTeamManager extends AbstractEntityManager<Team> implements T
 	@Override
 	public void delete(Team team) {
 		for (Depot depot: team.getOrganization().getDepots()) {
-			if (depot.getGateKeeper().onTeamDelete(team.getName()))
-				depot.setGateKeeper(new DefaultGateKeeper());
+			for (Iterator<GateKeeper> it = depot.getGateKeepers().iterator(); it.hasNext();) {
+				if (it.next().onTeamDelete(team.getName()))
+					it.remove();
+			}
 		}
 		dao.remove(team);
 	}

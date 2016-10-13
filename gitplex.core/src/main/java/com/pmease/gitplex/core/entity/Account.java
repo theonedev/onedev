@@ -22,7 +22,6 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
@@ -170,7 +169,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@Editable(order=150, autocomplete="new-password")
 	@Password(confirmative=true)
 	@NotEmpty
-	@Length(min=5, message="Password length should not less than 5")
 	public String getPassword() {
 		return super.getPassword();
 	}

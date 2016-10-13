@@ -88,7 +88,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.support.CommitMessageTransformSetting;
 import com.pmease.gitplex.core.entity.support.IntegrationPolicy;
 import com.pmease.gitplex.core.event.RefUpdated;
-import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
+import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DepotManager;
@@ -153,7 +153,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	@Lob
 	@Column(nullable=false, length=65535)
-	private GateKeeper gateKeeper = new DefaultGateKeeper();
+	private ArrayList<GateKeeper> gateKeepers = new ArrayList<>();
 	
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -249,12 +249,12 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 	@NotNull
 	@Valid
-	public GateKeeper getGateKeeper() {
-		return gateKeeper;
+	public List<GateKeeper> getGateKeepers() {
+		return gateKeepers;
 	}
 
-	public void setGateKeeper(GateKeeper gateKeeper) {
-		this.gateKeeper = gateKeeper;
+	public void setGateKeepers(ArrayList<GateKeeper> gateKeepers) {
+		this.gateKeepers = gateKeepers;
 	}
 
 	@Valid
@@ -394,6 +394,13 @@ public class Depot extends AbstractEntity implements AccountBelonging {
         return true;
 	}
 	
+	public GateKeeper getGateKeeper() {
+		AndGateKeeper andGateKeeper = new AndGateKeeper();
+		for (GateKeeper each: getGateKeepers())
+			andGateKeeper.getGateKeepers().add(each);
+		return andGateKeeper;
+	}
+
 	/**
 	 * Find fork root of this repository. 
 	 * 

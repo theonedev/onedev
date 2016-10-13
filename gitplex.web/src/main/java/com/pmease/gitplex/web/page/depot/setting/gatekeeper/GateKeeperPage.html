@@ -1,9 +1,13 @@
 <wicket:extend>
 	<div class="gate-keeper-setting">
-		<div wicket:id="gateKeeper"></div>
+		<div wicket:id="gateKeeperSetting">
+			<div wicket:id="gateKeepers">
+				<div wicket:id="gateKeeper"></div>
+			</div>
+			<div wicket:id="gateKeeperDropdownTrigger" class="well gate-keeper-add">Add Gatekeeper <i class="fa fa-lg fa-plus-circle"></i></div>
+		</div>
 		<div class="help-block">
-			<i class="fa fa-info-circle"></i> Repository can only be modified if checking of defined gatekeeper is passed. Multiple gatekeepers can be 
-			combined together with various composite gatekeepers 
+			<i class="fa fa-info-circle"></i> Commits have to pass all Gatekeepers defined here in order to be accepted by the repository    
 		</div>
 	</div>
 </wicket:extend>
