@@ -152,22 +152,16 @@
 	margin-bottom: 0;
 }
 
-.gate-keeper.panel {
-	border: 1px solid #BBBBBB;
+.gate-keeper.panel.odd, .gate-keeper.panel.odd>.panel-heading {
+	border-color: #198317;
+}
+.gate-keeper.panel.even, .gate-keeper.panel.even>.panel-heading {
+	border-color: #CA0606;
 }
 
-.gate-keeper.panel>.panel-heading {
-	border-color: #BBBBBB;
+.gate-keeper.panel.disabled {
+	opacity: 0.5;
 }
-.gate-keeper.panel.disabled, .gate-keeper.panel.disabled .panel {
-	color: #AAA;
-}
-.gate-keeper.panel.disabled>.panel-heading, .gate-keeper.panel.disabled .panel-heading {
-	color: #AAA;
-}
-.gate-keeper.panel.disabled .fa {
-	color: inherit;
-} 
 .gate-keeper table.viewer {
 	font-size: 13px !important; 
 	color: #444444;

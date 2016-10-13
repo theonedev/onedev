@@ -33,7 +33,7 @@ public class GateKeeperPage extends DepotSettingPage {
 
 			@Override
 			protected void populateItem(final ListItem<GateKeeper> item) {
-				item.add(new GateKeeperPanel("gateKeeper", item.getModelObject()) {
+				item.add(new GateKeeperPanel("gateKeeper", item.getModelObject(), 1) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {

@@ -35,10 +35,13 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipBehavi
 abstract class GateKeeperPanel extends Panel {
 	
 	private final GateKeeper gateKeeper;
+	
+	private final int level;
 
-	public GateKeeperPanel(String id, GateKeeper gateKeeper) {
+	public GateKeeperPanel(String id, GateKeeper gateKeeper, int level) {
 		super(id);
 		this.gateKeeper = gateKeeper;
+		this.level = level;
 	}
 
 	@Override
@@ -50,6 +53,12 @@ abstract class GateKeeperPanel extends Panel {
 		
 		if(!gateKeeper.isEnabled())
 			container.add(AttributeAppender.append("class", "disabled"));
+		
+		if (level%2 == 0) {
+			container.add(AttributeAppender.append("class", "even panel-danger"));
+		} else {
+			container.add(AttributeAppender.append("class", "odd panel-success"));
+		}
 		
 		final Class<? extends GateKeeper> clazz = gateKeeper.getClass();
 		container.add(new Label("title", EditableUtils.getName(clazz)));
@@ -133,7 +142,7 @@ abstract class GateKeeperPanel extends Panel {
 
 				@Override
 				protected void populateItem(final ListItem<GateKeeper> item) {
-					item.add(new GateKeeperPanel("child", item.getModelObject()) {
+					item.add(new GateKeeperPanel("child", item.getModelObject(), level+1) {
 
 						@Override
 						protected void onDelete(AjaxRequestTarget target) {
@@ -235,7 +244,7 @@ abstract class GateKeeperPanel extends Panel {
 				fragment.add(new WebMarkupContainer("gateKeeper").setVisible(false));
 				fragment.add(new WebMarkupContainer("gateKeeperEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 			} else {
-				fragment.add(new GateKeeperPanel("gateKeeper", notGateKeeper.getGateKeeper()) {
+				fragment.add(new GateKeeperPanel("gateKeeper", notGateKeeper.getGateKeeper(), level+1) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
@@ -302,7 +311,7 @@ abstract class GateKeeperPanel extends Panel {
 					
 				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "well gate-keeper-add")));
 			} else {
-				fragment.add(new GateKeeperPanel("ifGate", ifThenGateKeeper.getIfGate()) {
+				fragment.add(new GateKeeperPanel("ifGate", ifThenGateKeeper.getIfGate(), level+1) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
@@ -363,7 +372,7 @@ abstract class GateKeeperPanel extends Panel {
 					
 				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "well gate-keeper-add")));
 			} else {
-				fragment.add(new GateKeeperPanel("thenGate", ifThenGateKeeper.getThenGate()) {
+				fragment.add(new GateKeeperPanel("thenGate", ifThenGateKeeper.getThenGate(), level+1) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
