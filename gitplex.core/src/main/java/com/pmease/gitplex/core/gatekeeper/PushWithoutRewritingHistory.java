@@ -32,9 +32,9 @@ public class PushWithoutRewritingHistory extends AbstractGateKeeper {
 	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			if (GitUtils.isMergedInto(depot.getRepository(), oldCommit, newCommit))
-				return passed(Lists.newArrayList("Push operation does not rewrite history"));
+				return passed(Lists.newArrayList("Not trying to rewrite history"));
 			else
-				return failed(Lists.newArrayList("Push operation rewrites history"));
+				return failed(Lists.newArrayList("Trying to rewrite history"));
 		} else {
 			return ignored();
 		}

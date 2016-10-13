@@ -58,14 +58,14 @@ public class PerformSpecifiedOperations extends AbstractGateKeeper implements Va
 
 	private GateCheckResult checkUpdate() {
 		if (updateRef) {
-			return passed(Lists.newArrayList("Ref is being updated"));
+			return passed(Lists.newArrayList("Trying to update a ref"));
 		} 
 		List<String> reasons = new ArrayList<>();
 		if (deleteRef) {
-			reasons.add("Ref is not being deleted");
+			reasons.add("Trying to delete a ref");
 		}
 		if (createRef) {
-			reasons.add("Ref is not being created");
+			reasons.add("Trying to create a ref");
 		}
 		return failed(reasons);
 	}
@@ -84,26 +84,26 @@ public class PerformSpecifiedOperations extends AbstractGateKeeper implements Va
 	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (oldCommit.equals(ObjectId.zeroId())) {
 			if (createRef) {
-				return passed(Lists.newArrayList("Ref is being created"));
+				return passed(Lists.newArrayList("Trying to create a ref"));
 			}
 			List<String> reasons = new ArrayList<>();
 			if (updateRef) {
-				reasons.add("Ref is not being updated");
+				reasons.add("Trying to update a ref");
 			}
 			if (deleteRef) {
-				reasons.add("Ref is not being deleted");
+				reasons.add("Trying to delete a ref");
 			}
 			return failed(reasons);
 		} else if (newCommit.equals(ObjectId.zeroId())) {
 			if (deleteRef) {
-				return passed(Lists.newArrayList("Ref is being deleted"));
+				return passed(Lists.newArrayList("Trying to delete a ref"));
 			}
 			List<String> reasons = new ArrayList<>();
 			if (createRef) {
-				reasons.add("Ref is not being created");
+				reasons.add("Trying to create a ref");
 			}
 			if (updateRef) {
-				reasons.add("Ref is not being updated");
+				reasons.add("Trying to update a ref");
 			}
 			return failed(reasons);
 		} else {
