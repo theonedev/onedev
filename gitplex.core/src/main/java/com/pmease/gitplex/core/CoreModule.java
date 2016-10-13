@@ -42,7 +42,7 @@ import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestInfoManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
+import com.pmease.gitplex.core.manager.PullRequestTaskManager;
 import com.pmease.gitplex.core.manager.PullRequestReferenceManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewManager;
@@ -75,7 +75,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultOrganizationMembershipManager
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
-import com.pmease.gitplex.core.manager.impl.DefaultPullRequestNotificationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestTaskManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestReferenceManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestReviewInvitationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestReviewManager;
@@ -185,7 +185,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestReviewManager.class).to(DefaultPullRequestReviewManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
 		bind(BranchWatchManager.class).to(DefaultBranchWatchManager.class);
-		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
+		bind(PullRequestTaskManager.class).to(DefaultPullRequestTaskManager.class);
 		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(CommitInfoManager.class).to(DefaultCommitInfoManager.class);
 		bind(PullRequestInfoManager.class).to(DefaultPullRequestInfoManager.class);

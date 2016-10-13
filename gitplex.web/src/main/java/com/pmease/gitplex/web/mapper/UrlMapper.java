@@ -15,13 +15,13 @@ import com.pmease.gitplex.web.page.account.members.MemberListPage;
 import com.pmease.gitplex.web.page.account.members.MemberPrivilegeSourcePage;
 import com.pmease.gitplex.web.page.account.members.MemberTeamListPage;
 import com.pmease.gitplex.web.page.account.members.NewMembersPage;
-import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.overview.NewDepotPage;
 import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
+import com.pmease.gitplex.web.page.account.tasks.TaskListPage;
 import com.pmease.gitplex.web.page.account.teams.NewTeamPage;
 import com.pmease.gitplex.web.page.account.teams.TeamDepotListPage;
 import com.pmease.gitplex.web.page.account.teams.TeamEditPage;
@@ -121,7 +121,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		
 		add(new NoVersionMountedMapper("accounts/${account}/new-depot", NewDepotPage.class));
 		add(new NoVersionMountedMapper("accounts/${account}/new-organization", NewOrganizationPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/notifications", NotificationListPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/tasks", TaskListPage.class));
 		add(new NoVersionMountedMapper("accounts/${account}/settings/profile", ProfileEditPage.class));
 		add(new NoVersionMountedMapper("accounts/${account}/settings/avatar", AvatarEditPage.class));
 		add(new NoVersionMountedMapper("accounts/${account}/settings/password", PasswordEditPage.class));

@@ -17,13 +17,13 @@ import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPage;
 import com.pmease.gitplex.web.page.account.members.MemberListPage;
 import com.pmease.gitplex.web.page.account.members.MemberPage;
 import com.pmease.gitplex.web.page.account.members.NewMembersPage;
-import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.overview.NewDepotPage;
 import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
+import com.pmease.gitplex.web.page.account.tasks.TaskListPage;
 import com.pmease.gitplex.web.page.account.teams.TeamListPage;
 import com.pmease.gitplex.web.page.account.teams.TeamPage;
 
@@ -68,8 +68,8 @@ public abstract class AccountLayoutPage extends AccountPage {
 			tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", 
 					getAccount().getAllUserAuthorizationsInOrganization().size(),
 					AccountCollaboratorListPage.class, CollaboratorPage.class));
-			tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", 
-					getAccount().getRequestNotifications().size(), NotificationListPage.class));
+			tabs.add(new AccountTab("Tasks", "fa fa-fw fa-bell-o", 
+					getAccount().getRequestTasks().size(), TaskListPage.class));
 			tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", 0, 
 					ProfileEditPage.class, AvatarEditPage.class, PasswordEditPage.class));
 		}

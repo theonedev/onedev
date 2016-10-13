@@ -36,10 +36,10 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.accountselector.OrganizationSelector;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.depotselector.DepotSelector;
-import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
+import com.pmease.gitplex.web.page.account.tasks.TaskListPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.base.BasePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -155,19 +155,19 @@ public abstract class LayoutPage extends BasePage {
 		head.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
 		head.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
 		if (user != null) {
-			head.add(new BookmarkablePageLink<Void>("notifications", 
-					NotificationListPage.class, 
-					NotificationListPage.paramsOf(user)) {
+			head.add(new BookmarkablePageLink<Void>("tasks", 
+					TaskListPage.class, 
+					TaskListPage.paramsOf(user)) {
 	
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(!getLoginUser().getRequestNotifications().isEmpty());
+					setVisible(!getLoginUser().getRequestTasks().isEmpty());
 				}
 				
 			});
 		} else {
-			head.add(new WebMarkupContainer("notifications").setVisible(false));
+			head.add(new WebMarkupContainer("tasks").setVisible(false));
 		}
 		
 		if (signedIn) {

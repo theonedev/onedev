@@ -15,21 +15,21 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_request_id"), @Index(columnList="g_user_id"), @Index(columnList="task")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_request_id", "g_user_id", "task"})
+		indexes={@Index(columnList="g_request_id"), @Index(columnList="g_user_id"), @Index(columnList="type")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_request_id", "g_user_id", "type"})
 })
-public class PullRequestNotification extends AbstractEntity {
+public class PullRequestTask extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Task {
+	public enum Type {
 		REVIEW("Please review this pull request."), 
 		UPDATE("Please update this pull request."), 
 		INTEGRATE("Please integrate this pull request.");
 
 		private final String displayName;
 		
-		Task(String displayName) {
+		Type(String displayName) {
 			this.displayName = displayName;
 		}
 		
@@ -48,7 +48,7 @@ public class PullRequestNotification extends AbstractEntity {
 	private Account user;
 	
 	@Column(nullable=false)
-	private Task task;
+	private Type type;
 	
 	@Column(nullable=false)
 	private Date date = new Date();
@@ -69,12 +69,12 @@ public class PullRequestNotification extends AbstractEntity {
 		this.user = user;
 	}
 
-	public Task getTask() {
-		return task;
+	public Type getType() {
+		return type;
 	}
 
-	public void setTask(Task task) {
-		this.task = task;
+	public void setType(Type type) {
+		this.type = type;
 	}
 
 	public Date getDate() {

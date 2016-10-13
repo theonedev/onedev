@@ -128,7 +128,7 @@ public class Account extends AbstractUser implements ProtectedObject {
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestNotification> requestNotifications = new ArrayList<>();
+    private Collection<PullRequestTask> requestTasks = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestStatusChange> requestStatusChanges = new ArrayList<>();
@@ -288,12 +288,12 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.definedTeams = definedTeams;
 	}
 
-	public Collection<PullRequestNotification> getRequestNotifications() {
-		return requestNotifications;
+	public Collection<PullRequestTask> getRequestTasks() {
+		return requestTasks;
 	}
 
-	public void setRequestNotifications(Collection<PullRequestNotification> requestNotifications) {
-		this.requestNotifications = requestNotifications;
+	public void setRequestTasks(Collection<PullRequestTask> requestTasks) {
+		this.requestTasks = requestTasks;
 	}
 
 	@Override

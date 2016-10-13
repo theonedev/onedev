@@ -85,7 +85,6 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.BatchWorkManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestReviewInvitationManager;
 import com.pmease.gitplex.core.manager.PullRequestStatusChangeManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
@@ -125,9 +124,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
 			PullRequestReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
-			PullRequestNotificationManager notificationManager, MarkdownManager markdownManager, 
-			BatchWorkManager batchWorkManager, ListenerRegistry listenerRegistry,
-			UnitOfWork unitOfWork, PullRequestStatusChangeManager pullRequestStatusChangeManager) {
+			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
+			ListenerRegistry listenerRegistry, UnitOfWork unitOfWork, 
+			PullRequestStatusChangeManager pullRequestStatusChangeManager) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;

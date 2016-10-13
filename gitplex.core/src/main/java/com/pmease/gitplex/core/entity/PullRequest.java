@@ -229,7 +229,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestStatusChange> statusChanges = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestNotification> notifications = new ArrayList<>();
+	private Collection<PullRequestTask> tasks = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
@@ -477,12 +477,12 @@ public class PullRequest extends AbstractEntity {
 		this.statusChanges = statusChanges;
 	}
 
-	public Collection<PullRequestNotification> getNotifications() {
-		return notifications;
+	public Collection<PullRequestTask> getTasks() {
+		return tasks;
 	}
 
-	public void setNotifications(Collection<PullRequestNotification> notifications) {
-		this.notifications = notifications;
+	public void setTasks(Collection<PullRequestTask> tasks) {
+		this.tasks = tasks;
 	}
 
 	public Collection<PullRequestWatch> getWatches() {
