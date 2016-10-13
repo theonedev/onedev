@@ -222,11 +222,11 @@
 	background: #35A612; 
 }
 #request-detail .activities tr.activity>.content>.approved>.head>.icon,
-#request-detail .activities tr.activity>.content>.verification-succeeded>.head>.icon {
+#request-detail .activities tr.activity>.content>.completed-verification-successful>.head>.icon {
 	background: #35A612; 
 }
 #request-detail .activities tr.activity>.content>.disapproved>.head>.icon,
-#request-detail .activities tr.activity>.content>.verification-failed>.head>.icon {
+#request-detail .activities tr.activity>.content>.completed-verification-failed>.head>.icon {
 	background: #F93333; 
 }
 #request-detail .activities tr.activity>.content>.deleted-review>.head>.icon,

@@ -2,9 +2,7 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.act
 
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -26,7 +24,6 @@ import com.pmease.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commitmessage.ExpandableCommitMessagePanel;
@@ -94,53 +91,7 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					}
 					
 				};
-				item.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.name())) {
-
-					@Override
-					protected Component newStatusComponent(String id, final IModel<PullRequestVerification.Status> statusModel) {
-						return new Label(id, new AbstractReadOnlyModel<String>() {
-
-							@Override
-							public String getObject() {
-								if (statusModel.getObject() == PullRequestVerification.Status.SUCCESSFUL)
-									return "<i class='fa fa-check'></i><i class='caret'></i> ";
-								else if (statusModel.getObject() == PullRequestVerification.Status.RUNNING)
-									return "<i class='fa fa-clock-o'></i><i class='caret'></i> ";
-								else if (statusModel.getObject() == PullRequestVerification.Status.FAILED) 
-									return "<i class='fa fa-times'></i><i class='caret'></i>";
-								else 
-									return "";
-							}
-							
-						}) {
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								
-								if (statusModel.getObject() == PullRequestVerification.Status.SUCCESSFUL) {
-									tag.put("class", "successful");
-									tag.put("title", "Build is successful");
-								} else if (statusModel.getObject() == PullRequestVerification.Status.RUNNING) {
-									tag.put("class", "running");
-									tag.put("title", "Build is running");
-								} else if (statusModel.getObject() == PullRequestVerification.Status.FAILED) { 
-									tag.put("class", "failed");
-									tag.put("title", "Build is failed");
-								}
-							}
-
-							@Override
-							protected void onDetach() {
-								statusModel.detach();
-								
-								super.onDetach();
-							}
-							
-						}.setEscapeModelStrings(false);
-					}
-
-				});
+				item.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.name())));
 				
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();

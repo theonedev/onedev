@@ -9,9 +9,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
@@ -28,8 +28,6 @@ public class VerifiedByBuilds extends AbstractGateKeeper {
 	private int leastPassCount = 1;
 	
 	private boolean checkIntegrated = true;
-	
-	private boolean blockMode = true;
 	
 	@Editable(order=100, description="This specifies number of builds has to be reported successful "
 			+ "for this gatekeeper to be passed. Normally this number represents number of build "
@@ -52,34 +50,17 @@ public class VerifiedByBuilds extends AbstractGateKeeper {
 		this.checkIntegrated = checkIntegrated;
 	}
 
-	@Editable(order=300, description="If this is checked, subsequent gatekeepers will not be checked "
-			+ "while waiting for the build results. This can be used to only notify relevant voters "
-			+ "when the commit passes build.")
-	public boolean isBlockMode() {
-		return blockMode;
-	}
-
-	public void setBlockMode(boolean blockMode) {
-		this.blockMode = blockMode;
-	}
-
 	@Override
 	protected GateCheckResult doCheckRequest(PullRequest request) {
 		if (request.isNew()) {
-			if (blockMode)
-				return blocking(Lists.newArrayList("To be verified by build"));
-			else
-				return pending(Lists.newArrayList("To be verified by build"));
+			return pending(Lists.newArrayList("To be verified by build"));
 		}
 		
 		String commit;
 		if (isCheckIntegrated()) {
 			IntegrationPreview preview = request.getIntegrationPreview();
 			if (preview == null) {
-				if (blockMode)
-					return blocking(Lists.newArrayList("To be verified by build"));
-				else
-					return pending(Lists.newArrayList("To be verified by build"));
+				return pending(Lists.newArrayList("To be verified by build"));
 			}
 			commit = preview.getIntegrated();
 			if (commit == null) 
@@ -101,17 +82,10 @@ public class VerifiedByBuilds extends AbstractGateKeeper {
 		int lacks = leastPassCount - passedCount;
 		
 		if (lacks > 0) {
-			if (blockMode) {
-				if (leastPassCount > 1)
-					return blocking(Lists.newArrayList("To be verified by " + lacks + " more build(s)"));
-				else
-					return blocking(Lists.newArrayList("To be verified by build"));
-			} else {
-				if (leastPassCount > 1)
-					return pending(Lists.newArrayList("To be verified by " + lacks + " more build(s)"));
-				else
-					return pending(Lists.newArrayList("To be verified by build"));
-			}
+			if (leastPassCount > 1)
+				return pending(Lists.newArrayList("To be verified by " + lacks + " more build(s)"));
+			else
+				return pending(Lists.newArrayList("To be verified by build"));
 		} else {
 			return passed(Lists.newArrayList("Builds passed"));
 		}
@@ -119,20 +93,13 @@ public class VerifiedByBuilds extends AbstractGateKeeper {
 
 	@Override
 	protected GateCheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
-		if (blockMode)
-			return blocking(Lists.newArrayList("Not verified by build"));
-		else
-			return pending(Lists.newArrayList("Not verified by build"));
+		return pending(Lists.newArrayList("Not verified by build"));
 	}
 
 	@Override
 	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
-			if (blockMode) {
-				return blocking(Lists.newArrayList("Has to be verified by builds"));
-			} else {
-				return blocking(Lists.newArrayList("Has to be verified by builds"));
-			}
+			return pending(Lists.newArrayList("Has to be verified by builds"));
 		} else {
 			return ignored();
 		}

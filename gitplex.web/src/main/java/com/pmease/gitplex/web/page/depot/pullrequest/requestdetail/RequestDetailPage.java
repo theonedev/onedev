@@ -70,7 +70,6 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.PullRequestVerification;
 import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -463,49 +462,7 @@ public abstract class RequestDetailPage extends DepotPage {
 							return null;
 					}
 					
-				}) {
-
-					@Override
-					protected Component newStatusComponent(String id, final IModel<PullRequestVerification.Status> statusModel) {
-						return new Label(id, new AbstractReadOnlyModel<String>() {
-
-							@Override
-							public String getObject() {
-								if (statusModel.getObject() == PullRequestVerification.Status.SUCCESSFUL)
-									return "successful <i class='caret'></i>";
-								else if (statusModel.getObject() == PullRequestVerification.Status.RUNNING)
-									return "running <i class='caret'></i>";
-								else if (statusModel.getObject() == PullRequestVerification.Status.FAILED) 
-									return "failed <i class='caret'></i>";
-								else 
-									return "";
-							}
-							
-						}) {
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								
-								if (statusModel.getObject() == PullRequestVerification.Status.SUCCESSFUL)
-									tag.put("class", "label label-success");
-								else if (statusModel.getObject() == PullRequestVerification.Status.RUNNING)
-									tag.put("class", "label label-warning");
-								else if (statusModel.getObject() == PullRequestVerification.Status.FAILED) 
-									tag.put("class", "label label-danger");
-							}
-
-							@Override
-							protected void onDetach() {
-								statusModel.detach();
-								
-								super.onDetach();
-							}
-							
-						}.setEscapeModelStrings(false);
-					}
-					
-				});
+				}));
 			}
 
 			@Override

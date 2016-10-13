@@ -178,7 +178,7 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 		
 		WebMarkupContainer container = new WebMarkupContainer("statusChange");
 		String activityName = statusChange.getType().getName();
-		container.add(AttributeAppender.append("class", "activity " + activityName.replace(" ", "-").toLowerCase()));
+		container.add(AttributeAppender.append("class", "activity " + activityName.replace(" ", "-").replace("(", "").replace(")", "").toLowerCase()));
 		
 		WebMarkupContainer icon = new WebMarkupContainer("icon");
 		container.add(icon);

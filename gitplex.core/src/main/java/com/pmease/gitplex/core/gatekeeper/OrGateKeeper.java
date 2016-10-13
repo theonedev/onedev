@@ -5,9 +5,8 @@ import java.util.List;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
-import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
@@ -28,9 +27,6 @@ public class OrGateKeeper extends AndOrGateKeeper {
 			if (result instanceof Failed) {
 				rejectReasons.addAll(result.getReasons());
 			} else if (result instanceof Passed) {
-				return result;
-			} else if (result instanceof Blocking) {
-				result.getReasons().addAll(pendingReasons);
 				return result;
 			} else if (result instanceof Pending) {
 				pendingReasons.addAll(result.getReasons());

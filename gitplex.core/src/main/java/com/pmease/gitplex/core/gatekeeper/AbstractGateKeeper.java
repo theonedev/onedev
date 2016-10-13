@@ -7,12 +7,11 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
-import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
+import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
@@ -109,10 +108,6 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 
 	protected GateCheckResult pending(List<String> reasons) {
 		return new Pending(reasons);
-	}
-
-	protected GateCheckResult blocking(List<String> reasons) {
-		return new Blocking(reasons);
 	}
 
 	@Override

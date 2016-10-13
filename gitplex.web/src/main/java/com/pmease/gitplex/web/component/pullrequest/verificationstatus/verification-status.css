@@ -1,14 +1,14 @@
 .verification-status {
 	text-decoration: none !important;
 }
-.verification-status span.successful {
-	color: #5CB85C;
+.verification-status.successful {
+	color: #5CB85C !important;
 }
-.verification-status span.failed {
-	color: #D9534F;
+.verification-status.failed {
+	color: #D9534F !important;
 }
-.verification-status span.running {
-	color: #F0AD4E;
+.verification-status.running {
+	color: #F0AD4E !important;
 }
 
 table.verifications td {

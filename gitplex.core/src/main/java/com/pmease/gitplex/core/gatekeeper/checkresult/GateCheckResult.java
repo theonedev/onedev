@@ -28,10 +28,6 @@ public abstract class GateCheckResult implements Serializable {
     	return this instanceof Pending;
     }
 
-    public boolean isBlocking() {
-    	return this instanceof Blocking;
-    }
-    
     public boolean isIgnored() {
     	return this instanceof Ignored;
     }

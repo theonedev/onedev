@@ -79,7 +79,6 @@ import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingApproval;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingIntegration;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingUpdate;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestStatusChangeEvent;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
@@ -511,7 +510,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					IntegrationPreview integrationPreview = request.getIntegrationPreview();
 					Date timeBeforeCheck = new Date();
 					GateCheckResult result = request.checkGates(false);					
-					if (result instanceof Pending || result instanceof Blocking) { 
+					if (result instanceof Pending) { 
 						for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) { 
 							if (invitation.getDate().getTime()>=timeBeforeCheck.getTime())
 								reviewInvitationManager.save(invitation);

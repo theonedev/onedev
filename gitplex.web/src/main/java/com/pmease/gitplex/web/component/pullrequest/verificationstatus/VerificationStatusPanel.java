@@ -7,6 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -14,15 +15,13 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestVerification;
-import com.pmease.gitplex.core.entity.PullRequestVerification.Status;
 
 @SuppressWarnings("serial")
-public abstract class VerificationStatusPanel extends Panel {
+public class VerificationStatusPanel extends Panel {
 
 	private final IModel<PullRequest> requestModel;
 	
@@ -85,29 +84,36 @@ public abstract class VerificationStatusPanel extends Panel {
 			
 		};
 		add(link);
-		
-		link.add(newStatusComponent("overall", new LoadableDetachableModel<PullRequestVerification.Status>() {
 
-			@Override
-			protected Status load() {
-				PullRequestVerification.Status overallStatus = null;
-				for (PullRequestVerification verification: getVerifications()) {
-					if (verification.getStatus() == PullRequestVerification.Status.FAILED) {
-						overallStatus = PullRequestVerification.Status.FAILED;
-						break;
-					} else if (verification.getStatus() == PullRequestVerification.Status.RUNNING) {
-						overallStatus = PullRequestVerification.Status.RUNNING;
-					} else if (overallStatus == null) {
-						overallStatus = PullRequestVerification.Status.SUCCESSFUL;
-					}
-				}
-				return overallStatus;
+		PullRequestVerification.Status overallStatus = null;
+		for (PullRequestVerification verification: getVerifications()) {
+			if (verification.getStatus() == PullRequestVerification.Status.FAILED) {
+				overallStatus = PullRequestVerification.Status.FAILED;
+				break;
+			} else if (verification.getStatus() == PullRequestVerification.Status.RUNNING) {
+				overallStatus = PullRequestVerification.Status.RUNNING;
+			} else if (overallStatus == null) {
+				overallStatus = PullRequestVerification.Status.SUCCESSFUL;
 			}
-			
-		}));
+		}
+		WebMarkupContainer icon = new WebMarkupContainer("icon");
+		link.add(icon);
+		
+		if (overallStatus == PullRequestVerification.Status.SUCCESSFUL) {
+			link.add(AttributeAppender.append("class", "successful "));
+			link.add(AttributeAppender.append("title", "Builds are successful"));
+			icon.add(AttributeAppender.append("class", "fa fa-check"));
+		} else if (overallStatus == PullRequestVerification.Status.FAILED) {
+			link.add(AttributeAppender.append("class", "failed"));
+			link.add(AttributeAppender.append("title", "At least one build is failed"));
+			icon.add(AttributeAppender.append("class", "fa fa-times"));
+		} else {
+			link.add(AttributeAppender.append("class", "running"));
+			link.add(AttributeAppender.append("title", "Builds are running"));
+			icon.add(AttributeAppender.append("class", "fa fa-clock-o"));
+		}
+		
 	}
-	
-	protected abstract Component newStatusComponent(String id, IModel<PullRequestVerification.Status> statusModel);
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {

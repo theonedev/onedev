@@ -54,7 +54,6 @@ import com.pmease.gitplex.core.entity.support.DepotAndBranch;
 import com.pmease.gitplex.core.entity.support.IntegrationPreview;
 import com.pmease.gitplex.core.entity.support.LastEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestCodeCommentEvent;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.GateCheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
@@ -503,7 +502,7 @@ public class PullRequest extends AbstractEntity {
 			}
 		} else {
 			GateCheckResult result = checkGates(false);					
-			if (result instanceof Pending || result instanceof Blocking) { 
+			if (result instanceof Pending) { 
 				return Status.PENDING_APPROVAL;
 			} else if (result instanceof Failed) { 
 				return Status.PENDING_UPDATE;

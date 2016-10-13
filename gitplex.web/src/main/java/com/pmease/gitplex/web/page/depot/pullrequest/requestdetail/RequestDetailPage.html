@@ -26,7 +26,7 @@
 				checks below, and needs to be updated with new commits.
 			</div>
 			<div wicket:id="pendingApprovalNote" class="note with-status-reasons">
-				<i class="fa fa-exclamation-triangle"></i> This pull request needs to be approved/verified as below:
+				<i class="fa fa-exclamation-triangle"></i> This pull request needs to be approved/verified as below, before it can be integrated
 			</div>
 			<div wicket:id="integratedNote" class="integrated-note">
 				<div wicket:id="fastForwarded">
@@ -69,12 +69,12 @@
 					</wicket:link>
 				</div>
 				<div wicket:id="noConflict" class="no-conflict">
-					<label><i class="fa fa-check-circle"></i> Able to integrate without conflicts.</label> 
+					<label><i class="fa fa-check-circle"></i> Able to integrate without conflicts</label> 
 					<wicket:enclosure child="preview">
-						<a wicket:id="preview">Preview</a> the integration result.
+						<span class="middot"></span> <span><a wicket:id="preview">Preview</a> the integration result</span>
 					</wicket:enclosure>
 					<wicket:enclosure child="verification">
-						Build of the integration is <span wicket:id="verification"></span>
+						<span class="middot"></span> <span>Integration build verification <span wicket:id="verification"></span></span>
 					</wicket:enclosure>
 				</div>
 				<div wicket:id="conflict" class="conflict">
