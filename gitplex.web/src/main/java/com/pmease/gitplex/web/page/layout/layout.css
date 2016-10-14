@@ -51,7 +51,7 @@ html, body {
 #main>.head>.account {
 	margin-right: 0;
 }
-#main>.head>.account>.logged-in>.notifications {
+#main>.head>.account>.logged-in>.tasks {
 	color: #69B7F7;
 }
 #main>.head>.account>.logged-in>a, #main>.head>.account>.logged-in>span {

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -246,17 +247,24 @@ public abstract class RequestDetailPage extends DepotPage {
 				super.onEvent(event);
 
 				if (event.getPayload() instanceof PullRequestChanged) {
-					Form<?> form = visitChildren(Form.class, new IVisitor<Form<?>, Form<?>>() {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					for (Component child: this) {
+						if (child instanceof MarkupContainer) {
+							MarkupContainer container = (MarkupContainer) child;
+							Form<?> form = container.visitChildren(Form.class, new IVisitor<Form<?>, Form<?>>() {
 
-						@Override
-						public void component(Form<?> object, IVisit<Form<?>> visit) {
-							visit.stop(object);
+								@Override
+								public void component(Form<?> object, IVisit<Form<?>> visit) {
+									visit.stop(object);
+								}
+								
+							});
+							if (form == null) {
+								pullRequestChanged.getPartialPageRequestHandler().add(child);
+							}
+						} else if (!(child instanceof Form)) {
+							pullRequestChanged.getPartialPageRequestHandler().add(child);
 						}
-						
-					});
-					if (form == null) {
-						PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-						pullRequestChanged.getPartialPageRequestHandler().add(this);
 					}
 				}
 			}
@@ -391,7 +399,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			}
 			
 		};
-		integrationPreviewContainer.setOutputMarkupId(true);
+		integrationPreviewContainer.setOutputMarkupPlaceholderTag(true);
 		
 		integrationPreviewContainer.add(new WebMarkupContainer("calculating") {
 
@@ -499,7 +507,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			}
 			
 		};
-		operationsContainer.setOutputMarkupId(true);
+		operationsContainer.setOutputMarkupPlaceholderTag(true);
 		
 		String confirmId = "confirm";
 		
@@ -653,15 +661,20 @@ public abstract class RequestDetailPage extends DepotPage {
 				super.onSubmit(target, form);
 				
 				PullRequest request = getPullRequest();
-				operation.operate(request, noteInput.getModelObject());
-				setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
+				if (!operation.canOperate(request)) {
+					error("Not allowed to " + getOperationName(operation) + " at this point");
+					target.add(form);
+				} else {
+					operation.operate(request, noteInput.getModelObject());
+					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
+				}
 			}
 
 		}.add(AttributeModifier.replace("value", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return "Confirm " + WordUtils.capitalizeFully(operation.name()).replace("_", " ").toLowerCase();
+				return "Confirm " + getOperationName(operation);
 			}
 			
 		})).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
@@ -700,6 +713,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			}
 			
 		};
+		discardedNoteContainer.setOutputMarkupPlaceholderTag(true);
 		return discardedNoteContainer;
 	}
 	
@@ -713,6 +727,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			}
 			
 		};
+		pendingUpdateNoteContainer.setOutputMarkupPlaceholderTag(true);
 		return pendingUpdateNoteContainer;
 	}
 	
@@ -726,7 +741,12 @@ public abstract class RequestDetailPage extends DepotPage {
 			}
 			
 		};
+		pendingApprovalNoteContainer.setOutputMarkupPlaceholderTag(true);
 		return pendingApprovalNoteContainer;
+	}
+	
+	private String getOperationName(PullRequestOperation operation) {
+		return WordUtils.capitalizeFully(operation.name()).replace("_", " ").toLowerCase();		
 	}
 
 	private WebMarkupContainer newIntegratedNoteContainer() {
@@ -739,7 +759,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			}
 			
 		};
-		integratedNoteContainer.setOutputMarkupId(true);
+		integratedNoteContainer.setOutputMarkupPlaceholderTag(true);
 		
 		integratedNoteContainer.add(new WebMarkupContainer("fastForwarded") {
 
@@ -836,7 +856,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			}
 			
 		};
-		statusReasonsContainer.setOutputMarkupId(true);
+		statusReasonsContainer.setOutputMarkupPlaceholderTag(true);
 		
 		statusReasonsContainer.add(new ListView<String>("reasons", new AbstractReadOnlyModel<List<String>>() {
 
