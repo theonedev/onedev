@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -70,6 +71,7 @@ import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoi
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
+import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
@@ -246,6 +248,10 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			}
 			
 		});
+		PageParameters params = CommitDetailPage.paramsOf(target.getDepot(), target.getObjectName());
+		Link<Void> targetCommitLink = new BookmarkablePageLink<Void>("targetCommitLink", CommitDetailPage.class, params);
+		targetCommitLink.add(new Label("message", target.getCommit().getShortMessage()));
+		add(targetCommitLink);
 		
 		add(new AffinalBranchPicker("source", source.getDepotId(), source.getBranch()) {
 
@@ -257,6 +263,10 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			}
 			
 		});
+		params = CommitDetailPage.paramsOf(source.getDepot(), source.getObjectName());
+		Link<Void> sourceCommitLink = new BookmarkablePageLink<Void>("sourceCommitLink", CommitDetailPage.class, params);
+		sourceCommitLink.add(new Label("message", source.getCommit().getShortMessage()));
+		add(sourceCommitLink);
 		
 		add(new Link<Void>("swap") {
 
