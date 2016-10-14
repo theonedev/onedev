@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -85,6 +86,59 @@ public class VerificationStatusPanel extends Panel {
 		};
 		add(link);
 
+		link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				PullRequestVerification.Status overallStatus = getOverallStatus();				
+				if (overallStatus == PullRequestVerification.Status.SUCCESSFUL) {
+					return "successful";
+				} else if (overallStatus == PullRequestVerification.Status.FAILED) {
+					return "failed";
+				} else {
+					return "running";
+				}
+			}
+			
+		}));
+		link.add(AttributeAppender.append("title", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				PullRequestVerification.Status overallStatus = getOverallStatus();				
+				if (overallStatus == PullRequestVerification.Status.SUCCESSFUL) {
+					return "Builds are successful";
+				} else if (overallStatus == PullRequestVerification.Status.FAILED) {
+					return "At least one build is failed";
+				} else {
+					return "Builds are running";
+				}
+			}
+			
+		}));
+		
+		WebMarkupContainer icon = new WebMarkupContainer("icon");
+		link.add(icon);
+		icon.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				PullRequestVerification.Status overallStatus = getOverallStatus();				
+				if (overallStatus == PullRequestVerification.Status.SUCCESSFUL) {
+					return "fa fa-check";
+				} else if (overallStatus == PullRequestVerification.Status.FAILED) {
+					return "fa fa-times";
+				} else {
+					return "fa fa-clock-o";
+				}
+			}
+			
+		}));
+		
+		setOutputMarkupPlaceholderTag(true);
+	}
+	
+	private PullRequestVerification.Status getOverallStatus() {
 		PullRequestVerification.Status overallStatus = null;
 		for (PullRequestVerification verification: getVerifications()) {
 			if (verification.getStatus() == PullRequestVerification.Status.FAILED) {
@@ -96,23 +150,7 @@ public class VerificationStatusPanel extends Panel {
 				overallStatus = PullRequestVerification.Status.SUCCESSFUL;
 			}
 		}
-		WebMarkupContainer icon = new WebMarkupContainer("icon");
-		link.add(icon);
-		
-		if (overallStatus == PullRequestVerification.Status.SUCCESSFUL) {
-			link.add(AttributeAppender.append("class", "successful "));
-			link.add(AttributeAppender.append("title", "Builds are successful"));
-			icon.add(AttributeAppender.append("class", "fa fa-check"));
-		} else if (overallStatus == PullRequestVerification.Status.FAILED) {
-			link.add(AttributeAppender.append("class", "failed"));
-			link.add(AttributeAppender.append("title", "At least one build is failed"));
-			icon.add(AttributeAppender.append("class", "fa fa-times"));
-		} else {
-			link.add(AttributeAppender.append("class", "running"));
-			link.add(AttributeAppender.append("title", "Builds are running"));
-			icon.add(AttributeAppender.append("class", "fa fa-clock-o"));
-		}
-		
+		return overallStatus;
 	}
 	
 	@Override

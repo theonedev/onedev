@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.act
 import java.util.List;
 
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -15,6 +16,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -30,6 +33,7 @@ import com.pmease.gitplex.web.component.commitmessage.ExpandableCommitMessagePan
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -38,6 +42,23 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 
 	public UpdatedPanel(String id, IModel<PullRequestUpdate> model) {
 		super(id, model);
+	}
+	
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (event.getPayload() instanceof PullRequestChanged) {
+			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+			visitChildren(VerificationStatusPanel.class, new IVisitor<VerificationStatusPanel, Void>() {
+
+				@Override
+				public void component(VerificationStatusPanel object, IVisit<Void> visit) {
+					pullRequestChanged.getPartialPageRequestHandler().add(object);
+				}
+
+			});
+		}
 	}
 	
 	@Override
