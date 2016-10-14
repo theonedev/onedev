@@ -187,7 +187,7 @@ public class RequestListPage extends DepotPage {
 
 					@Override
 					public String getLabel() {
-						return "Open requests targeting this repository";
+						return "Incoming open requests";
 					}
 
 					@Override
@@ -216,7 +216,7 @@ public class RequestListPage extends DepotPage {
 
 					@Override
 					public String getLabel() {
-						return "Open requests originating from this repository";
+						return "Outgoing open requests";
 					}
 
 					@Override
