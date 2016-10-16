@@ -224,6 +224,7 @@ public abstract class RequestDetailPage extends DepotPage {
 				}
 
 				target.add(requestTitle);
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 		});
@@ -233,8 +234,8 @@ public abstract class RequestDetailPage extends DepotPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				editingTitle = false;
-				
 				target.add(requestTitle);
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 		});
@@ -268,6 +269,7 @@ public abstract class RequestDetailPage extends DepotPage {
 						}
 					}
 					WicketUtils.markLastVisibleChild(this);
+					pullRequestChanged.getPartialPageRequestHandler().appendJavaScript("$(window).resize();");
 				}
 			}
 
@@ -520,6 +522,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, APPROVE, operationsContainer));
 				target.add(operationsContainer);
+				target.appendJavaScript("$(window).resize();");
 			}
 
 			@Override
@@ -536,6 +539,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, DISAPPROVE, operationsContainer));
 				target.add(operationsContainer);
+				target.appendJavaScript("$(window).resize();");
 			}
 
 			@Override
@@ -552,6 +556,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, INTEGRATE, operationsContainer));
 				target.add(operationsContainer);
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
@@ -568,6 +573,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, DISCARD, operationsContainer));
 				target.add(operationsContainer);
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
@@ -583,6 +589,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, REOPEN, operationsContainer));
 				target.add(operationsContainer);
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
@@ -598,6 +605,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, DELETE_SOURCE_BRANCH, operationsContainer));
 				target.add(operationsContainer);
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
@@ -613,6 +621,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, RESTORE_SOURCE_BRANCH, operationsContainer));
 				target.add(operationsContainer);
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
@@ -667,9 +676,10 @@ public abstract class RequestDetailPage extends DepotPage {
 				if (!operation.canOperate(request)) {
 					error("Not allowed to " + getOperationName(operation) + " at this point");
 					target.add(form);
+					target.appendJavaScript("$(window).resize();");
 				} else {
 					operation.operate(request, noteInput.getModelObject());
-					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
+					setResponsePage(getPage().getClass(), getPageParameters());
 				}
 			}
 
@@ -699,6 +709,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onClick(AjaxRequestTarget target) {
 				fragment.replaceWith(new WebMarkupContainer(id).setVisible(false));
 				target.add(operationsContainer);
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 		});		
