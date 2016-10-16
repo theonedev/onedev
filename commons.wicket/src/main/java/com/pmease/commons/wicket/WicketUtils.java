@@ -2,8 +2,11 @@ package com.pmease.commons.wicket;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Page;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 
@@ -34,6 +37,17 @@ public class WicketUtils {
 			return new PageKey(page);
 		else
 			return null;
+	}
+	
+	public static void markLastVisibleChild(WebMarkupContainer container) {
+		Component lastVisible = null;
+		for (Component child: container) {
+			child.configure();
+			if (child.isVisible())
+				lastVisible = child;
+		}
+		if (lastVisible != null)
+			lastVisible.add(AttributeAppender.append("class", "last-visible"));
 	}
 	
 }

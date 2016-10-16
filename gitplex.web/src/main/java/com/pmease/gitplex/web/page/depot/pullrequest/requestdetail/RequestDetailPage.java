@@ -58,6 +58,7 @@ import org.apache.wicket.util.visit.IVisitor;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
@@ -266,6 +267,7 @@ public abstract class RequestDetailPage extends DepotPage {
 							pullRequestChanged.getPartialPageRequestHandler().add(child);
 						}
 					}
+					WicketUtils.markLastVisibleChild(this);
 				}
 			}
 
@@ -280,6 +282,7 @@ public abstract class RequestDetailPage extends DepotPage {
 		summaryContainer.add(newStatusReasonsContainer());
 		summaryContainer.add(newIntegrationPreviewContainer());
 		summaryContainer.add(newOperationsContainer());
+		WicketUtils.markLastVisibleChild(summaryContainer);
 		
 		List<Tab> tabs = new ArrayList<>();
 		

@@ -31,16 +31,6 @@
 	color: #999;
 }
 
-#request-detail>.summary>div {
-	border-bottom: 1px dotted #BBB; 
-	margin-bottom: 16px; 
-	padding-bottom: 12px;
-}
-#request-detail>.summary>div:last-child {
-	border-bottom: none; 
-	margin-bottom: 0; 
-	padding-bottom: 0;
-}
 #request-detail>.status-and-branches {
 	font-size: 18px;
 }
@@ -52,6 +42,16 @@
 	background: #EEE;
 	padding: 2px 4px;
 	border-radius: 2px;
+}
+#request-detail>.summary>div {
+	border-bottom: 1px dotted #BBB; 
+	margin-bottom: 16px; 
+	padding-bottom: 12px;
+}
+#request-detail>.summary>div.last-visible {
+	border-bottom: none; 
+	margin-bottom: 0; 
+	padding-bottom: 0;
 }
 #request-detail>.summary>.note {
 	font-size: 16px;
