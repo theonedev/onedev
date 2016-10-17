@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +57,12 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		return line;
 	}
 	
+	@Override
+	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+		super.updateAjaxAttributes(attributes);
+		attributes.setChannel(new AjaxChannel("input-assist", AjaxChannel.Type.DROP));
+	}
+
 	private List<Range> normalizeErrors(String inputContent, List<Range> errors) {
 		List<Range> normalizedErrors = new ArrayList<>();
 		
@@ -95,10 +104,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 		String type = params.getParameterValue("type").toString();
-		if (type.equals("tab")) {
-			String script = String.format("pmease.commons.inputassist.onTab('%s');", getComponent().getMarkupId());
-			target.appendJavaScript(script);
-		} else if (type.equals("close")) {
+		if (type.equals("close")) {
 			if (dropdown != null)
 				dropdown.close();
 		} else {
@@ -142,8 +148,8 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 							}
 							
 						};
-						script = String.format("pmease.commons.inputassist.assistOpened('%s', '%s');", 
-								getComponent().getMarkupId(), dropdown.getMarkupId());
+						script = String.format("pmease.commons.inputassist.assistOpened('%s', '%s', '%s');", 
+								getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
 						target.appendJavaScript(script);
 					} else {
 						Component content = dropdown.getContent();
@@ -156,8 +162,8 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 						script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
 						target.prependJavaScript(script);
 						
-						script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s');", 
-								getComponent().getMarkupId(), dropdown.getMarkupId());
+						script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s', '%s');", 
+								getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
 						target.appendJavaScript(script);
 					}
 				} else if (dropdown != null) {

@@ -98,31 +98,36 @@ pmease.commons.inputassist = {
 				}
 			}
 		});
-		
-		$input.bind("keydown", "tab", function() {
+
+		var tabbing = false;
+		function tab() {
+			tabbing = true;
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				// perform this via callback in order not to select unwanted result
-				// due to slow update of ajax searching result
-				callback("tab");
+				if ($dropdown.data("inputContent") != $input.val()) {
+					setTimeout(tab, 10);
+				} else {
+					tabbing = false;
+					var $active = $dropdown.find("tr.active");
+					if ($active.length != 0) 
+						$input.data("update")($active);
+					else 
+						$input.data("update")($dropdown.find("tr").first());
+				}
+				return false;
+			} else {
+				tabbing = false;
+			}
+		};
+		$input.bind("keydown", "tab", function() {
+			if (!tabbing) {
+				return tab();
+			} else {
 				return false;
 			}
 		});
 		
 		callback("input", $input.val());		
-	},
-	
-	onTab: function(inputId) {
-		var $input = $("#" + inputId);
-		var $dropdown = $input.data("dropdown");
-		if ($dropdown) {
-			var $active = $dropdown.find("tr.active");
-			if ($active.length != 0) 
-				$input.data("update")($active);
-			else 
-				$input.data("update")($dropdown.find("tr").first());
-			return false;
-		}
 	},
 	
 	markErrors: function(inputId, errors) {
@@ -153,7 +158,7 @@ pmease.commons.inputassist = {
 		}
 	},
 	
-	assistOpened: function(inputId, dropdownId) {
+	assistOpened: function(inputId, dropdownId, inputContent) {
 		var $input = $("#" + inputId);
 		var $dropdown = $("#" + dropdownId);
 		$dropdown.data("trigger", $input);
@@ -161,12 +166,13 @@ pmease.commons.inputassist = {
 		$dropdown.on("close", function() {
 			$input.data("dropdown", null);
 		});
-		pmease.commons.inputassist.assistUpdated(inputId, dropdownId);
+		pmease.commons.inputassist.assistUpdated(inputId, dropdownId, inputContent);
 	},
 	
-	assistUpdated: function(inputId, dropdownId) {
+	assistUpdated: function(inputId, dropdownId, inputContent) {
 		var $input = $("#" + inputId);
 		var $dropdown = $("#" + dropdownId);
+		$dropdown.data("inputContent", inputContent);
 		$dropdown.click(function() {
 			$input.focus();
 		});
