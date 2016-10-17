@@ -273,6 +273,12 @@ public abstract class RequestDetailPage extends DepotPage {
 				}
 			}
 
+			@Override
+			protected void onBeforeRender() {
+				super.onBeforeRender();
+				WicketUtils.markLastVisibleChild(this);
+			}
+
 		};
 		summaryContainer.setOutputMarkupPlaceholderTag(true);
 		add(summaryContainer);
@@ -679,7 +685,7 @@ public abstract class RequestDetailPage extends DepotPage {
 					target.appendJavaScript("$(window).resize();");
 				} else {
 					operation.operate(request, noteInput.getModelObject());
-					setResponsePage(getPage().getClass(), getPageParameters());
+					target.appendJavaScript("location.reload();");
 				}
 			}
 
