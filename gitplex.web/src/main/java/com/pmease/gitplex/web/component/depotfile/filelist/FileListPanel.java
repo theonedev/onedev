@@ -73,7 +73,7 @@ public abstract class FileListPanel extends Panel {
 						if (treeWalk.next()) {
 							BlobIdent grandChild = new BlobIdent(directory.revision, 
 									treeWalk.getPathString(), treeWalk.getRawMode(0));
-							if (treeWalk.next()) 
+							if (treeWalk.next() || !grandChild.isTree()) 
 								break;
 							else
 								child = grandChild;
