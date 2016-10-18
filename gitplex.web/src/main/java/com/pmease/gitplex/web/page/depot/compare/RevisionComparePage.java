@@ -390,7 +390,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				if (state.leftSide.getBranch()!=null && state.rightSide.getBranch()!=null) {
+				if (isLoggedIn() && state.leftSide.getBranch()!=null && state.rightSide.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();
 					setVisible(request == null && !mergeBase.equals(rightCommitId));
 				} else {
