@@ -255,13 +255,11 @@ public abstract class FileListPanel extends Panel {
 		
 		response.render(JavaScriptHeaderItem.forReference(new FileListResourceReference()));
 
-		String homeUrl = urlFor(getApplication().getHomePage(), new PageParameters()).toString();
-		
 		PageParameters params = LastCommitsResource.paramsOf(depotModel.getObject(), 
 				directory.revision, directory.path); 
 		String lastCommitsUrl = urlFor(new LastCommitsResourceReference(), params).toString();
 		response.render(OnDomReadyHeaderItem.forScript(
-				String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl, homeUrl)));
+				String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl)));
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);

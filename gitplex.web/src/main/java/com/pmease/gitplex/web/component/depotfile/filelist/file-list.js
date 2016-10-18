@@ -1,6 +1,7 @@
 gitplex.filelist = {
 	init: function(containerId, lastCommitsUrl) {
 		var $container = $("#" + containerId);
+		var containerEl = $container[0];
 		var $fileList = $container.find(">.file-list");
 		
 		$fileList.on("autofit", function(e, width, height) {
@@ -28,7 +29,7 @@ gitplex.filelist = {
 				xhr.setRequestHeader('Wicket-Ajax-BaseURL', Wicket.Ajax.baseUrl || '.');
 			},
 			success: function(lastCommits) {
-				if (jQuery.contains(document, $container[0])) { // add this check to avoid rendering last commits if directory is changed
+				if (jQuery.contains(document, containerEl)) { // add this check to avoid rendering last commits if directory is changed
 					var $table = $container.find(".file-list>table");
 					$table.find("tr.child").each(function() {
 						var $row = $(this);
@@ -37,16 +38,18 @@ gitplex.filelist = {
 						if (index != -1)
 							path = path.substring(0, index);
 						var lastCommit = lastCommits[path];
-						
-						var html = "<img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/> ";
-						if (lastCommit.authorUrl)
-							html += "<a href='" + lastCommit.authorUrl + "'>" + lastCommit.authorName + "</a>";
-						else
-							html += "<span>" + lastCommit.authorName + "</span>";
-						
-						$row.children(".last-commit.author").empty().append(html);
-						$row.children(".last-commit.when").append("<span class='when'>" + lastCommit.when + "</span>");
-						$row.children(".last-commit.message").append("<a href='" + lastCommit.url + "'>" + lastCommit.summary + "</a>");
+
+						if (lastCommit) {
+							var html = "<img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/> ";
+							if (lastCommit.authorUrl)
+								html += "<a href='" + lastCommit.authorUrl + "'>" + lastCommit.authorName + "</a>";
+							else
+								html += "<span>" + lastCommit.authorName + "</span>";
+							
+							$row.children(".last-commit.author").empty().append(html);
+							$row.children(".last-commit.when").append("<span class='when'>" + lastCommit.when + "</span>");
+							$row.children(".last-commit.message").append("<a href='" + lastCommit.url + "'>" + lastCommit.summary + "</a>");
+						}
 					});
 				}
 			}
