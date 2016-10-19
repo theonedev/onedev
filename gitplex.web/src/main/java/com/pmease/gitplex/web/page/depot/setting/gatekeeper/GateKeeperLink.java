@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page.depot.setting.gatekeeper;
 
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -23,6 +25,20 @@ abstract class GateKeeperLink extends DropdownLink {
 	}
 
 	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new GateKeeperDropBehavior() {
+
+			@Override
+			protected List<Integer> getPosition() {
+				return GateKeeperLink.this.getPosition();
+			}
+
+		});
+	}
+
+	@Override
 	protected Component newContent(String id) {
 		return new GateKeeperSelector(id) {
 			
@@ -35,4 +51,6 @@ abstract class GateKeeperLink extends DropdownLink {
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass);
+	
+	protected abstract List<Integer> getPosition();
 }

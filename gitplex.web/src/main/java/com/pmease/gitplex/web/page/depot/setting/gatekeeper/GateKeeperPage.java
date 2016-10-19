@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page.depot.setting.gatekeeper;
 
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -15,6 +17,8 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
+
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class GateKeeperPage extends DepotSettingPage {
@@ -32,8 +36,8 @@ public class GateKeeperPage extends DepotSettingPage {
 		content.add(new ListView<GateKeeper>("gateKeepers", getDepot().getGateKeepers()) {
 
 			@Override
-			protected void populateItem(final ListItem<GateKeeper> item) {
-				item.add(new GateKeeperPanel("gateKeeper", item.getModelObject(), 1) {
+			protected void populateItem(ListItem<GateKeeper> item) {
+				item.add(new GateKeeperPanel("gateKeeper", item.getModelObject(), Lists.newArrayList(item.getIndex())) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
@@ -46,7 +50,7 @@ public class GateKeeperPage extends DepotSettingPage {
 						getDepot().getGateKeepers().set(item.getIndex(), gateKeeper);
 						onGateKeeperChanged(target);
 					}
-					
+
 				});
 			}
 			
@@ -84,7 +88,12 @@ public class GateKeeperPage extends DepotSettingPage {
 					};
 				}
 			}
-			
+
+			@Override
+			protected List<Integer> getPosition() {
+				return Lists.newArrayList(getDepot().getGateKeepers().size());
+			}
+
 		});
 		content.add(new WebMarkupContainer("gateKeeperPanel").setVisible(false));
 		content.add(new WebMarkupContainer("gateKeeperModal").setOutputMarkupPlaceholderTag(true).setVisible(false));
@@ -98,7 +107,7 @@ public class GateKeeperPage extends DepotSettingPage {
 		add(newContent());
 	}
 	
-	private void onGateKeeperChanged(AjaxRequestTarget target) {
+	void onGateKeeperChanged(AjaxRequestTarget target) {
 		GitPlex.getInstance(DepotManager.class).save(getDepot(), null, null);
 		replace(newContent());
 		target.add(get(CONTAINER_ID));
