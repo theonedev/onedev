@@ -120,9 +120,9 @@ public class CodeCommentFilter implements Serializable {
 		}
 			
 		if (before != null)
-			criteria.add(Restrictions.le("createDate", before));
+			criteria.add(Restrictions.le("date", before));
 		if (after != null)
-			criteria.add(Restrictions.ge("createDate", after));
+			criteria.add(Restrictions.ge("date", after));
 	}
 	
 	public void filter(Collection<CodeComment> comments) {
