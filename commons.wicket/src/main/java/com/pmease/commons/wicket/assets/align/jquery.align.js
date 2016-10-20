@@ -112,8 +112,9 @@
             		}
         		}
         		
-        		if (alignment.placement.targetX==100 && alignment.placement.x==0 
-        				|| alignment.placement.targetX==0 && alignment.placement.x==100) {
+        		// adjust the top offset if we do not care about overlapping with the trigger
+        		if (!(alignment.placement.targetY==100 && alignment.placement.y==0) 
+        				&& !(alignment.placement.targetY==0 && alignment.placement.y==100)) {
             		if (top + height > borderBottom)
             			top = borderBottom - height;
             		if (top < borderTop)
@@ -166,8 +167,9 @@
             		}
         		}
         		
-        		if (alignment.placement.targetY==100 && alignment.placement.y==0 
-        				|| alignment.placement.targetY==0 && alignment.placement.y==100) {
+        		// adjust the left offset if we do not care about overlapping with the trigger
+        		if (!(alignment.placement.targetX==100 && alignment.placement.x==0) 
+        				&& !(alignment.placement.targetX==0 && alignment.placement.x==100)) {
             		if (left + width > borderRight)
             			left = borderRight - width;
             		if (left < borderLeft)

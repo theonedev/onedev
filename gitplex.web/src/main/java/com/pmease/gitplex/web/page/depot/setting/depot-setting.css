@@ -69,8 +69,8 @@
 .gate-keeper-selector.floating {
 	border-radius: 0;
 }
-.gate-keeper-selector.floating>.content {
-	width: 600px; 
+.gate-keeper-selector.floating {
+	max-width: 600px; 
 }
 .gate-keeper-selector .panel {
 	border: none; 
@@ -100,10 +100,12 @@
 }
 .gate-keeper-item {
 	margin-bottom: 6px; 
+}
+.gate-keeper-item>div {
 	padding: 4px; 
 	border: 1px solid white;
 }
-.gate-keeper-item:hover, .gate-keeper-item:focus {
+.gate-keeper-item>div:hover, .gate-keeper-item>div:focus {
 	background-color: #EBEBEB; 
 	cursor: pointer; 
 	border: 1px solid #ADADAD; 
