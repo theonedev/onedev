@@ -165,6 +165,7 @@
 	overflow: hidden;
 	white-space: nowrap;
 	padding: 0 4px;
+	border-left: 1px solid #EEE;
 }
 .text-diff>.body>tbody>tr>td.blame .hash, .text-diff>.body>tbody>tr>td.blame .date {
 	margin-right: 8px;

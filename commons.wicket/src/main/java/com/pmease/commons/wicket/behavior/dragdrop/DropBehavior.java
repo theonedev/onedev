@@ -1,26 +1,19 @@
 package com.pmease.commons.wicket.behavior.dragdrop;
 
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import com.pmease.commons.wicket.behavior.AbstractPostAjaxBehavior;
 
 @SuppressWarnings("serial")
-public abstract class DropBehavior extends AbstractDefaultAjaxBehavior {
-
-	@Override
-	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-		super.updateAjaxAttributes(attributes);
-		attributes.setMethod(Method.POST);
-	}
+public abstract class DropBehavior extends AbstractPostAjaxBehavior {
 
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {

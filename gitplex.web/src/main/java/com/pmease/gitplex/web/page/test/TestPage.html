@@ -1,3 +1,14 @@
 <wicket:extend>
-	<a wicket:id="test">test</a>
+	<table>
+		<tr>
+			<td class="blame">11</td>
+			<td>22</td>
+			<td class="blame">33</td>
+		</tr>
+	</table>
+	<script type="text/javascript">
+		$(function() {
+			console.log($("tr>td.blame:nth-of-type(2)").text());
+		});
+	</script>
 </wicket:extend>

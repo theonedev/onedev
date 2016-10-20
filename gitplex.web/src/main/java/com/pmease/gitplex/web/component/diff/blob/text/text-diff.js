@@ -511,35 +511,44 @@ gitplex.textdiff = {
 		$symbols.mouseover($container.data("symbolHover"));
 		$expandedTrs.find("td.content").mouseover($container.data("onMouseOverContent"));
 		var $firstExpandedTr = $expandedTrs.first();
-		var commitHash = $firstExpandedTr.find(">td.blame>a.hash").data("hash");
-		var prevCommitHash;
-		$firstExpandedTr.prevAll().each(function() {
-			if (!prevCommitHash) {
-				var $tr = $(this);
-				var $prevCommitLink = $tr.find(">td.blame>a.hash");
-				if ($prevCommitLink.length != 0) {
-					prevCommitHash = $prevCommitLink.data("hash");
-				}
-			}
-		});
-		if (commitHash == prevCommitHash) {
-			$firstExpandedTr.children("td.blame").html("<div class='same-as-above'>...</div>");
-		}
 		
-		if ($nextTr.length != 0) {
-			commitHash = $nextTr.find(">td.blame>a.hash").data("hash");
-			prevCommitHash = undefined;
-			$nextTr.prevAll().each(function() {
+		function processBlames(index) {
+			var commitHash = $firstExpandedTr.children("td.blame").eq(index).children("a.hash").data("hash");
+			var prevCommitHash;
+			$firstExpandedTr.prevAll().each(function() {
 				if (!prevCommitHash) {
-					var $prevCommitLink = $(this).find(">td.blame>a.hash");
+					var $tr = $(this);
+					var $prevCommitLink = $tr.children("td.blame").eq(index).children("a.hash");
 					if ($prevCommitLink.length != 0) {
 						prevCommitHash = $prevCommitLink.data("hash");
 					}
 				}
 			});
 			if (commitHash == prevCommitHash) {
-				$nextTr.children("td.blame").html("<div class='same-as-above'>...</div>");
+				$firstExpandedTr.children("td.blame").eq(index).html("<div class='same-as-above'>...</div>");
 			}
+			
+			if ($nextTr.length != 0) {
+				commitHash = $nextTr.children("td.blame").eq(index).children("a.hash").data("hash");
+				prevCommitHash = undefined;
+				$nextTr.prevAll().each(function() {
+					if (!prevCommitHash) {
+						var $prevCommitLink = $(this).children("td.blame").eq(index).children("a.hash");
+						if ($prevCommitLink.length != 0) {
+							prevCommitHash = $prevCommitLink.data("hash");
+						}
+					}
+				});
+				if (commitHash == prevCommitHash) {
+					$nextTr.children("td.blame").eq(index).html("<div class='same-as-above'>...</div>");
+				}
+			}
+		}
+		if ($firstExpandedTr.children("td.blame").length == 1) {
+			processBlames(0);
+		} else if ($firstExpandedTr.children("td.blame").length == 2) {
+			processBlames(0);
+			processBlames(1);
 		}
 		
 		gitplex.textdiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));

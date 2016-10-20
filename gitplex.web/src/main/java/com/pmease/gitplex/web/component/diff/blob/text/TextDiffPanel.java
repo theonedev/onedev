@@ -284,8 +284,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					target.appendJavaScript(script);
 					break;
 				case "expand":
-					if (blameInfo != null)
+					if (blameInfo != null) {
 						blameInfo.lastCommitHash = null;
+						blameInfo.lastOldCommitHash = null;
+						blameInfo.lastNewCommitHash = null;
+					}
 					int index = params.getParameterValue("param1").toInt();
 					Integer lastContextSize = contextSizes.get(index);
 					if (lastContextSize == null)
@@ -511,32 +514,53 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		StringBuilder builder = new StringBuilder();
 		if (blameInfo != null) {
 			blameInfo.lastCommitHash = null;
-			builder.append(""
-					+ "<colgroup>"
-					+ "<col width='240'></col>"
-					+ "<col width='60'></col>"
-					+ "<col width='60'></col>"
-					+ "<col width='15'></col>"
-					+ "<col></col>"
-					+ "</colgroup>");
-		} else if (diffMode == DiffViewMode.UNIFIED) {
-			builder.append(""
-					+ "<colgroup>"
-					+ "<col width='60'></col>"
-					+ "<col width='60'></col>"
-					+ "<col width='15'></col>"
-					+ "<col></col>"
-					+ "</colgroup>");
+			blameInfo.lastOldCommitHash = null;
+			blameInfo.lastNewCommitHash = null;
+		}
+		
+		if (diffMode == DiffViewMode.UNIFIED) {
+			if (blameInfo != null) {
+				builder.append(""
+						+ "<colgroup>"
+						+ "<col width='240'></col>"
+						+ "<col width='60'></col>"
+						+ "<col width='60'></col>"
+						+ "<col width='15'></col>"
+						+ "<col></col>"
+						+ "</colgroup>");
+			} else {
+				builder.append(""
+						+ "<colgroup>"
+						+ "<col width='60'></col>"
+						+ "<col width='60'></col>"
+						+ "<col width='15'></col>"
+						+ "<col></col>"
+						+ "</colgroup>");
+			}
 		} else {
-			builder.append(""
-					+ "<colgroup>"
-					+ "<col width='60'></col>"
-					+ "<col width='15'></col>"
-					+ "<col></col>"
-					+ "<col width='60'></col>"
-					+ "<col width='15'></col>"
-					+ "<col></col>"
-					+ "</colgroup>");
+			if (blameInfo != null) {
+				builder.append(""
+						+ "<colgroup>"
+						+ "<col width='240'></col>"
+						+ "<col width='60'></col>"
+						+ "<col width='15'></col>"
+						+ "<col></col>"
+						+ "<col width='240'></col>"
+						+ "<col width='60'></col>"
+						+ "<col width='15'></col>"
+						+ "<col></col>"
+						+ "</colgroup>");
+			} else {
+				builder.append(""
+						+ "<colgroup>"
+						+ "<col width='60'></col>"
+						+ "<col width='15'></col>"
+						+ "<col></col>"
+						+ "<col width='60'></col>"
+						+ "<col width='15'></col>"
+						+ "<col></col>"
+						+ "</colgroup>");
+			}
 		}
 		for (int i=0; i<getDiffBlocks().size(); i++) {
 			MarkAwareDiffBlock block = getDiffBlocks().get(i);
@@ -553,7 +577,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					if (nextBlock.getType() == Type.INSERT) {
 						LinkedHashMap<Integer, LineDiff> lineChanges = 
 								DiffUtils.align(block.getLines(), nextBlock.getLines());
-						if (blameInfo != null) {
+						if (blameInfo != null && diffMode == DiffViewMode.UNIFIED) {
 							for (int j=0; j<block.getLines().size(); j++) { 
 								LineDiff lineDiff = lineChanges.get(j);
 								if (lineDiff != null) {
@@ -638,11 +662,13 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private void appendBlame(StringBuilder builder, int oldLineNo, int newLineNo) {
 		BriefCommit commit;
-		if (oldLineNo != -1)
-			commit = Preconditions.checkNotNull(blameInfo.oldBlame.get(oldLineNo));
-		else
+		if (newLineNo != -1)
 			commit = Preconditions.checkNotNull(blameInfo.newBlame.get(newLineNo));
-		if (!commit.getHash().equals(blameInfo.lastCommitHash)) {
+		else
+			commit = Preconditions.checkNotNull(blameInfo.oldBlame.get(oldLineNo));
+		if (diffMode == DiffViewMode.UNIFIED && !commit.getHash().equals(blameInfo.lastCommitHash)
+				|| diffMode == DiffViewMode.SPLIT && newLineNo != -1 && !commit.getHash().equals(blameInfo.lastNewCommitHash)
+				|| diffMode == DiffViewMode.SPLIT && oldLineNo != -1 && !commit.getHash().equals(blameInfo.lastOldCommitHash)) {
 			CommitDetailPage.State state = new CommitDetailPage.State();
 			state.revision = commit.getHash();
 			state.whitespaceOption = change.getWhitespaceOption();
@@ -656,6 +682,10 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			builder.append("<td class='blame noselect'><div class='same-as-above'>...</div></td>");
 		}
 		blameInfo.lastCommitHash = commit.getHash();
+		if (newLineNo != -1)
+			blameInfo.lastNewCommitHash = commit.getHash();
+		if (oldLineNo != -1)
+			blameInfo.lastOldCommitHash = commit.getHash();
 	}
 	
 	private void appendEqual(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, int lastContextSize) {
@@ -667,7 +697,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		int oldLineNo = block.getOldStart() + lineIndex;
 		int newLineNo = block.getNewStart() + lineIndex;
 		
-		if (diffMode == DiffViewMode.UNIFIED || blameInfo != null) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			if (blameInfo != null) {
 				appendBlame(builder, oldLineNo, newLineNo);
 			}
@@ -685,6 +715,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			}
 			builder.append("</td>");
 		} else {
+			if (blameInfo != null) {
+				appendBlame(builder, oldLineNo, -1);
+			}
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content left' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
@@ -697,6 +730,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				}
 			}
 			builder.append("</td>");
+			if (blameInfo != null) {
+				appendBlame(builder, -1, newLineNo);
+			}
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content right' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
@@ -717,7 +753,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
-		if (diffMode == DiffViewMode.UNIFIED || blameInfo != null) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			if (blameInfo != null) {
 				appendBlame(builder, -1, newLineNo);
 			}
@@ -747,9 +783,15 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			}
 			builder.append("</td>");
 		} else {
+			if (blameInfo != null) {
+				builder.append("<td class='blame noselect'>&nbsp;</td>");
+			}
 			builder.append("<td class='number noselect'>&nbsp;</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content left'>&nbsp;</td>");
+			if (blameInfo != null) {
+				appendBlame(builder, -1, newLineNo);
+			}
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
@@ -769,7 +811,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
-		if (diffMode == DiffViewMode.UNIFIED || blameInfo != null) {
+		if (diffMode == DiffViewMode.UNIFIED ) {
 			if (blameInfo != null) {
 				appendBlame(builder, oldLineNo, -1);
 			}
@@ -799,6 +841,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			}
 			builder.append("</td>");
 		} else {
+			if (blameInfo != null) {
+				appendBlame(builder, oldLineNo, -1);
+			}
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
@@ -810,6 +855,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					builder.append(tokens.get(i).toHtml(Operation.EQUAL));
 			}
 			builder.append("</td>");
+			if (blameInfo != null) {
+				builder.append("<td class='blame noselect'>&nbsp;</td>");
+			}
 			builder.append("<td class='number noselect'>&nbsp;</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content right'>&nbsp;</td>");
@@ -822,6 +870,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		builder.append("<tr class='code original'>");
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
+		if (blameInfo != null) {
+			appendBlame(builder, oldLineNo, -1);
+		}
 		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect old'>-</td>");
 		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
@@ -835,6 +886,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		builder.append("</td>");
 		
 		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
+		if (blameInfo != null) {
+			appendBlame(builder, -1, newLineNo);
+		}
 		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect new'>+</td>");
 		builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
@@ -858,6 +912,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
 		if (diffMode == DiffViewMode.UNIFIED) {
+			if (blameInfo != null) {
+				appendBlame(builder, oldLineNo, newLineNo);
+			}
 			builder.append("<td class='number noselect old new'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect old new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old new'>*</td>");
@@ -872,6 +929,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			}
 			builder.append("</td>");
 		} else {
+			if (blameInfo != null) {
+				appendBlame(builder, oldLineNo, -1);
+			}
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
@@ -887,6 +947,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			}
 			builder.append("</td>");
 			
+			if (blameInfo != null) {
+				appendBlame(builder, -1, newLineNo);
+			}
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
@@ -910,11 +973,13 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
 		String script = String.format("javascript:$('#%s').data('callback')('expand', %d);", getMarkupId(), blockIndex);
-		if (diffMode == DiffViewMode.UNIFIED || blameInfo != null) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			if (blameInfo != null) {
 				builder.append("<td colspan='3' class='expander noselect'><a title='Show more lines' href=\"")
 						.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
 				blameInfo.lastCommitHash = null;
+				blameInfo.lastOldCommitHash = null;
+				blameInfo.lastNewCommitHash = null;
 			} else {
 				builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"")
 						.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
@@ -922,10 +987,20 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			builder.append("<td colspan='2' class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
-			builder.append("<td class='expander noselect'><a title='Show more lines' href=\"").append(script)
-					.append("\"><i class='fa fa-sort'></i></a></td>");
-			builder.append("<td class='skipped noselect' colspan='5'><i class='fa fa-ellipsis-h'></i> skipped ")
-					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
+			if (blameInfo != null) {
+				builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"").append(script)
+						.append("\"><i class='fa fa-sort'></i></a></td>");
+				builder.append("<td class='skipped noselect' colspan='6'><i class='fa fa-ellipsis-h'></i> skipped ")
+						.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
+				blameInfo.lastCommitHash = null;
+				blameInfo.lastOldCommitHash = null;
+				blameInfo.lastNewCommitHash = null;
+			} else {
+				builder.append("<td class='expander noselect'><a title='Show more lines' href=\"").append(script)
+						.append("\"><i class='fa fa-sort'></i></a></td>");
+				builder.append("<td class='skipped noselect' colspan='5'><i class='fa fa-ellipsis-h'></i> skipped ")
+						.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
+			}
 		}
 		builder.append("</tr>");
 	}
@@ -1121,6 +1196,10 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		Map<Integer, BriefCommit> newBlame = new HashMap<>();
 		
 		String lastCommitHash;
+		
+		String lastOldCommitHash;
+		
+		String lastNewCommitHash;
 		
 	}
 
