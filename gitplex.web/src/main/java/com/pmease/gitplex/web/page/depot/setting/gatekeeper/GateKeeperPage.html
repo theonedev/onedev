@@ -7,7 +7,12 @@
 			<div wicket:id="gateKeeperDropdownTrigger" class="well gate-keeper-add">Add Gatekeeper <i class="fa fa-lg fa-plus-circle"></i></div>
 		</div>
 		<div class="help-block">
-			<i class="fa fa-info-circle"></i> Commits have to pass all Gatekeepers defined here in order to be accepted by the repository    
+		<ul>
+		<li>Commits have to pass all Gatekeepers defined here in order to be accepted by the repository</li>
+		<li>If a gatekeeper is dragged and dropped on another gatekeepe, their positions will be swapped</li>
+		<li>If a gatekeeper is dragged and dropped on <i>Add/Define</i> placeholder, it will be moved to the placeholder position</li>
+		<li>A gatekeeper can not be dragged to a position containing itself or contained by itself</li> 
+		</ul>
 		</div>
 	</div>
 </wicket:extend>

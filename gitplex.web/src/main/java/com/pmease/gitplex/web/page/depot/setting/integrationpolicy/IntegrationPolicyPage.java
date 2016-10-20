@@ -78,7 +78,7 @@ public class IntegrationPolicyPage extends DepotSettingPage {
 				target.add(container);
 			}
 			
-		}.handle(".handle").items("li"));
+		}.handle(".drag-handle").items("li.policy"));
 		
 		container.add(newAddNewFrag());
 	}

@@ -26,9 +26,10 @@
 #depot-setting .general-setting form .delete {
 	margin-right: 0;
 }
-
-.integration-policy-setting .handle {
-	cursor: move; 
+#depot-setting .drag-handle {
+	cursor: move;
+}
+.integration-policy-setting .drag-handle {
 	margin-right: 8px;
 }
 .integration-policy-setting .panel-heading a {

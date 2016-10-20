@@ -1,7 +1,7 @@
 pmease.commons.dragdrop = {
 	setupDraggable: function(dragSelector, dragData, dragText) {
 		$(dragSelector).draggable({
-			cursor: 'pointer',
+			cursor: 'move',
 			helper: function(event) {
 				return $('<span data-drag="' + dragData + '">' + dragText + '</span>');
 			}
