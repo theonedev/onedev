@@ -6,6 +6,7 @@
 }
 .CodeMirror {
 	font-size: 13px;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 .CodeMirror-gutters {
 	background: white;

@@ -43,6 +43,7 @@ gitplex.fileedit = {
 					value: fileContent, 
 					theme: "eclipse",
 					indentWithTabs: indentType == "Tabs",
+					indentUnit: tabSize,
 					lineNumbers: true,
 					lineWrapping: lineWrapMode == "Soft wrap",
 					tabSize: tabSize,

@@ -53,7 +53,7 @@ public class SourceFormatPanel extends Panel {
 		if (cookie != null)
 			indentType = cookie.getValue();
 		else
-			indentType = "Spaces";
+			indentType = "Tabs";
 		
 		cookie = request.getCookie(COOKIE_TAB_SIZE);
 		if (cookie != null)
@@ -65,7 +65,7 @@ public class SourceFormatPanel extends Panel {
 		if (cookie != null)
 			lineWrapMode = cookie.getValue();
 		else
-			lineWrapMode = "Soft wrap";
+			lineWrapMode = "No wrap";
 	}
 
 	@Override
@@ -93,7 +93,9 @@ public class SourceFormatPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-				response.addCookie(new Cookie(COOKIE_INDENT_TYPE, indentType));
+				Cookie cookie = new Cookie(COOKIE_INDENT_TYPE, indentType);
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
 				indentTypeChangeCallback.onOptioneChange(target);
 			}
 			
@@ -120,7 +122,9 @@ public class SourceFormatPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-				response.addCookie(new Cookie(COOKIE_TAB_SIZE, tabSize));
+				Cookie cookie = new Cookie(COOKIE_TAB_SIZE, tabSize);
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
 				tabSizeChangeCallback.onOptioneChange(target);
 			}
 			
@@ -147,7 +151,9 @@ public class SourceFormatPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-				response.addCookie(new Cookie(COOKIE_LINE_WRAP_MODE, lineWrapMode));
+				Cookie cookie = new Cookie(COOKIE_LINE_WRAP_MODE, lineWrapMode);				
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
 				lineWrapModeChangeCallback.onOptioneChange(target);
 			}
 			

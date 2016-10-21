@@ -89,6 +89,7 @@ gitplex.sourceview = {
 					theme: "eclipse",
 					lineNumbers: true,
 					lineWrapping: lineWrapMode == "Soft wrap",
+					indentUnit: tabSize,
 					tabSize: tabSize,
 					styleActiveLine: true,
 					styleSelectedText: true,
