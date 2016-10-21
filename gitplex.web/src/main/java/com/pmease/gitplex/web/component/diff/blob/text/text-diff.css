@@ -170,11 +170,17 @@
 .text-diff>.body>tbody>tr>td.blame .hash, .text-diff>.body>tbody>tr>td.blame .date {
 	margin-right: 8px;
 }
+.text-diff>.body>tbody>tr>td.blame.abbr .hash {
+	margin-right: 0;
+}
 .text-diff>.body>tbody>tr>td.blame .same-as-above {
-	margin-left: 100px;
+	margin-left: 90px;
 	margin-top: -8px;
 	color: #666;
 	font-size: 16px;
+}
+.text-diff>.body>tbody>tr>td.blame.abbr .same-as-above {
+	margin-left: 14px;
 }
 .text-diff>.body>tbody>tr:hover>td {
 	background: #E8F2FE !important;

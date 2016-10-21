@@ -522,7 +522,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (blameInfo != null) {
 				builder.append(""
 						+ "<colgroup>"
-						+ "<col width='240'></col>"
+						+ "<col width='220'></col>"
 						+ "<col width='60'></col>"
 						+ "<col width='60'></col>"
 						+ "<col width='15'></col>"
@@ -541,11 +541,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (blameInfo != null) {
 				builder.append(""
 						+ "<colgroup>"
-						+ "<col width='240'></col>"
+						+ "<col width='60'></col>"
 						+ "<col width='60'></col>"
 						+ "<col width='15'></col>"
 						+ "<col></col>"
-						+ "<col width='240'></col>"
+						+ "<col width='60'></col>"
 						+ "<col width='60'></col>"
 						+ "<col width='15'></col>"
 						+ "<col></col>"
@@ -674,12 +674,21 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			state.whitespaceOption = change.getWhitespaceOption();
 			PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), state);
 			String url = urlFor(CommitDetailPage.class, params).toString();
-			builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>", 
-					url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash()), 
-					DateUtils.formatDate(commit.getCommitter().getWhen()),
-					HtmlEscape.escapeHtml5(commit.getAuthor().getName())));
+			if (diffMode == DiffViewMode.UNIFIED) {
+				builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>", 
+						url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash()), 
+						DateUtils.formatDate(commit.getCommitter().getWhen()),
+						HtmlEscape.escapeHtml5(commit.getAuthor().getName())));
+			} else {
+				builder.append(String.format("<td class='abbr blame noselect'><a class='hash' href='%s' data-hash='%s'>%s</a></td>", 
+						url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash())));
+			}
 		} else {
-			builder.append("<td class='blame noselect'><div class='same-as-above'>...</div></td>");
+			if (diffMode == DiffViewMode.UNIFIED) {
+				builder.append("<td class='blame noselect'><div class='same-as-above'>...</div></td>");
+			} else {
+				builder.append("<td class='abbr blame noselect'><div class='same-as-above'>...</div></td>");
+			}
 		}
 		blameInfo.lastCommitHash = commit.getHash();
 		if (newLineNo != -1)
