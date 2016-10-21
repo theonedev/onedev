@@ -126,6 +126,9 @@
 	white-space: nowrap;
 	padding: 0 4px;
 }
+.source-view .CodeMirror .CodeMirror-cursor {
+	border-left: none;
+}
 .CodeMirror-annotation .hash, .CodeMirror-annotation .date {
 	margin-right: 8px;
 }
