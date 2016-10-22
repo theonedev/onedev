@@ -39,6 +39,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
 import com.pmease.commons.lang.diff.WhitespaceOption;
+import com.pmease.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -203,8 +204,15 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent(), true));
-		add(new Label("commitHash", getCommit().name()));
 
+		DepotFilePage.State fileState = new DepotFilePage.State();
+		fileState.blobIdent.revision = getCommit().name();
+		params = DepotFilePage.paramsOf(depotModel.getObject(), fileState);
+		Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", DepotFilePage.class, params);
+		add(hashLink);
+		hashLink.add(new Label("hash", GitUtils.abbreviateSHA(getCommit().name())));
+		add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(getCommit().name()))));
+		
 		newParentsContainer(null);
 
 		if (getCommit().getParentCount() != 0) {

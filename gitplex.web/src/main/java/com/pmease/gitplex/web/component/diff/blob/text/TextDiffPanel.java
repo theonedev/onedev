@@ -523,7 +523,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (blameInfo != null) {
 				builder.append(""
 						+ "<colgroup>"
-						+ "<col width='220'></col>"
+						+ "<col width='240'></col>"
 						+ "<col width='60'></col>"
 						+ "<col width='60'></col>"
 						+ "<col width='15'></col>"
@@ -542,11 +542,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (blameInfo != null) {
 				builder.append(""
 						+ "<colgroup>"
-						+ "<col width='60'></col>"
+						+ "<col width='70'></col>"
 						+ "<col width='60'></col>"
 						+ "<col width='15'></col>"
 						+ "<col></col>"
-						+ "<col width='60'></col>"
+						+ "<col width='70'></col>"
 						+ "<col width='60'></col>"
 						+ "<col width='15'></col>"
 						+ "<col></col>"
