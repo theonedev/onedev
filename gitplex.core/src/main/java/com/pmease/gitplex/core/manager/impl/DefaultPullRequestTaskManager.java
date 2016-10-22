@@ -8,7 +8,7 @@ import static com.pmease.gitplex.core.entity.PullRequestTask.Type.UPDATE;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.hibernate.Query;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
@@ -18,11 +18,13 @@ import com.pmease.commons.hibernate.dao.AbstractEntityManager;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.loader.Listen;
+import com.pmease.commons.loader.ListenerRegistry;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestTask;
 import com.pmease.gitplex.core.entity.PullRequestReviewInvitation;
 import com.pmease.gitplex.core.entity.PullRequestStatusChange;
+import com.pmease.gitplex.core.event.TaskChangeEvent;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingApproval;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingIntegration;
 import com.pmease.gitplex.core.event.pullrequest.PullRequestPendingUpdate;
@@ -47,29 +49,26 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 	
 	private final UrlManager urlManager;
 	
+	private final ListenerRegistry listenerRegistry;
+	
 	@Inject
-	public DefaultPullRequestTaskManager(Dao dao, MailManager mailManager, UrlManager urlManager) {
+	public DefaultPullRequestTaskManager(Dao dao, MailManager mailManager, UrlManager urlManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	@Transactional
 	@Listen
 	public void on(PullRequestUpdated event) {
-		Query query = getSession().createQuery("delete from PullRequestTask "
-				+ "where request=:request and type=:type");
-		query.setParameter("request", event.getRequest());
-		query.setParameter("type", UPDATE);
-		query.executeUpdate();
-	}
-
-	private void onClosed(PullRequest request) {
-		Query query = getSession().createQuery("delete from PullRequestTask "
-				+ "where request=:request");
-		query.setParameter("request", request);
-		query.executeUpdate();
+		EntityCriteria<PullRequestTask> criteria = newCriteria();
+		criteria.add(Restrictions.eq("request", event.getRequest())).add(Restrictions.eq("type", UPDATE));
+		for (PullRequestTask task: findAll(criteria)) {
+			listenerRegistry.post(new TaskChangeEvent(task.getUser()));
+			delete(task);
+		}
 	}
 
 	@Transactional
@@ -79,12 +78,12 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 		PullRequest request = invitation.getRequest();
 		Account user = invitation.getUser();
 		if (invitation.getStatus() == PullRequestReviewInvitation.Status.EXCLUDED) {
-			Query query = getSession().createQuery("delete from PullRequestTask "
-					+ "where request=:request and user=:user and type=:type");
-			query.setParameter("request", request);
-			query.setParameter("user", user);
-			query.setParameter("type", REVIEW);
-			query.executeUpdate();
+			EntityCriteria<PullRequestTask> criteria = newCriteria();
+			criteria.add(Restrictions.eq("request", request)).add(Restrictions.eq("user", user)).add(Restrictions.eq("type", REVIEW));
+			for (PullRequestTask task: findAll(criteria)) {
+				listenerRegistry.post(new TaskChangeEvent(task.getUser()));
+				delete(task);
+			}
 		} else if (invitation.getStatus() == PullRequestReviewInvitation.Status.ADDED_BY_RULE) {
 			PullRequestTask task = new PullRequestTask();
 			task.setRequest(request);
@@ -104,6 +103,8 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 						+ "Please visit <a href='%s'>%s</a> to do the review.",
 						request.getNumber(), request.getTitle(), url, url);
 				mailManager.sendMailAsync(Sets.newHashSet(task.getUser()), subject, decorate(user, body));
+				
+				listenerRegistry.post(new TaskChangeEvent(user));
 			}
 		} else {
 			String subject = String.format("You are invited to review pull request #%d (%s)", 
@@ -128,12 +129,13 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 	@Transactional
 	@Listen
 	public void on(PullRequestPendingApproval event) {
-		Query query = getSession().createQuery("delete from PullRequestTask "
-				+ "where request=:request and (type=:update or type=:integrate)");
-		query.setParameter("request", event.getRequest());
-		query.setParameter("update", UPDATE);
-		query.setParameter("integrate", INTEGRATE);
-		query.executeUpdate();
+		EntityCriteria<PullRequestTask> criteria = newCriteria();
+		Criterion typeCriterion = Restrictions.or(Restrictions.eq("type", UPDATE), Restrictions.eq("type", INTEGRATE));
+		criteria.add(Restrictions.eq("request", event.getRequest())).add(typeCriterion);
+		for (PullRequestTask task: findAll(criteria)) {
+			listenerRegistry.post(new TaskChangeEvent(task.getUser()));
+			delete(task);
+		}
 	}
 
 	private void requestIntegration(PullRequest request) {
@@ -156,6 +158,7 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 					request.getNumber(), request.getTitle(), url, url);
 			
 			mailManager.sendMailAsync(Sets.newHashSet(task.getUser()), subject, decorate(user, body));
+			listenerRegistry.post(new TaskChangeEvent(user));
 		}
 	}
 	
@@ -189,6 +192,7 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 					request.getNumber(), request.getTitle(), url, url);
 			mailManager.sendMailAsync(Sets.newHashSet(request.getSubmitter()), subject, 
 					decorate(request.getSubmitter(), body));
+			listenerRegistry.post(new TaskChangeEvent(request.getSubmitter()));
 		}
 	}
 
@@ -197,34 +201,32 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 	public void on(PullRequestStatusChangeEvent event) {
 		PullRequestStatusChange statusChange = event.getStatusChange();
 		PullRequestStatusChange.Type type = statusChange.getType();
+		EntityCriteria<PullRequestTask> criteria = newCriteria();
+		criteria.add(Restrictions.eq("request", event.getRequest()));
 		if (type == PullRequestStatusChange.Type.APPROVED ||  type == PullRequestStatusChange.Type.DISAPPROVED) {
-			onReviewed(statusChange);
+			criteria.add(Restrictions.eq("user", statusChange.getUser())).add(Restrictions.eq("type", REVIEW));
+			for (PullRequestTask task: findAll(criteria)) {
+				listenerRegistry.post(new TaskChangeEvent(task.getUser()));
+				delete(task);
+			}
 		} else if (type == PullRequestStatusChange.Type.ASSIGNED) {
 			PullRequest request = event.getRequest();
 			Preconditions.checkNotNull(request.getAssignee());
 			
 			if (request.getStatus() == PENDING_INTEGRATE) {  
-				Query query = getSession().createQuery("delete from PullRequestTask "
-						+ "where request=:request and type=:type and user!=:user");
-				query.setParameter("request", request);
-				query.setParameter("type", INTEGRATE);
-				query.setParameter("user", request.getAssignee());
-				query.executeUpdate();
-				
+				criteria.add(Restrictions.ne("user", request.getAssignee())).add(Restrictions.eq("type", INTEGRATE));
+				for (PullRequestTask task: findAll(criteria)) {
+					listenerRegistry.post(new TaskChangeEvent(task.getUser()));
+					delete(task);
+				}
 				requestIntegration(request);
 			}
 		} else if (type == PullRequestStatusChange.Type.INTEGRATED || type == PullRequestStatusChange.Type.DISCARDED) {
-			onClosed(event.getRequest());
+			for (PullRequestTask task: findAll(criteria)) {
+				listenerRegistry.post(new TaskChangeEvent(task.getUser()));
+				delete(task);
+			}
 		}
-	}
-	
-	private void onReviewed(PullRequestStatusChange statusChange) {
-		Query query = getSession().createQuery("delete from PullRequestTask "
-				+ "where request=:request and user=:user and type=:type");
-		query.setParameter("request", statusChange.getRequest());
-		query.setParameter("user", statusChange.getUser());
-		query.setParameter("type", REVIEW);
-		query.executeUpdate();
 	}
 	
 }

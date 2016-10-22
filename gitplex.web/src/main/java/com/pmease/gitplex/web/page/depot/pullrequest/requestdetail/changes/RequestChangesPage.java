@@ -53,7 +53,6 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetail
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.CodeCommentChangedRegion;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
-import com.pmease.gitplex.web.websocket.PullRequestChangedRegion;
 
 @SuppressWarnings("serial")
 public class RequestChangesPage extends RequestDetailPage implements CommentSupport {
@@ -550,10 +549,9 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = new ArrayList<>();
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
 		if (state.commentId != null)
 			regions.add(new CodeCommentChangedRegion(state.commentId));
-		regions.add(new PullRequestChangedRegion(getPullRequest().getId()));
 		return regions;
 	}
 

@@ -78,6 +78,7 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 				}
 				
 			});
+			
 			onRender(handler);
 		} 
  

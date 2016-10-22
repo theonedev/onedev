@@ -204,8 +204,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (request != null 
 					&& request.getSource() != null 
 					&& request.getSource().getObjectName(false) != null
-					&& SecurityUtils.canWrite(request.getSourceDepot())) { 
-				// we are on pull request head and pull request source branch exists, so we edit source branch instead
+					&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), change.getPath())) { 
+				// we are in context of a pull request and pull request source branch exists, so we edit source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 
 					@Override
@@ -225,7 +225,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				};
 				editLink.add(AttributeAppender.append("title", "Edit on source branch"));
 				actions.add(editLink);
-			} else if (SecurityUtils.canWrite(depot) && depot.getBranchRef(change.getBlobIdent().revision) != null) {
+			} else if (SecurityUtils.canModify(depot, change.getBlobIdent().revision, change.getPath()) 
+					&& depot.getBranchRef(change.getBlobIdent().revision) != null) {
 				// we are on a branch 
 				Link<Void> editLink = new Link<Void>("editFile") {
 

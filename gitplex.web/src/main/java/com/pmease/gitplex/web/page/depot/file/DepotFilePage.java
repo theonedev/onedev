@@ -1015,10 +1015,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
-		List<WebSocketRegion> regions = new ArrayList<>();
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
 		regions.add(new CommitIndexedRegion(getDepot().getId(), commitId));
 		if (commentId != null)
 			regions.add(new CodeCommentChangedRegion(commentId));
+		
+		/*
+		 * add below so that we can jump to request changes page after editing a file 
+		 */
 		if (requestCompareInfo != null)
 			regions.add(new PullRequestChangedRegion(requestCompareInfo.requestId));
 		return regions;

@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.loader.AppLoader;
@@ -28,6 +29,8 @@ import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
+import com.pmease.commons.wicket.websocket.WebSocketRegion;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -46,6 +49,7 @@ import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
+import com.pmease.gitplex.web.websocket.TaskChangedRegion;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
@@ -155,10 +159,24 @@ public abstract class LayoutPage extends BasePage {
 		head.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
 		head.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
 		if (user != null) {
-			head.add(new BookmarkablePageLink<Void>("tasks", 
-					TaskListPage.class, 
-					TaskListPage.paramsOf(user)) {
+			head.add(new BookmarkablePageLink<Void>("tasks", TaskListPage.class, TaskListPage.paramsOf(user)) {
 	
+				@Override
+				protected void onInitialize() {
+					super.onInitialize();
+					
+					add(new WebSocketRenderBehavior() {
+						
+						@Override
+						protected void onRender(WebSocketRequestHandler handler) {
+							handler.add(getComponent());
+						}
+						
+					});
+					
+					setOutputMarkupPlaceholderTag(true);
+				}
+
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
@@ -166,6 +184,7 @@ public abstract class LayoutPage extends BasePage {
 				}
 				
 			});
+			
 		} else {
 			head.add(new WebMarkupContainer("tasks").setVisible(false));
 		}
@@ -292,6 +311,15 @@ public abstract class LayoutPage extends BasePage {
 	
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
 		setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
+	}
+
+	@Override
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+		if (isLoggedIn()) {
+			regions.add(new TaskChangedRegion(getLoginUser().getId()));
+		}
+		return regions;
 	}
 
 	@Override

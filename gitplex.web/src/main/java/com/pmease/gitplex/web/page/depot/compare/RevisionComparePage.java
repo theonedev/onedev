@@ -740,7 +740,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = new ArrayList<>();
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
 		if (state.commentId != null)
 			regions.add(new CodeCommentChangedRegion(state.commentId));
 		return regions;

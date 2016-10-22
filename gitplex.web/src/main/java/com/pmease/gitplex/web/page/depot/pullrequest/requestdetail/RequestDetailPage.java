@@ -56,7 +56,6 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.WicketUtils;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
@@ -915,7 +914,9 @@ public abstract class RequestDetailPage extends DepotPage {
 	
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
-		return Lists.newArrayList(new PullRequestChangedRegion(getPullRequest().getId()));
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+		regions.add(new PullRequestChangedRegion(getPullRequest().getId()));
+		return regions;
 	}
 
 	@Override

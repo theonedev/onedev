@@ -40,6 +40,7 @@ import com.pmease.gitplex.web.editable.EditSupportLocator;
 import com.pmease.gitplex.web.websocket.CodeCommentChangeBroadcaster;
 import com.pmease.gitplex.web.websocket.CommitIndexedBroadcaster;
 import com.pmease.gitplex.web.websocket.PullRequestChangeBroadcaster;
+import com.pmease.gitplex.web.websocket.TaskChangeBroadcaster;
 
 import jersey.repackaged.com.google.common.collect.Sets;
 
@@ -118,6 +119,7 @@ public class WebModule extends AbstractPluginModule {
 		bind(UrlManager.class).to(WicketUrlManager.class);
 		bind(CodeCommentChangeBroadcaster.class);
 		bind(PullRequestChangeBroadcaster.class);
+		bind(TaskChangeBroadcaster.class);
 	}
 	
 }
