@@ -28,4 +28,18 @@ public class DatabaseMigrator implements Migrator {
 		}	
 	}
 
+	private void migrate2(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Depots.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element gateKeeperElement = element.element("gateKeeper");
+					gateKeeperElement.detach();
+					element.addElement("gateKeepers");
+				}
+				dom.writeToFile(file, false);
+			}
+		}	
+	}
+	
 }

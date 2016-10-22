@@ -267,9 +267,6 @@ if [ "$FIRST_CHAR" != "/" ]
 then
     PIDDIR=$REALDIR/$PIDDIR
 fi
-if [ ! -d "$PIDDIR" ]; then
-	mkdir $PIDDIR
-fi
 
 # Same test for WRAPPER_CMD
 FIRST_CHAR=`echo $WRAPPER_CMD | cut -c1,1`

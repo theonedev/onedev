@@ -126,11 +126,6 @@ public class Bootstrap {
 
 		try {
 			if (command == null) {
-				getStatusDir().mkdirs();
-				if (!getStatusDir().exists()) {
-					throw new RuntimeException("Unable to create directory: " + getStatusDir().getAbsolutePath());
-				}
-				
 				if (!sandboxMode) {
 					File serverRunningFile = getServerRunningFile();
 					if (serverRunningFile.exists()) 

@@ -165,6 +165,7 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			restoreExecutables(upgradeBackup);
 
 			if (!MigrationHelper.getVersion(migrator.getClass()).equals(oldDataVersion.get())) {
 				dbBackup = new File(upgradeDir, getBackupName("dbbackup") + ".zip");
@@ -186,6 +187,7 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			restoreExecutables(upgradeBackup);
 		}
 		
 		boolean failed;
@@ -267,6 +269,7 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 						FileUtils.deleteFile(child);
 				}
 				FileUtils.copyDirectory(upgradeBackup, upgradeDir);
+				restoreExecutables(upgradeDir);
 				logger.info("Old installation directory is now restored.");
 			} catch (Exception e2) {
 				logger.error("Error restoring old installation directory", e2);
@@ -317,8 +320,18 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 	}
 	
 	protected void copyProgramFilesTo(File upgradeDir) {
+		String result;
+		try {
+			String from = FileUtils.readFileToString(new File(upgradeDir, "bin/server.sh"));
+			String to = FileUtils.readFileToString(new File(Bootstrap.getBinDir(), "server.sh"));
+			result = UpgradeUtils.copyRunAs(from, to);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
 		cleanAndCopy(new File(Bootstrap.installDir, "3rdparty-licenses"), new File(upgradeDir, "3rdparty-licenses"));
 		cleanAndCopy(Bootstrap.getBinDir(), new File(upgradeDir, "bin"));
+		FileUtils.writeFile(new File(upgradeDir, "bin/server.sh"), result);
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
 		for (File file: Bootstrap.getSiteLibDir().listFiles()) {
@@ -337,18 +350,22 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		restoreExecutables(upgradeDir);
 	}
 	
 	protected void cleanAndCopy(File srcDir, File destDir) {
 		try {
 			FileUtils.cleanDir(destDir);
 			FileUtils.copyDirectory(srcDir, destDir);
-			for (File file: destDir.listFiles()) {
-				if (file.getName().endsWith(".sh"))
-					file.setExecutable(true);
-			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	private void restoreExecutables(File installDir) {
+		for (File file: new File(installDir, "bin").listFiles()) {
+			if (file.getName().endsWith(".sh"))
+				file.setExecutable(true);
 		}
 	}
 	
