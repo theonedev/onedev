@@ -142,5 +142,5 @@ input.search {
 }
 
 .hash {
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }

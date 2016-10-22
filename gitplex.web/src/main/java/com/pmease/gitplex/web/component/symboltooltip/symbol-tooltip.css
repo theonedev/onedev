@@ -3,7 +3,7 @@
 	border: 1px solid black;
 	border-radius: 4px; 
 	color: black; 
-	font-family: monospace; 
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; 
 	font-size: 10pt; 
 	padding: 4px 8px; 
 	z-index: 100; 

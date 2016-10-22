@@ -114,7 +114,7 @@
 	background: #333;
 	color: #EEE;
 	border-radius: 4px;
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	margin: 4px 0 16px 0;
 }
 

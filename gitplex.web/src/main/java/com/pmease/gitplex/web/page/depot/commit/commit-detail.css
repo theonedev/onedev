@@ -66,7 +66,7 @@
 #commit-detail>.info>.contribution-and-parents .contributor-avatars {
 	margin-right: 4px;
 }
-#commit-detail>.info>.contribution-and-parents .commit {
+#commit-detail>.info>.contribution-and-parents div.commit {
 	margin: 7px 20px 0 20px;
 }
 #commit-detail>.info>.contribution-and-parents .hash {

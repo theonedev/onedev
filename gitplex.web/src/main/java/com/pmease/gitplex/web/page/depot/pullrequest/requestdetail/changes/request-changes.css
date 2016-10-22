@@ -34,7 +34,7 @@
 	color: #333;
 	padding: 4px 8px;
 	white-space: nowrap;
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 .commits-selector ul a:hover {
 	background: #FCEDAA;

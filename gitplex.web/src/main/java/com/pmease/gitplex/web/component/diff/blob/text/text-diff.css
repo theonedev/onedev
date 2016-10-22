@@ -160,7 +160,7 @@
 	line-height: 14px;
 }
 .text-diff>.body>tbody>tr>td.blame {
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
@@ -204,7 +204,7 @@
 	border: 1px solid black;
 	border-radius: 4px; 
 	color: black; 
-	font-family: monospace; 
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; 
 	font-size: 10pt; 
 	overflow: auto; 
 	padding: 4px 8px; 

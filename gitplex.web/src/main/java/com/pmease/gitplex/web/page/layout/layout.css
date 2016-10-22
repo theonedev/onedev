@@ -97,7 +97,7 @@ html, body {
 	white-space: nowrap;
 	border-right: 4px solid white;
 	width: 180px;
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	clear: both;
 	position: relative;
 }

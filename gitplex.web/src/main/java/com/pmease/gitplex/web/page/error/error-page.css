@@ -24,7 +24,7 @@ body.error .center-box .detail>.head {
 body.error .center-box .detail>.body {
 	white-space: pre-wrap;
 	word-wrap: break-word;
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
 body.error .center-box textarea {

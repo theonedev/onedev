@@ -9,7 +9,7 @@
 	color: #666;
 	text-decoration: none;
 	padding: 6px 12px;
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 #depot-setting>table>tbody>tr>td.nav li:hover a {
 	background: #F5F5F5;

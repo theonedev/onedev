@@ -120,7 +120,7 @@
 	width: 240px;
 }
 .CodeMirror-annotation {
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;

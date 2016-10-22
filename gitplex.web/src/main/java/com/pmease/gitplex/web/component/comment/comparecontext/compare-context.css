@@ -7,7 +7,7 @@
 	color: #333;
 	padding: 4px 8px;
 	white-space: nowrap;
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 .compare-context a:hover {
 	background: #F2F2F2;

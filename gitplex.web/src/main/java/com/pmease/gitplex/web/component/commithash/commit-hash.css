@@ -7,5 +7,5 @@ input.commit-hash {
 	padding-left: 3px;
 	padding-right: 3px;
 	height: 22px;
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }

@@ -25,7 +25,7 @@
 }
 .input-assist .suggestion a {
 	padding-right: 12px;
-	font-family: monospace;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	font-size: 13px;
 }
 .input-assist .help {
