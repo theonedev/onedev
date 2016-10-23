@@ -41,6 +41,10 @@ public class ResetAdminPasswordCommand extends DefaultPersistManager {
 
 	@Override
 	public void start() {
+		if (Bootstrap.command.getArgs().length == 0) {
+			logger.error("Missing password parameter. Usage: {} <new password>", Bootstrap.command.getScript());
+			System.exit(1);
+		}
 		if (Bootstrap.getServerRunningFile().exists()) {
 			logger.error("Please stop server before resetting admin password");
 			System.exit(1);
@@ -56,7 +60,8 @@ public class ResetAdminPasswordCommand extends DefaultPersistManager {
 			logger.error("Server not set up yet");
 			System.exit(1);
 		}
-		root.setPassword("12345");
+		String password = Bootstrap.command.getArgs()[0];
+		root.setPassword(password);
 		accountManager.save(root);
 		
 		// wait for a short period to have embedded db flushing data
@@ -67,7 +72,7 @@ public class ResetAdminPasswordCommand extends DefaultPersistManager {
 		}
 		sessionFactory.close();
 		
-		logger.info("Password of '" + root.getName() + "' has been reset to '12345'");
+		logger.info("Password of user '" + root.getName() + "' has been reset to: " + password);
 		System.exit(0);
 	}
 

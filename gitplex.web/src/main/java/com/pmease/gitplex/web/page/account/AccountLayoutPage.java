@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.account;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -39,9 +40,19 @@ public abstract class AccountLayoutPage extends AccountPage {
 		super.onInitialize();
 		
 		BookmarkablePageLink<Void> avatarLink = new BookmarkablePageLink<Void>("avatar", 
-				AvatarEditPage.class, AvatarEditPage.paramsOf(getAccount()));
-		if (!SecurityUtils.canManage(getAccount()))
+				AvatarEditPage.class, AvatarEditPage.paramsOf(getAccount())) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (!isEnabled())
+					tag.setName("span");
+			}
+			
+		};
+		if (!SecurityUtils.canManage(getAccount())) {
 			avatarLink.setEnabled(false);
+		}
 		add(avatarLink);
 		avatarLink.add(new Avatar("avatar", accountModel.getObject(), null));
 		
