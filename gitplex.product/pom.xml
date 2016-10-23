@@ -101,12 +101,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.core</artifactId>  
-            <version>1.0.35</version> 
+            <version>1.0.36</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.web</artifactId>  
-            <version>1.0.4</version> 
+            <version>1.0.5</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
@@ -118,24 +118,24 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0.4</version>  
+            <version>1.0.5</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.rest</artifactId>  
-            <version>1.0.4</version> 
+            <version>1.0.5</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.http</artifactId>  
-            <version>1.0.4</version> 
+            <version>1.0.5</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.search</artifactId>  
-            <version>1.0.4</version> 
+            <version>1.0.5</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -161,5 +161,5 @@
         <moduleClass>com.pmease.gitplex.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
     </properties>  
-    <version>1.0-EAP-build1</version> 
+    <version>1.0-EAP-build2</version> 
 </project>
