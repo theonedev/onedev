@@ -279,9 +279,18 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				case "showBlameMessage": 
 					String tooltipId = params.getParameterValue("param1").toString();
 					String commitHash = params.getParameterValue("param2").toString();
-					String message = depotModel.getObject().getRevCommit(commitHash).getFullMessage();
-					String escapedMessage = JavaScriptEscape.escapeJavaScript(message);
-					String script = String.format("gitplex.textdiff.showBlameMessage('%s', '%s');", tooltipId, escapedMessage); 
+					RevCommit commit = depotModel.getObject().getRevCommit(commitHash);
+					String authoring;
+					if (commit.getAuthorIdent() != null) {
+						authoring = commit.getAuthorIdent().getName();
+						if (commit.getCommitterIdent() != null)
+							authoring += " " + DateUtils.formatAge(commit.getCommitterIdent().getWhen());
+						authoring = "'" + JavaScriptEscape.escapeJavaScript(authoring) + "'";
+					} else {
+						authoring = "undefined";
+					}
+					String message = JavaScriptEscape.escapeJavaScript(commit.getFullMessage());
+					String script = String.format("gitplex.textdiff.showBlameMessage('%s', %s, '%s');", tooltipId, authoring, message); 
 					target.appendJavaScript(script);
 					break;
 				case "expand":

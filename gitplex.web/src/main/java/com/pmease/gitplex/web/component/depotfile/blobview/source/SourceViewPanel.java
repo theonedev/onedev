@@ -42,6 +42,7 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -457,9 +458,18 @@ public class SourceViewPanel extends BlobViewPanel {
 				case "showBlameMessage":
 					String tooltipId = params.getParameterValue("param1").toString();
 					String commitHash = params.getParameterValue("param2").toString();
-					String message = context.getDepot().getRevCommit(commitHash).getFullMessage();
-					String escapedMessage = JavaScriptEscape.escapeJavaScript(message);
-					String script = String.format("gitplex.sourceview.showBlameMessage('%s', '%s');", tooltipId, escapedMessage); 
+					RevCommit commit = context.getDepot().getRevCommit(commitHash);
+					String authoring;
+					if (commit.getAuthorIdent() != null) {
+						authoring = commit.getAuthorIdent().getName();
+						if (commit.getCommitterIdent() != null)
+							authoring += " " + DateUtils.formatAge(commit.getCommitterIdent().getWhen());
+						authoring = "'" + JavaScriptEscape.escapeJavaScript(authoring) + "'";
+					} else {
+						authoring = "undefined";
+					}
+					String message = JavaScriptEscape.escapeJavaScript(commit.getFullMessage());
+					String script = String.format("gitplex.sourceview.showBlameMessage('%s', %s, '%s');", tooltipId, authoring, message); 
 					target.appendJavaScript(script);
 					break;
 				case "openSelectionPopover": 

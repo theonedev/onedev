@@ -201,7 +201,10 @@
 	color: black; 
 	padding: 8px;
 }
-
+.blame-message>.authoring {
+	margin-bottom: 12px;
+	font-weight: bold;	
+}
 .diff-tokentooltip {
 	background-color: #FBFCC5; 
 	border: 1px solid black;

@@ -151,3 +151,7 @@
 	color: black; 
 	padding: 8px;
 }
+.blame-message>.authoring {
+	margin-bottom: 12px;
+	font-weight: bold;	
+}
