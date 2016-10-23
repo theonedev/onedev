@@ -95,47 +95,47 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jsw</artifactId>  
-            <version>1.0.32</version>  
+            <version>1.0.33</version>  
             <scope>provided</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.core</artifactId>  
-            <version>1.0.34</version> 
+            <version>1.0.35</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.web</artifactId>  
-            <version>1.0.3</version> 
+            <version>1.0.4</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.33</version>  
+            <version>1.0.34</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0.3</version>  
+            <version>1.0.4</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.rest</artifactId>  
-            <version>1.0.3</version> 
+            <version>1.0.4</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.http</artifactId>  
-            <version>1.0.3</version> 
+            <version>1.0.4</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>gitplex.search</artifactId>  
-            <version>1.0.3</version> 
+            <version>1.0.4</version> 
         </dependency> 
     </dependencies>  
     <repositories> 

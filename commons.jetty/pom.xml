@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.33</version> 
+            <version>1.0.34</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
@@ -65,5 +65,5 @@
     <properties> 
         <moduleClass>com.pmease.commons.jetty.JettyModule</moduleClass> 
     </properties>  
-    <version>1.0.33</version> 
+    <version>1.0.34</version> 
 </project>
