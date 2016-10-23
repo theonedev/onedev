@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.page.security;
 
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -13,6 +14,7 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
@@ -23,8 +25,10 @@ import com.pmease.gitplex.web.page.home.DashboardPage;
 public class RegisterPage extends BasePage {
 	
 	public RegisterPage() {
+		if (!GitPlex.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister())
+			throw new UnauthenticatedException("Account self-register is disabled");
 		if (getLoginUser() != null)
-			throw new IllegalStateException("Can not sign up an account while signed in.");
+			throw new IllegalStateException("Can not sign up an account while signed in");
 	}
 	
 	@Override

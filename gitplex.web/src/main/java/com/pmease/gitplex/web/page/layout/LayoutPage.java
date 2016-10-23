@@ -35,6 +35,7 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.accountselector.OrganizationSelector;
@@ -158,7 +159,8 @@ public abstract class LayoutPage extends BasePage {
 			
 		}.setVisible(!signedIn));
 		
-		head.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
+		boolean enableSelfRegister = GitPlex.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister();
+		head.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn && enableSelfRegister));
 		head.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
 		if (user != null) {
 			head.add(new BookmarkablePageLink<Void>("tasks", TaskListPage.class, TaskListPage.paramsOf(user)) {

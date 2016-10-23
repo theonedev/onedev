@@ -19,6 +19,7 @@
 #login .checkbox {
 	margin-top: 6px;
 }
-#login .register {
+#login .text-right>a {
 	font-size: 16px;
+	margin-left: 20px;
 }

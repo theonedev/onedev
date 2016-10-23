@@ -6,6 +6,7 @@ import com.pmease.commons.hibernate.dao.EntityManager;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.setting.BackupSetting;
 import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.setting.SecuritySetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 public interface ConfigManager extends EntityManager<Config> {
@@ -50,6 +51,7 @@ public interface ConfigManager extends EntityManager<Config> {
 	 * @throws 
 	 * 			RuntimeException if mail setting record is not found
 	 */
+	@Nullable
 	MailSetting getMailSetting();
 
 	/**
@@ -69,6 +71,7 @@ public interface ConfigManager extends EntityManager<Config> {
 	 * @throws 
 	 * 			RuntimeException if backup setting record is not found
 	 */
+	@Nullable
 	BackupSetting getBackupSetting();
 
 	/**
@@ -79,5 +82,8 @@ public interface ConfigManager extends EntityManager<Config> {
 	 * 			setting record will still be remained in database)
 	 */
 	void saveBackupSetting(@Nullable BackupSetting backupSetting);
+
+	SecuritySetting getSecuritySetting();
 	
+	void saveSecuritySetting(SecuritySetting securitySetting);
 }

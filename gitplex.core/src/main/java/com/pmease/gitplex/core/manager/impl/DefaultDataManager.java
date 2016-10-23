@@ -42,6 +42,7 @@ import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.setting.BackupSetting;
 import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.setting.SecuritySetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
@@ -131,6 +132,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 
+		Config securityConfig = configManager.getConfig(Key.SECURITY);
+		if (securityConfig == null) {
+			configManager.saveSecuritySetting(new SecuritySetting());
+		} 
+		
 		Config mailConfig = configManager.getConfig(Key.MAIL);
 		Serializable mailSetting = null;
 		if (mailConfig == null) {

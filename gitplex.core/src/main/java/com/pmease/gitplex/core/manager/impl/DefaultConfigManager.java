@@ -17,6 +17,7 @@ import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.setting.BackupSetting;
 import com.pmease.gitplex.core.setting.MailSetting;
+import com.pmease.gitplex.core.setting.SecuritySetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
@@ -29,6 +30,8 @@ public class DefaultConfigManager extends AbstractEntityManager<Config> implemen
 	private volatile Long mailSettingConfigId;
 	
 	private volatile Long backupSettingConfigId;
+	
+	private volatile Long securitySettingConfigId;
 	
 	@Inject
 	public DefaultConfigManager(Dao dao, DataManager dataManager) {
@@ -125,4 +128,30 @@ public class DefaultConfigManager extends AbstractEntityManager<Config> implemen
 		dataManager.scheduleBackup(backupSetting);
 	}
 
+	@Sessional
+	@Override
+	public SecuritySetting getSecuritySetting() {
+        Config config;
+        if (securitySettingConfigId == null) {
+    		config = getConfig(Key.SECURITY);
+    		Preconditions.checkNotNull(config);
+    		securitySettingConfigId = config.getId();
+        } else {
+            config = load(securitySettingConfigId);
+        }
+        return (SecuritySetting) config.getSetting();
+	}
+
+	@Transactional
+	@Override
+	public void saveSecuritySetting(SecuritySetting securitySetting) {
+		Config config = getConfig(Key.SECURITY);
+		if (config == null) {
+			config = new Config();
+			config.setKey(Key.SECURITY);
+		}
+		config.setSetting(securitySetting);
+		dao.persist(config);
+	}
+	
 }

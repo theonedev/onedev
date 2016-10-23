@@ -119,7 +119,9 @@ public class LoginPage extends BasePage {
 			}
 			
 		});
-		add(new BookmarkablePageLink<Void>("registerAccount", RegisterPage.class));
+
+		boolean enableSelfRegister = GitPlex.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister();
+		add(new BookmarkablePageLink<Void>("registerAccount", RegisterPage.class).setVisible(enableSelfRegister));
 	}
 
 	@Override
