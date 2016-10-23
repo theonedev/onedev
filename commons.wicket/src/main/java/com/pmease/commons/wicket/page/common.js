@@ -177,7 +177,9 @@ pmease.commons = {
 				$forms.each(function() {
 					pmease.commons.form.trackDirty(this);
 				});
-				$component.closest("form.ays-inited").not($component).trigger("checkform.areYouSure");
+				var $form = $component.closest("form").not($component);
+				if ($form.find(".dirty-aware").length != 0 || $form.hasClass("leave-confirm"))
+					$form.trigger("checkform.areYouSure");
 			});
 			
 			if (Wicket && Wicket.Ajax) {

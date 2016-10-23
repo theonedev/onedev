@@ -4,7 +4,11 @@ import java.io.Serializable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,43 +17,39 @@ import com.pmease.commons.wicket.behavior.testform.TestFormBehavior;
 import com.pmease.commons.wicket.behavior.testform.TestResult;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
+import com.pmease.commons.wicket.editable.EditorChanged;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.setting.MailSetting;
 
 @SuppressWarnings("serial")
 public class MailSettingPage extends AdministrationPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(MailSettingPage.class);
 	
-	private MailSetting mailSetting;
-	
-	private BeanEditor<Serializable> editor;
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		mailSetting = GitPlex.getInstance(ConfigManager.class).getMailSetting();
-		if (mailSetting == null)
-			mailSetting = new MailSetting();
+		MailSettingHolder mailSettingHolder = new MailSettingHolder();
+		mailSettingHolder.setMailSetting(GitPlex.getInstance(ConfigManager.class).getMailSetting());
 		
-		Form<?> form = new Form<Void>("form") {
+		BeanEditor<Serializable> editor = BeanContext.editBean("editor", mailSettingHolder);
+		
+		Button saveButton = new Button("save") {
 
 			@Override
-			protected void onSubmit() {
+			public void onSubmit() {
 				super.onSubmit();
-				GitPlex.getInstance(ConfigManager.class).saveMailSetting(mailSetting);
-				getSession().success("Mail setting has been updated");
+				
+				GitPlex.getInstance(ConfigManager.class).saveMailSetting(mailSettingHolder.getMailSetting());
+				getSession().success("Mail setting has been saved");
 			}
 			
 		};
-		form.add(editor = BeanContext.editBean("editor", mailSetting));
-				
-		form.add(new AjaxButton("test") {
+		AjaxButton testButton = new AjaxButton("test") {
 
 			private TestFormBehavior testBehavior;
 			
@@ -63,8 +63,8 @@ public class MailSettingPage extends AdministrationPage {
 					protected TestResult test() {
 						Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 						try {
-							GitPlex.getInstance(MailManager.class).sendMail(
-									mailSetting, Sets.newHashSet(currentUser), 
+							GitPlex.getInstance(MailManager.class).sendMail(mailSettingHolder.getMailSetting(), 
+									Sets.newHashSet(currentUser), 
 									"Test email from GitPlex", "Great, your mail setting is correct!");
 							return new TestResult.Successful("Test mail has been sent to " + 
 									currentUser.getEmail() + ", please check your mail box.");
@@ -75,6 +75,21 @@ public class MailSettingPage extends AdministrationPage {
 					}
 					
 				});
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				BeanEditor<Serializable> mailSettingEditor = editor.visitChildren(BeanEditor.class, new IVisitor<BeanEditor<Serializable>, BeanEditor<Serializable>>() {
+
+					public void component(BeanEditor<Serializable> component, IVisit<BeanEditor<Serializable>> visit) {
+						visit.stop(component);
+					}
+					
+				});
+				setVisible(mailSettingEditor != null && mailSettingEditor.isVisibleInHierarchy());
 			}
 
 			@Override
@@ -91,7 +106,26 @@ public class MailSettingPage extends AdministrationPage {
 				target.add(editor);
 			}
 
-		});
+		};
+		
+		Form<?> form = new Form<Void>("mailSetting") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof EditorChanged) {
+					EditorChanged editorChanged = (EditorChanged) event.getPayload();
+					editorChanged.getPartialPageRequestHandler().add(testButton);
+				}
+				
+			}
+
+		};
+		
+		form.add(editor);
+		form.add(saveButton);
+		form.add(testButton);
 		
 		add(form);
 	}

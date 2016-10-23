@@ -9,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -22,6 +23,7 @@ import com.pmease.commons.loader.ImplementationRegistry;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.EditorChanged;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
@@ -134,6 +136,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
+				send(PolymorphicPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 				target.add(fragment.get(BEAN_EDITOR_ID));
 			}
 			

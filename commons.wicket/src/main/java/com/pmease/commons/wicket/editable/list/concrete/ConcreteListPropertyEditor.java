@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -31,6 +32,7 @@ import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
 import com.pmease.commons.wicket.behavior.sortable.SortPosition;
 import com.pmease.commons.wicket.editable.BeanDescriptor;
 import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.EditorChanged;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PathSegment.Property;
@@ -107,6 +109,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 				
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
+					send(ConcreteListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 					target.add(ConcreteListPropertyEditor.this.get("listEditor"));
 				}
 				
@@ -199,8 +202,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 				if (rows.size() == 1)
 					target.add(noElementsRow);
 				
-				//target.focusComponent(newRow);
-				//target.add(TableListPropertyEditor.this.get("listEditor"));
+				send(ConcreteListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 			}
 
 		}.setDefaultFormProcessing(false));
@@ -236,6 +238,8 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 					for (int i=0; i<fromIndex-toIndex; i++) 
 						rows.swap(fromIndex-i, fromIndex-i-1);
 				}
+				
+				send(ConcreteListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 			}
 			
 		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
@@ -275,8 +279,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 					WebMarkupContainer table = (WebMarkupContainer) ConcreteListPropertyEditor.this.get("listEditor");
 					target.add(table.get("noElementsRow"));
 				}
-				//target.add(TableListPropertyEditor.this.get("listEditor"));
-				//target.focusComponent(null);
+				send(ConcreteListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 			}
 
 		}.setDefaultFormProcessing(false));

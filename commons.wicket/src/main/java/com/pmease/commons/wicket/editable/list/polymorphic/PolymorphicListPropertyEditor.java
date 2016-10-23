@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -32,6 +33,7 @@ import com.pmease.commons.wicket.behavior.sortable.SortPosition;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.EditorChanged;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
@@ -112,6 +114,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
+					send(PolymorphicListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 					target.add(PolymorphicListPropertyEditor.this.get("listEditor"));
 				}
 				
@@ -190,6 +193,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				
 				if (rows.size() == 1)
 					target.add(noElements);
+				
+				send(PolymorphicListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 			}
 			
 		}.setDefaultFormProcessing(false));
@@ -223,6 +228,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 					for (int i=0; i<fromIndex-toIndex; i++) 
 						rows.swap(fromIndex-i, fromIndex-i-1);
 				}
+				send(PolymorphicListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 			}
 			
 		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
@@ -304,6 +310,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 					WebMarkupContainer table = (WebMarkupContainer) PolymorphicListPropertyEditor.this.get("listEditor");
 					target.add(table.get("noElements"));
 				}
+				send(PolymorphicListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 			}
 
 		}.setDefaultFormProcessing(false));
