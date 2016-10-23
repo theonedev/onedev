@@ -51,13 +51,19 @@ public class ForgetPage extends BasePage {
 
 					@Override
 					protected TestResult test() {
-						AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-						Account user = userManager.findByName(bean.getUserName());
-						if (user != null) {
+						AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+						Account user = accountManager.findByName(bean.getUserNameOrEmailAddress());
+						if (user == null) {
+							user = accountManager.findByEmail(bean.getUserNameOrEmailAddress());
+						}
+						if (user == null) {
+							return new TestResult.Failed("No account found with name or email: " + bean.getUserNameOrEmailAddress());
+						} else {
 							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 							if (configManager.getMailSetting() != null) {
-								String password = RandomStringUtils.random(10, true, true);
+								String password = RandomStringUtils.random(10, true, true);								
 								user.setPassword(password);
+								accountManager.save(user);
 								
 								MailManager mailManager = GitPlex.getInstance(MailManager.class);
 								try {
@@ -72,7 +78,7 @@ public class ForgetPage extends BasePage {
 
 									mailManager.sendMail(configManager.getMailSetting(), Arrays.asList(user), 
 											"Your GitPlex password has been reset", mailBody);
-									return new TestResult.Successful("Please check your email for the reset password.");
+									return new TestResult.Successful("Please check your email " + user.getEmail() + " for the reset password.");
 								} catch (Exception e) {
 									logger.error("Error sending password reset email", e);
 									return new TestResult.Failed("Error sending password reset email: " + e.getMessage());
@@ -80,8 +86,6 @@ public class ForgetPage extends BasePage {
 							} else {
 								return new TestResult.Failed("Unable to send password reset email as smtp setting is not defined");
 							}
-						} else {
-							return new TestResult.Failed("No account found with name " + bean.getUserName());
 						}
 					}
 					
@@ -117,16 +121,16 @@ public class ForgetPage extends BasePage {
 	@Editable
 	public static class HelperBean implements Serializable {
 		
-		private String userName;
+		private String userNameOrEmailAddress;
 
-		@Editable(name="Please specify name of your account")
+		@Editable(name="Please specify your account name or email address")
 		@NotEmpty
-		public String getUserName() {
-			return userName;
+		public String getUserNameOrEmailAddress() {
+			return userNameOrEmailAddress;
 		}
 
-		public void setUserName(String userName) {
-			this.userName = userName;
+		public void setUserNameOrEmailAddress(String userNameOrEmailAddress) {
+			this.userNameOrEmailAddress = userNameOrEmailAddress;
 		}
 		
 	}
