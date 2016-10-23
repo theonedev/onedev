@@ -1,6 +1,7 @@
 gitplex.sourceview = {
 	init: function(fileContent, filePath, openComment, mark, symbolTooltipId, 
-			revision, blameInfos, comments, markCallback, viewState, loggedIn, anchor, tabSize, lineWrapMode) {
+			revision, blameInfos, comments, markCallback, blameMessageCallback, 
+			viewState, loggedIn, anchor, tabSize, lineWrapMode) {
 		var cm;
 		
 		var $sourceView = $(".source-view");
@@ -10,6 +11,7 @@ gitplex.sourceview = {
 			$sourceView.data("mark", mark);
 		
 		$sourceView.data("markCallback", markCallback);
+		$sourceView.data("blameMessageCallback", blameMessageCallback);
 		
 		var $code = $sourceView.children(".code");
 		$sourceView.closest(".scrollable").css("overflow", "visible");
@@ -224,18 +226,6 @@ gitplex.sourceview = {
 				Cookies.set(outlineWidthCookieKey, ui.size.width, {expires: Infinity});
 			}
 		});
-	},
-	showBlameMessage: function(tooltipId, authoring, message) {
-		var $blameTooltip = $("#" + tooltipId);
-		$blameTooltip.empty();
-		if (authoring) {
-			$blameTooltip.html("<div class='authoring'></div><div class='message'></div>");
-			$blameTooltip.children(".authoring").text(authoring);
-			$blameTooltip.children(".message").text(message);
-		} else {
-			$blameTooltip.text(message);
-		}
-		$blameTooltip.align({placement: $blameTooltip.data("alignment"), target: {element: $blameTooltip.data("trigger")}});
 	},
 	restoreMark: function() {
 		var $sourceView = $(".source-view");
@@ -489,7 +479,7 @@ gitplex.sourceview = {
 		var alignment = {targetX: 100, targetY: 100, x: 0, y: 0};
 		
 		if (blameInfos) {
-			var markCallback = $(".source-view").data("markCallback");
+			var blameMessageCallback = $(".source-view").data("blameMessageCallback");
 			var gutters = cm.getOption("gutters").slice();
 			gutters.splice(1, 0, "CodeMirror-annotations");
 			cm.setOption("gutters", gutters);
@@ -506,7 +496,7 @@ gitplex.sourceview = {
 
     				$hashLink.hover(function() {
     					var tooltipId = "blame-message-line-" + $(this).data("line");
-            			markCallback("showBlameMessage", tooltipId, $(this).data("hash"));
+    					blameMessageCallback(tooltipId, $(this).data("hash"));
     					var $tooltip = $("<div class='blame-message'><div class='loading'>Loading...</div></div>");
     					$tooltip.attr("id", tooltipId);
     					$tooltip.data("trigger", this);

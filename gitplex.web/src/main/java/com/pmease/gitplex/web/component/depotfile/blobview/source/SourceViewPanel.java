@@ -42,7 +42,6 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -76,6 +75,7 @@ import com.pmease.gitplex.core.entity.support.TextRange;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.web.behavior.BlameMessageBehavior;
 import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
@@ -129,6 +129,8 @@ public class SourceViewPanel extends BlobViewPanel {
 	private SymbolTooltipPanel symbolTooltip;
 	
 	private AbstractPostAjaxBehavior ajaxBehavior;
+	
+	private BlameMessageBehavior blameMessageBehavior;
 	
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
@@ -453,28 +455,10 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				
 				switch(params.getParameterValue("action").toString()) {
-				case "showBlameMessage":
-					String tooltipId = params.getParameterValue("param1").toString();
-					String commitHash = params.getParameterValue("param2").toString();
-					RevCommit commit = context.getDepot().getRevCommit(commitHash);
-					String authoring;
-					if (commit.getAuthorIdent() != null) {
-						authoring = commit.getAuthorIdent().getName();
-						if (commit.getCommitterIdent() != null)
-							authoring += " " + DateUtils.formatAge(commit.getCommitterIdent().getWhen());
-						authoring = "'" + JavaScriptEscape.escapeJavaScript(authoring) + "'";
-					} else {
-						authoring = "undefined";
-					}
-					String message = JavaScriptEscape.escapeJavaScript(commit.getFullMessage());
-					String script = String.format("gitplex.sourceview.showBlameMessage('%s', %s, '%s');", tooltipId, authoring, message); 
-					target.appendJavaScript(script);
-					break;
 				case "openSelectionPopover": 
 					TextRange mark = getMark(params, "param1", "param2", "param3", "param4");
-					script = String.format("gitplex.sourceview.openSelectionPopover(%s, '%s', %s);", 
+					String script = String.format("gitplex.sourceview.openSelectionPopover(%s, '%s', %s);", 
 							getJson(mark), context.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
@@ -525,6 +509,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							clearComment(target);
 							target.appendJavaScript("gitplex.sourceview.mark(undefined, false);");
 							target.appendJavaScript("gitplex.sourceview.onLayoutChange();");
+							context.onMark(target, null);
 						}
 						
 					});
@@ -630,6 +615,14 @@ public class SourceViewPanel extends BlobViewPanel {
 				}
 			}
 			
+		});
+		
+		add(blameMessageBehavior = new BlameMessageBehavior() {
+			
+			@Override
+			protected Depot getDepot() {
+				return context.getDepot();
+			}
 		});
 		
 		outlineContainer = new WebMarkupContainer("outline") {
@@ -897,7 +890,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				context.getBlobIdent().revision, 
 				jsonOfBlameInfos, 
 				jsonOfCommentInfos,
-				callback, 
+				callback, blameMessageBehavior.getCallback(),
 				viewState!=null?"JSON.parse('"+viewState+"')":"undefined", 
 				SecurityUtils.getAccount()!=null, 
 				context.getAnchor()!=null?"'"+context.getAnchor()+"'":"undefined", 

@@ -1,10 +1,11 @@
 gitplex.textdiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta",
-	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll, callback, 
+	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll, callback, blameMessageCallback,
 			markSupport, mark, openComment, oldComments, newComments, dirtyContainerId, doclink) {
 		var $container = $("#" + containerId);
 		$container.data("dirtyContainerId", dirtyContainerId);
 		$container.data("callback", callback);
+		$container.data("blameMessageCallback", blameMessageCallback);
 		$container.data("symbolHover", function() {
 			var revision;
 			var $symbol = $(this);
@@ -455,7 +456,7 @@ gitplex.textdiff = {
 				newLine = -1;
 
 			var tooltipId = "blame-message-" + containerId + "_" + oldLine + "_" + newLine;
-			$container.data("callback")("showBlameMessage", tooltipId, $(this).data("hash"));
+			$container.data("blameMessageCallback")(tooltipId, $(this).data("hash"));
 			var $tooltip = $("<div class='blame-message'><div class='loading'>Loading...</div></div>");
 			$tooltip.attr("id", tooltipId);
 			$tooltip.data("trigger", this);
@@ -463,18 +464,6 @@ gitplex.textdiff = {
 			$container.append($tooltip);
 			return $tooltip;
 		}, alignment);
-	},
-	showBlameMessage: function(tooltipId, authoring, message) {
-		var $blameTooltip = $("#" + tooltipId);
-		$blameTooltip.empty();
-		if (authoring) {
-			$blameTooltip.html("<div class='authoring'></div><div class='message'></div>");
-			$blameTooltip.children(".authoring").text(authoring);
-			$blameTooltip.children(".message").text(message);
-		} else {
-			$blameTooltip.text(message);
-		}
-		$blameTooltip.align({placement: $blameTooltip.data("alignment"), target: {element: $blameTooltip.data("trigger")}});
 	},
 	openSelectionPopover: function(containerId, position, mark, markUrl, loggedIn) {
 		var $container = $("#" + containerId);

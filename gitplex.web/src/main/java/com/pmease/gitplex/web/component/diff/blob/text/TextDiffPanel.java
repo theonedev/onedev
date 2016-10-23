@@ -33,7 +33,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
-import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +61,7 @@ import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.behavior.BlameMessageBehavior;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.diff.blob.SourceAware;
 import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
@@ -96,6 +96,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	private Component symbolTooltip;
 	
 	private AbstractPostAjaxBehavior callbackBehavior;
+	
+	private BlameMessageBehavior blameMessageBehavior;
 	
 	private transient List<MarkAwareDiffBlock> diffBlocks;
 	
@@ -276,23 +278,6 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				switch (params.getParameterValue("action").toString()) {
-				case "showBlameMessage": 
-					String tooltipId = params.getParameterValue("param1").toString();
-					String commitHash = params.getParameterValue("param2").toString();
-					RevCommit commit = depotModel.getObject().getRevCommit(commitHash);
-					String authoring;
-					if (commit.getAuthorIdent() != null) {
-						authoring = commit.getAuthorIdent().getName();
-						if (commit.getCommitterIdent() != null)
-							authoring += " " + DateUtils.formatAge(commit.getCommitterIdent().getWhen());
-						authoring = "'" + JavaScriptEscape.escapeJavaScript(authoring) + "'";
-					} else {
-						authoring = "undefined";
-					}
-					String message = JavaScriptEscape.escapeJavaScript(commit.getFullMessage());
-					String script = String.format("gitplex.textdiff.showBlameMessage('%s', %s, '%s');", tooltipId, authoring, message); 
-					target.appendJavaScript(script);
-					break;
 				case "expand":
 					if (blameInfo != null) {
 						blameInfo.lastCommitHash = null;
@@ -311,7 +296,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					
 					String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
 					expanded = StringUtils.replace(expanded, "\n", "");
-					script = String.format("gitplex.textdiff.expand('%s', %d, \"%s\");",
+					String script = String.format("gitplex.textdiff.expand('%s', %d, \"%s\");",
 							getMarkupId(), index, expanded);
 					target.appendJavaScript(script);
 					break;
@@ -345,6 +330,14 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				}
 			}
 
+		});
+		
+		add(blameMessageBehavior = new BlameMessageBehavior() {
+			
+			@Override
+			protected Depot getDepot() {
+				return depotModel.getObject();
+			}
 		});
 		
 		symbolTooltip = new SymbolTooltipPanel("symbolTooltip", depotModel) {
@@ -511,10 +504,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
-		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, '%s');", 
+		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s');", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
-				RequestCycle.get().find(AjaxRequestTarget.class) == null, callback, 
+				RequestCycle.get().find(AjaxRequestTarget.class) == null, 
+				callback, blameMessageBehavior.getCallback(),
 				markSupport!=null, jsonOfMark, jsonOfCommentInfo, 
 				jsonOfOldCommentInfos, jsonOfNewCommentInfos, dirtyContainerId, 
 				GitPlex.getInstance().getDocLink());
