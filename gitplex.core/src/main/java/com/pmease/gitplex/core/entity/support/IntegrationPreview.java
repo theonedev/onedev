@@ -15,16 +15,16 @@ import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 @Embeddable
 public class IntegrationPreview implements Serializable {
 	
-	@Column(name="G_PV_TARGET_HEAD")
+	@Column(name="PREVIEW_TARGET_HEAD")
 	private String targetHead;
 	
-	@Column(name="G_PV_REQUEST_HEAD")
+	@Column(name="PREVIEW_REQUEST_HEAD")
 	private String requestHead;
 	
-	@Column(name="G_PV_INT_STRATEGY")
+	@Column(name="PREVIEW_INTEGRATION_STRATEGY")
 	private IntegrationStrategy integrationStrategy;
 	
-	@Column(name="G_PV_INTEGRATED")
+	@Column(name="PREVIEW_INTEGRATED")
 	private String integrated;
 	
 	@SuppressWarnings("unused")
