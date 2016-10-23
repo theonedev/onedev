@@ -154,4 +154,8 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		return new ManagedSerializedForm(GitPlex.class);
 	}	
 	
+	public String getDocLink() {
+		return "http://wiki.pmease.com//display/gp" + StringUtils.substringBefore(AppLoader.getProduct().getVersion(), ".");
+	}
+	
 }

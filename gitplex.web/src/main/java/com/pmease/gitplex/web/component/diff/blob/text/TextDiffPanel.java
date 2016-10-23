@@ -502,12 +502,13 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
-		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s);", 
+		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, '%s');", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
 				RequestCycle.get().find(AjaxRequestTarget.class) == null, callback, 
 				markSupport!=null, jsonOfMark, jsonOfCommentInfo, 
-				jsonOfOldCommentInfos, jsonOfNewCommentInfos, dirtyContainerId);
+				jsonOfOldCommentInfos, jsonOfNewCommentInfos, dirtyContainerId, 
+				GitPlex.getInstance().getDocLink());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

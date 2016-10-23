@@ -1,7 +1,7 @@
 gitplex.textdiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta",
 	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll, callback, 
-			markSupport, mark, openComment, oldComments, newComments, dirtyContainerId) {
+			markSupport, mark, openComment, oldComments, newComments, dirtyContainerId, doclink) {
 		var $container = $("#" + containerId);
 		$container.data("dirtyContainerId", dirtyContainerId);
 		$container.data("callback", callback);
@@ -329,7 +329,7 @@ gitplex.textdiff = {
 				function showInvalidSelection() {
 					var $content = $("<div></div>");
 					$content.append("<a class='invalid'><i class='fa fa-warning'></i> Invalid selection, click for details</a>");
-					$content.children("a").attr("href", "http://wiki.pmease.com/display/gp/Diff+Selection");
+					$content.children("a").attr("href", doclink + "/Diff+Selection");
 					return {
 						position: position, 
 						content: $content

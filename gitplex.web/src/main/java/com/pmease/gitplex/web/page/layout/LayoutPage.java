@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -143,6 +144,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		head.add(new BookmarkablePageLink<Void>("administration", SystemSettingPage.class)
 				.setVisible(SecurityUtils.canManageSystem()));
+		head.add(new ExternalLink("docLink", GitPlex.getInstance().getDocLink()));
 		
 		Account user = getLoginUser();
 		boolean signedIn = user != null;
