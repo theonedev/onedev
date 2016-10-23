@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.33</version> 
+            <version>1.0.34</version> 
         </dependency>  
         <dependency> 
             <groupId>org.hibernate</groupId>  
@@ -98,12 +98,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jackson</artifactId>  
-            <version>1.0.2</version> 
+            <version>1.0.3</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0.33</version> 
+            <version>1.0.34</version> 
         </dependency>  
         <dependency> 
             <groupId>org.dom4j</groupId>  
@@ -137,5 +137,5 @@
         <moduleClass>com.pmease.commons.hibernate.HibernateModule</moduleClass>  
         <hibernateVersion>5.1.0.Final</hibernateVersion> 
     </properties>  
-    <version>1.0.32</version>
+    <version>1.0.33</version> 
 </project>

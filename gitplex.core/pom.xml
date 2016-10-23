@@ -33,12 +33,12 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.33</version> 
+            <version>1.0.34</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0.3</version> 
+            <version>1.0.4</version> 
         </dependency>  
         <dependency> 
             <groupId>org.jetbrains.xodus</groupId>  
@@ -47,46 +47,46 @@
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0.3</version>  
+            <version>1.0.4</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0.33</version> 
+            <version>1.0.34</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.33</version>  
+            <version>1.0.34</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.schedule</artifactId>  
-            <version>1.0.2</version> 
+            <version>1.0.3</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.hibernate</artifactId>  
-            <version>1.0.32</version> 
+            <version>1.0.33</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.shiro</artifactId>  
-            <version>1.0.32</version> 
+            <version>1.0.33</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.markdown</artifactId>  
-            <version>1.0.2</version> 
+            <version>1.0.3</version> 
         </dependency>  
         <dependency> 
             <groupId>com.pmease</groupId>  
             <artifactId>commons.lang</artifactId>  
-            <version>1.0.3</version> 
+            <version>1.0.4</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -109,5 +109,5 @@
     <properties> 
         <moduleClass>com.pmease.gitplex.core.CoreModule</moduleClass> 
     </properties>  
-    <version>1.0.34</version> 
+    <version>1.0.35</version> 
 </project>
