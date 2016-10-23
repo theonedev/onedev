@@ -45,28 +45,28 @@ public class RefInfo implements Comparable<RefInfo> {
 	}
 
 	@Override
-	public int compareTo(RefInfo o) {
-		if (obj instanceof RevTag) {
-			if (o.obj instanceof RevTag) {
-				return ((RevTag)obj).getTaggerIdent().getWhen().compareTo(((RevTag)o.obj).getTaggerIdent().getWhen());
+	public int compareTo(RefInfo other) {
+		if (obj instanceof RevTag && ((RevTag)obj).getTaggerIdent() != null) {
+			if (other.obj instanceof RevTag && ((RevTag)other.obj).getTaggerIdent() != null) {
+				return ((RevTag)obj).getTaggerIdent().getWhen().compareTo(((RevTag)other.obj).getTaggerIdent().getWhen());
 			} else {
 				return -1;
 			}
 		} else {
-			if (o.obj instanceof RevTag) {
+			if (other.obj instanceof RevTag && ((RevTag)other.obj).getTaggerIdent() != null) {
 				return 1;
 			} else {
 				if (obj instanceof RevCommit) {
-					if (o.peeledObj instanceof RevCommit) {
-						return ((RevCommit)peeledObj).getCommitTime() - ((RevCommit)o.peeledObj).getCommitTime();
+					if (other.peeledObj instanceof RevCommit) {
+						return ((RevCommit)peeledObj).getCommitTime() - ((RevCommit)other.peeledObj).getCommitTime();
 					} else {
 						return -1;
 					}
 				} else {
-					if (o.peeledObj instanceof RevCommit) {
+					if (other.peeledObj instanceof RevCommit) {
 						return 1;
 					} else {
-						return ref.getName().compareTo(o.ref.getName());
+						return ref.getName().compareTo(other.ref.getName());
 					}
 				}
 			}

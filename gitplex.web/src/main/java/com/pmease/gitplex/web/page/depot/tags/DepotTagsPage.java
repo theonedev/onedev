@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.page.depot.tags;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,7 +19,6 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
@@ -34,8 +32,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.filter.RevFilter;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.RefInfo;
@@ -45,7 +41,6 @@ import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.support.DepotAndRevision;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.archivemenulink.ArchiveMenuLink;
@@ -54,7 +49,6 @@ import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoBranchesPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
-import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -306,52 +300,6 @@ public class DepotTagsPage extends DepotPage {
 					}
 					
 				});
-				
-				link = new Link<Void>("compare") {
-
-					@Override
-					public void onClick() {
-						try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
-							RevCommit currentCommit = revWalk.lookupCommit(item.getModelObject().getPeeledObj());
-							RefInfo prevAncestorRef = null;
-							for (int i=item.getIndex()+1; i<tagsModel.getObject().size(); i++) {
-								RefInfo prevRef = tagsModel.getObject().get(i);
-								revWalk.setRevFilter(RevFilter.MERGE_BASE);
-								revWalk.markStart(currentCommit);
-								
-								RevCommit prevCommit = revWalk.lookupCommit(prevRef.getPeeledObj());
-								revWalk.markStart(prevCommit);
-								if (prevCommit.equals(revWalk.next())) {
-									prevAncestorRef = prevRef;
-									break;
-								}
-								revWalk.reset();
-							}
-							DepotAndRevision target;
-							if (prevAncestorRef != null) {
-								target = new DepotAndRevision(getDepot(), 
-										GitUtils.ref2tag(prevAncestorRef.getRef().getName()));
-							} else {
-								target = new DepotAndRevision(getDepot(), 
-										GitUtils.ref2tag(item.getModelObject().getRef().getName()));
-							}
-							DepotAndRevision source = new DepotAndRevision(getDepot(), 
-									GitUtils.ref2tag(item.getModelObject().getRef().getName()));
-							RevisionComparePage.State state = new RevisionComparePage.State();
-							state.leftSide = target;
-							state.rightSide = source;
-							state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
-							setResponsePage(RevisionComparePage.class, params);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
-					
-				};
-				link.setVisible(item.getIndex()<tagsModel.getObject().size()-1);
-				
-				item.add(link);
 				
 				item.add(new AjaxLink<Void>("delete") {
 
