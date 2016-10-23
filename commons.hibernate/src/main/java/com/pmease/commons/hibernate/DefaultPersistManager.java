@@ -115,6 +115,7 @@ public class DefaultPersistManager implements PersistManager {
 				}
 			}
 		} catch (SQLException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	

@@ -138,7 +138,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	private boolean publicRead;
 
 	@Lob
-	@Column(length=65535)
+	@Column(length=65535, name="COMMIT_MSG_TRANSFORM")
 	private CommitMessageTransformSetting commitMessageTransformSetting;
 	
 	@Column(nullable=false)
