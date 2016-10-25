@@ -20,6 +20,11 @@ div.revision-selector {
 }
 div.revision-selector ul.items {
 	margin-bottom: 0;
+	/* 
+	 * Configure max height to make sure scroll bar appears if there are many refs as we initially only 
+	 * loads a page of items 
+	 */
+	max-height: 600px; 
 }
 div.revision-selector ul.items>li {
 	position: relative;

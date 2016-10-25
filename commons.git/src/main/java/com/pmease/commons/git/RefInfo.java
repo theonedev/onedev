@@ -1,6 +1,7 @@
 package com.pmease.commons.git;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -46,30 +47,33 @@ public class RefInfo implements Comparable<RefInfo> {
 
 	@Override
 	public int compareTo(RefInfo other) {
+		Date date;
 		if (obj instanceof RevTag && ((RevTag)obj).getTaggerIdent() != null) {
-			if (other.obj instanceof RevTag && ((RevTag)other.obj).getTaggerIdent() != null) {
-				return ((RevTag)obj).getTaggerIdent().getWhen().compareTo(((RevTag)other.obj).getTaggerIdent().getWhen());
-			} else {
-				return -1;
-			}
+			date =  ((RevTag)obj).getTaggerIdent().getWhen();
+		} else if (peeledObj instanceof RevCommit) {
+			date = ((RevCommit)peeledObj).getCommitterIdent().getWhen();
 		} else {
-			if (other.obj instanceof RevTag && ((RevTag)other.obj).getTaggerIdent() != null) {
+			date = null;
+		}
+		Date otherDate;
+		if (other.obj instanceof RevTag && ((RevTag)other.obj).getTaggerIdent() != null) {
+			otherDate =  ((RevTag)other.obj).getTaggerIdent().getWhen();
+		} else if (other.peeledObj instanceof RevCommit) {
+			otherDate = ((RevCommit)other.peeledObj).getCommitterIdent().getWhen();
+		} else {
+			otherDate = null;
+		}
+		
+		if (date != null) {
+			if (otherDate != null)
+				return date.compareTo(otherDate);
+			else
 				return 1;
-			} else {
-				if (obj instanceof RevCommit) {
-					if (other.peeledObj instanceof RevCommit) {
-						return ((RevCommit)peeledObj).getCommitTime() - ((RevCommit)other.peeledObj).getCommitTime();
-					} else {
-						return -1;
-					}
-				} else {
-					if (other.peeledObj instanceof RevCommit) {
-						return 1;
-					} else {
-						return ref.getName().compareTo(other.ref.getName());
-					}
-				}
-			}
+		} else {
+			if (otherDate != null)
+				return -1;
+			else
+				return getRef().getName().compareTo(other.getRef().getName());
 		}
 	}
 	
