@@ -49,7 +49,7 @@
 	<wicket:fragment wicket:id="integratedFrag">
 		<div class="alert alert-success">
 			<div class="summary">
-				<span class="fa fa-lg fa-check-circle"></span>
+				<span class="fa fa-lg fa-check"></span>
 				<a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
 				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
 			</div>
@@ -58,8 +58,8 @@
 	<wicket:fragment wicket:id="rejectedFrag">
 		<div class="alert alert-danger">
 			<div class="summary">
-				<span class="fa fa-lg fa-ban"></span>
-				<span class="message">Gatekeeper of target repository rejects the integration request for below reasons:</span>
+				<span class="fa fa-lg fa-warning"></span>
+				<span class="message">Gatekeeper of target repository rejects the pull request for below reasons:</span>
 			</div>
 			<ul class="detail">
 				<li wicket:id="reasons"><span wicket:id="reason"></span></li>
