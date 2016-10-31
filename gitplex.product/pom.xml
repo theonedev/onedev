@@ -5,7 +5,7 @@
     <artifactId>gitplex</artifactId>  
     <name>GitPlex</name>  
     <parent> 
-        <groupId>com.pmease</groupId>  
+        <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
         <version>1.0.31</version> 
     </parent>  
@@ -21,7 +21,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId> 
             </plugin>  
             <plugin> 
-                <groupId>com.pmease</groupId>  
+                <groupId>com.gitplex</groupId>  
                 <artifactId>plugin.maven</artifactId>  
                 <executions> 
                     <execution> 
@@ -62,7 +62,7 @@
                                 <gant file="build/prepare_package.gant"> 
                                     <definition name="buildDirectory" value="${project.build.directory}"/>  
                                     <definition name="outputDirectory" value="${project.build.outputDirectory}"/>  
-                                    <definition name="jswPath" value="${com.pmease:commons.jsw:jar}"/>  
+                                    <definition name="jswPath" value="${com.gitplex:commons.jsw:jar}"/>  
                                     <definition name="productId" value="${project.artifactId}"/>  
                                     <definition name="productName" value="${project.name}"/>  
                                     <definition name="bootstrapClass" value="${bootstrapClass}"/> 
@@ -93,55 +93,55 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>commons.jsw</artifactId>  
             <version>1.0.33</version>  
             <scope>provided</scope> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.core</artifactId>  
             <version>1.0.37</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.web</artifactId>  
             <version>1.0.6</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
             <version>1.0.34</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>commons.git</artifactId>  
             <version>1.0.6</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.rest</artifactId>  
             <version>1.0.6</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.http</artifactId>  
             <version>1.0.6</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.search</artifactId>  
             <version>1.0.6</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
-            <id>pmeaseRepo</id>  
-            <name>PMEase Repository</name>  
+            <id>gitplexRepo</id>  
+            <name>GitPlex Repository</name>  
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -152,13 +152,13 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.pmease.com/</url> 
+            <url>http://artifact.gitplex.com/</url> 
         </repository> 
     </repositories>  
     <properties> 
         <executables>bin/*.sh, boot/wrapper-*</executables>  
-        <bootstrapClass>com.pmease.commons.bootstrap.Bootstrap</bootstrapClass>  
-        <moduleClass>com.pmease.gitplex.product.ProductModule</moduleClass>  
+        <bootstrapClass>com.gitplex.commons.bootstrap.Bootstrap</bootstrapClass>  
+        <moduleClass>com.gitplex.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
     </properties>  
     <version>1.0-EAP-build3</version> 

@@ -5,14 +5,14 @@
     <artifactId>gitplex.rest</artifactId>  
     <version>1.0.6</version>  
     <parent> 
-        <groupId>com.pmease</groupId>  
+        <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
         <version>1.0.31</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.pmease</groupId>  
+                <groupId>com.gitplex</groupId>  
                 <artifactId>plugin.maven</artifactId> 
             </plugin>  
             <plugin> 
@@ -25,20 +25,20 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>commons.jersey</artifactId>  
             <version>1.0.3</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.core</artifactId>  
             <version>1.0.37</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
-            <id>pmeaseRepo</id>  
-            <name>PMEase Repository</name>  
+            <id>gitplexRepo</id>  
+            <name>GitPlex Repository</name>  
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -49,10 +49,10 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.pmease.com/</url> 
+            <url>http://artifact.gitplex.com/</url> 
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.pmease.gitplex.rest.RestModule</moduleClass> 
+        <moduleClass>com.gitplex.rest.RestModule</moduleClass> 
     </properties> 
 </project>

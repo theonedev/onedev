@@ -34,7 +34,7 @@
 	<logger name="jetbrains.exodus" level="WARN"/>
 	<logger name="com.zaxxer.hikari.HikariDataSource" level="ERROR"/>
 	<logger name="com.zaxxer.hikari.util.DriverDataSource" level="ERROR"/>
-	<logger name="com.pmease" level="INFO"/>	
+	<logger name="com.gitplex" level="INFO"/>	
 	
 	<root level="WARN">
 		<appender-ref ref="FILE"/>

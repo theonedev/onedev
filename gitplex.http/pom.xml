@@ -5,14 +5,14 @@
     <artifactId>gitplex.http</artifactId>  
     <version>1.0.6</version>  
     <parent> 
-        <groupId>com.pmease</groupId>  
+        <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
         <version>1.0.31</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.pmease</groupId>  
+                <groupId>com.gitplex</groupId>  
                 <artifactId>plugin.maven</artifactId> 
             </plugin>  
             <!-- Uncomment below if you'd like to publish an archetype based on your plugin -->  
@@ -29,20 +29,20 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
             <version>1.0.34</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.core</artifactId>  
             <version>1.0.37</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
-            <id>pmeaseRepo</id>  
-            <name>PMEase Repository</name>  
+            <id>gitplexRepo</id>  
+            <name>GitPlex Repository</name>  
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -53,10 +53,10 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.pmease.com/</url> 
+            <url>http://artifact.gitplex.com/</url> 
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.pmease.gitplex.http.HttpModule</moduleClass> 
+        <moduleClass>com.gitplex.http.HttpModule</moduleClass> 
     </properties> 
 </project>

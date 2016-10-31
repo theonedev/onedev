@@ -1,0 +1,52 @@
+<wicket:extend>
+	<div id="main">
+		<div wicket:id="mainHead" class="head clearfix">
+			<div class="logo pull-left">
+				<a wicket:id="home" title="Dashboard"><i class="fa fa-ext fa-gitplex-logo"></i></a>
+			</div>
+			<div wicket:id="context" class="context pull-left"></div>
+			<div class="account pull-right">
+			  	<wicket:enclosure child="login">
+			  		<div class="logged-out">
+				  		<a wicket:id="login">Log in</a>
+				  		<a wicket:id="register">Sign up</a>
+			  		</div>
+				</wicket:enclosure>
+				<wicket:enclosure child="user">
+					<div class="logged-in">
+				  		<a wicket:id="tasks" class="tasks" title="You've got tasks"><i class="fa fa-circle"></i></a>
+				  		<a wicket:id="user" class="current"></a>
+				  		<a wicket:id="userMenuTrigger" class="menu"><i class="fa fa-angle-down"></i></a>
+					</div>
+			  	</wicket:enclosure>
+			</div>
+			<div class="actions pull-right">
+				<a wicket:id="createNewDropdown" title="Create new repository or organization"><i class="fa fa-plus"></i> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="organizations" title="Joined organizations"><i class="fa fa-group"></i> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="repositories" title="Accessible repositories"><i class="fa fa-ext fa-repo"></i> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="administration" title="System administration"><i class="fa fa-gear"></i></a>
+				<a wicket:id="docLink" title="Help"><i class="fa fa-question"></i></a>
+			</div>
+			<div class="search pull-right">
+				<input class="hidden form-control input-sm" placeholder="Search..."></input>
+			</div>
+		</div>
+		<div class="body">
+			<wicket:child></wicket:child>
+		</div>
+		<div wicket:id="mainFoot" class="foot clearfix">
+			<div class="pull-left">
+				<a href="http://www.gitplex.com">GitPlex GitPlex</a>, <span wicket:id="productVersion"></span>, <span wicket:id="releaseDate"></span>
+			</div>
+			<div class="pull-right">
+			    <a href="http://www.gitplex.com/support">Support</a> | <a href="http://track.gitplex.com">Report Bug or Enhancement</a> 
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="createNewFrag">
+		<div class="create-new">
+			<a wicket:id="createNewDepot">Create new repository</a>
+			<a wicket:id="createNewOrganization">Create new organization</a>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

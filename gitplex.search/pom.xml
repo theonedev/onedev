@@ -5,14 +5,14 @@
     <artifactId>gitplex.search</artifactId>  
     <version>1.0.6</version>  
     <parent> 
-        <groupId>com.pmease</groupId>  
+        <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
         <version>1.0.31</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.pmease</groupId>  
+                <groupId>com.gitplex</groupId>  
                 <artifactId>plugin.maven</artifactId> 
             </plugin>  
             <plugin> 
@@ -32,7 +32,7 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.core</artifactId>  
             <version>1.0.37</version> 
         </dependency>  
@@ -67,14 +67,14 @@
             <version>${luceneVersion}</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
             <version>1.0.34</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
-            <groupId>com.pmease</groupId>  
+            <groupId>com.gitplex</groupId>  
             <artifactId>commons.git</artifactId>  
             <version>1.0.6</version>  
             <type>test-jar</type>  
@@ -83,8 +83,8 @@
     </dependencies>  
     <repositories> 
         <repository> 
-            <id>pmeaseRepo</id>  
-            <name>PMEase Repository</name>  
+            <id>gitplexRepo</id>  
+            <name>GitPlex Repository</name>  
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -95,11 +95,11 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.pmease.com/</url> 
+            <url>http://artifact.gitplex.com/</url> 
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.pmease.gitplex.search.SearchModule</moduleClass>  
+        <moduleClass>com.gitplex.search.SearchModule</moduleClass>  
         <luceneVersion>4.10.3</luceneVersion> 
     </properties> 
 </project>

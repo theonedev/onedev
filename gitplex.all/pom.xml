@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>gitplex.all</artifactId>  
     <parent> 
-        <groupId>com.pmease</groupId>  
+        <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
         <version>1.0.31</version> 
     </parent>  
@@ -19,8 +19,8 @@
     </modules>  
     <repositories> 
         <repository> 
-            <id>pmeaseRepo</id>  
-            <name>PMEase Repository</name>  
+            <id>gitplexRepo</id>  
+            <name>GitPlex Repository</name>  
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -31,7 +31,7 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.pmease.com/</url> 
+            <url>http://artifact.gitplex.com/</url> 
         </repository> 
     </repositories> 
 </project>

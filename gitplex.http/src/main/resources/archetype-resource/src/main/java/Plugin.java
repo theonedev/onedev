@@ -1,7 +1,7 @@
 package ${package};
 
 import java.util.Collection;
-import com.pmease.commons.loader.AbstractPlugin;
+import com.gitplex.commons.loader.AbstractPlugin;
 
 public class Plugin extends AbstractPlugin {
 

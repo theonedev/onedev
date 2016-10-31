@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-#if (\${groupId} != "com.pmease")
+#if (\${groupId} != "com.gitplex")
 	<groupId>\${groupId}</groupId>	
 #end
 	<artifactId>\${artifactId}</artifactId>
 	<version>\${version}</version>
 	<parent>
-		<groupId>com.pmease</groupId>
+		<groupId>com.gitplex</groupId>
 		<artifactId>parent.general</artifactId>
 		<version>1.0.31</version>
 	</parent>
@@ -15,7 +15,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.pmease</groupId>
+				<groupId>com.gitplex</groupId>
 				<artifactId>plugin.maven</artifactId>
 			</plugin>
 			<plugin>
@@ -37,8 +37,8 @@
 
 	<repositories>
 		<repository>
-			<id>pmeaseRepo</id>
-			<name>PMEase Repository</name>
+			<id>gitplexRepo</id>
+			<name>GitPlex Repository</name>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>
@@ -49,7 +49,7 @@
 				<updatePolicy>always</updatePolicy>
 				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
-			<url>http://artifact.pmease.com/</url>
+			<url>http://artifact.gitplex.com/</url>
 		</repository>
 	</repositories>
 

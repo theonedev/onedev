@@ -1,7 +1,7 @@
 package ${package};
 
-import com.pmease.commons.loader.AbstractPlugin;
-import com.pmease.commons.loader.AbstractPluginModule;
+import com.gitplex.commons.loader.AbstractPlugin;
+import com.gitplex.commons.loader.AbstractPluginModule;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
