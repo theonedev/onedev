@@ -247,7 +247,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 				+ "<p style='margin: 16px 0;'>"
 				+ "-- Sent by GitPlex", 
 				url, url, Throwables.getStackTraceAsString(e));
-		mailManager.sendMail(Lists.newArrayList(root), "GitPlex database auto-backup failed", body);
+		mailManager.sendMail(Lists.newArrayList(root.getEmail()), "GitPlex database auto-backup failed", body);
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {

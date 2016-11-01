@@ -102,7 +102,7 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 				String body = String.format("You are designated to review pull request #%d (%s).<br>"
 						+ "Please visit <a href='%s'>%s</a> to do the review.",
 						request.getNumber(), request.getTitle(), url, url);
-				mailManager.sendMailAsync(Sets.newHashSet(task.getUser()), subject, decorate(user, body));
+				mailManager.sendMailAsync(Sets.newHashSet(task.getUser().getEmail()), subject, decorate(user, body));
 				
 				listenerRegistry.post(new TaskChangeEvent(user));
 			}
@@ -113,7 +113,7 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 			String body = String.format("You are invited to review pull request #%d (%s).<br>"
 					+ "Please visit <a href='%s'>%s</a> to do the review.",
 					request.getNumber(), request.getTitle(), url, url);
-			mailManager.sendMailAsync(Sets.newHashSet(invitation.getUser()), subject, decorate(user, body));
+			mailManager.sendMailAsync(Sets.newHashSet(invitation.getUser().getEmail()), subject, decorate(user, body));
 		}
 	}
 	
@@ -157,7 +157,7 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 					+ "Please visit <a href='%s'>%s</a> to check and integrate.", 
 					request.getNumber(), request.getTitle(), url, url);
 			
-			mailManager.sendMailAsync(Sets.newHashSet(task.getUser()), subject, decorate(user, body));
+			mailManager.sendMailAsync(Sets.newHashSet(task.getUser().getEmail()), subject, decorate(user, body));
 			listenerRegistry.post(new TaskChangeEvent(user));
 		}
 	}
@@ -190,7 +190,7 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 			String body = String.format("Next commits are expected for next round of review in pull request #%d (%s).<br>"
 					+ "Please visit <a href='%s'>%s</a> for details",
 					request.getNumber(), request.getTitle(), url, url);
-			mailManager.sendMailAsync(Sets.newHashSet(request.getSubmitter()), subject, 
+			mailManager.sendMailAsync(Sets.newHashSet(request.getSubmitter().getEmail()), subject, 
 					decorate(request.getSubmitter(), body));
 			listenerRegistry.post(new TaskChangeEvent(request.getSubmitter()));
 		}

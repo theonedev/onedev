@@ -76,7 +76,7 @@ public class ForgetPage extends BasePage {
 										+ "-- Sent by GitPlex", 
 										user.getDisplayName(), user.getName(), password);
 
-									mailManager.sendMail(configManager.getMailSetting(), Arrays.asList(user), 
+									mailManager.sendMail(configManager.getMailSetting(), Arrays.asList(user.getEmail()), 
 											"Your GitPlex password has been reset", mailBody);
 									return new TestResult.Successful("Please check your email " + user.getEmail() + " for the reset password.");
 								} catch (Exception e) {

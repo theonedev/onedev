@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -149,7 +150,8 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 						+ "For details, please visit <a href='%s'>%s</a>", 
 						subject, markdownManager.escape(markdown), url, url);
 				
-				mailManager.sendMailAsync(mentionUsers, subject, decorateBody(body));
+				mailManager.sendMailAsync(mentionUsers.stream().map(Account::getEmail).collect(Collectors.toList()), 
+						subject, decorateBody(body));
 			}
 		} 		
 
@@ -184,7 +186,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 			String body = String.format("You are assigned with pull request #%d (%s).<br>"
 					+ "Please visit <a href='%s'>%s</a> for details.",
 					request.getNumber(), request.getTitle(), url, url);
-			mailManager.sendMailAsync(Sets.newHashSet(request.getAssignee()), subject, decorateBody(body));
+			mailManager.sendMailAsync(Sets.newHashSet(request.getAssignee().getEmail()), subject, decorateBody(body));
 		}
 		
 		if (!watchUsers.isEmpty()) {
@@ -211,7 +213,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 						+ "You receive this email as you are watching the pull request.",
 						request.getNumber(), request.getTitle(), eventType, url, url);
 			}
-			mailManager.sendMailAsync(watchUsers, subject, body);
+			mailManager.sendMailAsync(watchUsers.stream().map(Account::getEmail).collect(Collectors.toList()), subject, body);
 		}
 		
 	}

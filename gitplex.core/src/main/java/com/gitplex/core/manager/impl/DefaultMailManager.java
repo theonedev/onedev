@@ -2,7 +2,6 @@ package com.gitplex.core.manager.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
@@ -16,13 +15,12 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.core.entity.Account;
-import com.gitplex.core.manager.ConfigManager;
-import com.gitplex.core.manager.MailManager;
-import com.gitplex.core.setting.MailSetting;
 import com.gitplex.commons.bootstrap.Bootstrap;
 import com.gitplex.commons.hibernate.Sessional;
 import com.gitplex.commons.hibernate.dao.Dao;
+import com.gitplex.core.manager.ConfigManager;
+import com.gitplex.core.manager.MailManager;
+import com.gitplex.core.setting.MailSetting;
 
 @Singleton
 public class DefaultMailManager implements MailManager {
@@ -44,7 +42,7 @@ public class DefaultMailManager implements MailManager {
 
 	@Sessional
 	@Override
-	public void sendMailAsync(Collection<Account> toList, String subject, String body) {
+	public void sendMailAsync(Collection<String> toList, String subject, String body) {
 		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
 			dao.doAsyncAfterCommit(newSendMailRunnable(toList, subject, body));
 		} else {
@@ -52,7 +50,7 @@ public class DefaultMailManager implements MailManager {
 		}
 	}
 	
-	private Runnable newSendMailRunnable(Collection<Account> toList, String subject, String body) {
+	private Runnable newSendMailRunnable(Collection<String> toList, String subject, String body) {
 		return new Runnable() {
 
 			@Override
@@ -68,14 +66,8 @@ public class DefaultMailManager implements MailManager {
 	}
 
 	@Override
-	public void sendMail(MailSetting mailSetting, Collection<Account> toList, String subject, String body) {
-		Collection<String> toAddresses = new ArrayList<>();
-		for (Account user: toList) {
-			if (user.getEmail() != null)
-				toAddresses.add(user.getEmail());
-		}
-		
-		if (toAddresses.isEmpty())
+	public void sendMail(MailSetting mailSetting, Collection<String> toList, String subject, String body) {
+		if (toList.isEmpty())
 			return;
 
 		if (mailSetting == null)
@@ -106,7 +98,7 @@ public class DefaultMailManager implements MailManager {
 		}
 		try {
 			email.setFrom(senderEmail);
-			for (String address: toAddresses)
+			for (String address: toList)
 				email.addTo(address);
 	
 			email.setHostName(mailSetting.getSmtpHost());
@@ -120,7 +112,7 @@ public class DefaultMailManager implements MailManager {
 			email.setSubject(subject);
 			email.setHtmlMsg(body);
 			
-			logger.debug("Sending email (to: {}, subject: {})... ", toAddresses, subject);
+			logger.debug("Sending email (to: {}, subject: {})... ", toList, subject);
 			email.send();
 		} catch (EmailException e) {
 			throw new RuntimeException(e);
@@ -128,7 +120,7 @@ public class DefaultMailManager implements MailManager {
 	}
 
 	@Override
-	public void sendMail(Collection<Account> toList, String subject, String body) {
+	public void sendMail(Collection<String> toList, String subject, String body) {
 		sendMail(configManager.getMailSetting(), toList, subject, body);
 	}
 

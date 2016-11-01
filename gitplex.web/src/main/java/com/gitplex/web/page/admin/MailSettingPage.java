@@ -64,7 +64,7 @@ public class MailSettingPage extends AdministrationPage {
 						Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 						try {
 							GitPlex.getInstance(MailManager.class).sendMail(mailSettingHolder.getMailSetting(), 
-									Sets.newHashSet(currentUser), 
+									Sets.newHashSet(currentUser.getEmail()), 
 									"Test email from GitPlex", "Great, your mail setting is correct!");
 							return new TestResult.Successful("Test mail has been sent to " + 
 									currentUser.getEmail() + ", please check your mail box.");

@@ -203,7 +203,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 					+ "For details, please visit <a href='%s'>%s</a>", 
 					markdownManager.escape(event.getMarkdown()), url, url);
 			
-			mailManager.sendMailAsync(mentionedUsers, subject, decorateBody(subject + "." + content));
+			mailManager.sendMailAsync(mentionedUsers.stream().map(Account::getEmail).collect(Collectors.toList()), 
+					subject, decorateBody(subject + "." + content));
 			
 			Collection<Account> involvedUsers = new HashSet<>();
 			RevCommit commit = comment.getDepot().getRevCommit(ObjectId.fromString(comment.getCommentPos().getCommit()));
@@ -216,8 +217,9 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			involvedUsers.removeAll(mentionedUsers);
 			involvedUsers.remove(event.getUser());
 			
-			subject = "You are involved in a code comment on file " + comment.getCommentPos().getPath();			
-			mailManager.sendMailAsync(involvedUsers, subject, decorateBody(subject + "." + content));
+			subject = "You are involved in a code comment on file " + comment.getCommentPos().getPath();
+			mailManager.sendMailAsync(involvedUsers.stream().map(Account::getEmail).collect(Collectors.toList()), 
+					subject, decorateBody(subject + "." + content));
 		}
 	}
 	
