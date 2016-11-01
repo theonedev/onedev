@@ -1,8 +1,6 @@
-var gitplex = {
-	mouseState: {
-		pressed: false, 
-		moved: false
-	}
+gitplex.mouseState = {
+	pressed: false, 
+	moved: false
 };
 
 $(document).ready(function() {
