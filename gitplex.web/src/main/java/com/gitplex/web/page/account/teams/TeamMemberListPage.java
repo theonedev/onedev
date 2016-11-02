@@ -61,6 +61,8 @@ public class TeamMemberListPage extends TeamPage {
 	
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
+	private String searchInput;
+	
 	public TeamMemberListPage(PageParameters params) {
 		super(params);
 		
@@ -78,6 +80,7 @@ public class TeamMemberListPage extends TeamPage {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
 				target.add(membersContainer);
 				target.add(pagingNavigator);
 				target.add(noMembersContainer);
@@ -209,7 +212,7 @@ public class TeamMemberListPage extends TeamPage {
 				List<TeamMembership> memberships = new ArrayList<>();
 				
 				for (TeamMembership membership: teamModel.getObject().getMemberships()) {
-					if (membership.getUser().matches(searchField.getInput())) {
+					if (membership.getUser().matches(searchInput)) {
 						memberships.add(membership);
 					}
 				}

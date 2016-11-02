@@ -7,15 +7,6 @@ gitplex.revisionSelector = {
 			$container.find("input").focus();
 		});
 		gitplex.revisionSelector.bindInputKeys(containerId);
-		gitplex.revisionSelector.setupInfiniteScroll(containerId);
-	},
-	setupInfiniteScroll: function(containerId) {
-		var $container = $("#" + containerId);
-		$container.find("ul.items").scroll(function() {
-			if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
-				$container.data("callback")("load");
-			}
-		});
 	},
 	bindInputKeys: function(containerId) {
 		var $container = $("#" + containerId);
@@ -24,14 +15,14 @@ gitplex.revisionSelector = {
 		$input.bind("keydown", "return", function() {
 			var $active = $container.find("ul.items li.active");
 			if ($active.length != 0)
-				callback("return", $active.data("value"));
+				callback($active.data("value"));
 			else
-				callback("return");
+				callback();
 		});
 		$input.bind("keydown", "up", function(e) {
 			e.preventDefault();
 			var $active = $container.find("ul.items li.active");
-			var $prev = $active.prev("li");
+			var $prev = $active.prev("li:not(.loading-indicator)");
 			if ($prev.length != 0) {
 				$active.removeClass("active");
 				$prev.addClass("active");
@@ -41,7 +32,7 @@ gitplex.revisionSelector = {
 		$input.bind("keydown", "down", function(e) {
 			e.preventDefault();
 			var $active = $container.find("ul.items li.active");
-			var $next = $active.next("li");
+			var $next = $active.next("li:not(.loading-indicator)");
 			if ($next.length != 0) {
 				$active.removeClass("active");
 				$next.addClass("active");

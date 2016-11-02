@@ -46,7 +46,7 @@ import com.gitplex.core.manager.CodeCommentManager;
 import com.gitplex.core.security.SecurityUtils;
 import com.gitplex.search.hit.QueryHit;
 import com.gitplex.web.Constants;
-import com.gitplex.web.behavior.BlameMessageBehavior;
+import com.gitplex.web.behavior.blamemessage.BlameMessageBehavior;
 import com.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.gitplex.web.component.diff.blob.SourceAware;
 import com.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;

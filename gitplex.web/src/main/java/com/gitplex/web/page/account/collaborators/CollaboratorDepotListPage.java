@@ -58,6 +58,8 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 	private WebMarkupContainer noDepotsContainer;
 	
 	private DepotPrivilege filterPrivilege;
+	
+	private String searchInput;
 
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
@@ -76,6 +78,8 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
+
 				target.add(depotsContainer);
 				target.add(pagingNavigator);
 				target.add(noDepotsContainer);
@@ -244,16 +248,10 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 			protected List<UserAuthorization> load() {
 				List<UserAuthorization> authorizations = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-
 				for (UserAuthorization authorization: collaboratorModel.getObject().getAuthorizedDepots()) {
 					Depot depot = authorization.getDepot();
 					if (depot.getAccount().equals(getAccount()) 
-							&& depot.getName().toLowerCase().contains(searchInput)) {
+							&& depot.matches(searchInput)) {
 						if (authorization.getPrivilege() != DepotPrivilege.NONE 
 								&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
 							authorizations.add(authorization);

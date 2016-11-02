@@ -32,6 +32,9 @@ div.revision-selector ul.items>li {
 div.revision-selector ul.items>li>a {
 	padding-left: 20px;
 }
+div.revision-selector ul.items>li.loading-indicator {
+	padding-left: 20px;
+}
 div.revision-selector .feedback {
 	color: #F94949; 
 	margin-bottom: 12px;

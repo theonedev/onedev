@@ -59,7 +59,7 @@ import com.gitplex.core.entity.support.TextRange;
 import com.gitplex.core.manager.CodeCommentManager;
 import com.gitplex.core.security.SecurityUtils;
 import com.gitplex.search.hit.QueryHit;
-import com.gitplex.web.behavior.BlameMessageBehavior;
+import com.gitplex.web.behavior.blamemessage.BlameMessageBehavior;
 import com.gitplex.web.component.comment.CodeCommentPanel;
 import com.gitplex.web.component.comment.CommentInput;
 import com.gitplex.web.component.comment.DepotAttachmentSupport;

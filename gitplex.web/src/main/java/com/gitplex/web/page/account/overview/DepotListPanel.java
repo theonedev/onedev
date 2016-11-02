@@ -41,6 +41,8 @@ public class DepotListPanel extends GenericPanel<Account> {
 	
 	private WebMarkupContainer noDepotsContainer;
 	
+	private String searchInput;
+	
 	public DepotListPanel(String id, IModel<Account> accountModel) {
 		super(id, accountModel);
 	}
@@ -60,6 +62,7 @@ public class DepotListPanel extends GenericPanel<Account> {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
 				target.add(depotsContainer);
 				target.add(noDepotsContainer);
 				target.add(pagingNavigator);
@@ -114,7 +117,7 @@ public class DepotListPanel extends GenericPanel<Account> {
 				List<Depot> depots = new ArrayList<>();
 				for (Depot depot: GitPlex.getInstance(DepotManager.class)
 						.findAllAccessible(getAccount(), SecurityUtils.getAccount())) {
-					if (depot.matches(searchField.getInput())) {
+					if (depot.matches(searchInput)) {
 						depots.add(depot);
 					}
 				}

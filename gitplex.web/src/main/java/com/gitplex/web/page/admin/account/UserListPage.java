@@ -42,6 +42,8 @@ public class UserListPage extends AdministrationPage {
 	
 	private WebMarkupContainer noAccountsContainer;
 	
+	private String searchInput;
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -52,6 +54,7 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
 				target.add(accountsContainer);
 				target.add(pagingNavigator);
 				target.add(noAccountsContainer);
@@ -92,7 +95,7 @@ public class UserListPage extends AdministrationPage {
 			protected List<Account> load() {
 				List<Account> accounts = new ArrayList<>();
 				for (Account account: GitPlex.getInstance(AccountManager.class).findAll()) {
-					if (account.matches(searchField.getInput()) && !account.isOrganization()) {
+					if (account.matches(searchInput) && !account.isOrganization()) {
 						accounts.add(account);
 					}
 				}

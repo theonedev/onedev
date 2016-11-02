@@ -51,6 +51,8 @@ public class DashboardPage extends LayoutPage {
 	
 	private WebMarkupContainer noDepotsContainer;
 	
+	private String searchInput;
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -123,12 +125,13 @@ public class DashboardPage extends LayoutPage {
 			
 		});
 		
-		TextField<String> searchDepots;
-		add(searchDepots = new TextField<String>("searchDepots", Model.of("")));
-		searchDepots.add(new OnTypingDoneBehavior(100) {
+		TextField<String> searchField;
+		add(searchField = new TextField<String>("search", Model.of("")));
+		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
 				target.add(depotsContainer);
 				target.add(depotsPageNav);
 				target.add(noDepotsContainer);
@@ -156,7 +159,7 @@ public class DashboardPage extends LayoutPage {
 				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
 				List<Depot> depots = new ArrayList<>();
 				for (Depot depot: depotManager.findAllAccessible(null, getLoginUser())) {
-					if (depot.matchesFQN(searchDepots.getInput())) {
+					if (depot.matchesFQN(searchInput)) {
 						depots.add(depot);
 					}
 				}

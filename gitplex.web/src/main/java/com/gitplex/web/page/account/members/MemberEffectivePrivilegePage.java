@@ -45,6 +45,8 @@ public class MemberEffectivePrivilegePage extends MemberPage {
 	
 	private DepotPrivilege filterPrivilege;
 	
+	private String searchInput;
+	
 	public MemberEffectivePrivilegePage(PageParameters params) {
 		super(params);
 	}
@@ -60,6 +62,8 @@ public class MemberEffectivePrivilegePage extends MemberPage {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
+				
 				target.add(depotsContainer);
 				target.add(pagingNavigator);
 				target.add(noDepotsContainer);
@@ -144,15 +148,9 @@ public class MemberEffectivePrivilegePage extends MemberPage {
 			protected List<DepotPermission> load() {
 				List<DepotPermission> permissions = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-
 				Account user = getMembership().getUser();
 				for (Depot depot: getAccount().getDepots()) {
-					if (depot.getName().toLowerCase().contains(searchInput)) {
+					if (depot.matches(searchInput)) {
 						DepotPrivilege privilege = new DepotAccess(user, depot).getGreatestPrivilege();
 						if (privilege != DepotPrivilege.NONE 
 								&& (filterPrivilege == null || filterPrivilege == privilege)) {

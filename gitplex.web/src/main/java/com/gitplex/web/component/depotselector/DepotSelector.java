@@ -26,13 +26,13 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.commons.wicket.behavior.InputChangeBehavior;
+import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
 import com.gitplex.core.GitPlex;
 import com.gitplex.core.entity.Depot;
 import com.gitplex.core.manager.DepotManager;
 import com.gitplex.web.page.depot.file.DepotFilePage;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.behavior.InputChangeBehavior;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
 public abstract class DepotSelector extends Panel {
@@ -42,6 +42,8 @@ public abstract class DepotSelector extends Panel {
 	private final Long currentDepotId;
 
 	private ListView<Depot> depotsView;
+	
+	private String searchInput;
 	
 	public DepotSelector(String id, IModel<Collection<Depot>> depotsModel, Long currentDepotId) {
 		super(id);
@@ -84,6 +86,7 @@ public abstract class DepotSelector extends Panel {
 			
 			@Override
 			protected void onInputChange(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
 				target.add(depotsContainer);
 				target.add(noDepotsContainer);
 			}
@@ -117,7 +120,7 @@ public abstract class DepotSelector extends Panel {
 			protected List<Depot> load() {
 				List<Depot> depots = new ArrayList<>();
 				for (Depot depot: depotsModel.getObject()) {
-					if (depot.matchesFQN(searchField.getInput())) {
+					if (depot.matchesFQN(searchInput)) {
 						depots.add(depot);
 					}
 				}

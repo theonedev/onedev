@@ -60,6 +60,8 @@ public class MemberListPage extends AccountLayoutPage {
 	
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
+	private String searchInput;
+	
 	public MemberListPage(PageParameters params) {
 		super(params);
 		
@@ -77,6 +79,7 @@ public class MemberListPage extends AccountLayoutPage {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
 				target.add(membersContainer);
 				target.add(pagingNavigator);
 				target.add(noMembersContainer);
@@ -217,7 +220,7 @@ public class MemberListPage extends AccountLayoutPage {
 				
 				for (OrganizationMembership membership: getAccount().getOrganizationMembers()) {
 					Account user = membership.getUser();
-					if (user.matches(searchField.getInput())) {
+					if (user.matches(searchInput)) {
 						if (filterRole == null 
 								|| filterRole.equals(ROLE_ADMIN) && membership.isAdmin() 
 								|| filterRole.equals(ROLE_MEMBER) && !membership.isAdmin()) {

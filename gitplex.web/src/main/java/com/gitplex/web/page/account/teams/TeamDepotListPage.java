@@ -66,9 +66,10 @@ public class TeamDepotListPage extends TeamPage {
 	
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
+	private String searchInput;
+	
 	public TeamDepotListPage(PageParameters params) {
 		super(params);
-		
 		Preconditions.checkState(getAccount().isOrganization());
 	}
 
@@ -83,6 +84,7 @@ public class TeamDepotListPage extends TeamPage {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
 				target.add(depotsContainer);
 				target.add(pagingNavigator);
 				target.add(noDepotsContainer);
@@ -251,7 +253,7 @@ public class TeamDepotListPage extends TeamPage {
 				List<TeamAuthorization> authorizations = new ArrayList<>();
 				
 				for (TeamAuthorization authorization: teamModel.getObject().getAuthorizations()) {
-					if (authorization.getDepot().matches(searchField.getInput())
+					if (authorization.getDepot().matches(searchInput)
 							&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
 						authorizations.add(authorization);
 					}

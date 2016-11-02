@@ -43,6 +43,8 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 	
 	private WebMarkupContainer noCollaboratorsContainer;
 	
+	private String searchInput;
+	
 	public AccountCollaboratorListPage(PageParameters params) {
 		super(params);
 	}
@@ -58,6 +60,7 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				searchInput = searchField.getInput();
 				target.add(collaboratorsContainer);
 				target.add(pagingNavigator);
 				target.add(noCollaboratorsContainer);
@@ -87,7 +90,7 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 				UserAuthorizationManager userAuthorizationManager = 
 						GitPlex.getInstance(UserAuthorizationManager.class);
 				for (UserAuthorization authorization: userAuthorizationManager.findAll(getAccount())) {
-					if (authorization.getUser().matches(searchField.getInput())) {
+					if (authorization.getUser().matches(searchInput)) {
 						setOfCollaborators.add(authorization.getUser());
 					}
 				}
