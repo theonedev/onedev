@@ -20,7 +20,7 @@ gitplex.fileedit = {
 	    $fileEdit.on("storeViewState", function(e) {
 			e.stopPropagation();
 			if (cm) {
-				pmease.commons.history.setViewState(pmease.commons.codemirror.getViewState(cm));
+				gitplex.commons.history.setViewState(gitplex.commons.codemirror.getViewState(cm));
 			}
 	    });
 	    
@@ -75,10 +75,10 @@ gitplex.fileedit = {
 						$fileEdit.data("contentChanged", false);
 					}
 				});
-				pmease.commons.codemirror.setMode(cm, filePath);
+				gitplex.commons.codemirror.setMode(cm, filePath);
 				
 			    if (mark) 
-			    	pmease.commons.codemirror.mark(cm, mark);
+			    	gitplex.commons.codemirror.mark(cm, mark);
 			}
 			
 			if ($edit.is(":visible")) {
@@ -89,7 +89,7 @@ gitplex.fileedit = {
 					cm.setOption("fullScreen", false);
 				cm.setSize($edit.width(), $edit.height());
 				if (initState)
-					pmease.commons.codemirror.initState(cm, viewState);
+					gitplex.commons.codemirror.initState(cm, viewState);
 			} else {
 				$body.css("overflow", "auto");
 			}
@@ -103,7 +103,7 @@ gitplex.fileedit = {
 	},
 	setMode: function(containerId, filePath) {
 		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
-		pmease.commons.codemirror.setMode(cm, filePath);
+		gitplex.commons.codemirror.setMode(cm, filePath);
 	},
 	mark: function(containerId, mark) {
 		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
@@ -171,7 +171,7 @@ gitplex.fileedit = {
 				endLine: newEndLine, 
 				endChar: newEndChar
 			};
-			pmease.commons.codemirror.mark(cm, newMark);
+			gitplex.commons.codemirror.mark(cm, newMark);
 		}
 	},
 	selectTab: function($tab) {
@@ -191,7 +191,7 @@ gitplex.fileedit = {
     	var $cm = $fileEdit.find(">.body>div.edit>.CodeMirror");
     	if ($cm.is(":visible")) {
         	var cm = $cm[0].CodeMirror;		
-    		$fileEdit.find(">.body>div.save").data("viewState", pmease.commons.codemirror.getViewState(cm));
+    		$fileEdit.find(">.body>div.save").data("viewState", gitplex.commons.codemirror.getViewState(cm));
     	}
     	
 		$body.find(">div").hide();

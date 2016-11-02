@@ -19,7 +19,7 @@ gitplex.blobInstantSearch = {
 		});
 
 		$input.data("return", function() {
-			if (pmease.commons.form.confirmLeave())
+			if (gitplex.commons.form.confirmLeave())
 				callback("return");
 		});
 		$input.data("keyup", function(e) {

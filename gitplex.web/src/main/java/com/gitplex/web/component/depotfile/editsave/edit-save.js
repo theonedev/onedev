@@ -3,7 +3,7 @@ gitplex.editsave = {
 		var $editSave = $("#" + containerId + ">.edit-save");
 		$editSave.on("storeViewState", function(e) {
 			e.stopPropagation();
-	    	pmease.commons.history.setViewState({scroll:{left: $editSave.scrollLeft(), top: $editSave.scrollTop()}});
+	    	gitplex.commons.history.setViewState({scroll:{left: $editSave.scrollLeft(), top: $editSave.scrollTop()}});
 		});
 		$editSave.on("autofit", function(e, width, height) {
 			e.stopPropagation();
@@ -12,7 +12,7 @@ gitplex.editsave = {
 			$editSave.outerWidth(width);
 			$editSave.outerHeight(height);
 			
-			var viewState = pmease.commons.history.getViewState();
+			var viewState = gitplex.commons.history.getViewState();
 			if (viewState && viewState.scroll) {
 				$editSave.scrollLeft(viewState.scroll.left);
 				$editSave.scrollTop(viewState.scroll.top);

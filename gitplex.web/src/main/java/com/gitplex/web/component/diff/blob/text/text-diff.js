@@ -436,7 +436,7 @@ gitplex.textdiff = {
 			if (mark) {
 				$container.data("mark", mark);
 				gitplex.textdiff.mark($container, mark);	
-				if (scroll && !pmease.commons.history.isVisited())
+				if (scroll && !gitplex.commons.history.isVisited())
 					gitplex.textdiff.scroll($container, mark);
 			}			
 		}

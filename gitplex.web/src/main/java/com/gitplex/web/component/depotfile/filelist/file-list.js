@@ -8,7 +8,7 @@ gitplex.filelist = {
 			$fileList.outerWidth(width);
 			$fileList.outerHeight(height);
 
-			var viewState = pmease.commons.history.getViewState();
+			var viewState = gitplex.commons.history.getViewState();
 			if (viewState && viewState.scroll) {
 			    $fileList.scrollLeft(viewState.scroll.left);
 			    $fileList.scrollTop(viewState.scroll.top);
@@ -17,7 +17,7 @@ gitplex.filelist = {
 		
 		$fileList.on("storeViewState", function(e) {
 			e.stopPropagation();
-			pmease.commons.history.setViewState({scroll:{left: $fileList.scrollLeft(), top: $fileList.scrollTop()}});			
+			gitplex.commons.history.setViewState({scroll:{left: $fileList.scrollLeft(), top: $fileList.scrollTop()}});			
 		});
 
 		$.ajax({
