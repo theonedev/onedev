@@ -64,6 +64,22 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.gitplex.commons.git.Blob;
+import com.gitplex.commons.git.BlobIdent;
+import com.gitplex.commons.git.GitUtils;
+import com.gitplex.commons.git.RefInfo;
+import com.gitplex.commons.git.Submodule;
+import com.gitplex.commons.git.exception.GitObjectNotFoundException;
+import com.gitplex.commons.git.exception.NotGitFileException;
+import com.gitplex.commons.hibernate.AbstractEntity;
+import com.gitplex.commons.hibernate.UnitOfWork;
+import com.gitplex.commons.loader.AppLoader;
+import com.gitplex.commons.loader.ListenerRegistry;
+import com.gitplex.commons.util.FileUtils;
+import com.gitplex.commons.util.LockUtils;
+import com.gitplex.commons.util.StringUtils;
+import com.gitplex.commons.wicket.editable.annotation.Editable;
+import com.gitplex.commons.wicket.editable.annotation.Markdown;
 import com.gitplex.core.GitPlex;
 import com.gitplex.core.entity.support.CommitMessageTransformSetting;
 import com.gitplex.core.entity.support.IntegrationPolicy;
@@ -82,22 +98,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.RefInfo;
-import com.gitplex.commons.git.Submodule;
-import com.gitplex.commons.git.exception.GitObjectNotFoundException;
-import com.gitplex.commons.git.exception.NotGitFileException;
-import com.gitplex.commons.hibernate.AbstractEntity;
-import com.gitplex.commons.hibernate.UnitOfWork;
-import com.gitplex.commons.loader.AppLoader;
-import com.gitplex.commons.loader.ListenerRegistry;
-import com.gitplex.commons.util.FileUtils;
-import com.gitplex.commons.util.LockUtils;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.editable.annotation.Editable;
-import com.gitplex.commons.wicket.editable.annotation.Markdown;
 
 @Entity
 @Table(

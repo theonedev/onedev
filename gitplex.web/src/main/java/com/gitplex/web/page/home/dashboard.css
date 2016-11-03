@@ -1,13 +1,10 @@
-#dashboard .repositories {
-	border-right: 1px solid #DDD;
-}
-#dashboard td {
+#dashboard {
 	padding: 20px;
 }
 #dashboard .title {
 	font-size: 18px;
 }
-#dashboard td>div, #dashboard td>ul {
+#dashboard>div, #dashboard>ul {
 	margin-bottom: 20px;
 } 
 #dashboard ul li a {

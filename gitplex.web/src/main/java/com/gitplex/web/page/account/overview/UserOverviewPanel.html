@@ -6,22 +6,47 @@
 				<span wicket:id="loginName"></span> <i class="fa fa-envelope-o"></i> <a wicket:id="email"></a>
 			</div>
 		</div>
-		<div wicket:id="organizations" class="organizations">
-			<div class="head">Organizations</div>
-			<div class="body clearfix">
-				<ul class="list-unstyled pull-left">
-					<li wicket:id="organizations" class="pull-left">
-						<a wicket:id="organization"></a>
-					</li>
-				</ul>
-				<div class="pull-left">
-					<a wicket:id="addOrganization" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
-				</div>
-			</div>
-		</div>
-		<div class="depots">
-			<div class="head">Repositories</div>
-			<div wicket:id="depots" class="body"></div>
-		</div>
+		<table class="organizations-and-depots">
+			<tr>
+				<td class="depots">
+					<div class="panel panel-default">
+						<div class="panel-heading"><span class="panel-title">Repositories</span></div>
+						<div class="panel-body">
+							<div wicket:id="depots" class="body"></div>
+						</div>
+					</div>
+				</td>
+				<td class="organizations">
+					<div class="panel panel-default">
+						<div class="panel-heading"><span class="panel-title">Organizations</span></div>
+						<div class="panel-body">
+							<div class="operations">
+								<a wicket:id="addOrganization" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+							</div>
+							<table wicket:id="organizations" class="table table-hover table-condensed">
+								<thead>
+									<tr>
+										<th class="name">Name</th>
+										<th class="role">Role</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr wicket:id="organizations">
+										<td class="name">
+											<a wicket:id="avatarLink"></a>
+											<a wicket:id="accountLink"></a>
+										</td>
+										<td class="role">
+											<span wicket:id="role"></span>
+										</td>
+									</tr>
+								</tbody>
+							</table>	
+							<div wicket:id="noOrganizations" class="alert alert-warning">No organizations found</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
 	</div>
 </wicket:panel>

@@ -41,5 +41,8 @@ public class DatabaseMigrator implements Migrator {
 			}
 		}	
 	}
+
+	private void migrate3(File dataDir, Stack<Integer> versions) {
+	}
 	
 }

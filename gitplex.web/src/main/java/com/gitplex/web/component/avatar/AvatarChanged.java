@@ -7,16 +7,16 @@ import com.gitplex.commons.wicket.AjaxEvent;
 
 public class AvatarChanged extends AjaxEvent {
 
-	private final Account user;
+	private final Account account;
 	
-	public AvatarChanged(AjaxRequestTarget target, Account user) {
+	public AvatarChanged(AjaxRequestTarget target, Account account) {
 		super(target);
 		
-		this.user = user;
+		this.account = account;
 	}
 
-	public Account getUser() {
-		return user;
+	public Account getAccount() {
+		return account;
 	}
 
 }

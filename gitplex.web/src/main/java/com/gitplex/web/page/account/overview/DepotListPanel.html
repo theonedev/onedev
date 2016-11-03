@@ -2,7 +2,7 @@
 	<div class="depot list">
 		<div class="head clearfix">
 			<div class="pull-left">
-				<input wicket:id="searchDepots" class="form-control search" placeholder="Search repositories"></input>
+				<input wicket:id="searchDepots" class="form-control search" placeholder="Search..."></input>
 			</div>
 			<div class="pull-left actions">
 				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
@@ -13,19 +13,15 @@
 				<tr>
 					<th class="name">Name</th>
 					<th class="public">Public</th>
-					<th class="actions"></th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr wicket:id="depots">
 					<td class="name">
-						<a wicket:id="depotLink"><span wicket:id="depotName"></span></a>
+						<i class="fa fa-ext fa-repo"></i> <a wicket:id="depotLink"><span wicket:id="depotName"></span></a>
 					</td>
 					<td class="public">
 						<span wicket:id="public"></span>
-					</td>
-					<td class="actions">
-						<a wicket:id="setting" class="fa fa-cog" title="Repository settings"></a>
 					</td>
 				</tr>
 			</tbody>

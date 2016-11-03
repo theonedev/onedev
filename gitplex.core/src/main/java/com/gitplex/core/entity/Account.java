@@ -24,6 +24,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.gitplex.commons.hibernate.AbstractEntity;
+import com.gitplex.commons.shiro.AbstractUser;
+import com.gitplex.commons.util.StringUtils;
+import com.gitplex.commons.wicket.editable.annotation.Editable;
+import com.gitplex.commons.wicket.editable.annotation.ExcludeValues;
+import com.gitplex.commons.wicket.editable.annotation.Password;
 import com.gitplex.core.GitPlex;
 import com.gitplex.core.manager.TeamAuthorizationManager;
 import com.gitplex.core.manager.TeamMembershipManager;
@@ -34,13 +40,6 @@ import com.gitplex.core.security.protectedobject.ProtectedObject;
 import com.gitplex.core.util.validation.AccountName;
 import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
-import com.gitplex.commons.hibernate.AbstractEntity;
-import com.gitplex.commons.shiro.AbstractUser;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.editable.annotation.Editable;
-import com.gitplex.commons.wicket.editable.annotation.ExcludeValues;
-import com.gitplex.commons.wicket.editable.annotation.Markdown;
-import com.gitplex.commons.wicket.editable.annotation.Password;
 
 @Entity
 @Table(indexes={
@@ -64,9 +63,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 	
 	/* used by user account */
 	private int reviewEffort;
-	
-	/* used by organization account */
-	private String description;
 	
 	/* used by organization account */
 	@Column(nullable=false)
@@ -200,16 +196,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	@Editable(order=350)
-	@Markdown
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	@Editable(order=370, description=""

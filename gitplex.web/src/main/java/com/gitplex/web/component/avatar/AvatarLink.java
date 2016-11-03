@@ -90,9 +90,9 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 		
 		if (event.getPayload() instanceof AvatarChanged) {
 			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
-			if (avatarChanged.getUser().getId().equals(accountId)) {
+			if (avatarChanged.getAccount().getId().equals(accountId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getUser());
+				url = avatarManager.getAvatarUrl(avatarChanged.getAccount());
 				avatarChanged.getPartialPageRequestHandler().add(this);
 			}
 		}

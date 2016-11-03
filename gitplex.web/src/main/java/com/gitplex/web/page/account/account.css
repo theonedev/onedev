@@ -103,6 +103,10 @@
 	border-bottom: 1px solid #DDD;
 	padding-bottom: 20px;
 }
+.account.overview>div>.head {
+	font-size: 18px;
+	margin-bottom: 12px;
+}
 .account.overview>div:last-child {
 	border-bottom: none;
 	margin-bottom: 0;
@@ -129,19 +133,16 @@
 	margin-right: 8px;
 }
 
-.account.overview>div>.head {
-	font-size: 18px;
-	margin-bottom: 12px;
+.account.overview>.organizations-and-depots td {
+	width: 50%;
+}
+.account.overview>.organizations-and-depots td:FIRST-CHILD {
+	padding-right: 20px;
+}
+.account.overview .panel-body>.operations {
+	margin-bottom: 20px;
+}
+.account.overview .panel-body table, .account.overview .panel-body .alert {
+	margin-bottom: 0;
 }
 
-.account.overview .organizations ul {
-	margin: 0 12px 0 0;
-}
-.account.overview .organizations a {
-	display: block;
-	margin-right: 8px;
-}
-.account.overview .organizations img {
-	width: 32px;
-	height: 32px;
-}

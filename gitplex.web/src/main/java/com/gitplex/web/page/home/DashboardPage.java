@@ -1,7 +1,6 @@
 package com.gitplex.web.page.home;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -14,22 +13,17 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.gitplex.core.GitPlex;
-import com.gitplex.core.entity.Account;
 import com.gitplex.core.entity.Depot;
-import com.gitplex.core.entity.OrganizationMembership;
 import com.gitplex.core.manager.DepotManager;
 import com.gitplex.web.Constants;
-import com.gitplex.web.component.avatar.Avatar;
-import com.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.web.page.depot.file.DepotFilePage;
 import com.gitplex.web.page.layout.LayoutPage;
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -37,12 +31,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class DashboardPage extends LayoutPage {
 
-	private ListView<Account> organizationsView;
-	
-	private WebMarkupContainer organizationsContainer; 
-	
-	private WebMarkupContainer noOrganizationsContainer;
-	
 	private PageableListView<Depot> depotsView;
 	
 	private BootstrapPagingNavigator depotsPageNav;
@@ -56,74 +44,6 @@ public class DashboardPage extends LayoutPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new WebMarkupContainer("organizations") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getLoginUser() != null);
-			}
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				organizationsContainer = new WebMarkupContainer("organizations") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!organizationsView.getModelObject().isEmpty());
-					}
-					
-				};
-				organizationsContainer.setOutputMarkupPlaceholderTag(true);
-				add(organizationsContainer);
-				
-				organizationsContainer.add(organizationsView = new ListView<Account>("organizations", 
-						new LoadableDetachableModel<List<Account>>() {
-
-					@Override
-					protected List<Account> load() {
-						List<Account> organizations = new ArrayList<>();
-						
-						Account loginUser = getLoginUser();
-						if (loginUser != null) {
-							for (OrganizationMembership membership: loginUser.getOrganizations()) {
-								organizations.add(membership.getOrganization());
-							}
-							Collections.sort(organizations);
-						}
-						return organizations;
-					}
-					
-				}) {
-
-					@Override
-					protected void populateItem(ListItem<Account> item) {
-						Account organization = item.getModelObject();
-						Link<Void> link = new BookmarkablePageLink<Void>("link", 
-								AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
-						link.add(new Avatar("avatar", organization));
-						link.add(new Label("name", organization.getDisplayName()));
-						item.add(link);
-					}
-					
-				});
-				add(noOrganizationsContainer = new WebMarkupContainer("noOrganizations") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(organizationsView.getModelObject().isEmpty());
-					}
-					
-				});
-				noOrganizationsContainer.setOutputMarkupPlaceholderTag(true);
-			}
-			
-		});
 		
 		TextField<String> searchField;
 		add(searchField = new TextField<String>("search", Model.of("")));
@@ -211,7 +131,7 @@ public class DashboardPage extends LayoutPage {
 
 	@Override
 	protected Component newContextHead(String componentId) {
-		return new Label(componentId, "Dashboard");
+		return new Label(componentId, "Accessible Repositories");
 	}
 
 }

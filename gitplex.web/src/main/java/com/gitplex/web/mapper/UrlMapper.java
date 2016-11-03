@@ -79,7 +79,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		
 		add(new NoVersionMountedMapper("test", TestPage.class));
 		add(new NoVersionMountedMapper("runmode", RunModePage.class));
-		add(new NoVersionMountedMapper("new-depot", CreateDepotPage.class));
+		add(new NoVersionMountedMapper("new-repository", CreateDepotPage.class));
 		
 		addResources();
 	}

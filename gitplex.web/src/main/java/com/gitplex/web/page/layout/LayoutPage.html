@@ -1,9 +1,6 @@
 <wicket:extend>
 	<div id="main">
 		<div wicket:id="mainHead" class="head clearfix">
-			<div class="logo pull-left">
-				<a wicket:id="home" title="Dashboard"><i class="fa fa-ext fa-gitplex-logo"></i></a>
-			</div>
 			<div wicket:id="context" class="context pull-left"></div>
 			<div class="account pull-right">
 			  	<wicket:enclosure child="login">
@@ -21,10 +18,8 @@
 			  	</wicket:enclosure>
 			</div>
 			<div class="actions pull-right">
+				<a wicket:id="depotsLink" title="Accessible repositories"><i class="fa fa-ext fa-repo"></i></a>
 				<a wicket:id="createNewDropdown" title="Create new repository or organization"><i class="fa fa-plus"></i> <i class="fa fa-caret-down"></i></a>
-				<a wicket:id="organizations" title="Joined organizations"><i class="fa fa-group"></i> <i class="fa fa-caret-down"></i></a>
-				<a wicket:id="repositories" title="Accessible repositories"><i class="fa fa-ext fa-repo"></i> <i class="fa fa-caret-down"></i></a>
-				<a wicket:id="administration" title="System administration"><i class="fa fa-gear"></i></a>
 				<a wicket:id="docLink" title="Help"><i class="fa fa-question"></i></a>
 			</div>
 			<div class="search pull-right">
@@ -36,10 +31,10 @@
 		</div>
 		<div wicket:id="mainFoot" class="foot clearfix">
 			<div class="pull-left">
-				<a href="http://www.gitplex.com">GitPlex GitPlex</a>, <span wicket:id="productVersion"></span>, <span wicket:id="releaseDate"></span>
+				<a href="http://www.gitplex.com">GitPlex</a>, <span wicket:id="productVersion"></span>, <span wicket:id="releaseDate"></span>
 			</div>
 			<div class="pull-right">
-			    <a href="http://www.gitplex.com/support">Support</a> | <a href="http://track.gitplex.com">Report Bug or Enhancement</a> 
+			    <a href="http://www.gitplex.com/support">Support & Bug Report</a> 
 			</div>
 		</div>
 	</div>
@@ -47,6 +42,26 @@
 		<div class="create-new">
 			<a wicket:id="createNewDepot">Create new repository</a>
 			<a wicket:id="createNewOrganization">Create new organization</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="userMenuFrag">
+		<div class="user">
+			<wicket:enclosure child="organizations">
+				<div class="organizations">
+					<div class="title">Organizations</div>
+					<ul class="list-unstyled">
+						<li wicket:id="organizations">
+							<a wicket:id="link">
+								<img wicket:id="avatar"></img>
+								<span wicket:id="name"></span>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</wicket:enclosure>		
+			<a wicket:id="administration"><i class="fa fa-fw fa-wrench"></i> Server administration</a>
+			<a wicket:id="profile"><i class="fa fa-fw fa-gear"></i> My profile</a>
+			<a wicket:id="logout"><i class="fa fa-fw fa-sign-out"></i> Logout</a>
 		</div>
 	</wicket:fragment>
 </wicket:extend>

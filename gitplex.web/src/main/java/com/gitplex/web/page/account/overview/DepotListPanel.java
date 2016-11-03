@@ -16,8 +16,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.gitplex.core.GitPlex;
 import com.gitplex.core.entity.Account;
 import com.gitplex.core.entity.Depot;
@@ -25,8 +25,6 @@ import com.gitplex.core.manager.DepotManager;
 import com.gitplex.core.security.SecurityUtils;
 import com.gitplex.web.Constants;
 import com.gitplex.web.page.depot.file.DepotFilePage;
-import com.gitplex.web.page.depot.setting.general.GeneralSettingPage;
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
@@ -138,22 +136,6 @@ public class DepotListPanel extends GenericPanel<Account> {
 				item.add(link);
 						
 				item.add(new Label("public", depot.isPublicRead()?"yes":"no"));
-				
-				item.add(new Link<Void>("setting") {
-
-					@Override
-					public void onClick() {
-						PageParameters params = GeneralSettingPage.paramsOf(item.getModelObject());
-						setResponsePage(GeneralSettingPage.class, params);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManage(item.getModelObject()));
-					}
-					
-				});
 			}
 			
 		});

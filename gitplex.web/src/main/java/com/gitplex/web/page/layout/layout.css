@@ -12,16 +12,9 @@ html, body {
 	text-decoration: none;
 	color: #CCC;
 }
-#main>.head>.logo .fa {
-	font-size: 28px;
-	color: #EEE;
-}
 #main>.head>.context {
 	color: #CCC;
 	font-size: 20px;
-}
-#main>.head>.context a {
-	color: #EEE;
 }
 #main>.head>.search {
 	padding-top: 2px;
@@ -147,4 +140,29 @@ section>.head {
 
 .create.depot {
 	padding: 20px;
+}
+
+.floating>.content>.user {
+	padding: 12px 0;
+}
+.floating>.content>.user a {
+	display: block;
+	color: #555;
+	text-decoration: none;
+	padding: 8px 12px;
+}
+.floating>.content>.user a:hover {
+	background: #F2F2F2;
+}
+.floating>.content>.user .organizations .title {
+	color: #999;
+	font-size: 16px;
+	padding: 0 12px 4px 12px;
+}
+.floating>.content>.user .organizations {
+	border-bottom: 1px solid #DDD;
+	margin-bottom: 8px;
+}
+.floating>.content>.user .organizations .avatar {
+	margin-right: 4px;
 }

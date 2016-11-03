@@ -45,7 +45,7 @@ public abstract class AdministrationPage extends LayoutPage {
 
 	@Override
 	protected Component newContextHead(String componentId) {
-		return new Label(componentId, "Administration");
+		return new Label(componentId, "Server Administration");
 	}
 
 }

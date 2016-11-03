@@ -1,9 +1,10 @@
 package com.gitplex.web.page.layout;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -14,25 +15,27 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.gitplex.commons.loader.AppLoader;
+import com.gitplex.commons.loader.Plugin;
+import com.gitplex.commons.wicket.component.DropdownLink;
+import com.gitplex.commons.wicket.component.floating.AlignPlacement;
+import com.gitplex.commons.wicket.websocket.WebSocketRegion;
+import com.gitplex.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.gitplex.core.GitPlex;
 import com.gitplex.core.entity.Account;
 import com.gitplex.core.entity.Depot;
 import com.gitplex.core.manager.ConfigManager;
-import com.gitplex.core.manager.DepotManager;
 import com.gitplex.core.security.SecurityUtils;
-import com.gitplex.web.component.accountselector.OrganizationSelector;
+import com.gitplex.web.component.avatar.Avatar;
 import com.gitplex.web.component.avatar.AvatarLink;
-import com.gitplex.web.component.depotselector.DepotSelector;
 import com.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.gitplex.web.page.account.setting.ProfileEditPage;
@@ -40,18 +43,11 @@ import com.gitplex.web.page.account.tasks.TaskListPage;
 import com.gitplex.web.page.admin.SystemSettingPage;
 import com.gitplex.web.page.base.BasePage;
 import com.gitplex.web.page.depot.file.DepotFilePage;
+import com.gitplex.web.page.home.DashboardPage;
 import com.gitplex.web.page.security.LoginPage;
 import com.gitplex.web.page.security.LogoutPage;
 import com.gitplex.web.page.security.RegisterPage;
 import com.gitplex.web.websocket.TaskChangedRegion;
-import com.gitplex.commons.loader.AppLoader;
-import com.gitplex.commons.loader.Plugin;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.floating.AlignPlacement;
-import com.gitplex.commons.wicket.component.menu.MenuItem;
-import com.gitplex.commons.wicket.component.menu.MenuLink;
-import com.gitplex.commons.wicket.websocket.WebSocketRegion;
-import com.gitplex.commons.wicket.websocket.WebSocketRenderBehavior;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
@@ -72,59 +68,7 @@ public abstract class LayoutPage extends BasePage {
 		WebMarkupContainer head = new WebMarkupContainer("mainHead");
 		add(head);
 		
-		head.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
 		head.add(newContextHead("context"));
-		
-		head.add(new DropdownLink("organizations") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getLoginUser() != null);
-			}
-
-			@Override
-			protected Component newContent(String id) {
-				return new OrganizationSelector(id, new AbstractReadOnlyModel<Account>() {
-
-					@Override
-					public Account getObject() {
-						return getLoginUser();
-					}
-
-				}, Account.idOf(getAccount())) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Account account) {
-						LayoutPage.this.onSelect(target, account);
-					}
-
-				};
-			}
-			
-		});
-		head.add(new DropdownLink("repositories") {
-
-			@Override
-			protected Component newContent(String id) {
-				return new DepotSelector(id, new LoadableDetachableModel<Collection<Depot>>() {
-
-					@Override
-					protected Collection<Depot> load() {
-						return GitPlex.getInstance(DepotManager.class).findAllAccessible(null, getLoginUser());
-					}
-					
-				}, Depot.idOf(getDepot())) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Depot depot) {
-						LayoutPage.this.onSelect(target, depot);
-					}
-
-				};
-			}
-			
-		});
 		
 		if (isLoggedIn()) {
 			head.add(new DropdownLink("createNewDropdown") {
@@ -143,8 +87,8 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("createNewDropdown").setVisible(false));
 		}
 		
-		head.add(new BookmarkablePageLink<Void>("administration", SystemSettingPage.class)
-				.setVisible(SecurityUtils.canManageSystem()));
+		head.add(new BookmarkablePageLink<Void>("depotsLink", DashboardPage.class));
+		
 		head.add(new ExternalLink("docLink", GitPlex.getInstance().getDocLink()));
 		
 		Account user = getLoginUser();
@@ -195,62 +139,47 @@ public abstract class LayoutPage extends BasePage {
 		
 		if (signedIn) {
 			head.add(new AvatarLink("user", user, null));
-			head.add(new MenuLink("userMenuTrigger", new AlignPlacement(50, 100, 50, 0, 8)) {
+			head.add(new DropdownLink("userMenuTrigger", new AlignPlacement(50, 100, 50, 0, 8)) {
 
 				@Override
-				protected List<MenuItem> getMenuItems() {
-					List<MenuItem> menuItems = new ArrayList<>();
-					menuItems.add(new MenuItem() {
+				protected Component newContent(String id) {
+					Fragment fragment = new Fragment(id, "userMenuFrag", LayoutPage.this);
+					List<Account> organizations = SecurityUtils.getAccount().getOrganizations()
+							.stream()
+							.map(membership->membership.getOrganization())
+							.collect(Collectors.toList());
+					Collections.sort(organizations);
 
-						@Override
-						public String getIconClass() {
-							return null;
+					RepeatingView organizationsView = new RepeatingView("organizations");
+					fragment.add(organizationsView);
+					
+					if (!organizations.isEmpty()) {
+						for (Account organization: organizations) {
+							WebMarkupContainer item = new WebMarkupContainer(organizationsView.newChildId());
+							Link<Void> link = new BookmarkablePageLink<Void>("link", 
+									AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
+							link.add(new Avatar("avatar", organization));
+							link.add(new Label("name", organization.getDisplayName()));
+							item.add(link);
+							organizationsView.add(item);
 						}
+					} else {
+						organizationsView.setVisible(false);
+					}
+
+					fragment.add(new BookmarkablePageLink<Void>("profile", ProfileEditPage.class, ProfileEditPage.paramsOf(user)));
+					fragment.add(new BookmarkablePageLink<Void>("administration", SystemSettingPage.class) {
 
 						@Override
-						public String getLabel() {
-							return "Profile";
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new Link<Void>(id) {
-
-								@Override
-								public void onClick() {
-									setResponsePage(ProfileEditPage.class, ProfileEditPage.paramsOf(user));									
-								}
-								
-							};
-						}
-						
-					});
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getIconClass() {
-							return null;
-						}
-
-						@Override
-						public String getLabel() {
-							return "Logout";
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new Link<Void>(id) {
-
-								@Override
-								public void onClick() {
-									setResponsePage(LogoutPage.class);									
-								}
-								
-							};
+						protected void onConfigure() {
+							super.onConfigure();
+							setVisible(SecurityUtils.canManageSystem());
 						}
 						
 					});
-					return menuItems;
+					fragment.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class));
+					
+					return fragment;
 				}
 				
 			});

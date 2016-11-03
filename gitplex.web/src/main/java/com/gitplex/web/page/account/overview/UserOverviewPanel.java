@@ -1,8 +1,7 @@
 package com.gitplex.web.page.account.overview;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -11,14 +10,15 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.core.entity.Account;
+import com.gitplex.core.entity.OrganizationMembership;
 import com.gitplex.core.security.SecurityUtils;
+import com.gitplex.web.component.AccountLink;
 import com.gitplex.web.component.avatar.AvatarLink;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import com.gitplex.web.component.roleselection.RoleSelectionPanel;
 
 @SuppressWarnings("serial")
 public class UserOverviewPanel extends GenericPanel<Account> {
@@ -49,52 +49,55 @@ public class UserOverviewPanel extends GenericPanel<Account> {
 		add(new Label("email", user.getEmail())
 				.add(AttributeAppender.append("href", "mailto:" + user.getEmail())));
 		
-		IModel<List<Account>> organizationsModel = new LoadableDetachableModel<List<Account>>() {
-
-			@Override
-			protected List<Account> load() {
-				List<Account> organizations = getUser().getOrganizations()
-						.stream()
-						// we do not want to disclose organization membership information
-						.filter((membership)->membership.isAdmin() || SecurityUtils.canManage(getUser()))
-						.map((membership)->membership.getOrganization())
-						.collect(Collectors.toList());
-				Collections.sort(organizations);
-				return organizations;
-			}
-			
-		};
-		add(new WebMarkupContainer("organizations") {
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new ListView<Account>("organizations", organizationsModel) {
-
-					@Override
-					protected void populateItem(ListItem<Account> item) {
-						item.add(new AvatarLink("organization", item.getModelObject(), new TooltipConfig()));
-					}
-					
-				});
-				
-				add(new BookmarkablePageLink<Void>("addOrganization", 
-						NewOrganizationPage.class, NewOrganizationPage.paramsOf(getUser())) {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManage(user));				
-					}
-					
-				});
-				
-			}
+		add(new BookmarkablePageLink<Void>("addOrganization", 
+				NewOrganizationPage.class, NewOrganizationPage.paramsOf(getUser())) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(user) || !organizationsModel.getObject().isEmpty());				
+				setVisible(SecurityUtils.canManage(user));				
+			}
+			
+		});
+		
+		WebMarkupContainer organizationsContainer = new WebMarkupContainer("organizations") {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getUser().getOrganizations().isEmpty());
+			}
+
+		};
+		add(organizationsContainer);
+		IModel<List<OrganizationMembership>> organizationsModel = new AbstractReadOnlyModel<List<OrganizationMembership>>() {
+
+			@Override
+			public List<OrganizationMembership> getObject() {
+				List<OrganizationMembership> memberships = new ArrayList<>(getUser().getOrganizations());
+				memberships.sort((o1, o2)->o1.getOrganization().getDisplayName().compareTo(o2.getOrganization().getDisplayName()));
+				return memberships;
+			}
+			
+		};
+		organizationsContainer.add(new ListView<OrganizationMembership>("organizations", organizationsModel) {
+
+			@Override
+			protected void populateItem(ListItem<OrganizationMembership> item) {
+				OrganizationMembership membership = item.getModelObject();
+				item.add(new AvatarLink("avatarLink", membership.getOrganization()));
+				item.add(new AccountLink("accountLink", membership.getOrganization()));
+				item.add(new Label("role", membership.isAdmin()?RoleSelectionPanel.ROLE_ADMIN:RoleSelectionPanel.ROLE_MEMBER));
+			}
+			
+		});
+		
+		add(new WebMarkupContainer("noOrganizations") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getUser().getOrganizations().isEmpty());
 			}
 			
 		});
