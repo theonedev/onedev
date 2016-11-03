@@ -10,15 +10,15 @@ public class RefUpdated {
 	
 	private final String refName;
 	
-	private final ObjectId oldCommit;
+	private final ObjectId oldObjectId;
 	
-	private final ObjectId newCommit;
+	private final ObjectId newObjectId;
 	
-	public RefUpdated(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	public RefUpdated(Depot depot, String refName, ObjectId oldObjectId, ObjectId newObjectId) {
 		this.depot = depot;
 		this.refName = refName;
-		this.oldCommit = oldCommit;
-		this.newCommit = newCommit;
+		this.oldObjectId = oldObjectId;
+		this.newObjectId = newObjectId;
 	}
 
 	public Depot getDepot() {
@@ -29,12 +29,12 @@ public class RefUpdated {
 		return refName;
 	}
 
-	public ObjectId getOldCommit() {
-		return oldCommit;
+	public ObjectId getOldObjectId() {
+		return oldObjectId;
 	}
 
-	public ObjectId getNewCommit() {
-		return newCommit;
+	public ObjectId getNewObjectId() {
+		return newObjectId;
 	}
 	
 }

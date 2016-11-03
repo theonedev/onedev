@@ -48,9 +48,10 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 	
 	@Override
-	public GateCheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	public GateCheckResult checkPush(Account user, Depot depot, String refName, 
+			ObjectId oldObjectId, ObjectId newObjectId) {
 		if (isEnabled())
-			return doCheckPush(user, depot, refName, oldCommit, newCommit);
+			return doCheckPush(user, depot, refName, oldObjectId, newObjectId);
 		else
 			return ignored();
 	}
@@ -92,7 +93,8 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
+	protected abstract GateCheckResult doCheckPush(Account user, Depot depot, String refName, 
+			ObjectId oldObjectId, ObjectId newObjectId);
 
 	protected GateCheckResult ignored() {
 		return new Ignored();

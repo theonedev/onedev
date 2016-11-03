@@ -43,12 +43,12 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	
 	@Override
 	protected GateCheckResult doCheckPush(final Account user, final Depot depot, final String refName, 
-			final ObjectId oldCommit, final ObjectId newCommit) {
+			final ObjectId oldObjectId, final ObjectId newObjectId) {
 		return aggregate(new Checker() {
 
 			@Override
 			public GateCheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkPush(user, depot, refName, oldCommit, newCommit);
+				return gateKeeper.checkPush(user, depot, refName, oldObjectId, newObjectId);
 			}
 			
 		});

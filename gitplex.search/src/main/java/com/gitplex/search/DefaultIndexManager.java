@@ -402,8 +402,8 @@ public class DefaultIndexManager implements IndexManager {
 	public void on(RefUpdated event) {
 		// only index branches at back end, tags will be indexed on demand from GUI 
 		// as many tags might be pushed all at once when the repository is imported 
-		if (event.getRefName().startsWith(Constants.R_HEADS) && !event.getNewCommit().equals(ObjectId.zeroId())) {
-			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, event.getNewCommit());
+		if (event.getRefName().startsWith(Constants.R_HEADS) && !event.getNewObjectId().equals(ObjectId.zeroId())) {
+			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, event.getNewObjectId());
 			batchWorkManager.submit(getBatchWorker(event.getDepot()), work);
 		}
 	}

@@ -81,8 +81,9 @@ public class PerformSpecifiedOperations extends AbstractGateKeeper implements Va
 	}
 
 	@Override
-	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		if (oldCommit.equals(ObjectId.zeroId())) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, 
+			ObjectId oldObjectId, ObjectId newObjectId) {
+		if (oldObjectId.equals(ObjectId.zeroId())) {
 			if (createRef) {
 				return passed(Lists.newArrayList("Trying to create a ref"));
 			}
@@ -94,7 +95,7 @@ public class PerformSpecifiedOperations extends AbstractGateKeeper implements Va
 				reasons.add("Trying to delete a ref");
 			}
 			return failed(reasons);
-		} else if (newCommit.equals(ObjectId.zeroId())) {
+		} else if (newObjectId.equals(ObjectId.zeroId())) {
 			if (deleteRef) {
 				return passed(Lists.newArrayList("Trying to delete a ref"));
 			}

@@ -62,8 +62,8 @@ public class DisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit,
-			ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldObjectId,
+			ObjectId newObjectId) {
 		return failed(Lists.newArrayList("Not disapproved by anyone from team " + getTeamName()));
 	}
 	

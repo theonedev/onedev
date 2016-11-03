@@ -54,14 +54,14 @@ public interface GateKeeper extends Serializable {
 	 * 			user to be checked
 	 * @param refName
 	 * 			refName to be checked
-	 * @param oldCommitHash
-	 * 			old commit of the ref
-	 * @param newCommitHash
-	 * 			new commit of the ref
+	 * @param oldObjectId
+	 * 			old object id of the ref
+	 * @param newObjectId
+	 * 			new object id of the ref
 	 * @return
 	 * 			result of the check
 	 */
-	GateCheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
+	GateCheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldObjectId, ObjectId newObjectId);
 	
 	void onDepotRename(Depot renamedDepot, String oldName);
 	

@@ -97,8 +97,9 @@ public class VerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, 
+			ObjectId oldObjectId, ObjectId newObjectId) {
+		if (!oldObjectId.equals(ObjectId.zeroId()) && !newObjectId.equals(ObjectId.zeroId())) {
 			return pending(Lists.newArrayList("Has to be verified by builds"));
 		} else {
 			return ignored();

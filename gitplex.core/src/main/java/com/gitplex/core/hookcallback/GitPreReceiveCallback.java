@@ -98,10 +98,10 @@ public class GitPreReceiveCallback extends HttpServlet {
 	        while (true) {
 	        	String refName = StringUtils.reverse(fields.get(pos));
 	        	pos++;
-	        	ObjectId newCommit = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
+	        	ObjectId newObjectId = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
 	        	pos++;
 	        	String field = fields.get(pos);
-	        	ObjectId oldCommit = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
+	        	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
 	        	
 	    		Account user = userManager.getCurrent();
 	    		Preconditions.checkNotNull(user);
@@ -113,14 +113,14 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    			}
 	    		} else {
 	    			GateKeeper gateKeeper = depot.getGateKeeper();
-	    			GateCheckResult checkResult = gateKeeper.checkPush(user, depot, refName, oldCommit, newCommit);
+	    			GateCheckResult checkResult = gateKeeper.checkPush(user, depot, refName, oldObjectId, newObjectId);
 	    			if (!checkResult.isPassedOrIgnored()) {
 	    				List<String> messages = new ArrayList<>();
 	    				for (String each: checkResult.getReasons())
 	    					messages.add(each);
 	    				if (GitUtils.ref2branch(refName) != null 
-	    						&& !oldCommit.equals(ObjectId.zeroId()) 
-	    						&& !newCommit.equals(ObjectId.zeroId()) 
+	    						&& !oldObjectId.equals(ObjectId.zeroId()) 
+	    						&& !newObjectId.equals(ObjectId.zeroId()) 
 	    						&& !(checkResult instanceof Failed)) {
 	    					messages.add("");
 	    					messages.add("----------------------------------------------------");

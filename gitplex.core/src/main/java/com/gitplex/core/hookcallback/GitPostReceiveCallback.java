@@ -94,15 +94,15 @@ public class GitPostReceiveCallback extends HttpServlet {
 			        while (true) {
 			        	String refName = StringUtils.reverse(fields.get(pos));
 			        	pos++;
-			        	ObjectId newCommit = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
+			        	ObjectId newObjectId = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
 			        	pos++;
 			        	String field = fields.get(pos);
-			        	ObjectId oldCommit = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
+			        	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
 			        	
-			        	if (!newCommit.equals(ObjectId.zeroId())) {
-			        		depot.cacheObjectId(refName, newCommit);
+			        	if (!newObjectId.equals(ObjectId.zeroId())) {
+			        		depot.cacheObjectId(refName, newObjectId);
 			        	} else {
-			        		newCommit = ObjectId.zeroId();
+			        		newObjectId = ObjectId.zeroId();
 			        		depot.cacheObjectId(refName, null);
 			        	}
 			        	
@@ -112,7 +112,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 			        		GitUtils.linkRef(refUpdate, refName);
 			        	}
 			        	
-			        	listenerRegistry.post(new RefUpdated(depot, refName, oldCommit, newCommit));
+			        	listenerRegistry.post(new RefUpdated(depot, refName, oldObjectId, newObjectId));
 			    		
 			        	field = field.substring(40);
 			        	if (field.length() == 0)

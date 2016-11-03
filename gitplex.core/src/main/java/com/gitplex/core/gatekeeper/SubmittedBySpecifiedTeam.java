@@ -32,7 +32,7 @@ public class SubmittedBySpecifiedTeam extends TeamAwareGateKeeper {
 
 	@Override
 	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, 
-			ObjectId oldCommit, ObjectId newCommit) {
+			ObjectId oldObjectId, ObjectId newObjectId) {
 		return checkSubmitter(user, depot.getAccount());
 	}
 

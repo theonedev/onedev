@@ -3,6 +3,7 @@ package com.gitplex.core.gatekeeper;
 import java.io.IOException;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -74,13 +75,20 @@ public class TouchSpecifiedFiles extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, 
+			ObjectId oldObjectId, ObjectId newObjectId) {
+		if (!oldObjectId.equals(ObjectId.zeroId()) && !newObjectId.equals(ObjectId.zeroId())) {
 			try (TreeWalk treeWalk = new TreeWalk(depot.getRepository())) {
 				treeWalk.setFilter(TreeFilter.ANY_DIFF);
 				treeWalk.setRecursive(true);
-				treeWalk.addTree(depot.getRevCommit(oldCommit).getTree());
-				treeWalk.addTree(depot.getRevCommit(newCommit).getTree());
+				RevCommit oldCommit = depot.getRevCommit(oldObjectId, false);
+				if (oldCommit == null)
+					return ignored();
+				RevCommit newCommit = depot.getRevCommit(newObjectId, false);
+				if (newCommit == null)
+					return ignored();
+				treeWalk.addTree(oldCommit.getTree());
+				treeWalk.addTree(newCommit.getTree());
 				while (treeWalk.next()) {
 					if (matches(treeWalk.getPathString()))
 						return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));

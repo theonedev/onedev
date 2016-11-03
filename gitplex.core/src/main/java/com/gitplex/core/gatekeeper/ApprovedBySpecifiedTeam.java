@@ -65,7 +65,8 @@ public class ApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
     }
 
 	@Override
-	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, 
+			ObjectId oldObjectId, ObjectId newObjectId) {
         return pending(Lists.newArrayList("Need to be approved by at least " + getLeastApprovals()
         			+ " member(s) of team " + getTeamName()));
 	}

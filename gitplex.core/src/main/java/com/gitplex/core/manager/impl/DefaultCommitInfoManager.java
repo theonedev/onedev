@@ -571,9 +571,12 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 
 	@Listen
 	public void on(RefUpdated event) {
-		if (!event.getNewCommit().equals(ObjectId.zeroId())) {
-			CollectingWork refUpdate = new CollectingWork(PRIORITY, event.getNewCommit());
-			batchWorkManager.submit(getBatchWorker(event.getDepot()), refUpdate);
+		if (!event.getNewObjectId().equals(ObjectId.zeroId())) {
+			RevCommit commit = event.getDepot().getRevCommit(event.getNewObjectId(), false);
+			if (commit != null) {
+				CollectingWork refUpdate = new CollectingWork(PRIORITY, commit.getId());
+				batchWorkManager.submit(getBatchWorker(event.getDepot()), refUpdate);
+			}
 		}
 	}
 

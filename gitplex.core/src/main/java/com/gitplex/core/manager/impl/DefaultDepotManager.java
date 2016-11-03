@@ -335,7 +335,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	@Transactional
 	@Listen
 	public void on(RefUpdated event) {
-		if (event.getNewCommit().equals(ObjectId.zeroId())) {
+		if (event.getNewObjectId().equals(ObjectId.zeroId())) {
 			String branch = GitUtils.ref2branch(event.getRefName());
 			for (Depot each: findAll()) {
 				if (branch != null) {

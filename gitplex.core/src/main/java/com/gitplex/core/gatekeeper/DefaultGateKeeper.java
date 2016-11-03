@@ -24,7 +24,8 @@ public class DefaultGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected GateCheckResult doCheckPush(Account user, Depot depot, String refName, 
+			ObjectId oldObjectId, ObjectId newObjectId) {
 		return ignored();
 	}
 
