@@ -9,6 +9,7 @@ import org.dom4j.Element;
 
 import com.gitplex.commons.hibernate.migration.Migrator;
 import com.gitplex.commons.hibernate.migration.VersionedDocument;
+import com.gitplex.commons.util.StringUtils;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -43,6 +44,30 @@ public class DatabaseMigrator implements Migrator {
 	}
 
 	private void migrate3(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			VersionedDocument dom = VersionedDocument.fromFile(file);
+			for (Element element: dom.getRootElement().elements()) {
+				String name = element.getName();
+				name = StringUtils.replace(name, "com.pmease.commons", "com.gitplex.commons");
+				name = StringUtils.replace(name, "com.pmease.gitplex", "com.gitplex");
+				element.setName(name);
+			}
+			if (file.getName().startsWith("Configs.xml")) {
+				for (Element element: dom.getRootElement().elements()) {
+					Element settingElement = element.element("setting");
+					if (settingElement != null) {
+						String clazz = settingElement.attributeValue("class");
+						settingElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex"));
+						Element gitConfigElement = settingElement.element("gitConfig");
+						if (gitConfigElement != null) {
+							clazz = gitConfigElement.attributeValue("class");
+							gitConfigElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex"));
+						}
+					}
+				}
+			}
+			dom.writeToFile(file, false);
+		}	
 	}
 	
 }
