@@ -7,7 +7,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.31</version> 
+        <version>1.0-SNAPSHOT</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -32,16 +32,6 @@
             <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.core</artifactId>  
             <version>1.0.37</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.wicket</artifactId>  
-            <version>1.0.34</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.jetty</artifactId>  
-            <version>1.0.34</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  

@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0.31</version> 
+        <version>1.0-SNAPSHOT</version> 
     </parent>  
     <packaging>pom</packaging>  
     <modules> 
