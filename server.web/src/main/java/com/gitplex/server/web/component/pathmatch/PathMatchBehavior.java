@@ -12,7 +12,7 @@ import com.gitplex.commons.antlr.codeassist.ParentedElement;
 import com.gitplex.commons.antlr.grammar.ElementSpec;
 import com.gitplex.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.gitplex.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
-import com.gitplex.core.util.includeexclude.IncludeExcludeParser;
+import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.web.util.SuggestionUtils;
 

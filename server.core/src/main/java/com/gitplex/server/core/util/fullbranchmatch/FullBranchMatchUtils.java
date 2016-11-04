@@ -13,11 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.gitplex.commons.util.match.IncludeExclude;
 import com.gitplex.commons.util.match.Matcher;
 import com.gitplex.commons.util.match.WildcardUtils;
-import com.gitplex.core.util.fullbranchmatch.FullBranchMatchLexer;
-import com.gitplex.core.util.fullbranchmatch.FullBranchMatchParser;
-import com.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.CriteriaContext;
-import com.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.FullBranchMatchContext;
-import com.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.MatchContext;
+import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchLexer;
+import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchParser;
+import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchParser.CriteriaContext;
+import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchParser.FullBranchMatchContext;
+import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchParser.MatchContext;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.support.DepotAndBranch;
 

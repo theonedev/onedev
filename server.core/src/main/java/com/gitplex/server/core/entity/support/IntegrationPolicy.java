@@ -11,7 +11,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.gitplex.commons.wicket.editable.annotation.Editable;
 import com.gitplex.commons.wicket.editable.annotation.Horizontal;
-import com.gitplex.core.util.includeexclude.IncludeExcludeParser;
+import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser;
 import com.gitplex.server.core.annotation.BranchMatch;
 import com.gitplex.server.core.annotation.FullBranchMatch;
 import com.gitplex.server.core.entity.Account;
@@ -19,8 +19,8 @@ import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.PullRequest.IntegrationStrategy;
 import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.gitplex.server.core.util.includeexclude.IncludeExcludeUtils;
-import com.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.CriteriaContext;
-import com.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.FullBranchMatchContext;
+import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchParser.CriteriaContext;
+import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchParser.FullBranchMatchContext;
 
 @Editable
 @Horizontal

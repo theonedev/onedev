@@ -48,6 +48,6 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.server.rest.RestModule</moduleClass> 
+        <moduleClass>com.gitplex.server.rest.RestModule</moduleClass> 
     </properties> 
 </project>

@@ -16,7 +16,7 @@ import com.gitplex.commons.antlr.grammar.ElementSpec;
 import com.gitplex.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.gitplex.commons.util.Range;
 import com.gitplex.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
-import com.gitplex.core.util.includeexclude.IncludeExcludeParser;
+import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser;
 import com.gitplex.server.core.entity.Depot;
 
 @SuppressWarnings("serial")

@@ -24,7 +24,7 @@ import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.manager.CommitInfoManager;
 import com.gitplex.server.web.Constants;
 import com.gitplex.server.web.util.SuggestionUtils;
-import com.gitplex.web.page.depot.commit.CommitQueryParser;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser;
 
 @SuppressWarnings("serial")
 public class QueryAssistBehavior extends ANTLRAssistBehavior {

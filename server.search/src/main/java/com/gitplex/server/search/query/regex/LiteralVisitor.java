@@ -5,14 +5,14 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.search.query.regex.PCREBaseVisitor;
-import com.gitplex.search.query.regex.PCREParser.AlternationContext;
-import com.gitplex.search.query.regex.PCREParser.AtomContext;
-import com.gitplex.search.query.regex.PCREParser.Cc_atomContext;
-import com.gitplex.search.query.regex.PCREParser.ElementContext;
-import com.gitplex.search.query.regex.PCREParser.ExprContext;
-import com.gitplex.search.query.regex.PCREParser.ParseContext;
-import com.gitplex.search.query.regex.PCREParser.QuantifierContext;
+import com.gitplex.server.search.query.regex.PCREBaseVisitor;
+import com.gitplex.server.search.query.regex.PCREParser.AlternationContext;
+import com.gitplex.server.search.query.regex.PCREParser.AtomContext;
+import com.gitplex.server.search.query.regex.PCREParser.Cc_atomContext;
+import com.gitplex.server.search.query.regex.PCREParser.ElementContext;
+import com.gitplex.server.search.query.regex.PCREParser.ExprContext;
+import com.gitplex.server.search.query.regex.PCREParser.ParseContext;
+import com.gitplex.server.search.query.regex.PCREParser.QuantifierContext;
 
 public class LiteralVisitor extends PCREBaseVisitor<Literals> {
 

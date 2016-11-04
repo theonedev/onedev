@@ -49,7 +49,7 @@ public class DatabaseMigrator implements Migrator {
 			for (Element element: dom.getRootElement().elements()) {
 				String name = element.getName();
 				name = StringUtils.replace(name, "com.pmease.commons", "com.gitplex.commons");
-				name = StringUtils.replace(name, "com.pmease.gitplex", "com.gitplex");
+				name = StringUtils.replace(name, "com.pmease.gitplex", "com.gitplex.server");
 				element.setName(name);
 			}
 			if (file.getName().startsWith("Configs.xml")) {
@@ -57,11 +57,11 @@ public class DatabaseMigrator implements Migrator {
 					Element settingElement = element.element("setting");
 					if (settingElement != null) {
 						String clazz = settingElement.attributeValue("class");
-						settingElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex"));
+						settingElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex.server"));
 						Element gitConfigElement = settingElement.element("gitConfig");
 						if (gitConfigElement != null) {
 							clazz = gitConfigElement.attributeValue("class");
-							gitConfigElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex"));
+							gitConfigElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex.server"));
 						}
 					}
 				}

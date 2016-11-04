@@ -11,7 +11,7 @@ import com.gitplex.commons.antlr.codeassist.ParentedElement;
 import com.gitplex.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.gitplex.commons.antlr.parser.Element;
 import com.gitplex.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
-import com.gitplex.core.util.fullbranchmatch.FullBranchMatchParser;
+import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchParser;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.manager.DepotManager;

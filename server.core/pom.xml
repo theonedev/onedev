@@ -112,7 +112,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.server.core.CoreModule</moduleClass> 
+        <moduleClass>com.gitplex.server.core.CoreModule</moduleClass> 
     </properties>  
     <version>1.0.38</version> 
 </project>

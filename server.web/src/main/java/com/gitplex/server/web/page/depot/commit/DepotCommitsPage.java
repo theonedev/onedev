@@ -67,10 +67,10 @@ import com.gitplex.server.web.model.CommitRefsModel;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.web.page.depot.commit.CommitQueryLexer;
-import com.gitplex.web.page.depot.commit.CommitQueryParser;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.CriteriaContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.QueryContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryLexer;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.CriteriaContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.QueryContext;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import jersey.repackaged.com.google.common.collect.Lists;

@@ -83,7 +83,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.server.web.WebModule</moduleClass>  
+        <moduleClass>com.gitplex.server.web.WebModule</moduleClass>  
         <tika.version>1.4</tika.version>  
         <wikitext.version>2.0.0</wikitext.version> 
     </properties> 

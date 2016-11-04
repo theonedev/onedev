@@ -9,10 +9,10 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.gitplex.commons.util.match.IncludeExclude;
-import com.gitplex.core.util.includeexclude.IncludeExcludeLexer;
-import com.gitplex.core.util.includeexclude.IncludeExcludeParser;
-import com.gitplex.core.util.includeexclude.IncludeExcludeParser.CriteriaContext;
-import com.gitplex.core.util.includeexclude.IncludeExcludeParser.MatchContext;
+import com.gitplex.server.core.util.includeexclude.IncludeExcludeLexer;
+import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser;
+import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser.CriteriaContext;
+import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser.MatchContext;
 
 public class IncludeExcludeUtils {
 	

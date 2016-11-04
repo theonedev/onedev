@@ -14,8 +14,8 @@
         <module>../server.web</module>
         <module>../server.rest</module>
         <module>../server.http</module>
-        <module>../server.product</module>
         <module>../server.search</module>
+        <module>../server</module>
     </modules>  
     <repositories> 
         <repository> 

@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.gitplex.commons.git.GitUtils;
 import com.gitplex.commons.util.match.PatternMatcher;
 import com.gitplex.commons.wicket.editable.annotation.Editable;
-import com.gitplex.core.util.includeexclude.IncludeExcludeParser;
+import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser;
 import com.gitplex.server.core.annotation.RefMatch;
 import com.gitplex.server.core.entity.Account;
 import com.gitplex.server.core.entity.Depot;

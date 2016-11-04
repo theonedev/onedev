@@ -158,7 +158,7 @@
     <properties> 
         <executables>bin/*.sh, boot/wrapper-*</executables>  
         <bootstrapClass>com.gitplex.commons.bootstrap.Bootstrap</bootstrapClass>  
-        <moduleClass>com.server.product.ProductModule</moduleClass>  
+        <moduleClass>com.gitplex.server.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
     </properties>  
     <version>1.0-EAP-build4</version> 

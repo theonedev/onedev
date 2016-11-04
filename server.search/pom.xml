@@ -99,7 +99,7 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.server.search.SearchModule</moduleClass>  
+        <moduleClass>com.gitplex.server.search.SearchModule</moduleClass>  
         <luceneVersion>4.10.3</luceneVersion> 
     </properties> 
 </project>

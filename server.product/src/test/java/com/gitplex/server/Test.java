@@ -1,4 +1,4 @@
-package com.gitplex.server.product;
+package com.gitplex.server;
 
 import java.io.IOException;
 

@@ -52,6 +52,6 @@
         </repository> 
     </repositories>  
     <properties> 
-        <moduleClass>com.server.http.HttpModule</moduleClass> 
+        <moduleClass>com.gitplex.server.http.HttpModule</moduleClass> 
     </properties> 
 </project>

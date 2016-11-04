@@ -6,17 +6,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.unbescape.java.JavaEscape;
 
 import com.gitplex.commons.git.command.RevListCommand;
-import com.gitplex.web.page.depot.commit.CommitQueryBaseListener;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.AfterContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.AuthorContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.BeforeContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.CommitterContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.MessageContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.PathContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.RevisionContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.RevisionExclusionContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.RevisionRangeContext;
-import com.gitplex.web.page.depot.commit.CommitQueryParser.SingleRevisionContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryBaseListener;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.AfterContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.AuthorContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.BeforeContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.CommitterContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.MessageContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.PathContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.RevisionContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.RevisionExclusionContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.RevisionRangeContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.SingleRevisionContext;
 
 public class RevListCommandFiller extends CommitQueryBaseListener {
 

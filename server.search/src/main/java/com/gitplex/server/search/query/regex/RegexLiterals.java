@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import com.gitplex.search.query.regex.PCRELexer;
-import com.gitplex.search.query.regex.PCREParser;
+import com.gitplex.server.search.query.regex.PCRELexer;
+import com.gitplex.server.search.query.regex.PCREParser;
 import com.gitplex.server.search.query.NGramLuceneQuery;
 import com.gitplex.server.search.query.TooGeneralQueryException;
 
