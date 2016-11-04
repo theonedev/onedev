@@ -32,17 +32,7 @@
     <dependencies> 
         <dependency> 
             <groupId>com.gitplex</groupId>  
-            <artifactId>commons.loader</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.git</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.jersey</artifactId>  
+            <artifactId>commons</artifactId>  
             <version>1.0-SNAPSHOT</version> 
         </dependency>  
         <dependency> 
@@ -58,41 +48,11 @@
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
-            <artifactId>commons.jetty</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
             <version>1.0-SNAPSHOT</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.schedule</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.hibernate</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.shiro</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.markdown</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.lang</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
-        </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
