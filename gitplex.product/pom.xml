@@ -101,12 +101,12 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.core</artifactId>  
-            <version>1.0.37</version> 
+            <version>1.0.38</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.web</artifactId>  
-            <version>1.0.6</version> 
+            <version>1.0.7</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
@@ -125,17 +125,17 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.rest</artifactId>  
-            <version>1.0.6</version> 
+            <version>1.0.7</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.http</artifactId>  
-            <version>1.0.6</version> 
+            <version>1.0.7</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>gitplex.search</artifactId>  
-            <version>1.0.6</version> 
+            <version>1.0.7</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -161,5 +161,5 @@
         <moduleClass>com.gitplex.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
     </properties>  
-    <version>1.0-EAP-build3</version> 
+    <version>1.0-EAP-build4</version> 
 </project>
