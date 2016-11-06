@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0-SNAPSHOT</version> 
+        <version>1.0.0</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -33,7 +33,7 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons</artifactId>  
-            <version>1.0-SNAPSHOT</version> 
+            <version>1.0.0</version> 
         </dependency>  
         <dependency> 
             <groupId>org.jetbrains.xodus</groupId>  
@@ -42,17 +42,17 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0-SNAPSHOT</version>  
+            <version>1.0.0</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0-SNAPSHOT</version>  
+            <version>1.0.0</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
-        </dependency>  
+        </dependency> 
     </dependencies>  
     <repositories> 
         <repository> 
@@ -74,5 +74,5 @@
     <properties> 
         <moduleClass>com.gitplex.server.core.CoreModule</moduleClass> 
     </properties>  
-    <version>1.0.38</version> 
+    <version>1.0-EAP-build4</version> 
 </project>

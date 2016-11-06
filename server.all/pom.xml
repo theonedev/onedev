@@ -6,16 +6,16 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>parent.general</artifactId>  
-        <version>1.0-SNAPSHOT</version> 
+        <version>1.0.0</version> 
     </parent>  
     <packaging>pom</packaging>  
     <modules> 
-        <module>../server.core</module>
-        <module>../server.web</module>
-        <module>../server.rest</module>
-        <module>../server.http</module>
-        <module>../server.search</module>
-        <module>../server.product</module>
+        <module>../server.core</module>  
+        <module>../server.web</module>  
+        <module>../server.rest</module>  
+        <module>../server.http</module>  
+        <module>../server.search</module>  
+        <module>../server.product</module> 
     </modules>  
     <repositories> 
         <repository> 
@@ -33,5 +33,6 @@
             </snapshots>  
             <url>http://artifact.gitplex.com/</url> 
         </repository> 
-    </repositories> 
+    </repositories>  
+    <version>1.0-EAP-build4</version>
 </project>

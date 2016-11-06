@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>com.gitplex</groupId>
 		<artifactId>parent.general</artifactId>
-		<version>1.0.31</version>
+		<version>1.0.0</version>
 	</parent>
 
 	<build>
