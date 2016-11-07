@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+    <modelVersion>4.0.0</modelVersion>  
+    <artifactId>server</artifactId>  
+    <parent> 
+        <groupId>com.gitplex</groupId>  
+        <artifactId>commons</artifactId>  
+        <version>1.0.0</version> 
+    </parent>  
+    <packaging>pom</packaging>  
+    <modules> 
+        <module>server.core</module>  
+        <module>server.web</module>  
+        <module>server.rest</module>  
+        <module>server.http</module>  
+        <module>server.search</module>  
+        <module>server.product</module> 
+    </modules>  
+    <repositories> 
+        <repository> 
+            <id>gitplexRepo</id>  
+            <name>GitPlex Repository</name>  
+            <releases> 
+                <enabled>true</enabled>  
+                <updatePolicy>never</updatePolicy>  
+                <checksumPolicy>fail</checksumPolicy> 
+            </releases>  
+            <snapshots> 
+                <enabled>true</enabled>  
+                <updatePolicy>always</updatePolicy>  
+                <checksumPolicy>fail</checksumPolicy> 
+            </snapshots>  
+            <url>http://artifact.pmease.com/</url> 
+        </repository> 
+    </repositories>  
+    <version>1.0-EAP-build4</version>
+</project>

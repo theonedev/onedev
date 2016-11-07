@@ -51,7 +51,7 @@
 				<updatePolicy>always</updatePolicy>
 				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
-			<url>http://artifact.gitplex.com/</url>
+			<url>http://artifact.pmease.com/</url>
 		</repository>
 	</repositories>
 

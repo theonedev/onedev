@@ -2,12 +2,11 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
-    <artifactId>server.http</artifactId>  
-    <version>1.0-EAP-build4</version>  
+    <artifactId>server.http</artifactId>    
     <parent> 
-        <groupId>com.gitplex</groupId>  
-        <artifactId>parent.general</artifactId>  
-        <version>1.0.0</version> 
+        <groupId>com.gitplex</groupId>    
+        <version>1.0-EAP-build4</version>
+        <artifactId>server</artifactId>
     </parent>  
     <build> 
         <plugins> 
@@ -48,7 +47,7 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.gitplex.com/</url> 
+            <url>http://artifact.pmease.com/</url> 
         </repository> 
     </repositories>  
     <properties> 

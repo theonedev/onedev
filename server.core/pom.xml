@@ -5,8 +5,8 @@
     <artifactId>server.core</artifactId>  
     <parent> 
         <groupId>com.gitplex</groupId>  
-        <artifactId>parent.general</artifactId>  
-        <version>1.0.0</version> 
+        <artifactId>server</artifactId>  
+        <version>1.0-EAP-build4</version>
     </parent>  
     <build> 
         <plugins> 
@@ -32,7 +32,7 @@
     <dependencies> 
         <dependency> 
             <groupId>com.gitplex</groupId>  
-            <artifactId>commons</artifactId>  
+            <artifactId>commons.product</artifactId>  
             <version>1.0.0</version> 
         </dependency>  
         <dependency> 
@@ -68,11 +68,10 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.gitplex.com/</url> 
+            <url>http://artifact.pmease.com/</url> 
         </repository> 
     </repositories>  
     <properties> 
         <moduleClass>com.gitplex.server.core.CoreModule</moduleClass> 
-    </properties>  
-    <version>1.0-EAP-build4</version> 
+    </properties>   
 </project>
