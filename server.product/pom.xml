@@ -159,8 +159,8 @@
     </dependencies>  
     <repositories> 
         <repository> 
-            <id>gitplexRepo</id>  
-            <name>GitPlex Repository</name>  
+            <id>pmeaseRepo</id>  
+            <name>PMEase Repository</name>  
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -171,7 +171,7 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.gitplex.com/</url> 
+            <url>http://artifact.pmease.com/</url> 
         </repository> 
     </repositories>  
     <properties> 

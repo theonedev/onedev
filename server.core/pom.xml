@@ -56,8 +56,8 @@
     </dependencies>  
     <repositories> 
         <repository> 
-            <id>gitplexRepo</id>  
-            <name>GitPlex Repository</name>  
+            <id>pmeaseRepo</id>  
+            <name>PMEase Repository</name>  
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
