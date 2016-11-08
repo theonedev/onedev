@@ -29,6 +29,7 @@ import com.gitplex.server.web.page.account.teams.TeamListPage;
 import com.gitplex.server.web.page.account.teams.TeamMemberListPage;
 import com.gitplex.server.web.page.admin.DatabaseBackupPage;
 import com.gitplex.server.web.page.admin.MailSettingPage;
+import com.gitplex.server.web.page.admin.SecuritySettingPage;
 import com.gitplex.server.web.page.admin.SystemSettingPage;
 import com.gitplex.server.web.page.admin.account.NewUserPage;
 import com.gitplex.server.web.page.admin.account.UserListPage;
@@ -104,6 +105,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new NoVersionMountedMapper("administration/settings/system", SystemSettingPage.class));
 		add(new NoVersionMountedMapper("administration/settings/mail", MailSettingPage.class));
 		add(new NoVersionMountedMapper("administration/settings/backup", DatabaseBackupPage.class));
+		add(new NoVersionMountedMapper("administration/settings/security", SecuritySettingPage.class));
 	}
 	
 	private void addAccountPages() {

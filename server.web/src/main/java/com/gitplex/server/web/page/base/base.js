@@ -1,3 +1,4 @@
+gitplex.server = {};
 gitplex.server.mouseState = {
 	pressed: false, 
 	moved: false
