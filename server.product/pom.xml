@@ -21,22 +21,23 @@
                 <artifactId>maven-javadoc-plugin</artifactId> 
             </plugin>  
         	<plugin>
-	            <groupId>org.codehaus.groovy.maven</groupId>
-	            <artifactId>gmaven-plugin</artifactId>
-	            <version>1.0</version>
+	            <groupId>org.codehaus.gmaven</groupId>
+	            <artifactId>groovy-maven-plugin</artifactId>
+	            <version>2.0</version>
 	            <executions>
 	                <execution>
 	                    <phase>initialize</phase>
 	                    <goals>
 	                        <goal>execute</goal>
-	                  </goals>
-	                   <configuration>
-	                      <source>
-	                      project.properties["lowerCaseProductName"] = project.name.toLowerCase() 
-	                     </source>
-	                 </configuration>
-	             </execution>
-	          </executions>
+	                 	</goals>
+	                   	<configuration>
+	                    	<source>
+	                      		project.properties["lowerCaseProductName"] = project.name.toLowerCase() 
+	                      		project.properties["docLink"] = "http://wiki.pmease.com/display/gp" + project.version.substring(0, project.version.indexOf('.'))
+	                    	</source>
+	                 	</configuration>
+	             	</execution>
+	          	</executions>
 	     	</plugin>
 			<plugin> 
                 <groupId>com.gitplex</groupId>  
@@ -54,6 +55,7 @@
                                     <fileset dir="system" excludes="site/images/**, site/avatars/**, **/*.keystore, **/*.jar"/>  
                                     <filterset> 
                                         <filter token="productName" value="${lowerCaseProductName}"/> 
+                                        <filter token="docLink" value="${docLink}"/>
                                     </filterset> 
                                 </copy>  
                                 <copy todir="${project.build.directory}/sandbox"> 
