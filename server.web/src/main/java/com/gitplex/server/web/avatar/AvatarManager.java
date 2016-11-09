@@ -1,5 +1,7 @@
 package com.gitplex.server.web.avatar;
 
+import java.io.File;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -31,6 +33,8 @@ public interface AvatarManager {
 	String getAvatarUrl(PersonIdent person);
 
 	void useAvatar(Account user, @Nullable FileUpload avatar);
+	
+	File getUploaded(Account account);
 	
 }
 

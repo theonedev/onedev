@@ -2,7 +2,6 @@ package com.gitplex.server.core.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -73,8 +72,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 	
 	private String noSpaceFullName;
 	
-	private Date avatarUploadDate;
-
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
 	
@@ -214,14 +211,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	public void setDefaultPrivilege(DepotPrivilege defaultPrivilege) {
 		this.defaultPrivilege = defaultPrivilege;
-	}
-
-	public Date getAvatarUploadDate() {
-		return avatarUploadDate;
-	}
-
-	public void setAvatarUploadDate(Date avatarUploadDate) {
-		this.avatarUploadDate = avatarUploadDate;
 	}
 
 	public Collection<OrganizationMembership> getOrganizations() {

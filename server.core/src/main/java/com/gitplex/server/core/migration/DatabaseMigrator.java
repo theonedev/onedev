@@ -70,4 +70,18 @@ public class DatabaseMigrator implements Migrator {
 		}	
 	}
 	
+	private void migrate4(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Accounts.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element avatarUploadDateElement = element.element("avatarUploadDate");
+					if (avatarUploadDateElement != null)
+						avatarUploadDateElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}	
+	}
+	
 }

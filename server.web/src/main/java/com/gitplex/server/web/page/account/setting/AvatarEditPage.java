@@ -83,7 +83,8 @@ public class AvatarEditPage extends AccountSettingPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(accountModel.getObject().getAvatarUploadDate() != null);
+				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
+				setVisible(avatarManager.getUploaded(accountModel.getObject()).exists());
 			}
 
 			@Override
