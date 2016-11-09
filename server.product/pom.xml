@@ -3,11 +3,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server.product</artifactId>  
-    <name>GitPlex</name>
+    <name>GitPlex</name>  
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>server</artifactId>  
-        <version>1.0-EAP-build4</version> 
+        <version>1.0-EAP-build5</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -20,26 +20,23 @@
             <plugin> 
                 <artifactId>maven-javadoc-plugin</artifactId> 
             </plugin>  
-        	<plugin>
-	            <groupId>org.codehaus.gmaven</groupId>
-	            <artifactId>groovy-maven-plugin</artifactId>
-	            <version>2.0</version>
-	            <executions>
-	                <execution>
-	                    <phase>initialize</phase>
-	                    <goals>
-	                        <goal>execute</goal>
-	                 	</goals>
-	                   	<configuration>
-	                    	<source>
-	                      		project.properties["lowerCaseProductName"] = project.name.toLowerCase() 
-	                      		project.properties["docLink"] = "http://wiki.pmease.com/display/gp" + project.version.substring(0, project.version.indexOf('.'))
-	                    	</source>
-	                 	</configuration>
-	             	</execution>
-	          	</executions>
-	     	</plugin>
-			<plugin> 
+            <plugin> 
+                <groupId>org.codehaus.gmaven</groupId>  
+                <artifactId>groovy-maven-plugin</artifactId>  
+                <version>2.0</version>  
+                <executions> 
+                    <execution> 
+                        <phase>initialize</phase>  
+                        <goals> 
+                            <goal>execute</goal> 
+                        </goals>  
+                        <configuration> 
+                            <source>project.properties["lowerCaseProductName"] = project.name.toLowerCase() project.properties["docLink"] = "http://wiki.pmease.com/display/gp" + project.version.substring(0, project.version.indexOf('.'))</source> 
+                        </configuration> 
+                    </execution> 
+                </executions> 
+            </plugin>  
+            <plugin> 
                 <groupId>com.gitplex</groupId>  
                 <artifactId>plugin.maven</artifactId>  
                 <executions> 
@@ -54,8 +51,8 @@
                                 <copy todir="${project.build.directory}/sandbox"> 
                                     <fileset dir="system" excludes="site/images/**, site/avatars/**, **/*.keystore, **/*.jar"/>  
                                     <filterset> 
-                                        <filter token="productName" value="${lowerCaseProductName}"/> 
-                                        <filter token="docLink" value="${docLink}"/>
+                                        <filter token="productName" value="${lowerCaseProductName}"/>  
+                                        <filter token="docLink" value="${docLink}"/> 
                                     </filterset> 
                                 </copy>  
                                 <copy todir="${project.build.directory}/sandbox"> 
@@ -120,12 +117,12 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.core</artifactId>  
-            <version>1.0-EAP-build4</version> 
+            <version>1.0-EAP-build5</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.web</artifactId>  
-            <version>1.0-EAP-build4</version> 
+            <version>1.0-EAP-build5</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
@@ -144,17 +141,17 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.rest</artifactId>  
-            <version>1.0-EAP-build4</version> 
+            <version>1.0-EAP-build5</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.http</artifactId>  
-            <version>1.0-EAP-build4</version> 
+            <version>1.0-EAP-build5</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.search</artifactId>  
-            <version>1.0-EAP-build4</version> 
+            <version>1.0-EAP-build5</version> 
         </dependency> 
     </dependencies>  
     <repositories> 
@@ -179,5 +176,5 @@
         <bootstrapClass>com.gitplex.commons.bootstrap.Bootstrap</bootstrapClass>  
         <moduleClass>com.gitplex.server.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
-    </properties>   
+    </properties> 
 </project>
