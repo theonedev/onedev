@@ -4,6 +4,7 @@
 .recommenders/
 .idea/
 **/.classpath
+.project
 **/.project
 **/*.iml
 .settings/**
