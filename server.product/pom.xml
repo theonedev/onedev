@@ -31,7 +31,10 @@
                             <goal>execute</goal> 
                         </goals>  
                         <configuration> 
-                            <source>project.properties["lowerCaseProductName"] = project.name.toLowerCase() project.properties["docLink"] = "http://wiki.pmease.com/display/gp" + project.version.substring(0, project.version.indexOf('.'))</source> 
+                            <source>
+	                            project.properties["lowerCaseProductName"] = project.name.toLowerCase() 
+	                            project.properties["docLink"] = "http://wiki.pmease.com/display/gp" + project.version.substring(0, project.version.indexOf('.'))
+                            </source> 
                         </configuration> 
                     </execution> 
                 </executions> 
