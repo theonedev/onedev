@@ -124,7 +124,10 @@
                                         </goals>
                                     </pluginExecutionFilter>  
                                     <action> 
-                                        <ignore/> 
+                                        <execute> 
+                                            <runOnIncremental>true</runOnIncremental>  
+                                            <runOnConfiguration>true</runOnConfiguration> 
+                                        </execute> 
                                     </action> 
                                 </pluginExecution>  
                                 <pluginExecution> 

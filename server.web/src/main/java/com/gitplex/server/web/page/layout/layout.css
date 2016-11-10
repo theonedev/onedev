@@ -12,6 +12,10 @@ html, body {
 	text-decoration: none;
 	color: #CCC;
 }
+#main>.head>.logo .fa {
+	font-size: 28px;
+	color: #EEE;
+}
 #main>.head>.context {
 	color: #CCC;
 	font-size: 20px;

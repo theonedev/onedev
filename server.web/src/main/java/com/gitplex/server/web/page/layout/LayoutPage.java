@@ -43,7 +43,6 @@ import com.gitplex.server.web.page.account.tasks.TaskListPage;
 import com.gitplex.server.web.page.admin.SystemSettingPage;
 import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.server.web.page.home.DashboardPage;
 import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
@@ -68,6 +67,8 @@ public abstract class LayoutPage extends BasePage {
 		WebMarkupContainer head = new WebMarkupContainer("mainHead");
 		add(head);
 		
+		head.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
+		
 		head.add(newContextHead("context"));
 		
 		if (isLoggedIn()) {
@@ -86,8 +87,6 @@ public abstract class LayoutPage extends BasePage {
 		} else {
 			head.add(new WebMarkupContainer("createNewDropdown").setVisible(false));
 		}
-		
-		head.add(new BookmarkablePageLink<Void>("depotsLink", DashboardPage.class));
 		
 		head.add(new ExternalLink("docLink", GitPlex.getInstance().getDocLink()));
 		
