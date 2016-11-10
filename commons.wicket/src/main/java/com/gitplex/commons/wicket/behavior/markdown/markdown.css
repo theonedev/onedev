@@ -1,0 +1,103 @@
+/* MARKDOWN */
+.atwho-view .emoji {
+	display: inline-block; 
+	height: 20px; 
+	width: 20px; 
+	vertical-align: middle; 
+	background-repeat: no-repeat; 
+	background-size: 20px 20px;
+}
+.atwho-view .avatar img {
+	display: inline-block; 
+	width: 20px; 
+	height: 20px; 
+	vertical-align: middle;
+}
+.atwho-view .cur .text-muted {
+	color: inherit;	
+}
+
+.md-help, .md-emojis {
+	padding: 0 8px 8px 8px; 
+	display: none;
+}
+
+.md-emojis {
+	position: relative;
+}
+.md-emojis .loading {
+	padding: 20px; 
+	text-align: center; 
+	font-size: 16px;
+}
+.md-emojis .emoji {
+	margin-right: 12px;
+}
+.md-emojis .emoji img {
+	width: 16px; 
+	height: 16px;
+}
+.md-emojis .content {
+	font-size: 12px; 
+	line-height: 24px; 
+	height: 200px; 
+	overflow: auto;
+}
+.md-emojis .mask {
+	position: absolute; 
+	height: 208px; 
+	width: 100%; 
+	left: 0; 
+	top: 0; 
+	background-color: rgba(0, 0, 0, 0.2); 
+	display: none;
+}
+
+/* original value is 99999 which will hide image/link dialogs */
+.md-editor.md-fullscreen-mode {
+    z-index: 100 !important;
+}
+.md-editor .md-preview {
+	padding: 10px 20px;
+}
+.md-editor>textarea.md-input {
+	padding: 8px; 
+	border-bottom: none;
+}
+
+.select-url form.url {
+	margin-bottom: 20px;
+}
+.select-url input.url {
+	width: 495px;
+	margin-right: 7px;
+}
+.select-url .attachments {
+	max-height: 300px;
+	overflow: auto;
+	margin-bottom: 20px;
+}
+.select-url .attachments img {
+	max-width: 100%;
+}
+.select-url .attachment a {
+	color: #666;
+}
+.select-url .attachment a.select {
+	margin-right: 6px;
+}
+.select-url .alert-info {
+	margin-top: 20px;
+}
+.md-input.drag-over {
+	border: 2px solid #69B7F7;
+}
+.md-fullscreen-mode textarea {
+	max-height: inherit;
+}
+.md-nooverflow .btn, .md-nooverflow .form-control {
+	z-index: 0 !important;
+}
+.md-control-fullscreen, .exit-fullscreen {
+	display: none;
+}

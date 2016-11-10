@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+#if (${groupId} != "com.gitplex")
+	<groupId>${groupId}</groupId>	
+#end
+	<artifactId>${artifactId}</artifactId>
+	<version>${version}</version>
+	<parent>
+		<groupId>com.gitplex</groupId>
+		<artifactId>parent.general</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.gitplex</groupId>
+				<artifactId>plugin.maven</artifactId>
+			</plugin>
+			<!-- Uncomment below if you'd like to publish an archetype based on your plugin -->
+			<!--plugin>
+				<artifactId>maven-archetype-plugin</artifactId>
+			</plugin-->
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.gitplex</groupId>
+			<artifactId>commons.loader</artifactId>
+			<version>1.0-EAP-build6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.gitplex</groupId>
+			<artifactId>commons.loader</artifactId>
+			<version>1.0-EAP-build6</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>pmeaseRepo</id>
+			<name>PMEase Repository</name>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+			<url>http://artifact.pmease.com/</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<moduleClass>${package}.PluginModule</moduleClass>
+	</properties>
+
+</project>

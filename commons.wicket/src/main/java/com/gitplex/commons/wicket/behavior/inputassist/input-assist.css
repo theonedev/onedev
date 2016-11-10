@@ -1,0 +1,47 @@
+.input-assist {
+	padding: 8px;
+}
+.input-assist td {
+	padding: 2px 4px;
+}
+.input-assist a {
+	color: #333;
+	text-decoration: none;
+	display: block;
+}
+.input-assist tr:hover td {
+	background-color: #E0F0FC;
+}
+.input-assist tr.active td {
+	background-color: #CBE8FB;
+	border-color: #8BC8F9;
+}
+.input-assist .description {
+	color: #999;
+	text-align: right;
+}
+.input-assist .suggestions {
+	max-height: 400px;
+}
+.input-assist .suggestion a {
+	padding-right: 12px;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	font-size: 13px;
+}
+.input-assist .help {
+	margin-top: 8px;
+	margin-bottom: 0;
+	background: #F0F0F0;
+	padding: 2px 4px;
+	border: 1px dashed #CCC;
+	color: #666;
+}
+.input-assist .help.multiple li {
+	list-style: disc;
+	margin-left: 18px;
+}
+.input-error-mark {
+    background: url(wave.png) repeat-x bottom;
+	position: absolute;
+    z-index: 100000;
+}

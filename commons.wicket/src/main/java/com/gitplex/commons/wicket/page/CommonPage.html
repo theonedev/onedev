@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html class="no-js" xmlns:wicket="http://wicket.apache.org">
+<head>
+</head>
+<body>
+	<wicket:child></wicket:child>
+	
+	<div wicket:id="sessionFeedback" id="session-feedback"></div>
+	<div id="ajax-loading-indicator"><div>Loading...</div></div>
+	
+	<!-- Two divs are used here in order to make overlay works in IE. -->
+	<div id="ajax-loading-overlay"><div></div></div>
+	<div wicket:id="keepSessionAlive" style="display:none;"></div>
+	<a id="websocket-error" href="javascript: location.reload();"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+	Page is in error, refresh to recover</a>
+	<div wicket:id="rootComponents"></div>
+</body>
+</html>

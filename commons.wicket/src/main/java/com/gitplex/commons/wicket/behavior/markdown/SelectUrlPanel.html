@@ -1,0 +1,34 @@
+<wicket:panel>
+	<div class="modal-header">
+		<button wicket:id="close" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<h4 wicket:id="title" class="modal-title"></h4>
+	</div>
+	<div class="modal-body select-url">
+		<form wicket:id="form" class="form-inline url">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div class="form-group">
+				<input wicket:id="url" class="form-control focusable url"></input>
+				<button wicket:id="insert" type="submit" class="btn btn-primary">Insert</button>
+			</div>		
+		</form>
+		<div wicket:id="attachments"></div>
+	</div>
+	<wicket:fragment wicket:id="attachmentsFrag">
+		<wicket:enclosure child="attachments">
+		<ul class="attachments list-unstyled">
+			<li wicket:id="attachments" class="attachment">
+				<a wicket:id="select" title="Select this attachment" class="select"></a>
+				<a wicket:id="delete" title="Remove this attachment" class="delete"><i class="fa fa-trash"></i></a>
+			</li>
+		</ul>
+		</wicket:enclosure>
+		<form wicket:id="form" class="upload">
+		    <span class="btn btn-default btn-file">
+		        Select local file... <input wicket:id="file" type="file"></input> <button wicket:id="submit" class="hidden">submit</button>
+		    </span>		
+		</form>
+		<div class="alert alert-info">
+			<i class="fa fa-info-circle"></i> Note: <span wicket:id="hint"></span>    
+		</div>
+	</wicket:fragment>
+</wicket:panel>

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server.core</artifactId>  
     <parent> 
         <groupId>com.gitplex</groupId>  
-        <artifactId>server</artifactId>  
-        <version>1.0-EAP-build5</version> 
+        <artifactId>gitplex</artifactId>  
+        <version>1.0-EAP-build6</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -32,8 +31,23 @@
     <dependencies> 
         <dependency> 
             <groupId>com.gitplex</groupId>  
-            <artifactId>commons.product</artifactId>  
-            <version>1.0.0</version> 
+            <artifactId>commons.wicket</artifactId>  
+            <version>1.0-EAP-build6</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.gitplex</groupId>  
+            <artifactId>commons.schedule</artifactId>  
+            <version>1.0-EAP-build6</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.gitplex</groupId>  
+            <artifactId>commons.git</artifactId>  
+            <version>1.0-EAP-build6</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.gitplex</groupId>  
+            <artifactId>commons.jersey</artifactId>  
+            <version>1.0-EAP-build6</version> 
         </dependency>  
         <dependency> 
             <groupId>org.jetbrains.xodus</groupId>  
@@ -42,14 +56,14 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0.0</version>  
+            <version>1.0-EAP-build6</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0.0</version>  
+            <version>1.0-EAP-build6</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency> 

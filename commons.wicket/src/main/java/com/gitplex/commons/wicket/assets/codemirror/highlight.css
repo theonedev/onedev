@@ -1,0 +1,9 @@
+pre.highlight {
+	padding: 8px;
+	border: 1px dashed #BBB;
+	background: #F9F9F9;
+}
+pre.highlight>code>.CodeMirror {
+	height: auto;
+	background: #F9F9F9;
+}

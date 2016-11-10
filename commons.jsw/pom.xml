@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+    <modelVersion>4.0.0</modelVersion>  
+    <parent> 
+        <groupId>com.gitplex</groupId>  
+        <artifactId>gitplex</artifactId>  
+        <version>1.0-EAP-build6</version> 
+    </parent>  
+    <artifactId>commons.jsw</artifactId>  
+    <build> 
+        <plugins> 
+            <plugin> 
+                <groupId>com.gitplex</groupId>  
+                <artifactId>plugin.maven</artifactId> 
+            </plugin>  
+            <plugin> 
+                <artifactId>maven-antrun-plugin</artifactId>  
+                <executions> 
+                    <execution> 
+                        <phase>prepare-package</phase>  
+                        <goals> 
+                            <goal>run</goal> 
+                        </goals>  
+                        <configuration> 
+                            <target> 
+                                <unzip src="wrapper/wrapper-delta-pack-st.zip" dest="${project.build.outputDirectory}" overwrite="true"> 
+                                    <regexpmapper from="^.*?/(.*)" to="\1"/> 
+                                </unzip>  
+                                <copy todir="${project.build.outputDirectory}/customization"> 
+                                    <fileset dir="wrapper/customization"/> 
+                                </copy> 
+                            </target> 
+                        </configuration> 
+                    </execution> 
+                </executions> 
+            </plugin> 
+        </plugins> 
+    </build>  
+    <repositories> 
+        <repository> 
+            <id>pmeaseRepo</id>  
+            <name>PMEase Repository</name>  
+            <releases> 
+                <enabled>true</enabled>  
+                <updatePolicy>never</updatePolicy>  
+                <checksumPolicy>fail</checksumPolicy> 
+            </releases>  
+            <snapshots> 
+                <enabled>true</enabled>  
+                <updatePolicy>always</updatePolicy>  
+                <checksumPolicy>fail</checksumPolicy> 
+            </snapshots>  
+            <url>http://artifact.pmease.com/</url> 
+        </repository> 
+    </repositories> 
+</project>

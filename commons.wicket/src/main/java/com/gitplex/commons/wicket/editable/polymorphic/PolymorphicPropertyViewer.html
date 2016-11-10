@@ -1,0 +1,17 @@
+<wicket:panel>
+	<div wicket:id="content" class="polymorphic"></div>
+	<wicket:fragment wicket:id="horizontalFrag">
+		<table>
+			<tbody>
+				<tr>
+					<td wicket:id="type" class="type-selector"></td>
+					<td wicket:id="beanViewer"></td>
+				</tr>
+			</tbody>
+		</table>
+	</wicket:fragment>	
+	<wicket:fragment wicket:id="verticalFrag">
+		<div wicket:id="type" class="type-selector"></div>
+		<div wicket:id="beanViewer"></div>
+	</wicket:fragment>
+</wicket:panel>

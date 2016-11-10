@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server.web</artifactId>  
     <parent> 
         <groupId>com.gitplex</groupId>  
-        <version>1.0-EAP-build5</version>  
-        <artifactId>server</artifactId> 
+        <artifactId>gitplex</artifactId>  
+        <version>1.0-EAP-build6</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -30,12 +29,12 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.core</artifactId>  
-            <version>1.0-EAP-build5</version> 
+            <version>1.0-EAP-build6</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.rest</artifactId>  
-            <version>1.0-EAP-build5</version> 
+            <version>1.0-EAP-build6</version> 
         </dependency>  
         <!-- JERSEY CLIENT -->  
         <dependency> 
@@ -61,7 +60,7 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.search</artifactId>  
-            <version>1.0-EAP-build5</version> 
+            <version>1.0-EAP-build6</version> 
         </dependency> 
     </dependencies>  
     <repositories> 

@@ -1,0 +1,19 @@
+<wicket:panel>
+	<div wicket:id="content" class="polymorphic"></div>
+	<wicket:fragment wicket:id="verticalFrag">
+		<div wicket:id="typeSelectorContainer" class="type-selector">
+			<select wicket:id="typeSelector" class="form-control focusable"></select>
+		</div>
+		<div wicket:id="beanEditor"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="horizontalFrag">
+		<table>
+			<tbody>
+				<tr>
+					<td wicket:id="typeSelectorContainer" class="type-selector"><select wicket:id="typeSelector" class="form-control focusable"></select></td>
+					<td><div wicket:id="beanEditor"></div></td>
+				</tr>
+			</tbody>
+		</table>
+	</wicket:fragment>
+</wicket:panel>
