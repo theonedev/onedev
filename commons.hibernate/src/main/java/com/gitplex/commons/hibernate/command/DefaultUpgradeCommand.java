@@ -90,7 +90,7 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 			logger.error("Please stop server running at \"{}\" before upgrading", upgradeDir.getAbsolutePath());
 			System.exit(1);
 		}
-		if (Bootstrap.getServerRunningFile().exists()) {
+		if (Bootstrap.isServerRunning()) {
 			logger.error("Please stop server running at \"{}\" before upgrading", Bootstrap.installDir.getAbsolutePath());
 			System.exit(1);
 		}

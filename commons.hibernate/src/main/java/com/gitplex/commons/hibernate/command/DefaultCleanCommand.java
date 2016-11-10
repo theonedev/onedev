@@ -35,7 +35,7 @@ public class DefaultCleanCommand extends DefaultPersistManager {
 
 	@Override
 	public void start() {
-		if (Bootstrap.getServerRunningFile().exists()) {
+		if (Bootstrap.isServerRunning()) {
 			logger.error("Please stop server before cleaning database");
 			System.exit(1);
 		}

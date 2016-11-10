@@ -125,21 +125,6 @@ public class Bootstrap {
 		configureLogging();
 
 		try {
-			if (command == null) {
-				if (!sandboxMode) {
-					File serverRunningFile = getServerRunningFile();
-					if (serverRunningFile.exists()) 
-						throw new RuntimeException("Server is already running");
-					
-					try {
-						serverRunningFile.createNewFile();
-						serverRunningFile.deleteOnExit();
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-			
 	        File tempDir = Bootstrap.getTempDir();
 			if (tempDir.exists()) {
 				logger.info("Cleaning temp directory...");
@@ -333,8 +318,15 @@ public class Bootstrap {
 		return new File(installDir, "status");
 	}
 	
-	public static File getServerRunningFile() {
-		return new File(getStatusDir(), "server_running");
+	public static boolean isServerRunning() {
+		// status directory may contain multiple pid files, for instance, 
+		// appname.pid, appname_backup.pid, etc. We only check for appname.pid
+		// here and assumes that appname does not contain underscore
+		for (File file: getStatusDir().listFiles()) {
+			if (file.getName().endsWith(".pid") && !file.getName().contains("_"))
+				return true;
+		}
+		return false;
 	}
 
 	public static File getLibDir() {
