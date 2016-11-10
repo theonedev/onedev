@@ -320,18 +320,16 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 	}
 	
 	protected void copyProgramFilesTo(File upgradeDir) {
-		String result;
-		try {
-			String from = FileUtils.readFileToString(new File(upgradeDir, "bin/server.sh"));
-			String to = FileUtils.readFileToString(new File(Bootstrap.getBinDir(), "server.sh"));
-			result = UpgradeUtils.copyRunAs(from, to);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		
 		cleanAndCopy(new File(Bootstrap.installDir, "3rdparty-licenses"), new File(upgradeDir, "3rdparty-licenses"));
-		cleanAndCopy(Bootstrap.getBinDir(), new File(upgradeDir, "bin"));
-		FileUtils.writeFile(new File(upgradeDir, "bin/server.sh"), result);
+		for (File file: Bootstrap.getBinDir().listFiles()) {
+			if (!file.getName().equals("server.sh")) { // server.sh may be customized by user
+				try {
+					FileUtils.copyFile(file, new File(upgradeDir, "bin/" + file.getName()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
 		for (File file: Bootstrap.getSiteLibDir().listFiles()) {
