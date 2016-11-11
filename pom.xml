@@ -561,16 +561,9 @@
         </dependency> 
     </dependencies>  
     <pluginRepositories> 
-        <!-- access central repository via http protocol as otherwise m2e 
-		will access central via https protocol to cause certificate error -->  
         <pluginRepository> 
-            <id>central</id>  
-            <url>http://repo1.maven.org/maven2</url>  
-            <releases> 
-                <enabled>true</enabled> 
-            </releases> 
-        </pluginRepository>  
-        <pluginRepository> 
+            <id>pmeaseRepo</id>  
+            <url>http://artifact.pmease.com/</url> 
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -581,24 +574,12 @@
                 <updatePolicy>never</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <id>pmeaseRepo</id>  
-            <name>PMEase Repository</name>  
-            <url>http://artifact.pmease.com/</url> 
         </pluginRepository> 
     </pluginRepositories>  
     <repositories> 
-        <!-- access central repository via http protocol as otherwise m2e 
-		will access central via https protocol to cause certificate error -->  
-        <repository> 
-            <id>central</id>  
-            <url>http://repo1.maven.org/maven2</url>  
-            <releases> 
-                <enabled>true</enabled> 
-            </releases> 
-        </repository>  
         <repository> 
             <id>pmeaseRepo</id>  
-            <name>PMEase Repository</name>  
+            <url>http://artifact.pmease.com/</url> 
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -609,30 +590,7 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-            <url>http://artifact.pmease.com/</url> 
         </repository>  
-        <repository> 
-            <id>apache-snapshots</id>  
-            <name>Apache Snapshots</name>  
-            <url>http://repository.apache.org/snapshots/</url>  
-            <releases> 
-                <enabled>false</enabled> 
-            </releases>  
-            <snapshots> 
-                <enabled>true</enabled> 
-            </snapshots> 
-        </repository>  
-        <repository> 
-            <id>sonatype-snapshots</id>  
-            <name>Sonatype Snapshots</name>  
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>  
-            <releases> 
-                <enabled>false</enabled> 
-            </releases>  
-            <snapshots> 
-                <enabled>true</enabled> 
-            </snapshots> 
-        </repository> 
     </repositories>  
     <distributionManagement> 
         <repository> 

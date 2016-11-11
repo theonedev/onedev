@@ -151,7 +151,7 @@
 	<repositories>
 		<repository>
 			<id>pmeaseRepo</id>
-			<name>PMEase Repository</name>
+			<url>http://localhost:8081/artifactory/pmeaseRepo</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>
@@ -162,7 +162,6 @@
 				<updatePolicy>always</updatePolicy>
 				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
-			<url>http://localhost:8081/artifactory/pmeaseRepo</url>
 		</repository>
 	</repositories>
 	<properties>
