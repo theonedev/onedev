@@ -145,7 +145,7 @@
 	<distributionManagement>
 		<repository>
 			<id>pmeaseRepo</id>
-			<url>http://artifact.pmease.com/</url>
+			<url>http://localhost:8081/artifactory/pmeaseRepo</url>
 		</repository>
 	</distributionManagement>
 	<repositories>
@@ -162,7 +162,7 @@
 				<updatePolicy>always</updatePolicy>
 				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
-			<url>http://artifact.pmease.com/</url>
+			<url>http://localhost:8081/artifactory/pmeaseRepo</url>
 		</repository>
 	</repositories>
 	<properties>

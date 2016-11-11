@@ -73,23 +73,6 @@
             <version>1.0-EAP-build6</version> 
         </dependency> 
     </dependencies>  
-    <repositories> 
-        <repository> 
-            <id>pmeaseRepo</id>  
-            <name>PMEase Repository</name>  
-            <releases> 
-                <enabled>true</enabled>  
-                <updatePolicy>never</updatePolicy>  
-                <checksumPolicy>fail</checksumPolicy> 
-            </releases>  
-            <snapshots> 
-                <enabled>true</enabled>  
-                <updatePolicy>always</updatePolicy>  
-                <checksumPolicy>fail</checksumPolicy> 
-            </snapshots>  
-            <url>http://artifact.pmease.com/</url> 
-        </repository> 
-    </repositories>  
     <properties> 
         <jgitVersion>4.4.1.201607150455-r</jgitVersion>  
         <moduleClass>com.gitplex.commons.git.GitModule</moduleClass> 
