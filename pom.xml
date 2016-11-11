@@ -563,7 +563,7 @@
     <pluginRepositories> 
         <pluginRepository> 
             <id>pmeaseRepo</id>  
-            <url>http://artifact.pmease.com/</url> 
+            <url>http://artifact.pmease.com/artifactory/pmeaseRepo</url> 
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -579,7 +579,7 @@
     <repositories> 
         <repository> 
             <id>pmeaseRepo</id>  
-            <url>http://artifact.pmease.com/</url> 
+            <url>http://artifact.pmease.com/artifactory/pmeaseRepo</url> 
             <releases> 
                 <enabled>true</enabled>  
                 <updatePolicy>never</updatePolicy>  
@@ -595,7 +595,7 @@
     <distributionManagement> 
         <repository> 
             <id>pmeaseRepo</id>  
-            <url>http://artifact.pmease.com/</url> 
+            <url>http://artifact.pmease.com/artifactory/pmeaseRepo</url> 
         </repository> 
     </distributionManagement>  
     <properties> 

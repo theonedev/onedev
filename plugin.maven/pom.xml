@@ -145,13 +145,13 @@
 	<distributionManagement>
 		<repository>
 			<id>pmeaseRepo</id>
-			<url>http://localhost:8081/artifactory/pmeaseRepo</url>
+            <url>http://artifact.pmease.com/artifactory/pmeaseRepo</url> 
 		</repository>
 	</distributionManagement>
 	<repositories>
 		<repository>
 			<id>pmeaseRepo</id>
-			<url>http://localhost:8081/artifactory/pmeaseRepo</url>
+            <url>http://artifact.pmease.com/artifactory/pmeaseRepo</url> 
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>
