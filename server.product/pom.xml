@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>gitplex</artifactId>  
-        <version>1.0-EAP-build6</version> 
+        <version>1.0-EAP-build7</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -113,47 +113,47 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.jsw</artifactId>  
-            <version>1.0-EAP-build6</version>  
+            <version>1.0-EAP-build7</version>  
             <scope>provided</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.core</artifactId>  
-            <version>1.0-EAP-build6</version> 
+            <version>1.0-EAP-build7</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.web</artifactId>  
-            <version>1.0-EAP-build6</version> 
+            <version>1.0-EAP-build7</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0-EAP-build6</version>  
+            <version>1.0-EAP-build7</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0-EAP-build6</version>  
+            <version>1.0-EAP-build7</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.rest</artifactId>  
-            <version>1.0-EAP-build6</version> 
+            <version>1.0-EAP-build7</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.http</artifactId>  
-            <version>1.0-EAP-build6</version> 
+            <version>1.0-EAP-build7</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.search</artifactId>  
-            <version>1.0-EAP-build6</version> 
+            <version>1.0-EAP-build7</version> 
         </dependency> 
     </dependencies>  
     <properties> 

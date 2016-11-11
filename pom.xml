@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>  
     <groupId>com.gitplex</groupId>  
     <artifactId>gitplex</artifactId>  
-    <version>1.0-EAP-build6</version>  
+    <version>1.0-EAP-build7</version>  
     <packaging>pom</packaging>  
     <prerequisites> 
         <maven>3.0</maven> 
@@ -212,7 +212,7 @@
                 <plugin> 
                     <groupId>com.gitplex</groupId>  
                     <artifactId>plugin.maven</artifactId>  
-                    <version>1.0-EAP-build6</version>  
+                    <version>1.0-EAP-build7</version>  
                     <executions> 
                         <execution> 
                             <id>check-project-dependencies</id>  
@@ -609,7 +609,7 @@
                 <updatePolicy>always</updatePolicy>  
                 <checksumPolicy>fail</checksumPolicy> 
             </snapshots>  
-			<url>http://localhost:8081/artifactory/pmeaseRepo</url>
+            <url>http://artifact.pmease.com/</url> 
         </repository>  
         <repository> 
             <id>apache-snapshots</id>  
@@ -637,7 +637,7 @@
     <distributionManagement> 
         <repository> 
             <id>pmeaseRepo</id>  
-			<url>http://localhost:8081/artifactory/pmeaseRepo</url>
+            <url>http://artifact.pmease.com/</url> 
         </repository> 
     </distributionManagement>  
     <properties> 
