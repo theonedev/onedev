@@ -444,6 +444,7 @@ public class DepotCommitsPage extends DepotPage {
 
 			DepotFilePage.State browseState = new DepotFilePage.State();
 			browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
+			browseState.blobIdent.path = path;
 			PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), browseState);
 			item.add(new BookmarkablePageLink<Void>("browseCode", DepotFilePage.class, params));
 			
