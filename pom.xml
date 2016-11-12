@@ -212,7 +212,7 @@
                 <plugin> 
                     <groupId>com.gitplex</groupId>  
                     <artifactId>plugin.maven</artifactId>  
-                    <version>1.0-EAP-build7</version>  
+                    <version>1.0-EAP-build8</version>  
                     <executions> 
                         <execution> 
                             <id>check-project-dependencies</id>  
