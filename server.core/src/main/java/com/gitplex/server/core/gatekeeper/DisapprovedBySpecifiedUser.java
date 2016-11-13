@@ -15,7 +15,7 @@ import com.gitplex.server.core.entity.PullRequestReview;
 import com.gitplex.server.core.gatekeeper.checkresult.GateCheckResult;
 import com.gitplex.server.core.manager.AccountManager;
 
-@Editable(order=300, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
+@Editable(order=300, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
 		"This gatekeeper will be passed if the commit is disapproved by specified user. "
 		+ "It normally works together with a NOT container to reject the pull request "
 		+ "in case the user disapproved it")

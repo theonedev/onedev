@@ -1,4 +1,4 @@
-package com.gitplex.server.rest.resource;
+package com.gitplex.server.rest;
 
 import java.util.Collection;
 import java.util.Date;

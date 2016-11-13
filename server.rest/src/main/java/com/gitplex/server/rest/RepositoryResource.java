@@ -1,4 +1,4 @@
-package com.gitplex.server.rest.resource;
+package com.gitplex.server.rest;
 
 import java.util.ArrayList;
 import java.util.Collection;
