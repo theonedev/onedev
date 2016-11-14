@@ -684,7 +684,7 @@ public abstract class RequestDetailPage extends DepotPage {
 					target.appendJavaScript("$(window).resize();");
 				} else {
 					operation.operate(request, noteInput.getModelObject());
-					target.appendJavaScript("location.reload();");
+					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
 				}
 			}
 
