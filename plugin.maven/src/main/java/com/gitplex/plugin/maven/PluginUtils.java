@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -45,16 +45,16 @@ public class PluginUtils {
 	
 	public static boolean containsFile(File file, String path) {
 		if (file.isFile() && file.getName().endsWith(".jar")) {
-			ZipFile zip = null;
+			JarFile jar = null;
 			try {
-				zip = new ZipFile(file);
-				return zip.getEntry(path) != null; 
+				jar = new JarFile(file);
+				return jar.getJarEntry(path) != null; 
 			} catch (Exception e) {
 				throw unchecked(e);
 			} finally {
-				if (zip != null) {
+				if (jar != null) {
 					try {
-						zip.close();
+						jar.close();
 					} catch (IOException e) {
 					}
 				}
@@ -68,14 +68,14 @@ public class PluginUtils {
 	
 	public static Properties loadProperties(File file, String path) {
 		if (file.isFile() && file.getName().endsWith(".jar")) {
-			ZipFile zip = null;
+			JarFile jar = null;
 			try {
-				zip = new ZipFile(file);
-				ZipEntry entry = zip.getEntry(path);
+				jar = new JarFile(file);
+				JarEntry entry = jar.getJarEntry(path);
 				if (entry != null) {
 					InputStream is = null;
 					try {
-						is = zip.getInputStream(entry);
+						is = jar.getInputStream(entry);
 						Properties props = new Properties();
 						props.load(is);
 						return props;
@@ -92,9 +92,9 @@ public class PluginUtils {
 			} catch (Exception e) {
 				throw unchecked(e);
 			} finally {
-				if (zip != null) {
+				if (jar != null) {
 					try {
-						zip.close();
+						jar.close();
 					} catch (IOException e) {
 					}
 				}
@@ -347,6 +347,8 @@ public class PluginUtils {
 	}
 	
 	public static void writeProperties(File file, Properties props) {
+		if (!file.getParentFile().exists())
+			file.getParentFile().mkdirs();
     	OutputStream os = null;
     	try {
     		os = new FileOutputStream(file);
@@ -453,7 +455,7 @@ public class PluginUtils {
 		}
 	}
 
-	public static void zipFile(ZipOutputStream zos, File file, int offset, boolean includeArchetypeResources) {
+	public static void addFileToJar(JarOutputStream jos, File file, int offset, boolean includeArchetypeResources) {
 		String entryName = file.getAbsolutePath().substring(offset + 1);
 		
 		if (File.separatorChar != '/')
@@ -480,7 +482,7 @@ public class PluginUtils {
 			return;
 		
 		try {
-			zos.putNextEntry(new ZipEntry(entryName));
+			jos.putNextEntry(new JarEntry(entryName));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -490,13 +492,13 @@ public class PluginUtils {
 				FileInputStream is = null;
 				try {
 					is = new FileInputStream(file);
-					IOUtil.copy(is, zos);
+					IOUtil.copy(is, jos);
 				} finally {
 					IOUtil.close(is);
 				}
 
-				zos.flush();
-				zos.closeEntry();
+				jos.flush();
+				jos.closeEntry();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -504,13 +506,10 @@ public class PluginUtils {
 	}
 
 	public static void listFiles(File dir, List<File> fileList) {
-		if (dir.listFiles().length == 0)
-			fileList.add(dir);
 		for (File file : dir.listFiles()) {
+			fileList.add(file);
 			if (file.isDirectory())
 				listFiles(file, fileList);
-			else
-				fileList.add(file);
 		}
 	}
 }

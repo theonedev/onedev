@@ -90,9 +90,9 @@ public class AppLoader implements Startable {
 		
 		for (URL url: classLoader.getURLs()) {
 			Properties pluginProps = FileUtils.loadProperties(
-					new File(url.getFile()), "gitplex-plugin.properties");
+					new File(url.getFile()), "META-INF/gitplex-plugin.properties");
 			if (pluginProps != null) {
-				Properties productProps = FileUtils.loadProperties(new File(url.getFile()), "gitplex-product.properties");
+				Properties productProps = FileUtils.loadProperties(new File(url.getFile()), "META-INF/gitplex-product.properties");
 				String pluginId = pluginProps.getProperty("id");
 				if (pluginModules.containsKey(pluginId))
 					throw new RuntimeException("More than one version of plugin '" + pluginId + "' is found.");

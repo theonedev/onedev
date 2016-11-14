@@ -243,7 +243,7 @@ public class Bootstrap {
 	}
 
 	private static boolean isPriorityLib(File lib) {
-		String entryName = "gitplex-artifact.properties";
+		String entryName = "META-INF/gitplex-artifact.properties";
 		if (lib.isDirectory()) {
 			return new File(lib, entryName).exists();
 		} else {

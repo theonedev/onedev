@@ -8,7 +8,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.ZipOutputStream;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -79,10 +81,12 @@ public class PackageArtifactMojo extends AbstractMojo {
 		 * archive to avoid the "Can not override..." warning when use this archive to generate 
 		 * an archetype.
 		 */
-		ZipOutputStream zos = null;
+		JarOutputStream jos = null;
 		try {
-			zos = new ZipOutputStream(new FileOutputStream(jarFile));
-			zos.setLevel(9);
+			Manifest manifest = new Manifest();
+			manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+			jos = new JarOutputStream(new FileOutputStream(jarFile), manifest);
+			jos.setLevel(9);
 
 			List<File> files = new ArrayList<File>();
 			PluginUtils.listFiles(new File(project.getBuild().getOutputDirectory()), files);
@@ -90,7 +94,7 @@ public class PackageArtifactMojo extends AbstractMojo {
 			boolean includeArchetypeResources = (project.getPlugin("org.apache.maven.plugins:maven-archetype-plugin")!=null);
 
 			for (File file : files) { 
-				PluginUtils.zipFile(zos, file, project.getBuild().getOutputDirectory().length(), includeArchetypeResources);
+				PluginUtils.addFileToJar(jos, file, project.getBuild().getOutputDirectory().length(), includeArchetypeResources);
 			}
 			
 			if (new File(project.getBuild().getOutputDirectory(), PluginConstants.PRODUCT_PROPERTY_FILE).exists()) {
@@ -105,13 +109,13 @@ public class PackageArtifactMojo extends AbstractMojo {
 
 				for (File file: files) {
 					if (!excluded.contains(file.getName())) 
-						PluginUtils.zipFile(zos, file, sandboxDir.getParent().length(), includeArchetypeResources);
+						PluginUtils.addFileToJar(jos, file, sandboxDir.getParent().length(), includeArchetypeResources);
 				}
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
-			IOUtil.close(zos);
+			IOUtil.close(jos);
 		}
 		
 		project.getArtifact().setFile(jarFile);
