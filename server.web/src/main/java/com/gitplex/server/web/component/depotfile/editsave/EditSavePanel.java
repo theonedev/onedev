@@ -74,8 +74,6 @@ public abstract class EditSavePanel extends Panel {
 	
 	private BlobChange change;
 	
-	private boolean saveInProgress;
-	
 	public EditSavePanel(String id, IModel<Depot> depotModel, String refName, 
 			@Nullable String oldPath, @Nullable PathAndContent newFile, 
 			ObjectId prevCommitId, @Nullable CancelListener cancelListener) {
@@ -219,19 +217,18 @@ public abstract class EditSavePanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 
-				if (saveInProgress || (fileEdit.getOldPath() != null && fileEdit.getNewFile() != null))
+				if ((fileEdit.getOldPath() != null && fileEdit.getNewFile() != null))
 					tag.put("disabled", "disabled");
-				if (saveInProgress)
-					tag.put("value", "Please wait...");
 			}
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				save(target, feedback);
-				saveInProgress = true;
-				target.add(this);
-				target.appendJavaScript("gitplex.commons.form.markClean($('form'));");
+				String script = String.format(""
+						+ "$('#%s').attr('disabled', 'disabled').val('Please wait...');"
+						+ "gitplex.commons.form.markClean($('form'));", getMarkupId());
+				target.appendJavaScript(script);
 			}
 			
 		};
