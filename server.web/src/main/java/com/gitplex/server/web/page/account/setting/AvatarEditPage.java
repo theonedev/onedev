@@ -1,9 +1,5 @@
 package com.gitplex.server.web.page.account.setting;
 
-import java.util.Map;
-
-import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -15,7 +11,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.lang.Bytes;
 
 import com.gitplex.commons.util.FileUtils;
 import com.gitplex.server.core.GitPlex;
@@ -28,7 +23,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public class AvatarEditPage extends AccountSettingPage {
 
-	private static final int MAX_IMAGE_SIZE = 2; // In megabytes
+	private static final int MAX_IMAGE_SIZE = 2*1024*1024;
 	
 	public AvatarEditPage(PageParameters params) {
 		super(params);
@@ -38,23 +33,17 @@ public class AvatarEditPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		final Form<?> form = new Form<Void>("form") {
-
-			@Override
-			protected void onFileUploadException(FileUploadException e, Map<String, Object> model) {
-				if (e instanceof SizeLimitExceededException)
-				    error("Upload must be less than " + FileUtils.byteCountToDisplaySize(getMaxSize().bytes()));
-			}
-			
-		};
+		Form<?> form = new Form<Void>("form");
 		add(form);
 		form.add(new NotificationPanel("feedback", form));
 		form.setOutputMarkupId(true);
 
-		form.setMaxSize(Bytes.megabytes(MAX_IMAGE_SIZE));
+		// for some reason, javascript reports cross origin iframe access error when file size
+		// exceeds this limit, so we check at server side for the file size instead
+		// form.setMaxSize(Bytes.megabytes(MAX_IMAGE_SIZE));
 		form.setMultiPart(true);
 		
-		final FileUploadField uploadField = new FileUploadField("file");
+		FileUploadField uploadField = new FileUploadField("file");
 		form.add(uploadField);
 		
 		uploadField.add(new AjaxFormSubmitBehavior("change") {
@@ -63,11 +52,15 @@ public class AvatarEditPage extends AccountSettingPage {
 			protected void onSubmit(AjaxRequestTarget target) {
 				super.onSubmit(target);
 				FileUpload upload = uploadField.getFileUpload();
-				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-            	avatarManager.useAvatar(accountModel.getObject(), upload);
-				form.success("Avatar has been updated.");
+				if (upload.getSize() >= MAX_IMAGE_SIZE) {
+				    form.error("Upload must be less than " + FileUtils.byteCountToDisplaySize(MAX_IMAGE_SIZE));
+				} else {
+					AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
+	            	avatarManager.useAvatar(accountModel.getObject(), upload);
+					form.success("Avatar has been updated.");
+					send(getPage(), Broadcast.BREADTH, new AvatarChanged(target, accountModel.getObject()));								
+				}
 				target.add(form);
-				send(getPage(), Broadcast.BREADTH, new AvatarChanged(target, accountModel.getObject()));								
 			}
 
 			@Override
