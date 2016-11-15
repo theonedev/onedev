@@ -6,6 +6,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -34,6 +36,8 @@ import com.gitplex.server.core.setting.ServerConfig;
 public class GitPlex extends AbstractPlugin implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(GitPlex.class);
+	
+	private static final Pattern DOCLINK_PATTERN = Pattern.compile("\\d+\\.\\d+");
 	
 	private final ConfigManager configManager;
 	
@@ -155,7 +159,12 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	}	
 	
 	public String getDocLink() {
-		return "http://wiki.pmease.com//display/gp" + StringUtils.substringBefore(AppLoader.getProduct().getVersion(), ".");
+		String productVersion = AppLoader.getProduct().getVersion();
+		Matcher matcher = DOCLINK_PATTERN.matcher(productVersion);
+		if (!matcher.find())
+			throw new RuntimeException("Unexpected product version format: " + productVersion);
+		String wikiSpace = "GP" + matcher.group().replace(".", "");
+		return "http://wiki.pmease.com//display/" + wikiSpace;
 	}
 	
 }

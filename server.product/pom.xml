@@ -31,8 +31,9 @@
                         </goals>  
                         <configuration> 
                             <source>
-	                            project.properties["lowerCaseProductName"] = project.name.toLowerCase() 
-	                            project.properties["docLink"] = "http://wiki.pmease.com/display/gp" + project.version.substring(0, project.version.indexOf('.'))
+	                            project.properties["lowerCaseProductName"] = project.name.toLowerCase()
+	                            def wikiSpace = "GP" + project.version.find(/\d+\.\d+/).replace('.', '')
+	                            project.properties["docLink"] = "http://wiki.pmease.com/display/" + wikiSpace
                             </source> 
                         </configuration> 
                     </execution> 
