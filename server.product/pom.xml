@@ -54,7 +54,8 @@
                                 <copy todir="${project.build.directory}/sandbox"> 
                                     <fileset dir="system" excludes="site/images/**, site/avatars/**, **/*.keystore, **/*.jar"/>  
                                     <filterset> 
-                                        <filter token="productName" value="${lowerCaseProductName}"/>  
+                                        <filter token="productName" value="${project.name}"/>  
+                                        <filter token="lowerCaseProductName" value="${lowerCaseProductName}"/>  
                                         <filter token="docLink" value="${docLink}"/> 
                                     </filterset> 
                                 </copy>  
@@ -82,8 +83,8 @@
                                     <definition name="buildDirectory" value="${project.build.directory}"/>  
                                     <definition name="outputDirectory" value="${project.build.outputDirectory}"/>  
                                     <definition name="jswPath" value="${com.gitplex:commons.jsw:jar}"/>  
-                                    <definition name="productName" value="${lowerCaseProductName}"/>  
-                                    <definition name="productDescription" value="${project.name}"/>  
+                                    <definition name="productName" value="${project.name}"/>  
+                                    <definition name="lowerCaseProductName" value="${lowerCaseProductName}"/>  
                                     <definition name="bootstrapClass" value="${bootstrapClass}"/> 
                                 </gant> 
                             </target> 
