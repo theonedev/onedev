@@ -51,7 +51,7 @@ public class DefaultBackupCommand extends DefaultPersistManager {
 			System.exit(1);
 		}
 		
-		if (Bootstrap.isServerRunning() && getDialect().toLowerCase().contains("hsql")) {
+		if (Bootstrap.isServerRunning(Bootstrap.installDir) && getDialect().toLowerCase().contains("hsql")) {
 			logger.error("Please stop server before backing up database");
 			System.exit(1);
 		}
