@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>gitplex</artifactId>  
-        <version>1.0-EAP-build12</version> 
+        <version>1.0-EAP-build13</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -29,7 +29,7 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.core</artifactId>  
-            <version>1.0-EAP-build12</version> 
+            <version>1.0-EAP-build13</version> 
         </dependency> 
     </dependencies>  
     <properties> 
