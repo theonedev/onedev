@@ -81,7 +81,12 @@ public abstract class AbstractTokenizerTest {
 				tokenizedLines.add(currentLine);
 				currentLine = new ArrayList<>();
 			} else {
-				currentLine.add(new CmToken(style, text));
+				CmToken token = new CmToken(style, text);
+				List<CmToken> splitted = token.split();
+				if (splitted != null)
+					currentLine.addAll(splitted);
+				else
+					currentLine.add(token);
 			}
 		}
 		

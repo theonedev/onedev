@@ -165,6 +165,14 @@ public class DiffUtils {
 		return diffBlocks;
 	}
 	
+	/**
+	 * This method checks deleted lines and inserted lines, and position them so that 
+	 * similar delete line and insert line (indicates they are the same line with 
+	 * modification) will be displayed on same row
+	 * @param deleteLines
+	 * @param insertLines
+	 * @return
+	 */
 	public static LinkedHashMap<Integer, LineDiff> align(
 			List<List<CmToken>> deleteLines, List<List<CmToken>> insertLines) {
 		LinkedHashMap<Integer, LineDiff> lineDiffs = new LinkedHashMap<>();

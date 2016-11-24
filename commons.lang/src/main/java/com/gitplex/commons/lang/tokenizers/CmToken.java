@@ -1,6 +1,10 @@
 package com.gitplex.commons.lang.tokenizers;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 import com.gitplex.commons.lang.diff.DiffMatchPatch.Operation;
 import com.gitplex.commons.util.StringUtils;
@@ -166,6 +170,32 @@ public class CmToken implements Serializable {
 			return text + "[" + type + "]";
 		else
 			return text;
+	}
+
+	/**
+	 * CodeMirror returns continuous spaces/tabs as a single token and it makes diff not ideal, 
+	 * for instance, if we have three tabs as below:
+	 * \t\t\t
+	 * And if we add another tab:
+	 * \t\t\t\t
+	 * The diff will be a deletion of token "\t\t\t" and addition of token "\t\t\t\t", which is 
+	 * not optimal. So we split a whitespace token containing multiple characters as multiple 
+	 * single-character tokens to make the diff able to figure out that a single "\t" token is 
+	 * inserted
+	 * 
+	 * @return
+	 */
+	@Nullable
+	public List<CmToken> split() {
+		if (isWhitespace()) {
+			List<CmToken> splitted = new ArrayList<>();
+			for (char ch: text.toCharArray()) {
+				splitted.add(new CmToken(type, String.valueOf(ch)));
+			}
+			return splitted;
+		} else {
+			return null;
+		}
 	}
 	
 }

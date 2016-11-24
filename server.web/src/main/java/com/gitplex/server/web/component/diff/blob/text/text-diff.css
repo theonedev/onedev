@@ -81,7 +81,8 @@
 	background: #ffecec;
 }
 .text-diff>.body>tbody>tr>td.old .delete {
-	background-color: #F8C8C8;
+	background-color: #F8B8B8;
+	text-decoration: line-through;
 }
 .text-diff>.body>tbody>tr>td.new.number {
 	background: #dbffdb;

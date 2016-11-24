@@ -21,7 +21,12 @@ public abstract class AbstractTokenizer<S> implements Tokenizer {
 			StringStream stream = new StringStream(line);
 			while (!stream.eol()) {
 				String style = token(stream, state);
-				tokenizedLine.add(new CmToken(style, stream.current()));
+				CmToken token = new CmToken(style, stream.current());
+				List<CmToken> splitted = token.split();
+				if (splitted != null)
+					tokenizedLine.addAll(splitted);
+				else
+					tokenizedLine.add(token);
 				stream.start(stream.pos());
 			}
 			tokenizedLines.add(tokenizedLine);
