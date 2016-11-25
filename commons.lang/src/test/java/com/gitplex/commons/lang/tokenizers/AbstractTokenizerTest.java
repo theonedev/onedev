@@ -23,6 +23,9 @@ public abstract class AbstractTokenizerTest {
 
 	protected void verify(Tokenizer tokenizer, String[] loadModes, String fileName) {
 		try {
+			// disable nashorn assertion on duplicate code
+			getClass().getClassLoader().getParent().setDefaultAssertionStatus(false);
+			
 			byte[] bytes = Resources.toByteArray(Resources.getResource("META-INF/maven/org.webjars/codemirror/pom.properties"));
 			Properties cmProps = new Properties();
 			cmProps.load(new ByteArrayInputStream(bytes));
