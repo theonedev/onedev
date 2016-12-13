@@ -112,13 +112,11 @@ App = (function() {
         if ((ref = _this.controller()) != null) {
           ref.view.hide();
         }
-        console.log("compositionstart");
         _this.isComposing = true;
         return null;
       };
     })(this)).on('compositionend', (function(_this) {
       return function(e) {
-        console.log("compositionend");
         _this.isComposing = false;
         return null;
       };

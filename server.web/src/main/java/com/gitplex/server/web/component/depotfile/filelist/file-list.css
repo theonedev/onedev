@@ -38,15 +38,13 @@
 }
 .file-list>.readme>.head {
 	padding: 6px 12px;
-	background: #EEE;
+	background: #F2F2F2;
 	font-weight: bold;	
 	border-bottom: 1px solid #BBB;
 }
-.file-list>.readme>.head img {
-	width: 16px;
-	height: 16px;
-	vertical-align: top;
-	margin-right: 4px;
+.file-list>.readme>.head a {
+	color: #333;
+	margin-left: 4px;
 }
 .file-list>.readme>.body {
 	padding: 20px;

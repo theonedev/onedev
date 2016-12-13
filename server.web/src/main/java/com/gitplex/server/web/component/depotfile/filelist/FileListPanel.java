@@ -35,6 +35,8 @@ import com.gitplex.commons.git.BlobIdent;
 import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
 import com.gitplex.commons.wicket.component.markdown.MarkdownPanel;
 import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
@@ -230,6 +232,27 @@ public abstract class FileListPanel extends Panel {
 			}
 			
 		}));
+		
+		readmeContainer.add(new AjaxLink<Void>("edit") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				DepotFilePage.State state = new DepotFilePage.State();
+				state.blobIdent = readmeModel.getObject();
+				state.mode = Mode.EDIT;
+				setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depotModel.getObject(), state));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				Depot depot = depotModel.getObject();
+				BlobIdent blobIdent = readmeModel.getObject();
+				setVisible(depot.getBranchRef(blobIdent.revision) != null 
+						&& SecurityUtils.canModify(depotModel.getObject(), blobIdent.revision, blobIdent.path));
+			}
+			
+		});
 		readmeContainer.add(new MarkdownPanel("body", new LoadableDetachableModel<String>() {
 
 			@Override
