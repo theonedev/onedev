@@ -128,20 +128,25 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						new ConfirmDeleteAccountModal(target) {
-							
-							@Override
-							protected void onDeleted(AjaxRequestTarget target) {
-								target.add(accountsContainer);
-								target.add(pagingNavigator);
-								target.add(noAccountsContainer);
-							}
-							
-							@Override
-							protected Account getAccount() {
-								return GitPlex.getInstance(AccountManager.class).load(accountId);
-							}
-						};
+						Account account = GitPlex.getInstance(AccountManager.class).load(accountId);
+						if (!account.getDepots().isEmpty()) {
+							target.appendJavaScript("alert('Please delete or transfer repositories under this account first');");
+						} else {
+							new ConfirmDeleteAccountModal(target) {
+								
+								@Override
+								protected void onDeleted(AjaxRequestTarget target) {
+									target.add(accountsContainer);
+									target.add(pagingNavigator);
+									target.add(noAccountsContainer);
+								}
+								
+								@Override
+								protected Account getAccount() {
+									return GitPlex.getInstance(AccountManager.class).load(accountId);
+								}
+							};
+						}
 					}
 
 					@Override

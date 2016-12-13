@@ -94,7 +94,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<UserAuthorization> authorizedDepots = new ArrayList<>();
 	
-	@OneToMany(mappedBy="account", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="account")
 	private Collection<Depot> depots = new ArrayList<>();
 
 	/* used by organization account */

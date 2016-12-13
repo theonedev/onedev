@@ -13,8 +13,6 @@ import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.gitplex.commons.hibernate.Sessional;
 import com.gitplex.commons.hibernate.Transactional;
 import com.gitplex.commons.hibernate.dao.AbstractEntityManager;
@@ -29,14 +27,13 @@ import com.gitplex.server.core.entity.support.IntegrationPolicy;
 import com.gitplex.server.core.event.lifecycle.SystemStarting;
 import com.gitplex.server.core.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.manager.DepotManager;
 import com.gitplex.server.core.manager.PullRequestManager;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 @Singleton
 public class DefaultAccountManager extends AbstractEntityManager<Account> implements AccountManager {
 
-    private final DepotManager depotManager;
-    
     private final PullRequestManager pullRequestManager;
     
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
@@ -46,10 +43,9 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultAccountManager(Dao dao, DepotManager depotManager, PullRequestManager pullRequestManager) {
+    public DefaultAccountManager(Dao dao, PullRequestManager pullRequestManager) {
         super(dao);
         
-        this.depotManager = depotManager;
         this.pullRequestManager = pullRequestManager;
     }
 
@@ -125,9 +121,6 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	query = getSession().createQuery("update CodeComment set lastEvent.user=null where lastEvent.user=:user");
     	query.setParameter("user", account);
     	query.executeUpdate();
-    	
-    	for (Depot depot: account.getDepots())
-    		depotManager.delete(depot);
     	
 		dao.remove(account);
 		

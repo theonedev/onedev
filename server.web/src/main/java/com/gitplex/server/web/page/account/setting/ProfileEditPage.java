@@ -102,19 +102,23 @@ public class ProfileEditPage extends AccountSettingPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				new ConfirmDeleteAccountModal(target) {
+				if (!getAccount().getDepots().isEmpty()) {
+					target.appendJavaScript("alert('Please delete or transfer repositories under this account first');");
+				} else {
+					new ConfirmDeleteAccountModal(target) {
 
-					@Override
-					protected void onDeleted(AjaxRequestTarget target) {
-						setResponsePage(getApplication().getHomePage());
-					}
+						@Override
+						protected void onDeleted(AjaxRequestTarget target) {
+							setResponsePage(getApplication().getHomePage());
+						}
 
-					@Override
-					protected Account getAccount() {
-						return ProfileEditPage.this.getAccount();
-					}
-					
-				};
+						@Override
+						protected Account getAccount() {
+							return ProfileEditPage.this.getAccount();
+						}
+						
+					};
+				}
 			}
 			
 		});
