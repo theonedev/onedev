@@ -168,11 +168,11 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			Preconditions.checkState(!strategies.isEmpty());
 			pullRequest.setIntegrationStrategy(strategies.get(0));
 			
-			ObjectPermission writePermission = ObjectPermission.ofDepotWrite(getDepot());
+			ObjectPermission writePermission = ObjectPermission.ofDepotWrite(target.getDepot());
 			if (currentUser.asSubject().isPermitted(writePermission))
 				pullRequest.setAssignee(currentUser);
 			else
-				pullRequest.setAssignee(getDepot().getAccount());
+				pullRequest.setAssignee(target.getDepot().getAccount());
 
 			ObjectId baseCommitId = GitUtils.getMergeBase(
 					target.getDepot().getRepository(), target.getObjectId(), 
