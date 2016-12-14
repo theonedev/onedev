@@ -4,7 +4,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>gitplex</artifactId>  
-        <version>1.0-EAP-build14</version> 
+        <version>1.0-EAP-build15</version> 
     </parent>  
     <artifactId>commons.jetty</artifactId>  
     <build> 
@@ -25,7 +25,7 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0-EAP-build14</version> 
+            <version>1.0-EAP-build15</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jetty</groupId>  
