@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>gitplex</artifactId>  
-        <version>1.0-EAP-build13</version> 
+        <version>1.0-EAP-build14</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -29,12 +29,12 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.core</artifactId>  
-            <version>1.0-EAP-build13</version> 
+            <version>1.0-EAP-build14</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.rest</artifactId>  
-            <version>1.0-EAP-build13</version> 
+            <version>1.0-EAP-build14</version> 
         </dependency>  
         <!-- JERSEY CLIENT -->  
         <dependency> 
@@ -60,7 +60,7 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server.search</artifactId>  
-            <version>1.0-EAP-build13</version> 
+            <version>1.0-EAP-build14</version> 
         </dependency> 
     </dependencies>  
     <properties> 
