@@ -44,7 +44,9 @@ public abstract class BlobViewPanel extends Panel {
 	}
 	
 	protected WebMarkupContainer newOptions(String id) {
-		return new WebMarkupContainer(id);
+		WebMarkupContainer options = new WebMarkupContainer(id);
+		options.setVisible(false);
+		return options;
 	}
 	
 	protected WebMarkupContainer newAdditionalActions(String id) {
