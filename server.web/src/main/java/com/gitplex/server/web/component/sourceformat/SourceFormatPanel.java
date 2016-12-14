@@ -65,7 +65,7 @@ public class SourceFormatPanel extends Panel {
 		if (cookie != null)
 			lineWrapMode = cookie.getValue();
 		else
-			lineWrapMode = "No wrap";
+			lineWrapMode = "Soft wrap";
 	}
 
 	@Override

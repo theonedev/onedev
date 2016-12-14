@@ -15,11 +15,11 @@ gitplex.commons.initMarkdownPanel = function($preview, taskCallback) {
 		if ($anchor.length != 0) {
 			$this.addClass("permalinked").append($anchor.html());
 			$anchor.empty();
-			$this.prepend("<a href='#" + $anchor.attr("name") + "' class='permalink'><i class='fa fa-link'></i></a>");
+			$this.append("<a href='#" + $anchor.attr("name") + "' class='permalink'><i class='fa fa-link'></i></a>");
 		} else {
 			var anchorName = encodeURIComponent($this.text());
 			$this.addClass("permalinked").prepend("<a name='" + anchorName + "'></a>");
-			$this.prepend("<a href='#" + anchorName + "' class='permalink'><i class='fa fa-link'></i></a>");
+			$this.append("<a href='#" + anchorName + "' class='permalink'><i class='fa fa-link'></i></a>");
 		}
 	});
 };

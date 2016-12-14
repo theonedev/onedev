@@ -13,6 +13,11 @@ gitplex.server.filelist = {
 			    $fileList.scrollLeft(viewState.scroll.left);
 			    $fileList.scrollTop(viewState.scroll.top);
 			}
+			if (location.hash) { // scroll markdown headlines into view
+				var element = document.getElementsByName(decodeURIComponent(location.hash.slice(1)))[0];
+				if (element)
+					element.scrollIntoView();
+			}
 		});
 		
 		$fileList.on("storeViewState", function(e) {

@@ -50,44 +50,33 @@
 .md-preview .task-list-item input {
 	margin-right: 8px;
 }
-.md-preview .permalinked {
-	position: relative;
-	margin-left: -20px;
-	padding-left: 20px;	
-}
 .md-preview .permalinked a.permalink {
-	position: absolute;
 	display: none;
 }
 .md-preview .permalinked:hover a.permalink {
-	display: inherit;
+	display: inline;
 }
 .md-preview h1.permalinked a.permalink {
-	font-size: 16px;
-	left: 3px;
-	top: 11px;
+	margin-left: 12px;
+	font-size: 24px;
 }
 .md-preview h2.permalinked a.permalink {
-	font-size: 15px;
-	left: 3px;
-	top: 8px;
+	margin-left: 10px;
+	font-size: 20px;
 }
 .md-preview h3.permalinked a.permalink {
-	font-size: 14px;
-	top: 6px;
-	left: 3px;
+	margin-left: 8px;
+	font-size: 16px;
 }
 .md-preview h4.permalinked a.permalink {
-	font-size: 13px;
-	top: 3px;
-	left: 4px;
+	margin-left: 6px;
+	font-size: 14px;
 }
 .md-preview h5.permalinked a.permalink {
+	margin-left: 4px;
 	font-size: 12px;
-	top: 2px;
-	left: 5px;
 }
 .md-preview h6.permalinked a.permalink {
-	font-size: 11px;
-	left: 5px;
+	margin-left: 2px;
+	font-size: 10px;
 }

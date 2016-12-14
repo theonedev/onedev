@@ -23,5 +23,10 @@ gitplex.server.blobView = function(containerId) {
 		    $body.scrollLeft(viewState.scroll.left);
 		    $body.scrollTop(viewState.scroll.top);
 		}
+		if (location.hash) { // scroll markdown headlines into view
+			var element = document.getElementsByName(decodeURIComponent(location.hash.slice(1)))[0];
+			if (element)
+				element.scrollIntoView();
+		}
 	});
 };
