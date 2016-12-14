@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>gitplex</artifactId>  
-        <version>1.0-EAP-build16</version> 
+        <version>1.0-EAP-build17</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -29,12 +29,12 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0-EAP-build16</version> 
+            <version>1.0-EAP-build17</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0-EAP-build16</version>  
+            <version>1.0-EAP-build17</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
