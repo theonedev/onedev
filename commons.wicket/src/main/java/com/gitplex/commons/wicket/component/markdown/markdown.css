@@ -1,5 +1,10 @@
 .md-preview {
 	overflow: auto;
+	font-size: 16px;
+	line-height: 1.5;
+}
+.md-preview li {
+	margin-bottom: 6px;
 }
 .md-preview .emoji {
 	width: 20px; 
