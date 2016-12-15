@@ -4,7 +4,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>gitplex</artifactId>  
-        <version>1.0-EAP-build16</version> 
+        <version>1.0-EAP-build17</version> 
     </parent>  
     <artifactId>archetype.product</artifactId>  
     <name>GitPlex Product Archetype</name>  
