@@ -10,13 +10,20 @@ import org.antlr.v4.runtime.Recognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Token stream holds a list of tokens parsed from source file, and provides various 
+ * methods to work with these tokens
+ * 
+ * @author robin
+ *
+ */
 public class TokenStream {
 
 	private static final Logger logger = LoggerFactory.getLogger(TokenStream.class);
 	
 	private final List<Token> tokens;
 	
-	private int pos = -1; // 0-indexed position of current token 
+	private int index = -1; // index of current token in stream 
 	
 	public TokenStream(List<Token> tokens) {
 		this.tokens = tokens;
@@ -44,25 +51,73 @@ public class TokenStream {
 		tokens.add(Token.EOF);
 	}
 	
-	public Token at(int pos) {
-		if (pos >=0 && pos < tokens.size())
-			return tokens.get(pos);
+	/**
+	 * Get token at specified index in stream
+	 * 
+	 * @param index
+	 * 			index of the token in stream
+	 * @return
+	 * 			token at specified index
+	 * @throws
+	 * 			ExtractException if index is invalid
+	 */
+	public Token at(int index) {
+		if (index >=0 && index < tokens.size())
+			return tokens.get(index);
 		else
-			throw new ExtractException("Invalid token position: " + pos);
+			throw new ExtractException("Invalid token position: " + index);
 	}
 	
+	/**
+	 * Get next token in stream and move index forward
+	 * 
+	 * @return
+	 * 			next token in stream
+	 * @throws 
+	 * 			ExtractException if no token at next index
+	 */
 	public Token next() {
-		return at(++pos);
+		return at(++index);
 	}
 	
+	/**
+	 * Get next N token in stream without moving index
+	 * 
+	 * @param ahead
+	 * 			number of tokens to look ahead
+	 * @return
+	 * 			next N token in stream
+	 * @throws
+	 * 			ExtractException if no token at specified look ahead index
+	 */
 	public Token lookAhead(int ahead) {
-		return at(pos+ahead);
+		return at(index+ahead);
 	}
 	
+	/**
+	 * Get previous N token in stream without moving index
+	 * 
+	 * @param behind
+	 * 			number of tokens to look behind
+	 * @return
+	 * 			previous N token in stream
+	 * @throws
+	 * 			ExtractException if no token at specified look behind index
+	 */
 	public Token lookBehind(int behind) {
-		return at(pos-behind);
+		return at(index-behind);
 	}
 	
+	/**
+	 * Get next token of specified type and move index forward
+	 * 
+	 * @param type
+	 * 			ANTLR lexer token type
+	 * @return
+	 * 			next token of specified type
+	 * @throws 
+	 * 			ExtractException if no subsequent token matches specified type 
+	 */
 	public Token nextType(int type) {
 		Token token = next();
 		while(true) {
@@ -72,6 +127,16 @@ public class TokenStream {
 		}
 	}
 	
+	/**
+	 * Get next token of specified types and move index forward
+	 * 
+	 * @param types
+	 * 			ANTLR lexer token types
+	 * @return
+	 * 			next token of specified types
+	 * @throws 
+	 * 			ExtractException if no subsequent token matches specified types
+	 */
 	public Token nextType(int...types) {
 		Token token = next();
 		while(true) {
@@ -84,15 +149,20 @@ public class TokenStream {
 	/**
 	 * Seek to next closed type, with balancing open/close considered, that is, all open/close pair 
 	 * of the same type will be skipped. Below is an example of start position and stop position 
-	 * when calling this method.
+	 * when calling this method. 
 	 *  
 	 * text { text { text }  } 
 	 *      ^                ^
 	 *      seek here        stop here
 	 *                         
 	 * @param openType
+	 * 			open type to seek 
 	 * @param closeType
+	 * 			close type to seek
 	 * @return
+	 * 			token at stop position
+	 * @throws 
+	 * 			ExtractException if no stop token can be found 
 	 */
 	public Token nextClosed(int openType, int closeType) {
 		int nestingLevel = 1;
@@ -108,37 +178,63 @@ public class TokenStream {
 		}
 	}
 	
-	public int pos() {
-		return pos;
+	/**
+	 * Get current index in stream
+	 * 
+	 * @return
+	 * 			current index in stream
+	 */
+	public int index() {
+		return index;
 	}
 
-	public void pos(int pos) {
-		this.pos = pos;
+	/**
+	 * Set current index in stream
+	 * 
+	 * @param index
+	 * 			index to set
+	 */
+	public void index(int index) {
+		this.index = index;
 	}
 	
 	/**
-	 * Get tokens between startPos and endPos
+	 * Get tokens between a range
 	 * 
-	 * @param startPos 
-	 * 			0-indexed start position, inclusive  
-	 * @param endPos 
-	 * 			0-indexed end position, inclusive
+	 * @param startIndex 
+	 * 			0-indexed start index, inclusive  
+	 * @param endIndex 
+	 * 			0-indexed end index, inclusive
 	 * @return 
-	 * 			list of tokens between startPos and endPos 
+	 * 			list of tokens between specified range 
+	 * @throws 
+	 * 			ExtractException if no token at specified range 
 	 */
-	public List<Token> between(int startPos, int endPos) {
+	public List<Token> between(int startIndex, int endIndex) {
 		List<Token> tokens = new ArrayList<>();
-		for (int i=startPos; i<=endPos; i++) 
+		for (int i=startIndex; i<=endIndex; i++) 
 			tokens.add(at(i));
 		return tokens;
 	}
 	
+	/**
+	 * Get token at current index
+	 * 
+	 * @return
+	 * 			token at current index
+	 */
 	public Token current() {
-		return at(pos);
+		return at(index);
 	}
 	
+	/**
+	 * Seek to specified index
+	 * 
+	 * @param index
+	 * 			index to seek to
+	 */
 	public void seek(int index) {
-		this.pos = index;
+		this.index = index;
 	}
 	
 }

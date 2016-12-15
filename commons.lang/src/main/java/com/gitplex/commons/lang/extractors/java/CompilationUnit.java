@@ -1,14 +1,11 @@
 package com.gitplex.commons.lang.extractors.java;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.gitplex.commons.lang.extractors.Symbol;
 import com.gitplex.commons.lang.extractors.TokenPosition;
 import com.gitplex.commons.lang.extractors.java.icons.Icons;
 import com.gitplex.commons.util.Range;
@@ -26,15 +23,6 @@ public class CompilationUnit extends JavaSymbol {
 		this.packageName = packageName;
 	}
 	
-	@Override
-	public String describe(List<Symbol> symbols) {
-		StringBuilder builder =  new StringBuilder();
-		if (packageName != null)
-			builder.append("package ").append(packageName).append(";\n\n");
-		
-		return builder.toString();
-	}
-
 	@Nullable
 	public String getPackageName() {
 		return packageName;

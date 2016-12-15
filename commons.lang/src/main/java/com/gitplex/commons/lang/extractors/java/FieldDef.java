@@ -8,7 +8,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.gitplex.commons.lang.extractors.Symbol;
 import com.gitplex.commons.lang.extractors.TokenPosition;
 import com.gitplex.commons.lang.extractors.java.icons.Icons;
 import com.gitplex.commons.util.Range;
@@ -47,17 +46,6 @@ public class FieldDef extends JavaSymbol {
 	@Override
 	public Component render(String componentId, Range matchRange) {
 		return new FieldDefPanel(componentId, this, matchRange);
-	}
-
-	@Override
-	public String describe(List<Symbol> symbols) {
-		StringBuilder builder = new StringBuilder();
-		for (Modifier modifier: modifiers) 
-			builder.append(modifier.name().toLowerCase()).append(" ");
-		if (type != null)
-			builder.append(type).append(" ");
-		builder.append(getName()).append(";");
-		return builder.toString();
 	}
 
 	@Override

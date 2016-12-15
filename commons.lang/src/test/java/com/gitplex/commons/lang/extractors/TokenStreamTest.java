@@ -1,4 +1,4 @@
-package com.gitplex.commons.lang.extractors.java;
+package com.gitplex.commons.lang.extractors;
 
 import static org.junit.Assert.fail;
 

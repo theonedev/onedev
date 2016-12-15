@@ -285,9 +285,9 @@ public class JavaExtractor extends AbstractExtractor {
 		String identifier = stream.current().getText();
 		Token token = stream.next();
 		if (token.is(LT)) {
-			int tokenPos = stream.pos();
+			int tokenPos = stream.index();
 			stream.nextClosed(LT, GT);
-			TokenStream typeArgStream = new TokenStream(stream.between(tokenPos, stream.pos()));
+			TokenStream typeArgStream = new TokenStream(stream.between(tokenPos, stream.index()));
 			token = typeArgStream.next();
 			while (true) {
 				skipModifiers(typeArgStream);
