@@ -2,15 +2,13 @@ package com.gitplex.commons.lang.extractors;
 
 import java.io.Serializable;
 
-import org.antlr.v4.runtime.Token;
-
 import com.gitplex.commons.util.Range;
 
-public class ExtractToken implements Serializable {
+public class Token implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final ExtractToken EOF = new ExtractToken(Token.EOF, "", null);
+	public static final Token EOF = new Token(org.antlr.v4.runtime.Token.EOF, "", null);
 	
 	private final int type;
 	
@@ -18,7 +16,7 @@ public class ExtractToken implements Serializable {
 	
 	private final TokenPosition pos;
 	
-	public ExtractToken(Token antlrToken) {
+	public Token(org.antlr.v4.runtime.Token antlrToken) {
 		type = antlrToken.getType();
 		text = antlrToken.getText();
 		Range range = new Range(antlrToken.getCharPositionInLine(), 
@@ -26,7 +24,7 @@ public class ExtractToken implements Serializable {
 		pos = new TokenPosition(antlrToken.getLine()-1, range);
 	}
 
-	public ExtractToken(int type, String text, TokenPosition pos) {
+	public Token(int type, String text, TokenPosition pos) {
 		this.type = type;
 		this.text = text;
 		this.pos = pos;
@@ -49,7 +47,7 @@ public class ExtractToken implements Serializable {
 	}
 	
 	public boolean isEof() {
-		return type == Token.EOF;
+		return type == org.antlr.v4.runtime.Token.EOF;
 	}
 
 	public int getType() {
@@ -64,13 +62,13 @@ public class ExtractToken implements Serializable {
 		return pos;
 	}
 	
-	public ExtractToken checkType(int... expectedTypes) {
+	public Token checkType(int... expectedTypes) {
 		if (!is(expectedTypes))
 			throw new UnexpectedTokenException(this);
 		return this;
 	}
 	
-	public ExtractToken checkText(String expectedText) {
+	public Token checkText(String expectedText) {
 		if (!text.equals(expectedText))
 			throw new UnexpectedTokenException(this);
 		return this;

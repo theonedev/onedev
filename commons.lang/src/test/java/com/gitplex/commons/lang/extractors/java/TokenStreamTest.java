@@ -7,11 +7,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.gitplex.commons.lang.extractors.ExtractException;
-import com.gitplex.commons.lang.extractors.ExtractStream;
+import com.gitplex.commons.lang.extractors.TokenStream;
 import com.gitplex.commons.lang.extractors.TokenFilter;
 import com.gitplex.commons.lang.extractors.java.JavaLexer;
 
-public class ExtractStreamTest {
+public class TokenStreamTest {
 
 	@Test
 	public void testBalanced() {
@@ -19,7 +19,7 @@ public class ExtractStreamTest {
 				+ "  public void sayHello() {System.out.println(\"hello\");}"
 				+ "}";
 		
-		ExtractStream extractStream = new ExtractStream(
+		TokenStream extractStream = new TokenStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
 		
 		extractStream.nextType(JavaLexer.LBRACE);
@@ -31,7 +31,7 @@ public class ExtractStreamTest {
 		String text = "public class MyClass {"
 				+ "  public void sayHello() {System.out.println(\"hello\");}";
 		
-		ExtractStream extractStream = new ExtractStream(
+		TokenStream extractStream = new TokenStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
 		extractStream.nextType(JavaLexer.LBRACE);
 		try {
