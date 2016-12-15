@@ -8,7 +8,7 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.gitplex.commons.util.Range;
-import com.gitplex.commons.wicket.component.EmphasizeAwareLabel;
+import com.gitplex.commons.wicket.component.HighlightableLabel;
 
 public class FileHit extends QueryHit {
 
@@ -32,7 +32,7 @@ public class FileHit extends QueryHit {
 		if (fileName.contains("/")) 
 			fileName = StringUtils.substringAfterLast(fileName, "/");
 		
-		return new EmphasizeAwareLabel(componentId, fileName, matchRange);
+		return new HighlightableLabel(componentId, fileName, matchRange);
 	}
 
 	@Override

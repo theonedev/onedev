@@ -9,18 +9,18 @@ import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
-public class EmphasizeAwareLabel extends Label {
+public class HighlightableLabel extends Label {
 
-	public EmphasizeAwareLabel(String id, @Nullable String label, @Nullable Range emphasize) {
+	public HighlightableLabel(String id, @Nullable String label, @Nullable Range highlight) {
 		super(id, new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
 				if (label != null) {
-					if (emphasize != null) {
-						String prefix = label.substring(0, emphasize.getFrom());
-						String middle = label.substring(emphasize.getFrom(), emphasize.getTo());
-						String suffix = label.substring(emphasize.getTo());
+					if (highlight != null) {
+						String prefix = label.substring(0, highlight.getFrom());
+						String middle = label.substring(highlight.getFrom(), highlight.getTo());
+						String suffix = label.substring(highlight.getTo());
 						return StringUtils.escapeHtml(prefix) 
 								+ "<b>" 
 								+ StringUtils.escapeHtml(middle) 

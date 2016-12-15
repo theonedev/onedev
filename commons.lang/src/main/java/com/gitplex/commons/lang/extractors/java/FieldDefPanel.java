@@ -4,7 +4,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.gitplex.commons.util.Range;
-import com.gitplex.commons.wicket.component.EmphasizeAwareLabel;
+import com.gitplex.commons.wicket.component.HighlightableLabel;
 
 @SuppressWarnings("serial")
 public class FieldDefPanel extends Panel {
@@ -23,7 +23,7 @@ public class FieldDefPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new EmphasizeAwareLabel("name", fieldDef.getName(), matchRange));
+		add(new HighlightableLabel("name", fieldDef.getName(), matchRange));
 		
 		add(new Label("type", fieldDef.getType()).setVisible(fieldDef.getType()!=null));
 	}

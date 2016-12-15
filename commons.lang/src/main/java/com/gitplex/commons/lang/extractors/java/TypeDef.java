@@ -12,7 +12,7 @@ import com.gitplex.commons.lang.extractors.Symbol;
 import com.gitplex.commons.lang.extractors.TokenPosition;
 import com.gitplex.commons.lang.extractors.java.icons.Icons;
 import com.gitplex.commons.util.Range;
-import com.gitplex.commons.wicket.component.EmphasizeAwareLabel;
+import com.gitplex.commons.wicket.component.HighlightableLabel;
 
 public class TypeDef extends JavaSymbol {
 
@@ -45,7 +45,7 @@ public class TypeDef extends JavaSymbol {
 
 	@Override
 	public Component render(String componentId, Range matchRange) {
-		return new EmphasizeAwareLabel(componentId, getName(), matchRange);
+		return new HighlightableLabel(componentId, getName(), matchRange);
 	}
 
 	public String getPackageName() {

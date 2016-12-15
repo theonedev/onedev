@@ -7,7 +7,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 import com.gitplex.commons.lang.extractors.TokenPosition;
 import com.gitplex.commons.util.Range;
-import com.gitplex.commons.wicket.component.EmphasizeAwareLabel;
+import com.gitplex.commons.wicket.component.HighlightableLabel;
 
 public class TextHit extends QueryHit {
 
@@ -38,7 +38,7 @@ public class TextHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		return new EmphasizeAwareLabel(componentId, lineContent, getTokenPos().getRange());
+		return new HighlightableLabel(componentId, lineContent, getTokenPos().getRange());
 	}
 
 	@Override

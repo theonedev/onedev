@@ -33,7 +33,7 @@ import com.gitplex.server.search.hit.TextHit;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.wicket.component.EmphasizeAwareLabel;
+import com.gitplex.commons.wicket.component.HighlightableLabel;
 import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
@@ -400,7 +400,7 @@ public abstract class SearchResultPanel extends Panel {
 						super.onInitialize();
 						
 						String blobPath = blobItem.getModelObject().getBlobPath();
-						add(new EmphasizeAwareLabel("label", blobPath, blobItem.getModelObject().getMatchRange()));
+						add(new HighlightableLabel("label", blobPath, blobItem.getModelObject().getMatchRange()));
 						
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));
