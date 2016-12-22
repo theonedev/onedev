@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.commons.hibernate.Sessional;
+import com.gitplex.commons.hibernate.dao.Dao;
 import com.gitplex.commons.loader.AbstractPlugin;
 import com.gitplex.commons.loader.AppLoader;
 import com.gitplex.commons.loader.ListenerRegistry;
@@ -39,6 +40,8 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private static final Pattern DOCLINK_PATTERN = Pattern.compile("\\d+\\.\\d+");
 	
+	private final Dao dao;
+	
 	private final ConfigManager configManager;
 	
 	private final DataManager dataManager;
@@ -52,8 +55,9 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	private volatile InitStage initStage;
 	
 	@Inject
-	public GitPlex(ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager,
+	public GitPlex(Dao dao, ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager,
             AccountManager accountManager, ListenerRegistry listenerRegistry) {
+		this.dao = dao;
 		this.configManager = configManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
@@ -73,6 +77,9 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 			initStage = new InitStage("Server Setup", manualConfigs);
 			
 			initStage.waitFor();
+			
+			// clear session in order to pick up changes made in interactive setup 
+			dao.getSession().clear();
 		}
 
 		ThreadContext.bind(accountManager.getRoot().asSubject());
