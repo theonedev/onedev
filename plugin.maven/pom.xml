@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.gitplex</groupId>
 	<artifactId>plugin.maven</artifactId>
-	<version>1.0-EAP-build17</version>
+	<version>1.0-EAP-build18</version>
 	<packaging>maven-plugin</packaging>
 	<prerequisites>
 		<maven>${mavenVersion}</maven>
