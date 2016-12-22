@@ -2,7 +2,6 @@ package com.gitplex.commons.wicket.websocket;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.wicket.Page;
 import org.apache.wicket.protocol.ws.api.registry.IKey;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 
@@ -20,11 +19,6 @@ public class PageKey {
 	public PageKey(String sessionId, Integer pageId) {
 		this.sessionId = sessionId;
 		this.pageId = new PageIdKey(pageId);
-	}
-	
-	public PageKey(Page page) {
-		this.sessionId = page.getSession().getId();
-		this.pageId = new PageIdKey(page.getPageId());
 	}
 	
 	public String getSessionId() {

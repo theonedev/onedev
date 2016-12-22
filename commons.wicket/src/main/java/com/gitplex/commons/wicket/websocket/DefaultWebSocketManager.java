@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
+import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -48,13 +49,17 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	
 	@Override
 	public void onRegionChange(CommonPage page) {
-		regions.put(new PageKey(page), page.getWebSocketRegions());
+		String sessionId = page.getSession().getId();
+		if (sessionId != null) {
+			regions.put(new PageKey(sessionId, new PageIdKey(page.getPageId())), page.getWebSocketRegions());
+		}
 	}
 	
 	@Override
 	public void onDestroySession(String sessionId) {
 		for (Iterator<Map.Entry<PageKey, Collection<WebSocketRegion>>> it = regions.entrySet().iterator(); it.hasNext();) {
-			if (it.next().getKey().getSessionId().equals(sessionId))
+			PageKey pageKey = it.next().getKey();
+			if (pageKey.getSessionId().equals(sessionId))
 				it.remove();
 		}
 	}

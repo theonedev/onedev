@@ -8,6 +8,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 
@@ -34,10 +35,13 @@ public class WicketUtils {
 	@Nullable
 	public static PageKey getPageKey() {
 		Page page = getPage();
-		if (page != null)
-			return new PageKey(page);
-		else
-			return null;
+		if (page != null) {
+			String sessionId = page.getSession().getId();
+			if (sessionId != null) {
+				return new PageKey(sessionId, new PageIdKey(page.getPageId()));
+			}
+		}
+		return null;
 	}
 	
 	public static void markLastVisibleChild(WebMarkupContainer container) {
