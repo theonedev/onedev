@@ -7,31 +7,23 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import com.gitplex.commons.lang.diff.DiffBlock;
-import com.gitplex.commons.lang.diff.DiffUtils;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
 import com.gitplex.commons.lang.diff.DiffMatchPatch.Operation;
-import com.gitplex.commons.lang.tokenizers.CmToken;
-import com.gitplex.commons.lang.tokenizers.Tokenizers;
-import com.gitplex.commons.lang.tokenizers.clike.JavaTokenizer;
-import com.gitplex.commons.loader.AppLoader;
+import com.gitplex.jsyntax.Token;
 import com.google.common.collect.Lists;
-import com.gitplex.commons.loader.AppLoaderMocker;
 
-public class DiffUtilsTest extends AppLoaderMocker {
+public class DiffUtilsTest {
 
-	private String toString(DiffBlock<List<CmToken>> block) {
+	private String toString(DiffBlock<List<Token>> block) {
 		StringBuffer buffer = new StringBuffer();
-		for (List<CmToken> line: block.getUnits()) {
+		for (List<Token> line: block.getUnits()) {
 			if (block.getOperation() == Operation.INSERT)
 				buffer.append("+");
 			else if (block.getOperation() == Operation.DELETE)
 				buffer.append("-");
 			else
 				buffer.append(" ");
-			for (CmToken token: line) 
+			for (Token token: line) 
 				buffer.append(token.getText());
 			buffer.append("\n");
 		}
@@ -53,7 +45,7 @@ public class DiffUtilsTest extends AppLoaderMocker {
 				"		System.out.println(\"hello tim\");",
 				"	}",
 				"}");
-		List<DiffBlock<List<CmToken>>> diffBlocks = DiffUtils.diff(
+		List<DiffBlock<List<Token>>> diffBlocks = DiffUtils.diff(
 				oldLines, "test.java", 
 				newLines, "test.java", 
 				WhitespaceOption.DEFAULT);
@@ -111,22 +103,6 @@ public class DiffUtilsTest extends AppLoaderMocker {
 		assertTrue(map.get(3) == 4);
 		assertTrue(map.get(4) == 5);
 		assertTrue(map.get(5) == 6);
-	}
-	
-	@Override
-	protected void setup() {
-		Mockito.when(AppLoader.getInstance(Tokenizers.class)).thenReturn(new Tokenizers() {
-
-			@Override
-			public List<List<CmToken>> tokenize(List<String> lines, String fileName) {
-				return new JavaTokenizer().tokenize(lines);
-			}
-			
-		});
-	}
-
-	@Override
-	protected void teardown() {
 	}
 
 }

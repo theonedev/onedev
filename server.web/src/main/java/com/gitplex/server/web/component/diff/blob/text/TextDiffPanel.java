@@ -70,11 +70,11 @@ import com.gitplex.commons.lang.diff.DiffBlock;
 import com.gitplex.commons.lang.diff.DiffMatchPatch.Operation;
 import com.gitplex.commons.lang.diff.DiffUtils;
 import com.gitplex.commons.lang.diff.LineDiff;
-import com.gitplex.commons.lang.tokenizers.CmToken;
 import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.RangeUtils;
 import com.gitplex.commons.util.StringUtils;
 import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.jsyntax.Token;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel implements SourceAware {
@@ -702,6 +702,15 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			blameInfo.lastOldCommitHash = commit.getHash();
 	}
 	
+	private String getOperationClass(Operation operation) {
+		if (operation == Operation.INSERT)
+			return "insert";
+		else if (operation == Operation.DELETE)
+			return "delete";
+		else
+			return null;
+	}
+	
 	private void appendEqual(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, int lastContextSize) {
 		if (lastContextSize != 0)
 			builder.append("<tr class='code expanded'>");
@@ -719,12 +728,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			List<CmToken> tokens = block.getLines().get(lineIndex);
+			List<Token> tokens = block.getLines().get(lineIndex);
 			if (tokens.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
-				for (CmToken token: tokens) {
-					builder.append(token.toHtml(Operation.EQUAL));
+				for (Token token: tokens) {
+					builder.append(token.toHtml(null));
 				}
 			}
 			builder.append("</td>");
@@ -735,12 +744,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content left' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			List<CmToken> tokens = block.getLines().get(lineIndex);
+			List<Token> tokens = block.getLines().get(lineIndex);
 			if (tokens.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {			
-				for (CmToken token: tokens) {
-					builder.append(token.toHtml(Operation.EQUAL));
+				for (Token token: tokens) {
+					builder.append(token.toHtml(null));
 				}
 			}
 			builder.append("</td>");
@@ -754,8 +763,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (tokens.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {			
-				for (CmToken token: tokens) {
-					builder.append(token.toHtml(Operation.EQUAL));
+				for (Token token: tokens) {
+					builder.append(token.toHtml(null));
 				}
 			}
 			builder.append("</td>");
@@ -763,7 +772,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		builder.append("</tr>");
 	}
 	
-	private void appendInsert(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, @Nullable List<DiffBlock<CmToken>> tokenDiffs) {
+	private void appendInsert(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, @Nullable List<DiffBlock<Token>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
@@ -779,20 +788,20 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				if (tokenDiffs.isEmpty()) {
 					builder.append("&nbsp;");
 				} else {
-					for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
-						for (CmToken token: tokenBlock.getUnits()) {
+					for (DiffBlock<Token> tokenBlock: tokenDiffs) { 
+						for (Token token: tokenBlock.getUnits()) {
 							if (tokenBlock.getOperation() != Operation.DELETE) 
-								builder.append(token.toHtml(tokenBlock.getOperation()));
+								builder.append(token.toHtml(getOperationClass(tokenBlock.getOperation())));
 						}
 					}
 				}			
 			} else {
-				List<CmToken> tokens = block.getLines().get(lineIndex);
+				List<Token> tokens = block.getLines().get(lineIndex);
 				if (tokens.isEmpty()) {
 					builder.append("&nbsp;");
 				} else {
 					for (int i=0; i<tokens.size(); i++) 
-						builder.append(tokens.get(i).toHtml(Operation.EQUAL));
+						builder.append(tokens.get(i).toHtml(null));
 				}
 			}
 			builder.append("</td>");
@@ -809,19 +818,19 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-			List<CmToken> tokens = block.getLines().get(lineIndex);
+			List<Token> tokens = block.getLines().get(lineIndex);
 			if (tokens.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
 				for (int i=0; i<tokens.size(); i++) 
-					builder.append(tokens.get(i).toHtml(Operation.EQUAL));
+					builder.append(tokens.get(i).toHtml(null));
 			}
 			builder.append("</td>");
 		}
 		builder.append("</tr>");
 	}
 	
-	private void appendDelete(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, @Nullable List<DiffBlock<CmToken>> tokenDiffs) {
+	private void appendDelete(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, @Nullable List<DiffBlock<Token>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
@@ -837,20 +846,20 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				if (tokenDiffs.isEmpty()) {
 					builder.append("&nbsp;");
 				} else {
-					for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
-						for (CmToken token: tokenBlock.getUnits()) {
+					for (DiffBlock<Token> tokenBlock: tokenDiffs) { 
+						for (Token token: tokenBlock.getUnits()) {
 							if (tokenBlock.getOperation() != Operation.INSERT) 
-								builder.append(token.toHtml(tokenBlock.getOperation()));
+								builder.append(token.toHtml(getOperationClass(tokenBlock.getOperation())));
 						}
 					}
 				}
 			} else {
-				List<CmToken> tokens = block.getLines().get(lineIndex);
+				List<Token> tokens = block.getLines().get(lineIndex);
 				if (tokens.isEmpty()) {
 					builder.append("&nbsp;");
 				} else {
 					for (int i=0; i<tokens.size(); i++) 
-						builder.append(tokens.get(i).toHtml(Operation.EQUAL));
+						builder.append(tokens.get(i).toHtml(null));
 				}
 			}
 			builder.append("</td>");
@@ -861,12 +870,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-			List<CmToken> tokens = block.getLines().get(lineIndex);
+			List<Token> tokens = block.getLines().get(lineIndex);
 			if (tokens.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
 				for (int i=0; i<tokens.size(); i++) 
-					builder.append(tokens.get(i).toHtml(Operation.EQUAL));
+					builder.append(tokens.get(i).toHtml(null));
 			}
 			builder.append("</td>");
 			if (blameInfo != null) {
@@ -890,12 +899,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect old'>-</td>");
 		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-		List<CmToken> tokens = deleteBlock.getLines().get(deleteLineIndex);
+		List<Token> tokens = deleteBlock.getLines().get(deleteLineIndex);
 		if (tokens.isEmpty()) {
 			builder.append("&nbsp;");
 		} else {
-			for (CmToken token: tokens)
-				builder.append(token.toHtml(Operation.EQUAL));
+			for (Token token: tokens)
+				builder.append(token.toHtml(null));
 		}
 		builder.append("</td>");
 		
@@ -910,8 +919,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		if (tokens.isEmpty()) {
 			builder.append("&nbsp;");
 		} else {
-			for (CmToken token: tokens)
-				builder.append(token.toHtml(Operation.EQUAL));
+			for (Token token: tokens)
+				builder.append(token.toHtml(null));
 		}
 		builder.append("</td>");
 		
@@ -920,7 +929,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 	private void appendModification(StringBuilder builder, MarkAwareDiffBlock deleteBlock, 
 			MarkAwareDiffBlock insertBlock, int deleteLineIndex, int insertLineIndex, 
-			List<DiffBlock<CmToken>> tokenDiffs) {
+			List<DiffBlock<Token>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
@@ -936,9 +945,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (tokenDiffs.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
-				for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
-					for (CmToken token: tokenBlock.getUnits()) 
-						builder.append(token.toHtml(tokenBlock.getOperation()));
+				for (DiffBlock<Token> tokenBlock: tokenDiffs) { 
+					for (Token token: tokenBlock.getUnits()) 
+						builder.append(token.toHtml(getOperationClass(tokenBlock.getOperation())));
 				}
 			}
 			builder.append("</td>");
@@ -952,10 +961,10 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (tokenDiffs.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
-				for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
-					for (CmToken token: tokenBlock.getUnits()) {
+				for (DiffBlock<Token> tokenBlock: tokenDiffs) { 
+					for (Token token: tokenBlock.getUnits()) {
 						if (tokenBlock.getOperation() != Operation.INSERT) 
-							builder.append(token.toHtml(tokenBlock.getOperation()));
+							builder.append(token.toHtml(getOperationClass(tokenBlock.getOperation())));
 					}
 				}
 			}
@@ -970,10 +979,10 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (tokenDiffs.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
-				for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
-					for (CmToken token: tokenBlock.getUnits()) {
+				for (DiffBlock<Token> tokenBlock: tokenDiffs) { 
+					for (Token token: tokenBlock.getUnits()) {
 						if (tokenBlock.getOperation() != Operation.DELETE) 
-							builder.append(token.toHtml(tokenBlock.getOperation()));
+							builder.append(token.toHtml(getOperationClass(tokenBlock.getOperation())));
 					}
 				}
 			}			
@@ -1045,7 +1054,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				}
 			}
 			
-			for (DiffBlock<List<CmToken>> diffBlock: change.getDiffBlocks()) {
+			for (DiffBlock<List<Token>> diffBlock: change.getDiffBlocks()) {
 				if (diffBlock.getOperation() == Operation.DELETE) {
 					diffBlocks.add(new MarkAwareDiffBlock(Type.DELETE, diffBlock.getUnits(), 
 							diffBlock.getOldStart(), diffBlock.getNewStart()));
@@ -1072,12 +1081,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 							if (to > diffBlock.getUnits().size())
 								to = diffBlock.getUnits().size();
 							if (lastIndex < from) {
-								List<List<CmToken>> lines = diffBlock.getUnits().subList(lastIndex, from);
+								List<List<Token>> lines = diffBlock.getUnits().subList(lastIndex, from);
 								diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
 										diffBlock.getOldStart()+lastIndex, diffBlock.getNewStart()+lastIndex));
 							}
 							if (from < to) {
-								List<List<CmToken>> lines = diffBlock.getUnits().subList(from, to);
+								List<List<Token>> lines = diffBlock.getUnits().subList(from, to);
 								diffBlocks.add(new MarkAwareDiffBlock(Type.MARKED_EQUAL, lines, 
 										diffBlock.getOldStart()+from, diffBlock.getNewStart()+from));
 							}
@@ -1086,7 +1095,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					}
 					
 					if (lastIndex < diffBlock.getUnits().size()) {
-						List<List<CmToken>> lines = diffBlock.getUnits().subList(lastIndex, diffBlock.getUnits().size());
+						List<List<Token>> lines = diffBlock.getUnits().subList(lastIndex, diffBlock.getUnits().size());
 						diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
 								diffBlock.getOldStart()+lastIndex, diffBlock.getNewStart()+lastIndex));
 					}

@@ -35,11 +35,6 @@
             <version>1.0-EAP-build18</version> 
         </dependency>  
         <dependency> 
-            <groupId>org.webjars</groupId>  
-            <artifactId>codemirror</artifactId>  
-            <version>5.1</version> 
-        </dependency>  
-        <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
             <version>1.0-EAP-build18</version>  
@@ -61,6 +56,11 @@
             <artifactId>commons.antlr</artifactId>  
             <version>1.0-EAP-build18</version> 
         </dependency> 
+        <dependency>
+        	<groupId>com.gitplex</groupId>
+        	<artifactId>jsyntax</artifactId>
+        	<version>1.0.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>  
     <properties> 
         <moduleClass>com.gitplex.commons.lang.LangModule</moduleClass> 
