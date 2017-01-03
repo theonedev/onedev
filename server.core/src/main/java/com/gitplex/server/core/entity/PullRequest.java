@@ -45,7 +45,7 @@ import com.gitplex.commons.hibernate.AbstractEntity;
 import com.gitplex.commons.hibernate.UnitOfWork;
 import com.gitplex.commons.hibernate.dao.Dao;
 import com.gitplex.commons.jackson.ExternalView;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.commons.wicket.editable.EditableUtils;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.support.CloseInfo;

@@ -13,24 +13,22 @@ import javax.annotation.Nullable;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.server.core.GitPlex;
+import com.gitplex.commons.util.ContentDetector;
+import com.gitplex.commons.util.match.WildcardUtils;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.SymbolHit;
+import com.gitplex.symbolextractor.ExtractException;
+import com.gitplex.symbolextractor.Range;
+import com.gitplex.symbolextractor.Symbol;
+import com.gitplex.symbolextractor.SymbolExtractor;
+import com.gitplex.symbolextractor.SymbolExtractorRegistry;
 import com.google.common.base.Splitter;
-import com.gitplex.commons.lang.extractors.ExtractException;
-import com.gitplex.commons.lang.extractors.Extractor;
-import com.gitplex.commons.lang.extractors.Extractors;
-import com.gitplex.commons.lang.extractors.Symbol;
-import com.gitplex.commons.util.ContentDetector;
-import com.gitplex.commons.util.Range;
-import com.gitplex.commons.util.match.WildcardUtils;
 
 public class SymbolQuery extends BlobQuery {
 
@@ -44,19 +42,17 @@ public class SymbolQuery extends BlobQuery {
 	
 	private final boolean caseSensitive;
 	
-	private final String directory;
-	
 	private final String fileNames;
 	
 	public SymbolQuery(String term, @Nullable String excludeTerm, boolean primary, 
-			boolean caseSensitive, @Nullable String directory, @Nullable String fileNames, int count) {
-		super(count);
+			boolean caseSensitive, @Nullable String directory, @Nullable String fileNames, 
+			int count) {
+		super(directory, count);
 		
 		this.term = term;
 		this.excludeTerm = excludeTerm;
 		this.primary = primary;
 		this.caseSensitive = caseSensitive;
-		this.directory = directory;
 		this.fileNames = fileNames;
 	}
 
@@ -64,7 +60,7 @@ public class SymbolQuery extends BlobQuery {
 	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
 		
-		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(blobPath);
+		SymbolExtractor extractor = SymbolExtractorRegistry.getExtractor(blobPath);
 		if (extractor != null) {
 			ObjectLoader objectLoader;
 			try {
@@ -76,7 +72,7 @@ public class SymbolQuery extends BlobQuery {
 						try {
 							for (Symbol symbol: extractor.extract(content)) {
 								if (hits.size() < getCount()) {
-									if (primary == symbol.isPrimary() && symbol.getName() != null) {
+									if (primary == symbol.isPrimary() && symbol.getIndexName() != null) {
 										String normalizedTerm;
 										if (!caseSensitive)
 											normalizedTerm = term.toLowerCase();
@@ -85,9 +81,9 @@ public class SymbolQuery extends BlobQuery {
 										
 										String normalizedSymbolName;
 										if (!caseSensitive)
-											normalizedSymbolName = symbol.getName().toLowerCase();
+											normalizedSymbolName = symbol.getIndexName().toLowerCase();
 										else
-											normalizedSymbolName = symbol.getName();
+											normalizedSymbolName = symbol.getIndexName();
 										
 										String normalizedExcludeTerm;
 										if (excludeTerm != null) {
@@ -121,12 +117,7 @@ public class SymbolQuery extends BlobQuery {
 	}
 
 	@Override
-	public Query asLuceneQuery() throws TooGeneralQueryException {
-		BooleanQuery query = new BooleanQuery(true);
-
-		if (directory != null)
-			applyDirectory(query, directory);
-
+	protected void applyConstraints(BooleanQuery query) {
 		if (fileNames != null) {
 			BooleanQuery subQuery = new BooleanQuery(true);
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))
@@ -152,8 +143,6 @@ public class SymbolQuery extends BlobQuery {
 			fieldName = BLOB_SECONDARY_SYMBOLS.name();
 		
 		query.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), Occur.MUST);
-		
-		return query;
 	}
 	
 }

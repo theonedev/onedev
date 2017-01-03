@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.gitplex.commons.lang.extractors.TokenPosition;
+import com.gitplex.symbolextractor.TokenPosition;
 
 public class TextRange implements Serializable {
 	
@@ -34,8 +34,8 @@ public class TextRange implements Serializable {
 	}
 	
 	public TextRange(TokenPosition tokenPos) {
-		this(tokenPos.getLine(), tokenPos.getRange().getFrom(), 
-				tokenPos.getLine(), tokenPos.getRange().getTo());
+		this(tokenPos.getFromLine(), tokenPos.getFromCh(), 
+				tokenPos.getToLine(), tokenPos.getToCh());
 	}
 
 	public TextRange(String markStr) {

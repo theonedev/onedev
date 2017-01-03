@@ -61,10 +61,9 @@ import com.gitplex.commons.antlr.codeassist.InputSuggestion;
 import com.gitplex.commons.git.Blob;
 import com.gitplex.commons.git.BlobChange;
 import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.lang.diff.DiffUtils;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.StringUtils;
+import com.gitplex.commons.util.diff.DiffUtils;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.commons.util.match.WildcardUtils;
 import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.commons.wicket.behavior.inputassist.InputAssistBehavior;
@@ -88,6 +87,7 @@ import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.blob.SourceAware;
 import com.gitplex.server.web.component.diff.diffstat.DiffStatBar;
 import com.gitplex.server.web.util.SuggestionUtils;
+import com.gitplex.symbolextractor.Range;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

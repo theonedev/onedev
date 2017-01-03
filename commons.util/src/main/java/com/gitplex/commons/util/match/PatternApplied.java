@@ -2,7 +2,7 @@ package com.gitplex.commons.util.match;
 
 import java.io.Serializable;
 
-import com.gitplex.commons.util.Range;
+import com.gitplex.symbolextractor.Range;
 
 public class PatternApplied implements Serializable {
 

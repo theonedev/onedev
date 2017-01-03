@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 import com.gitplex.commons.git.Blame;
 import com.gitplex.commons.git.BriefCommit;
 import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.execution.Commandline;
 import com.gitplex.commons.util.execution.ExecuteResult;
 import com.gitplex.commons.util.execution.LineConsumer;
+import com.gitplex.symbolextractor.Range;
 import com.google.common.base.Preconditions;
 
 public class BlameCommand extends GitCommand<Map<String, Blame>> {
@@ -97,7 +97,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 					if (commit != null && !commitBuilder.hash.equals(commit.getHash())) {
 						Blame blame = blames.get(commit.getHash());
 						if (blame == null) {
-							blame = new Blame(commit, new ArrayList<Range>());
+							blame = new Blame(commit, new ArrayList<>());
 							blames.put(commit.getHash(), blame);
 						}
 						blame.getRanges().add(new Range(beginLine.get(), endLine.get()));

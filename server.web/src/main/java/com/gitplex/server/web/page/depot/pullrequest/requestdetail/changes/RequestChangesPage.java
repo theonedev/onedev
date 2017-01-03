@@ -34,7 +34,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
 import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.commons.wicket.component.DropdownLink;
 import com.gitplex.commons.wicket.websocket.WebSocketManager;

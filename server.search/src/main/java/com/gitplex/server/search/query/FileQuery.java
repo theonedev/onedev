@@ -9,15 +9,14 @@ import javax.annotation.Nullable;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Splitter;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.match.WildcardUtils;
 import com.gitplex.server.search.hit.FileHit;
 import com.gitplex.server.search.hit.QueryHit;
+import com.gitplex.symbolextractor.Range;
+import com.google.common.base.Splitter;
 
 public class FileQuery extends BlobQuery {
 
@@ -27,16 +26,13 @@ public class FileQuery extends BlobQuery {
 	
 	private final boolean caseSensitive;
 	
-	private final String directory;
-	
 	public FileQuery(String fileNames, @Nullable String excludeFileName, boolean caseSensitive,  
 			@Nullable String directory, int count) {
-		super(count);
+		super(directory, count);
 		
 		this.fileNames = fileNames;
 		this.excludeFileName = excludeFileName;
 		this.caseSensitive = caseSensitive;
-		this.directory = directory;
 	}
 
 	@Override
@@ -65,12 +61,7 @@ public class FileQuery extends BlobQuery {
 	}
 
 	@Override
-	public Query asLuceneQuery() throws TooGeneralQueryException {
-		BooleanQuery query = new BooleanQuery(true);
-
-		if (directory != null)
-			applyDirectory(query, directory);
-
+	protected void applyConstraints(BooleanQuery query) {
 		boolean tooGeneral = true;
 		for (char ch: fileNames.toCharArray()) {
 			if (ch != '?' && ch != '*' && ch != ',' && ch != '.') {
@@ -89,8 +80,6 @@ public class FileQuery extends BlobQuery {
 			query.add(subQuery, Occur.MUST);
 		else
 			throw new TooGeneralQueryException();
-
-		return query;
 	}
 
 }

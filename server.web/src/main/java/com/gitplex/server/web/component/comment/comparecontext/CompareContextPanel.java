@@ -22,7 +22,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.server.core.entity.CodeComment;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.PullRequest;

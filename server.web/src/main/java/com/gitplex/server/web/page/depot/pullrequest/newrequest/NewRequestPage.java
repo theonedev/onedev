@@ -38,7 +38,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import com.google.common.base.Preconditions;
 import com.gitplex.commons.git.GitUtils;
 import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.gitplex.commons.wicket.component.tabbable.AjaxActionTab;
 import com.gitplex.commons.wicket.component.tabbable.Tab;

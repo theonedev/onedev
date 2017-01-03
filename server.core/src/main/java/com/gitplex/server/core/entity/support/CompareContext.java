@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.OptimisticLock;
 
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 
 @Embeddable
 public class CompareContext implements Serializable {

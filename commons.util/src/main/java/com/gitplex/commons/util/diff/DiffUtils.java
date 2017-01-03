@@ -1,4 +1,4 @@
-package com.gitplex.commons.lang.diff;
+package com.gitplex.commons.util.diff;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,11 +10,12 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.commons.lang.diff.DiffMatchPatch.Diff;
-import com.gitplex.commons.lang.diff.DiffMatchPatch.Operation;
 import com.gitplex.commons.util.StringUtils;
+import com.gitplex.commons.util.diff.DiffMatchPatch.Diff;
+import com.gitplex.commons.util.diff.DiffMatchPatch.Operation;
 import com.gitplex.jsyntax.Token;
-import com.gitplex.jsyntax.Tokenizers;
+import com.gitplex.jsyntax.Tokenizer;
+import com.gitplex.jsyntax.TokenizerRegistry;
 import com.google.common.base.Preconditions;
 
 public class DiffUtils {
@@ -42,10 +43,9 @@ public class DiffUtils {
 	}
 	
 	private static List<List<Token>> tokenize(List<String> lines, @Nullable String fileName) {
-		List<List<Token>> tokenizedLines = null;
-		if (fileName != null)
-			tokenizedLines = Tokenizers.tokenize(lines, fileName);
-		if (tokenizedLines != null) {
+		Tokenizer tokenizer = TokenizerRegistry.getTokenizer(fileName);
+		if (tokenizer != null) {
+			List<List<Token>> tokenizedLines = tokenizer.tokenize(lines);
 			List<List<Token>> refinedLines = new ArrayList<>();
 			for (List<Token> tokenizedLine: tokenizedLines) {
 				List<Token> refinedLine = new ArrayList<>();
@@ -63,7 +63,7 @@ public class DiffUtils {
 			}
 			return refinedLines;
 		} else {
-			tokenizedLines = new ArrayList<>();
+			List<List<Token>> tokenizedLines = new ArrayList<>();
 			for (String line: lines) {
 				List<Token> tokenizedLine = new ArrayList<>();
 				for (String each: splitByWord(line)) 

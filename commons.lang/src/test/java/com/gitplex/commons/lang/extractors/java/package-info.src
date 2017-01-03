@@ -1,5 +1,0 @@
-/*
- *some comment here
- */
-@jdk.Exported
-package com.sun.javadoc;

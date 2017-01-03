@@ -11,11 +11,11 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
-import com.gitplex.commons.lang.diff.DiffBlock;
-import com.gitplex.commons.lang.diff.DiffUtils;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.DiffBlock;
+import com.gitplex.commons.util.diff.DiffUtils;
+import com.gitplex.commons.util.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.DiffMatchPatch.Operation;
 import com.gitplex.jsyntax.Token;
-import com.gitplex.commons.lang.diff.DiffMatchPatch.Operation;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")

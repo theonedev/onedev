@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.commons.util.Range;
+import com.gitplex.symbolextractor.Range;
 
 public class WildcardUtils {
 	

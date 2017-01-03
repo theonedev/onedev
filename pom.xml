@@ -16,7 +16,7 @@
         <module>commons.jetty</module>  
         <module>commons.git</module>  
         <module>commons.hibernate</module>  
-        <module>commons.lang</module>  
+          
         <module>commons.jersey</module>  
         <module>commons.shiro</module>  
         <module>commons.wicket</module>  
@@ -79,19 +79,6 @@
                     <configuration> 
                         <lifecycleMappingMetadata> 
                             <pluginExecutions> 
-                                <pluginExecution> 
-                                    <pluginExecutionFilter> 
-                                        <groupId>org.apache.maven.plugins</groupId>  
-                                        <artifactId>maven-enforcer-plugin</artifactId>  
-                                        <versionRange>[1.0.0,)</versionRange>  
-                                        <goals> 
-                                            <goal>enforce</goal> 
-                                        </goals> 
-                                    </pluginExecutionFilter>  
-                                    <action> 
-                                        <ignore/> 
-                                    </action> 
-                                </pluginExecution>  
                                 <pluginExecution> 
                                     <pluginExecutionFilter> 
                                         <groupId>com.gitplex</groupId>  
@@ -312,28 +299,6 @@
                 </plugin> 
             </plugins> 
         </pluginManagement>  
-        <plugins> 
-            <plugin> 
-                <groupId>org.apache.maven.plugins</groupId>  
-                <artifactId>maven-enforcer-plugin</artifactId>  
-                <version>1.3.1</version>  
-                <executions> 
-                    <execution> 
-                        <id>enforce-java</id>  
-                        <goals> 
-                            <goal>enforce</goal> 
-                        </goals>  
-                        <configuration> 
-                            <rules> 
-                                <requireJavaVersion> 
-                                    <version>1.8.0</version> 
-                                </requireJavaVersion> 
-                            </rules> 
-                        </configuration> 
-                    </execution> 
-                </executions> 
-            </plugin> 
-        </plugins> 
     </build>  
     <dependencyManagement> 
         <dependencies> 

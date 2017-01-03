@@ -24,7 +24,6 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
@@ -38,6 +37,17 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.gitplex.commons.git.Blob;
+import com.gitplex.commons.git.BlobIdent;
+import com.gitplex.commons.git.GitUtils;
+import com.gitplex.commons.git.exception.GitObjectNotFoundException;
+import com.gitplex.commons.hibernate.UnitOfWork;
+import com.gitplex.commons.loader.ListenerRegistry;
+import com.gitplex.commons.util.diff.DiffUtils;
+import com.gitplex.commons.wicket.component.modal.ModalLink;
+import com.gitplex.commons.wicket.websocket.WebSocketManager;
+import com.gitplex.commons.wicket.websocket.WebSocketRegion;
+import com.gitplex.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.CodeComment;
 import com.gitplex.server.core.entity.Depot;
@@ -78,19 +88,9 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.Reque
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.PullRequestChangedRegion;
+import com.gitplex.symbolextractor.TokenPosition;
+import com.gitplex.symbolextractor.util.NoAntiCacheImage;
 import com.google.common.base.Objects;
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.exception.GitObjectNotFoundException;
-import com.gitplex.commons.hibernate.UnitOfWork;
-import com.gitplex.commons.lang.diff.DiffUtils;
-import com.gitplex.commons.lang.extractors.TokenPosition;
-import com.gitplex.commons.loader.ListenerRegistry;
-import com.gitplex.commons.wicket.component.modal.ModalLink;
-import com.gitplex.commons.wicket.websocket.WebSocketManager;
-import com.gitplex.commons.wicket.websocket.WebSocketRegion;
-import com.gitplex.commons.wicket.websocket.WebSocketRenderBehavior;
 
 @SuppressWarnings("serial")
 public class DepotFilePage extends DepotPage implements BlobViewContext {
@@ -352,7 +352,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Image("icon", new PackageResourceReference(DepotFilePage.class, "indexing.gif")));
+				add(new NoAntiCacheImage("icon", new PackageResourceReference(DepotFilePage.class, "indexing.gif")));
 				setOutputMarkupPlaceholderTag(true);
 			}
 

@@ -1,5 +1,5 @@
 gitplex.server.textdiff = {
-	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta",
+	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string",
 	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll, callback, blameMessageCallback,
 			markSupport, mark, openComment, oldComments, newComments, dirtyContainerId, doclink) {
 		var $container = $("#" + containerId);

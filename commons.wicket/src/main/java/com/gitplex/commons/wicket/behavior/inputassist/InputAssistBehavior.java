@@ -21,13 +21,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.commons.antlr.codeassist.InputCompletion;
 import com.gitplex.commons.antlr.codeassist.InputStatus;
 import com.gitplex.commons.loader.AppLoader;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.RangeUtils;
 import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.commons.wicket.component.floating.AlignPlacement;
 import com.gitplex.commons.wicket.component.floating.AlignTarget;
 import com.gitplex.commons.wicket.component.floating.ComponentTarget;
 import com.gitplex.commons.wicket.component.floating.FloatingPanel;
+import com.gitplex.symbolextractor.Range;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 

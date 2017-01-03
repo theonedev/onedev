@@ -27,8 +27,8 @@ import com.gitplex.commons.antlr.codeassist.InputStatus;
 import com.gitplex.commons.antlr.codeassist.InputSuggestion;
 import com.gitplex.commons.antlr.codeassist.ParentedElement;
 import com.gitplex.commons.antlr.grammar.ElementSpec;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.StringUtils;
+import com.gitplex.symbolextractor.Range;
 
 @SuppressWarnings("serial")
 public abstract class ANTLRAssistBehavior extends InputAssistBehavior {

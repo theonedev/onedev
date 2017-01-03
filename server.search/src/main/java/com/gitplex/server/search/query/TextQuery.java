@@ -15,19 +15,18 @@ import org.apache.commons.lang3.CharUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Splitter;
-import com.gitplex.commons.lang.extractors.TokenPosition;
 import com.gitplex.commons.util.ContentDetector;
-import com.gitplex.commons.util.Range;
 import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.TextHit;
 import com.gitplex.server.search.query.regex.RegexLiterals;
+import com.gitplex.symbolextractor.Range;
+import com.gitplex.symbolextractor.TokenPosition;
+import com.google.common.base.Splitter;
 
 public class TextQuery extends BlobQuery {
 
@@ -40,8 +39,6 @@ public class TextQuery extends BlobQuery {
 	private final boolean caseSensitive;
 	
 	private final boolean wholeWord;
-
-	private final String directory;
 	
 	private final String fileNames;
 	
@@ -49,13 +46,12 @@ public class TextQuery extends BlobQuery {
 	
 	public TextQuery(String term, boolean regex, boolean caseSensitive, boolean wordMatch, 
 			@Nullable String directory, @Nullable String fileNames, int count) {
-		super(count);
+		super(directory, count);
 		
 		this.term = term;
 		this.regex = regex;
 		this.caseSensitive = caseSensitive;
 		this.wholeWord = wordMatch;
-		this.directory = directory;
 		this.fileNames = fileNames;
 	}
 
@@ -98,7 +94,8 @@ public class TextQuery extends BlobQuery {
 								Matcher matcher = pattern.matcher(line);
 								while (matcher.find()) {
 									Range range = new Range(matcher.start(), matcher.end());
-									hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
+									TokenPosition position = new TokenPosition(lineNo, range.getFrom(), lineNo, range.getTo());
+									hits.add(new TextHit(blobPath, line, position));
 									if (hits.size() >= getCount())
 										break;
 								}
@@ -141,13 +138,15 @@ public class TextQuery extends BlobQuery {
 										
 										if (!isWordChar(beforeChar) && !isWordChar(afterChar)) {
 											Range range = new Range(start, end);
-											hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
+											TokenPosition position = new TokenPosition(lineNo, range.getFrom(), lineNo, range.getTo());
+											hits.add(new TextHit(blobPath, line, position));
 											if (hits.size() >= getCount())
 												break;
 										}
 									} else {
 										Range range = new Range(start, end);
-										hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
+										TokenPosition position = new TokenPosition(lineNo, range.getFrom(), lineNo, range.getTo());
+										hits.add(new TextHit(blobPath, line, position));
 										if (hits.size() >= getCount())
 											break;
 									}
@@ -171,12 +170,7 @@ public class TextQuery extends BlobQuery {
 	}
 
 	@Override
-	public Query asLuceneQuery() throws TooGeneralQueryException {
-		BooleanQuery query = new BooleanQuery(true);
-
-		if (directory != null)
-			applyDirectory(query, directory);
-
+	protected void applyConstraints(BooleanQuery query) {
 		if (fileNames != null) {
 			BooleanQuery subQuery = new BooleanQuery(true);
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))
@@ -191,8 +185,6 @@ public class TextQuery extends BlobQuery {
 			query.add(new NGramLuceneQuery(BLOB_TEXT.name(), term, NGRAM_SIZE), Occur.MUST);
 		else 
 			throw new TooGeneralQueryException();
-
-		return query;
 	}
 	
 }

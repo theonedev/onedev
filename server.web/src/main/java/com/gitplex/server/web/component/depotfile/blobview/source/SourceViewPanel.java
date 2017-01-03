@@ -29,7 +29,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -49,6 +48,16 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitplex.commons.git.Blame;
+import com.gitplex.commons.git.Blob;
+import com.gitplex.commons.git.BlobIdent;
+import com.gitplex.commons.git.GitUtils;
+import com.gitplex.commons.git.command.BlameCommand;
+import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.commons.wicket.component.DropdownLink;
+import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
+import com.gitplex.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.CodeComment;
 import com.gitplex.server.core.entity.Depot;
@@ -65,30 +74,20 @@ import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.comment.comparecontext.CompareContextPanel;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
-import com.gitplex.server.web.component.depotfile.blobview.BlobViewPanel;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext.Mode;
+import com.gitplex.server.web.component.depotfile.blobview.BlobViewPanel;
 import com.gitplex.server.web.component.sourceformat.OptionChangeCallback;
 import com.gitplex.server.web.component.sourceformat.SourceFormatPanel;
 import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.util.DateUtils;
+import com.gitplex.symbolextractor.ExtractException;
+import com.gitplex.symbolextractor.Range;
+import com.gitplex.symbolextractor.Symbol;
+import com.gitplex.symbolextractor.SymbolExtractor;
+import com.gitplex.symbolextractor.SymbolExtractorRegistry;
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.git.Blame;
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.command.BlameCommand;
-import com.gitplex.commons.lang.extractors.ExtractException;
-import com.gitplex.commons.lang.extractors.Extractor;
-import com.gitplex.commons.lang.extractors.Extractors;
-import com.gitplex.commons.lang.extractors.Symbol;
-import com.gitplex.commons.util.Range;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.commons.wicket.websocket.WebSocketRenderBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -138,7 +137,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		Preconditions.checkArgument(blob.getText() != null);
 		
-		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(context.getBlobIdent().path);
+		SymbolExtractor extractor = SymbolExtractorRegistry.getExtractor(context.getBlobIdent().path);
 		if (extractor != null) {
 			try {
 				symbols.addAll(extractor.extract(blob.getText().getContent()));
@@ -682,20 +681,20 @@ public class SourceViewPanel extends BlobViewPanel {
 				Fragment fragment = new Fragment(id, "outlineNodeFrag", SourceViewPanel.this);
 				Symbol symbol = nodeModel.getObject();
 				
-				fragment.add(new Image("icon", symbol.getIcon()));
+				fragment.add(symbol.renderIcon("icon"));
 				
 				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						context.onSelect(target, context.getBlobIdent(), symbol.getPos());
+						context.onSelect(target, context.getBlobIdent(), symbol.getPosition());
 					}
 					
 				};
 				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent = context.getBlobIdent();
 				state.commentId = CodeComment.idOf(context.getOpenComment());
-				state.mark = TextRange.of(symbol.getPos());
+				state.mark = TextRange.of(symbol.getPosition());
 				PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
 				link.add(AttributeAppender.replace("href", urlFor(DepotFilePage.class, params).toString()));
 				link.add(symbol.render("label", null));

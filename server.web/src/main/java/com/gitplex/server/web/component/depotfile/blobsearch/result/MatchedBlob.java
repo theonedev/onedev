@@ -3,8 +3,8 @@ package com.gitplex.server.web.component.depotfile.blobsearch.result;
 import java.io.Serializable;
 import java.util.List;
 
-import com.gitplex.commons.util.Range;
 import com.gitplex.server.search.hit.QueryHit;
+import com.gitplex.symbolextractor.Range;
 
 public class MatchedBlob implements Serializable {
 	

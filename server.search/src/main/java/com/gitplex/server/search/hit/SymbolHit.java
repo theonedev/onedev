@@ -3,10 +3,10 @@ package com.gitplex.server.search.hit;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.request.resource.ResourceReference;
+import org.apache.wicket.markup.html.image.Image;
 
-import com.gitplex.commons.lang.extractors.Symbol;
-import com.gitplex.commons.util.Range;
+import com.gitplex.symbolextractor.Range;
+import com.gitplex.symbolextractor.Symbol;
 
 public class SymbolHit extends QueryHit {
 
@@ -17,7 +17,7 @@ public class SymbolHit extends QueryHit {
 	private final Range matchRange;
 	
 	public SymbolHit(String blobPath, Symbol symbol, @Nullable Range matchRange) {
-		super(blobPath, symbol.getPos());
+		super(blobPath, symbol.getPosition());
 		this.symbol = symbol;
 		this.matchRange = matchRange;
 	}
@@ -37,10 +37,10 @@ public class SymbolHit extends QueryHit {
 	}
 
 	@Override
-	public ResourceReference getIcon() {
-		return symbol.getIcon();
+	public Image renderIcon(String componentId) {
+		return symbol.renderIcon(componentId);
 	}
-
+	
 	@Override
 	public String getScope() {
 		return symbol.getScope();

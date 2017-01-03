@@ -11,8 +11,7 @@ import java.util.StringTokenizer;
 
 import javax.annotation.Nullable;
 
-import org.unbescape.html.HtmlEscape;
-
+import com.gitplex.jsyntax.TokenizerUtils;
 import com.google.common.base.CaseFormat;
 
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
@@ -329,13 +328,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     public static String escapeHtml(String text) {
-		String escapedText = "";
-		for (int i=0; i<text.length(); i++) {
-			char ch = text.charAt(i);
-			if (ch == ' ' || ch == '\t' || !Character.isWhitespace(ch))
-				escapedText += ch;
-		}
-		return HtmlEscape.escapeHtml5(escapedText);
+    	return TokenizerUtils.escapeHtml(text);
     }
     
 }

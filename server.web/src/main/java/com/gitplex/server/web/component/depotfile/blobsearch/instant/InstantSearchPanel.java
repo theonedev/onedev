@@ -27,9 +27,16 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.ResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.gitplex.commons.util.StringUtils;
+import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
+import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
+import com.gitplex.commons.wicket.component.floating.AlignPlacement;
+import com.gitplex.commons.wicket.component.floating.ComponentTarget;
+import com.gitplex.commons.wicket.component.floating.FloatingPanel;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.support.TextRange;
@@ -41,14 +48,6 @@ import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TooGeneralQueryException;
 import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.commons.wicket.component.floating.AlignPlacement;
-import com.gitplex.commons.wicket.component.floating.ComponentTarget;
-import com.gitplex.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
 public abstract class InstantSearchPanel extends Panel {
@@ -242,14 +241,7 @@ public abstract class InstantSearchPanel extends Panel {
 							}
 							
 						};
-						link.add(new Image("icon", hit.getIcon()) {
-
-							@Override
-							protected boolean shouldAddAntiCacheParameter() {
-								return false;
-							}
-							
-						});
+						link.add(hit.renderIcon("icon"));
 						link.add(hit.render("label"));
 						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
@@ -378,12 +370,12 @@ public abstract class InstantSearchPanel extends Panel {
 		}
 
 		@Override
-		public ResourceReference getIcon() {
+		protected int score() {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		protected int score() {
+		public Image renderIcon(String componentId) {
 			throw new UnsupportedOperationException();
 		}
 		

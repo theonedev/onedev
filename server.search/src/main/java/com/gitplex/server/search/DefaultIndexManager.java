@@ -59,13 +59,7 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.gitplex.commons.hibernate.UnitOfWork;
-import com.gitplex.commons.lang.extractors.ExtractException;
-import com.gitplex.commons.lang.extractors.Extractor;
-import com.gitplex.commons.lang.extractors.Extractors;
-import com.gitplex.commons.lang.extractors.Symbol;
 import com.gitplex.commons.loader.Listen;
 import com.gitplex.commons.loader.ListenerRegistry;
 import com.gitplex.commons.util.ContentDetector;
@@ -77,6 +71,11 @@ import com.gitplex.server.core.manager.DepotManager;
 import com.gitplex.server.core.manager.StorageManager;
 import com.gitplex.server.core.manager.support.BatchWorker;
 import com.gitplex.server.core.manager.support.IndexResult;
+import com.gitplex.symbolextractor.Symbol;
+import com.gitplex.symbolextractor.SymbolExtractor;
+import com.gitplex.symbolextractor.SymbolExtractorRegistry;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 
 @Singleton
 public class DefaultIndexManager implements IndexManager {
@@ -93,8 +92,6 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final BatchWorkManager batchWorkManager;
 	
-	private final Extractors extractors; 
-	
 	private final UnitOfWork unitOfWork;
 	
 	private final DepotManager depotManager;
@@ -103,12 +100,10 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Inject
 	public DefaultIndexManager(ListenerRegistry listenerRegistry, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, Extractors extractors, UnitOfWork unitOfWork, 
-			DepotManager depotManager) {
+			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, DepotManager depotManager) {
 		this.listenerRegistry = listenerRegistry;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
-		this.extractors = extractors;
 		this.unitOfWork = unitOfWork;
 		this.depotManager = depotManager;
 	}
@@ -155,7 +150,7 @@ public class DefaultIndexManager implements IndexManager {
 				if (topDocs.scoreDocs.length != 0) {
 					Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
 					String lastCommitAnalyzersVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
-					if (lastCommitAnalyzersVersion.equals(extractors.getVersion())) {
+					if (lastCommitAnalyzersVersion.equals(SymbolExtractorRegistry.getVersion())) {
 						String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
 						ObjectId lastCommitId = repository.resolve(lastCommitHash);
 						if (repository.hasObject(lastCommitId)) { 
@@ -207,7 +202,7 @@ public class DefaultIndexManager implements IndexManager {
 						checked++;
 					}
 	
-					Extractor extractor = extractors.getExtractor(blobPath);
+					SymbolExtractor extractor = SymbolExtractorRegistry.getExtractor(blobPath);
 					String currentBlobIndexVersion = getCurrentBlobIndexVersion(extractor);
 					String blobIndexVersion = blobIndexVersionRef.get();
 					if (blobIndexVersion != null) {
@@ -236,7 +231,7 @@ public class DefaultIndexManager implements IndexManager {
 			// record last commit so that we only need to indexing changed files for subsequent commits
 			document = new Document();
 			document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.NO));
-			document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), extractors.getVersion()));
+			document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), SymbolExtractorRegistry.getVersion()));
 			document.add(new StoredField(LAST_COMMIT_HASH.name(), commitId.getName()));
 			writer.updateDocument(META.term(LAST_COMMIT.name()), document);
 			
@@ -245,7 +240,7 @@ public class DefaultIndexManager implements IndexManager {
 	}
 	
 	private void indexBlob(IndexWriter writer, Repository repository, 
-			Extractor extractor, ObjectId blobId, String blobPath) throws IOException {
+			SymbolExtractor extractor, ObjectId blobId, String blobPath) throws IOException {
 		Document document = new Document();
 		
 		document.add(new StoredField(BLOB_INDEX_VERSION.name(), getCurrentBlobIndexVersion(extractor)));
@@ -268,7 +263,7 @@ public class DefaultIndexManager implements IndexManager {
 				if (extractor != null) {
 					try {
 						for (Symbol symbol: extractor.extract(content)) {
-							String fieldValue = symbol.getName();
+							String fieldValue = symbol.getIndexName();
 							if (fieldValue != null) {
 								fieldValue = fieldValue.toLowerCase();
 								
@@ -280,7 +275,7 @@ public class DefaultIndexManager implements IndexManager {
 								document.add(new StringField(fieldName, fieldValue, Store.NO));
 							}
 						}
-					} catch (ExtractException e) {
+					} catch (Exception e) {
 						logger.error("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 				} 
@@ -371,10 +366,10 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	private String getCurrentCommitIndexVersion() {
-		return INDEX_VERSION + ";" + extractors.getVersion();
+		return INDEX_VERSION + ";" + SymbolExtractorRegistry.getVersion();
 	}
 	
-	private String getCurrentBlobIndexVersion(Extractor extractor) {
+	private String getCurrentBlobIndexVersion(SymbolExtractor extractor) {
 		if (extractor != null)
 			return INDEX_VERSION + ";" + extractor.getVersion();
 		else

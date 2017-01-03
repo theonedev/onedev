@@ -4,6 +4,8 @@ import static com.gitplex.server.search.FieldConstants.BLOB_PATH;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -14,10 +16,18 @@ import com.gitplex.server.search.hit.QueryHit;
 
 public abstract class BlobQuery {
 
+	private final String directory;
+	
 	private final int count;
 
-	public BlobQuery(int count) {
+	public BlobQuery(@Nullable String directory, int count) {
+		this.directory = directory;
 		this.count = count;
+	}
+
+	@Nullable
+	public String getDirectory() {
+		return directory;
 	}
 
 	public int getCount() {
@@ -34,11 +44,21 @@ public abstract class BlobQuery {
 	 * @throws 
 	 * 			TooGeneralQueryException if supplied query term is too general to possibly cause query slow
 	 */
-	public abstract Query asLuceneQuery() throws TooGeneralQueryException;
-
-	protected void applyDirectory(BooleanQuery query, String directory) {
-		if (!directory.endsWith("/"))
-			directory += "/";
-		query.add(new WildcardQuery(BLOB_PATH.term(directory + "*")), Occur.MUST);
+	public Query asLuceneQuery() throws TooGeneralQueryException {
+		BooleanQuery luceneQuery = new BooleanQuery(true);
+		
+		String directory = this.directory;
+		if (directory != null) {
+			if (!directory.endsWith("/"))
+				directory += "/";
+			luceneQuery.add(new WildcardQuery(BLOB_PATH.term(directory + "*")), Occur.MUST);
+		}
+		
+		applyConstraints(luceneQuery);
+		
+		return luceneQuery;
 	}
+
+	protected abstract void applyConstraints(BooleanQuery query);
+	
 }

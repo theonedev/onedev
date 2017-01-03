@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.gitplex.symbolextractor.Range;
+
 public class Highlighter {
 
 	public static String highlightRanges(String text, List<Range> ranges, 

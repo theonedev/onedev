@@ -28,7 +28,7 @@ import com.gitplex.commons.git.BlobChange;
 import com.gitplex.commons.git.BlobIdent;
 import com.gitplex.commons.git.GitUtils;
 import com.gitplex.commons.git.PathAndContent;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.commons.wicket.component.ViewStateAwareAjaxLink;

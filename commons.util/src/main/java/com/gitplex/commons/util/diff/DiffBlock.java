@@ -1,9 +1,9 @@
-package com.gitplex.commons.lang.diff;
+package com.gitplex.commons.util.diff;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.gitplex.commons.lang.diff.DiffMatchPatch.Operation;
+import com.gitplex.commons.util.diff.DiffMatchPatch.Operation;
 
 public class DiffBlock<T> implements Serializable {
 

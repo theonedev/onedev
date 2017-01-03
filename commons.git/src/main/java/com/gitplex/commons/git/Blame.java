@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.gitplex.commons.util.Range;
+import com.gitplex.symbolextractor.Range;
 
 public class Blame {
 	

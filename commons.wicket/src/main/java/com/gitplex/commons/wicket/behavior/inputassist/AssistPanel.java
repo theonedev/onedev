@@ -13,8 +13,8 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 
 import com.gitplex.commons.antlr.codeassist.InputCompletion;
 import com.gitplex.commons.antlr.codeassist.InputStatus;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.wicket.behavior.infinitescroll.InfiniteScrollBehavior;
+import com.gitplex.symbolextractor.Range;
 
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {

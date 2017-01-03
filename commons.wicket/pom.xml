@@ -108,6 +108,11 @@
             <artifactId>commons.antlr</artifactId>  
             <version>1.0-EAP-build18</version> 
         </dependency> 
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>codemirror</artifactId>
+			<version>5.21.0</version>
+		</dependency>
     </dependencies>  
     <properties> 
         <moduleClass>com.gitplex.commons.wicket.WicketModule</moduleClass>  

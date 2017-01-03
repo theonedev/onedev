@@ -15,12 +15,12 @@ import com.gitplex.commons.antlr.codeassist.InputSuggestion;
 import com.gitplex.commons.git.GitUtils;
 import com.gitplex.commons.git.RefInfo;
 import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.match.PatternApplied;
 import com.gitplex.commons.util.match.WildcardUtils;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.manager.CommitInfoManager;
+import com.gitplex.symbolextractor.Range;
 
 public class SuggestionUtils {
 	

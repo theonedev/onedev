@@ -5,9 +5,9 @@ import java.io.Serializable;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.request.resource.ResourceReference;
+import org.apache.wicket.markup.html.image.Image;
 
-import com.gitplex.commons.lang.extractors.TokenPosition;
+import com.gitplex.symbolextractor.TokenPosition;
 
 public abstract class QueryHit implements Serializable, Comparable<QueryHit> {
 	
@@ -38,7 +38,7 @@ public abstract class QueryHit implements Serializable, Comparable<QueryHit> {
 	@Nullable
 	public abstract String getScope();
 	
-	public abstract ResourceReference getIcon();
+	public abstract Image renderIcon(String componentId);
 	
 	protected abstract int score();
 	

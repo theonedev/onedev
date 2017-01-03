@@ -32,7 +32,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.commons.wicket.behavior.TooltipBehavior;
 import com.gitplex.commons.wicket.component.tabbable.AjaxActionTab;
 import com.gitplex.commons.wicket.component.tabbable.Tab;

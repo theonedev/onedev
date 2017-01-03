@@ -13,7 +13,6 @@ import com.google.common.collect.Lists;
 import com.gitplex.commons.antlr.codeassist.InputCompletion;
 import com.gitplex.commons.antlr.codeassist.InputStatus;
 import com.gitplex.commons.antlr.codeassist.InputSuggestion;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.ReflectionUtils;
 import com.gitplex.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.gitplex.commons.wicket.editable.ErrorContext;
@@ -22,6 +21,7 @@ import com.gitplex.commons.wicket.editable.PropertyDescriptor;
 import com.gitplex.commons.wicket.editable.PropertyEditor;
 import com.gitplex.server.core.annotation.FileChoice;
 import com.gitplex.server.web.util.SuggestionUtils;
+import com.gitplex.symbolextractor.Range;
 
 @SuppressWarnings("serial")
 public class FileChoiceEditor extends PropertyEditor<String> {

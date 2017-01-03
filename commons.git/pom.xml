@@ -67,11 +67,6 @@
             <artifactId>commons.wicket</artifactId>  
             <version>1.0-EAP-build18</version> 
         </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>commons.lang</artifactId>  
-            <version>1.0-EAP-build18</version> 
-        </dependency> 
     </dependencies>  
     <properties> 
         <jgitVersion>4.4.1.201607150455-r</jgitVersion>  

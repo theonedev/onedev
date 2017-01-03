@@ -5,6 +5,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -15,7 +16,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -28,19 +28,20 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
+import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.support.TextRange;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;
+import com.gitplex.server.search.query.PathQuery;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
@@ -81,14 +82,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<QueryHit> item) {
 				final QueryHit hit = item.getModelObject();
-				item.add(new Image("icon", hit.getIcon()) {
-
-					@Override
-					protected boolean shouldAddAntiCacheParameter() {
-						return false;
-					}
-					
-				});
+				item.add(hit.renderIcon("icon"));
 				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 					@Override
@@ -183,15 +177,21 @@ public abstract class SymbolTooltipPanel extends Panel {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				revision = params.getParameterValue("revision").toString();
 				symbol = params.getParameterValue("symbol").toString();
-				if (symbol.startsWith("@"))
-					symbol = symbol.substring(1);
+				boolean isString = symbol.indexOf('\'') != -1 || symbol.indexOf('"') != -1;
+				String charsToStrip = "@'\"./\\";
+				symbol = StringUtils.stripEnd(StringUtils.stripStart(symbol, charsToStrip), charsToStrip);
+				symbol = StringUtils.replace(symbol, "\\", "/");
 				try {
-					SymbolQuery query = new SymbolQuery(symbol, null, true, true, null, null, QUERY_ENTRIES);
+					BlobQuery query = new SymbolQuery(symbol, null, true, true, null, null, QUERY_ENTRIES);
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 					ObjectId commit = depotModel.getObject().getRevCommit(revision);
 					symbolHits = searchManager.search(depotModel.getObject(), commit, query);
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						query = new SymbolQuery(symbol, null, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
+						symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+					}
+					if (isString && symbolHits.size() < QUERY_ENTRIES) {
+						query = new PathQuery(null, symbol, QUERY_ENTRIES - symbolHits.size());
 						symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 					}
 				} catch (InterruptedException e) {

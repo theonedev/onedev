@@ -16,7 +16,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.gitplex.commons.git.Blob;
 import com.gitplex.commons.git.BlobChange;
-import com.gitplex.commons.lang.diff.DiffUtils;
+import com.gitplex.commons.util.diff.DiffUtils;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.CodeComment;
 import com.gitplex.server.core.entity.Depot;

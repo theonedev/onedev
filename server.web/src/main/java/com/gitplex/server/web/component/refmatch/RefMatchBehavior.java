@@ -14,9 +14,9 @@ import com.gitplex.commons.antlr.codeassist.InputSuggestion;
 import com.gitplex.commons.antlr.codeassist.ParentedElement;
 import com.gitplex.commons.antlr.grammar.ElementSpec;
 import com.gitplex.commons.antlr.grammar.LexerRuleRefElementSpec;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser;
+import com.gitplex.symbolextractor.Range;
 import com.gitplex.server.core.entity.Depot;
 
 @SuppressWarnings("serial")

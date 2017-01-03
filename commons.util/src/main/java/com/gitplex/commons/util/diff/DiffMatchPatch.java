@@ -16,7 +16,7 @@
  * the License.
  */
 
-package com.gitplex.commons.lang.diff;
+package com.gitplex.commons.util.diff;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

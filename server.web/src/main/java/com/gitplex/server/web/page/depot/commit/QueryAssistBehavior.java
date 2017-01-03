@@ -14,7 +14,6 @@ import com.gitplex.commons.antlr.codeassist.ParentedElement;
 import com.gitplex.commons.antlr.grammar.ElementSpec;
 import com.gitplex.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.gitplex.commons.git.NameAndEmail;
-import com.gitplex.commons.util.Range;
 import com.gitplex.commons.util.StringUtils;
 import com.gitplex.commons.util.match.PatternApplied;
 import com.gitplex.commons.util.match.WildcardUtils;
@@ -24,6 +23,7 @@ import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.manager.CommitInfoManager;
 import com.gitplex.server.web.Constants;
 import com.gitplex.server.web.util.SuggestionUtils;
+import com.gitplex.symbolextractor.Range;
 import com.gitplex.server.web.page.depot.commit.CommitQueryParser;
 
 @SuppressWarnings("serial")

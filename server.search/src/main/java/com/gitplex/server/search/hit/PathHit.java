@@ -2,7 +2,6 @@ package com.gitplex.server.search.hit;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.request.resource.PackageResourceReference;
@@ -11,13 +10,13 @@ import com.gitplex.symbolextractor.Range;
 import com.gitplex.symbolextractor.util.HighlightableLabel;
 import com.gitplex.symbolextractor.util.NoAntiCacheImage;
 
-public class FileHit extends QueryHit {
+public class PathHit extends QueryHit {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Range matchRange;
 	
-	public FileHit(String blobPath, @Nullable Range matchRange) {
+	public PathHit(String blobPath, @Nullable Range matchRange) {
 		super(blobPath, null);
 		this.matchRange = matchRange;
 	}
@@ -29,24 +28,17 @@ public class FileHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		String fileName = getBlobPath();
-		if (fileName.contains("/")) 
-			fileName = StringUtils.substringAfterLast(fileName, "/");
-		
-		return new HighlightableLabel(componentId, fileName, matchRange);
+		return new HighlightableLabel(componentId, getBlobPath(), matchRange);
 	}
 
 	@Override
 	public Image renderIcon(String componentId) {
-		return new NoAntiCacheImage(componentId, new PackageResourceReference(FileHit.class, "file.png"));
+		return new NoAntiCacheImage(componentId, new PackageResourceReference(PathHit.class, "file.png"));
 	}
 
 	@Override
 	public String getScope() {
-		if (getBlobPath().contains("/")) 
-			return StringUtils.substringBeforeLast(getBlobPath(), "/");
-		else 
-			return null;
+		return null;
 	}
 
 	public Range getMatchRange() {
@@ -55,10 +47,7 @@ public class FileHit extends QueryHit {
 
 	@Override
 	protected int score() {
-		if (getBlobPath().contains("/")) 
-			return StringUtils.substringAfterLast(getBlobPath(), "/").length();
-		else 
-			return getBlobPath().length();
+		return getBlobPath().length();
 	}
 
 }

@@ -2,12 +2,13 @@ package com.gitplex.server.search.hit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
 
-import com.gitplex.commons.lang.extractors.TokenPosition;
-import com.gitplex.commons.util.Range;
-import com.gitplex.commons.wicket.component.HighlightableLabel;
+import com.gitplex.symbolextractor.Range;
+import com.gitplex.symbolextractor.TokenPosition;
+import com.gitplex.symbolextractor.util.HighlightableLabel;
+import com.gitplex.symbolextractor.util.NoAntiCacheImage;
 
 public class TextHit extends QueryHit {
 
@@ -26,24 +27,14 @@ public class TextHit extends QueryHit {
 	}
 	
 	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(getTokenPos().getLine()).append(": ");
-		Range range = getTokenPos().getRange();
-		builder.append(lineContent.substring(0, range.getFrom()));
-		builder.append("[").append(lineContent.substring(range.getFrom(), range.getTo())).append("]");
-		builder.append(lineContent.substring(range.getTo()));
-		return builder.toString();
-	}
-
-	@Override
 	public Component render(String componentId) {
-		return new HighlightableLabel(componentId, lineContent, getTokenPos().getRange());
+		return new HighlightableLabel(componentId, lineContent, 
+				new Range(getTokenPos().getFromCh(), getTokenPos().getToCh()));
 	}
 
 	@Override
-	public ResourceReference getIcon() {
-		return new PackageResourceReference(FileHit.class, "bullet.gif");
+	public Image renderIcon(String componentId) {
+		return new NoAntiCacheImage(componentId, new PackageResourceReference(FileHit.class, "bullet.gif"));
 	}
 
 	@Override

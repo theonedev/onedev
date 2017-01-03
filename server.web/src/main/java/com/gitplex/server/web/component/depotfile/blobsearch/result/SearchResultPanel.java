@@ -17,7 +17,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -26,15 +25,16 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
+import com.gitplex.commons.git.BlobIdent;
+import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
 import com.gitplex.server.core.entity.support.TextRange;
 import com.gitplex.server.search.hit.FileHit;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.TextHit;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.wicket.component.HighlightableLabel;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
+import com.gitplex.symbolextractor.Range;
+import com.gitplex.symbolextractor.util.HighlightableLabel;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
@@ -86,14 +86,14 @@ public abstract class SearchResultPanel extends Panel {
 				FileHit fileHit = (FileHit) hit;
 				if (fileHit.getMatchRange() != null) {
 					int index = blob.getBlobPath().lastIndexOf('/');
-					blob.setMatchRange(fileHit.getMatchRange().moveBy(index+1));
+					blob.setMatchRange(new Range(fileHit.getMatchRange().getFrom()+index+1, fileHit.getMatchRange().getTo()+index+1));
 				}
 			}
 		}
 		
 		blobs = new ArrayList<>(hitsByBlob.values());
 		for (MatchedBlob blob: blobs) {
-			blob.getHits().sort((hit1, hit2) -> hit1.getTokenPos().getLine() - hit2.getTokenPos().getLine());
+			blob.getHits().sort((hit1, hit2) -> hit1.getTokenPos().getFromLine() - hit2.getTokenPos().getFromLine());
 		}
 	}
 
@@ -447,15 +447,8 @@ public abstract class SearchResultPanel extends Panel {
 							protected void onInitialize() {
 								super.onInitialize();
 								
-								add(new Image("icon", hit.getIcon()) {
-
-									@Override
-									protected boolean shouldAddAntiCacheParameter() {
-										return false;
-									}
-									
-								});
-								add(new Label("lineNo", String.valueOf(hit.getTokenPos().getLine()+1) + ":"));
+								add(hit.renderIcon("icon"));
+								add(new Label("lineNo", String.valueOf(hit.getTokenPos().getFromLine()+1) + ":"));
 								add(hit.render("label"));
 								add(new Label("scope", hit.getScope())
 										.setVisible(!(hit instanceof TextHit) && hit.getScope()!=null));

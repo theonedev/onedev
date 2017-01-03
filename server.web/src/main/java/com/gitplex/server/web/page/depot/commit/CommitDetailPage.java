@@ -38,7 +38,7 @@ import com.google.common.base.Preconditions;
 import com.gitplex.commons.git.BlobIdent;
 import com.gitplex.commons.git.GitUtils;
 import com.gitplex.commons.git.RefInfo;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.CodeComment;

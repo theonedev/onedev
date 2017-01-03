@@ -40,7 +40,7 @@ import com.gitplex.commons.git.PathAndContent;
 import com.gitplex.commons.git.exception.GitObjectAlreadyExistsException;
 import com.gitplex.commons.git.exception.NotGitTreeException;
 import com.gitplex.commons.git.exception.ObsoleteCommitException;
-import com.gitplex.commons.lang.diff.WhitespaceOption;
+import com.gitplex.commons.util.diff.WhitespaceOption;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Account;
 import com.gitplex.server.core.entity.Depot;
