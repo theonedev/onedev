@@ -202,7 +202,7 @@ public class DefaultIndexManager implements IndexManager {
 						checked++;
 					}
 	
-					SymbolExtractor extractor = SymbolExtractorRegistry.getExtractor(blobPath);
+					SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobPath);
 					String currentBlobIndexVersion = getCurrentBlobIndexVersion(extractor);
 					String blobIndexVersion = blobIndexVersionRef.get();
 					if (blobIndexVersion != null) {
@@ -240,7 +240,7 @@ public class DefaultIndexManager implements IndexManager {
 	}
 	
 	private void indexBlob(IndexWriter writer, Repository repository, 
-			SymbolExtractor extractor, ObjectId blobId, String blobPath) throws IOException {
+			SymbolExtractor<Symbol> extractor, ObjectId blobId, String blobPath) throws IOException {
 		Document document = new Document();
 		
 		document.add(new StoredField(BLOB_INDEX_VERSION.name(), getCurrentBlobIndexVersion(extractor)));
@@ -276,7 +276,7 @@ public class DefaultIndexManager implements IndexManager {
 							}
 						}
 					} catch (Exception e) {
-						logger.error("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
+						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 				} 
 			} else {
@@ -369,7 +369,7 @@ public class DefaultIndexManager implements IndexManager {
 		return INDEX_VERSION + ";" + SymbolExtractorRegistry.getVersion();
 	}
 	
-	private String getCurrentBlobIndexVersion(SymbolExtractor extractor) {
+	private String getCurrentBlobIndexVersion(SymbolExtractor<Symbol> extractor) {
 		if (extractor != null)
 			return INDEX_VERSION + ";" + extractor.getVersion();
 		else

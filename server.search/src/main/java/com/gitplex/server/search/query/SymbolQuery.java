@@ -60,7 +60,7 @@ public class SymbolQuery extends BlobQuery {
 	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
 		
-		SymbolExtractor extractor = SymbolExtractorRegistry.getExtractor(blobPath);
+		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobPath);
 		if (extractor != null) {
 			ObjectLoader objectLoader;
 			try {

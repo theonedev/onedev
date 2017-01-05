@@ -12,15 +12,15 @@ public class Test {
 		try {
 			graphics = image.getGraphics();
 
-			graphics.setColor(Color.decode("0x7F55FF"));
+			graphics.setColor(Color.decode("0x208507"));
 			graphics.fillOval(0, 0, 16, 16);
 
 			int fontSize = new Double(16).intValue();
 			Font font = new Font(Font.MONOSPACED, Font.BOLD, fontSize);
 			graphics.setFont(font);
 			graphics.setColor(Color.WHITE);
-			graphics.drawString("p", 4, 13);
-			ImageIO.write(image, "PNG", new File("w:\\temp\\icons\\property.png"));
+			graphics.drawString("P", 4, 13);
+			ImageIO.write(image, "PNG", new File("w:\\temp\\exported_property.png"));
 		} finally {
 			if (graphics != null)
 				graphics.dispose();

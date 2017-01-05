@@ -82,7 +82,6 @@ import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.util.DateUtils;
-import com.gitplex.symbolextractor.ExtractException;
 import com.gitplex.symbolextractor.Range;
 import com.gitplex.symbolextractor.Symbol;
 import com.gitplex.symbolextractor.SymbolExtractor;
@@ -137,11 +136,11 @@ public class SourceViewPanel extends BlobViewPanel {
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		Preconditions.checkArgument(blob.getText() != null);
 		
-		SymbolExtractor extractor = SymbolExtractorRegistry.getExtractor(context.getBlobIdent().path);
+		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(context.getBlobIdent().path);
 		if (extractor != null) {
 			try {
 				symbols.addAll(extractor.extract(blob.getText().getContent()));
-			} catch (ExtractException e) {
+			} catch (Exception e) {
 				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
 			}
 		}

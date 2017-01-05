@@ -2,6 +2,8 @@ package com.gitplex.commons.util;
 
 import static com.gitplex.commons.util.PathUtils.matchLongest;
 import static com.gitplex.commons.util.PathUtils.parseRelative;
+import static com.gitplex.commons.util.PathUtils.matchSegments;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -37,4 +39,12 @@ public class PathUtilsTest {
 		assertEquals(matchLongest(basePaths, "/asset1/asset2/test.html"), "/asset1/asset2");
 	}
 	
+	@Test
+	public void shouldMatchSegments() {
+		assertEquals("0-5", matchSegments("hello/world", "hello", true).toString());
+		assertEquals("5-16", matchSegments("just/hello/world/do", "hello/world", true).toString());
+		assertEquals("13-18", matchSegments("hello0/world/hello.gif", "hello", true).toString());
+		assertNull(matchSegments("mayhello/worldtwo", "hello/world", true));
+		assertNull(matchSegments("hello0/world/hello.gif", "hello", false));
+	}
 }

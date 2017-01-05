@@ -2,7 +2,11 @@ package com.gitplex.commons.util;
 
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.io.FilenameUtils;
+
+import com.gitplex.symbolextractor.Range;
 
 public class PathUtils {
 
@@ -79,4 +83,17 @@ public class PathUtils {
     	return matchedBasePath;
     }
 
+    public @Nullable static Range matchSegments(String path, String match, boolean ignoreExt) {
+    	int beginIndex = path.indexOf(match);
+    	while (beginIndex != -1) {
+    		int endIndex = beginIndex+match.length();
+    		char leftCh = beginIndex==0?'/':path.charAt(beginIndex-1);
+    		char rightCh = endIndex==path.length()?'/':path.charAt(endIndex);
+    		if (leftCh == '/' && (rightCh=='/' || ignoreExt&&rightCh=='.'))
+    			return new Range(beginIndex, endIndex);
+    		beginIndex = path.indexOf(match, beginIndex+1);
+    	}
+    	return null;
+    }
+    
 }

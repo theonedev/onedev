@@ -148,7 +148,7 @@ gitplex.server.sourceview = {
 					var node = e.target || e.srcElement, $node = $(node);
 					if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
 							|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def") || $node.hasClass("cm-meta")
-							|| $node.hasClass("cm-string")) {
+							|| $node.hasClass("cm-string") || $node.hasClass("cm-tag") || $node.hasClass("cm-attribute")) {
 						document.getElementById(symbolTooltipId).onMouseOverSymbol(revision, node);
 					}
 			    });

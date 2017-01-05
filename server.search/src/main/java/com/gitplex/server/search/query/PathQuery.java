@@ -12,32 +12,32 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.gitplex.commons.util.PathUtils;
 import com.gitplex.server.search.hit.PathHit;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.symbolextractor.Range;
 
 public class PathQuery extends BlobQuery {
 
-	private final String subPath;
+	private final String match;
 	
-	public PathQuery(@Nullable String directory, String subPath, int count) {
+	public PathQuery(@Nullable String directory, String match, int count) {
 		super(directory, count);
-		this.subPath = subPath;
+		this.match = match;
 	}
 
 	@Override
 	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
-		int index = blobPath.indexOf(subPath);
-		if (index != -1) {
-			Range matchRange = new Range(index, index+subPath.length());
-			hits.add(new PathHit(blobPath, matchRange));
+		Range range = PathUtils.matchSegments(blobPath, match, true);
+		if (range != null) {
+			hits.add(new PathHit(blobPath, range));
 		}
 	}
 
 	@Override
 	protected void applyConstraints(BooleanQuery query) {
-		query.add(new WildcardQuery(new Term(BLOB_PATH.name(), "*"+subPath+"*")), Occur.MUST);
+		query.add(new WildcardQuery(new Term(BLOB_PATH.name(), "*"+match+"*")), Occur.MUST);
 	}
 		
 }
