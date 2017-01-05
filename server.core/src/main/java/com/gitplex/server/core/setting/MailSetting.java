@@ -16,13 +16,15 @@ public class MailSetting implements Serializable {
 	
 	private int smtpPort = 587;
 	
+	private boolean enableSSL;
+	
 	private String smtpUser;
 	
 	private String smtpPassword;
 	
 	private String senderAddress;
 	
-	private int timeout = 300;
+	private int timeout = 60;
 
 	@Editable(order=100, name="SMTP Host", description=
 		"Specify the SMTP mail host used by GitPlex to send email."
@@ -46,6 +48,15 @@ public class MailSetting implements Serializable {
 
 	public void setSmtpPort(int smtpPort) {
 		this.smtpPort = smtpPort;
+	}
+
+	@Editable(order=250, name="Enable SSL", description="Whether or not to enable SSL")
+	public boolean isEnableSSL() {
+		return enableSSL;
+	}
+
+	public void setEnableSSL(boolean enableSSL) {
+		this.enableSSL = enableSSL;
 	}
 
 	@Editable(order=300, name="SMTP User", description=

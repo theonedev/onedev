@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
+import com.gitplex.commons.util.ExceptionUtils;
 import com.gitplex.commons.wicket.behavior.testform.TestFormBehavior;
 import com.gitplex.commons.wicket.behavior.testform.TestResult;
 import com.gitplex.commons.wicket.editable.BeanContext;
@@ -70,6 +71,9 @@ public class MailSettingPage extends AdministrationPage {
 									currentUser.getEmail() + ", please check your mail box.");
 						} catch (Exception e) {
 							logger.error("Error sending test email", e);
+							String suggestedSolution = ExceptionUtils.suggestSolution(e);
+							if (suggestedSolution != null)
+								logger.warn("!!! " + suggestedSolution);
 							return new TestResult.Failed("Error sending test email: " + e.getMessage() + ", check server log for details.");
 						}
 					}

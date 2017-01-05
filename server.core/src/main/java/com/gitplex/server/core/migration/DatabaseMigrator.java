@@ -84,4 +84,17 @@ public class DatabaseMigrator implements Migrator {
 		}	
 	}
 	
+	private void migrate5(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Configs.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL"))
+						element.element("setting").addElement("enableSSL").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}	
+	}
+	
 }
