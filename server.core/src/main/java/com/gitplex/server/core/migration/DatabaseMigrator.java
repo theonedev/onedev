@@ -89,8 +89,11 @@ public class DatabaseMigrator implements Migrator {
 			if (file.getName().startsWith("Configs.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					if (element.elementTextTrim("key").equals("MAIL"))
-						element.element("setting").addElement("enableSSL").setText("false");
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element settingElement = element.element("setting");
+						if (settingElement != null)
+							settingElement.addElement("enableSSL").setText("false");
+					}
 				}
 				dom.writeToFile(file, false);
 			}
