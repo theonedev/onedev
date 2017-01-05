@@ -70,8 +70,9 @@
 #new-request>.body>.status>.can-send form>table .reviewers li a:hover {
 	text-decoration: none;
 }
-#new-request>.body>.status>.can-send form .feedbackPanelERROR>.alert {
-	margin-bottom: 0; margin-top: 16px;
+#new-request>.body>.status>.can-send form .alert {
+	margin-bottom: 0; 
+	margin-top: 16px;
 }
 #new-request>.body>.status>.can-send form .assignee .help-block {
 	margin-top: 12px;

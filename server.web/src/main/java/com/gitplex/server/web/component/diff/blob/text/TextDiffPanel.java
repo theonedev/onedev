@@ -36,6 +36,19 @@ import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitplex.commons.git.Blame;
+import com.gitplex.commons.git.BlobChange;
+import com.gitplex.commons.git.BriefCommit;
+import com.gitplex.commons.git.GitUtils;
+import com.gitplex.commons.git.command.BlameCommand;
+import com.gitplex.commons.util.RangeUtils;
+import com.gitplex.commons.util.StringUtils;
+import com.gitplex.commons.util.diff.DiffBlock;
+import com.gitplex.commons.util.diff.DiffMatchPatch.Operation;
+import com.gitplex.commons.util.diff.DiffUtils;
+import com.gitplex.commons.util.diff.LineDiff;
+import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.jsyntax.Token;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.CodeComment;
 import com.gitplex.server.core.entity.Depot;
@@ -59,22 +72,10 @@ import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.depot.file.RequestCompareInfo;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
+import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.symbolextractor.Range;
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.git.Blame;
-import com.gitplex.commons.git.BlobChange;
-import com.gitplex.commons.git.BriefCommit;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.command.BlameCommand;
-import com.gitplex.commons.util.RangeUtils;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.util.diff.DiffBlock;
-import com.gitplex.commons.util.diff.DiffUtils;
-import com.gitplex.commons.util.diff.LineDiff;
-import com.gitplex.commons.util.diff.DiffMatchPatch.Operation;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.jsyntax.Token;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel implements SourceAware {
@@ -206,7 +207,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (request != null 
 					&& request.getSource() != null 
 					&& request.getSource().getObjectName(false) != null
-					&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), change.getPath())) { 
+					&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), change.getPath())
+					&& (getPage() instanceof RequestChangesPage || getPage() instanceof IntegrationPreviewPage)) { 
 				// we are in context of a pull request and pull request source branch exists, so we edit source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 
@@ -218,9 +220,14 @@ public class TextDiffPanel extends Panel implements SourceAware {
 						editState.mode = Mode.EDIT;
 						editState.requestCompareInfo = new RequestCompareInfo();
 						editState.requestCompareInfo.requestId = request.getId();
-						RequestChangesPage page = (RequestChangesPage) getPage();
-						editState.requestCompareInfo.compareState = page.getState();
-						PageParameters params = DepotFilePage.paramsOf(depot, editState);
+						if (getPage() instanceof RequestChangesPage) {
+							RequestChangesPage page = (RequestChangesPage) getPage();
+							editState.requestCompareInfo.compareState = page.getState();
+						} else {
+							IntegrationPreviewPage page = (IntegrationPreviewPage) getPage();
+							editState.requestCompareInfo.previewState = page.getState();
+						}
+						PageParameters params = DepotFilePage.paramsOf(request.getSourceDepot(), editState);
 						setResponsePage(DepotFilePage.class, params);
 					}
 					

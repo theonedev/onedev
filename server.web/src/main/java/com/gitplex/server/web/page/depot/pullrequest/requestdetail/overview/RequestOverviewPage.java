@@ -27,6 +27,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -624,7 +625,14 @@ public class RequestOverviewPage extends RequestDetailPage {
 				assigneeContainer = new Fragment("assignee", "assigneeEditFrag", this);			
 				assigneeContainer.add(new WebMarkupContainer("help").add(new TooltipBehavior(Model.of(ASSIGNEE_HELP))));
 				
-				AssigneeChoice choice = new AssigneeChoice("assignee", depotModel, new IModel<Account>() {
+				AssigneeChoice choice = new AssigneeChoice("assignee", new AbstractReadOnlyModel<Depot>() {
+
+					@Override
+					public Depot getObject() {
+						return getPullRequest().getTargetDepot();
+					}
+					
+				}, new IModel<Account>() {
 
 					@Override
 					public void detach() {

@@ -193,6 +193,10 @@ public class IntegrationPreviewPage extends RequestDetailPage {
 		}
 	}
 	
+	public State getState() {
+		return state;
+	}
+	
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
 		setResponsePage(RequestListPage.class, paramsOf(depot));
@@ -220,7 +224,7 @@ public class IntegrationPreviewPage extends RequestDetailPage {
 		public String pathFilter;
 		
 		@Nullable
-		private String blameFile;
+		public String blameFile;
 		
 	}
 

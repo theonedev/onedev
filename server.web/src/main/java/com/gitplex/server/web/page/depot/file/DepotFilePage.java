@@ -85,6 +85,7 @@ import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
+import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.PullRequestChangedRegion;
@@ -532,8 +533,13 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				protected void onCancel(AjaxRequestTarget target) {
 					if (requestCompareInfo != null) {
 						PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(requestCompareInfo.requestId);
-						PageParameters params = RequestChangesPage.paramsOf(request, requestCompareInfo.compareState);
-						setResponsePage(RequestChangesPage.class, params);
+						if (requestCompareInfo.compareState != null) {
+							PageParameters params = RequestChangesPage.paramsOf(request, requestCompareInfo.compareState);
+							setResponsePage(RequestChangesPage.class, params);
+						} else {
+							PageParameters params = IntegrationPreviewPage.paramsOf(request, requestCompareInfo.previewState);
+							setResponsePage(IntegrationPreviewPage.class, params);
+						}
 					} else {
 						mode = null;
 						newFileNavigator(target);
@@ -553,8 +559,13 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				public void onCancel(AjaxRequestTarget target) {
 					if (requestCompareInfo != null) {
 						PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(requestCompareInfo.requestId);
-						PageParameters params = RequestChangesPage.paramsOf(request, requestCompareInfo.compareState);
-						setResponsePage(RequestChangesPage.class, params);
+						if (requestCompareInfo.compareState != null) {
+							PageParameters params = RequestChangesPage.paramsOf(request, requestCompareInfo.compareState);
+							setResponsePage(RequestChangesPage.class, params);
+						} else {
+							PageParameters params = IntegrationPreviewPage.paramsOf(request, requestCompareInfo.previewState);
+							setResponsePage(IntegrationPreviewPage.class, params);
+						}
 					} else {
 						mode = null;
 						newFileViewer(target);
@@ -648,29 +659,46 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 	
 	private void showRequestChanges(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId) {
-		RequestChangesPage.State state = SerializationUtils.clone(requestCompareInfo.compareState);
-		state.newCommit = newCommitId.name();
-		state.pathFilter = null;
-		if (state.commentId != null) {
-			CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
-			state.oldCommit = comment.getCommentPos().getCommit();
-		} else {
-			state.oldCommit = oldCommitId.name();
-		}
-		get(FILE_VIEWER_ID).add(new WebSocketRenderBehavior() {
-			
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(requestCompareInfo.requestId);
-				for (PullRequestUpdate update: request.getUpdates()) {
-					if (update.getHeadCommitHash().equals(newCommitId.name())) {
-						setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
-						break;
+		if (requestCompareInfo.compareState != null) {
+			RequestChangesPage.State state = SerializationUtils.clone(requestCompareInfo.compareState);
+			state.newCommit = newCommitId.name();
+			state.pathFilter = null;
+			if (state.commentId != null) {
+				CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
+				state.oldCommit = comment.getCommentPos().getCommit();
+			} else {
+				state.oldCommit = oldCommitId.name();
+			}
+			get(FILE_VIEWER_ID).add(new WebSocketRenderBehavior() {
+				
+				@Override
+				protected void onRender(WebSocketRequestHandler handler) {
+					PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(requestCompareInfo.requestId);
+					for (PullRequestUpdate update: request.getUpdates()) {
+						if (update.getHeadCommitHash().equals(newCommitId.name())) {
+							setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, state));
+							break;
+						}
 					}
 				}
-			}
-			
-		});
+				
+			});
+		} else {
+			get(FILE_VIEWER_ID).add(new WebSocketRenderBehavior() {
+				
+				@Override
+				protected void onRender(WebSocketRequestHandler handler) {
+					PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(requestCompareInfo.requestId);
+					for (PullRequestUpdate update: request.getUpdates()) {
+						if (update.getHeadCommitHash().equals(newCommitId.name())) {
+							setResponsePage(RequestChangesPage.class, IntegrationPreviewPage.paramsOf(request));
+							break;
+						}
+					}
+				}
+				
+			});
+		}
 	}
 	
 	private void pushState(AjaxRequestTarget target) {

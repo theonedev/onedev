@@ -35,7 +35,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.commons.git.GitUtils;
 import com.gitplex.commons.hibernate.dao.Dao;
 import com.gitplex.commons.util.diff.WhitespaceOption;
@@ -48,10 +47,10 @@ import com.gitplex.server.core.entity.Account;
 import com.gitplex.server.core.entity.CodeComment;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestReviewInvitation;
-import com.gitplex.server.core.entity.PullRequestUpdate;
 import com.gitplex.server.core.entity.PullRequest.IntegrationStrategy;
 import com.gitplex.server.core.entity.PullRequest.Status;
+import com.gitplex.server.core.entity.PullRequestReviewInvitation;
+import com.gitplex.server.core.entity.PullRequestUpdate;
 import com.gitplex.server.core.entity.support.CloseInfo;
 import com.gitplex.server.core.entity.support.CommentPos;
 import com.gitplex.server.core.entity.support.DepotAndBranch;
@@ -77,6 +76,7 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetail
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.page.security.LoginPage;
+import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -171,8 +171,6 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			ObjectPermission writePermission = ObjectPermission.ofDepotWrite(target.getDepot());
 			if (currentUser.asSubject().isPermitted(writePermission))
 				pullRequest.setAssignee(currentUser);
-			else
-				pullRequest.setAssignee(target.getDepot().getAccount());
 
 			ObjectId baseCommitId = GitUtils.getMergeBase(
 					target.getDepot().getRepository(), target.getObjectId(), 
@@ -615,7 +613,14 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 		WebMarkupContainer assigneeContainer = new WebMarkupContainer("assignee");
 		form.add(assigneeContainer);
 		IModel<Account> assigneeModel = new PropertyModel<>(getPullRequest(), "assignee");
-		AssigneeChoice assigneeChoice = new AssigneeChoice("assignee", depotModel, assigneeModel);
+		AssigneeChoice assigneeChoice = new AssigneeChoice("assignee", new AbstractReadOnlyModel<Depot>() {
+
+			@Override
+			public Depot getObject() {
+				return target.getDepot();
+			}
+			
+		}, assigneeModel);
 		assigneeChoice.setRequired(true);
 		assigneeContainer.add(assigneeChoice);
 		
