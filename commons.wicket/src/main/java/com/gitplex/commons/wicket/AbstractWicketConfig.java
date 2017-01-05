@@ -124,13 +124,14 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			}
 			
 		});
-		
-		List<Class<?>> resourcePackScopes = new ArrayList<>();
-		for (ResourcePackScopeContribution contribution: AppLoader.getExtensions(ResourcePackScopeContribution.class)) {
-			resourcePackScopes.addAll(contribution.getResourcePackScopes());
+
+		if (Bootstrap.prodMode) {
+			List<Class<?>> resourcePackScopes = new ArrayList<>();
+			for (ResourcePackScopeContribution contribution: AppLoader.getExtensions(ResourcePackScopeContribution.class)) {
+				resourcePackScopes.addAll(contribution.getResourcePackScopes());
+			}
+			new PackageResourceBundler(WicketModule.class, resourcePackScopes.toArray(new Class<?>[resourcePackScopes.size()])).install(this);
 		}
-		
-		new PackageResourceBundler(WicketModule.class, resourcePackScopes.toArray(new Class<?>[resourcePackScopes.size()])).install(this);
 	}
 
 	@Override

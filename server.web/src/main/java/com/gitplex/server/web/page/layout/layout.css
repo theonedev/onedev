@@ -50,6 +50,7 @@ html, body {
 }
 #main>.head>.account>.logged-in>.tasks {
 	color: #69B7F7;
+	margin-right: 16px;
 }
 #main>.head>.account>.logged-in>a, #main>.head>.account>.logged-in>span {
 	margin-right: 8px;

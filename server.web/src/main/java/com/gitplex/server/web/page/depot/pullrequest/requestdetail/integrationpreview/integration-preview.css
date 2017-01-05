@@ -1,7 +1,5 @@
 #request-detail>.integration-preview>.available>.head {
 	margin-bottom: 20px;
-	padding-bottom: 20px;
-	border-bottom: 1px dotted #BBB;
 	font-size: 16px;
 }
 #request-detail>.integration-preview>.available>.head .out-dated {
