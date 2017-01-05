@@ -34,7 +34,6 @@
         <module>archetype.artifact</module>
         <module>archetype.plugin</module>
         <module>archetype.product</module>
-        <module>plugin.maven</module>
     </modules>  
     <build> 
         <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>  
