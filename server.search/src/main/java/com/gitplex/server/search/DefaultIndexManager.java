@@ -71,6 +71,7 @@ import com.gitplex.server.core.manager.DepotManager;
 import com.gitplex.server.core.manager.StorageManager;
 import com.gitplex.server.core.manager.support.BatchWorker;
 import com.gitplex.server.core.manager.support.IndexResult;
+import com.gitplex.symbolextractor.ExtractException;
 import com.gitplex.symbolextractor.Symbol;
 import com.gitplex.symbolextractor.SymbolExtractor;
 import com.gitplex.symbolextractor.SymbolExtractorRegistry;
@@ -275,7 +276,7 @@ public class DefaultIndexManager implements IndexManager {
 								document.add(new StringField(fieldName, fieldValue, Store.NO));
 							}
 						}
-					} catch (Exception e) {
+					} catch (ExtractException e) {
 						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 				} 
