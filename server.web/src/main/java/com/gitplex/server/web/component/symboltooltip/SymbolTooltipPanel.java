@@ -34,6 +34,7 @@ import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.support.TextRange;
+import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;
@@ -66,7 +67,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final WebMarkupContainer content = new WebMarkupContainer("content");
+		WebMarkupContainer content = new WebMarkupContainer("content");
 		content.setOutputMarkupId(true);
 		add(content);
 		
@@ -137,18 +138,22 @@ public abstract class SymbolTooltipPanel extends Panel {
 						String script = String.format("gitplex.server.symboltooltip.removeTooltip(document.getElementById('%s'));", 
 								SymbolTooltipPanel.this.getMarkupId());
 						target.prependJavaScript(script);						
-						
-						BlobQuery query = new TextQuery(symbol, false, true, true, 
+						List<QueryHit> hits;						
+						// do this check to avoid TooGeneralQueryException
+						if (symbol.length() >= IndexConstants.NGRAM_SIZE) {
+							BlobQuery query = new TextQuery(symbol, false, true, true, 
 									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
-						try {
-							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-							ObjectId commit = depotModel.getObject().getRevCommit(revision);
-							List<QueryHit> hits = searchManager.search(depotModel.getObject(), commit, query);
-							onOccurrencesQueried(target, hits);
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						}								
-						
+							try {
+								SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+								ObjectId commit = depotModel.getObject().getRevCommit(revision);
+								hits = searchManager.search(depotModel.getObject(), commit, query);
+							} catch (InterruptedException e) {
+								throw new RuntimeException(e);
+							}								
+						} else {
+							hits = new ArrayList<>();
+						}
+						onOccurrencesQueried(target, hits);
 					}
 					
 				});
@@ -167,7 +172,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				runTaskBehavior.requestRun(target);
 			}
-			
+
 		});
 
 		add(new AbstractPostAjaxBehavior() {
@@ -181,22 +186,27 @@ public abstract class SymbolTooltipPanel extends Panel {
 				String charsToStrip = "@'\"./\\";
 				symbol = StringUtils.stripEnd(StringUtils.stripStart(symbol, charsToStrip), charsToStrip);
 				symbol = StringUtils.replace(symbol, "\\", "/");
-				try {
-					BlobQuery query = new SymbolQuery(symbol, null, true, true, null, null, QUERY_ENTRIES);
-					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					ObjectId commit = depotModel.getObject().getRevCommit(revision);
-					symbolHits = searchManager.search(depotModel.getObject(), commit, query);
-					if (symbolHits.size() < QUERY_ENTRIES) {
-						query = new SymbolQuery(symbol, null, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
-						symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
-					}
-					if (isString && symbolHits.size() < QUERY_ENTRIES) {
-						query = new PathQuery(null, symbol, QUERY_ENTRIES - symbolHits.size());
-						symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
-					}
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}								
+				// do this check to avoid TooGeneralQueryException
+				if (symbol.length() == 0 || symbol.indexOf('?') != -1 || symbol.indexOf('*') != -1) {
+					symbolHits = new ArrayList<>();
+				} else {
+					try {
+						BlobQuery query = new SymbolQuery(symbol, null, true, true, null, null, QUERY_ENTRIES);
+						SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+						ObjectId commit = depotModel.getObject().getRevCommit(revision);
+						symbolHits = searchManager.search(depotModel.getObject(), commit, query);
+						if (symbolHits.size() < QUERY_ENTRIES) {
+							query = new SymbolQuery(symbol, null, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
+							symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+						}
+						if (isString && symbolHits.size() < QUERY_ENTRIES) {
+							query = new PathQuery(null, symbol, QUERY_ENTRIES - symbolHits.size());
+							symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+						}
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}								
+				}
 				target.add(content);
 				String script = String.format("gitplex.server.symboltooltip.doneQuery('%s');", content.getMarkupId());
 				target.appendJavaScript(script);

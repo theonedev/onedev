@@ -55,26 +55,36 @@
   				while (start && re.test(line.charAt(start - 1))) --start;
   				while (end < line.length && re.test(line.charAt(end))) ++end;
   				if (start < end) {
-  					var tokenType = cm.getTokenTypeAt(new CodeMirror.Pos(cur.line, (start+end)/2));
+  					var tokenPos = new CodeMirror.Pos(cur.line, (start+end)/2);
+  					var tokenType = cm.getTokenTypeAt(tokenPos);
   					if (tokenType != null) {
-  	  					if (tokenType.indexOf("variable") > -1 
-  	  							|| tokenType.indexOf("property") > -1 
-  	  							|| tokenType.indexOf("def") > -1 
-  	  							|| tokenType.indexOf("string") > -1
-  	  							|| tokenType.indexOf("string2") > -1) {
+  	  					if (tokenType.indexOf("variable") != -1 
+  	  							|| tokenType.indexOf("property") != -1 
+  	  							|| tokenType.indexOf("def") != -1
+  	  							|| tokenType.indexOf("tag") != -1
+  	  							|| tokenType.indexOf("attribute") != -1
+  	  							|| tokenType.indexOf("string") != -1
+  	  							|| tokenType.indexOf("string2") != -1) {
+  	  						var token = cm.getTokenAt(tokenPos);
 	  	  		  			var state = cm.state.identifierHighlighter;
 		  	  	  			if (state.overlay) {
 		  	  	  				cm.removeOverlay(state.overlay);
 		  	  	  				state.overlay = null;
 		  	  	  			}
-		  					var query = line.slice(start, end);
-		  					cm.addOverlay(state.overlay = makeOverlay(query, re, state.style));
-	
-		  					if (cm.showMatchesOnScrollbar2) {
-		  						clearScrollbarMatches(state);
-		  						
-		  						var queryRe = new RegExp("\\b" + query + "\\b");
-		  						state.annotate = cm.showMatchesOnScrollbar2(queryRe, false);
+		  					var query = line.slice(token.start, token.end);
+		  					if (query.startsWith("'") || query.startsWith("\""))
+		  						query = query.substring(1);
+		  					if (query.endsWith("'") || query.endsWith("\""))
+		  						query = query.substring(0, query.length-1);
+		  					if (query.length != 0) {
+			  					cm.addOverlay(state.overlay = makeOverlay(query, re, state.style));
+			  					
+			  					if (cm.showMatchesOnScrollbar2) {
+			  						clearScrollbarMatches(state);
+			  						
+			  						var queryRe = new RegExp("\\b" + query + "\\b");
+			  						state.annotate = cm.showMatchesOnScrollbar2(queryRe, false);
+			  					}
 		  					}
   	  					}
   					}
@@ -94,7 +104,7 @@
   		return (!stream.start || !re.test(stream.string.charAt(stream.start - 1))) &&
   			(stream.pos == stream.string.length || !re.test(stream.string.charAt(stream.pos)));
   	}
-
+ 
   	function makeOverlay(query, hasBoundary, style) {
   		return {token: function(stream) {
   			if (stream.match(query) && (!hasBoundary || boundariesAround(stream, hasBoundary)))
