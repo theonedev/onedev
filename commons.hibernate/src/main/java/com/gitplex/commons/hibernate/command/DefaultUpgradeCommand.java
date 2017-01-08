@@ -288,6 +288,17 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 			System.exit(1);
 		} else {
 			logger.info("Successfully upgraded {}", upgradeDir.getAbsolutePath());
+			
+			if (Integer.parseInt(oldDataVersion.get()) <= 5) {
+				logger.warn("\n"
+						+ "************************* IMPORTANT NOTICE *************************\n"
+						+ "* GitPlex password hash algorithm has been changed for security    *\n"
+						+ "* reason. Please reset administrator password with the             *\n"
+						+ "* reset_admin_password command. Other users' password will be      *\n"
+						+ "* reset and sent to their mail box automatically when they logs    *\n"
+						+ "* into GitPlex.                                                    *\n"
+						+ "********************************************************************");
+			}
 			System.exit(0);
 		}
 	}

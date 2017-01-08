@@ -1,5 +1,8 @@
 package com.gitplex.server.web.page.security;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.RestartResponseException;
@@ -11,9 +14,14 @@ import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.core.GitPlex;
+import com.gitplex.server.core.entity.Account;
+import com.gitplex.server.core.manager.AccountManager;
 import com.gitplex.server.core.manager.ConfigManager;
+import com.gitplex.server.core.manager.MailManager;
 import com.gitplex.server.web.WebSession;
 import com.gitplex.server.web.page.base.BasePage;
 
@@ -22,6 +30,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public class LoginPage extends BasePage {
 
+	private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
+	
 	private String userName;
 	
 	private String password;
@@ -45,12 +55,64 @@ public class LoginPage extends BasePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				try {
-					WebSession.get().login(userName, password, rememberMe);
-					continueToOriginalDestination();
-					setResponsePage(getApplication().getHomePage());
-				} catch (AuthenticationException ae) {
-					error("Invalid user name and/or password.");
+				String feedback = null;
+				
+				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+				if (userName != null) {
+					Account user = accountManager.findByName(userName);
+					if (user != null && user.getPassword() != null && user.getPassword().startsWith("@hash^prefix@")) {
+						String hashAlgorithmChangeMessage = "GitPlex password hash algorithm has been changed for security reason.";
+						if (user.isAdministrator()) {
+							feedback = hashAlgorithmChangeMessage + " Please reset administrator password by running "
+									+ "reset_admin_password command from GitPlex bin directory"; 
+						} else {
+							String password = RandomStringUtils.random(10, true, true);								
+							user.setPassword(password);
+							accountManager.save(user);
+							
+							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
+							if (configManager.getMailSetting() != null) {
+								
+								MailManager mailManager = GitPlex.getInstance(MailManager.class);
+								try {
+									String mailBody = String.format("Dear %s, "
+										+ "<p style='margin: 16px 0;'>"
+										+ hashAlgorithmChangeMessage
+										+ " As a result of this, password of your account \"%s\" has been reset to:<br>"
+										+ "%s<br><br>"
+										+ "-- Sent by GitPlex", 
+										user.getDisplayName(), user.getName(), password);
+
+									mailManager.sendMail(configManager.getMailSetting(), Arrays.asList(user.getEmail()), 
+											"Your GitPlex password has been reset", mailBody);
+									feedback = hashAlgorithmChangeMessage  
+										+ " As a result of this, password of your account has been reset and sent to "
+										+ "address " + user.getEmail();
+								} catch (Exception e) {
+									logger.error("Error sending password reset email", e);
+									feedback = hashAlgorithmChangeMessage 
+											+ " Since the reset password can not be been sent to your mail box "
+											+ "due to mail error (check server log for details). Please "
+											+ "contact GitPlex administrator to reset your password manually";
+								}
+							} else {
+								feedback = hashAlgorithmChangeMessage 
+										+ " The reset password can not be sent as mail setting is not defined. "
+										+ "Please contact GitPlex administrator to reset your password manually";
+							}
+						}
+					}
+				}
+				if (feedback != null) {
+					error(feedback);
+				} else {
+					try {
+						WebSession.get().login(userName, password, rememberMe);
+						continueToOriginalDestination();
+						setResponsePage(getApplication().getHomePage());
+					} catch (AuthenticationException ae) {
+						error("Invalid user name and/or password.");
+					}
 				}
 			}
 			

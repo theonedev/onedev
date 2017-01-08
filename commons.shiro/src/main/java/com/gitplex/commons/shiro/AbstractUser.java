@@ -11,7 +11,6 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.gitplex.commons.hibernate.AbstractEntity;
 import com.gitplex.commons.loader.AppLoader;
 import com.google.common.base.Preconditions;
@@ -20,13 +19,10 @@ import com.google.common.base.Preconditions;
 @MappedSuperclass
 public abstract class AbstractUser extends AbstractEntity implements AuthenticationInfo {
 
-	public static final String HASH_PREFIX = "@hash^prefix@";
-	
     @Column(unique=true, nullable=false)
     private String name;
 
     @Column(length=1024)
-    @JsonDeserialize(using=PasswordDeserializer.class)
     private String password;
 
     public String getName() {
@@ -58,12 +54,9 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
      */
     public void setPassword(String password) {
     	if (password != null) {
-    		if (password.startsWith(HASH_PREFIX))
-    			this.password = password;
-    		else
-    			this.password = HASH_PREFIX + AppLoader.getInstance(PasswordService.class).encryptPassword(password);
+    		this.password = AppLoader.getInstance(PasswordService.class).encryptPassword(password);
     	} else {
-    		this.password = "";
+    		this.password = null;
     	}
     }
     
@@ -74,10 +67,7 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     
     @Override
     public Object getCredentials() {
-    	if (password != null && password.startsWith(HASH_PREFIX))
-    		return password.substring(HASH_PREFIX.length());
-    	else
-    		return password;
+    	return password;
     }
 
     public Subject asSubject() {

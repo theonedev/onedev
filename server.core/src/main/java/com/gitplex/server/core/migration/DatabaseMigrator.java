@@ -99,5 +99,8 @@ public class DatabaseMigrator implements Migrator {
 			}
 		}	
 	}
+
+	private void migrate6(File dataDir, Stack<Integer> versions) {
+	}
 	
 }
