@@ -14,7 +14,4 @@ like any other copyrighted material (e.  g., a book or musical recording).
 You may not redistribute the Source, or make any software competing with 
 GitPlex based on the Source. 
 
-By contributing to this Source, you automatically grant PMEase the right 
-to use, modify, and redistribute your part of work freely.
-
-Copyright (C) 2016 by PMEase LLC.  All rights reserved.  
+Copyright (C) 2016-2017 by PMEase LLC.  All rights reserved.  
