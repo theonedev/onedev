@@ -71,10 +71,10 @@ import com.gitplex.server.core.manager.DepotManager;
 import com.gitplex.server.core.manager.StorageManager;
 import com.gitplex.server.core.manager.support.BatchWorker;
 import com.gitplex.server.core.manager.support.IndexResult;
-import com.gitplex.symbolextractor.ExtractException;
-import com.gitplex.symbolextractor.Symbol;
-import com.gitplex.symbolextractor.SymbolExtractor;
-import com.gitplex.symbolextractor.SymbolExtractorRegistry;
+import com.gitplex.jsymbol.ExtractException;
+import com.gitplex.jsymbol.Symbol;
+import com.gitplex.jsymbol.SymbolExtractor;
+import com.gitplex.jsymbol.SymbolExtractorRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 

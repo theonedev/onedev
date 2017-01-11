@@ -27,7 +27,7 @@ import com.gitplex.commons.wicket.component.floating.AlignPlacement;
 import com.gitplex.commons.wicket.component.floating.AlignTarget;
 import com.gitplex.commons.wicket.component.floating.ComponentTarget;
 import com.gitplex.commons.wicket.component.floating.FloatingPanel;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 

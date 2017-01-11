@@ -12,7 +12,7 @@ import com.gitplex.server.core.entity.CodeComment;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.support.TextRange;
 import com.gitplex.server.search.hit.QueryHit;
-import com.gitplex.symbolextractor.TokenPosition;
+import com.gitplex.jsymbol.TokenPosition;
 import com.gitplex.commons.git.BlobIdent;
 
 public interface BlobViewContext extends Serializable {

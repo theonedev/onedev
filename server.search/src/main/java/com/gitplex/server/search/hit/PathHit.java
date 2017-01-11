@@ -6,9 +6,9 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
-import com.gitplex.symbolextractor.Range;
-import com.gitplex.symbolextractor.util.HighlightableLabel;
-import com.gitplex.symbolextractor.util.NoAntiCacheImage;
+import com.gitplex.jsymbol.Range;
+import com.gitplex.jsymbol.util.HighlightableLabel;
+import com.gitplex.jsymbol.util.NoAntiCacheImage;
 
 public class PathHit extends QueryHit {
 

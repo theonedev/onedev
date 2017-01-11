@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.io.FilenameUtils;
 
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 
 public class PathUtils {
 

@@ -15,7 +15,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.gitplex.commons.util.match.WildcardUtils;
 import com.gitplex.server.search.hit.FileHit;
 import com.gitplex.server.search.hit.QueryHit;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 import com.google.common.base.Splitter;
 
 public class FileQuery extends BlobQuery {

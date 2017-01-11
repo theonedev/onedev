@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 
 public class InputCompletion implements Serializable {
 

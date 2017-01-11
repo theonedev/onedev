@@ -21,7 +21,7 @@ import com.gitplex.commons.git.GitUtils;
 import com.gitplex.commons.util.execution.Commandline;
 import com.gitplex.commons.util.execution.ExecuteResult;
 import com.gitplex.commons.util.execution.LineConsumer;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 import com.google.common.base.Preconditions;
 
 public class BlameCommand extends GitCommand<Map<String, Blame>> {

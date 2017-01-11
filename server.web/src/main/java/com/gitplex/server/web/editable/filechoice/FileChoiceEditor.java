@@ -21,7 +21,7 @@ import com.gitplex.commons.wicket.editable.PropertyDescriptor;
 import com.gitplex.commons.wicket.editable.PropertyEditor;
 import com.gitplex.server.core.annotation.FileChoice;
 import com.gitplex.server.web.util.SuggestionUtils;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 
 @SuppressWarnings("serial")
 public class FileChoiceEditor extends PropertyEditor<String> {

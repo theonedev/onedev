@@ -74,7 +74,7 @@ import com.gitplex.server.web.page.depot.file.RequestCompareInfo;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.gitplex.server.web.util.DateUtils;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")

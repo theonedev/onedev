@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.gitplex.server.search.hit.QueryHit;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 
 public class MatchedBlob implements Serializable {
 	

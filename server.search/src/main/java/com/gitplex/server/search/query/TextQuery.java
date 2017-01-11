@@ -24,8 +24,8 @@ import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.TextHit;
 import com.gitplex.server.search.query.regex.RegexLiterals;
-import com.gitplex.symbolextractor.Range;
-import com.gitplex.symbolextractor.TokenPosition;
+import com.gitplex.jsymbol.Range;
+import com.gitplex.jsymbol.TokenPosition;
 import com.google.common.base.Splitter;
 
 public class TextQuery extends BlobQuery {

@@ -33,8 +33,8 @@ import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.TextHit;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.symbolextractor.Range;
-import com.gitplex.symbolextractor.util.HighlightableLabel;
+import com.gitplex.jsymbol.Range;
+import com.gitplex.jsymbol.util.HighlightableLabel;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {

@@ -20,7 +20,7 @@ import com.gitplex.commons.util.match.WildcardUtils;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.manager.CommitInfoManager;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 
 public class SuggestionUtils {
 	

@@ -23,7 +23,7 @@ import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.manager.CommitInfoManager;
 import com.gitplex.server.web.Constants;
 import com.gitplex.server.web.util.SuggestionUtils;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 import com.gitplex.server.web.page.depot.commit.CommitQueryParser;
 
 @SuppressWarnings("serial")

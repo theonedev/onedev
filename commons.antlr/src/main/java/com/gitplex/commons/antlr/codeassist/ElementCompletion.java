@@ -2,7 +2,7 @@ package com.gitplex.commons.antlr.codeassist;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 
 public class ElementCompletion extends InputCompletion {
 

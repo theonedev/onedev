@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.Token;
 
 import com.gitplex.commons.antlr.grammar.ElementSpec;
 import com.gitplex.commons.antlr.grammar.Grammar;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 
 public abstract class FenceAware {
 	

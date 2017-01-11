@@ -87,7 +87,7 @@ import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.blob.SourceAware;
 import com.gitplex.server.web.component.diff.diffstat.DiffStatBar;
 import com.gitplex.server.web.util.SuggestionUtils;
-import com.gitplex.symbolextractor.Range;
+import com.gitplex.jsymbol.Range;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

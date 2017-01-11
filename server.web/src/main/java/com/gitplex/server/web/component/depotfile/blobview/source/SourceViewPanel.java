@@ -82,11 +82,11 @@ import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.util.DateUtils;
-import com.gitplex.symbolextractor.ExtractException;
-import com.gitplex.symbolextractor.Range;
-import com.gitplex.symbolextractor.Symbol;
-import com.gitplex.symbolextractor.SymbolExtractor;
-import com.gitplex.symbolextractor.SymbolExtractorRegistry;
+import com.gitplex.jsymbol.ExtractException;
+import com.gitplex.jsymbol.Range;
+import com.gitplex.jsymbol.Symbol;
+import com.gitplex.jsymbol.SymbolExtractor;
+import com.gitplex.jsymbol.SymbolExtractorRegistry;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;

@@ -89,8 +89,8 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpr
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.PullRequestChangedRegion;
-import com.gitplex.symbolextractor.TokenPosition;
-import com.gitplex.symbolextractor.util.NoAntiCacheImage;
+import com.gitplex.jsymbol.TokenPosition;
+import com.gitplex.jsymbol.util.NoAntiCacheImage;
 import com.google.common.base.Objects;
 
 @SuppressWarnings("serial")
