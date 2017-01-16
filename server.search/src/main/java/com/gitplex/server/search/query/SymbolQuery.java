@@ -72,7 +72,7 @@ public class SymbolQuery extends BlobQuery {
 						try {
 							for (Symbol symbol: extractor.extract(content)) {
 								if (hits.size() < getCount()) {
-									if (primary == symbol.isPrimary() && symbol.getIndexName() != null) {
+									if (primary == symbol.isPrimary() && symbol.getName() != null) {
 										String normalizedTerm;
 										if (!caseSensitive)
 											normalizedTerm = term.toLowerCase();
@@ -81,9 +81,9 @@ public class SymbolQuery extends BlobQuery {
 										
 										String normalizedSymbolName;
 										if (!caseSensitive)
-											normalizedSymbolName = symbol.getIndexName().toLowerCase();
+											normalizedSymbolName = symbol.getName().toLowerCase();
 										else
-											normalizedSymbolName = symbol.getIndexName();
+											normalizedSymbolName = symbol.getName();
 										
 										String normalizedExcludeTerm;
 										if (excludeTerm != null) {

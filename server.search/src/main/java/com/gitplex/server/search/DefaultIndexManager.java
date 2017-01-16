@@ -264,16 +264,18 @@ public class DefaultIndexManager implements IndexManager {
 				if (extractor != null) {
 					try {
 						for (Symbol symbol: extractor.extract(content)) {
-							String fieldValue = symbol.getIndexName();
-							if (fieldValue != null) {
-								fieldValue = fieldValue.toLowerCase();
-								
-								String fieldName;
-								if (symbol.isPrimary())
-									fieldName = BLOB_PRIMARY_SYMBOLS.name();
-								else
-									fieldName = BLOB_SECONDARY_SYMBOLS.name();
-								document.add(new StringField(fieldName, fieldValue, Store.NO));
+							if (!symbol.isLocal()) {
+								String fieldValue = symbol.getName();
+								if (fieldValue != null) {
+									fieldValue = fieldValue.toLowerCase();
+
+									String fieldName;
+									if (symbol.isPrimary())
+										fieldName = BLOB_PRIMARY_SYMBOLS.name();
+									else
+										fieldName = BLOB_SECONDARY_SYMBOLS.name();
+									document.add(new StringField(fieldName, fieldValue, Store.NO));
+								}
 							}
 						}
 					} catch (ExtractException e) {
