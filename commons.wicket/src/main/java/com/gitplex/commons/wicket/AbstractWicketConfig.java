@@ -125,7 +125,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			
 		});
 
-		if (Bootstrap.prodMode) {
+		if (getConfigurationType() == RuntimeConfigurationType.DEPLOYMENT) {
 			List<Class<?>> resourcePackScopes = new ArrayList<>();
 			for (ResourcePackScopeContribution contribution: AppLoader.getExtensions(ResourcePackScopeContribution.class)) {
 				resourcePackScopes.addAll(contribution.getResourcePackScopes());
