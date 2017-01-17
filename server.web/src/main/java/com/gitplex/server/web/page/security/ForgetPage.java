@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -13,6 +14,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gitplex.commons.loader.AppLoader;
 import com.gitplex.commons.wicket.behavior.testform.TestFormBehavior;
 import com.gitplex.commons.wicket.behavior.testform.TestResult;
 import com.gitplex.commons.wicket.editable.BeanContext;
@@ -62,7 +64,7 @@ public class ForgetPage extends BasePage {
 							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 							if (configManager.getMailSetting() != null) {
 								String password = RandomStringUtils.random(10, true, true);								
-								user.setPassword(password);
+								user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
 								accountManager.save(user);
 								
 								MailManager mailManager = GitPlex.getInstance(MailManager.class);

@@ -43,7 +43,7 @@ public class SymbolHit extends QueryHit {
 	
 	@Override
 	public String getScope() {
-		return symbol.getScope();
+		return symbol.getNamespace();
 	}
 
 	@Override

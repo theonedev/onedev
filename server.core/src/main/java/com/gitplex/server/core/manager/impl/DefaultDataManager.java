@@ -10,14 +10,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;
 
+import org.apache.shiro.authc.credential.PasswordService;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.gitplex.commons.bootstrap.Bootstrap;
 import com.gitplex.commons.bootstrap.BootstrapUtils;
 import com.gitplex.commons.hibernate.IdManager;
@@ -44,6 +42,9 @@ import com.gitplex.server.core.setting.BackupSetting;
 import com.gitplex.server.core.setting.MailSetting;
 import com.gitplex.server.core.setting.SecuritySetting;
 import com.gitplex.server.core.setting.SystemSetting;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -64,13 +65,15 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final MailManager mailManager;
 	
+	private final PasswordService passwordService;
+	
 	private String backupTaskId;
 	
 	@Inject
 	public DefaultDataManager(IdManager idManager, AccountManager accountManager, 
 			ConfigManager configManager, TaskScheduler taskScheduler, 
 			PersistManager persistManager, MailManager mailManager, 
-			Validator validator) {
+			Validator validator, PasswordService passwordService) {
 		this.accountManager = accountManager;
 		this.configManager = configManager;
 		this.validator = validator;
@@ -78,6 +81,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.taskScheduler = taskScheduler;
 		this.persistManager = persistManager;
 		this.mailManager = mailManager;
+		this.passwordService = passwordService;
 	}
 	
 	@SuppressWarnings("serial")
@@ -99,7 +103,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					accountManager.save((Account) getSetting(), null);
+					Account account = (Account) getSetting();
+					account.setPassword(passwordService.encryptPassword(account.getPassword()));
+					accountManager.save(account, null);
 					idManager.init(Account.class);
 				}
 				

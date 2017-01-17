@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -17,6 +18,7 @@ import org.apache.wicket.model.IModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gitplex.commons.loader.AppLoader;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Account;
 import com.gitplex.server.core.manager.AccountManager;
@@ -67,7 +69,7 @@ public class LoginPage extends BasePage {
 									+ "reset_admin_password command from GitPlex bin directory"; 
 						} else {
 							String password = RandomStringUtils.random(10, true, true);								
-							user.setPassword(password);
+							user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
 							accountManager.save(user);
 							
 							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);

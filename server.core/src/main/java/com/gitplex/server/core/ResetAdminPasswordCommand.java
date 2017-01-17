@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.authc.credential.PasswordService;
 import org.hibernate.Interceptor;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
@@ -29,14 +30,17 @@ public class ResetAdminPasswordCommand extends DefaultPersistManager {
 	
 	private final AccountManager accountManager;
 	
+	private final PasswordService passwordService;
+	
 	@Inject
 	public ResetAdminPasswordCommand(Set<ModelProvider> modelProviders, 
 			PhysicalNamingStrategy physicalNamingStrategy, HibernateProperties properties, 
 			Migrator migrator, Interceptor interceptor, IdManager idManager, Dao dao, 
-			EntityValidator validator, AccountManager accountManager) {
+			EntityValidator validator, AccountManager accountManager, PasswordService passwordService) {
 		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, 
 				idManager, dao, validator);
 		this.accountManager = accountManager;
+		this.passwordService = passwordService;
 	}
 
 	@Override
@@ -61,7 +65,7 @@ public class ResetAdminPasswordCommand extends DefaultPersistManager {
 			System.exit(1);
 		}
 		String password = Bootstrap.command.getArgs()[0];
-		root.setPassword(password);
+		root.setPassword(passwordService.encryptPassword(password));
 		accountManager.save(root);
 		
 		// wait for a short period to have embedded db flushing data

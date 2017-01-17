@@ -5,7 +5,6 @@ import javax.persistence.MappedSuperclass;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -44,17 +43,14 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     }
     
     /**
-     * Set plain text password of this user. 
-     * <p>
-     * The plain text password will be hashed via {@link PasswordService} before stored. Bind PasswordService to 
-     * your own implementation via Guice if you'd like to change the default hash algorithm.
+     * Set password of this user. 
      * 
      * @param password
-     * 			plain text password to set
+     * 			password to set
      */
     public void setPassword(String password) {
     	if (password != null) {
-    		this.password = AppLoader.getInstance(PasswordService.class).encryptPassword(password);
+    		this.password = password;
     	} else {
     		this.password = null;
     	}

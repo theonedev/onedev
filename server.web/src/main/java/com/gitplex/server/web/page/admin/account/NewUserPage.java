@@ -1,8 +1,10 @@
 package com.gitplex.server.web.page.admin.account;
 
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 
+import com.gitplex.commons.loader.AppLoader;
 import com.gitplex.commons.wicket.editable.BeanContext;
 import com.gitplex.commons.wicket.editable.BeanEditor;
 import com.gitplex.commons.wicket.editable.PathSegment;
@@ -40,6 +42,7 @@ public class NewUserPage extends AdministrationPage {
 							.addError("This email has already been used by another account.");
 				} 
 				if (!editor.hasErrors(true)){
+					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(user.getPassword()));
 					accountManager.save(user, null);
 					Session.get().success("New user account created");
 					setResponsePage(UserListPage.class);

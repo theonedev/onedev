@@ -3,12 +3,14 @@ package com.gitplex.server.web.page.account.setting;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
+import com.gitplex.commons.loader.AppLoader;
 import com.gitplex.commons.wicket.editable.BeanContext;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Account;
@@ -42,7 +44,7 @@ public class PasswordEditPage extends AccountSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getAccount().setPassword(bean.getNewPassword());
+				getAccount().setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
 				GitPlex.getInstance(AccountManager.class).save(getAccount(), null);
 				Session.get().success("Password has been changed");
 
