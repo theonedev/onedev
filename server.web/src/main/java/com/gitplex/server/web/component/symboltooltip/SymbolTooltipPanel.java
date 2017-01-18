@@ -26,19 +26,25 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.gitplex.commons.git.Blob;
+import com.gitplex.commons.git.BlobIdent;
 import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
 import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
+import com.gitplex.jsymbol.Symbol;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.entity.support.TextRange;
 import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
+import com.gitplex.server.search.hit.SymbolHit;
 import com.gitplex.server.search.query.BlobQuery;
 import com.gitplex.server.search.query.PathQuery;
+import com.gitplex.server.search.query.SourceContext;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
@@ -53,7 +59,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	private String revision = "";
 	
-	private String symbol = "";
+	private String symbolName = "";
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
@@ -99,7 +105,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 				CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, getQueryHitParams(hit));
 				link.add(AttributeAppender.replace("href", url.toString()));
 				link.add(hit.render("label"));
-				link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
+				link.add(new Label("scope", hit.getNamespace()).setVisible(hit.getNamespace()!=null));
 				
 				item.add(link);
 			}
@@ -140,8 +146,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 						target.prependJavaScript(script);						
 						List<QueryHit> hits;						
 						// do this check to avoid TooGeneralQueryException
-						if (symbol.length() >= IndexConstants.NGRAM_SIZE) {
-							BlobQuery query = new TextQuery(symbol, false, true, true, 
+						if (symbolName.length() >= IndexConstants.NGRAM_SIZE) {
+							BlobQuery query = new TextQuery(symbolName, false, true, true, 
 									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 							try {
 								SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
@@ -181,31 +187,65 @@ public abstract class SymbolTooltipPanel extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				revision = params.getParameterValue("revision").toString();
-				symbol = params.getParameterValue("symbol").toString();
-				boolean isString = symbol.indexOf('\'') != -1 || symbol.indexOf('"') != -1;
+				symbolName = params.getParameterValue("symbol").toString();
+				boolean isString = symbolName.indexOf('\'') != -1 || symbolName.indexOf('"') != -1;
 				String charsToStrip = "@'\"./\\";
-				symbol = StringUtils.stripEnd(StringUtils.stripStart(symbol, charsToStrip), charsToStrip);
-				symbol = StringUtils.replace(symbol, "\\", "/");
+				symbolName = StringUtils.stripEnd(StringUtils.stripStart(symbolName, charsToStrip), charsToStrip);
+				symbolName = StringUtils.replace(symbolName, "\\", "/");
+				symbolHits.clear();
+				
 				// do this check to avoid TooGeneralQueryException
-				if (symbol.length() == 0 || symbol.indexOf('?') != -1 || symbol.indexOf('*') != -1) {
-					symbolHits = new ArrayList<>();
-				} else {
-					try {
-						BlobQuery query = new SymbolQuery(symbol, null, true, true, null, null, QUERY_ENTRIES);
-						SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-						ObjectId commit = depotModel.getObject().getRevCommit(revision);
-						symbolHits = searchManager.search(depotModel.getObject(), commit, query);
-						if (symbolHits.size() < QUERY_ENTRIES) {
-							query = new SymbolQuery(symbol, null, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
-							symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+				if (symbolName.length() != 0 && symbolName.indexOf('?') == -1 && symbolName.indexOf('*') == -1) {
+					BlobIdent blobIdent = new BlobIdent(revision, getBlobPath(), FileMode.TYPE_FILE);
+					Blob blob = depotModel.getObject().getBlob(blobIdent);
+					
+					if (symbolHits.size() < QUERY_ENTRIES) {
+						List<Symbol> symbols = GitPlex.getInstance(SearchManager.class).getSymbols(depotModel.getObject(), 
+								blob.getBlobId(), getBlobPath());
+						if (symbols != null) {
+							for (Symbol symbol: symbols) {
+								if (symbolHits.size() < QUERY_ENTRIES 
+										&& symbol.isSearchable() 
+										&& symbolName.equals(symbol.getName()) 
+										&& symbol.isPrimary()) {
+									symbolHits.add(new SymbolHit(getBlobPath(), symbol, null));
+								}
+							}
+							for (Symbol symbol: symbols) {
+								if (symbolHits.size() < QUERY_ENTRIES 
+										&& symbol.isSearchable() 
+										&& symbolName.equals(symbol.getName())
+										&& !symbol.isPrimary()) {
+									symbolHits.add(new SymbolHit(getBlobPath(), symbol, null));
+								}
+							}
 						}
-						if (isString && symbolHits.size() < QUERY_ENTRIES) {
-							query = new PathQuery(null, symbol, QUERY_ENTRIES - symbolHits.size());
-							symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
-						}
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}								
+					}					
+					
+					if (symbolHits.size() < QUERY_ENTRIES) {
+						SourceContext sourceContext = new SourceContext(blob);
+						try {
+							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+							ObjectId commit = depotModel.getObject().getRevCommit(revision);
+							BlobQuery query;
+							if (symbolHits.size() < QUERY_ENTRIES) {
+								query = new SymbolQuery(symbolName, null, blobIdent.path, true, true, null, null, 
+										sourceContext, QUERY_ENTRIES);
+								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+							}							
+							if (symbolHits.size() < QUERY_ENTRIES) {
+								query = new SymbolQuery(symbolName, null, blobIdent.path, false, true, null, null, 
+										sourceContext, QUERY_ENTRIES - symbolHits.size());
+								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+							}
+							if (isString && symbolHits.size() < QUERY_ENTRIES) {
+								query = new PathQuery(null, symbolName, QUERY_ENTRIES - symbolHits.size());
+								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+							}
+						} catch (InterruptedException e) {
+							throw new RuntimeException(e);
+						}								
+					}					
 				}
 				target.add(content);
 				String script = String.format("gitplex.server.symboltooltip.doneQuery('%s');", content.getMarkupId());
@@ -245,12 +285,12 @@ public abstract class SymbolTooltipPanel extends Panel {
 		DepotFilePage.State state = new DepotFilePage.State();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = getBlobPath();
-		state.query = symbol;
+		state.query = symbolName;
 		return DepotFilePage.paramsOf(depotModel.getObject(), state);
 	}
 	
 	public String getSymbol() {
-		return symbol;
+		return symbolName;
 	}
 
 	public String getRevision() {

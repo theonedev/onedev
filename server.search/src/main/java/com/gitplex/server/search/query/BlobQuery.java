@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -34,7 +35,7 @@ public abstract class BlobQuery {
 		return count;
 	}
 
-	public abstract void collect(TreeWalk treeWalk, List<QueryHit> hits);
+	public abstract void collect(IndexSearcher searcher, TreeWalk treeWalk, List<QueryHit> hits);
 
 	/**
 	 * Get lucene query representation of this query

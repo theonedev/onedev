@@ -450,8 +450,8 @@ public abstract class SearchResultPanel extends Panel {
 								add(hit.renderIcon("icon"));
 								add(new Label("lineNo", String.valueOf(hit.getTokenPos().getFromLine()+1) + ":"));
 								add(hit.render("label"));
-								add(new Label("scope", hit.getScope())
-										.setVisible(!(hit instanceof TextHit) && hit.getScope()!=null));
+								add(new Label("scope", hit.getNamespace())
+										.setVisible(!(hit instanceof TextHit) && hit.getNamespace()!=null));
 								
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));

@@ -84,14 +84,14 @@ public abstract class InstantSearchPanel extends Panel {
 		try {
 			// first try an exact search against primary symbol to make sure the result 
 			// always contains exact match if exists
-			BlobQuery query = new SymbolQuery(searchInput, null, true, false, 
-					null, null, count);
+			BlobQuery query = new SymbolQuery(searchInput, null, null, true, false, 
+					null, null, null, count);
 			symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			
 			// now do wildcard search but exclude the exact match returned above 
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery(searchInput+"*", searchInput, true, false, 
-						null, null, count-symbolHits.size());
+				query = new SymbolQuery(searchInput+"*", searchInput, null, true, false, 
+						null, null, null, count-symbolHits.size());
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
 
@@ -110,14 +110,14 @@ public abstract class InstantSearchPanel extends Panel {
 			
 			// do the same for secondary symbols
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery(searchInput, null, false, false, 
-						null, null, count-symbolHits.size());
+				query = new SymbolQuery(searchInput, null, null, false, false, 
+						null, null, null, count-symbolHits.size());
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery(searchInput+"*", searchInput, false, false, 
-						null, null, count-symbolHits.size());
+				query = new SymbolQuery(searchInput+"*", searchInput, null, false, false, 
+						null, null, null, count-symbolHits.size());
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
 			
@@ -243,7 +243,7 @@ public abstract class InstantSearchPanel extends Panel {
 						};
 						link.add(hit.renderIcon("icon"));
 						link.add(hit.render("label"));
-						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
+						link.add(new Label("scope", hit.getNamespace()).setVisible(hit.getNamespace()!=null));
 						item.add(link);
 
 						DepotFilePage.State state = new DepotFilePage.State();
@@ -365,12 +365,7 @@ public abstract class InstantSearchPanel extends Panel {
 		}
 
 		@Override
-		public String getScope() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		protected int score() {
+		public String getNamespace() {
 			throw new UnsupportedOperationException();
 		}
 

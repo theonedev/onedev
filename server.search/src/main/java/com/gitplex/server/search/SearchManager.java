@@ -2,8 +2,12 @@ package com.gitplex.server.search;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import org.apache.lucene.search.IndexSearcher;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.gitplex.jsymbol.Symbol;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;
@@ -22,5 +26,11 @@ public interface SearchManager {
 	 */
 	List<QueryHit> search(Depot depot, ObjectId commit, BlobQuery query) 
 			throws InterruptedException, TooGeneralQueryException;
+	
+	@Nullable
+	List<Symbol> getSymbols(Depot depot, ObjectId blobId, String blobPath);
+	
+	@Nullable
+	List<Symbol> getSymbols(IndexSearcher searcher, ObjectId blobId, String blobPath);
 	
 }

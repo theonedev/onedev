@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.tika.mime.MediaType;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.commons.util.ContentDetector;
 import com.google.common.base.Charsets;
@@ -16,6 +17,8 @@ public class Blob {
 	
 	private final BlobIdent ident;
 	
+	private final ObjectId blobId;
+	
 	private final byte[] bytes;
 	
 	private final long size;
@@ -24,18 +27,23 @@ public class Blob {
 	
 	private transient Optional<Text> optionalText;
 	
-	public Blob(BlobIdent ident, byte[] bytes) {
-		this(ident, bytes, bytes.length);
+	public Blob(BlobIdent ident, ObjectId id, byte[] bytes) {
+		this(ident, id, bytes, bytes.length);
 	}
 	
-	public Blob(BlobIdent ident, byte[] bytes, long size) {
+	public Blob(BlobIdent ident, ObjectId blobId, byte[] bytes, long size) {
 		this.ident = ident;
+		this.blobId = blobId;
 		this.bytes = bytes;
 		this.size = size;
 	}
 
 	public BlobIdent getIdent() {
 		return ident;
+	}
+
+	public ObjectId getBlobId() {
+		return blobId;
 	}
 
 	public byte[] getBytes() {

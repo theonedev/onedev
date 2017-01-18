@@ -42,13 +42,8 @@ public class SymbolHit extends QueryHit {
 	}
 	
 	@Override
-	public String getScope() {
+	public String getNamespace() {
 		return symbol.getNamespace();
-	}
-
-	@Override
-	protected int score() {
-		return symbol.score();
 	}
 
 }

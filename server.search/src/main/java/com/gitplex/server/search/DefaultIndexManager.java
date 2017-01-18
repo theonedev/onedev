@@ -6,6 +6,7 @@ import static com.gitplex.server.search.FieldConstants.BLOB_NAME;
 import static com.gitplex.server.search.FieldConstants.BLOB_PATH;
 import static com.gitplex.server.search.FieldConstants.BLOB_PRIMARY_SYMBOLS;
 import static com.gitplex.server.search.FieldConstants.BLOB_SECONDARY_SYMBOLS;
+import static com.gitplex.server.search.FieldConstants.BLOB_SYMBOL_LIST;
 import static com.gitplex.server.search.FieldConstants.BLOB_TEXT;
 import static com.gitplex.server.search.FieldConstants.COMMIT_HASH;
 import static com.gitplex.server.search.FieldConstants.COMMIT_INDEX_VERSION;
@@ -18,13 +19,16 @@ import static com.gitplex.server.search.IndexConstants.NGRAM_SIZE;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -64,6 +68,10 @@ import com.gitplex.commons.loader.Listen;
 import com.gitplex.commons.loader.ListenerRegistry;
 import com.gitplex.commons.util.ContentDetector;
 import com.gitplex.commons.util.concurrent.Prioritized;
+import com.gitplex.jsymbol.ExtractException;
+import com.gitplex.jsymbol.Symbol;
+import com.gitplex.jsymbol.SymbolExtractor;
+import com.gitplex.jsymbol.SymbolExtractorRegistry;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.core.event.RefUpdated;
 import com.gitplex.server.core.manager.BatchWorkManager;
@@ -71,10 +79,6 @@ import com.gitplex.server.core.manager.DepotManager;
 import com.gitplex.server.core.manager.StorageManager;
 import com.gitplex.server.core.manager.support.BatchWorker;
 import com.gitplex.server.core.manager.support.IndexResult;
-import com.gitplex.jsymbol.ExtractException;
-import com.gitplex.jsymbol.Symbol;
-import com.gitplex.jsymbol.SymbolExtractor;
-import com.gitplex.jsymbol.SymbolExtractorRegistry;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
@@ -263,8 +267,9 @@ public class DefaultIndexManager implements IndexManager {
 				
 				if (extractor != null) {
 					try {
-						for (Symbol symbol: extractor.extract(content)) {
-							if (!symbol.isLocal()) {
+						List<Symbol> symbols = extractor.extract(content);
+						for (Symbol symbol: symbols) {
+							if (!symbol.isEffectivelyLocal()) {
 								String fieldValue = symbol.getName();
 								if (fieldValue != null) {
 									fieldValue = fieldValue.toLowerCase();
@@ -278,6 +283,8 @@ public class DefaultIndexManager implements IndexManager {
 								}
 							}
 						}
+						byte[] bytesOfSymbols = SerializationUtils.serialize((Serializable) symbols);
+						document.add(new StoredField(BLOB_SYMBOL_LIST.name(), bytesOfSymbols));
 					} catch (ExtractException e) {
 						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}

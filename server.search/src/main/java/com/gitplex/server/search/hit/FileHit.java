@@ -42,7 +42,7 @@ public class FileHit extends QueryHit {
 	}
 
 	@Override
-	public String getScope() {
+	public String getNamespace() {
 		if (getBlobPath().contains("/")) 
 			return StringUtils.substringBeforeLast(getBlobPath(), "/");
 		else 
@@ -51,14 +51,6 @@ public class FileHit extends QueryHit {
 
 	public Range getMatchRange() {
 		return matchRange;
-	}
-
-	@Override
-	protected int score() {
-		if (getBlobPath().contains("/")) 
-			return StringUtils.substringAfterLast(getBlobPath(), "/").length();
-		else 
-			return getBlobPath().length();
 	}
 
 }

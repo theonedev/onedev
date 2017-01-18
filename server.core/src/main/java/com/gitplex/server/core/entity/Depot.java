@@ -494,18 +494,18 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		defaultBranch = null;
 	}
 	
-	private Blob readBlob(ObjectLoader objectLoader, BlobIdent ident) {
+	private Blob readBlob(ObjectLoader objectLoader, BlobIdent ident, ObjectId id) {
 		long blobSize = objectLoader.getSize();
 		if (blobSize > MAX_READ_BLOB_SIZE) {
 			try (InputStream is = objectLoader.openStream()) {
 				byte[] bytes = new byte[MAX_READ_BLOB_SIZE];
 				is.read(bytes);
-				return new Blob(ident, bytes, blobSize);
+				return new Blob(ident, id, bytes, blobSize);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
-			return new Blob(ident, objectLoader.getCachedBytes());
+			return new Blob(ident, id, objectLoader.getCachedBytes());
 		}
 	}
 	
@@ -546,17 +546,18 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 				RevTree revTree = revWalk.parseCommit(revId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
 				if (treeWalk != null) {
+					ObjectId blobId = treeWalk.getObjectId(0);
 					if (blobIdent.isGitLink()) {
 						String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
 						if (url == null)
 							throw new GitObjectNotFoundException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
-						String hash = treeWalk.getObjectId(0).name();
-						blob = new Blob(blobIdent, new Submodule(url, hash).toString().getBytes());
+						String hash = blobId.name();
+						blob = new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes());
 					} else if (blobIdent.isTree()) {
 						throw new NotGitFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
-						ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
-						blob = readBlob(objectLoader, blobIdent);
+						ObjectLoader objectLoader = treeWalk.getObjectReader().open(blobId);
+						blob = readBlob(objectLoader, blobIdent, blobId);
 					}
 					getBlobCache().put(blobIdent, blob);
 				} else {

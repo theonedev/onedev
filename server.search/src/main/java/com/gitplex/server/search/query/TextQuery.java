@@ -15,6 +15,7 @@ import org.apache.commons.lang3.CharUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -78,7 +79,7 @@ public class TextQuery extends BlobQuery {
 	}
 	
 	@Override
-	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
+	public void collect(IndexSearcher searcher, TreeWalk treeWalk, List<QueryHit> hits) {
 		ObjectLoader objectLoader;
 		try {
 			objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));

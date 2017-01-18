@@ -126,7 +126,7 @@ public abstract class FileEditPanel extends Panel {
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
 						if (blobIdent.revision.equals(ObjectId.zeroId().name()))
-							return new Blob(blobIdent, content.getBytes(Charsets.UTF_8));
+							return new Blob(blobIdent, ObjectId.zeroId(), content.getBytes(Charsets.UTF_8));
 						else
 							return depotModel.getObject().getBlob(blobIdent);
 					}

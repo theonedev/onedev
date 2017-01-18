@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
@@ -27,7 +28,7 @@ public class PathQuery extends BlobQuery {
 	}
 
 	@Override
-	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
+	public void collect(IndexSearcher searcher, TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
 		Range range = PathUtils.matchSegments(blobPath, match, true);
 		if (range != null) {

@@ -37,17 +37,12 @@ public class PathHit extends QueryHit {
 	}
 
 	@Override
-	public String getScope() {
+	public String getNamespace() {
 		return null;
 	}
 
 	public Range getMatchRange() {
 		return matchRange;
-	}
-
-	@Override
-	protected int score() {
-		return getBlobPath().length();
 	}
 
 }

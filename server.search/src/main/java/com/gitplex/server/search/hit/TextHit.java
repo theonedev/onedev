@@ -38,16 +38,11 @@ public class TextHit extends QueryHit {
 	}
 
 	@Override
-	public String getScope() {
+	public String getNamespace() {
 		String fileName = getBlobPath();
 		if (fileName.contains("/")) 
 			fileName = StringUtils.substringAfterLast(fileName, "/");
 		return fileName;
-	}
-
-	@Override
-	protected int score() {
-		return lineContent.length();
 	}
 
 }
