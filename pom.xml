@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>  
     <groupId>com.gitplex</groupId>  
     <artifactId>gitplex</artifactId>  
-    <version>1.0-EAP-build22</version>  
+    <version>1.0-EAP-build23</version>  
     <packaging>pom</packaging>  
     <prerequisites> 
         <maven>3.0</maven> 
