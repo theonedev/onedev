@@ -71,7 +71,7 @@ public class SymbolQuery extends BlobQuery {
 					if ((primary==null || primary.booleanValue() == symbol.isPrimary()) 
 							&& symbol.getName() != null 
 							&& symbol.isSearchable()
-							&& (local == null || local.booleanValue() == symbol.isEffectivelyLocal())) {
+							&& (local == null || local.booleanValue() == symbol.isLocalInHierarchy())) {
 						String normalizedTerm;
 						if (!caseSensitive)
 							normalizedTerm = term.toLowerCase();
