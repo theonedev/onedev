@@ -206,8 +206,12 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		} else {
 			String symbol = params.get(PARAM_QUERY).toString();
 			if (symbol != null) {
-				BlobQuery query = new TextQuery(symbol, false, true, true, 
-						null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
+				BlobQuery query = new TextQuery.Builder()
+						.term(symbol)
+						.wholeWord(true)
+						.caseSensitive(true) 
+						.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+						.build();
 				try {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 					queryHits = searchManager.search(depotModel.getObject(), commitId, query);

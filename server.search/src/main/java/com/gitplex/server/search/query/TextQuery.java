@@ -21,12 +21,13 @@ import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.commons.util.ContentDetector;
+import com.gitplex.jsymbol.Range;
+import com.gitplex.jsymbol.TokenPosition;
 import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.TextHit;
 import com.gitplex.server.search.query.regex.RegexLiterals;
-import com.gitplex.jsymbol.Range;
-import com.gitplex.jsymbol.TokenPosition;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 public class TextQuery extends BlobQuery {
@@ -45,14 +46,14 @@ public class TextQuery extends BlobQuery {
 	
 	private transient Pattern pattern;
 	
-	public TextQuery(String term, boolean regex, boolean caseSensitive, boolean wordMatch, 
+	private TextQuery(String term, boolean regex, boolean caseSensitive, boolean wholeWord, 
 			@Nullable String directory, @Nullable String fileNames, int count) {
 		super(directory, count);
 		
 		this.term = term;
 		this.regex = regex;
 		this.caseSensitive = caseSensitive;
-		this.wholeWord = wordMatch;
+		this.wholeWord = wholeWord;
 		this.fileNames = fileNames;
 	}
 
@@ -186,6 +187,65 @@ public class TextQuery extends BlobQuery {
 			query.add(new NGramLuceneQuery(BLOB_TEXT.name(), term, NGRAM_SIZE), Occur.MUST);
 		else 
 			throw new TooGeneralQueryException();
+	}
+	
+	public static class Builder {
+
+		private String term;
+		
+		private int count;
+
+		private boolean regex;
+		
+		private boolean wholeWord;
+		
+		private boolean caseSensitive;
+		
+		private String directory;
+		
+		private String fileNames;
+		
+		public Builder term(String term) {
+			this.term = term;
+			return this;
+		}
+		
+		public Builder count(int count) {
+			this.count = count;
+			return this;
+		}
+		
+		public Builder regex(boolean regex) {
+			this.regex = regex;
+			return this;
+		}
+
+		public Builder wholeWord(boolean wholeWord) {
+			this.wholeWord = wholeWord;
+			return this;
+		}
+		
+		public Builder caseSensitive(boolean caseSensitive) {
+			this.caseSensitive = caseSensitive;
+			return this;
+		}
+		
+		public Builder directory(String directory) {
+			this.directory = directory;
+			return this;
+		}
+		
+		public Builder fileNames(String fileNames) {
+			this.fileNames = fileNames;
+			return this;
+		}
+		
+		public TextQuery build() {
+			Preconditions.checkArgument(term!=null, "Query term should be specified");
+			Preconditions.checkArgument(count!=0, "Query count should be specified");
+			return new TextQuery(term, regex, caseSensitive, wholeWord, directory, fileNames, count);
+		}
+		
 	}
 	
 }

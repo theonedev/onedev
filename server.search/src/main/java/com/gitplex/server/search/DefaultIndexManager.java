@@ -269,18 +269,16 @@ public class DefaultIndexManager implements IndexManager {
 					try {
 						List<Symbol> symbols = extractor.extract(content);
 						for (Symbol symbol: symbols) {
-							if (!symbol.isEffectivelyLocal()) {
-								String fieldValue = symbol.getName();
-								if (fieldValue != null) {
-									fieldValue = fieldValue.toLowerCase();
+							String fieldValue = symbol.getName();
+							if (fieldValue != null) {
+								fieldValue = fieldValue.toLowerCase();
 
-									String fieldName;
-									if (symbol.isPrimary())
-										fieldName = BLOB_PRIMARY_SYMBOLS.name();
-									else
-										fieldName = BLOB_SECONDARY_SYMBOLS.name();
-									document.add(new StringField(fieldName, fieldValue, Store.NO));
-								}
+								String fieldName;
+								if (symbol.isPrimary())
+									fieldName = BLOB_PRIMARY_SYMBOLS.name();
+								else
+									fieldName = BLOB_SECONDARY_SYMBOLS.name();
+								document.add(new StringField(fieldName, fieldValue, Store.NO));
 							}
 						}
 						byte[] bytesOfSymbols = SerializationUtils.serialize((Serializable) symbols);

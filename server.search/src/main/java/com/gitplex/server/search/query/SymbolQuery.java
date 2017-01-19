@@ -23,6 +23,7 @@ import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.SymbolHit;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 public class SymbolQuery extends BlobQuery {
@@ -33,7 +34,9 @@ public class SymbolQuery extends BlobQuery {
 	
 	private final String excludeBlobPath;
 	
-	private final boolean primary;
+	private final Boolean primary;
+	
+	private final Boolean local;
 	
 	private final boolean caseSensitive;
 	
@@ -41,15 +44,16 @@ public class SymbolQuery extends BlobQuery {
 	
 	private final SourceContext sourceContext;
 	
-	public SymbolQuery(String term, @Nullable String excludeTerm, @Nullable String excludeBlobPath, 
-			boolean primary, boolean caseSensitive, @Nullable String directory, @Nullable String fileNames, 
-			@Nullable SourceContext sourceContext, int count) {
+	private SymbolQuery(String term, @Nullable String excludeTerm, @Nullable String excludeBlobPath, 
+			@Nullable Boolean primary, @Nullable Boolean local, boolean caseSensitive, @Nullable String directory, 
+			@Nullable String fileNames, @Nullable SourceContext sourceContext, int count) {
 		super(directory, count);
 		
 		this.term = term;
 		this.excludeTerm = excludeTerm;
 		this.excludeBlobPath = excludeBlobPath;
 		this.primary = primary;
+		this.local = local;
 		this.caseSensitive = caseSensitive;
 		this.fileNames = fileNames;
 		this.sourceContext = sourceContext;
@@ -64,7 +68,9 @@ public class SymbolQuery extends BlobQuery {
 		if (symbols != null) {
 			for (Symbol symbol: symbols) {
 				if (hits.size() < getCount()) {
-					if (primary == symbol.isPrimary() && symbol.getName() != null && !symbol.isEffectivelyLocal()) {
+					if ((primary==null || primary.booleanValue() == symbol.isPrimary()) 
+							&& symbol.getName() != null 
+							&& (local == null || local.booleanValue() == symbol.isEffectivelyLocal())) {
 						String normalizedTerm;
 						if (!caseSensitive)
 							normalizedTerm = term.toLowerCase();
@@ -130,4 +136,84 @@ public class SymbolQuery extends BlobQuery {
 		query.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), Occur.MUST);
 	}
 	
+	public static class Builder {
+
+		private String term;
+		
+		private int count;
+		
+		private String directory;
+
+		private String excludeTerm;
+		
+		private String excludeBlobPath;
+		
+		private Boolean primary;
+		
+		private Boolean local;
+		
+		private boolean caseSensitive;
+		
+		private String fileNames;
+		
+		private SourceContext sourceContext;
+		
+		public Builder term(String term) {
+			this.term = term;
+			return this;
+		}
+		
+		public Builder count(int count) {
+			this.count = count;
+			return this;
+		}
+		
+		public Builder directory(String directory) {
+			this.directory = directory;
+			return this;
+		}
+		
+		public Builder excludeTerm(String excludeTerm) {
+			this.excludeTerm = excludeTerm;
+			return this;
+		}
+		
+		public Builder excludeBlobPath(String excludeBlobPath) {
+			this.excludeBlobPath = excludeBlobPath;
+			return this;
+		}
+		
+		public Builder primary(Boolean primary) {
+			this.primary = primary;
+			return this;
+		}
+		
+		public Builder local(Boolean local) {
+			this.local = local;
+			return this;
+		}
+		
+		public Builder caseSensitive(boolean caseSensitive) {
+			this.caseSensitive = caseSensitive;
+			return this;
+		}
+		
+		public Builder fileNames(String fileNames) {
+			this.fileNames = fileNames;
+			return this;
+		}
+		
+		public Builder sourceContext(SourceContext sourceContext) {
+			this.sourceContext = sourceContext;
+			return this;
+		}
+		
+		public SymbolQuery build() {
+			Preconditions.checkArgument(term!=null, "Query term should be specified");
+			Preconditions.checkArgument(count!=0, "Query count should be specified");
+			return new SymbolQuery(term, excludeTerm, excludeBlobPath, primary, local, 
+					caseSensitive, directory, fileNames, sourceContext, count);
+		}
+		
+	}
 }

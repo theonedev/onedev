@@ -84,40 +84,56 @@ public abstract class InstantSearchPanel extends Panel {
 		try {
 			// first try an exact search against primary symbol to make sure the result 
 			// always contains exact match if exists
-			BlobQuery query = new SymbolQuery(searchInput, null, null, true, false, 
-					null, null, null, count);
+			BlobQuery query = new SymbolQuery.Builder()
+					.term(searchInput)
+					.primary(true)
+					.count(count)
+					.build();
 			symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			
 			// now do wildcard search but exclude the exact match returned above 
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery(searchInput+"*", searchInput, null, true, false, 
-						null, null, null, count-symbolHits.size());
+				query = new SymbolQuery.Builder().term(searchInput+"*")
+						.excludeTerm(searchInput)
+						.primary(true)
+						.count(count-symbolHits.size())
+						.build();
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
 
 			// do the same for file names
 			if (symbolHits.size() < count) {
-				query = new FileQuery(searchInput, null, false, null, 
-						count-symbolHits.size());
+				query = new FileQuery.Builder()
+						.fileNames(searchInput)
+						.count(count-symbolHits.size())
+						.build();
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new FileQuery(searchInput+"*", searchInput, false, null, 
-						count-symbolHits.size());
+				query = new FileQuery.Builder().fileNames(searchInput+"*")
+						.excludeFileName(searchInput)
+						.count(count-symbolHits.size())
+						.build();
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
 			
 			// do the same for secondary symbols
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery(searchInput, null, null, false, false, 
-						null, null, null, count-symbolHits.size());
+				query = new SymbolQuery.Builder()
+						.term(searchInput)
+						.primary(false)
+						.count(count-symbolHits.size())
+						.build();
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery(searchInput+"*", searchInput, null, false, false, 
-						null, null, null, count-symbolHits.size());
+				query = new SymbolQuery.Builder().term(searchInput+"*")
+						.excludeTerm(searchInput)
+						.primary(false)
+						.count(count-symbolHits.size())
+						.build();
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
 			

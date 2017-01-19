@@ -14,9 +14,10 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.commons.util.match.WildcardUtils;
+import com.gitplex.jsymbol.Range;
 import com.gitplex.server.search.hit.FileHit;
 import com.gitplex.server.search.hit.QueryHit;
-import com.gitplex.jsymbol.Range;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 public class FileQuery extends BlobQuery {
@@ -27,7 +28,7 @@ public class FileQuery extends BlobQuery {
 	
 	private final boolean caseSensitive;
 	
-	public FileQuery(String fileNames, @Nullable String excludeFileName, boolean caseSensitive,  
+	private FileQuery(String fileNames, @Nullable String excludeFileName, boolean caseSensitive,  
 			@Nullable String directory, int count) {
 		super(directory, count);
 		
@@ -81,6 +82,53 @@ public class FileQuery extends BlobQuery {
 			query.add(subQuery, Occur.MUST);
 		else
 			throw new TooGeneralQueryException();
+	}
+
+	public static class Builder {
+
+		private int count;
+		
+		private String directory;
+
+		private String excludeFileName;
+		
+		private boolean caseSensitive;
+		
+		private String fileNames;
+		
+		public Builder count(int count) {
+			this.count = count;
+			return this;
+		}
+		
+		public Builder directory(String directory) {
+			this.directory = directory;
+			return this;
+		}
+		
+		public Builder excludeFileName(String excludeFileName) {
+			this.excludeFileName = excludeFileName;
+			return this;
+		}
+		
+		public Builder caseSensitive(boolean caseSensitive) {
+			this.caseSensitive = caseSensitive;
+			return this;
+		}
+		
+		public Builder fileNames(String fileNames) {
+			this.fileNames = fileNames;
+			return this;
+		}
+		
+		public FileQuery build() {
+			Preconditions.checkArgument(fileNames!=null, "File names should be specified");
+			Preconditions.checkArgument(count!=0, "Query count should be specified");
+			
+			return new FileQuery(fileNames, excludeFileName, caseSensitive, 
+					directory, count);
+		}
+		
 	}
 
 }

@@ -37,6 +37,12 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gitplex.commons.git.BlobIdent;
+import com.gitplex.commons.util.StringUtils;
+import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
+import com.gitplex.commons.wicket.component.tabbable.AjaxActionTab;
+import com.gitplex.commons.wicket.component.tabbable.Tab;
+import com.gitplex.commons.wicket.component.tabbable.Tabbable;
 import com.gitplex.server.core.GitPlex;
 import com.gitplex.server.core.entity.Depot;
 import com.gitplex.server.search.SearchManager;
@@ -47,12 +53,6 @@ import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.search.query.TooGeneralQueryException;
 import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
-import com.gitplex.commons.wicket.component.tabbable.AjaxActionTab;
-import com.gitplex.commons.wicket.component.tabbable.Tab;
-import com.gitplex.commons.wicket.component.tabbable.Tabbable;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -231,8 +231,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 								
 							});
 						} else {
-							SymbolQuery query = new SymbolQuery(validatable.getValue(), null, null, true, false, null, 
-									null, null, 0);
+							SymbolQuery query = new SymbolQuery.Builder().term(validatable.getValue()).count(1).build();
 							try {
 								query.asLuceneQuery();
 							} catch (TooGeneralQueryException e) {
@@ -309,7 +308,10 @@ public abstract class AdvancedSearchPanel extends Panel {
 								
 							});
 						} else {
-							FileQuery query = new FileQuery(validatable.getValue(), null, false, null, 0);
+							FileQuery query = new FileQuery.Builder()
+									.fileNames(validatable.getValue())
+									.count(1)
+									.build();
 							try {
 								query.asLuceneQuery();
 							} catch (TooGeneralQueryException e) {
@@ -388,7 +390,10 @@ public abstract class AdvancedSearchPanel extends Panel {
 							});
 						} else {
 							boolean regex = regexCheck.getInput()!=null?true:false;
-							TextQuery query = new TextQuery(validatable.getValue(), regex, false, false, null, null, 0);
+							TextQuery query = new TextQuery.Builder()
+									.term(validatable.getValue()).regex(regex)
+									.count(1)
+									.build();
 							try {
 								query.asLuceneQuery();
 							} catch (TooGeneralQueryException e) {
@@ -517,16 +522,26 @@ public abstract class AdvancedSearchPanel extends Panel {
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			List<QueryHit> hits;
-			BlobQuery query = new SymbolQuery(term, null, null, true, caseSensitive, 
-					context.getDirectory(insideCurrentDir), fileNames, 
-					null, SearchResultPanel.MAX_QUERY_ENTRIES);
+			BlobQuery query = new SymbolQuery.Builder()
+					.term(term)
+					.primary(true)
+					.caseSensitive(caseSensitive)
+					.directory(context.getDirectory(insideCurrentDir))
+					.fileNames(fileNames)
+					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+					.build();
 			ObjectId commit = context.depotModel.getObject().getRevCommit(context.revisionModel.getObject());
 			hits = searchManager.search(context.depotModel.getObject(), commit, query);
 			
 			if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
-				query = new SymbolQuery(term, null, null, false, caseSensitive, 
-						context.getDirectory(insideCurrentDir), fileNames, 
-						null, SearchResultPanel.MAX_QUERY_ENTRIES - hits.size());
+				query = new SymbolQuery.Builder()
+						.term(term)
+						.primary(false)
+						.caseSensitive(caseSensitive)
+						.directory(context.getDirectory(insideCurrentDir))
+						.fileNames(fileNames)
+						.count(SearchResultPanel.MAX_QUERY_ENTRIES - hits.size())
+						.build();
 				hits.addAll(searchManager.search(context.depotModel.getObject(), commit, query));
 			}
 			
@@ -546,8 +561,12 @@ public abstract class AdvancedSearchPanel extends Panel {
 		@Override
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-			BlobQuery query = new FileQuery(term, null, caseSensitive, 
-					context.getDirectory(insideCurrentDir), SearchResultPanel.MAX_QUERY_ENTRIES);
+			BlobQuery query = new FileQuery.Builder()
+					.fileNames(term)
+					.caseSensitive(caseSensitive) 
+					.directory(context.getDirectory(insideCurrentDir))
+					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+					.build();
 			ObjectId commit = context.depotModel.getObject().getRevCommit(context.revisionModel.getObject());
 			return searchManager.search(context.depotModel.getObject(), commit, query);
 		}
@@ -570,8 +589,15 @@ public abstract class AdvancedSearchPanel extends Panel {
 		@Override
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-			BlobQuery query = new TextQuery(term, regex, caseSensitive, wholeWord, 
-					context.getDirectory(insideCurrentDir), fileNames, SearchResultPanel.MAX_QUERY_ENTRIES);
+			BlobQuery query = new TextQuery.Builder()
+					.term(term)
+					.regex(regex)
+					.caseSensitive(caseSensitive)
+					.wholeWord(wholeWord)
+					.directory(context.getDirectory(insideCurrentDir))
+					.fileNames(fileNames)
+					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+					.build();
 			ObjectId commit = context.depotModel.getObject().getRevCommit(context.revisionModel.getObject());
 			return searchManager.search(context.depotModel.getObject(), commit, query);
 		}

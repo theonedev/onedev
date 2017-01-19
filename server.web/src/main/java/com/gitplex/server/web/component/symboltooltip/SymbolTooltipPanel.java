@@ -147,8 +147,12 @@ public abstract class SymbolTooltipPanel extends Panel {
 						List<QueryHit> hits;						
 						// do this check to avoid TooGeneralQueryException
 						if (symbolName.length() >= IndexConstants.NGRAM_SIZE) {
-							BlobQuery query = new TextQuery(symbolName, false, true, true, 
-									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
+							BlobQuery query = new TextQuery.Builder()
+									.term(symbolName)
+									.wholeWord(true)
+									.caseSensitive(true)
+									.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+									.build();
 							try {
 								SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 								ObjectId commit = depotModel.getObject().getRevCommit(revision);
@@ -200,6 +204,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					Blob blob = depotModel.getObject().getBlob(blobIdent);
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
+						// first find in current file for matched symbols
 						List<Symbol> symbols = GitPlex.getInstance(SearchManager.class).getSymbols(depotModel.getObject(), 
 								blob.getBlobId(), getBlobPath());
 						if (symbols != null) {
@@ -223,19 +228,32 @@ public abstract class SymbolTooltipPanel extends Panel {
 					}					
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
+						// then find in other files for public symbols
 						SourceContext sourceContext = new SourceContext(blob);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							ObjectId commit = depotModel.getObject().getRevCommit(revision);
 							BlobQuery query;
 							if (symbolHits.size() < QUERY_ENTRIES) {
-								query = new SymbolQuery(symbolName, null, blobIdent.path, true, true, null, null, 
-										sourceContext, QUERY_ENTRIES);
+								query = new SymbolQuery.Builder().term(symbolName)
+										.excludeBlobPath(blobIdent.path)
+										.primary(true)
+										.local(false)
+										.caseSensitive(true)
+										.sourceContext(sourceContext)
+										.count(QUERY_ENTRIES)
+										.build();
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 							}							
 							if (symbolHits.size() < QUERY_ENTRIES) {
-								query = new SymbolQuery(symbolName, null, blobIdent.path, false, true, null, null, 
-										sourceContext, QUERY_ENTRIES - symbolHits.size());
+								query = new SymbolQuery.Builder().term(symbolName)
+										.excludeBlobPath(blobIdent.path)
+										.primary(false)
+										.local(false)
+										.caseSensitive(true)
+										.sourceContext(sourceContext)
+										.count(QUERY_ENTRIES - symbolHits.size())
+										.build();
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 							}
 							if (isString && symbolHits.size() < QUERY_ENTRIES) {
