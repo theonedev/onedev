@@ -70,6 +70,7 @@ public class SymbolQuery extends BlobQuery {
 				if (hits.size() < getCount()) {
 					if ((primary==null || primary.booleanValue() == symbol.isPrimary()) 
 							&& symbol.getName() != null 
+							&& symbol.isSearchable()
 							&& (local == null || local.booleanValue() == symbol.isEffectivelyLocal())) {
 						String normalizedTerm;
 						if (!caseSensitive)

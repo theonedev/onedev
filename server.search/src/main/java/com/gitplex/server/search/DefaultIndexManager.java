@@ -270,7 +270,7 @@ public class DefaultIndexManager implements IndexManager {
 						List<Symbol> symbols = extractor.extract(content);
 						for (Symbol symbol: symbols) {
 							String fieldValue = symbol.getName();
-							if (fieldValue != null) {
+							if (fieldValue != null && symbol.isSearchable()) {
 								fieldValue = fieldValue.toLowerCase();
 
 								String fieldName;
