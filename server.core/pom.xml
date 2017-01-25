@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>gitplex</artifactId>  
-        <version>1.0-EAP-build23</version> 
+        <version>1.0-EAP-build24</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -32,22 +32,22 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.wicket</artifactId>  
-            <version>1.0-EAP-build23</version> 
+            <version>1.0-EAP-build24</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.schedule</artifactId>  
-            <version>1.0-EAP-build23</version> 
+            <version>1.0-EAP-build24</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0-EAP-build23</version> 
+            <version>1.0-EAP-build24</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.jersey</artifactId>  
-            <version>1.0-EAP-build23</version> 
+            <version>1.0-EAP-build24</version> 
         </dependency>  
         <dependency> 
             <groupId>org.jetbrains.xodus</groupId>  
@@ -56,14 +56,14 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.git</artifactId>  
-            <version>1.0-EAP-build23</version>  
+            <version>1.0-EAP-build24</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0-EAP-build23</version>  
+            <version>1.0-EAP-build24</version>  
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency> 
