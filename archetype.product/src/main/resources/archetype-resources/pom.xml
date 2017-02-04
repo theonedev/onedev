@@ -104,23 +104,23 @@
 		<dependency>
 			<groupId>com.gitplex</groupId>
 			<artifactId>commons.jsw</artifactId>
-			<version>1.0-EAP-build23</version>
+			<version>1.0-EAP-build24</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.gitplex</groupId>
 			<artifactId>commons.hibernate</artifactId>
-			<version>1.0-EAP-build23</version>
+			<version>1.0-EAP-build24</version>
 		</dependency>
 		<dependency>
 			<groupId>com.gitplex</groupId>
 			<artifactId>commons.wicket</artifactId>
-			<version>1.0-EAP-build23</version>
+			<version>1.0-EAP-build24</version>
 		</dependency>
 		<dependency>
 			<groupId>com.gitplex</groupId>
 			<artifactId>commons.jetty</artifactId>
-			<version>1.0-EAP-build23</version>
+			<version>1.0-EAP-build24</version>
 		</dependency>
 	</dependencies>
 
