@@ -14,8 +14,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Gravatar {
 
-	public static final String PRE = "http://www.gravatar.com/avatar/";
-	public static final String SSL_PRE = "https://secure.gravatar.com/avatar/";
+	public static final String PRE = "https://secure.gravatar.com/avatar/";
 
 	// default images
 	public static final int DFLT_DEFAULT = 2;
@@ -191,24 +190,15 @@ public class Gravatar {
 	}
 
 	/**
-	 * Get the URL for this Gravatar.
-	 * 
-	 * @return URL for this Gravatar
-	 */
-	public String getURL() {
-		return this.getURL(false);
-	}
-
-	/**
 	 * Get the URL for this Gravatar, HTTPS if specified.
 	 * 
 	 * @param secure
 	 *            true if HTTPS is desired
 	 * @return URL for this Gravatar
 	 */
-	public String getURL(boolean secure) {
+	public String getURL() {
 		StringBuilder str = new StringBuilder();
-		str.append(secure ? SSL_PRE : PRE);
+		str.append(PRE);
 		str.append(this.hash);
 		str.append(this.getOptions());
 		return str.toString();
@@ -257,33 +247,15 @@ public class Gravatar {
 		return (opts.length() > 1) ? opts.toString() : "";
 	}
 
-	// ////////////////////
-	// Static Interface //
-	// ////////////////////
-
 	/**
-	 * Get the Gravatar URL for a particular email.
+	 * Get the optionally HTTPS Gravatar URL for a particular email.
 	 * 
 	 * @param email
 	 *            the email for this Gravatar
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email) {
-		return Gravatar.getURL(email, false);
-	}
-
-	/**
-	 * Get the optionally HTTPS Gravatar URL for a particular email.
-	 * 
-	 * @param email
-	 *            the email for this Gravatar
-	 * @param secure
-	 *            true if HTTPS is desired
-	 * @return the URL of the Gravatar
-	 */
-	public static String getURL(String email, boolean secure) {
-		return Gravatar
-				.getURL(email, 0, DFLT_DEFAULT, false, RTNG_NONE, secure);
+		return Gravatar.getURL(email, 0, DFLT_DEFAULT, false, RTNG_NONE);
 	}
 
 	/**
@@ -333,49 +305,6 @@ public class Gravatar {
 	}
 
 	/**
-	 * Get the Gravatar for an email with a specified size, default image,
-	 * maximum rating, and specified force default option.
-	 * 
-	 * @param email
-	 *            the email for this Gravatar
-	 * @param size
-	 *            the desired size for this Gravatar [1-512]
-	 * @param dflt
-	 *            must be one of the DFLT_XXX constants
-	 * @param forceDefault
-	 *            true if the default should always be returned
-	 * @param rating
-	 *            must be one of the RTNG_XXX constants
-	 * @return the URL of the Gravatar
-	 */
-	public static String getURL(String email, int size, int dflt,
-			boolean forceDefault, int rating) {
-		return Gravatar.getURL(email, size, dflt, forceDefault, rating, false);
-	}
-
-	/**
-	 * Get the Gravatar for an email with a specified size, custom default,
-	 * maximum rating, and specified force default option.
-	 * 
-	 * @param email
-	 *            the email for this Gravatar
-	 * @param size
-	 *            the desired size for this Gravatar [1-512]
-	 * @param customDefault
-	 *            URL of custom default image
-	 * @param forceDefault
-	 *            true if the default should always be returned
-	 * @param rating
-	 *            must be one of the RTNG_XXX constants
-	 * @return the URL of the Gravatar
-	 */
-	public static String getURL(String email, int size, String customDefault,
-			boolean forceDefault, int rating) {
-		return Gravatar.getURL(email, size, customDefault, forceDefault,
-				rating, false);
-	}
-
-	/**
 	 * Get the Gravatar for an email with a specified size, custom default,
 	 * maximum rating, and specified force default option, and HTTPS preference.
 	 * 
@@ -394,13 +323,13 @@ public class Gravatar {
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email, int size, int dflt,
-			boolean forceDefault, int rating, boolean secure) {
+			boolean forceDefault, int rating) {
 		Gravatar g = new Gravatar(email);
 		g.setSize(size);
 		g.setDefault(dflt);
 		g.setForceDefault(forceDefault);
 		g.setRating(rating);
-		return g.getURL(secure);
+		return g.getURL();
 	}
 
 	/**
@@ -422,13 +351,13 @@ public class Gravatar {
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email, int size, String customDefault,
-			boolean forceDefault, int rating, boolean secure) {
+			boolean forceDefault, int rating) {
 		Gravatar g = new Gravatar(email);
 		g.setSize(size);
 		g.setCustomDefault(customDefault);
 		g.setForceDefault(forceDefault);
 		g.setRating(rating);
-		return g.getURL(secure);
+		return g.getURL();
 	}
 
 	/**
