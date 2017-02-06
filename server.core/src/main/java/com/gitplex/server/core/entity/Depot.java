@@ -474,7 +474,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		if (defaultBranch == null) {
 			try {
 				Ref headRef = getRepository().findRef("HEAD");
-				if (headRef.isSymbolic() 
+				if (headRef != null 
+						&& headRef.isSymbolic() 
 						&& headRef.getTarget().getName().startsWith(Constants.R_HEADS) 
 						&& headRef.getObjectId() != null) {
 					defaultBranch = Optional.of(Repository.shortenRefName(headRef.getTarget().getName()));
