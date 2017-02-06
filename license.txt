@@ -1,17 +1,17 @@
 License Agreement for PMEase GitPlex Source Code
 
-This is a legal agreement between you and PMEase LLC.  
+This is a legal agreement between you and PMEase  
 covering your use of GitPlex source code (the "Source").  Be sure to 
 read the following agreement before using the Source.  BY USING THE 
 SOURCE,YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS AGREEMENT.
 IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT
 USE THE SOURCE AND DESTROY ALL COPIES IN YOUR POSSESSION.  
 
-The Source is owned by PMEase LLC. and is protected by
+The Source is owned by PMEase and is protected by
 international treaty provisions.  Therefore, you must treat the Source 
 like any other copyrighted material (e.  g., a book or musical recording).  
 
 You may not redistribute the Source, or make any software competing with 
 GitPlex based on the Source. 
 
-Copyright (C) 2016-2017 by PMEase LLC.  All rights reserved.  
+Copyright (C) 2016-2017 by PMEase. All rights reserved.  
