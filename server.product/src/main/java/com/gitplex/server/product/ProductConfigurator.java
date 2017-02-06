@@ -2,7 +2,9 @@ package com.gitplex.server.product;
 
 import javax.inject.Inject;
 
+import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -38,6 +40,10 @@ public class ProductConfigurator implements ServerConfigurator {
 			
 			ServerConnector connector = new ServerConnector(server, sslContextFactory);
 			connector.setPort(sslConfig.getPort());
+			
+			HttpConfiguration configuration = new HttpConfiguration();
+			configuration.addCustomizer(new SecureRequestCustomizer());
+			connector.addConnectionFactory(new HttpConnectionFactory(configuration));
 			
 			server.addConnector(connector);
 		}
