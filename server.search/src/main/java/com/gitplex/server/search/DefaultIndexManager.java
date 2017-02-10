@@ -267,7 +267,7 @@ public class DefaultIndexManager implements IndexManager {
 				
 				if (extractor != null) {
 					try {
-						List<Symbol> symbols = extractor.extract(content, blobName);
+						List<Symbol> symbols = extractor.extract(content, blobPath);
 						for (Symbol symbol: symbols) {
 							String fieldValue = symbol.getName();
 							if (fieldValue != null && symbol.isSearchable()) {
