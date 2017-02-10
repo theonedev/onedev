@@ -44,7 +44,6 @@ import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.SymbolHit;
 import com.gitplex.server.search.query.BlobQuery;
 import com.gitplex.server.search.query.PathQuery;
-import com.gitplex.server.search.query.SourceContext;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
@@ -192,10 +191,18 @@ public abstract class SymbolTooltipPanel extends Panel {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				revision = params.getParameterValue("revision").toString();
 				symbolName = params.getParameterValue("symbol").toString();
-				boolean isString = symbolName.indexOf('\'') != -1 || symbolName.indexOf('"') != -1;
+
+				if (symbolName.startsWith("#include")) { 
+					// handle c/c++ include directive as CodeMirror return the whole line as a meta  
+					symbolName = symbolName.substring("#include".length()).trim();
+				}
+
+				boolean canBePath = symbolName.indexOf('\'') != -1 || symbolName.indexOf('"') != -1;
+				// normalize the symbol
 				String charsToStrip = "@'\"./\\";
 				symbolName = StringUtils.stripEnd(StringUtils.stripStart(symbolName, charsToStrip), charsToStrip);
 				symbolName = StringUtils.replace(symbolName, "\\", "/");
+				
 				symbolHits.clear();
 				
 				// do this check to avoid TooGeneralQueryException
@@ -229,7 +236,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						// then find in other files for public symbols
-						SourceContext sourceContext = new SourceContext(blob);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							ObjectId commit = depotModel.getObject().getRevCommit(revision);
@@ -240,7 +246,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.primary(true)
 										.local(false)
 										.caseSensitive(true)
-										.sourceContext(sourceContext)
 										.count(QUERY_ENTRIES)
 										.build();
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
@@ -251,12 +256,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.primary(false)
 										.local(false)
 										.caseSensitive(true)
-										.sourceContext(sourceContext)
 										.count(QUERY_ENTRIES - symbolHits.size())
 										.build();
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 							}
-							if (isString && symbolHits.size() < QUERY_ENTRIES) {
+							if (canBePath && symbolHits.size() < QUERY_ENTRIES) {
 								query = new PathQuery(null, symbolName, QUERY_ENTRIES - symbolHits.size());
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 							}

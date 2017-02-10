@@ -173,6 +173,7 @@ public class DefaultIndexManager implements IndexManager {
 						&& (treeWalk.getTreeCount() == 1 || !treeWalk.idEqual(0, 1))) {
 					ObjectId blobId = treeWalk.getObjectId(0);
 					String blobPath = treeWalk.getPathString();
+					String blobName = treeWalk.getNameString();
 					
 					BooleanQuery query = new BooleanQuery();
 					query.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
@@ -207,7 +208,7 @@ public class DefaultIndexManager implements IndexManager {
 						checked++;
 					}
 	
-					SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobPath);
+					SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
 					String currentBlobIndexVersion = getCurrentBlobIndexVersion(extractor);
 					String blobIndexVersion = blobIndexVersionRef.get();
 					if (blobIndexVersion != null) {
@@ -267,7 +268,7 @@ public class DefaultIndexManager implements IndexManager {
 				
 				if (extractor != null) {
 					try {
-						List<Symbol> symbols = extractor.extract(content);
+						List<Symbol> symbols = extractor.extract(blobName, content);
 						for (Symbol symbol: symbols) {
 							String fieldValue = symbol.getName();
 							if (fieldValue != null && symbol.isSearchable()) {

@@ -43,7 +43,10 @@ public class SymbolHit extends QueryHit {
 	
 	@Override
 	public String getNamespace() {
-		return symbol.getNamespace();
+		if (symbol.getParent() != null)
+			return symbol.getParent().getFQN();
+		else
+			return null;
 	}
 
 }
