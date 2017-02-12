@@ -44,7 +44,6 @@ import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.SymbolHit;
 import com.gitplex.server.search.query.BlobQuery;
 import com.gitplex.server.search.query.PathQuery;
-import com.gitplex.server.search.query.SourceContext;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
@@ -229,7 +228,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						// then find in other files for public symbols
-						SourceContext sourceContext = new SourceContext(blob);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							ObjectId commit = depotModel.getObject().getRevCommit(revision);
@@ -240,7 +238,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.primary(true)
 										.local(false)
 										.caseSensitive(true)
-										.sourceContext(sourceContext)
 										.count(QUERY_ENTRIES)
 										.build();
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
@@ -251,7 +248,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.primary(false)
 										.local(false)
 										.caseSensitive(true)
-										.sourceContext(sourceContext)
 										.count(QUERY_ENTRIES - symbolHits.size())
 										.build();
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));

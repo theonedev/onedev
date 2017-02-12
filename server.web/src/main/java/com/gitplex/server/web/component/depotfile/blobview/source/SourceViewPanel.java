@@ -137,10 +137,11 @@ public class SourceViewPanel extends BlobViewPanel {
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		Preconditions.checkArgument(blob.getText() != null);
 		
-		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(context.getBlobIdent().path);
+		String blobName = context.getBlobIdent().getName();
+		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
 		if (extractor != null) {
 			try {
-				symbols.addAll(extractor.extract(null, blob.getText().getContent()));
+				symbols.addAll(extractor.extract(blob.getText().getContent()));
 			} catch (ExtractException e) {
 				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
 			}

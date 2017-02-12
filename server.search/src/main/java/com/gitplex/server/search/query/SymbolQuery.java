@@ -42,11 +42,9 @@ public class SymbolQuery extends BlobQuery {
 	
 	private final String fileNames;
 	
-	private final SourceContext sourceContext;
-	
 	private SymbolQuery(String term, @Nullable String excludeTerm, @Nullable String excludeBlobPath, 
 			@Nullable Boolean primary, @Nullable Boolean local, boolean caseSensitive, @Nullable String directory, 
-			@Nullable String fileNames, @Nullable SourceContext sourceContext, int count) {
+			@Nullable String fileNames, int count) {
 		super(directory, count);
 		
 		this.term = term;
@@ -56,7 +54,6 @@ public class SymbolQuery extends BlobQuery {
 		this.local = local;
 		this.caseSensitive = caseSensitive;
 		this.fileNames = fileNames;
-		this.sourceContext = sourceContext;
 	}
  
 	@Override
@@ -95,8 +92,7 @@ public class SymbolQuery extends BlobQuery {
 						}
 						if (WildcardUtils.matchString(normalizedTerm, normalizedSymbolName)
 								&& (normalizedExcludeTerm == null || !normalizedSymbolName.equals(normalizedExcludeTerm))
-								&& (excludeBlobPath == null || !excludeBlobPath.equals(blobPath))
-								&& (sourceContext == null || sourceContext.maybeUsing(symbol))) {
+								&& (excludeBlobPath == null || !excludeBlobPath.equals(blobPath))) {
 							Range matchRange = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
 							hits.add(new SymbolHit(blobPath, symbol, matchRange));
 						}
@@ -157,8 +153,6 @@ public class SymbolQuery extends BlobQuery {
 		
 		private String fileNames;
 		
-		private SourceContext sourceContext;
-		
 		public Builder term(String term) {
 			this.term = term;
 			return this;
@@ -204,16 +198,11 @@ public class SymbolQuery extends BlobQuery {
 			return this;
 		}
 		
-		public Builder sourceContext(SourceContext sourceContext) {
-			this.sourceContext = sourceContext;
-			return this;
-		}
-		
 		public SymbolQuery build() {
 			Preconditions.checkArgument(term!=null, "Query term should be specified");
 			Preconditions.checkArgument(count!=0, "Query count should be specified");
 			return new SymbolQuery(term, excludeTerm, excludeBlobPath, primary, local, 
-					caseSensitive, directory, fileNames, sourceContext, count);
+					caseSensitive, directory, fileNames, count);
 		}
 		
 	}
