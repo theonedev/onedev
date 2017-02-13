@@ -4,7 +4,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>gitplex</artifactId>  
-        <version>1.0-EAP-build25</version> 
+        <version>1.0-EAP-build26</version> 
     </parent>  
     <artifactId>commons.wicket</artifactId>  
     <build> 
@@ -76,37 +76,37 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.loader</artifactId>  
-            <version>1.0-EAP-build25</version> 
+            <version>1.0-EAP-build26</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.validation</artifactId>  
-            <version>1.0-EAP-build25</version> 
+            <version>1.0-EAP-build26</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.shiro</artifactId>  
-            <version>1.0-EAP-build25</version> 
+            <version>1.0-EAP-build26</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.jetty</artifactId>  
-            <version>1.0-EAP-build25</version> 
+            <version>1.0-EAP-build26</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.hibernate</artifactId>  
-            <version>1.0-EAP-build25</version> 
+            <version>1.0-EAP-build26</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.markdown</artifactId>  
-            <version>1.0-EAP-build25</version> 
+            <version>1.0-EAP-build26</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>commons.antlr</artifactId>  
-            <version>1.0-EAP-build25</version> 
+            <version>1.0-EAP-build26</version> 
         </dependency> 
 		<dependency>
 			<groupId>org.webjars.npm</groupId>
