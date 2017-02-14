@@ -1,0 +1,45 @@
+<wicket:extend>
+	<div class="authorization list">
+		<div class="head clearfix">
+			<div wicket:id="filter" class="pull-left filter btn-group">
+				<a wicket:id="selection" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="clear" class="btn btn-default" title="Clear privilege filter"><i class="fa fa-times"></i></a>
+			</div>
+			<div class="pull-left">
+				<input wicket:id="addNew" type="hidden" class="form-control"></input>
+			</div>
+			<div class="pull-left">
+				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
+			</div>
+		</div>
+		<table wicket:id="teams" class="teams table table-hover table-condensed">
+			<thead>
+				<tr>
+					<th class="name">Team Name</th>
+					<th class="privilege">Privilege</th>
+					<th class="actions"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="teams">
+					<td class="name">
+						<a wicket:id="link"><span wicket:id="name"></span></a>
+						<div wicket:id="greaterPrivileges" class="note">
+							Some members have greater privileges. <a wicket:id="detail">View details</a>
+						</div>
+					</td>
+					<td class="privilege">
+						<a wicket:id="privilege" class="btn btn-default btn-xs"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+					</td>
+					<td class="actions">
+						<a wicket:id="remove" title="Remove authorization"><i class="fa fa-times"></i></a>
+						<a wicket:id="undoRemove" title="Do not remove"><i class="fa fa-undo"></i></a>
+						<span wicket:id="pendingRemoval" class="label label-danger">Pending removal</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>	
+		<div wicket:id="noTeams" class="alert alert-warning">No teams found</div>
+		<div wicket:id="tip" class="help-block"></div>
+	</div>
+</wicket:extend>

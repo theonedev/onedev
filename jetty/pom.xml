@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+    <modelVersion>4.0.0</modelVersion>  
+    <parent> 
+        <groupId>com.gitplex</groupId>  
+        <artifactId>server-parent</artifactId>  
+        <version>1.0-EAP-build26</version> 
+		<relativePath>../parent</relativePath>
+    </parent>  
+    <artifactId>server-jetty</artifactId>  
+    <build> 
+        <plugins> 
+            <plugin> 
+                <groupId>com.gitplex</groupId>  
+                <artifactId>plugin-maven</artifactId> 
+            </plugin>  
+            <plugin> 
+                <artifactId>maven-source-plugin</artifactId> 
+            </plugin>  
+            <plugin> 
+                <artifactId>maven-javadoc-plugin</artifactId> 
+            </plugin> 
+        </plugins> 
+    </build>  
+    <dependencies> 
+        <dependency> 
+            <groupId>org.eclipse.jetty</groupId>  
+            <artifactId>jetty-server</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.eclipse.jetty</groupId>  
+            <artifactId>jetty-servlets</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.eclipse.jetty</groupId>  
+            <artifactId>jetty-servlet</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.eclipse.jetty.websocket</groupId>  
+            <artifactId>websocket-server</artifactId> 
+        </dependency> 
+    </dependencies>  
+    <properties> 
+        <moduleClass>com.gitplex.commons.jetty.JettyModule</moduleClass> 
+    </properties> 
+</project>

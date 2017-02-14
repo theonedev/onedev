@@ -1,0 +1,44 @@
+<wicket:extend>
+	<div class="team member list">
+		<div class="head clearfix">
+			<div class="pull-left">
+				<input wicket:id="searchMembers" class="form-control search" placeholder="Search members"></input>
+			</div>
+			<div class="pull-left">
+				<input wicket:id="addNew" type="hidden" class="form-control"></input>
+			</div>
+			<div class="pull-left">
+				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
+			</div>
+		</div>
+		<table wicket:id="members" class="members table table-hover table-condensed">
+			<thead>
+				<tr>
+					<th class="name">Member Name</th>
+					<th class="actions"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="members">
+					<td class="name">
+						<a wicket:id="avatarLink"><img wicket:id="avatar"></img></a>
+						<a wicket:id="nameLink"><span wicket:id="name"></span></a>
+					</td>
+					<td class="actions">
+						<a wicket:id="remove" title="Remove from team"><i class="fa fa-times"></i></a>
+						<a wicket:id="undoRemove" title="Do not remove"><i class="fa fa-undo"></i></a>
+						<span wicket:id="pendingRemoval" class="label label-danger">Pending removal</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>	
+		<div class="center"><ul wicket:id="pageNav"></ul></div>
+		<div wicket:id="noMembers" class="alert alert-warning">No members found</div>
+		<wicket:enclosure child="organizationMembers">
+		<div class="help-block">
+		<i class="fa fa-info-circle"></i> 
+		Users need to be added as <a wicket:id="organizationMembers">organization members</a> before they can be added to team
+		</div>
+		</wicket:enclosure>
+	</div>
+</wicket:extend>

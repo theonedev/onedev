@@ -1,0 +1,8 @@
+.repository-and-revision {
+	white-space: nowrap;
+}
+.repository-and-revision>a {
+	color: #444;
+	text-decoration: none;
+	font-size: 16px;
+}

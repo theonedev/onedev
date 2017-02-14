@@ -1,0 +1,44 @@
+<wicket:panel>
+	<table class="code-comments">
+		<tr>
+			<td class="filter">
+				<div class="head">Filter options</div>
+				<div class="body">
+					<div class="btn-group shortcuts">
+						<a wicket:id="myComments" class="btn btn-sm btn-default">My</a>
+						<a wicket:id="myUnresolvedComments" class="btn btn-sm btn-default">My unresolved</a>
+						<a wicket:id="unresolvedComments" class="btn btn-sm btn-default">Unresolved</a>
+						<a wicket:id="allComments" class="btn btn-sm btn-default">All</a>
+					</div>
+					<form wicket:id="filterForm">
+						<div wicket:id="editor" class="nofocus"></div>
+						<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
+					</form>
+				</div>
+			</td>
+			<td class="spacing">&nbsp;</td>
+			<td class="result">
+				<div wicket:id="alert" class="alert alert-warning"></div>
+				<table wicket:id="comments"></table>
+			</td>
+		</tr>
+	</table>
+	<wicket:fragment wicket:id="commentFrag">
+		<div class="first-line">
+			<a wicket:id="title" class="title"><span wicket:id="label"></span></a> 
+			<span wicket:id="resolved" title="This comment is resolved" class="resolved fa fa-check-circle"></span>
+		</div>
+		<div class="second-line">
+			commented by 
+			<a wicket:id="user" class="user"></a>
+			on 
+			<a wicket:id="file" class="file"><span wicket:id="label"></span></a>
+			<span wicket:id="date"></span>
+		</div>
+		<div wicket:id="lastEvent" class="third-line">
+			<a wicket:id="user" class="user"></a>	
+			<span wicket:id="description"></span>
+			<span wicket:id="date"></span>
+		</div>
+	</wicket:fragment>
+</wicket:panel>

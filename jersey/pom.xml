@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
+    <modelVersion>4.0.0</modelVersion>  
+    <artifactId>server-jersey</artifactId>  
+    <parent> 
+        <groupId>com.gitplex</groupId>  
+        <artifactId>server-parent</artifactId>  
+        <version>1.0-EAP-build26</version> 
+		<relativePath>../parent</relativePath>
+    </parent>  
+    <build> 
+        <plugins> 
+            <plugin> 
+                <groupId>com.gitplex</groupId>  
+                <artifactId>plugin-maven</artifactId> 
+            </plugin>  
+            <!-- Uncomment below if you'd like to publish an archetype based on your 
+				plugin -->  
+            <!--plugin> <artifactId>maven-archetype-plugin</artifactId> </plugin -->  
+            <plugin> 
+                <artifactId>maven-source-plugin</artifactId> 
+            </plugin>  
+            <plugin> 
+                <artifactId>maven-javadoc-plugin</artifactId> 
+            </plugin> 
+        </plugins> 
+    </build>  
+    <dependencies> 
+        <dependency> 
+            <groupId>com.gitplex</groupId>  
+            <artifactId>server-validation</artifactId>  
+            <version>1.0-EAP-build26</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.gitplex</groupId>  
+            <artifactId>server-jackson</artifactId>  
+            <version>1.0-EAP-build26</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.glassfish.jersey.containers</groupId>  
+            <artifactId>jersey-container-servlet</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.glassfish.jersey.ext</groupId>  
+            <artifactId>jersey-bean-validation</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.glassfish.hk2</groupId>  
+            <artifactId>guice-bridge</artifactId>  
+            <version>2.4.0-b06</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>com.gitplex</groupId>  
+            <artifactId>server-shiro</artifactId>  
+            <version>1.0-EAP-build26</version> 
+        </dependency> 
+    </dependencies>  
+    <properties> 
+        <moduleClass>com.gitplex.commons.jersey.JerseyModule</moduleClass> 
+    </properties> 
+</project>

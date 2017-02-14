@@ -1,0 +1,39 @@
+.depot.more-info {
+	padding: 20px;
+	width: 600px;
+}
+.depot.more-info>div {
+	margin-bottom: 20px;
+}
+.depot.more-info>.general {
+	border-bottom: 1px solid #ddd;
+	padding-bottom: 20px;
+	font-size: 20px; 
+}
+.depot.more-info>.general>a {
+	color: #777;
+}
+.depot.more-info>.general>span {
+	margin-right: 16px;
+}
+.depot.more-info>.description {
+	border: 1px solid #DDD;
+	padding: 20px 20px 10px 20px;
+	border-radius: 4px;
+	background: #F5F5F5;
+}
+.depot.more-info>.metrics>a, .depot.more-info>.metrics>span {
+	font-size: 16px;
+	color: #444;
+	margin-right: 20px;
+}
+.depot.more-info>.clone {
+	margin-bottom: 20px;
+}
+.depot.more-info>.clone input {
+	background: white;
+}
+
+.modal-content>.fork-options {
+	padding: 20px;
+}

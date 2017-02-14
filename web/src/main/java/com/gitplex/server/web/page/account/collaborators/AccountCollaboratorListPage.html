@@ -1,0 +1,24 @@
+<wicket:extend>
+	<div class="collaborator list">
+		<div class="head">
+			<input wicket:id="searchCollaborators" class="form-control search" placeholder="Search collaborators"></input>
+		</div>
+		<table wicket:id="collaborators" class="collaborators table table-hover table-condensed">
+			<thead>
+				<tr>
+					<th class="name">User Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="collaborators">
+					<td class="name">
+						<a wicket:id="avatarLink"><img wicket:id="avatar"></img></a>
+						<a wicket:id="nameLink"><span wicket:id="name"></span></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>	
+		<div class="center"><ul wicket:id="pageNav"></ul></div>
+		<div wicket:id="noCollaborators" class="alert alert-warning">No collaborators found</div>
+	</div>
+</wicket:extend>

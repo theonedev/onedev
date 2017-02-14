@@ -1,0 +1,19 @@
+<wicket:panel>
+	<div class="gate-keeper-editor">
+		<div class="modal-header">
+			<div class="clearfix">
+				<div wicket:id="icon" class="pull-left fa fa-lg "></div>
+				<div wicket:id="name" class="gate-keeper-name pull-left"></div>
+			</div>
+			<div wicket:id="description" class="gate-keeper-description"></div>
+		</div>
+		<form wicket:id="form" onsubmit="return false" class="leave-confirm">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div wicket:id="beanEditor" class="modal-body"></div>
+			<div class="modal-footer">
+				<input type="submit" wicket:id="save" class="btn btn-primary dirty-aware" value="Save"></input>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>			
+			</div>
+		</form>
+	</div>
+</wicket:panel>

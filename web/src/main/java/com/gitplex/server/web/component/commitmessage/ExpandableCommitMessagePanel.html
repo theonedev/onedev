@@ -1,0 +1,11 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<span class="commit-message">
+		<a wicket:id="link" class="summary"><span wicket:id="label"></span></a> 
+		<a class="ellipsis-expander" href="javascript:void(0);" title="Toggle detail message" onclick="$(this).next().toggle(); $(window).resize();" wicket:id="toggle">
+			<i class="fa fa-ellipsis-h"></i>
+		</a>
+		<pre wicket:id="detail" class="detail"></pre>
+	</span>
+</wicket:panel>
+</html>

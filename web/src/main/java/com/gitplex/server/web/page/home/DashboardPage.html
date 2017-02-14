@@ -1,0 +1,14 @@
+<wicket:extend>
+	<div id="dashboard">
+		<div class="search">
+			<input wicket:id="search" class="form-control focusable" placeholder="Search..."></input>
+		</div>
+		<ul wicket:id="depots" class="list-unstyled">
+			<li wicket:id="depots">
+				<a wicket:id="link"><i class="fa fa-ext fa-repo"></i> <span wicket:id="name"></span></a> 
+			</li>
+		</ul>	
+		<div class="center"><ul wicket:id="depotsPageNav"></ul></div>
+		<div wicket:id="noDepots" class="alert alert-warning">No repositories found</div>
+	</div>
+</wicket:extend>

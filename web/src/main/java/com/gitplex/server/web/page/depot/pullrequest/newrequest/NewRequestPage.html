@@ -1,0 +1,118 @@
+<wicket:extend>
+	<div id="new-request">
+		<div class="head">Open Pull Request</div>
+		<div class="body">
+			<table class="branches">
+				<tr>
+					<td class="target branch">
+						<div class="title clearfix">
+							<label class="pull-left">Target</label>
+						</div>
+						<div wicket:id="target" class="selector"></div>
+						<div class="message">
+							<a wicket:id="targetCommitLink"><span wicket:id="message"></span></a>
+						</div>
+					</td>
+					<td class="action">
+						<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-exchange"></i></a>
+					</td>
+					<td class="source branch">
+						<div class="title">
+							<label>Source</label>
+						</div>
+						<div wicket:id="source" class="selector"></div>
+						<div class="message">
+							<a wicket:id="sourceCommitLink"><span wicket:id="message"></span></a>
+						</div>
+					</td>
+				</tr>
+			</table>
+			<div wicket:id="status" class="status"></div>
+			<ul wicket:id="tabs" class="nav nav-tabs"></ul>
+			<div wicket:id="tabPanel" class="tab-panel"></div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="openedFrag">
+		<div class="alert alert-info">
+			<div>Pull request #<span wicket:id="no"></span> is already open for this comparison:</div> 
+			<b><a wicket:id="link"><span wicket:id="label"></span></a></b>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="sameBranchFrag">
+		<div class="alert alert-warning">
+			<div class="summary">
+				<span class="fa fa-lg fa-warning"></span>
+				<span>Please select different branches to integrate.</span>
+			</div>
+		</div>		
+	</wicket:fragment>
+	<wicket:fragment wicket:id="integratedFrag">
+		<div class="alert alert-success">
+			<div class="summary">
+				<span class="fa fa-lg fa-check"></span>
+				<a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
+				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
+			</div>
+		</div>		
+	</wicket:fragment>
+	<wicket:fragment wicket:id="rejectedFrag">
+		<div class="alert alert-danger">
+			<div class="summary">
+				<span class="fa fa-lg fa-warning"></span>
+				<span class="message">Gatekeeper of target repository rejects the pull request for below reasons:</span>
+			</div>
+			<ul class="detail">
+				<li wicket:id="reasons"><span wicket:id="reason"></span></li>
+			</ul>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="canSendFrag">
+		<div class="can-send">
+			<form wicket:id="form">
+				<table>
+					<tr class="title">
+						<td class="name">Title <span class="required"></span></td>
+						<td wicket:id="title" class="value">
+							<input wicket:id="title" type="text" class="form-control focusable" placeholder="Input title here">
+							<div wicket:id="feedback"></div>
+						</td>
+					</tr>
+					<tr class="description">
+						<td class="name">Description</td>
+						<td class="value"><textarea wicket:id="comment" rows="5" class="form-control focusable"></textarea></td>
+					</tr>
+					<tr class="assignee">
+						<td class="name">Assignee <span class="required"></span></td>
+						<td wicket:id="assignee" class="value">
+							<input wicket:id="assignee" type="hidden"></input>
+							<div wicket:id="feedback"></div>
+							<div class="help-block">
+								<i class="fa fa-info-circle"></i> Assignee is responsible for integration of the 
+								pull request after it passes gatekeeper check.
+							</div>
+						</td>
+					</tr>
+					<tr class="reviewers">
+						<td class="name">Reviewers</td>
+						<td wicket:id="reviewers" class="value">
+							<ul class="clearfix list-unstyled">
+								<li wicket:id="reviewers" class="pull-left">
+									<a wicket:id="avatar"></a>
+								</li>
+								<wicket:enclosure child="addReviewer">
+								<li class="pull-left"><input wicket:id="addReviewer" type="hidden"></input></li>
+								</wicket:enclosure>
+							</ul>
+							<div wicket:id="prePopulateHint" class="help-block">
+								<i class="fa fa-info-circle"></i> GitPlex pre-populated some reviewers above as suggested 
+								by gatekeeper of the repository. You may adjust the list by removing existing (hovering mouse 
+								over reviewer avatar) or adding more.
+							</div>
+						</td>
+					</tr>
+				</table>
+				<input wicket:id="send" type="submit" class="btn btn-primary" value="Send Pull Request"></input>
+			</form>
+		</div>	
+	</wicket:fragment>
+</wicket:extend>

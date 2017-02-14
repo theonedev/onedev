@@ -1,0 +1,52 @@
+#depot-head .separator {
+	margin: 0 8px;
+}
+#depot-head .more-info {
+	background: #444;
+	padding: 0 8px;
+	border-radius: 4px;
+	font-size: 14px;
+	margin-top: 6px;
+	margin-left: 8px;
+}
+#depot-head .more-info:hover, #depot-head .more-info.dropdown-open {
+	background: #777;
+}
+
+#depot>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
+	display: block;
+	margin-top: -20px;
+	text-align: right;
+	font-size: 20px;
+	padding-right: 20px;
+	border-bottom: 1px solid #BBB;
+	text-decoration: none;
+	color: #666;
+	height: 31px;
+}
+#depot>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
+	color: #333;
+}
+#depot>.sidebar>table>tbody>tr>td.nav>.mini-toggle>span:before {
+	font-family: "FontAwesome";
+	content: "\f100";
+}
+#depot>.sidebar>table>tbody>tr>td.mini.nav>.mini-toggle>span:before {
+	content: "\f101";
+}
+#depot>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
+	background: #EEE;
+}
+#depot>.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
+	width: 220px;
+}
+#depot>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
+	width: auto;
+}
+#depot>.sidebar>table>tbody>tr>td.mini.nav {
+	width: 40px;
+}
+#depot>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text,
+#depot>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.badge {
+	display: none;
+}
