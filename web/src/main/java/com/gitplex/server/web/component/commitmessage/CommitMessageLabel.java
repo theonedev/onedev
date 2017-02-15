@@ -5,9 +5,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.unbescape.html.HtmlEscape;
 
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.commitmessagetransform.CommitMessageTransformer;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.web.util.commitmessagetransform.CommitMessageTransformer;
 
 @SuppressWarnings("serial")
 public class CommitMessageLabel extends Label {

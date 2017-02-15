@@ -7,10 +7,10 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.depotselector.DepotSelector;
 
 @SuppressWarnings("serial")

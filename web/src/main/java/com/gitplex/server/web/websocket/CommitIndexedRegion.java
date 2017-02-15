@@ -2,7 +2,7 @@ package com.gitplex.server.web.websocket;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.commons.wicket.websocket.WebSocketRegion;
+import com.gitplex.server.web.websocket.WebSocketRegion;
 
 public class CommitIndexedRegion implements WebSocketRegion {
 

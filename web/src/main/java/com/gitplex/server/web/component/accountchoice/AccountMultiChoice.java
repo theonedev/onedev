@@ -6,9 +6,9 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.component.select2.Select2MultiChoice;
-import com.gitplex.server.core.entity.Account;
+import com.gitplex.server.entity.Account;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
+import com.gitplex.server.web.component.select2.Select2MultiChoice;
 
 public class AccountMultiChoice extends Select2MultiChoice<Account> {
 

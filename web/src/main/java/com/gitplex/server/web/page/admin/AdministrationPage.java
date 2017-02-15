@@ -8,9 +8,9 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 
-import com.gitplex.commons.wicket.component.tabbable.PageTab;
-import com.gitplex.commons.wicket.component.tabbable.Tabbable;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.component.tabbable.PageTab;
+import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.admin.account.NewUserPage;
 import com.gitplex.server.web.page.admin.account.UserListPage;
 import com.gitplex.server.web.page.layout.LayoutPage;

@@ -7,15 +7,15 @@ import java.util.Set;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestReviewInvitation;
-import com.gitplex.server.core.manager.PullRequestReviewInvitationManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestReviewInvitation;
+import com.gitplex.server.manager.PullRequestReviewInvitationManager;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.RemoveableAvatar;
-import com.gitplex.server.web.model.EntityModel;
-import com.gitplex.server.web.model.UserModel;
+import com.gitplex.server.web.util.model.EntityModel;
+import com.gitplex.server.web.util.model.UserModel;
 
 @SuppressWarnings("serial")
 public class ReviewerAvatar extends RemoveableAvatar {

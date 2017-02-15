@@ -6,8 +6,8 @@ import org.apache.wicket.markup.html.image.Image;
 
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewPanel;
-import com.gitplex.server.web.resource.BlobResource;
-import com.gitplex.server.web.resource.BlobResourceReference;
+import com.gitplex.server.web.util.resource.BlobResource;
+import com.gitplex.server.web.util.resource.BlobResourceReference;
 
 @SuppressWarnings("serial")
 public class ImageViewPanel extends BlobViewPanel {

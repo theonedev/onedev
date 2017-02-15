@@ -10,13 +10,13 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.util.ReflectionUtils;
-import com.gitplex.commons.wicket.component.modal.ModalPanel;
-import com.gitplex.commons.wicket.editable.EditableUtils;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.gatekeeper.GateKeeper;
-import com.gitplex.server.core.manager.DepotManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.gatekeeper.GateKeeper;
+import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.util.ReflectionUtils;
+import com.gitplex.server.util.editable.EditableUtils;
+import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.page.depot.setting.DepotSettingPage;
 
 import jersey.repackaged.com.google.common.collect.Lists;

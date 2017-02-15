@@ -10,17 +10,17 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Preconditions;
-import com.gitplex.commons.antlr.codeassist.InputSuggestion;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.RefInfo;
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.util.match.PatternApplied;
-import com.gitplex.commons.util.match.WildcardUtils;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.CommitInfoManager;
+import com.gitplex.codeassist.InputSuggestion;
 import com.gitplex.jsymbol.Range;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.manager.CommitInfoManager;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.util.match.PatternApplied;
+import com.gitplex.server.util.match.WildcardUtils;
+import com.google.common.base.Preconditions;
 
 public class SuggestionUtils {
 	

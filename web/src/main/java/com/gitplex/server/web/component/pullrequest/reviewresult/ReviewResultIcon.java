@@ -7,9 +7,9 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.behavior.dropdown.DropdownHover;
-import com.gitplex.commons.wicket.component.floating.AlignPlacement;
-import com.gitplex.server.core.entity.PullRequestReview;
+import com.gitplex.server.entity.PullRequestReview;
+import com.gitplex.server.web.behavior.dropdown.DropdownHover;
+import com.gitplex.server.web.component.floating.AlignPlacement;
 
 @SuppressWarnings("serial")
 public class ReviewResultIcon extends WebComponent {

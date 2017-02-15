@@ -8,8 +8,8 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.util.string.Strings;
 
-import com.gitplex.commons.util.WordUtils;
-import com.gitplex.commons.wicket.component.MultilineLabel;
+import com.gitplex.server.util.WordUtils;
+import com.gitplex.server.web.component.MultilineLabel;
 import com.gitplex.server.web.page.home.DashboardPage;
 
 @SuppressWarnings("serial")

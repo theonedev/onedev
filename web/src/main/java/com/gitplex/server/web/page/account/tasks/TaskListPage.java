@@ -22,18 +22,18 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.hibernate.AbstractEntity;
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.hibernate.dao.EntityCriteria;
-import com.gitplex.commons.wicket.component.datatable.DefaultDataTable;
-import com.gitplex.commons.wicket.component.datatable.EntityDataProvider;
-import com.gitplex.commons.wicket.component.datatable.SelectionColumn;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestTask;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestTask;
+import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.BranchLink;
+import com.gitplex.server.web.component.datatable.DefaultDataTable;
+import com.gitplex.server.web.component.datatable.EntityDataProvider;
+import com.gitplex.server.web.component.datatable.SelectionColumn;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
@@ -155,7 +155,7 @@ public class TaskListPage extends AccountLayoutPage {
 		});
 		
 		DataTable<PullRequestTask, String> dataTable = 
-				new DefaultDataTable<PullRequestTask, String>("tasks", columns, dataProvider, Constants.DEFAULT_PAGE_SIZE);
+				new DefaultDataTable<PullRequestTask, String>("tasks", columns, dataProvider, WebConstants.DEFAULT_PAGE_SIZE);
 		dataTable.setVisible(dataTable.getRowCount() != 0);
 		add(dataTable);
 		

@@ -10,14 +10,14 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.commons.wicket.component.select2.ResponseFiller;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.OrganizationMembership;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.OrganizationMembership;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.select2.Response;
+import com.gitplex.server.web.component.select2.ResponseFiller;
 
 public class AdministrativeAccountChoiceProvider extends AbstractAccountChoiceProvider {
 
@@ -26,7 +26,7 @@ public class AdministrativeAccountChoiceProvider extends AbstractAccountChoicePr
 	@Override
 	public void query(String term, int page, Response<Account> response) {
 		Account loginUser = Preconditions.checkNotNull(SecurityUtils.getAccount());
-		int pageSize = Constants.DEFAULT_PAGE_SIZE;
+		int pageSize = WebConstants.DEFAULT_PAGE_SIZE;
 		if (loginUser.isAdministrator()) {
 			AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
 			int first = page * pageSize;

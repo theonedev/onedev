@@ -7,9 +7,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.AccountManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.web.page.account.AccountPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 

@@ -11,15 +11,15 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.commons.hibernate.dao.EntityCriteria;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.commons.wicket.component.select2.ResponseFiller;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.OrganizationMembership;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.OrganizationMembership;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceProvider;
+import com.gitplex.server.web.component.select2.Response;
+import com.gitplex.server.web.component.select2.ResponseFiller;
 
 public class NonMemberChoiceProvider extends AccountChoiceProvider {
 
@@ -52,7 +52,7 @@ public class NonMemberChoiceProvider extends AccountChoiceProvider {
 				nonMembers.add(user);
 		}
 
-		new ResponseFiller<Account>(response).fill(nonMembers, page, Constants.DEFAULT_PAGE_SIZE);
+		new ResponseFiller<Account>(response).fill(nonMembers, page, WebConstants.DEFAULT_PAGE_SIZE);
 	}
 
 	@Override

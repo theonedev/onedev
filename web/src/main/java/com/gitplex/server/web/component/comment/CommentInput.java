@@ -21,16 +21,16 @@ import org.hibernate.criterion.Restrictions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.hibernate.dao.EntityCriteria;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.gitplex.commons.wicket.behavior.markdown.MarkdownBehavior;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.web.avatar.AvatarManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
+import com.gitplex.server.web.behavior.markdown.MarkdownBehavior;
+import com.gitplex.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
 public abstract class CommentInput extends TextArea<String> {

@@ -6,9 +6,9 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.commons.wicket.component.modal.ModalLink;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.component.modal.ModalLink;
 
 @SuppressWarnings("serial")
 public abstract class CreateTagLink extends ModalLink {

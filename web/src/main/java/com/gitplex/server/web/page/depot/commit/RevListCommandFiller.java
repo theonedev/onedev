@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 import org.unbescape.java.JavaEscape;
 
-import com.gitplex.commons.git.command.RevListCommand;
+import com.gitplex.server.git.command.RevListCommand;
 import com.gitplex.server.web.page.depot.commit.CommitQueryBaseListener;
 import com.gitplex.server.web.page.depot.commit.CommitQueryParser.AfterContext;
 import com.gitplex.server.web.page.depot.commit.CommitQueryParser.AuthorContext;

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Order;
 
-import com.gitplex.commons.util.WordUtils;
+import com.gitplex.server.util.WordUtils;
 
 public class SortOption implements Serializable {
 

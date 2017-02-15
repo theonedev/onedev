@@ -5,9 +5,9 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.shiro.authc.credential.PasswordService;
 
-import com.gitplex.calla.loader.AppLoader;
-import com.gitplex.commons.wicket.WicketUtils;
+import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.web.page.account.AccountPage;
+import com.gitplex.server.web.util.WicketUtils;
 
 public class OldPasswordValidator implements ConstraintValidator<OldPassword, String> {
 

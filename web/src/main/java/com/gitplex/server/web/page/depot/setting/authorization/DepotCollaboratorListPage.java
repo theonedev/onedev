@@ -23,27 +23,27 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.commons.wicket.component.select2.ResponseFiller;
-import com.gitplex.commons.wicket.component.select2.SelectToAddChoice;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.UserAuthorization;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.manager.UserAuthorizationManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.core.security.privilege.DepotPrivilege;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.UserAuthorization;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserAuthorizationManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.accountchoice.AbstractAccountChoiceProvider;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
-import com.gitplex.server.web.depotaccess.DepotAccess;
+import com.gitplex.server.web.component.select2.Response;
+import com.gitplex.server.web.component.select2.ResponseFiller;
+import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.page.account.collaborators.CollaboratorDepotListPage;
 import com.gitplex.server.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
 import com.gitplex.server.web.page.depot.setting.DepotSettingPage;
+import com.gitplex.server.web.util.depotaccess.DepotAccess;
 
 @SuppressWarnings("serial")
 public class DepotCollaboratorListPage extends DepotSettingPage {
@@ -144,7 +144,7 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 				
 				Collections.sort(collaborators);
 				
-				new ResponseFiller<Account>(response).fill(collaborators, page, Constants.DEFAULT_PAGE_SIZE);
+				new ResponseFiller<Account>(response).fill(collaborators, page, WebConstants.DEFAULT_PAGE_SIZE);
 			}
 
 		}) {

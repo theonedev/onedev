@@ -6,10 +6,10 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.floating.AlignPlacement;
-import com.gitplex.commons.wicket.component.floating.FloatingPanel;
-import com.gitplex.server.core.gatekeeper.GateKeeper;
+import com.gitplex.server.gatekeeper.GateKeeper;
+import com.gitplex.server.web.component.DropdownLink;
+import com.gitplex.server.web.component.floating.AlignPlacement;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
 abstract class GateKeeperLink extends DropdownLink {

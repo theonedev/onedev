@@ -2,7 +2,7 @@ package com.gitplex.server.web.websocket;
 
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
-import com.gitplex.commons.wicket.AjaxEvent;
+import com.gitplex.server.web.util.AjaxEvent;
 
 public class PullRequestChanged extends AjaxEvent {
 

@@ -7,11 +7,11 @@ import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.component.menu.MenuItem;
-import com.gitplex.commons.wicket.component.menu.MenuLink;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.web.resource.ArchiveResource;
-import com.gitplex.server.web.resource.ArchiveResourceReference;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.web.component.menu.MenuItem;
+import com.gitplex.server.web.component.menu.MenuLink;
+import com.gitplex.server.web.util.resource.ArchiveResource;
+import com.gitplex.server.web.util.resource.ArchiveResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class ArchiveMenuLink extends MenuLink {

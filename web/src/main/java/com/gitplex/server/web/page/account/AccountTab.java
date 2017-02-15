@@ -3,7 +3,7 @@ package com.gitplex.server.web.page.account;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.commons.wicket.component.tabbable.PageTab;
+import com.gitplex.server.web.component.tabbable.PageTab;
 
 @SuppressWarnings("serial")
 public class AccountTab extends PageTab {

@@ -4,13 +4,13 @@ import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 
-import com.gitplex.calla.loader.AppLoader;
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.commons.wicket.editable.BeanEditor;
-import com.gitplex.commons.wicket.editable.PathSegment;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.AccountManager;
+import com.gitplex.launcher.loader.AppLoader;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.server.web.editable.BeanEditor;
+import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")

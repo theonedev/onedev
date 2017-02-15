@@ -5,7 +5,7 @@ import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.gitplex.commons.git.BlobIdent;
+import com.gitplex.server.git.BlobIdent;
 
 @SuppressWarnings("serial")
 public class BlobIcon extends WebComponent {

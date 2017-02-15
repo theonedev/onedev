@@ -24,12 +24,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.RefInfo;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.behavior.InputChangeBehavior;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.server.web.behavior.InputChangeBehavior;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
 public abstract class BranchSelector extends Panel {

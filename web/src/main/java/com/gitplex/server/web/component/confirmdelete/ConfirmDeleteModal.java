@@ -3,7 +3,7 @@ package com.gitplex.server.web.component.confirmdelete;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.gitplex.commons.wicket.component.modal.ModalPanel;
+import com.gitplex.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
 public abstract class ConfirmDeleteModal extends ModalPanel {

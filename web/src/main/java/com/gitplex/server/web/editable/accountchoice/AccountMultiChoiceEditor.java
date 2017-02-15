@@ -9,15 +9,15 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.gitplex.commons.wicket.editable.ErrorContext;
-import com.gitplex.commons.wicket.editable.PathSegment;
-import com.gitplex.commons.wicket.editable.PropertyDescriptor;
-import com.gitplex.commons.wicket.editable.PropertyEditor;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.AccountManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceProvider;
 import com.gitplex.server.web.component.accountchoice.AccountMultiChoice;
+import com.gitplex.server.web.editable.ErrorContext;
+import com.gitplex.server.web.editable.PathSegment;
+import com.gitplex.server.web.editable.PropertyDescriptor;
+import com.gitplex.server.web.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
 public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {

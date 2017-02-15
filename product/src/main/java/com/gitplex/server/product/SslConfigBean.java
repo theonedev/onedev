@@ -1,6 +1,6 @@
 package com.gitplex.server.product;
 
-import com.gitplex.server.core.setting.SslConfig;
+import com.gitplex.server.util.serverconfig.SslConfig;
 
 class SslConfigBean implements SslConfig {
 

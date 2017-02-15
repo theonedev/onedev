@@ -11,9 +11,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.commons.wicket.editable.EditableUtils;
-import com.gitplex.server.core.gatekeeper.GateKeeper;
+import com.gitplex.server.gatekeeper.GateKeeper;
+import com.gitplex.server.util.editable.EditableUtils;
+import com.gitplex.server.web.editable.BeanContext;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

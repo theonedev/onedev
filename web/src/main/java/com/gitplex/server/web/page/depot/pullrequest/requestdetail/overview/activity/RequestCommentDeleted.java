@@ -2,7 +2,7 @@ package com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.act
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.gitplex.commons.wicket.AjaxEvent;
+import com.gitplex.server.web.util.AjaxEvent;
 
 public class RequestCommentDeleted extends AjaxEvent {
 

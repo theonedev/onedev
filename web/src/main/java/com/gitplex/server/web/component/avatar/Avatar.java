@@ -10,11 +10,11 @@ import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.gitplex.commons.wicket.behavior.TooltipBehavior;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.web.avatar.AvatarManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.web.behavior.TooltipBehavior;
+import com.gitplex.server.web.util.avatar.AvatarManager;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 

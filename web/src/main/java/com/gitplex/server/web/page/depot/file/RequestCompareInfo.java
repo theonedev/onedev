@@ -9,8 +9,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.commons.util.diff.WhitespaceOption;
-import com.gitplex.server.core.entity.support.CommentPos;
+import com.gitplex.server.entity.support.CommentPos;
+import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.google.common.base.Charsets;

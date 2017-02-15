@@ -10,12 +10,12 @@ import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.RefInfo;
-import com.gitplex.commons.wicket.component.select2.ChoiceProvider;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.select2.ChoiceProvider;
+import com.gitplex.server.web.component.select2.Response;
 
 @SuppressWarnings("serial")
 public class BranchChoiceProvider extends ChoiceProvider<String> {
@@ -39,8 +39,8 @@ public class BranchChoiceProvider extends ChoiceProvider<String> {
 		
 		Collections.sort(branches);
 
-		int first = page * Constants.DEFAULT_PAGE_SIZE;
-		int last = first + Constants.DEFAULT_PAGE_SIZE;
+		int first = page * WebConstants.DEFAULT_PAGE_SIZE;
+		int last = first + WebConstants.DEFAULT_PAGE_SIZE;
 		response.setHasMore(last<branches.size());
 		if (last > branches.size())
 			last = branches.size();

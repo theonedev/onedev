@@ -3,7 +3,7 @@ package com.gitplex.server.web.page.account.overview;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.core.entity.Account;
+import com.gitplex.server.entity.Account;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 
 @SuppressWarnings("serial")

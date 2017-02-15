@@ -2,7 +2,7 @@ package com.gitplex.server.web.component.diff.blob.image;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.gitplex.commons.git.BlobChange;
+import com.gitplex.server.git.BlobChange;
 
 @SuppressWarnings("serial")
 public class ImageDiffPanel extends Panel {

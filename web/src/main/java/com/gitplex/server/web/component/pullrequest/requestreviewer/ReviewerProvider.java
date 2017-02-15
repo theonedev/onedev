@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.accountchoice.AbstractAccountChoiceProvider;
+import com.gitplex.server.web.component.select2.Response;
 
 public class ReviewerProvider extends AbstractAccountChoiceProvider {
 
@@ -33,8 +33,8 @@ public class ReviewerProvider extends AbstractAccountChoiceProvider {
 		
 		reviewers.sort((user1, user2) -> user1.getDisplayName().compareTo(user2.getDisplayName()));
 
-		int first = page * Constants.DEFAULT_PAGE_SIZE;
-		int last = first + Constants.DEFAULT_PAGE_SIZE;
+		int first = page * WebConstants.DEFAULT_PAGE_SIZE;
+		int last = first + WebConstants.DEFAULT_PAGE_SIZE;
 		if (last > reviewers.size()) {
 			response.addAll(reviewers.subList(first, reviewers.size()));
 		} else {

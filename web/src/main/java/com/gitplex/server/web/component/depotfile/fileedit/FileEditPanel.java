@@ -23,25 +23,25 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.git.BlobChange;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.PathAndContent;
-import com.gitplex.commons.util.diff.WhitespaceOption;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.component.ViewStateAwareAjaxLink;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.support.TextRange;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.support.TextRange;
+import com.gitplex.server.git.Blob;
+import com.gitplex.server.git.BlobChange;
+import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.git.PathAndContent;
+import com.gitplex.server.util.diff.WhitespaceOption;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.server.web.component.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.component.depotfile.editsave.EditSavePanel;
 import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.revision.DiffViewMode;
 import com.gitplex.server.web.component.sourceformat.OptionChangeCallback;
 import com.gitplex.server.web.component.sourceformat.SourceFormatPanel;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
 public abstract class FileEditPanel extends Panel {

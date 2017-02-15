@@ -7,12 +7,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
 import com.gitplex.server.web.component.AccountLink;
-import com.gitplex.server.web.depotaccess.DepotAccess;
-import com.gitplex.server.web.depotaccess.PrivilegeSource;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.util.depotaccess.DepotAccess;
+import com.gitplex.server.web.util.depotaccess.PrivilegeSource;
 
 @SuppressWarnings("serial")
 public class PrivilegeSourcePanel extends Panel {

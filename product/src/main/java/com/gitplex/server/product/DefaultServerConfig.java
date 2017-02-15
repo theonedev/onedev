@@ -5,10 +5,10 @@ import java.io.File;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.gitplex.calla.bootstrap.Bootstrap;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.server.core.setting.ServerConfig;
-import com.gitplex.server.core.setting.SslConfig;
+import com.gitplex.launcher.bootstrap.Bootstrap;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.serverconfig.ServerConfig;
+import com.gitplex.server.util.serverconfig.SslConfig;
 
 @Singleton
 public class DefaultServerConfig implements ServerConfig {

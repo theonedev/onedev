@@ -23,19 +23,17 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.calla.loader.AppLoader;
-import com.gitplex.calla.loader.Plugin;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.floating.AlignPlacement;
-import com.gitplex.commons.wicket.websocket.WebSocketRegion;
-import com.gitplex.commons.wicket.websocket.WebSocketRenderBehavior;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.ConfigManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.launcher.loader.AppLoader;
+import com.gitplex.launcher.loader.Plugin;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.floating.AlignPlacement;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.page.account.overview.NewOrganizationPage;
 import com.gitplex.server.web.page.account.setting.ProfileEditPage;
@@ -47,6 +45,8 @@ import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
 import com.gitplex.server.web.websocket.TaskChangedRegion;
+import com.gitplex.server.web.websocket.WebSocketRegion;
+import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {

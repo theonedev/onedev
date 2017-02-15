@@ -20,13 +20,13 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.gitplex.commons.util.ContentDetector;
 import com.gitplex.jsymbol.Range;
 import com.gitplex.jsymbol.TokenPosition;
 import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.TextHit;
 import com.gitplex.server.search.query.regex.RegexLiterals;
+import com.gitplex.server.util.ContentDetector;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 

@@ -18,12 +18,12 @@ import org.apache.wicket.model.IModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.calla.loader.AppLoader;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.manager.ConfigManager;
-import com.gitplex.server.core.manager.MailManager;
+import com.gitplex.launcher.loader.AppLoader;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.web.WebSession;
 import com.gitplex.server.web.page.base.BasePage;
 

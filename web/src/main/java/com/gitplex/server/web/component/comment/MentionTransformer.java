@@ -3,9 +3,9 @@ package com.gitplex.server.web.component.comment;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Element;
 
-import com.gitplex.commons.markdown.extensionpoint.HtmlTransformer;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.util.markdown.MentionParser;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.util.markdown.HtmlTransformer;
+import com.gitplex.server.util.markdown.MentionParser;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 
 public class MentionTransformer extends MentionParser implements HtmlTransformer {

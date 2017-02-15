@@ -2,8 +2,8 @@ package com.gitplex.server.web.page.admin;
 
 import java.io.Serializable;
 
-import com.gitplex.commons.wicket.editable.annotation.Editable;
-import com.gitplex.server.core.setting.MailSetting;
+import com.gitplex.server.entity.support.setting.MailSetting;
+import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable
 public class MailSettingHolder implements Serializable {

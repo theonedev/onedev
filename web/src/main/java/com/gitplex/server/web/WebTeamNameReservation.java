@@ -2,7 +2,7 @@ package com.gitplex.server.web;
 
 import java.util.Set;
 
-import com.gitplex.server.core.util.validation.TeamNameReservation;
+import com.gitplex.server.util.validation.TeamNameReservation;
 import com.google.common.collect.Sets;
 
 public class WebTeamNameReservation implements TeamNameReservation {

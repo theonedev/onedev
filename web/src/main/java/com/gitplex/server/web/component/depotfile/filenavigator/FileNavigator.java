@@ -41,18 +41,18 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.commons.wicket.component.floating.AlignPlacement;
-import com.gitplex.commons.wicket.component.floating.FloatingPanel;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.BlobIcon;
+import com.gitplex.server.web.component.DropdownLink;
+import com.gitplex.server.web.component.PreventDefaultAjaxLink;
 import com.gitplex.server.web.component.depotfile.blobview.BlobNameChangeCallback;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
+import com.gitplex.server.web.component.floating.AlignPlacement;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
 public abstract class FileNavigator extends Panel {

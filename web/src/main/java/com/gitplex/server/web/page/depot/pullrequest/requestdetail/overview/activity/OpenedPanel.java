@@ -16,20 +16,20 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.hibernate.StaleStateException;
 
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.gitplex.commons.wicket.component.markdown.MarkdownEditSupport;
-import com.gitplex.commons.wicket.component.markdown.MarkdownPanel;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.manager.PullRequestManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
+import com.gitplex.server.web.component.markdown.MarkdownEditSupport;
+import com.gitplex.server.web.component.markdown.MarkdownPanel;
 import com.gitplex.server.web.util.DateUtils;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

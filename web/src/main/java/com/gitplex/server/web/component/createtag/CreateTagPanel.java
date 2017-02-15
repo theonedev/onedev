@@ -12,13 +12,13 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.security.SecurityUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.gatekeeper.checkresult.GateCheckResult;
-import com.gitplex.server.core.security.SecurityUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

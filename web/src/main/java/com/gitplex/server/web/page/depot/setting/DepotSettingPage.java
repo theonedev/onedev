@@ -8,9 +8,9 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.wicket.component.tabbable.PageTab;
-import com.gitplex.commons.wicket.component.tabbable.Tabbable;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.component.tabbable.PageTab;
+import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;

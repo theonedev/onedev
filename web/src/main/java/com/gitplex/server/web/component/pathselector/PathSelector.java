@@ -28,11 +28,11 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.BlobIcon;
+import com.gitplex.server.web.component.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
 public abstract class PathSelector extends Panel {

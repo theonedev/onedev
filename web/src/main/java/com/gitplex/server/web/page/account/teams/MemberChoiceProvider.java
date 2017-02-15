@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.OrganizationMembership;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.OrganizationMembership;
+import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceProvider;
+import com.gitplex.server.web.component.select2.Response;
 
 public class MemberChoiceProvider extends AccountChoiceProvider {
 
@@ -35,8 +35,8 @@ public class MemberChoiceProvider extends AccountChoiceProvider {
 		}
 		members.sort((user1, user2) -> user1.getName().compareTo(user2.getName()));
 		
-		int from = page * Constants.DEFAULT_PAGE_SIZE;
-		int to = from + Constants.DEFAULT_PAGE_SIZE;
+		int from = page * WebConstants.DEFAULT_PAGE_SIZE;
+		int to = from + WebConstants.DEFAULT_PAGE_SIZE;
 		
 		if (to > members.size()) {
 			to = members.size();

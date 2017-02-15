@@ -27,19 +27,19 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.ContributorAvatars;
 import com.gitplex.server.web.component.commitgraph.CommitGraphResourceReference;
 import com.gitplex.server.web.component.commitgraph.CommitGraphUtils;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
-import com.gitplex.server.web.model.CommitRefsModel;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.util.model.CommitRefsModel;
 
 @SuppressWarnings("serial")
 public class CommitListPanel extends Panel {
@@ -67,8 +67,8 @@ public class CommitListPanel extends Panel {
 			@Override
 			protected List<RevCommit> load() {
 				List<RevCommit> commits = commitsModel.getObject();
-				if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
-					commits = commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
+				if (commits.size() > WebConstants.MAX_DISPLAY_COMMITS)
+					commits = commits.subList(commits.size()-WebConstants.MAX_DISPLAY_COMMITS, commits.size());
 				CommitGraphUtils.sort(commits, 0);
 				return separateByDate(commits);
 			}
@@ -86,13 +86,13 @@ public class CommitListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String tooManyMessage = "Too many commits, displaying recent " + Constants.MAX_DISPLAY_COMMITS;
+		String tooManyMessage = "Too many commits, displaying recent " + WebConstants.MAX_DISPLAY_COMMITS;
 		add(new Label("tooManyCommits", tooManyMessage) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(commitsModel.getObject().size()>Constants.MAX_DISPLAY_COMMITS);
+				setVisible(commitsModel.getObject().size()>WebConstants.MAX_DISPLAY_COMMITS);
 			}
 			
 		});
@@ -160,7 +160,7 @@ public class CommitListPanel extends Panel {
 				} else {
 					fragment = new Fragment("commit", "dateFrag", CommitListPanel.this);
 					DateTime dateTime = new DateTime(getModelObject().get(item.getIndex()+1).getCommitterIdent().getWhen());
-					fragment.add(new Label("date", Constants.DATE_FORMATTER.print(dateTime)));
+					fragment.add(new Label("date", WebConstants.DATE_FORMATTER.print(dateTime)));
 					if (item.getIndex() == 0)
 						item.add(AttributeAppender.append("class", "date first"));
 					else

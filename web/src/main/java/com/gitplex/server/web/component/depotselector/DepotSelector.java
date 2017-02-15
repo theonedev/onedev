@@ -26,12 +26,12 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.behavior.InputChangeBehavior;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.DepotManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.server.web.behavior.InputChangeBehavior;
+import com.gitplex.server.web.component.PreventDefaultAjaxLink;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")

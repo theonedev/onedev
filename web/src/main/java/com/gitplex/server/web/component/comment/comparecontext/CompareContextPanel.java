@@ -21,12 +21,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.util.diff.WhitespaceOption;
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.support.DepotAndRevision;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.support.DepotAndRevision;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.component.revisionpicker.RevisionSelector;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;

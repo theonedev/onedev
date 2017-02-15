@@ -11,18 +11,18 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.wicket.component.select2.ChoiceProvider;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.security.ObjectPermission;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.core.security.privilege.DepotPrivilege;
-import com.gitplex.server.web.Constants;
-import com.gitplex.server.web.avatar.AvatarManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.security.ObjectPermission;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.select2.ChoiceProvider;
+import com.gitplex.server.web.component.select2.Response;
+import com.gitplex.server.web.util.avatar.AvatarManager;
 
 public class AssigneeProvider extends ChoiceProvider<Assignee> {
 
@@ -54,8 +54,8 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 				assignees.add(0, new Assignee(currentUser, "Me"));
 		}
 
-		int first = page * Constants.DEFAULT_PAGE_SIZE;
-		int last = first + Constants.DEFAULT_PAGE_SIZE;
+		int first = page * WebConstants.DEFAULT_PAGE_SIZE;
+		int last = first + WebConstants.DEFAULT_PAGE_SIZE;
 		if (last > assignees.size()) {
 			response.addAll(assignees.subList(first, assignees.size()));
 		} else {

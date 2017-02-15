@@ -7,12 +7,12 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.hibernate.dao.EntityCriteria;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.select2.Response;
 
 public class AccountChoiceProvider extends AbstractAccountChoiceProvider {
 
@@ -27,7 +27,7 @@ public class AccountChoiceProvider extends AbstractAccountChoiceProvider {
 	@Override
 	public void query(String term, int page, Response<Account> response) {
 		Dao dao = GitPlex.getInstance(Dao.class);
-		int first = page * Constants.DEFAULT_PAGE_SIZE;
+		int first = page * WebConstants.DEFAULT_PAGE_SIZE;
 		Criterion criterion = Restrictions.and(Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.ANYWHERE),
 				Restrictions.ilike("fullName", term, MatchMode.ANYWHERE)));
@@ -35,12 +35,12 @@ public class AccountChoiceProvider extends AbstractAccountChoiceProvider {
 		criteria.add(criterion);
 		criteria.add(Restrictions.eq("organization", organization));
 		criteria.addOrder(Order.asc("name"));
-		List<Account> accounts = dao.findRange(criteria, first, Constants.DEFAULT_PAGE_SIZE + 1);
+		List<Account> accounts = dao.findRange(criteria, first, WebConstants.DEFAULT_PAGE_SIZE + 1);
 
-		if (accounts.size() <= Constants.DEFAULT_PAGE_SIZE) {
+		if (accounts.size() <= WebConstants.DEFAULT_PAGE_SIZE) {
 			response.addAll(accounts);
 		} else {
-			response.addAll(accounts.subList(0, Constants.DEFAULT_PAGE_SIZE));
+			response.addAll(accounts.subList(0, WebConstants.DEFAULT_PAGE_SIZE));
 			response.setHasMore(true);
 		}
 	}

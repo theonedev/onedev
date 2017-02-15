@@ -8,20 +8,20 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.gitplex.codeassist.InputCompletion;
+import com.gitplex.codeassist.InputStatus;
+import com.gitplex.codeassist.InputSuggestion;
+import com.gitplex.jsymbol.Range;
+import com.gitplex.server.util.ReflectionUtils;
+import com.gitplex.server.util.editable.annotation.FileChoice;
+import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
+import com.gitplex.server.web.editable.ErrorContext;
+import com.gitplex.server.web.editable.PathSegment;
+import com.gitplex.server.web.editable.PropertyDescriptor;
+import com.gitplex.server.web.editable.PropertyEditor;
+import com.gitplex.server.web.util.SuggestionUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.gitplex.commons.antlr.codeassist.InputCompletion;
-import com.gitplex.commons.antlr.codeassist.InputStatus;
-import com.gitplex.commons.antlr.codeassist.InputSuggestion;
-import com.gitplex.commons.util.ReflectionUtils;
-import com.gitplex.commons.wicket.behavior.inputassist.InputAssistBehavior;
-import com.gitplex.commons.wicket.editable.ErrorContext;
-import com.gitplex.commons.wicket.editable.PathSegment;
-import com.gitplex.commons.wicket.editable.PropertyDescriptor;
-import com.gitplex.commons.wicket.editable.PropertyEditor;
-import com.gitplex.server.core.annotation.FileChoice;
-import com.gitplex.server.web.util.SuggestionUtils;
-import com.gitplex.jsymbol.Range;
 
 @SuppressWarnings("serial")
 public class FileChoiceEditor extends PropertyEditor<String> {

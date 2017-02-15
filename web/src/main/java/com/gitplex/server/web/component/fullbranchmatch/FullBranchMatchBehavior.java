@@ -6,15 +6,15 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.antlr.codeassist.InputSuggestion;
-import com.gitplex.commons.antlr.codeassist.ParentedElement;
-import com.gitplex.commons.antlr.grammar.LexerRuleRefElementSpec;
-import com.gitplex.commons.antlr.parser.Element;
-import com.gitplex.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
-import com.gitplex.server.core.util.fullbranchmatch.FullBranchMatchParser;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.DepotManager;
+import com.gitplex.codeassist.InputSuggestion;
+import com.gitplex.codeassist.ParentedElement;
+import com.gitplex.codeassist.grammar.LexerRuleRefElementSpec;
+import com.gitplex.codeassist.parser.Element;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.util.fullbranchmatch.FullBranchMatchParser;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.util.SuggestionUtils;
 

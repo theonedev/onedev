@@ -6,8 +6,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.web.component.DropdownLink;
 
 @SuppressWarnings("serial")
 public abstract class BranchPicker extends DropdownLink {

@@ -7,11 +7,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.modal.ModalPanel;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.support.DepotAndRevision;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.support.DepotAndRevision;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.web.component.DropdownLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
 public abstract class RevisionPicker extends DropdownLink {

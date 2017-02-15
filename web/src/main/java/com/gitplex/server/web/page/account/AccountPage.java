@@ -7,11 +7,11 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.web.model.UserModel;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.web.page.layout.LayoutPage;
+import com.gitplex.server.web.util.model.UserModel;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 

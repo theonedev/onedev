@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 
-import com.gitplex.commons.wicket.page.CommonDependentResourceReference;
+import com.gitplex.server.web.page.CommonDependentResourceReference;
 
 public class BaseResourceReference extends CommonDependentResourceReference {
 

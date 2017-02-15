@@ -19,12 +19,12 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.hibernate.dao.EntityCriteria;
-import com.gitplex.commons.jersey.ValidQueryParams;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.DepotManager;
-import com.gitplex.server.core.security.ObjectPermission;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.rest.jersey.ValidQueryParams;
+import com.gitplex.server.security.ObjectPermission;
 
 @Path("/repositories")
 @Consumes(MediaType.WILDCARD)

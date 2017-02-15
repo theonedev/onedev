@@ -1,6 +1,6 @@
 package com.gitplex.server.web.component.depotfile.blobview.image;
 
-import com.gitplex.commons.git.Blob;
+import com.gitplex.server.git.Blob;
 import com.gitplex.server.web.component.depotfile.blobview.BlobRenderer;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewPanel;

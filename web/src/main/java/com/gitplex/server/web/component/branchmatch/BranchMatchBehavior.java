@@ -6,14 +6,14 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.antlr.codeassist.FenceAware;
-import com.gitplex.commons.antlr.codeassist.InputSuggestion;
-import com.gitplex.commons.antlr.codeassist.ParentedElement;
-import com.gitplex.commons.antlr.grammar.ElementSpec;
-import com.gitplex.commons.antlr.grammar.LexerRuleRefElementSpec;
-import com.gitplex.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
-import com.gitplex.server.core.util.includeexclude.IncludeExcludeParser;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.codeassist.FenceAware;
+import com.gitplex.codeassist.InputSuggestion;
+import com.gitplex.codeassist.ParentedElement;
+import com.gitplex.codeassist.grammar.ElementSpec;
+import com.gitplex.codeassist.grammar.LexerRuleRefElementSpec;
+import com.gitplex.server.util.includeexclude.IncludeExcludeParser;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import com.gitplex.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")

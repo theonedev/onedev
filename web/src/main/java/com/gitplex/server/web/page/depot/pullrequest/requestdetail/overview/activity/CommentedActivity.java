@@ -5,9 +5,9 @@ import java.util.Date;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.PullRequestComment;
-import com.gitplex.server.core.manager.PullRequestCommentManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.PullRequestComment;
+import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.PullRequestActivity;
 
 @SuppressWarnings("serial")

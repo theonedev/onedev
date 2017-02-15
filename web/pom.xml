@@ -6,7 +6,6 @@
         <groupId>com.gitplex</groupId>  
         <artifactId>server-parent</artifactId>  
         <version>1.0-EAP-build26</version> 
-        <relativePath>../parent</relativePath>
     </parent>  
     <build> 
         <plugins> 
@@ -28,6 +27,62 @@
     </build>  
     <dependencies> 
         <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-core</artifactId>  
+            <version>${wicketVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-extensions</artifactId>  
+            <version>${wicketVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-request</artifactId>  
+            <version>${wicketVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-util</artifactId>  
+            <version>${wicketVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-devutils</artifactId>  
+            <version>${wicketVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-native-websocket-core</artifactId>  
+            <version>${wicketVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.webjars</groupId>  
+            <artifactId>font-awesome</artifactId>  
+            <version>4.5.0</version>  
+            <exclusions> 
+                <exclusion> 
+                    <groupId>org.webjars</groupId>  
+                    <artifactId>bootstrap</artifactId> 
+                </exclusion> 
+            </exclusions> 
+        </dependency>  
+        <dependency> 
+            <groupId>de.agilecoders.wicket</groupId>  
+            <artifactId>wicket-bootstrap-core</artifactId>  
+            <version>${wicketBootstrapVersion}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>de.agilecoders.wicket</groupId>  
+            <artifactId>wicket-bootstrap-extensions</artifactId>  
+            <version>${wicketBootstrapVersion}</version> 
+        </dependency>  
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>codemirror</artifactId>
+			<version>5.21.0</version>
+		</dependency>
+		<dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server-core</artifactId>  
             <version>1.0-EAP-build26</version> 
@@ -63,10 +118,15 @@
             <artifactId>server-search</artifactId>  
             <version>1.0-EAP-build26</version> 
         </dependency> 
+        <dependency>
+        	<groupId>com.gitplex</groupId>
+        	<artifactId>codeassist</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
     </dependencies>  
     <properties> 
         <moduleClass>com.gitplex.server.web.WebModule</moduleClass>  
-        <tika.version>1.4</tika.version>  
-        <wikitext.version>2.0.0</wikitext.version> 
+        <wicketVersion>7.3.0</wicketVersion>  
+        <wicketBootstrapVersion>0.10.6</wicketBootstrapVersion> 
     </properties> 
 </project>

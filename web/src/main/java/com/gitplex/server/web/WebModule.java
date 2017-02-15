@@ -9,38 +9,44 @@ import org.apache.wicket.Application;
 import org.apache.wicket.core.request.mapper.StalePageException;
 import org.apache.wicket.protocol.http.PageExpiredException;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.protocol.http.WicketFilter;
+import org.apache.wicket.protocol.http.WicketServlet;
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.StaleStateException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.pegdown.Parser;
 import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
-import com.google.common.collect.Lists;
-import com.gitplex.commons.git.exception.GitException;
-import com.gitplex.commons.jetty.ServletConfigurator;
-import com.gitplex.calla.loader.AbstractPluginModule;
-import com.gitplex.commons.markdown.extensionpoint.HtmlTransformer;
-import com.gitplex.commons.markdown.extensionpoint.MarkdownExtension;
-import com.gitplex.commons.wicket.AbstractWicketConfig;
-import com.gitplex.commons.wicket.ResourcePackScopeContribution;
-import com.gitplex.commons.wicket.editable.EditSupport;
-import com.gitplex.commons.wicket.websocket.DefaultWebSocketManager;
-import com.gitplex.commons.wicket.websocket.WebSocketManager;
-import com.gitplex.server.core.manager.UrlManager;
-import com.gitplex.server.core.util.validation.AccountNameReservation;
-import com.gitplex.server.core.util.validation.DepotNameReservation;
-import com.gitplex.server.core.util.validation.TeamNameReservation;
-import com.gitplex.server.web.avatar.AvatarManager;
-import com.gitplex.server.web.avatar.DefaultAvatarManager;
+import com.gitplex.launcher.loader.AbstractPlugin;
+import com.gitplex.launcher.loader.AbstractPluginModule;
+import com.gitplex.server.git.exception.GitException;
+import com.gitplex.server.manager.UrlManager;
+import com.gitplex.server.util.markdown.HtmlTransformer;
+import com.gitplex.server.util.markdown.MarkdownExtension;
+import com.gitplex.server.util.validation.AccountNameReservation;
+import com.gitplex.server.util.validation.DepotNameReservation;
+import com.gitplex.server.util.validation.TeamNameReservation;
+import com.gitplex.server.web.behavior.markdown.EmojiTransformer;
 import com.gitplex.server.web.component.comment.MentionTransformer;
 import com.gitplex.server.web.component.comment.PullRequestTransformer;
 import com.gitplex.server.web.component.depotfile.blobview.BlobRenderer;
 import com.gitplex.server.web.component.diff.DiffRenderer;
+import com.gitplex.server.web.editable.DefaultEditSupportRegistry;
+import com.gitplex.server.web.editable.EditSupport;
 import com.gitplex.server.web.editable.EditSupportLocator;
+import com.gitplex.server.web.editable.EditSupportRegistry;
+import com.gitplex.server.web.util.avatar.AvatarManager;
+import com.gitplex.server.web.util.avatar.DefaultAvatarManager;
+import com.gitplex.server.web.util.commitmessagetransform.CommitMessageTransformer;
+import com.gitplex.server.web.util.commitmessagetransform.PatternCommitMessageTransformer;
 import com.gitplex.server.web.websocket.CodeCommentChangeBroadcaster;
 import com.gitplex.server.web.websocket.CommitIndexedBroadcaster;
+import com.gitplex.server.web.websocket.DefaultWebSocketManager;
 import com.gitplex.server.web.websocket.PullRequestChangeBroadcaster;
 import com.gitplex.server.web.websocket.TaskChangeBroadcaster;
+import com.gitplex.server.web.websocket.WebSocketManager;
+import com.google.common.collect.Lists;
 
 import jersey.repackaged.com.google.common.collect.Sets;
 
@@ -54,14 +60,44 @@ public class WebModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		// put your guice bindings here
-		bind(AbstractWicketConfig.class).to(WicketConfig.class);		
+		bind(WicketServlet.class).to(DefaultWicketServlet.class);
+		bind(WicketFilter.class).to(DefaultWicketFilter.class);
+		bind(WebSocketPolicy.class).toInstance(WebSocketPolicy.newServerPolicy());
+		bind(EditSupportRegistry.class).to(DefaultEditSupportRegistry.class);
+		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
+
+		contribute(CommitMessageTransformer.class, PatternCommitMessageTransformer.class);
+		
+		contributeFromPackage(EditSupport.class, EditSupport.class);
+		
+		contribute(MarkdownExtension.class, new MarkdownExtension() {
+			
+			@Override
+			public Collection<Class<? extends Parser>> getInlineParsers() {
+				return null;
+			}
+			
+			@Override
+			public Collection<HtmlTransformer> getHtmlTransformers() {
+				return Lists.newArrayList((HtmlTransformer)new EmojiTransformer());
+			}
+			
+			@Override
+			public Collection<ToHtmlSerializerPlugin> getHtmlSerializers() {
+				return null;
+			}
+			
+			@Override
+			public Collection<Class<? extends Parser>> getBlockParsers() {
+				return null;
+			}
+		});
+		
 		bind(WebApplication.class).to(WicketConfig.class);
 		bind(Application.class).to(WicketConfig.class);
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
-		contribute(ServletConfigurator.class, WebServletConfigurator.class);
 		contribute(AccountNameReservation.class, WebAccountNameReservation.class);
 		contribute(DepotNameReservation.class, WebDepotNameReservation.class);
 		contribute(TeamNameReservation.class, WebTeamNameReservation.class);
@@ -120,6 +156,11 @@ public class WebModule extends AbstractPluginModule {
 		bind(CodeCommentChangeBroadcaster.class);
 		bind(PullRequestChangeBroadcaster.class);
 		bind(TaskChangeBroadcaster.class);
+	}
+
+	@Override
+	protected Class<? extends AbstractPlugin> getPluginClass() {
+		return WebPlugin.class;
 	}
 	
 }

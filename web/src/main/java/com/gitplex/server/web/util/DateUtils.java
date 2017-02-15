@@ -5,7 +5,7 @@ import java.util.Date;
 import org.joda.time.DateTime;
 import org.ocpsoft.prettytime.PrettyTime;
 
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.web.WebConstants;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
@@ -14,11 +14,11 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
     public static String formatDate(Date date) {
-        return Constants.DATE_FORMATTER.print(new DateTime(date));
+        return WebConstants.DATE_FORMATTER.print(new DateTime(date));
     }
 
     public static String formatDateTime(Date date) {
-        return Constants.DATETIME_FORMATTER.print(new DateTime(date));
+        return WebConstants.DATETIME_FORMATTER.print(new DateTime(date));
     }
 
 }

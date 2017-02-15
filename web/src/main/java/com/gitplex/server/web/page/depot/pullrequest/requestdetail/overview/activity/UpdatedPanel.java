@@ -21,13 +21,13 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestUpdate;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestUpdate;
+import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
@@ -65,13 +65,13 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String tooManyMessage = "Too many commits, displaying recent " + Constants.MAX_DISPLAY_COMMITS;
+		String tooManyMessage = "Too many commits, displaying recent " + WebConstants.MAX_DISPLAY_COMMITS;
 		add(new Label("tooManyCommits", tooManyMessage) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getUpdate().getCommits().size()>Constants.MAX_DISPLAY_COMMITS);
+				setVisible(getUpdate().getCommits().size()>WebConstants.MAX_DISPLAY_COMMITS);
 			}
 			
 		});
@@ -80,8 +80,8 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 			@Override
 			protected List<RevCommit> load() {
 				List<RevCommit> commits = getUpdate().getCommits();
-				if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
-					return commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
+				if (commits.size() > WebConstants.MAX_DISPLAY_COMMITS)
+					return commits.subList(commits.size()-WebConstants.MAX_DISPLAY_COMMITS, commits.size());
 				else 
 					return commits;
 			}

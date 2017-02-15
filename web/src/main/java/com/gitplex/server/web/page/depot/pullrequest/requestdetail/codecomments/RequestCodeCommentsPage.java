@@ -7,8 +7,8 @@ import java.util.List;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.PullRequest;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.PullRequest;
 import com.gitplex.server.web.component.comment.CodeCommentAware;
 import com.gitplex.server.web.component.comment.CodeCommentFilter;
 import com.gitplex.server.web.component.comment.CodeCommentListPanel;

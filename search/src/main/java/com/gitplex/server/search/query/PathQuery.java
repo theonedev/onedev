@@ -13,9 +13,9 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.gitplex.commons.util.PathUtils;
 import com.gitplex.server.search.hit.PathHit;
 import com.gitplex.server.search.hit.QueryHit;
+import com.gitplex.server.util.PathUtils;
 import com.gitplex.jsymbol.Range;
 
 public class PathQuery extends BlobQuery {

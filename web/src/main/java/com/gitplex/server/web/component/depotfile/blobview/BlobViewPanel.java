@@ -18,15 +18,15 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.util.FileUtils;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.commons.wicket.component.ViewStateAwareAjaxLink;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.web.component.PreventDefaultAjaxLink;
+import com.gitplex.server.web.component.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.server.web.resource.BlobResource;
-import com.gitplex.server.web.resource.BlobResourceReference;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import com.gitplex.server.web.util.resource.BlobResource;
+import com.gitplex.server.web.util.resource.BlobResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class BlobViewPanel extends Panel {

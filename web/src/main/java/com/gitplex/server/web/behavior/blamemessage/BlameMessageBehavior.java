@@ -10,8 +10,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.util.DateUtils;
 
 public abstract class BlameMessageBehavior extends AbstractPostAjaxBehavior {

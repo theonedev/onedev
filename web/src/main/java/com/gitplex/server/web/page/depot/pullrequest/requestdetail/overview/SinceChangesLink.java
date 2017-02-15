@@ -9,8 +9,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestUpdate;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestUpdate;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.websocket.PullRequestChanged;
 

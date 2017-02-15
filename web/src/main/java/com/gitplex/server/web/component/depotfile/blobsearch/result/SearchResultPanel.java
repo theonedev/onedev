@@ -25,12 +25,12 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.server.core.entity.support.TextRange;
+import com.gitplex.server.entity.support.TextRange;
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.search.hit.FileHit;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.TextHit;
+import com.gitplex.server.web.component.PreventDefaultAjaxLink;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.jsymbol.Range;

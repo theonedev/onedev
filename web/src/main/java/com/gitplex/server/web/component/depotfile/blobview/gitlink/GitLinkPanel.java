@@ -7,10 +7,10 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.git.Submodule;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.manager.ConfigManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.git.Blob;
+import com.gitplex.server.git.Submodule;
+import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewPanel;
 

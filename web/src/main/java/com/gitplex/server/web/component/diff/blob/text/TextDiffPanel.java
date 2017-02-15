@@ -36,29 +36,29 @@ import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitplex.commons.git.Blame;
-import com.gitplex.commons.git.BlobChange;
-import com.gitplex.commons.git.BriefCommit;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.command.BlameCommand;
-import com.gitplex.commons.util.RangeUtils;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.util.diff.DiffBlock;
-import com.gitplex.commons.util.diff.DiffMatchPatch.Operation;
-import com.gitplex.commons.util.diff.DiffUtils;
-import com.gitplex.commons.util.diff.LineDiff;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.jsyntax.Token;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.support.CommentPos;
-import com.gitplex.server.core.entity.support.TextRange;
-import com.gitplex.server.core.manager.CodeCommentManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.support.CommentPos;
+import com.gitplex.server.entity.support.TextRange;
+import com.gitplex.server.git.Blame;
+import com.gitplex.server.git.BlobChange;
+import com.gitplex.server.git.BriefCommit;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.git.command.BlameCommand;
+import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.search.hit.QueryHit;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.RangeUtils;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.diff.DiffBlock;
+import com.gitplex.server.util.diff.DiffUtils;
+import com.gitplex.server.util.diff.LineDiff;
+import com.gitplex.server.util.diff.DiffMatchPatch.Operation;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.blamemessage.BlameMessageBehavior;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.gitplex.server.web.component.diff.blob.SourceAware;
@@ -294,8 +294,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					int index = params.getParameterValue("param1").toInt();
 					Integer lastContextSize = contextSizes.get(index);
 					if (lastContextSize == null)
-						lastContextSize = Constants.DIFF_CONTEXT_SIZE;
-					int contextSize = lastContextSize + Constants.DIFF_EXPAND_SIZE;
+						lastContextSize = WebConstants.DIFF_CONTEXT_SIZE;
+					int contextSize = lastContextSize + WebConstants.DIFF_EXPAND_SIZE;
 					contextSizes.put(index, contextSize);
 					
 					StringBuilder builder = new StringBuilder();
@@ -579,7 +579,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			if (block.getType() == Type.EQUAL) {
 				Integer lastContextSize = contextSizes.get(i);
 				if (lastContextSize == null)
-					lastContextSize = Constants.DIFF_CONTEXT_SIZE;
+					lastContextSize = WebConstants.DIFF_CONTEXT_SIZE;
 				appendEquals(builder, i, 0, lastContextSize);
 			} else if (block.getType() == Type.MARKED_EQUAL) {
 				appendMarkedEquals(builder, i);

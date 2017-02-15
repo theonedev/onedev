@@ -17,13 +17,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.DepotManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -124,7 +124,7 @@ public class DepotListPanel extends GenericPanel<Account> {
 				return depots;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}, WebConstants.DEFAULT_PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(final ListItem<Depot> item) {

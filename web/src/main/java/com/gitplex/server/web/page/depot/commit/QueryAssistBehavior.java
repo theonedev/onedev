@@ -8,23 +8,22 @@ import java.util.Map;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.antlr.codeassist.FenceAware;
-import com.gitplex.commons.antlr.codeassist.InputSuggestion;
-import com.gitplex.commons.antlr.codeassist.ParentedElement;
-import com.gitplex.commons.antlr.grammar.ElementSpec;
-import com.gitplex.commons.antlr.grammar.LexerRuleRefElementSpec;
-import com.gitplex.commons.git.NameAndEmail;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.util.match.PatternApplied;
-import com.gitplex.commons.util.match.WildcardUtils;
-import com.gitplex.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.CommitInfoManager;
-import com.gitplex.server.web.Constants;
-import com.gitplex.server.web.util.SuggestionUtils;
+import com.gitplex.codeassist.FenceAware;
+import com.gitplex.codeassist.InputSuggestion;
+import com.gitplex.codeassist.ParentedElement;
+import com.gitplex.codeassist.grammar.ElementSpec;
+import com.gitplex.codeassist.grammar.LexerRuleRefElementSpec;
 import com.gitplex.jsymbol.Range;
-import com.gitplex.server.web.page.depot.commit.CommitQueryParser;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.NameAndEmail;
+import com.gitplex.server.manager.CommitInfoManager;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.match.PatternApplied;
+import com.gitplex.server.util.match.WildcardUtils;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import com.gitplex.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
 public class QueryAssistBehavior extends ANTLRAssistBehavior {
@@ -104,9 +103,9 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 										suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
 								}
 								if (suggestions.size() < count)
-									suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
+									suggestions.add(new InputSuggestion(WebConstants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
 								if (suggestions.size() < count)
-									suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
+									suggestions.add(new InputSuggestion(WebConstants.DATE_FORMATTER.print(System.currentTimeMillis())));
 								for (String dateExample: DATE_EXAMPLES) { 
 									if (suggestions.size() < count)
 										suggestions.add(new InputSuggestion(dateExample));

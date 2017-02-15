@@ -26,27 +26,27 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.modal.ModalLink;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.commons.wicket.component.select2.ResponseFiller;
-import com.gitplex.commons.wicket.component.select2.SelectToAddChoice;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.Team;
-import com.gitplex.server.core.entity.TeamAuthorization;
-import com.gitplex.server.core.manager.TeamAuthorizationManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.core.security.privilege.DepotPrivilege;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.Team;
+import com.gitplex.server.entity.TeamAuthorization;
+import com.gitplex.server.manager.TeamAuthorizationManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.depotchoice.AbstractDepotChoiceProvider;
 import com.gitplex.server.web.component.depotchoice.DepotChoiceResourceReference;
 import com.gitplex.server.web.component.greaterprivilege.GreaterPrivilegesPanel;
+import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
-import com.gitplex.server.web.depotaccess.DepotAccess;
+import com.gitplex.server.web.component.select2.Response;
+import com.gitplex.server.web.component.select2.ResponseFiller;
+import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotTeamListPage;
+import com.gitplex.server.web.util.depotaccess.DepotAccess;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -198,7 +198,7 @@ public class TeamDepotListPage extends TeamPage {
 				
 				Collections.sort(depots);
 				
-				new ResponseFiller<Depot>(response).fill(depots, page, Constants.DEFAULT_PAGE_SIZE);
+				new ResponseFiller<Depot>(response).fill(depots, page, WebConstants.DEFAULT_PAGE_SIZE);
 			}
 
 		}) {
@@ -264,7 +264,7 @@ public class TeamDepotListPage extends TeamPage {
 				return authorizations;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}, WebConstants.DEFAULT_PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(ListItem<TeamAuthorization> item) {

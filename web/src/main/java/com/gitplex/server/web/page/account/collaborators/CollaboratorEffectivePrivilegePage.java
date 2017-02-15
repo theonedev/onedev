@@ -18,16 +18,16 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.core.security.privilege.DepotPrivilege;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
-import com.gitplex.server.web.depotaccess.DepotAccess;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
+import com.gitplex.server.web.util.depotaccess.DepotAccess;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -164,7 +164,7 @@ public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 				return permissions;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}, WebConstants.DEFAULT_PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(ListItem<DepotPermission> item) {

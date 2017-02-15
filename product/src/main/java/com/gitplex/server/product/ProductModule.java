@@ -4,14 +4,14 @@ import java.io.File;
 
 import org.hibernate.cfg.Environment;
 
-import com.gitplex.calla.bootstrap.Bootstrap;
-import com.gitplex.commons.hibernate.HibernateProperties;
-import com.gitplex.commons.jetty.ServerConfigurator;
-import com.gitplex.commons.jetty.ServletConfigurator;
-import com.gitplex.calla.loader.AbstractPluginModule;
-import com.gitplex.commons.util.FileUtils;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.server.core.setting.ServerConfig;
+import com.gitplex.launcher.loader.AbstractPluginModule;
+import com.gitplex.launcher.bootstrap.Bootstrap;
+import com.gitplex.server.persistence.HibernateProperties;
+import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.jetty.ServerConfigurator;
+import com.gitplex.server.util.jetty.ServletConfigurator;
+import com.gitplex.server.util.serverconfig.ServerConfig;
 
 public class ProductModule extends AbstractPluginModule {
 

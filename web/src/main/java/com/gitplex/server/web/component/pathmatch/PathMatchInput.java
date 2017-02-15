@@ -10,8 +10,8 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
 
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.util.includeexclude.IncludeExcludeUtils;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.util.includeexclude.IncludeExcludeUtils;
 
 @SuppressWarnings("serial")
 public class PathMatchInput extends TextField<String> {

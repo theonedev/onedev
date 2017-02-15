@@ -26,24 +26,24 @@ import org.json.JSONWriter;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.gitplex.commons.wicket.component.select2.ChoiceProvider;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.commons.wicket.component.select2.ResponseFiller;
-import com.gitplex.commons.wicket.component.select2.SelectToAddChoice;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.OrganizationMembership;
-import com.gitplex.server.core.entity.TeamMembership;
-import com.gitplex.server.core.manager.OrganizationMembershipManager;
-import com.gitplex.server.core.manager.TeamMembershipManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.web.Constants;
-import com.gitplex.server.web.avatar.AvatarManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.OrganizationMembership;
+import com.gitplex.server.entity.TeamMembership;
+import com.gitplex.server.manager.OrganizationMembershipManager;
+import com.gitplex.server.manager.TeamMembershipManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.select2.ChoiceProvider;
+import com.gitplex.server.web.component.select2.Response;
+import com.gitplex.server.web.component.select2.ResponseFiller;
+import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.page.account.members.MemberListPage;
 import com.gitplex.server.web.page.account.members.MemberTeamListPage;
+import com.gitplex.server.web.util.avatar.AvatarManager;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -131,7 +131,7 @@ public class TeamMemberListPage extends TeamPage {
 				memberships.sort((membership1, membership2) 
 						-> membership1.getUser().compareTo(membership2.getUser()));
 				
-				new ResponseFiller<OrganizationMembership>(response).fill(memberships, page, Constants.DEFAULT_PAGE_SIZE);
+				new ResponseFiller<OrganizationMembership>(response).fill(memberships, page, WebConstants.DEFAULT_PAGE_SIZE);
 			}
 
 			@Override
@@ -222,7 +222,7 @@ public class TeamMemberListPage extends TeamPage {
 				return memberships;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}, WebConstants.DEFAULT_PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(ListItem<TeamMembership> item) {

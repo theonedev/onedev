@@ -17,16 +17,16 @@ import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.web.avatar.AvatarManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.util.DateUtils;
+import com.gitplex.server.web.util.avatar.AvatarManager;
 
 /**
  * Loading commits of children may take some time, and we do this via resource loading to avoid blocking 

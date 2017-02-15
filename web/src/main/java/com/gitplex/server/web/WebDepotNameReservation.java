@@ -2,7 +2,7 @@ package com.gitplex.server.web;
 
 import java.util.Set;
 
-import com.gitplex.server.core.util.validation.DepotNameReservation;
+import com.gitplex.server.util.validation.DepotNameReservation;
 import com.google.common.collect.Sets;
 
 public class WebDepotNameReservation implements DepotNameReservation {

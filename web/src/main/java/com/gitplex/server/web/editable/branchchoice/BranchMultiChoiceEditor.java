@@ -9,13 +9,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.gitplex.commons.wicket.editable.ErrorContext;
-import com.gitplex.commons.wicket.editable.PathSegment;
-import com.gitplex.commons.wicket.editable.PropertyDescriptor;
-import com.gitplex.commons.wicket.editable.PropertyEditor;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.entity.Depot;
 import com.gitplex.server.web.component.branchchoice.BranchChoiceProvider;
 import com.gitplex.server.web.component.branchchoice.BranchMultiChoice;
+import com.gitplex.server.web.editable.ErrorContext;
+import com.gitplex.server.web.editable.PathSegment;
+import com.gitplex.server.web.editable.PropertyDescriptor;
+import com.gitplex.server.web.editable.PropertyEditor;
 import com.gitplex.server.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")

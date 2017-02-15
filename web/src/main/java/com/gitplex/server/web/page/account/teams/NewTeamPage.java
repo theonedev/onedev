@@ -7,14 +7,14 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.commons.wicket.editable.BeanEditor;
-import com.gitplex.commons.wicket.editable.PathSegment;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Team;
-import com.gitplex.server.core.manager.TeamManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Team;
+import com.gitplex.server.manager.TeamManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.server.web.editable.BeanEditor;
+import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 

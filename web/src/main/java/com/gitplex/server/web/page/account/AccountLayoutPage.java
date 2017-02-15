@@ -9,10 +9,10 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.wicket.component.tabbable.PageTab;
-import com.gitplex.commons.wicket.component.tabbable.Tabbable;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.tabbable.PageTab;
+import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.account.collaborators.AccountCollaboratorListPage;
 import com.gitplex.server.web.page.account.collaborators.CollaboratorPage;
 import com.gitplex.server.web.page.account.members.MemberListPage;

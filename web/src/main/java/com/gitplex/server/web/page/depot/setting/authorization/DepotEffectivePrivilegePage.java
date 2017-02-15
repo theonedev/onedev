@@ -20,22 +20,22 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.OrganizationMembership;
-import com.gitplex.server.core.entity.UserAuthorization;
-import com.gitplex.server.core.security.privilege.DepotPrivilege;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.OrganizationMembership;
+import com.gitplex.server.entity.UserAuthorization;
+import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
-import com.gitplex.server.web.depotaccess.DepotAccess;
 import com.gitplex.server.web.page.account.collaborators.CollaboratorDepotListPage;
 import com.gitplex.server.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
 import com.gitplex.server.web.page.account.members.MemberEffectivePrivilegePage;
 import com.gitplex.server.web.page.account.members.MemberPrivilegeSourcePage;
 import com.gitplex.server.web.page.depot.setting.DepotSettingPage;
+import com.gitplex.server.web.util.depotaccess.DepotAccess;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -178,7 +178,7 @@ public class DepotEffectivePrivilegePage extends DepotSettingPage {
 				return permissions;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}, WebConstants.DEFAULT_PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(ListItem<UserPermission> item) {

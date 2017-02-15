@@ -1,9 +1,9 @@
 package com.gitplex.server.web.page.depot.pullrequest.requestdetail;
 
-import static com.gitplex.server.core.entity.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
-import static com.gitplex.server.core.entity.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
-import static com.gitplex.server.core.entity.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
-import static com.gitplex.server.core.entity.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
+import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
+import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
+import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
+import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -12,14 +12,14 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequest.IntegrationStrategy;
-import com.gitplex.server.core.entity.support.IntegrationPreview;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequest.IntegrationStrategy;
+import com.gitplex.server.entity.support.IntegrationPreview;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 class ResolveConflictInstructionPanel extends Panel {

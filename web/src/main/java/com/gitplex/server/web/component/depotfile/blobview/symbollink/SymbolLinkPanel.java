@@ -17,7 +17,7 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.gitplex.commons.git.Blob;
+import com.gitplex.server.git.Blob;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewPanel;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;

@@ -7,7 +7,6 @@
         <groupId>com.gitplex</groupId>  
         <artifactId>server-parent</artifactId>  
         <version>1.0-EAP-build26</version> 
-        <relativePath>../parent</relativePath>
     </parent>  
     <build> 
         <plugins> 
@@ -83,7 +82,7 @@
                                 <gant file="build/prepare_package.gant"> 
                                     <definition name="buildDirectory" value="${project.build.directory}"/>  
                                     <definition name="outputDirectory" value="${project.build.outputDirectory}"/>  
-                                    <definition name="jswPath" value="${com.gitplex:commons.jsw:jar}"/>  
+                                    <definition name="jswPath" value="${basedir}/build/jsw"/>  
                                     <definition name="productName" value="${project.name}"/>  
                                     <definition name="lowerCaseProductName" value="${lowerCaseProductName}"/>  
                                     <definition name="bootstrapClass" value="${bootstrapClass}"/> 
@@ -115,12 +114,6 @@
     <dependencies> 
         <dependency> 
             <groupId>com.gitplex</groupId>  
-            <artifactId>server-jsw</artifactId>  
-            <version>1.0-EAP-build26</version>  
-            <scope>provided</scope> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
             <artifactId>server-core</artifactId>  
             <version>1.0-EAP-build26</version> 
         </dependency>  
@@ -131,19 +124,7 @@
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
-            <artifactId>server-git</artifactId>  
-            <version>1.0-EAP-build26</version>  
-            <type>test-jar</type>  
-            <scope>test</scope> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
             <artifactId>server-rest</artifactId>  
-            <version>1.0-EAP-build26</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-http</artifactId>  
             <version>1.0-EAP-build26</version> 
         </dependency>  
         <dependency> 
@@ -151,45 +132,10 @@
             <artifactId>server-search</artifactId>  
             <version>1.0-EAP-build26</version> 
         </dependency> 
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-validation</artifactId>  
-            <version>1.0-EAP-build26</version> 
-        </dependency> 
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-schedule</artifactId>  
-            <version>1.0-EAP-build26</version> 
-        </dependency> 
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-shiro</artifactId>  
-            <version>1.0-EAP-build26</version> 
-        </dependency> 
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-jersey</artifactId>  
-            <version>1.0-EAP-build26</version> 
-        </dependency> 
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-markdown</artifactId>  
-            <version>1.0-EAP-build26</version> 
-        </dependency> 
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-hibernate</artifactId>  
-            <version>1.0-EAP-build26</version> 
-        </dependency> 
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-jetty</artifactId>  
-            <version>1.0-EAP-build26</version> 
-        </dependency> 
     </dependencies>  
     <properties> 
         <executables>bin/*.sh, boot/wrapper-*</executables>  
-        <bootstrapClass>com.gitplex.calla.bootstrap.Bootstrap</bootstrapClass>  
+        <bootstrapClass>com.gitplex.launcher.bootstrap.Bootstrap</bootstrapClass>  
         <moduleClass>com.gitplex.server.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
     </properties> 

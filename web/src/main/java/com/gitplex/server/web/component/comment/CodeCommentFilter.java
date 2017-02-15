@@ -11,12 +11,12 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.commons.hibernate.dao.EntityCriteria;
-import com.gitplex.commons.util.match.WildcardUtils;
-import com.gitplex.commons.wicket.editable.annotation.Editable;
-import com.gitplex.server.core.annotation.AccountChoice;
-import com.gitplex.server.core.annotation.FileChoice;
-import com.gitplex.server.core.entity.CodeComment;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.util.editable.annotation.AccountChoice;
+import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.server.util.editable.annotation.FileChoice;
+import com.gitplex.server.util.match.WildcardUtils;
 
 @Editable
 public class CodeCommentFilter implements Serializable {

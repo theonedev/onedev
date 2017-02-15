@@ -33,11 +33,11 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.string.Strings;
 
-import com.gitplex.commons.util.FileUtils;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.ConfigManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.page.home.DashboardPage;
 import com.gitplex.server.web.util.DateUtils;
 

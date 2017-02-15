@@ -33,24 +33,24 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
 
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.git.RefInfo;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmListener;
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.gitplex.commons.wicket.behavior.clipboard.CopyClipboardBehavior;
-import com.gitplex.commons.wicket.component.modal.ModalLink;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
+import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.archivemenulink.ArchiveMenuLink;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
+import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.util.DateUtils;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -241,7 +241,7 @@ public class DepotTagsPage extends DepotPage {
 		PageableListView<RefInfo> tagsView;
 
 		tagsContainer.add(tagsView = new PageableListView<RefInfo>("tags", tagsModel, 
-				com.gitplex.server.web.Constants.DEFAULT_PAGE_SIZE) {
+				com.gitplex.server.web.WebConstants.DEFAULT_PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(ListItem<RefInfo> item) {

@@ -8,7 +8,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.apache.wicket.request.Request;
 
-import com.gitplex.server.core.GitPlex;
+import com.gitplex.server.GitPlex;
 
 public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 

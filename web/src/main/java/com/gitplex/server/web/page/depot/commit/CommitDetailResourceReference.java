@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.gitplex.commons.wicket.assets.oneline.OnelineResourceReference;
+import com.gitplex.server.web.assets.oneline.OnelineResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class CommitDetailResourceReference extends BaseDependentResourceReference {

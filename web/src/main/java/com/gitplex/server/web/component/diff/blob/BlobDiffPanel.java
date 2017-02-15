@@ -14,15 +14,15 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.git.BlobChange;
-import com.gitplex.commons.util.diff.DiffUtils;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.support.CommentPos;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.support.CommentPos;
+import com.gitplex.server.git.Blob;
+import com.gitplex.server.git.BlobChange;
+import com.gitplex.server.util.diff.DiffUtils;
+import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.diff.DiffRenderer;
 import com.gitplex.server.web.component.diff.blob.text.TextDiffPanel;
 import com.gitplex.server.web.component.diff.difftitle.BlobDiffTitle;
@@ -74,7 +74,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 		if (blob.getText() != null) {
 			if (blob.getText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 				add(newFragment("Unable to diff as the file is too large.", true));
-			} else if (change.getAdditions()+change.getDeletions() > Constants.MAX_SINGLE_FILE_DIFF_LINES) {
+			} else if (change.getAdditions()+change.getDeletions() > WebConstants.MAX_SINGLE_FILE_DIFF_LINES) {
 				add(newFragment("Diff is too large to be displayed.", true));
 			} else if (change.getDiffBlocks().isEmpty()) {
 				if (change.getNewBlobIdent().path != null)
@@ -112,7 +112,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 			if (change.getOldText() != null && change.getNewText() != null) {
 				if (change.getOldText().getLines().size() + change.getNewText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 					add(newFragment("Unable to diff as the file is too large.", true));
-				} else if (change.getAdditions() + change.getDeletions() > Constants.MAX_SINGLE_FILE_DIFF_LINES) {
+				} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_FILE_DIFF_LINES) {
 					add(newFragment("Diff is too large to be displayed.", true));
 				} else if (change.getAdditions() + change.getDeletions() == 0 
 						&& (markSupport == null || markSupport.getComments().isEmpty())) {

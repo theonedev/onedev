@@ -1,6 +1,6 @@
 package com.gitplex.server.web.page.test;
 
-import com.gitplex.commons.wicket.page.CommonPage;
+import com.gitplex.server.web.page.CommonPage;
 
 @SuppressWarnings("serial")
 public class TestPage extends CommonPage {

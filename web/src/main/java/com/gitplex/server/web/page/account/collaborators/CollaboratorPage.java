@@ -14,15 +14,15 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.wicket.component.tabbable.PageTab;
-import com.gitplex.commons.wicket.component.tabbable.PageTabLink;
-import com.gitplex.commons.wicket.component.tabbable.Tabbable;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.tabbable.PageTab;
+import com.gitplex.server.web.component.tabbable.PageTabLink;
+import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 
 @SuppressWarnings("serial")

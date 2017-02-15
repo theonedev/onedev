@@ -53,32 +53,28 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-import com.gitplex.commons.antlr.codeassist.InputCompletion;
-import com.gitplex.commons.antlr.codeassist.InputStatus;
-import com.gitplex.commons.antlr.codeassist.InputSuggestion;
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.git.BlobChange;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.util.diff.DiffUtils;
-import com.gitplex.commons.util.diff.WhitespaceOption;
-import com.gitplex.commons.util.match.WildcardUtils;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.behavior.inputassist.InputAssistBehavior;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.menu.MenuItem;
-import com.gitplex.commons.wicket.component.menu.MenuLink;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.support.CommentPos;
-import com.gitplex.server.core.entity.support.CompareContext;
-import com.gitplex.server.core.manager.CodeCommentManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.web.Constants;
+import com.gitplex.codeassist.InputCompletion;
+import com.gitplex.codeassist.InputStatus;
+import com.gitplex.codeassist.InputSuggestion;
+import com.gitplex.jsymbol.Range;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.support.CommentPos;
+import com.gitplex.server.entity.support.CompareContext;
+import com.gitplex.server.git.Blob;
+import com.gitplex.server.git.BlobChange;
+import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.manager.CodeCommentManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.diff.DiffUtils;
+import com.gitplex.server.util.diff.WhitespaceOption;
+import com.gitplex.server.util.match.WildcardUtils;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.comment.CodeCommentPanel;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
@@ -86,8 +82,12 @@ import com.gitplex.server.web.component.comment.comparecontext.CompareContextPan
 import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.blob.SourceAware;
 import com.gitplex.server.web.component.diff.diffstat.DiffStatBar;
+import com.gitplex.server.web.component.menu.MenuItem;
+import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.util.SuggestionUtils;
-import com.gitplex.jsymbol.Range;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -254,8 +254,8 @@ public class RevisionDiffPanel extends Panel {
 	    			->Paths.get(change1.getPath()).compareTo(Paths.get(change2.getPath())));
 	    	
 			List<BlobChange> diffChanges = new ArrayList<>();
-			if (normalizedChanges.size() > Constants.MAX_DIFF_FILES)
-				diffChanges = normalizedChanges.subList(0, Constants.MAX_DIFF_FILES);
+			if (normalizedChanges.size() > WebConstants.MAX_DIFF_FILES)
+				diffChanges = normalizedChanges.subList(0, WebConstants.MAX_DIFF_FILES);
 			else
 				diffChanges = normalizedChanges;
 			
@@ -312,9 +312,9 @@ public class RevisionDiffPanel extends Panel {
 	    		 * display smaller diffs from different files as many as
 	    		 * possible
 	    		 */
-	    		if (changedLines <= Constants.MAX_SINGLE_FILE_DIFF_LINES) {
+	    		if (changedLines <= WebConstants.MAX_SINGLE_FILE_DIFF_LINES) {
 		    		totalChangedLines += changedLines;
-		    		if (totalChangedLines <= Constants.MAX_DIFF_LINES)
+		    		if (totalChangedLines <= WebConstants.MAX_DIFF_LINES)
 		    			displayChanges.add(change);
 		    		else
 		    			break;

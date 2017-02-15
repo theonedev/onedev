@@ -10,7 +10,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitplex.server.core.GitPlex;
+import com.gitplex.server.GitPlex;
 
 public class CommitGraphUtils {
 	

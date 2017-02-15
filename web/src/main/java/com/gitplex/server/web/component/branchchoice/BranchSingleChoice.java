@@ -4,8 +4,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.component.select2.ChoiceProvider;
-import com.gitplex.commons.wicket.component.select2.Select2Choice;
+import com.gitplex.server.web.component.select2.ChoiceProvider;
+import com.gitplex.server.web.component.select2.Select2Choice;
 
 @SuppressWarnings("serial")
 public class BranchSingleChoice extends Select2Choice<String> {

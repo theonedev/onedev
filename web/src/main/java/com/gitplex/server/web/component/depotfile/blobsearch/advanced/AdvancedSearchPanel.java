@@ -37,14 +37,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
-import com.gitplex.commons.wicket.component.tabbable.AjaxActionTab;
-import com.gitplex.commons.wicket.component.tabbable.Tab;
-import com.gitplex.commons.wicket.component.tabbable.Tabbable;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;
@@ -52,7 +47,12 @@ import com.gitplex.server.search.query.FileQuery;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.search.query.TooGeneralQueryException;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.web.behavior.RunTaskBehavior;
 import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
+import com.gitplex.server.web.component.tabbable.AjaxActionTab;
+import com.gitplex.server.web.component.tabbable.Tab;
+import com.gitplex.server.web.component.tabbable.Tabbable;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

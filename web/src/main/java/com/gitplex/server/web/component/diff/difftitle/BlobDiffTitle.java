@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
-import com.gitplex.commons.git.BlobChange;
+import com.gitplex.server.git.BlobChange;
 
 @SuppressWarnings("serial")
 public class BlobDiffTitle extends Panel {

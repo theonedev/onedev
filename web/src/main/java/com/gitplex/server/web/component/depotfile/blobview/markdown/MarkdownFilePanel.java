@@ -7,11 +7,11 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.commons.wicket.component.markdown.MarkdownPanel;
+import com.gitplex.server.git.Blob;
+import com.gitplex.server.web.component.PreventDefaultAjaxLink;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewPanel;
+import com.gitplex.server.web.component.markdown.MarkdownPanel;
 
 @SuppressWarnings("serial")
 public class MarkdownFilePanel extends BlobViewPanel {

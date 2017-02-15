@@ -33,26 +33,26 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.git.GitUtils;
-import com.gitplex.commons.util.diff.WhitespaceOption;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.websocket.WebSocketManager;
-import com.gitplex.commons.wicket.websocket.WebSocketRegion;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestUpdate;
-import com.gitplex.server.core.entity.support.CodeCommentActivity;
-import com.gitplex.server.core.entity.support.CommentPos;
-import com.gitplex.server.core.manager.CodeCommentManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestUpdate;
+import com.gitplex.server.entity.support.CodeCommentActivity;
+import com.gitplex.server.entity.support.CommentPos;
+import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.manager.CodeCommentManager;
+import com.gitplex.server.util.diff.WhitespaceOption;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.PullRequestChanged;
+import com.gitplex.server.web.websocket.WebSocketManager;
+import com.gitplex.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public class RequestChangesPage extends RequestDetailPage implements CommentSupport {

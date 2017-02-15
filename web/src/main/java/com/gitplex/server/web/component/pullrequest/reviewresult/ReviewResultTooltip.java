@@ -5,11 +5,11 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestReview;
-import com.gitplex.server.core.manager.PullRequestReviewManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestReview;
+import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 class ReviewResultTooltip extends GenericPanel<PullRequestReview> {

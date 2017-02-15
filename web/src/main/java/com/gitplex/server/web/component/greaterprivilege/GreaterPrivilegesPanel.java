@@ -17,15 +17,15 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.OrganizationMembership;
-import com.gitplex.server.core.entity.TeamAuthorization;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.core.security.privilege.DepotPrivilege;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.OrganizationMembership;
+import com.gitplex.server.entity.TeamAuthorization;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.component.avatar.Avatar;
-import com.gitplex.server.web.depotaccess.DepotAccess;
 import com.gitplex.server.web.page.account.members.MemberEffectivePrivilegePage;
 import com.gitplex.server.web.page.account.members.MemberPrivilegeSourcePage;
+import com.gitplex.server.web.util.depotaccess.DepotAccess;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")

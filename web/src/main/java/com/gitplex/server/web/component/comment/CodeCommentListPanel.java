@@ -31,19 +31,19 @@ import org.apache.wicket.model.Model;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.hibernate.dao.EntityCriteria;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.support.CompareContext;
-import com.gitplex.server.core.manager.CodeCommentManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.support.CompareContext;
+import com.gitplex.server.manager.CodeCommentManager;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.AccountLink;
+import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
@@ -263,7 +263,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			
 		};
 		DataTable<CodeComment, Void> dataTable = new DataTable<>("comments", columns, 
-				dataProvider, getPullRequest()!=null?Integer.MAX_VALUE:Constants.DEFAULT_PAGE_SIZE);
+				dataProvider, getPullRequest()!=null?Integer.MAX_VALUE:WebConstants.DEFAULT_PAGE_SIZE);
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		dataTable.addBottomToolbar(new NavigationToolbar(dataTable) {
 

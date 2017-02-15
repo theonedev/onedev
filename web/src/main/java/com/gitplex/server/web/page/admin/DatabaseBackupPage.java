@@ -8,12 +8,12 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import com.gitplex.calla.bootstrap.BootstrapUtils;
-import com.gitplex.commons.hibernate.PersistManager;
-import com.gitplex.commons.util.FileUtils;
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.manager.ConfigManager;
+import com.gitplex.launcher.bootstrap.BootstrapUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.persistence.PersistManager;
+import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.web.editable.BeanContext;
 
 @SuppressWarnings("serial")
 public class DatabaseBackupPage extends AdministrationPage {

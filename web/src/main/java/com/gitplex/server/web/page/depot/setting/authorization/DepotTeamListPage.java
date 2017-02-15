@@ -23,27 +23,27 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.commons.wicket.component.modal.ModalLink;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.commons.wicket.component.select2.ResponseFiller;
-import com.gitplex.commons.wicket.component.select2.SelectToAddChoice;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.Team;
-import com.gitplex.server.core.entity.TeamAuthorization;
-import com.gitplex.server.core.manager.TeamAuthorizationManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.core.security.privilege.DepotPrivilege;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.Team;
+import com.gitplex.server.entity.TeamAuthorization;
+import com.gitplex.server.manager.TeamAuthorizationManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.greaterprivilege.GreaterPrivilegesPanel;
+import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
+import com.gitplex.server.web.component.select2.Response;
+import com.gitplex.server.web.component.select2.ResponseFiller;
+import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.component.teamchoice.AbstractTeamChoiceProvider;
 import com.gitplex.server.web.component.teamchoice.TeamChoiceResourceReference;
-import com.gitplex.server.web.depotaccess.DepotAccess;
 import com.gitplex.server.web.page.account.teams.TeamDepotListPage;
 import com.gitplex.server.web.page.depot.setting.DepotSettingPage;
+import com.gitplex.server.web.util.depotaccess.DepotAccess;
 
 @SuppressWarnings("serial")
 public class DepotTeamListPage extends DepotSettingPage {
@@ -143,7 +143,7 @@ public class DepotTeamListPage extends DepotSettingPage {
 				
 				Collections.sort(teams);
 				
-				new ResponseFiller<Team>(response).fill(teams, page, Constants.DEFAULT_PAGE_SIZE);
+				new ResponseFiller<Team>(response).fill(teams, page, WebConstants.DEFAULT_PAGE_SIZE);
 			}
 
 		}) {

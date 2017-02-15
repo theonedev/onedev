@@ -30,13 +30,13 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.git.Blob;
-import com.gitplex.commons.git.BlobIdent;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.commons.wicket.component.markdown.MarkdownPanel;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.git.Blob;
+import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.component.PreventDefaultAjaxLink;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext.Mode;
+import com.gitplex.server.web.component.markdown.MarkdownPanel;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")

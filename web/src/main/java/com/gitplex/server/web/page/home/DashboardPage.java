@@ -17,11 +17,11 @@ import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.DepotManager;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.layout.LayoutPage;
 
@@ -87,7 +87,7 @@ public class DashboardPage extends LayoutPage {
 				return depots;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}, WebConstants.DEFAULT_PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(ListItem<Depot> item) {

@@ -8,8 +8,8 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.support.CommentPos;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.support.CommentPos;
 
 public interface BlobCommentSupport extends Serializable {
 	

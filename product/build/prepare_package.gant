@@ -2,11 +2,9 @@ target(default:"prepare to package the product") {
 	File buildDir = new File("${buildDirectory}")
 	File sandboxDir = new File(buildDir, "sandbox")
 	
-	File jswLoc = new File("${jswPath}")
-	if (jswLoc.isFile()) {
-		File extractTo = new File(buildDir, "jsw")
-		unzip(src: jswLoc, dest: extractTo)
-		jswLoc = extractTo
+	File jswLoc = new File(buildDir, "jsw")
+	unzip(src: new File("${jswPath}/wrapper-delta-pack-st.zip"), dest: jswLoc, overwrite: true) {
+	  regexpmapper(from: "^.*?/(.*)", to:"\\1")
 	}
 	
 	File binDir = new File(sandboxDir, "bin")
@@ -30,44 +28,44 @@ target(default:"prepare to package the product") {
 		filter(token: "set_pass_through", value: "PASS_THROUGH=true")
 	}
 	
-	copy(tofile: binDir.absolutePath + "/server.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+	copy(tofile: binDir.absolutePath + "/server.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset() {
 			filter(token: "set_fixed_command", value: "")
 			filter(token: "properties_and_parameters", value: "wrapper.pidfile=../status/${lowerCaseProductName}.pid")
 		}
 	}
-	copy(tofile: binDir.absolutePath + "/restore.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+	copy(tofile: binDir.absolutePath + "/restore.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Restore\" wrapper.pidfile=${lowerCaseProductName}_restore.pid wrapper.name=${lowerCaseProductName}_restore wrapper.displayname=\"${productName} Restore\" wrapper.description=\"${productName} Restore\" -- restore")
 		}
 	}
-	copy(tofile: binDir.absolutePath + "/backup.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+	copy(tofile: binDir.absolutePath + "/backup.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Backup\" wrapper.pidfile=${lowerCaseProductName}_backup.pid wrapper.name=${lowerCaseProductName}_backup wrapper.displayname=\"${productName} Backup\" wrapper.description=\"${productName} Backup\" -- backup")
 		}
 	}
-	copy(tofile: binDir.absolutePath + "/upgrade.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+	copy(tofile: binDir.absolutePath + "/upgrade.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Upgrade\" wrapper.pidfile=${lowerCaseProductName}_upgrade.pid wrapper.name=${lowerCaseProductName}_upgrade wrapper.displayname=\"${productName} Upgrade\" wrapper.description=\"${productName} Upgrade\" -- upgrade")
 		}
 	}
-	copy(tofile: binDir.absolutePath + "/apply_db_constraints.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+	copy(tofile: binDir.absolutePath + "/apply_db_constraints.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Apply DB Constraints\" wrapper.pidfile=${lowerCaseProductName}_apply_db_constraints.pid wrapper.name=${lowerCaseProductName}_apply_db_constraints wrapper.displayname=\"${productName} Apply DB Constraints\" wrapper.description=\"${productName} Apply DB Constraints\" -- apply_db_constraints")
 		}
 	}
-	copy(tofile: binDir.absolutePath + "/reset_admin_password.bat", file: jswLoc.absolutePath + "/customization/AppCommand.bat.in") {
+	copy(tofile: binDir.absolutePath + "/reset_admin_password.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Reset Admin Password\" wrapper.pidfile=${lowerCaseProductName}_reset_admin_password.pid wrapper.name=${lowerCaseProductName}_reset_admin_password wrapper.displayname=\"${productName} Reset Admin Password\" wrapper.description=\"${productName} Reset Admin Password\" -- reset_admin_password")
 		}
 	}
 	
-	copy(tofile: binDir.absolutePath + "/server.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+	copy(tofile: binDir.absolutePath + "/server.sh", file: "${jswPath}/sh.script.in") {
 		filterset(refid: "appFilterSet")
 		filterset() {
 			filter(token: "set_fixed_command", value: "")
@@ -75,7 +73,7 @@ target(default:"prepare to package the product") {
 			filter(token: "properties_and_parameters", value: "--")
 		}
 	}	
-	copy(tofile: binDir.absolutePath + "/restore.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+	copy(tofile: binDir.absolutePath + "/restore.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
 			filter(token: "app.name", value: "${lowerCaseProductName}_restore")
 			filter(token: "app.long.name", value: "${productName} Restore")
@@ -87,7 +85,7 @@ target(default:"prepare to package the product") {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Restore' wrapper.name=${lowerCaseProductName}_restore wrapper.displayname='${productName} Restore' wrapper.description='${productName} Restore' -- restore")
 		}
 	}	
-	copy(tofile: binDir.absolutePath + "/backup.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+	copy(tofile: binDir.absolutePath + "/backup.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
 			filter(token: "app.name", value: "${lowerCaseProductName}_backup")
 			filter(token: "app.long.name", value: "${productName} Backup")
@@ -99,7 +97,7 @@ target(default:"prepare to package the product") {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Backup' wrapper.name=${lowerCaseProductName}_backup wrapper.displayname='${productName} Backup' wrapper.description='${productName} Backup' -- backup")
 		}
 	}	
-	copy(tofile: binDir.absolutePath + "/upgrade.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+	copy(tofile: binDir.absolutePath + "/upgrade.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
 			filter(token: "app.name", value: "${lowerCaseProductName}_upgrade")
 			filter(token: "app.long.name", value: "${productName} Upgrade")
@@ -111,7 +109,7 @@ target(default:"prepare to package the product") {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Upgrade' wrapper.name=${lowerCaseProductName}_upgrade wrapper.displayname='${productName} Upgrade' wrapper.description='${productName} Upgrade' -- upgrade")
 		}
 	}	
-	copy(tofile: binDir.absolutePath + "/apply_db_constraints.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+	copy(tofile: binDir.absolutePath + "/apply_db_constraints.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
 			filter(token: "app.name", value: "${lowerCaseProductName}_apply_db_constraints")
 			filter(token: "app.long.name", value: "${productName} Apply DB Constraints")
@@ -123,7 +121,7 @@ target(default:"prepare to package the product") {
 			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Apply DB Constraints' wrapper.name=${lowerCaseProductName}_apply_db_constraints wrapper.displayname='${productName} Apply DB Constraints' wrapper.description='${productName} Apply DB Constraints' -- apply_db_constraints")
 		}
 	}	
-	copy(tofile: binDir.absolutePath + "/reset_admin_password.sh", file: jswLoc.absolutePath + "/customization/sh.script.in") {
+	copy(tofile: binDir.absolutePath + "/reset_admin_password.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
 			filter(token: "app.name", value: "${lowerCaseProductName}_reset_admin_password")
 			filter(token: "app.long.name", value: "${productName} Reset Admin Password")
@@ -136,7 +134,7 @@ target(default:"prepare to package the product") {
 		}
 	}	
 	
-	copy(tofile: sandboxDir.absolutePath + "/conf/wrapper.conf", file: jswLoc.absolutePath + "/customization/wrapper.conf") {
+	copy(tofile: sandboxDir.absolutePath + "/conf/wrapper.conf", file: "${jswPath}/wrapper.conf") {
 		filterset(refid: "appFilterSet")
 	}	
 }		

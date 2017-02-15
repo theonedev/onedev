@@ -2,7 +2,7 @@ package com.gitplex.server.search;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.core.entity.Depot;
+import com.gitplex.server.entity.Depot;
 
 public class CommitIndexed {
 	

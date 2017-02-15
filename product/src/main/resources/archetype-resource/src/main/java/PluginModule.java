@@ -1,7 +1,7 @@
 package ${package};
 
-import com.gitplex.calla.loader.AbstractPlugin;
-import com.gitplex.calla.loader.AbstractPluginModule;
+import com.gitplex.launcher.loader.AbstractPlugin;
+import com.gitplex.launcher.loader.AbstractPluginModule;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

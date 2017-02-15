@@ -6,36 +6,37 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.mapper.ICompoundRequestMapper;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletMapping;
 
+import com.gitplex.server.util.ReflectionUtils;
+import com.gitplex.server.util.validation.AccountNameReservation;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import com.gitplex.commons.jetty.JettyPlugin;
-import com.gitplex.commons.util.ReflectionUtils;
-import com.gitplex.server.core.util.validation.AccountNameReservation;
 
 public class WebAccountNameReservation implements AccountNameReservation {
 
-	private final JettyPlugin jettyPlugin;
+	private final Provider<ServletContextHandler> servletContextHandlerProvider;
 	
 	private final WicketConfig webApp;
 	
 	@Inject
-	public WebAccountNameReservation(JettyPlugin jettyPlugin, WicketConfig webApp) {
-		this.jettyPlugin = jettyPlugin;
+	public WebAccountNameReservation(Provider<ServletContextHandler> servletContextHandlerProvider, WicketConfig webApp) {
+		this.servletContextHandlerProvider = servletContextHandlerProvider;
 		this.webApp = webApp;
 	}
 	
 	@Override
 	public Set<String> getReserved() {
 		Set<String> reserved = new HashSet<String>();
-		for (ServletMapping mapping: jettyPlugin.getContextHandler().getServletHandler().getServletMappings()) {
+		for (ServletMapping mapping: servletContextHandlerProvider.get().getServletHandler().getServletMappings()) {
 			for (String pathSpec: mapping.getPathSpecs()) {
 				pathSpec = StringUtils.stripStart(pathSpec, "/");
 				pathSpec = StringUtils.substringBefore(pathSpec, "/");

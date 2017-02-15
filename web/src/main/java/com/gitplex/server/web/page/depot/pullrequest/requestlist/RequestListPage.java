@@ -32,20 +32,20 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.hibernate.dao.Dao;
-import com.gitplex.commons.hibernate.dao.EntityCriteria;
-import com.gitplex.commons.wicket.component.menu.MenuItem;
-import com.gitplex.commons.wicket.component.menu.MenuLink;
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.BranchLink;
+import com.gitplex.server.web.component.menu.MenuItem;
+import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.component.pullrequest.requeststatus.RequestStatusPanel;
+import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
@@ -403,7 +403,7 @@ public class RequestListPage extends DepotPage {
 			
 		};
 		DataTable<PullRequest, Void> dataTable = new DataTable<>("requests", columns, 
-				dataProvider, Constants.DEFAULT_PAGE_SIZE);
+				dataProvider, WebConstants.DEFAULT_PAGE_SIZE);
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		dataTable.addBottomToolbar(new NavigationToolbar(dataTable) {
 			

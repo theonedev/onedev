@@ -6,8 +6,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestReference;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestReference;
 import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.pullrequest.requeststatus.RequestStatusPanel;

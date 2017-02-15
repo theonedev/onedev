@@ -16,13 +16,13 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.gitplex.commons.util.match.WildcardUtils;
 import com.gitplex.jsymbol.Range;
 import com.gitplex.jsymbol.Symbol;
-import com.gitplex.server.core.GitPlex;
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.SymbolHit;
+import com.gitplex.server.util.match.WildcardUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 

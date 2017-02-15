@@ -7,14 +7,14 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.component.select2.SelectToAddChoice;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestReviewInvitation;
-import com.gitplex.server.core.manager.PullRequestReviewInvitationManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestReviewInvitation;
+import com.gitplex.server.manager.PullRequestReviewInvitationManager;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
+import com.gitplex.server.web.component.select2.SelectToAddChoice;
 
 @SuppressWarnings("serial")
 public abstract class ReviewerChoice extends SelectToAddChoice<Account> {

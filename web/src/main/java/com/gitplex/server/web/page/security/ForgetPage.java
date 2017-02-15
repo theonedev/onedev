@@ -14,16 +14,16 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.calla.loader.AppLoader;
-import com.gitplex.commons.wicket.behavior.testform.TestFormBehavior;
-import com.gitplex.commons.wicket.behavior.testform.TestResult;
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.commons.wicket.editable.annotation.Editable;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.manager.AccountManager;
-import com.gitplex.server.core.manager.ConfigManager;
-import com.gitplex.server.core.manager.MailManager;
+import com.gitplex.launcher.loader.AppLoader;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.manager.MailManager;
+import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.server.web.behavior.testform.TestFormBehavior;
+import com.gitplex.server.web.behavior.testform.TestResult;
+import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.base.BasePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;

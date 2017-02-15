@@ -15,18 +15,18 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.wicket.ConfirmOnClick;
-import com.gitplex.commons.wicket.component.markdown.MarkdownPanel;
-import com.gitplex.commons.wicket.component.tabbable.PageTab;
-import com.gitplex.commons.wicket.component.tabbable.PageTabLink;
-import com.gitplex.commons.wicket.component.tabbable.Tabbable;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Team;
-import com.gitplex.server.core.manager.TeamManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Team;
+import com.gitplex.server.manager.TeamManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.component.markdown.MarkdownPanel;
+import com.gitplex.server.web.component.tabbable.PageTab;
+import com.gitplex.server.web.component.tabbable.PageTabLink;
+import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
+import com.gitplex.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
 public abstract class TeamPage extends AccountLayoutPage {

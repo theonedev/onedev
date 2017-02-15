@@ -24,18 +24,18 @@ import org.json.JSONWriter;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.gitplex.commons.wicket.component.select2.ChoiceProvider;
-import com.gitplex.commons.wicket.component.select2.Response;
-import com.gitplex.commons.wicket.component.select2.ResponseFiller;
-import com.gitplex.commons.wicket.component.select2.SelectToAddChoice;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Team;
-import com.gitplex.server.core.entity.TeamMembership;
-import com.gitplex.server.core.manager.TeamManager;
-import com.gitplex.server.core.manager.TeamMembershipManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.web.Constants;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Team;
+import com.gitplex.server.entity.TeamMembership;
+import com.gitplex.server.manager.TeamManager;
+import com.gitplex.server.manager.TeamMembershipManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.select2.ChoiceProvider;
+import com.gitplex.server.web.component.select2.Response;
+import com.gitplex.server.web.component.select2.ResponseFiller;
+import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.component.teamchoice.TeamChoiceResourceReference;
 import com.gitplex.server.web.page.account.teams.TeamMemberListPage;
 
@@ -104,7 +104,7 @@ public class MemberTeamListPage extends MemberPage {
 				
 				Collections.sort(teams);
 				
-				new ResponseFiller<Team>(response).fill(teams, page, Constants.DEFAULT_PAGE_SIZE);
+				new ResponseFiller<Team>(response).fill(teams, page, WebConstants.DEFAULT_PAGE_SIZE);
 			}
 
 			@Override

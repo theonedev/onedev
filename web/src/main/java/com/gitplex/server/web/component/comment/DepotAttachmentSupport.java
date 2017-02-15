@@ -12,16 +12,16 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.util.FileUtils;
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.manager.AttachmentManager;
-import com.gitplex.server.core.manager.DepotManager;
-import com.gitplex.server.core.security.SecurityUtils;
-import com.gitplex.server.web.resource.AttachmentResource;
-import com.gitplex.server.web.resource.AttachmentResourceReference;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.manager.AttachmentManager;
+import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
+import com.gitplex.server.web.util.resource.AttachmentResource;
+import com.gitplex.server.web.util.resource.AttachmentResourceReference;
 
 import jersey.repackaged.com.google.common.base.Throwables;
 

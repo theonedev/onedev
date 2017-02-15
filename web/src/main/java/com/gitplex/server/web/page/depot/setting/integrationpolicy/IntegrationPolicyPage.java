@@ -12,12 +12,12 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.commons.wicket.behavior.sortable.SortBehavior;
-import com.gitplex.commons.wicket.behavior.sortable.SortPosition;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.support.IntegrationPolicy;
-import com.gitplex.server.core.manager.DepotManager;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.support.IntegrationPolicy;
+import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.web.behavior.sortable.SortBehavior;
+import com.gitplex.server.web.behavior.sortable.SortPosition;
 import com.gitplex.server.web.page.depot.setting.DepotSettingPage;
 
 @SuppressWarnings("serial")

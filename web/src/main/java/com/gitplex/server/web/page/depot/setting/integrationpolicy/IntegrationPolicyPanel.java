@@ -6,9 +6,9 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmListener;
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.server.core.entity.support.IntegrationPolicy;
+import com.gitplex.server.entity.support.IntegrationPolicy;
+import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
 abstract class IntegrationPolicyPanel extends Panel {

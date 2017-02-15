@@ -7,7 +7,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.gitplex.server.core.security.privilege.DepotPrivilege;
+import com.gitplex.server.security.privilege.DepotPrivilege;
 
 @SuppressWarnings("serial")
 public abstract class PrivilegeSelectionPanel extends Panel {

@@ -1,6 +1,6 @@
 package com.gitplex.server.web.websocket;
 
-import com.gitplex.commons.wicket.websocket.WebSocketRegion;
+import com.gitplex.server.web.websocket.WebSocketRegion;
 
 public class TaskChangedRegion implements WebSocketRegion {
 	

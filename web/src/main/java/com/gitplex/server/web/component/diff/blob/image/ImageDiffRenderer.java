@@ -3,7 +3,7 @@ package com.gitplex.server.web.component.diff.blob.image;
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.gitplex.commons.git.BlobChange;
+import com.gitplex.server.git.BlobChange;
 import com.gitplex.server.web.component.diff.DiffRenderer;
 
 public class ImageDiffRenderer implements DiffRenderer {

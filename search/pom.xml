@@ -6,7 +6,6 @@
         <groupId>com.gitplex</groupId>  
         <artifactId>server-parent</artifactId>  
         <version>1.0-EAP-build26</version> 
-        <relativePath>../parent</relativePath>
     </parent>  
     <build> 
         <plugins> 
@@ -65,13 +64,6 @@
             <type>jar</type>  
             <version>${luceneVersion}</version> 
         </dependency>  
-        <dependency> 
-            <groupId>com.gitplex</groupId>  
-            <artifactId>server-git</artifactId>  
-            <version>1.0-EAP-build26</version>  
-            <type>test-jar</type>  
-            <scope>test</scope> 
-        </dependency> 
     </dependencies>  
     <properties> 
         <moduleClass>com.gitplex.server.search.SearchModule</moduleClass>  

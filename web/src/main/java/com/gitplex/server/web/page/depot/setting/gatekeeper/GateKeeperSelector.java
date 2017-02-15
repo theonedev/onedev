@@ -16,15 +16,15 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.calla.loader.ImplementationRegistry;
-import com.gitplex.commons.wicket.behavior.CollapseBehavior;
-import com.gitplex.commons.wicket.component.AccordionPanel;
-import com.gitplex.commons.wicket.editable.EditableUtils;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.gatekeeper.DefaultGateKeeper;
-import com.gitplex.server.core.gatekeeper.GateKeeper;
-import com.gitplex.server.core.gatekeeper.TeamAwareGateKeeper;
+import com.gitplex.launcher.loader.ImplementationRegistry;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.gatekeeper.DefaultGateKeeper;
+import com.gitplex.server.gatekeeper.GateKeeper;
+import com.gitplex.server.gatekeeper.TeamAwareGateKeeper;
+import com.gitplex.server.util.editable.EditableUtils;
+import com.gitplex.server.web.behavior.CollapseBehavior;
+import com.gitplex.server.web.component.AccordionPanel;
 import com.gitplex.server.web.page.account.AccountPage;
 
 @SuppressWarnings("serial")

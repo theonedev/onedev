@@ -17,9 +17,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.gitplex.commons.wicket.component.DropdownLink;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestVerification;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestVerification;
+import com.gitplex.server.web.component.DropdownLink;
 
 @SuppressWarnings("serial")
 public class VerificationStatusPanel extends Panel {

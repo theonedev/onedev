@@ -9,9 +9,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
-import com.gitplex.commons.jetty.ServerConfigurator;
-import com.gitplex.server.core.setting.ServerConfig;
-import com.gitplex.server.core.setting.SslConfig;
+import com.gitplex.server.util.jetty.ServerConfigurator;
+import com.gitplex.server.util.serverconfig.ServerConfig;
+import com.gitplex.server.util.serverconfig.SslConfig;
 
 public class ProductConfigurator implements ServerConfigurator {
 

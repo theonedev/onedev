@@ -2,8 +2,8 @@ package com.gitplex.server.web.component.avatar;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.gitplex.commons.wicket.AjaxEvent;
-import com.gitplex.server.core.entity.Account;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.web.util.AjaxEvent;
 
 public class AvatarChanged extends AjaxEvent {
 

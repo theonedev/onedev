@@ -20,17 +20,17 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmListener;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.Team;
-import com.gitplex.server.core.entity.TeamMembership;
-import com.gitplex.server.core.manager.TeamManager;
-import com.gitplex.server.core.manager.TeamMembershipManager;
-import com.gitplex.server.core.security.SecurityUtils;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.Team;
+import com.gitplex.server.entity.TeamMembership;
+import com.gitplex.server.manager.TeamManager;
+import com.gitplex.server.manager.TeamMembershipManager;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 

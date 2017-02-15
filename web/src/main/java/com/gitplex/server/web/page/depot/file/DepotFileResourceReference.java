@@ -6,8 +6,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.gitplex.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.gitplex.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
+import com.gitplex.server.web.assets.cookies.CookiesResourceReference;
+import com.gitplex.server.web.assets.jqueryui.JQueryUIResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 

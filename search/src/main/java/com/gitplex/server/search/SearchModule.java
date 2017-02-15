@@ -1,6 +1,6 @@
 package com.gitplex.server.search;
 
-import com.gitplex.calla.loader.AbstractPluginModule;
+import com.gitplex.launcher.loader.AbstractPluginModule;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

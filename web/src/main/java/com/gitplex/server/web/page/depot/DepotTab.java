@@ -3,7 +3,7 @@ package com.gitplex.server.web.page.depot;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.component.tabbable.PageTab;
+import com.gitplex.server.web.component.tabbable.PageTab;
 
 @SuppressWarnings("serial")
 public class DepotTab extends PageTab {

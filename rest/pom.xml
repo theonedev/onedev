@@ -6,7 +6,6 @@
         <groupId>com.gitplex</groupId>  
         <artifactId>server-parent</artifactId>  
         <version>1.0-EAP-build26</version> 
-		<relativePath>../parent</relativePath>
     </parent>  
     <build> 
         <plugins> 
@@ -28,6 +27,19 @@
             <artifactId>server-core</artifactId>  
             <version>1.0-EAP-build26</version> 
         </dependency> 
+        <dependency> 
+            <groupId>org.glassfish.jersey.containers</groupId>  
+            <artifactId>jersey-container-servlet</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.glassfish.jersey.ext</groupId>  
+            <artifactId>jersey-bean-validation</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.glassfish.hk2</groupId>  
+            <artifactId>guice-bridge</artifactId>  
+            <version>2.4.0-b06</version> 
+        </dependency>  
     </dependencies>  
     <properties> 
         <moduleClass>com.gitplex.server.rest.RestModule</moduleClass> 

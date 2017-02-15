@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.commons.wicket.editable.annotation.Editable;
-import com.gitplex.commons.wicket.editable.annotation.Password;
+import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.server.util.editable.annotation.Password;
 
 @Editable
 public class PasswordEditBean implements Serializable {

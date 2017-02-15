@@ -3,15 +3,15 @@ package com.gitplex.server.web;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.gitplex.server.core.entity.Account;
-import com.gitplex.server.core.entity.CodeComment;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.PullRequest;
-import com.gitplex.server.core.entity.PullRequestComment;
-import com.gitplex.server.core.entity.PullRequestStatusChange;
-import com.gitplex.server.core.entity.support.CodeCommentActivity;
-import com.gitplex.server.core.manager.ConfigManager;
-import com.gitplex.server.core.manager.UrlManager;
+import com.gitplex.server.entity.Account;
+import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.entity.PullRequestComment;
+import com.gitplex.server.entity.PullRequestStatusChange;
+import com.gitplex.server.entity.support.CodeCommentActivity;
+import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.manager.UrlManager;
 
 @Singleton
 public class WicketUrlManager implements UrlManager {

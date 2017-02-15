@@ -19,20 +19,20 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.google.common.base.Joiner;
-import com.gitplex.commons.util.ReflectionUtils;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmListener;
-import com.gitplex.commons.wicket.behavior.dragdrop.DragBehavior;
-import com.gitplex.commons.wicket.component.modal.ModalLink;
-import com.gitplex.commons.wicket.component.modal.ModalPanel;
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.commons.wicket.editable.EditableUtils;
-import com.gitplex.server.core.gatekeeper.AbstractGateKeeper;
-import com.gitplex.server.core.gatekeeper.AndGateKeeper;
-import com.gitplex.server.core.gatekeeper.AndOrGateKeeper;
-import com.gitplex.server.core.gatekeeper.ConditionalGateKeeper;
-import com.gitplex.server.core.gatekeeper.DefaultGateKeeper;
-import com.gitplex.server.core.gatekeeper.GateKeeper;
-import com.gitplex.server.core.gatekeeper.NotGateKeeper;
+import com.gitplex.server.gatekeeper.AbstractGateKeeper;
+import com.gitplex.server.gatekeeper.AndGateKeeper;
+import com.gitplex.server.gatekeeper.AndOrGateKeeper;
+import com.gitplex.server.gatekeeper.ConditionalGateKeeper;
+import com.gitplex.server.gatekeeper.DefaultGateKeeper;
+import com.gitplex.server.gatekeeper.GateKeeper;
+import com.gitplex.server.gatekeeper.NotGateKeeper;
+import com.gitplex.server.util.ReflectionUtils;
+import com.gitplex.server.util.editable.EditableUtils;
+import com.gitplex.server.web.behavior.dragdrop.DragBehavior;
+import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
+import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipBehavior;
 

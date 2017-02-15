@@ -7,14 +7,14 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.commons.wicket.editable.BeanContext;
-import com.gitplex.commons.wicket.editable.PropertyDescriptor;
-import com.gitplex.commons.wicket.editable.EditSupport;
-import com.gitplex.commons.wicket.editable.NotDefinedLabel;
-import com.gitplex.commons.wicket.editable.PropertyContext;
-import com.gitplex.commons.wicket.editable.PropertyEditor;
-import com.gitplex.commons.wicket.editable.PropertyViewer;
-import com.gitplex.server.core.annotation.FileChoice;
+import com.gitplex.server.util.editable.annotation.FileChoice;
+import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.server.web.editable.EditSupport;
+import com.gitplex.server.web.editable.NotDefinedLabel;
+import com.gitplex.server.web.editable.PropertyContext;
+import com.gitplex.server.web.editable.PropertyDescriptor;
+import com.gitplex.server.web.editable.PropertyEditor;
+import com.gitplex.server.web.editable.PropertyViewer;
 
 @SuppressWarnings("serial")
 public class FileEditSupport implements EditSupport {

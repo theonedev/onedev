@@ -29,25 +29,25 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.commons.util.StringUtils;
-import com.gitplex.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.commons.wicket.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.commons.wicket.behavior.RunTaskBehavior;
-import com.gitplex.commons.wicket.component.PreventDefaultAjaxLink;
-import com.gitplex.commons.wicket.component.floating.AlignPlacement;
-import com.gitplex.commons.wicket.component.floating.ComponentTarget;
-import com.gitplex.commons.wicket.component.floating.FloatingPanel;
-import com.gitplex.server.core.GitPlex;
-import com.gitplex.server.core.entity.Depot;
-import com.gitplex.server.core.entity.support.TextRange;
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.entity.Depot;
+import com.gitplex.server.entity.support.TextRange;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;
 import com.gitplex.server.search.query.FileQuery;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TooGeneralQueryException;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.server.web.behavior.RunTaskBehavior;
+import com.gitplex.server.web.component.PreventDefaultAjaxLink;
 import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
+import com.gitplex.server.web.component.floating.AlignPlacement;
+import com.gitplex.server.web.component.floating.ComponentTarget;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
 public abstract class InstantSearchPanel extends Panel {
