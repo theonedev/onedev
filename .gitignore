@@ -13,7 +13,6 @@ release.properties
 pom.xml.releaseBackup
 
 .loadpath
-*.class
 *~
 *.lock
 *.swp
@@ -22,4 +21,3 @@ pom.xml.releaseBackup
 *.bak
 *~.nib
 *.DS_Store
-*.log
