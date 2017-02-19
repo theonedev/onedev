@@ -10,16 +10,13 @@
     <artifactId>server-parent</artifactId>  
     <version>1.0-EAP-build26</version>  
     <packaging>pom</packaging>  
-    <prerequisites> 
-        <maven>3.0</maven> 
-    </prerequisites>  
     <build>
     	<pluginManagement>
     		<plugins>
                 <plugin> 
                     <groupId>org.antlr</groupId>  
                     <artifactId>antlr4-maven-plugin</artifactId>  
-                    <version>${antlrVersion}</version>  
+                    <version>${antlr.version}</version>  
                     <executions> 
                         <execution> 
                             <goals> 
@@ -29,10 +26,29 @@
                     </executions>  
                     <configuration> 
                         <sourceDirectory>${basedir}/src/main/java</sourceDirectory> 
+                        <listener>true</listener>
+	                    <visitor>false</visitor> 
                     </configuration> 
                 </plugin>  
     		</plugins>
     	</pluginManagement>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>target/generated-sources/antlr4</directory>
+				<includes>
+					<include>*.tokens</include>
+				</includes>
+			</resource>
+		</resources>
     </build>
     <modules> 
         <module>core</module>
@@ -116,72 +132,72 @@
             <dependency> 
                 <groupId>org.eclipse.jetty</groupId>  
                 <artifactId>jetty-server</artifactId>  
-                <version>${jettyVersion}</version> 
+                <version>${jetty.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.eclipse.jetty</groupId>  
                 <artifactId>jetty-servlets</artifactId>  
-                <version>${jettyVersion}</version> 
+                <version>${jetty.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.eclipse.jetty</groupId>  
                 <artifactId>jetty-servlet</artifactId>  
-                <version>${jettyVersion}</version> 
+                <version>${jetty.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.eclipse.jetty</groupId>  
                 <artifactId>jetty-websocket</artifactId>  
-                <version>${jettyVersion}</version> 
+                <version>${jetty.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.eclipse.jetty</groupId>  
                 <artifactId>jetty-util</artifactId>  
-                <version>${jettyVersion}</version> 
+                <version>${jetty.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.eclipse.jetty.websocket</groupId>  
                 <artifactId>websocket-server</artifactId>  
-                <version>${jettyVersion}</version> 
+                <version>${jetty.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>javax.servlet</groupId>  
                 <artifactId>javax.servlet-api</artifactId>  
-                <version>${servletVersion}</version> 
+                <version>${servlet.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>com.fasterxml.jackson.core</groupId>  
                 <artifactId>jackson-core</artifactId>  
-                <version>${jacksonVersion}</version> 
+                <version>${jackson.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>com.fasterxml.jackson.core</groupId>  
                 <artifactId>jackson-databind</artifactId>  
-                <version>${jacksonVersion}</version> 
+                <version>${jackson.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>com.fasterxml.jackson.datatype</groupId>  
                 <artifactId>jackson-datatype-guava</artifactId>  
-                <version>${jacksonVersion}</version> 
+                <version>${jackson.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>com.fasterxml.jackson.datatype</groupId>  
                 <artifactId>jackson-datatype-joda</artifactId>  
-                <version>${jacksonVersion}</version> 
+                <version>${jackson.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>  
                 <artifactId>jackson-jaxrs-json-provider</artifactId>  
-                <version>${jacksonVersion}</version> 
+                <version>${jackson.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.glassfish.jersey.containers</groupId>  
                 <artifactId>jersey-container-servlet</artifactId>  
-                <version>${jerseyVersion}</version> 
+                <version>${jersey.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.glassfish.jersey.ext</groupId>  
                 <artifactId>jersey-bean-validation</artifactId>  
-                <version>${jerseyVersion}</version> 
+                <version>${jersey.version}</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.hibernate</groupId>  
@@ -194,11 +210,6 @@
                 <version>0.9.9</version> 
             </dependency>  
             <dependency> 
-                <groupId>org.antlr</groupId>  
-                <artifactId>antlr4-runtime</artifactId>  
-                <version>${antlrVersion}</version> 
-            </dependency>  
-            <dependency> 
                 <groupId>org.unbescape</groupId>  
                 <artifactId>unbescape</artifactId>  
                 <version>1.1.2.RELEASE</version> 
@@ -209,12 +220,12 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>launcher-loader</artifactId>  
-            <version>${launcherVersion}</version> 
+            <version>${launcher.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>launcher-loader</artifactId>  
-            <version>${launcherVersion}</version> 
+            <version>${launcher.version}</version> 
             <type>test-jar</type>  
             <scope>test</scope> 
         </dependency> 
@@ -236,11 +247,11 @@
 		</repository>
 	</repositories>
     <properties> 
-    	<launcherVersion>1.0.0</launcherVersion>
-        <jerseyVersion>2.13</jerseyVersion>  
-        <jettyVersion>9.3.8.v20160314</jettyVersion>  
-        <jacksonVersion>2.4.3</jacksonVersion>  
-        <servletVersion>3.1.0</servletVersion>  
-        <antlrVersion>4.5.1-1</antlrVersion>
+    	<launcher.version>1.0.0</launcher.version>
+        <jersey.version>2.13</jersey.version>  
+        <jetty.version>9.3.8.v20160314</jetty.version>  
+        <jackson.version>2.4.3</jackson.version>  
+        <servlet.version>3.1.0</servlet.version>  
+        <antlr.version>4.5.1-1</antlr.version>
     </properties> 
 </project>

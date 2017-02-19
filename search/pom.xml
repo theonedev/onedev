@@ -14,12 +14,6 @@
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
             <plugin> 
-                <artifactId>maven-source-plugin</artifactId> 
-            </plugin>  
-            <plugin> 
-                <artifactId>maven-javadoc-plugin</artifactId> 
-            </plugin>  
-            <plugin> 
                 <groupId>org.antlr</groupId>  
                 <artifactId>antlr4-maven-plugin</artifactId>  
                 <configuration> 
@@ -38,35 +32,35 @@
             <artifactId>lucene-core</artifactId>  
             <groupId>org.apache.lucene</groupId>  
             <type>jar</type>  
-            <version>${luceneVersion}</version> 
+            <version>${lucene.version}</version> 
         </dependency>  
         <dependency> 
             <artifactId>lucene-queries</artifactId>  
             <groupId>org.apache.lucene</groupId>  
             <type>jar</type>  
-            <version>${luceneVersion}</version> 
+            <version>${lucene.version}</version> 
         </dependency>  
         <dependency> 
             <artifactId>lucene-queryparser</artifactId>  
             <groupId>org.apache.lucene</groupId>  
             <type>jar</type>  
-            <version>${luceneVersion}</version> 
+            <version>${lucene.version}</version> 
         </dependency>  
         <dependency> 
             <artifactId>lucene-analyzers-common</artifactId>  
             <groupId>org.apache.lucene</groupId>  
             <type>jar</type>  
-            <version>${luceneVersion}</version> 
+            <version>${lucene.version}</version> 
         </dependency>  
         <dependency> 
             <artifactId>lucene-facet</artifactId>  
             <groupId>org.apache.lucene</groupId>  
             <type>jar</type>  
-            <version>${luceneVersion}</version> 
+            <version>${lucene.version}</version> 
         </dependency>  
     </dependencies>  
     <properties> 
         <moduleClass>com.gitplex.server.search.SearchModule</moduleClass>  
-        <luceneVersion>4.10.3</luceneVersion> 
+        <lucene.version>4.10.3</lucene.version> 
     </properties> 
 </project>

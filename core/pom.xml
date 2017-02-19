@@ -14,12 +14,6 @@
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
             <plugin> 
-                <artifactId>maven-source-plugin</artifactId> 
-            </plugin>  
-            <plugin> 
-                <artifactId>maven-javadoc-plugin</artifactId> 
-            </plugin>  
-            <plugin> 
                 <groupId>org.antlr</groupId>  
                 <artifactId>antlr4-maven-plugin</artifactId> 
             </plugin> 
@@ -33,7 +27,7 @@
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
             <artifactId>shiro-core</artifactId>  
-            <version>${shiroVersion}</version> 
+            <version>${shiro.version}</version> 
             <exclusions>
             	<exclusion>
             		<groupId>org.slf4j</groupId>
@@ -44,7 +38,7 @@
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
             <artifactId>shiro-web</artifactId>  
-            <version>${shiroVersion}</version> 
+            <version>${shiro.version}</version> 
         </dependency>  
         <dependency>
         	<groupId>com.pmease.security.shiro</groupId>
@@ -54,12 +48,12 @@
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
             <artifactId>shiro-guice</artifactId>  
-            <version>${shiroVersion}</version> 
+            <version>${shiro.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.hibernate</groupId>  
             <artifactId>hibernate-core</artifactId>  
-            <version>${hibernateVersion}</version>  
+            <version>${hibernate.version}</version>  
             <exclusions> 
                 <exclusion> 
                     <groupId>dom4j</groupId>  
@@ -70,12 +64,12 @@
         <dependency> 
             <groupId>org.hibernate</groupId>  
             <artifactId>hibernate-ehcache</artifactId>  
-            <version>${hibernateVersion}</version> 
+            <version>${hibernate.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.hibernate</groupId>  
             <artifactId>hibernate-entitymanager</artifactId>  
-            <version>${hibernateVersion}</version>  
+            <version>${hibernate.version}</version>  
             <exclusions> 
                 <exclusion> 
                     <groupId>dom4j</groupId>  
@@ -86,7 +80,7 @@
         <dependency> 
             <groupId>org.hibernate</groupId>  
             <artifactId>hibernate-hikaricp</artifactId>  
-            <version>${hibernateVersion}</version>  
+            <version>${hibernate.version}</version>  
             <exclusions> 
                 <exclusion> 
                     <groupId>com.zaxxer</groupId>  
@@ -257,18 +251,18 @@
         <dependency> 
             <groupId>org.eclipse.jgit</groupId>  
             <artifactId>org.eclipse.jgit.http.server</artifactId>  
-            <version>${jgitVersion}</version> 
+            <version>${jgit.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.eclipse.jgit</groupId>  
             <artifactId>org.eclipse.jgit.archive</artifactId>  
-            <version>${jgitVersion}</version> 
+            <version>${jgit.version}</version> 
         </dependency>  
 	</dependencies>  
     <properties> 
         <moduleClass>com.gitplex.server.CoreModule</moduleClass> 
-        <hibernateVersion>5.1.0.Final</hibernateVersion> 
-        <shiroVersion>1.2.2</shiroVersion> 
-        <jgitVersion>4.4.1.201607150455-r</jgitVersion>  
+        <hibernate.version>5.1.0.Final</hibernate.version> 
+        <shiro.version>1.2.2</shiro.version> 
+        <jgit.version>4.4.1.201607150455-r</jgit.version>  
     </properties> 
 </project>

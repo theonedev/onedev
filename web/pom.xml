@@ -14,12 +14,6 @@
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
             <plugin> 
-                <artifactId>maven-source-plugin</artifactId> 
-            </plugin>  
-            <plugin> 
-                <artifactId>maven-javadoc-plugin</artifactId> 
-            </plugin>  
-            <plugin> 
                 <groupId>org.antlr</groupId>  
                 <artifactId>antlr4-maven-plugin</artifactId> 
             </plugin> 
@@ -29,32 +23,32 @@
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-core</artifactId>  
-            <version>${wicketVersion}</version> 
+            <version>${wicket.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-extensions</artifactId>  
-            <version>${wicketVersion}</version> 
+            <version>${wicket.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-request</artifactId>  
-            <version>${wicketVersion}</version> 
+            <version>${wicket.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-util</artifactId>  
-            <version>${wicketVersion}</version> 
+            <version>${wicket.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-devutils</artifactId>  
-            <version>${wicketVersion}</version> 
+            <version>${wicket.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.wicket</groupId>  
             <artifactId>wicket-native-websocket-core</artifactId>  
-            <version>${wicketVersion}</version> 
+            <version>${wicket.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.webjars</groupId>  
@@ -70,12 +64,12 @@
         <dependency> 
             <groupId>de.agilecoders.wicket</groupId>  
             <artifactId>wicket-bootstrap-core</artifactId>  
-            <version>${wicketBootstrapVersion}</version> 
+            <version>${wicketbootstrap.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>de.agilecoders.wicket</groupId>  
             <artifactId>wicket-bootstrap-extensions</artifactId>  
-            <version>${wicketBootstrapVersion}</version> 
+            <version>${wicketbootstrap.version}</version> 
         </dependency>  
 		<dependency>
 			<groupId>org.webjars.npm</groupId>
@@ -91,12 +85,6 @@
             <groupId>com.gitplex</groupId>  
             <artifactId>server-rest</artifactId>  
             <version>1.0-EAP-build26</version> 
-        </dependency>  
-        <!-- JERSEY CLIENT -->  
-        <dependency> 
-            <groupId>org.glassfish.jersey.core</groupId>  
-            <artifactId>jersey-client</artifactId>  
-            <version>${jerseyVersion}</version> 
         </dependency>  
         <dependency> 
             <groupId>commons-fileupload</groupId>  
@@ -126,7 +114,7 @@
     </dependencies>  
     <properties> 
         <moduleClass>com.gitplex.server.web.WebModule</moduleClass>  
-        <wicketVersion>7.3.0</wicketVersion>  
-        <wicketBootstrapVersion>0.10.6</wicketBootstrapVersion> 
+        <wicket.version>7.3.0</wicket.version>  
+        <wicketbootstrap.version>0.10.6</wicketbootstrap.version> 
     </properties> 
 </project>
