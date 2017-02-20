@@ -1,13 +1,11 @@
-package com.gitplex.server.migration;
+package com.gitplex.server.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.gitplex.server.model.AbstractEntity;
-
 @Entity
 @Table
-public class VersionTable extends AbstractEntity {
+public class ModelVersion extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 

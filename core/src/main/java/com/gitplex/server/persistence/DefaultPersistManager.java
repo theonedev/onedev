@@ -43,9 +43,9 @@ import org.slf4j.LoggerFactory;
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.migration.DatabaseMigrator;
 import com.gitplex.server.migration.MigrationHelper;
-import com.gitplex.server.migration.VersionTable;
 import com.gitplex.server.migration.VersionedDocument;
 import com.gitplex.server.model.AbstractEntity;
+import com.gitplex.server.model.ModelVersion;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.BeanUtils;
@@ -175,7 +175,7 @@ public class DefaultPersistManager implements PersistManager {
 			Session session = sessionFactory.openSession();
 			Transaction transaction = session.beginTransaction();
 			try {
-				VersionTable dataVersion = new VersionTable();
+				ModelVersion dataVersion = new ModelVersion();
 				dataVersion.versionColumn = MigrationHelper.getVersion(DatabaseMigrator.class);
 				session.save(dataVersion);
 				session.flush();
@@ -212,12 +212,12 @@ public class DefaultPersistManager implements PersistManager {
 
 	private String getVersionTableName() {
 		JdbcEnvironment environment = serviceRegistry.getService(JdbcEnvironment.class);
-		Identifier identifier = Identifier.toIdentifier(VersionTable.class.getSimpleName());
+		Identifier identifier = Identifier.toIdentifier(ModelVersion.class.getSimpleName());
 		return physicalNamingStrategy.toPhysicalTableName(identifier, environment).getText();
 	}
 	
 	private String getVersionFieldName() {
-		return VersionTable.class.getFields()[0].getName();
+		return ModelVersion.class.getFields()[0].getName();
 	}
 	
 	private String getVersionColumnName() {
@@ -265,7 +265,7 @@ public class DefaultPersistManager implements PersistManager {
 	}
 	
 	protected void migrateData(File dataDir) {
-		File versionFile = new File(dataDir, VersionTable.class.getSimpleName() + "s.xml");
+		File versionFile = new File(dataDir, ModelVersion.class.getSimpleName() + "s.xml");
 		VersionedDocument dom = VersionedDocument.fromFile(versionFile);
 		List<Element> elements = dom.getRootElement().elements();
 		if (elements.size() != 1)
