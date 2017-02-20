@@ -25,10 +25,6 @@ import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.GitPlex;
@@ -47,6 +43,7 @@ import com.gitplex.server.manager.CodeCommentInfoManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.PullRequestInfoManager;
+import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.TeamAuthorizationManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
@@ -61,11 +58,17 @@ import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.Pair;
 import com.gitplex.server.util.StringUtils;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 @Singleton
 public class DefaultDepotManager extends AbstractEntityManager<Depot> implements DepotManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultDepotManager.class);
+	
+	private static final int INFO_VERSION = 2;
 	
 	private final ListenerRegistry listenerRegistry;
 	
@@ -79,6 +82,8 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
    
     private final TeamAuthorizationManager teamAuthorizationManager;
     
+    private final StorageManager storageManager;
+    
     private final String gitReceiveHook;
     
 	private final BiMap<Pair<Long, String>, Long> nameToId = HashBiMap.create();
@@ -90,7 +95,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     @Inject
     public DefaultDepotManager(Dao dao, AccountManager userManager, CodeCommentInfoManager codeCommentInfoManager,
     		TeamAuthorizationManager teamAuthorizationManager, PullRequestInfoManager pullRequestInfoManager,
-    		CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry) {
+    		CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry, StorageManager storageManager) {
     	super(dao);
     	
         this.userManager = userManager;
@@ -99,6 +104,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
         this.commitInfoManager = commitInfoManager;
         this.codeCommentInfoManager = codeCommentInfoManager;
         this.listenerRegistry = listenerRegistry;
+        this.storageManager = storageManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -182,7 +188,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 					idLock.writeLock().unlock();
 				}
 				if (isNew) {
-		    		checkSanity(depot);
+		    		checkGit(depot);
 				}
 			}
         	
@@ -274,7 +280,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
         doAfterCommit(newAfterCommitRunnable(to, isNew));
 	}
 
-	private void checkSanity(Depot depot) {
+	private void checkGit(Depot depot) {
 		logger.info("Checking sanity of repository '{}'...", depot);
 		File gitDir = depot.getDirectory();
 		if (depot.getDirectory().exists() && !GitUtils.isValid(gitDir)) {
@@ -316,10 +322,29 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	@Listen
 	public void on(SystemStarted event) {
 		for (Depot depot: findAll()) {
-			checkSanity(depot);
+			checkGit(depot);
+			checkInfo(depot);
 	        commitInfoManager.collect(depot);
 	        pullRequestInfoManager.collect(depot);
 	        codeCommentInfoManager.collect(depot);
+		}
+	}
+	
+	private void checkInfo(Depot depot) {
+		File infoVersionFile = new File(storageManager.getInfoDir(depot), "version.txt");
+		int infoVersion;
+		if (infoVersionFile.exists()) {
+			try {
+				infoVersion = Integer.parseInt(FileUtils.readFileToString(infoVersionFile).trim());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			infoVersion = 0;
+		}
+		if (infoVersion != INFO_VERSION) {
+			FileUtils.cleanDir(infoVersionFile.getParentFile());
+			FileUtils.writeFile(infoVersionFile, String.valueOf(INFO_VERSION));
 		}
 	}
 

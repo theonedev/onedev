@@ -25,9 +25,11 @@ import com.gitplex.server.persistence.HibernateProperties;
 import com.gitplex.server.persistence.IdManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.execution.Commandline;
 import com.gitplex.server.util.execution.LineConsumer;
 import com.gitplex.server.util.validation.EntityValidator;
+import com.google.common.base.Charsets;
 
 @Singleton
 public class DefaultUpgradeCommand extends DefaultPersistManager {
@@ -47,9 +49,31 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 	}
 
 	protected Commandline buildCommandline(File upgradeDir, String command, String...commandArgs) {
+		String version;
+		File versionFile = new File(upgradeDir, "version.txt");
+		if (versionFile.exists()) {
+			try {
+				version = FileUtils.readFileToString(versionFile).trim();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			version = "1.0-EAP-build26";
+		}
+		
+		String bootstrapClass;
+		if (version.startsWith("1.0-EAP")) {
+			int build = Integer.parseInt(StringUtils.substringAfterLast(version, "build"));
+			if (build <= 26)
+				bootstrapClass = "com.gitplex.commons.bootstrap.Bootstrap";
+			else
+				bootstrapClass = "com.gitplex.launcher.bootstrap.Bootstrap";
+		} else {
+			bootstrapClass = "com.gitplex.launcher.bootstrap.Bootstrap";
+		}
 		Commandline cmdline= new Commandline(System.getProperty("java.home") + "/bin/java");
-		cmdline.addArgs("-Xmx" + Runtime.getRuntime().maxMemory()/1024/1024 + "m",  "-classpath", "*", 
-				"com.gitplex.launcher.bootstrap.Bootstrap", command);
+		cmdline.addArgs("-Xmx" + Runtime.getRuntime().maxMemory()/1024/1024 + "m",  "-classpath", "*", bootstrapClass, 
+				command);
 		cmdline.addArgs(commandArgs);
 		cmdline.workingDir(new File(upgradeDir, "boot"));
 		return cmdline;
@@ -155,6 +179,8 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 		File upgradeBackup = new File(Bootstrap.installDir, getBackupName(upgradeDir.getName()));
 		FileUtils.createDir(upgradeBackup);
 		File dbBackup = null;
+		
+		FileUtils.cleanDir(new File(upgradeDir, "temp"));
 		
 		if (usingEmbeddedDB.get()) {
 			logger.info("Backing up old installation directory as {}...", upgradeBackup.getAbsolutePath());
@@ -350,10 +376,17 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 			}
 		}
 		try {
+			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
+			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, Charsets.UTF_8);
+			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
+					"com.gitplex.launcher.bootstrap.Bootstrap");
+			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, Charsets.UTF_8);
+			
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
 					new File(upgradeDir, "conf/wrapper-license.conf"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "readme.txt"), new File(upgradeDir, "readme.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "license.txt"), new File(upgradeDir, "license.txt"));
+			FileUtils.copyFile(new File(Bootstrap.installDir, "version.txt"), new File(upgradeDir, "version.txt"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

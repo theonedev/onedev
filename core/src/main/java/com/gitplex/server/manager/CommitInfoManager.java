@@ -45,4 +45,5 @@ public interface CommitInfoManager {
 	 * 			child commits
 	 */
 	Set<ObjectId> getChildren(Depot depot, ObjectId parent);
+	
 }

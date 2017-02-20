@@ -1,13 +1,16 @@
 package com.gitplex.server.migration;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Stack;
 
 import javax.inject.Singleton;
 
+import org.apache.commons.io.FileUtils;
 import org.dom4j.Element;
 
 import com.gitplex.server.util.StringUtils;
+import com.google.common.base.Charsets;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -94,6 +97,43 @@ public class DatabaseMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			}
+		}	
+	}
+	
+	private void migrate6(File dataDir, Stack<Integer> versions) {
+	}
+	
+	private void migrate7(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			try {
+				String content = FileUtils.readFileToString(file, Charsets.UTF_8);
+				content = StringUtils.replace(content, 
+						"com.gitplex.commons.hibernate.migration.VersionTable", 
+						"com.gitplex.server.model.ModelVersion");
+				content = StringUtils.replace(content, 
+						"com.gitplex.server.core.entity.support.IntegrationPolicy", 
+						"com.gitplex.server.model.support.IntegrationPolicy");
+				content = StringUtils.replace(content, 
+						"com.gitplex.server.core.entity.PullRequest_-IntegrationStrategy", 
+						"com.gitplex.server.model.PullRequest_-IntegrationStrategy");
+				content = StringUtils.replace(content, 
+						"com.gitplex.server.core.entity.", "com.gitplex.server.model.");
+				content = StringUtils.replace(content, 
+						"com.gitplex.server.core.setting.SpecifiedGit", "com.gitplex.server.git.config.SpecifiedGit");
+				content = StringUtils.replace(content, 
+						"com.gitplex.server.core.setting.SystemGit", "com.gitplex.server.git.config.SystemGit");
+				content = StringUtils.replace(content, 
+						"com.gitplex.server.core.setting.", "com.gitplex.server.model.support.setting.");
+				content = StringUtils.replace(content, 
+						"com.gitplex.server.core.gatekeeper.", "com.gitplex.server.gatekeeper.");
+				FileUtils.writeStringToFile(file, content, Charsets.UTF_8);
+				
+				if (file.getName().equals("VersionTables.xml")) {
+					FileUtils.moveFile(file, new File(file.getParentFile(), "ModelVersions.xml"));
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}	
 	}

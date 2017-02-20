@@ -6,7 +6,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0-EAP-build26</version> 
+        <version>1.0-EAP-build27</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -92,8 +92,9 @@
                                     <definition name="buildDirectory" value="${project.build.directory}"/>  
                                     <definition name="outputDirectory" value="${project.build.outputDirectory}"/>  
                                     <definition name="jswPath" value="${basedir}/build/jsw"/>  
-                                    <definition name="productName" value="${project.name}"/>  
+                                    <definition name="productName" value="${project.name}"/>
                                     <definition name="lowerCaseProductName" value="${lowerCaseProductName}"/>  
+                                    <definition name="productVersion" value="${project.version}"/>
                                     <definition name="bootstrapClass" value="${bootstrapClass}"/> 
                                 </gant> 
                             </target> 
@@ -124,22 +125,22 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0-EAP-build26</version> 
+            <version>1.0-EAP-build27</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server-web</artifactId>  
-            <version>1.0-EAP-build26</version> 
+            <version>1.0-EAP-build27</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server-rest</artifactId>  
-            <version>1.0-EAP-build26</version> 
+            <version>1.0-EAP-build27</version> 
         </dependency>  
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server-search</artifactId>  
-            <version>1.0-EAP-build26</version> 
+            <version>1.0-EAP-build27</version> 
         </dependency> 
     </dependencies>  
     <properties> 

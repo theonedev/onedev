@@ -263,9 +263,17 @@ public class DefaultPersistManager implements PersistManager {
 				throw Throwables.propagate(e);
 		}
 	}
+
+	private File getVersionFile(File dataDir) {
+		File versionFile = new File(dataDir, ModelVersion.class.getSimpleName() + "s.xml");
+		if (!versionFile.exists())
+			versionFile = new File(dataDir, "VersionTables.xml");
+		return versionFile;
+	}
 	
 	protected void migrateData(File dataDir) {
-		File versionFile = new File(dataDir, ModelVersion.class.getSimpleName() + "s.xml");
+		File versionFile = getVersionFile(dataDir);
+		
 		VersionedDocument dom = VersionedDocument.fromFile(versionFile);
 		List<Element> elements = dom.getRootElement().elements();
 		if (elements.size() != 1)
@@ -276,7 +284,8 @@ public class DefaultPersistManager implements PersistManager {
 		}
 		
 		if (MigrationHelper.migrate(versionElement.getText(), new DatabaseMigrator(), dataDir)) {
-			// read VersionTable dom again in case we changed something of it while migrating
+			// load version file again in case we changed something of it while migrating
+			versionFile = getVersionFile(dataDir);
 			dom = VersionedDocument.fromFile(versionFile);
 			elements = dom.getRootElement().elements();
 			Preconditions.checkState(elements.size() == 1);

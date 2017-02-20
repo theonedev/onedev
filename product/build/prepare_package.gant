@@ -2,6 +2,8 @@ target(default:"prepare to package the product") {
 	File buildDir = new File("${buildDirectory}")
 	File sandboxDir = new File(buildDir, "sandbox")
 	
+	echo(file: new File(sandboxDir, "version.txt"), message: "${productVersion}")
+	
 	File jswLoc = new File(buildDir, "jsw")
 	unzip(src: new File("${jswPath}/wrapper-delta-pack-st.zip"), dest: jswLoc, overwrite: true) {
 	  regexpmapper(from: "^.*?/(.*)", to:"\\1")

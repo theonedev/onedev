@@ -87,8 +87,9 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	@Override
 	public void start() {
+		jettyRunner.start();
+		
 		if (Bootstrap.command == null) {
-			jettyRunner.start();
 			taskScheduler.start();
 		}
 		
