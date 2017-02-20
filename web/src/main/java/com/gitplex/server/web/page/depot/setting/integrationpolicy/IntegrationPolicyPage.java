@@ -13,9 +13,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.support.IntegrationPolicy;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.support.IntegrationPolicy;
 import com.gitplex.server.web.behavior.sortable.SortBehavior;
 import com.gitplex.server.web.behavior.sortable.SortPosition;
 import com.gitplex.server.web.page.depot.setting.DepotSettingPage;

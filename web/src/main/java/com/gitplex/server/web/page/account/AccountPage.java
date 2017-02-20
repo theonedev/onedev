@@ -8,8 +8,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.web.page.layout.LayoutPage;
 import com.gitplex.server.web.util.model.UserModel;
 import com.google.common.base.Preconditions;

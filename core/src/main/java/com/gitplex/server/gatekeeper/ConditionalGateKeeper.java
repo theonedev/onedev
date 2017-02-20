@@ -3,12 +3,12 @@ package com.gitplex.server.gatekeeper;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.gatekeeper.checkresult.Failed;
 import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
 import com.gitplex.server.gatekeeper.checkresult.Passed;
 import com.gitplex.server.gatekeeper.checkresult.Pending;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.Horizontal;
 

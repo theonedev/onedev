@@ -6,10 +6,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.web.component.accountchoice.AccountSingleChoice;
 import com.gitplex.server.web.component.accountchoice.AdministrativeAccountChoiceProvider;
 import com.gitplex.server.web.editable.BeanContext;

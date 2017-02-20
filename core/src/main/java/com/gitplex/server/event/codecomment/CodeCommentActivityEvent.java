@@ -2,10 +2,10 @@ package com.gitplex.server.event.codecomment;
 
 import java.util.Date;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.support.CodeCommentActivity;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.support.CodeCommentActivity;
 
 public abstract class CodeCommentActivityEvent extends CodeCommentEvent {
 

@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
 import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.google.common.collect.Lists;
 

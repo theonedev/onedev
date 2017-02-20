@@ -3,7 +3,7 @@ package com.gitplex.server.web.component.comment;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Element;
 
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.util.markdown.HtmlTransformer;
 import com.gitplex.server.util.markdown.MentionParser;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;

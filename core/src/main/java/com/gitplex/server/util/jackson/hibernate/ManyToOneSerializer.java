@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 
 public final class ManyToOneSerializer extends StdSerializer<AbstractEntity> {
 

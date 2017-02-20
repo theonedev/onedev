@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.util.resource.ArchiveResource;

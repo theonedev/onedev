@@ -2,7 +2,6 @@ package com.gitplex.server.command;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -17,14 +16,13 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.launcher.loader.PluginManager;
 import com.gitplex.launcher.bootstrap.Bootstrap;
+import com.gitplex.launcher.loader.PluginManager;
+import com.gitplex.server.migration.DatabaseMigrator;
 import com.gitplex.server.migration.MigrationHelper;
-import com.gitplex.server.migration.Migrator;
 import com.gitplex.server.persistence.DefaultPersistManager;
 import com.gitplex.server.persistence.HibernateProperties;
 import com.gitplex.server.persistence.IdManager;
-import com.gitplex.server.persistence.ModelProvider;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.execution.Commandline;
@@ -41,10 +39,10 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 	private final String appName;
 	
 	@Inject
-	public DefaultUpgradeCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
-			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
+	public DefaultUpgradeCommand(PhysicalNamingStrategy physicalNamingStrategy,
+			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator, PluginManager pluginManager) {
-		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
+		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
 		appName = pluginManager.getProduct().getName();
 	}
 
@@ -167,7 +165,7 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 			}
 			restoreExecutables(upgradeBackup);
 
-			if (!MigrationHelper.getVersion(migrator.getClass()).equals(oldDataVersion.get())) {
+			if (!MigrationHelper.getVersion(DatabaseMigrator.class).equals(oldDataVersion.get())) {
 				dbBackup = new File(upgradeDir, getBackupName("dbbackup") + ".zip");
 				logger.info("Backing up database as {}...", dbBackup.getAbsolutePath());
 				backupDB(upgradeDir, dbBackup);
@@ -175,7 +173,7 @@ public class DefaultUpgradeCommand extends DefaultPersistManager {
 		} else {
 			// for non-embedded database, we should include database backup in the old installation backup directory
 			// in case we need that for database restore after a failed upgrade
-			if (!MigrationHelper.getVersion(migrator.getClass()).equals(oldDataVersion.get())) {
+			if (!MigrationHelper.getVersion(DatabaseMigrator.class).equals(oldDataVersion.get())) {
 				dbBackup = new File(upgradeDir, getBackupName("dbbackup") + ".zip");
 				logger.info("Backing up database as {}...", dbBackup.getAbsolutePath());
 				backupDB(upgradeDir, dbBackup);

@@ -8,12 +8,12 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestReference;
 import com.gitplex.server.event.MarkdownAware;
 import com.gitplex.server.event.pullrequest.PullRequestChangeEvent;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.PullRequestReferenceManager;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReference;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;

@@ -2,9 +2,9 @@ package com.gitplex.server.event.pullrequest;
 
 import java.util.Date;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequestStatusChange;
 import com.gitplex.server.event.MarkdownAware;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequestStatusChange;
 
 public class PullRequestStatusChangeEvent extends PullRequestChangeEvent implements MarkdownAware {
 

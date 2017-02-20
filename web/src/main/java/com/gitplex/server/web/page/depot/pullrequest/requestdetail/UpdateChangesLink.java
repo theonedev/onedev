@@ -5,7 +5,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.entity.PullRequestUpdate;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 
 @SuppressWarnings("serial")

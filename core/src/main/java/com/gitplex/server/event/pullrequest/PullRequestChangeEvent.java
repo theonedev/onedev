@@ -4,8 +4,8 @@ import java.util.Date;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
 
 public abstract class PullRequestChangeEvent extends PullRequestEvent {
 

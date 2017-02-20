@@ -31,10 +31,10 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.jsymbol.Symbol;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.support.TextRange;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;

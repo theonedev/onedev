@@ -25,8 +25,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.gitplex.server.entity.support.TextRange;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.hit.FileHit;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.TextHit;

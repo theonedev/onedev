@@ -7,10 +7,10 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.BranchWatch;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.manager.BranchWatchManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.BranchWatch;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;

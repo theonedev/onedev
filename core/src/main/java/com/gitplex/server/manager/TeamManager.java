@@ -2,8 +2,8 @@ package com.gitplex.server.manager;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Team;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Team;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface TeamManager extends EntityManager<Team> {

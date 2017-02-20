@@ -12,13 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
 import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.manager.AttachmentManager;
 import com.gitplex.server.manager.StorageManager;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityPersisted;

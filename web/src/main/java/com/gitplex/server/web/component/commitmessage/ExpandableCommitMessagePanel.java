@@ -17,8 +17,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.Highlighter;
 import com.gitplex.server.util.Transformer;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;

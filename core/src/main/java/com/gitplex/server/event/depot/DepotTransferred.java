@@ -1,7 +1,7 @@
 package com.gitplex.server.event.depot;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 
 public class DepotTransferred {
 

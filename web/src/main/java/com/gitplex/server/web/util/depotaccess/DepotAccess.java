@@ -3,12 +3,12 @@ package com.gitplex.server.web.util.depotaccess;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.OrganizationMembership;
-import com.gitplex.server.entity.TeamAuthorization;
-import com.gitplex.server.entity.TeamMembership;
-import com.gitplex.server.entity.UserAuthorization;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.OrganizationMembership;
+import com.gitplex.server.model.TeamAuthorization;
+import com.gitplex.server.model.TeamMembership;
+import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 
 public class DepotAccess {

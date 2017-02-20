@@ -8,7 +8,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.jsymbol.Symbol;
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;
 import com.gitplex.server.search.query.TooGeneralQueryException;

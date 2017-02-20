@@ -16,9 +16,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.support.IntegrationPreview;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.support.IntegrationPreview;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;

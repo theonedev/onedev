@@ -3,8 +3,8 @@ package com.gitplex.server.web.component.confirmdelete;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Depot;
 
 @SuppressWarnings("serial")
 public abstract class ConfirmDeleteDepotModal extends ConfirmDeleteModal {

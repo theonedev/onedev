@@ -7,10 +7,10 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.CodeCommentStatusChange;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.event.codecomment.CodeCommentEvent;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.CodeCommentStatusChange;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface CodeCommentManager extends EntityManager<CodeComment> {

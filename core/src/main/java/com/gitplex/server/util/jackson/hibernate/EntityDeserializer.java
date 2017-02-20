@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.SettableAnyProperty;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
 import com.fasterxml.jackson.databind.deser.impl.PropertyValue;
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.dao.Dao;
 import com.google.common.base.Preconditions;
 

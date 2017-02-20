@@ -1,6 +1,6 @@
 package com.gitplex.server.event;
 
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 
 public class TaskChangeEvent {
 

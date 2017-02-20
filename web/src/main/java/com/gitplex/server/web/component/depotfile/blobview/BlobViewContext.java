@@ -8,10 +8,10 @@ import javax.annotation.Nullable;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.support.TextRange;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.jsymbol.TokenPosition;
 

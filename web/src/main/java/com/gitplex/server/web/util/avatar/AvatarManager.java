@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 
 public interface AvatarManager {
 	

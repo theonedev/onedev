@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.PullRequestUpdate;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.PullRequestActivity;
 

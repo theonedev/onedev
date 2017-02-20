@@ -11,8 +11,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.init.InitStage;
 import com.gitplex.server.util.init.ManualConfig;

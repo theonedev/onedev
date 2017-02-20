@@ -1,9 +1,9 @@
 package com.gitplex.server.manager.impl;
 
-import static com.gitplex.server.entity.PullRequest.Status.PENDING_INTEGRATE;
-import static com.gitplex.server.entity.PullRequestTask.Type.INTEGRATE;
-import static com.gitplex.server.entity.PullRequestTask.Type.REVIEW;
-import static com.gitplex.server.entity.PullRequestTask.Type.UPDATE;
+import static com.gitplex.server.model.PullRequest.Status.PENDING_INTEGRATE;
+import static com.gitplex.server.model.PullRequestTask.Type.INTEGRATE;
+import static com.gitplex.server.model.PullRequestTask.Type.REVIEW;
+import static com.gitplex.server.model.PullRequestTask.Type.UPDATE;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,11 +15,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ListenerRegistry;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestReviewInvitation;
-import com.gitplex.server.entity.PullRequestStatusChange;
-import com.gitplex.server.entity.PullRequestTask;
 import com.gitplex.server.event.TaskChangeEvent;
 import com.gitplex.server.event.pullrequest.PullRequestPendingApproval;
 import com.gitplex.server.event.pullrequest.PullRequestPendingIntegration;
@@ -30,6 +25,11 @@ import com.gitplex.server.event.pullrequest.PullRequestUpdated;
 import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.manager.PullRequestTaskManager;
 import com.gitplex.server.manager.UrlManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReviewInvitation;
+import com.gitplex.server.model.PullRequestStatusChange;
+import com.gitplex.server.model.PullRequestTask;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;

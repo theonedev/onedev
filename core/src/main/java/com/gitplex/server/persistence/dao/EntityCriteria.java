@@ -16,7 +16,7 @@ import org.hibernate.internal.CriteriaImpl;
 import org.hibernate.sql.JoinType;
 import org.hibernate.transform.ResultTransformer;
 
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 
 @SuppressWarnings("serial")
 public class EntityCriteria<T extends AbstractEntity> implements CriteriaSpecification, Serializable {

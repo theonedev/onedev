@@ -22,10 +22,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.OrganizationMembership;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.OrganizationMembershipManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.DropdownLink;

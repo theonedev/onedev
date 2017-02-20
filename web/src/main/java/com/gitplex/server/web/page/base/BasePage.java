@@ -13,8 +13,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.web.page.CommonPage;
 import com.gitplex.server.web.page.init.ServerInitPage;
 import com.gitplex.server.web.page.security.LoginPage;

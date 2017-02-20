@@ -4,8 +4,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.OrganizationMembership;
 import com.gitplex.server.manager.OrganizationMembershipManager;
+import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 
 public class IsOrganizationMember implements PrivilegeSource {

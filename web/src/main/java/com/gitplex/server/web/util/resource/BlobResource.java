@@ -15,11 +15,11 @@ import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jgit.lib.Constants;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;

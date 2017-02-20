@@ -16,8 +16,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.LockUtils;

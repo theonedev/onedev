@@ -11,10 +11,10 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;

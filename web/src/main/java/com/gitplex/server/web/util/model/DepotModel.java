@@ -1,6 +1,6 @@
 package com.gitplex.server.web.util.model;
 
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Depot;
 
 /** Shortcut for {@link EntityModel}<Repository> */
 public class DepotModel extends EntityModel<Depot> {

@@ -27,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.command.AdvertiseReceiveRefsCommand;
 import com.gitplex.server.git.command.AdvertiseUploadRefsCommand;
 import com.gitplex.server.git.command.ReceiveCommand;
@@ -37,6 +35,8 @@ import com.gitplex.server.git.exception.GitException;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.WorkExecutor;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.util.concurrent.PrioritizedRunnable;
 import com.gitplex.server.util.serverconfig.ServerConfig;

@@ -11,9 +11,9 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.gatekeeper.GateKeeper;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.ReflectionUtils;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.web.component.modal.ModalPanel;

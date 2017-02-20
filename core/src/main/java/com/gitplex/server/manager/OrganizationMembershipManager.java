@@ -4,9 +4,9 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.OrganizationMembership;
-import com.gitplex.server.entity.TeamMembership;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.OrganizationMembership;
+import com.gitplex.server.model.TeamMembership;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface OrganizationMembershipManager extends EntityManager<OrganizationMembership> {

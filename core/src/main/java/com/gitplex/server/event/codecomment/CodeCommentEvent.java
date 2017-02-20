@@ -2,9 +2,9 @@ package com.gitplex.server.event.codecomment;
 
 import java.util.Date;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.CodeComment;
 import com.gitplex.server.event.MarkdownAware;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.CodeComment;
 
 public abstract class CodeCommentEvent implements MarkdownAware {
 

@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.Email;
 
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;

@@ -1,9 +1,9 @@
 package com.gitplex.server.web.page.depot.pullrequest.requestlist;
 
-import static com.gitplex.server.entity.PullRequest.CriterionHelper.ofSource;
-import static com.gitplex.server.entity.PullRequest.CriterionHelper.ofSourceDepot;
-import static com.gitplex.server.entity.PullRequest.CriterionHelper.ofTarget;
-import static com.gitplex.server.entity.PullRequest.CriterionHelper.ofTargetDepot;
+import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSource;
+import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSourceDepot;
+import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTarget;
+import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTargetDepot;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,9 +13,9 @@ import javax.validation.constraints.NotNull;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.support.DepotAndBranch;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.util.editable.annotation.AccountChoice;
 import com.gitplex.server.util.editable.annotation.BranchChoice;

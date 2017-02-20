@@ -10,8 +10,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceProvider;
 import com.gitplex.server.web.component.accountchoice.AccountMultiChoice;
 import com.gitplex.server.web.editable.ErrorContext;

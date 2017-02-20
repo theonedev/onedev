@@ -11,6 +11,9 @@ import org.mockito.Mockito;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.git.AbstractGitTest;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestUpdate;
 
 public class PullRequestTest extends AbstractGitTest {
 

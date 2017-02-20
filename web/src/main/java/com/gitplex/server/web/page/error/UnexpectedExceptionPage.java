@@ -34,8 +34,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.string.Strings;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.page.home.DashboardPage;

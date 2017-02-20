@@ -6,7 +6,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.unbescape.html.HtmlEscape;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.web.util.commitmessagetransform.CommitMessageTransformer;
 
 @SuppressWarnings("serial")

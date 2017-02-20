@@ -4,7 +4,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.entity.Team;
+import com.gitplex.server.model.Team;
 import com.gitplex.server.web.component.select2.Select2Choice;
 
 @SuppressWarnings("serial")

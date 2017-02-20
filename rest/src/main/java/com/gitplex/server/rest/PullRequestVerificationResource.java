@@ -21,9 +21,9 @@ import javax.ws.rs.core.MediaType;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.server.entity.PullRequestVerification;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.PullRequestVerificationManager;
+import com.gitplex.server.model.PullRequestVerification;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;

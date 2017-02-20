@@ -10,8 +10,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.model.Depot;
 
 public class CommitRefsModel extends LoadableDetachableModel<Map<String, List<String>>> {
 

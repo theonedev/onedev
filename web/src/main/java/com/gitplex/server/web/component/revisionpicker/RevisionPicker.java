@@ -7,9 +7,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.support.DepotAndRevision;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.support.DepotAndRevision;
 import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 

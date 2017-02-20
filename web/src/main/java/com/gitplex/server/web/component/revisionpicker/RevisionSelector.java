@@ -38,9 +38,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.unbescape.html.HtmlEscape;
 
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;

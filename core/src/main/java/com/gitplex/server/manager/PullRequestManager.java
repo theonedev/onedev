@@ -5,12 +5,12 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequest.IntegrationStrategy;
-import com.gitplex.server.entity.support.DepotAndBranch;
-import com.gitplex.server.entity.support.IntegrationPreview;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequest.IntegrationStrategy;
+import com.gitplex.server.model.support.DepotAndBranch;
+import com.gitplex.server.model.support.IntegrationPreview;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {

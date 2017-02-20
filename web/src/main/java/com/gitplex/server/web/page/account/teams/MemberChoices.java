@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
 import com.gitplex.server.web.component.select2.Select2MultiChoice;
 

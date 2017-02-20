@@ -23,10 +23,10 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestTask;
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestTask;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.web.WebConstants;

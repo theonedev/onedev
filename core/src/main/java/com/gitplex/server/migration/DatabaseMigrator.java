@@ -11,7 +11,7 @@ import com.gitplex.server.util.StringUtils;
 
 @Singleton
 @SuppressWarnings("unused")
-public class DatabaseMigrator implements Migrator {
+public class DatabaseMigrator {
 	
 	private void migrate1(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
@@ -96,9 +96,6 @@ public class DatabaseMigrator implements Migrator {
 				dom.writeToFile(file, false);
 			}
 		}	
-	}
-
-	private void migrate6(File dataDir, Stack<Integer> versions) {
 	}
 	
 }

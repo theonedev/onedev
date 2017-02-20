@@ -4,11 +4,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.ListenerRegistry;
-import com.gitplex.server.entity.PullRequestComment;
-import com.gitplex.server.entity.support.LastEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
 import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.model.PullRequestComment;
+import com.gitplex.server.model.support.LastEvent;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;

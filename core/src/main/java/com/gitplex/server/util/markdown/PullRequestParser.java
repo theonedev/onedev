@@ -12,7 +12,7 @@ import org.jsoup.select.NodeTraversor;
 
 import com.google.common.collect.ImmutableSet;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.JsoupUtils;
 import com.gitplex.server.util.TextNodeVisitor;

@@ -33,9 +33,9 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
 
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;

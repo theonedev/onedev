@@ -2,9 +2,9 @@ package com.gitplex.server.event.pullrequest;
 
 import java.util.Date;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
 import com.gitplex.server.event.MarkdownAware;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable(name="opened")

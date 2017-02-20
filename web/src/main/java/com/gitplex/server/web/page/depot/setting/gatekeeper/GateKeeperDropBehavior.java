@@ -9,7 +9,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.gatekeeper.AndGateKeeper;
 import com.gitplex.server.gatekeeper.AndOrGateKeeper;
 import com.gitplex.server.gatekeeper.CompositeGateKeeper;
@@ -18,6 +17,7 @@ import com.gitplex.server.gatekeeper.DefaultGateKeeper;
 import com.gitplex.server.gatekeeper.GateKeeper;
 import com.gitplex.server.gatekeeper.NotGateKeeper;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.web.behavior.dragdrop.DropBehavior;
 
 abstract class GateKeeperDropBehavior extends DropBehavior {

@@ -21,17 +21,17 @@ import org.apache.shiro.subject.PrincipalCollection;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.OrganizationMembership;
-import com.gitplex.server.entity.Team;
-import com.gitplex.server.entity.TeamAuthorization;
-import com.gitplex.server.entity.TeamMembership;
-import com.gitplex.server.entity.UserAuthorization;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.OrganizationMembershipManager;
 import com.gitplex.server.manager.TeamMembershipManager;
 import com.gitplex.server.manager.UserAuthorizationManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.OrganizationMembership;
+import com.gitplex.server.model.Team;
+import com.gitplex.server.model.TeamAuthorization;
+import com.gitplex.server.model.TeamMembership;
+import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.security.privilege.AccountPrivilege;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 

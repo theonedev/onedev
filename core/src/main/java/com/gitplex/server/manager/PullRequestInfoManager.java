@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Depot;
 
 public interface PullRequestInfoManager {
 	

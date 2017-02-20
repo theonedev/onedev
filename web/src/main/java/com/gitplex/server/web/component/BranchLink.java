@@ -6,7 +6,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.entity.support.DepotAndBranch;
+import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 

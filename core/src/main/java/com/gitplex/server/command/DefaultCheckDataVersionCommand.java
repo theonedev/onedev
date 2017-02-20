@@ -1,7 +1,5 @@
 package com.gitplex.server.command;
 
-import java.util.Set;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -12,11 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.server.migration.Migrator;
 import com.gitplex.server.persistence.DefaultPersistManager;
 import com.gitplex.server.persistence.HibernateProperties;
 import com.gitplex.server.persistence.IdManager;
-import com.gitplex.server.persistence.ModelProvider;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.validation.EntityValidator;
 
@@ -26,10 +22,10 @@ public class DefaultCheckDataVersionCommand extends DefaultPersistManager {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCheckDataVersionCommand.class);
 	
 	@Inject
-	public DefaultCheckDataVersionCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
-			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
+	public DefaultCheckDataVersionCommand(PhysicalNamingStrategy physicalNamingStrategy,
+			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
-		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
+		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
 	}
 
 	@Override

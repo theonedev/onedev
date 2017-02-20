@@ -1,6 +1,6 @@
 package com.gitplex.server.persistence.dao;
 
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 
 public class EntityPersisted {
 	

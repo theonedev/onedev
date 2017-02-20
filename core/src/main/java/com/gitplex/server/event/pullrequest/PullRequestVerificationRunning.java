@@ -2,8 +2,8 @@ package com.gitplex.server.event.pullrequest;
 
 import java.util.Date;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequestVerification;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequestVerification;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable(name="ran verification", icon="fa fa-cog")

@@ -13,7 +13,7 @@ import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.component.avatar.AvatarChanged;
 import com.gitplex.server.web.util.avatar.AvatarManager;

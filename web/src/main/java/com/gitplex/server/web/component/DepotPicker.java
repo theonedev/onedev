@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.depotselector.DepotSelector;

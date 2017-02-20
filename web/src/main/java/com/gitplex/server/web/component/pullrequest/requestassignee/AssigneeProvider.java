@@ -12,9 +12,9 @@ import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.security.SecurityUtils;

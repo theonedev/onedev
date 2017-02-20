@@ -27,9 +27,9 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.ContributorAvatars;

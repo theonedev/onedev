@@ -2,9 +2,9 @@ package com.gitplex.server.manager;
 
 import java.util.List;
 
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.CodeCommentRelation;
-import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.CodeCommentRelation;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface CodeCommentRelationManager extends EntityManager<CodeCommentRelation> {

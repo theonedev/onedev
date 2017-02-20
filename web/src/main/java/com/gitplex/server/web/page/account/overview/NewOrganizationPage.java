@@ -6,10 +6,10 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.OrganizationMembership;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.OrganizationMembershipManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;

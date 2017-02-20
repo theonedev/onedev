@@ -2,11 +2,11 @@ package com.gitplex.server.manager;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.entity.Config;
-import com.gitplex.server.entity.support.setting.BackupSetting;
-import com.gitplex.server.entity.support.setting.MailSetting;
-import com.gitplex.server.entity.support.setting.SecuritySetting;
-import com.gitplex.server.entity.support.setting.SystemSetting;
+import com.gitplex.server.model.Config;
+import com.gitplex.server.model.support.setting.BackupSetting;
+import com.gitplex.server.model.support.setting.MailSetting;
+import com.gitplex.server.model.support.setting.SecuritySetting;
+import com.gitplex.server.model.support.setting.SystemSetting;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface ConfigManager extends EntityManager<Config> {

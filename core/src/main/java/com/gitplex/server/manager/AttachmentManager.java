@@ -2,7 +2,7 @@ package com.gitplex.server.manager;
 
 import java.io.File;
 
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Depot;
 
 public interface AttachmentManager {
 

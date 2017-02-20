@@ -2,8 +2,8 @@ package com.gitplex.server.security;
 
 import org.apache.shiro.authz.Permission;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.privilege.AccountPrivilege;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.security.privilege.Privilege;

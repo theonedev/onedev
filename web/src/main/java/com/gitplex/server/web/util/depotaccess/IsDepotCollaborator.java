@@ -4,8 +4,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.UserAuthorization;
 import com.gitplex.server.manager.UserAuthorizationManager;
+import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 
 public class IsDepotCollaborator implements PrivilegeSource {

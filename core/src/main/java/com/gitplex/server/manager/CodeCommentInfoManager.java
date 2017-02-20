@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.support.CompareContext;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.support.CompareContext;
 
 public interface CodeCommentInfoManager {
 	

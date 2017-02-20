@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.accountchoice.AbstractAccountChoiceProvider;
 import com.gitplex.server.web.component.select2.Response;

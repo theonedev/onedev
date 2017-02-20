@@ -20,10 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.MailManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.web.WebSession;
 import com.gitplex.server.web.page.base.BasePage;
 

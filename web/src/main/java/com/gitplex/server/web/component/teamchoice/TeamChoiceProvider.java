@@ -7,9 +7,9 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Team;
 import com.gitplex.server.manager.TeamManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Team;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.Response;

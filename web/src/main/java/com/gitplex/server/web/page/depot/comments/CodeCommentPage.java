@@ -4,10 +4,10 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.CodeCommentRelation;
-import com.gitplex.server.entity.support.CompareContext;
 import com.gitplex.server.manager.CodeCommentManager;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.CodeCommentRelation;
+import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;

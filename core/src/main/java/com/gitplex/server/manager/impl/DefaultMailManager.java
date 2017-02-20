@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.server.entity.support.setting.MailSetting;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.MailManager;
+import com.gitplex.server.model.support.setting.MailSetting;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.Dao;
 

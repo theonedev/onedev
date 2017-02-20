@@ -9,7 +9,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.hibernate.criterion.Order;
 
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 

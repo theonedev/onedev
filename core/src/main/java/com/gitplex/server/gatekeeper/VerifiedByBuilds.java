@@ -7,13 +7,13 @@ import javax.validation.constraints.Min;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestVerification;
-import com.gitplex.server.entity.support.IntegrationPreview;
 import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
 import com.gitplex.server.manager.PullRequestVerificationManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestVerification;
+import com.gitplex.server.model.support.IntegrationPreview;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.google.common.collect.Lists;
 

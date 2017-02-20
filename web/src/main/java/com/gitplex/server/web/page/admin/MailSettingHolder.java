@@ -2,7 +2,7 @@ package com.gitplex.server.web.page.admin;
 
 import java.io.Serializable;
 
-import com.gitplex.server.entity.support.setting.MailSetting;
+import com.gitplex.server.model.support.setting.MailSetting;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable

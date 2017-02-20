@@ -19,8 +19,8 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;

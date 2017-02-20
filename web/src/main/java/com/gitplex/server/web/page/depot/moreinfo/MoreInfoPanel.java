@@ -19,9 +19,9 @@ import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.Constants;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.UrlManager;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.DropdownLink;

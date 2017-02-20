@@ -7,8 +7,8 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 
 public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 

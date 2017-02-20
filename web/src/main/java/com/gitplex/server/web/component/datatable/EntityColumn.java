@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.web.editable.PropertyContext;
 import com.gitplex.server.web.editable.PropertyDescriptor;

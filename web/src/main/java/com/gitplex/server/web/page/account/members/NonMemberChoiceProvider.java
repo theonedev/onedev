@@ -12,9 +12,9 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.OrganizationMembership;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceProvider;

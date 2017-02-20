@@ -1,7 +1,7 @@
 package com.gitplex.server.event.pullrequest;
 
-import com.gitplex.server.entity.CodeCommentStatusChange;
-import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.model.CodeCommentStatusChange;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable(name="resolved code comment")

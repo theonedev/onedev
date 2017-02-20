@@ -8,9 +8,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.support.CommitMessageTransformSetting;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.support.CommitMessageTransformSetting;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.reflection.ReflectionPropertyEditor;
 import com.gitplex.server.web.page.depot.setting.DepotSettingPage;

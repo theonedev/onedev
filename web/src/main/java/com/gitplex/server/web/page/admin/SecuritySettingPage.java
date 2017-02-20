@@ -3,8 +3,8 @@ package com.gitplex.server.web.page.admin;
 import org.apache.wicket.markup.html.form.Form;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.support.setting.SecuritySetting;
 import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.model.support.setting.SecuritySetting;
 import com.gitplex.server.web.editable.BeanContext;
 
 @SuppressWarnings("serial")

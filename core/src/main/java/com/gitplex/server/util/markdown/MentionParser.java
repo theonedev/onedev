@@ -12,8 +12,8 @@ import org.jsoup.select.NodeTraversor;
 
 import com.google.common.collect.ImmutableSet;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.util.JsoupUtils;
 import com.gitplex.server.util.TextNodeVisitor;
 

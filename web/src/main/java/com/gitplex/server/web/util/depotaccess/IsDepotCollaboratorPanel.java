@@ -5,7 +5,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.entity.UserAuthorization;
+import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 
 @SuppressWarnings("serial")

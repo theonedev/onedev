@@ -9,9 +9,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 
 @SuppressWarnings("serial")
 abstract class CreateTagPanel extends Panel {

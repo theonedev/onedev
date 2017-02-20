@@ -4,7 +4,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 
 @SuppressWarnings("serial")
 public class OrganizationOverviewPanel extends GenericPanel<Account> {

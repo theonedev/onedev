@@ -1,6 +1,6 @@
 package com.gitplex.server.event.depot;
 
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Depot;
 
 public class DepotDeleted {
 	

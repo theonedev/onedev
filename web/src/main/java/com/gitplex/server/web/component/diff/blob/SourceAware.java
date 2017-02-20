@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.support.CommentPos;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.support.CommentPos;
 
 public interface SourceAware {
 	

@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.ClassUtils;
 

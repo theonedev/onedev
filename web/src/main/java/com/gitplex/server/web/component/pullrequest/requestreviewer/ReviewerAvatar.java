@@ -8,10 +8,10 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestReviewInvitation;
 import com.gitplex.server.manager.PullRequestReviewInvitationManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReviewInvitation;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.RemoveableAvatar;
 import com.gitplex.server.web.util.model.EntityModel;

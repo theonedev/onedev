@@ -6,8 +6,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.PullRequest;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.PullRequestActivity;
 
 @SuppressWarnings("serial")

@@ -6,8 +6,8 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.Repository;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface DepotManager extends EntityManager<Depot> {

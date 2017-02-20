@@ -17,8 +17,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestVerification;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestVerification;
 import com.gitplex.server.web.component.DropdownLink;
 
 @SuppressWarnings("serial")

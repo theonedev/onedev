@@ -11,8 +11,8 @@ import com.gitplex.codeassist.InputSuggestion;
 import com.gitplex.codeassist.ParentedElement;
 import com.gitplex.codeassist.grammar.ElementSpec;
 import com.gitplex.codeassist.grammar.LexerRuleRefElementSpec;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.includeexclude.IncludeExcludeParser;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import com.gitplex.server.web.util.SuggestionUtils;
 

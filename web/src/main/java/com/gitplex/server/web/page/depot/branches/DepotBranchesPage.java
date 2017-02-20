@@ -48,14 +48,14 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.BranchWatch;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.support.DepotAndBranch;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.BranchWatchManager;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.model.BranchWatch;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;

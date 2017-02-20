@@ -18,13 +18,13 @@ import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.launcher.loader.LoaderUtils;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.gatekeeper.GateKeeper;
 import com.gitplex.server.gatekeeper.checkresult.Failed;
 import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.util.StringUtils;

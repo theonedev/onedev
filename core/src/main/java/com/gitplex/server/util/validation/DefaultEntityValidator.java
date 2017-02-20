@@ -7,8 +7,8 @@ import javax.inject.Singleton;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
+import com.gitplex.server.model.Account;
 
 @Singleton
 public class DefaultEntityValidator implements EntityValidator {

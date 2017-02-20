@@ -6,7 +6,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.gitplex.server.entity.support.IntegrationPolicy;
+import com.gitplex.server.model.support.IntegrationPolicy;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 

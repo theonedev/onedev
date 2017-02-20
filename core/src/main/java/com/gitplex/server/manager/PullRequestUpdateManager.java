@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequestUpdate;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface PullRequestUpdateManager extends EntityManager<PullRequestUpdate> {

@@ -2,7 +2,7 @@ package com.gitplex.server.manager;
 
 import java.util.Collection;
 
-import com.gitplex.server.entity.support.setting.MailSetting;
+import com.gitplex.server.model.support.setting.MailSetting;
 
 public interface MailManager {
 	

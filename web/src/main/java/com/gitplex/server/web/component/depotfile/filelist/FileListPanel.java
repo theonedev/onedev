@@ -30,9 +30,9 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.PreventDefaultAjaxLink;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext.Mode;

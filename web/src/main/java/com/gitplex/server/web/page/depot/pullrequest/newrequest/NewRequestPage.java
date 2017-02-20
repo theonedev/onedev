@@ -1,7 +1,7 @@
 package com.gitplex.server.web.page.depot.pullrequest.newrequest;
 
-import static com.gitplex.server.entity.PullRequest.Status.INTEGRATED;
-import static com.gitplex.server.entity.PullRequest.Status.PENDING_UPDATE;
+import static com.gitplex.server.model.PullRequest.Status.INTEGRATED;
+import static com.gitplex.server.model.PullRequest.Status.PENDING_UPDATE;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,20 +36,20 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestReviewInvitation;
-import com.gitplex.server.entity.PullRequestUpdate;
-import com.gitplex.server.entity.PullRequest.IntegrationStrategy;
-import com.gitplex.server.entity.PullRequest.Status;
-import com.gitplex.server.entity.support.CloseInfo;
-import com.gitplex.server.entity.support.CommentPos;
-import com.gitplex.server.entity.support.DepotAndBranch;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReviewInvitation;
+import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.model.PullRequest.IntegrationStrategy;
+import com.gitplex.server.model.PullRequest.Status;
+import com.gitplex.server.model.support.CloseInfo;
+import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.util.diff.WhitespaceOption;

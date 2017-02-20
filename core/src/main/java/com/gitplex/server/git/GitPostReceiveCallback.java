@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.launcher.loader.LoaderUtils;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.util.StringUtils;
 import com.google.common.base.Preconditions;

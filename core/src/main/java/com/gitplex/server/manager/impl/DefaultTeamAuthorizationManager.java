@@ -10,10 +10,10 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.TeamAuthorization;
 import com.gitplex.server.event.depot.DepotTransferred;
 import com.gitplex.server.manager.TeamAuthorizationManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.TeamAuthorization;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;

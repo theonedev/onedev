@@ -7,10 +7,10 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.UserAuthorization;
 import com.gitplex.server.manager.UserAuthorizationManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;

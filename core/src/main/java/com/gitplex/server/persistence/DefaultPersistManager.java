@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.ManyToOne;
 
@@ -42,10 +41,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.LoaderUtils;
+import com.gitplex.server.migration.DatabaseMigrator;
 import com.gitplex.server.migration.MigrationHelper;
-import com.gitplex.server.migration.Migrator;
 import com.gitplex.server.migration.VersionTable;
 import com.gitplex.server.migration.VersionedDocument;
+import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.BeanUtils;
@@ -63,13 +63,9 @@ public class DefaultPersistManager implements PersistManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPersistManager.class);
 	
-	protected final Set<ModelProvider> modelProviders;
-
 	protected final PhysicalNamingStrategy physicalNamingStrategy;
 
 	protected final HibernateProperties properties;
-	
-	protected final Migrator migrator;
 	
 	protected final Interceptor interceptor;
 	
@@ -84,13 +80,11 @@ public class DefaultPersistManager implements PersistManager {
 	protected volatile SessionFactory sessionFactory;
 	
 	@Inject
-	public DefaultPersistManager(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
-			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
+	public DefaultPersistManager(PhysicalNamingStrategy physicalNamingStrategy,
+			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
-		this.modelProviders = modelProviders;
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.properties = properties;
-		this.migrator = migrator;
 		this.interceptor = interceptor;
 		this.idManager = idManager;
 		this.dao = dao;
@@ -128,11 +122,6 @@ public class DefaultPersistManager implements PersistManager {
 			metadataSources.addAnnotatedClass(each);
 		}
 		
-		for (ModelProvider provider: modelProviders) {
-			for (Class<? extends AbstractEntity> modelClass: provider.getModelClasses())
-				metadataSources.addAnnotatedClass(modelClass);
-		}
-		
 		return metadataSources.getMetadataBuilder().applyPhysicalNamingStrategy(physicalNamingStrategy).build();
 	}
 	
@@ -146,7 +135,7 @@ public class DefaultPersistManager implements PersistManager {
 			logger.error("Database is not populated yet");
 			System.exit(1);
 		}
-		String appDataVersion = MigrationHelper.getVersion(migrator.getClass());
+		String appDataVersion = MigrationHelper.getVersion(DatabaseMigrator.class);
 		if (dbDataVersion != null && !dbDataVersion.equals(appDataVersion)) {
 			logger.error("Data version mismatch (app data version: {}, db data version: {})", appDataVersion, dbDataVersion);
 			System.exit(1);
@@ -187,7 +176,7 @@ public class DefaultPersistManager implements PersistManager {
 			Transaction transaction = session.beginTransaction();
 			try {
 				VersionTable dataVersion = new VersionTable();
-				dataVersion.versionColumn = MigrationHelper.getVersion(migrator.getClass());
+				dataVersion.versionColumn = MigrationHelper.getVersion(DatabaseMigrator.class);
 				session.save(dataVersion);
 				session.flush();
 				transaction.commit();
@@ -286,13 +275,13 @@ public class DefaultPersistManager implements PersistManager {
 			throw new RuntimeException("Incorrect data format: no data version");
 		}
 		
-		if (MigrationHelper.migrate(versionElement.getText(), migrator, dataDir)) {
+		if (MigrationHelper.migrate(versionElement.getText(), new DatabaseMigrator(), dataDir)) {
 			// read VersionTable dom again in case we changed something of it while migrating
 			dom = VersionedDocument.fromFile(versionFile);
 			elements = dom.getRootElement().elements();
 			Preconditions.checkState(elements.size() == 1);
 			versionElement = Preconditions.checkNotNull(elements.iterator().next().element(getVersionFieldName()));		
-			versionElement.setText(MigrationHelper.getVersion(migrator.getClass()));
+			versionElement.setText(MigrationHelper.getVersion(DatabaseMigrator.class));
 			dom.writeToFile(versionFile, false);
 		}		
 	}

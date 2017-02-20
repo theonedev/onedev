@@ -9,15 +9,15 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestComment;
-import com.gitplex.server.entity.PullRequestReview;
-import com.gitplex.server.entity.PullRequestStatusChange;
-import com.gitplex.server.entity.support.CodeCommentActivity;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestComment;
+import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.PullRequestStatusChange;
+import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.security.privilege.Privilege;
 

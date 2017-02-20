@@ -13,8 +13,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.OrganizationMembership;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.avatar.AvatarLink;

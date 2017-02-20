@@ -1,8 +1,8 @@
 package com.gitplex.server.event.pullrequest;
 
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.PullRequest;
 import com.gitplex.server.event.MarkdownAware;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.PullRequest;
 
 public abstract class PullRequestCodeCommentEvent extends PullRequestChangeEvent implements MarkdownAware {
 

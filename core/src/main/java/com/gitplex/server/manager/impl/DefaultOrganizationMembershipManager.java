@@ -7,12 +7,12 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.OrganizationMembership;
-import com.gitplex.server.entity.TeamMembership;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.OrganizationMembershipManager;
 import com.gitplex.server.manager.TeamMembershipManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.OrganizationMembership;
+import com.gitplex.server.model.TeamMembership;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;

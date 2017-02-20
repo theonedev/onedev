@@ -30,8 +30,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.support.TextRange;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;

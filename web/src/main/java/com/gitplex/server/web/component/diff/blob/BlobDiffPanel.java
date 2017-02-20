@@ -15,12 +15,12 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.CodeComment;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.support.CommentPos;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobChange;
+import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.support.CommentPos;
 import com.gitplex.server.util.diff.DiffUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.diff.DiffRenderer;

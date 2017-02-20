@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStarting;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.StorageManager;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.FileUtils;

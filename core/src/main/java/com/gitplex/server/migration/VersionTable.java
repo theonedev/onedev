@@ -3,7 +3,7 @@ package com.gitplex.server.migration;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 
 @Entity
 @Table

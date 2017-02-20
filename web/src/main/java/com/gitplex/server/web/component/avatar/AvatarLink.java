@@ -13,8 +13,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.web.behavior.TooltipBehavior;
 import com.gitplex.server.web.page.account.AccountPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;

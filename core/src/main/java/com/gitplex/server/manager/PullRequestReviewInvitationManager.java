@@ -3,9 +3,9 @@ package com.gitplex.server.manager;
 import java.util.Collection;
 import java.util.Date;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestReviewInvitation;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReviewInvitation;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface PullRequestReviewInvitationManager extends EntityManager<PullRequestReviewInvitation> {

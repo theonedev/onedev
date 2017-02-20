@@ -1,6 +1,6 @@
 package com.gitplex.server.event.pullrequest;
 
-import com.gitplex.server.entity.PullRequestReviewInvitation;
+import com.gitplex.server.model.PullRequestReviewInvitation;
 
 public class PullRequestReviewInvitationChanged extends PullRequestEvent {
 

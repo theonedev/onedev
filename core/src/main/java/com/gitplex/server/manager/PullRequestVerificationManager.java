@@ -2,8 +2,8 @@ package com.gitplex.server.manager;
 
 import java.util.Collection;
 
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestVerification;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestVerification;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface PullRequestVerificationManager extends EntityManager<PullRequestVerification> {

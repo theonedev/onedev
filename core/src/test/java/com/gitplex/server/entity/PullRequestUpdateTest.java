@@ -8,6 +8,9 @@ import org.junit.Test;
 
 import com.gitplex.server.git.AbstractGitTest;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.google.common.collect.Sets;
 
 public class PullRequestUpdateTest extends AbstractGitTest {

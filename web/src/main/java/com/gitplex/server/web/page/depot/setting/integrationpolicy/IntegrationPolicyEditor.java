@@ -6,7 +6,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.gitplex.server.entity.support.IntegrationPolicy;
+import com.gitplex.server.model.support.IntegrationPolicy;
 import com.gitplex.server.web.editable.BeanContext;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;

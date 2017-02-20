@@ -35,12 +35,11 @@ import org.pegdown.Parser;
 import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitplex.launcher.bootstrap.Bootstrap;
+import com.gitplex.launcher.bootstrap.Command;
 import com.gitplex.launcher.loader.AbstractPlugin;
 import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.launcher.loader.ImplementationProvider;
-import com.gitplex.launcher.loader.LoaderUtils;
-import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.launcher.bootstrap.Command;
 import com.gitplex.server.command.DefaultApplyDBConstraintsCommand;
 import com.gitplex.server.command.DefaultBackupCommand;
 import com.gitplex.server.command.DefaultCheckDataVersionCommand;
@@ -49,7 +48,6 @@ import com.gitplex.server.command.DefaultDBDialectCommand;
 import com.gitplex.server.command.DefaultRestoreCommand;
 import com.gitplex.server.command.DefaultUpgradeCommand;
 import com.gitplex.server.command.ResetAdminPasswordCommand;
-import com.gitplex.server.entity.EntityLocator;
 import com.gitplex.server.git.config.GitConfig;
 import com.gitplex.server.git.config.SpecifiedGit;
 import com.gitplex.server.git.config.SystemGit;
@@ -120,18 +118,13 @@ import com.gitplex.server.manager.impl.DefaultTeamMembershipManager;
 import com.gitplex.server.manager.impl.DefaultUserAuthorizationManager;
 import com.gitplex.server.manager.impl.DefaultVisitInfoManager;
 import com.gitplex.server.manager.impl.DefaultWorkExecutor;
-import com.gitplex.server.migration.DatabaseMigrator;
 import com.gitplex.server.migration.JpaConverter;
-import com.gitplex.server.migration.Migrator;
 import com.gitplex.server.migration.PersistentBagConverter;
-import com.gitplex.server.migration.VersionTable;
-import com.gitplex.server.persistence.AbstractEntity;
 import com.gitplex.server.persistence.DefaultIdManager;
 import com.gitplex.server.persistence.DefaultPersistManager;
 import com.gitplex.server.persistence.DefaultUnitOfWork;
 import com.gitplex.server.persistence.HibernateInterceptor;
 import com.gitplex.server.persistence.IdManager;
-import com.gitplex.server.persistence.ModelProvider;
 import com.gitplex.server.persistence.PersistListener;
 import com.gitplex.server.persistence.PersistManager;
 import com.gitplex.server.persistence.PrefixedNamingStrategy;
@@ -235,20 +228,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		
 		
 		configurePersistence();
-		
-		bind(Migrator.class).to(DatabaseMigrator.class);
-		
-		contribute(ModelProvider.class, new ModelProvider() {
-
-			@Override
-			public Collection<Class<? extends AbstractEntity>> getModelClasses() {
-				Collection<Class<? extends AbstractEntity>> modelClasses = 
-						new HashSet<Class<? extends AbstractEntity>>();
-				modelClasses.addAll(LoaderUtils.findImplementations(AbstractEntity.class, EntityLocator.class));
-				return modelClasses;
-			}
-			
-		});
 		
 		/*
 		 * Contribute empty reservations to avoid Guice complain 
@@ -417,16 +396,6 @@ public class CoreModule extends AbstractPluginModule {
 			}
 		});
 	    
-		contribute(ModelProvider.class, new ModelProvider() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public Collection<Class<? extends AbstractEntity>> getModelClasses() {
-				return Lists.newArrayList(VersionTable.class);
-			}
-			
-		});
-		
 		// put your guice bindings here
 		bind(XStream.class).toProvider(new com.google.inject.Provider<XStream>() {
 

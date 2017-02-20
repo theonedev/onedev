@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.NameAndEmail;
+import com.gitplex.server.model.Depot;
 
 public interface CommitInfoManager {
 	

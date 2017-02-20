@@ -1,7 +1,6 @@
 package com.gitplex.server.command;
 
 import java.io.File;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,11 +14,9 @@ import org.slf4j.LoggerFactory;
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.launcher.bootstrap.BootstrapUtils;
 import com.gitplex.launcher.bootstrap.Command;
-import com.gitplex.server.migration.Migrator;
 import com.gitplex.server.persistence.DefaultPersistManager;
 import com.gitplex.server.persistence.HibernateProperties;
 import com.gitplex.server.persistence.IdManager;
-import com.gitplex.server.persistence.ModelProvider;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.validation.EntityValidator;
@@ -30,10 +27,10 @@ public class DefaultRestoreCommand extends DefaultPersistManager {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultRestoreCommand.class);
 	
 	@Inject
-	public DefaultRestoreCommand(Set<ModelProvider> modelProviders, PhysicalNamingStrategy physicalNamingStrategy,
-			HibernateProperties properties, Migrator migrator, Interceptor interceptor, 
+	public DefaultRestoreCommand(PhysicalNamingStrategy physicalNamingStrategy,
+			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
-		super(modelProviders, physicalNamingStrategy, properties, migrator, interceptor, idManager, dao, validator);
+		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
 	}
 
 	@Override

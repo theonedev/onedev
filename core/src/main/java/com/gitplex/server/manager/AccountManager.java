@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface AccountManager extends EntityManager<Account> {

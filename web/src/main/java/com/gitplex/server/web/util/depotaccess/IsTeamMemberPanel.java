@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.entity.TeamMembership;
+import com.gitplex.server.model.TeamMembership;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.page.account.teams.TeamDepotListPage;
 import com.gitplex.server.web.page.account.teams.TeamMemberListPage;

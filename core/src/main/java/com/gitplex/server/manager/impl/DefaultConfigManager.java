@@ -5,14 +5,14 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.server.entity.Config;
-import com.gitplex.server.entity.Config.Key;
-import com.gitplex.server.entity.support.setting.BackupSetting;
-import com.gitplex.server.entity.support.setting.MailSetting;
-import com.gitplex.server.entity.support.setting.SecuritySetting;
-import com.gitplex.server.entity.support.setting.SystemSetting;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
+import com.gitplex.server.model.Config;
+import com.gitplex.server.model.Config.Key;
+import com.gitplex.server.model.support.setting.BackupSetting;
+import com.gitplex.server.model.support.setting.MailSetting;
+import com.gitplex.server.model.support.setting.SecuritySetting;
+import com.gitplex.server.model.support.setting.SystemSetting;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;

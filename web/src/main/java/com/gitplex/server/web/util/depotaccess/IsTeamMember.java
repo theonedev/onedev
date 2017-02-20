@@ -4,8 +4,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.TeamMembership;
 import com.gitplex.server.manager.TeamMembershipManager;
+import com.gitplex.server.model.TeamMembership;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 
 public class IsTeamMember implements PrivilegeSource {

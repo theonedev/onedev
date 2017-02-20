@@ -16,7 +16,7 @@ import org.hibernate.criterion.Projections;
 
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.launcher.loader.ManagedSerializedForm;
-import com.gitplex.server.persistence.AbstractEntity;
+import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;

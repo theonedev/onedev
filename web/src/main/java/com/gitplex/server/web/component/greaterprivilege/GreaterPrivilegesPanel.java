@@ -17,9 +17,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.OrganizationMembership;
-import com.gitplex.server.entity.TeamAuthorization;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.OrganizationMembership;
+import com.gitplex.server.model.TeamAuthorization;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.component.avatar.Avatar;

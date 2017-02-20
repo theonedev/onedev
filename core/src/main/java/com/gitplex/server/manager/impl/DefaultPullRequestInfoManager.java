@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequestUpdate;
 import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.git.GitUtils;
@@ -35,6 +33,8 @@ import com.gitplex.server.manager.PullRequestInfoManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.support.BatchWorker;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;

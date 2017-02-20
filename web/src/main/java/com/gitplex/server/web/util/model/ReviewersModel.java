@@ -6,8 +6,8 @@ import java.util.List;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestReviewInvitation;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReviewInvitation;
 
 @SuppressWarnings("serial")
 public class ReviewersModel extends LoadableDetachableModel<List<PullRequestReviewInvitation>>{

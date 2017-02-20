@@ -4,10 +4,10 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestReview;
-import com.gitplex.server.entity.PullRequestUpdate;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface PullRequestReviewManager extends EntityManager<PullRequestReview> {

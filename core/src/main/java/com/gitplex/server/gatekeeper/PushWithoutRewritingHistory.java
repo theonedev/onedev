@@ -5,11 +5,11 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
 import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.ExceptionUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
 

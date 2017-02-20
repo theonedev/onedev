@@ -8,8 +8,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.PullRequest;
 import com.gitplex.server.manager.CodeCommentInfoManager;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.web.component.comment.CodeCommentAware;
 import com.gitplex.server.web.component.comment.CodeCommentFilter;
 import com.gitplex.server.web.component.comment.CodeCommentListPanel;

@@ -1,6 +1,6 @@
 package com.gitplex.server.web.util.model;
 
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 
 public class UserModel extends EntityModel<Account> {
 

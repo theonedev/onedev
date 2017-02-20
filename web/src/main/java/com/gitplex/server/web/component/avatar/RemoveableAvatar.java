@@ -10,7 +10,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.web.behavior.TooltipBehavior;
 import com.gitplex.server.web.util.avatar.AvatarManager;
 

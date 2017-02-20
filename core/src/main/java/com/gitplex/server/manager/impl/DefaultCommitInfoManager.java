@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
@@ -45,6 +44,7 @@ import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.support.BatchWorker;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;

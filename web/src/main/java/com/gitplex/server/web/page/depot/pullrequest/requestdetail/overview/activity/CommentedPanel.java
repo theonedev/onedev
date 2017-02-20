@@ -17,10 +17,10 @@ import org.apache.wicket.model.Model;
 import org.hibernate.StaleStateException;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestComment;
 import com.gitplex.server.manager.PullRequestCommentManager;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.AccountLink;

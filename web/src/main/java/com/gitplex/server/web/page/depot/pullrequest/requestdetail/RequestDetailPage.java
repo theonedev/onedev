@@ -1,10 +1,10 @@
 package com.gitplex.server.web.page.depot.pullrequest.requestdetail;
 
-import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
-import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
-import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
-import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
-import static com.gitplex.server.entity.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
+import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
+import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
+import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
+import static com.gitplex.server.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
+import static com.gitplex.server.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.APPROVE;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.DELETE_SOURCE_BRANCH;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.DISAPPROVE;
@@ -57,14 +57,14 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Depot;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestUpdate;
-import com.gitplex.server.entity.PullRequest.Status;
-import com.gitplex.server.entity.support.DepotAndBranch;
-import com.gitplex.server.entity.support.IntegrationPreview;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.model.PullRequest.Status;
+import com.gitplex.server.model.support.DepotAndBranch;
+import com.gitplex.server.model.support.IntegrationPreview;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;

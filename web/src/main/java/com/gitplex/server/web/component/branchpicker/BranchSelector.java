@@ -24,9 +24,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.gitplex.server.entity.Depot;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.model.Depot;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;

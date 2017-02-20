@@ -1,6 +1,6 @@
 package com.gitplex.server.web.page.depot.pullrequest.requestdetail;
 
-import static com.gitplex.server.entity.PullRequest.Status.PENDING_INTEGRATE;
+import static com.gitplex.server.model.PullRequest.Status.PENDING_INTEGRATE;
 
 import javax.annotation.Nullable;
 
@@ -10,16 +10,16 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.entity.Account;
-import com.gitplex.server.entity.PullRequest;
-import com.gitplex.server.entity.PullRequestReview;
-import com.gitplex.server.entity.PullRequestReviewInvitation;
-import com.gitplex.server.entity.PullRequest.Status;
-import com.gitplex.server.entity.support.IntegrationPreview;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.model.Account;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.PullRequestReviewInvitation;
+import com.gitplex.server.model.PullRequest.Status;
+import com.gitplex.server.model.support.IntegrationPreview;
 import com.gitplex.server.security.SecurityUtils;
 
 @SuppressWarnings("serial")

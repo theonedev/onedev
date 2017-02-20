@@ -3,7 +3,7 @@ package com.gitplex.server.web.component.comment;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Element;
 
-import com.gitplex.server.entity.PullRequest;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.markdown.HtmlTransformer;
 import com.gitplex.server.util.markdown.PullRequestParser;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;

@@ -11,7 +11,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.server.entity.CodeComment;
+import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.util.editable.annotation.AccountChoice;
 import com.gitplex.server.util.editable.annotation.Editable;
