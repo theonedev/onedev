@@ -68,8 +68,6 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	private RunTaskBehavior moreSymbolHitsBehavior;
 	
-	private int activeHitIndex;
-	
 	public InstantSearchPanel(String id, IModel<Depot> depotModel, IModel<String> revisionModel) {
 		super(id);
 		
@@ -164,7 +162,7 @@ public abstract class InstantSearchPanel extends Panel {
 				String key = params.getParameterValue("key").toString();
 
 				if (key.equals("input")) {
-					searchInput = params.getParameterValue("input").toString();
+					searchInput = params.getParameterValue("param").toString();
 					if (StringUtils.isNotBlank(searchInput)) {
 						symbolHits = querySymbols(searchInput, MAX_QUERY_ENTRIES);
 						if (searchHint == null)
@@ -177,19 +175,15 @@ public abstract class InstantSearchPanel extends Panel {
 						if (searchHint != null)
 							searchHint.close();
 					}
-					activeHitIndex = 0;
 				} else if (key.equals("return")) {
-					QueryHit activeHit = getActiveHit();
+					int activeHitIndex = params.getParameterValue("param").toInt();
+					QueryHit activeHit = getActiveHit(activeHitIndex);
 					if (activeHit != null) {
 						if (activeHit instanceof MoreSymbolHit) 
 							moreSymbolHitsBehavior.requestRun(target);
 						else 
 							selectHit(target, activeHit);
 					}
-				} else if (key.equals("up")) {
-					activeHitIndex--;
-				} else if (key.equals("down")) {
-					activeHitIndex++;
 				} else {
 					throw new IllegalStateException("Unrecognized key: " + key);
 				}
@@ -201,7 +195,7 @@ public abstract class InstantSearchPanel extends Panel {
 				String script = String.format(
 						"gitplex.server.blobInstantSearch.init('%s', %s);", 
 						searchField.getMarkupId(), 
-						getCallbackFunction(explicit("key"), explicit("input")));
+						getCallbackFunction(explicit("key"), explicit("param")));
 				
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
@@ -270,7 +264,7 @@ public abstract class InstantSearchPanel extends Panel {
 						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
 						link.add(AttributeAppender.replace("href", url.toString()));
 
-						if (item.getIndex() == activeHitIndex)
+						if (item.getIndex() == 0)
 							item.add(AttributeModifier.append("class", "active"));
 					}
 					
@@ -331,18 +325,20 @@ public abstract class InstantSearchPanel extends Panel {
 		target.appendJavaScript(script);
 	}
 	
-	private QueryHit getActiveHit() {
+	private QueryHit getActiveHit(int activeHitIndex) {
 		List<QueryHit> hits = new ArrayList<>();
 		hits.addAll(symbolHits);
 		if (symbolHits.size() == MAX_QUERY_ENTRIES)
 			hits.add(new MoreSymbolHit());
-		
-		if (activeHitIndex >=0 && activeHitIndex<hits.size())
-			return hits.get(activeHitIndex);
-		else if (!hits.isEmpty())
-			return hits.get(0);
-		else
+
+		if (hits.isEmpty())
 			return null;
+		else if (activeHitIndex <0) 
+			return hits.get(0);
+		else if (activeHitIndex>=hits.size())
+			return hits.get(hits.size()-1);
+		else
+			return hits.get(activeHitIndex);
 	}
 	
 	@Override

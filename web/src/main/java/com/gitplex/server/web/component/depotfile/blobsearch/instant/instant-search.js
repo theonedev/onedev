@@ -19,8 +19,15 @@ gitplex.server.blobInstantSearch = {
 		});
 
 		$input.data("return", function() {
-			if (gitplex.commons.form.confirmLeave())
-				callback("return");
+			if (gitplex.commons.form.confirmLeave()) {
+				var $hint = $input.data("hint");
+				if ($hint != null) {
+					var $active = $hint.find("li.hit.active");
+					if ($active.length != 0) {
+						callback("return", $active.index());
+					}
+				}				
+			}
 		});
 		$input.data("keyup", function(e) {
 			var $hint = $input.data("hint");
@@ -31,7 +38,6 @@ gitplex.server.blobInstantSearch = {
 				if ($prev.length != 0) {
 					$active.removeClass("active");
 					$prev.addClass("active");
-					callback("up");
 				} 
 				$hint.scrollIntoView("li.hit.active", 36, 36);
 			}
@@ -45,7 +51,6 @@ gitplex.server.blobInstantSearch = {
 				if ($next.length != 0) {
 					$active.removeClass("active");
 					$next.addClass("active");
-					callback("down");
 				} 
 				$hint.scrollIntoView("li.hit.active", 36, 36);
 			}
