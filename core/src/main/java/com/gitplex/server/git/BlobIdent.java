@@ -1,6 +1,7 @@
 package com.gitplex.server.git;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -8,6 +9,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.FileMode;
 
+import com.gitplex.server.git.exception.ObjectNotFoundException;
+import com.gitplex.server.model.Depot;
 import com.google.common.base.Objects;
 
 public class BlobIdent implements Serializable, Comparable<BlobIdent> {
@@ -36,6 +39,29 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		this.revision = revision;
 		this.path = path;
 		this.mode = mode;
+	}
+	
+	public BlobIdent(Depot depot, List<String> urlSegments) {
+		StringBuilder revisionBuilder = new StringBuilder();
+		for (int i=0; i<urlSegments.size(); i++) {
+			if (i != 0)
+				revisionBuilder.append("/");
+			revisionBuilder.append(urlSegments.get(i));
+			if (depot.getObjectId(revisionBuilder.toString(), false) != null) {
+				revision = revisionBuilder.toString();
+				StringBuilder pathBuilder = new StringBuilder();
+				for (int j=i+1; j<urlSegments.size(); j++) {
+					if (j != i+1)
+						pathBuilder.append("/");
+					pathBuilder.append(urlSegments.get(j));
+				}
+				if (pathBuilder.length() != 0)
+					path = pathBuilder.toString();
+				return;
+			}
+		}
+		if (revisionBuilder.length() != 0)
+			throw new ObjectNotFoundException("Revision not found: " + revisionBuilder.toString());
 	}
 	
 	public boolean isTree() {

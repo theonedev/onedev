@@ -6,8 +6,8 @@ import org.apache.wicket.markup.html.image.Image;
 
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext;
 import com.gitplex.server.web.component.depotfile.blobview.BlobViewPanel;
-import com.gitplex.server.web.util.resource.BlobResource;
-import com.gitplex.server.web.util.resource.BlobResourceReference;
+import com.gitplex.server.web.util.resource.RawBlobResource;
+import com.gitplex.server.web.util.resource.RawBlobResourceReference;
 
 @SuppressWarnings("serial")
 public class ImageViewPanel extends BlobViewPanel {
@@ -20,8 +20,8 @@ public class ImageViewPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Image("img", new BlobResourceReference(), 
-				BlobResource.paramsOf(context.getDepot(), context.getBlobIdent())));
+		add(new Image("img", new RawBlobResourceReference(), 
+				RawBlobResource.paramsOf(context.getDepot(), context.getBlobIdent())));
 	}
 
 	@Override

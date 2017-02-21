@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.core.MediaType;
@@ -25,7 +27,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
-public class BlobResource extends AbstractResource {
+public class RawBlobResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,23 +47,36 @@ public class BlobResource extends AbstractResource {
 		if (StringUtils.isBlank(userName))
 			throw new IllegalArgumentException("account name has to be specified");
 		
-		String repoName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
-		if (StringUtils.isBlank(repoName))
+		String depotName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
+		if (StringUtils.isBlank(depotName))
 			throw new IllegalArgumentException("repository name has to be specified");
 		
-		if (repoName.endsWith(Constants.DOT_GIT_EXT))
-			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
+		if (depotName.endsWith(Constants.DOT_GIT_EXT))
+			depotName = depotName.substring(0, depotName.length() - Constants.DOT_GIT_EXT.length());
 		
-		final Depot depot = GitPlex.getInstance(DepotManager.class).find(userName, repoName);
+		Depot depot = GitPlex.getInstance(DepotManager.class).find(userName, depotName);
 		
 		if (depot == null) 
-			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);
+			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + depotName);
+
+		List<String> revisionAndPathSegments = new ArrayList<>();
+		String segment = params.get(PARAM_REVISION).toString();
+		if (segment.length() != 0)
+			revisionAndPathSegments.add(segment);
+		segment = params.get(PARAM_PATH).toString();
+		if (segment.length() != 0)
+			revisionAndPathSegments.add(segment);
 		
-		String revision = params.get(PARAM_REVISION).toString();
-		if (StringUtils.isBlank(revision))
-			throw new IllegalArgumentException("revision parameter has to be specified");
+		for (int i=0; i<params.getIndexedCount(); i++) {
+			segment = params.get(i).toString();
+			if (segment.length() != 0)
+				revisionAndPathSegments.add(segment);
+		}
 		
-		String path = params.get(PARAM_PATH).toString();
+		BlobIdent blobIdent = new BlobIdent(depot, revisionAndPathSegments);
+		
+		String revision = blobIdent.revision;
+		String path = blobIdent.path;
 		if (StringUtils.isBlank(path))
 			throw new IllegalArgumentException("path parameter has to be specified");
 

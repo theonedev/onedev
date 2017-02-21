@@ -1,11 +1,10 @@
 package com.gitplex.server.web.util.mapper;
 
-import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.resource.ResourceReference;
 
-public class DepotResourceMapper extends ResourceMapper {
+public class DepotResourceMapper extends WebResourceMapper {
 
 	public DepotResourceMapper(String path, ResourceReference resourceReference) {
 		super(path, resourceReference);

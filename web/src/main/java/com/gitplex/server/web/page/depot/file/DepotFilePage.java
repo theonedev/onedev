@@ -37,13 +37,15 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.gitplex.jsymbol.TokenPosition;
+import com.gitplex.jsymbol.util.NoAntiCacheImage;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.git.exception.GitObjectNotFoundException;
+import com.gitplex.server.git.exception.ObjectNotFoundException;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.PullRequestManager;
@@ -89,8 +91,6 @@ import com.gitplex.server.web.websocket.PullRequestChangedRegion;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
 import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
-import com.gitplex.jsymbol.TokenPosition;
-import com.gitplex.jsymbol.util.NoAntiCacheImage;
 import com.google.common.base.Objects;
 
 @SuppressWarnings("serial")
@@ -161,11 +161,23 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		if (getDepot().getDefaultBranch() == null) 
 			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
+
+		List<String> revisionAndPathSegments = new ArrayList<>();
+		String segment = params.get(PARAM_REVISION).toString();
+		if (segment != null && segment.length() != 0)
+			revisionAndPathSegments.add(segment);
+		segment = params.get(PARAM_PATH).toString();
+		if (segment != null && segment.length() != 0)
+			revisionAndPathSegments.add(segment);
 		
-		blobIdent.revision = params.get(PARAM_REVISION).toString();
-		blobIdent.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
+		for (int i=0; i<params.getIndexedCount(); i++) {
+			segment = params.get(i).toString();
+			if (segment.length() != 0)
+				revisionAndPathSegments.add(segment);
+		}
 		
-		blobIdent.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+		blobIdent = new BlobIdent(getDepot(), revisionAndPathSegments);
+		
 		if (blobIdent.revision == null)
 			blobIdent.revision = getDepot().getDefaultBranch();
 
@@ -179,7 +191,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				RevTree revTree = commit.getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(getDepot().getRepository(), blobIdent.path, revTree);
 				if (treeWalk == null) {
-					throw new GitObjectNotFoundException("Unable to find blob path '" + blobIdent.path
+					throw new ObjectNotFoundException("Unable to find blob path '" + blobIdent.path
 							+ "' in revision '" + blobIdent.revision + "'");
 				}
 				blobIdent.mode = treeWalk.getRawMode(0);
@@ -256,7 +268,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 						cursorLine = DiffUtils.getNewLineAround(oldLines, newLines, commentPos.getRange().getBeginLine());
 					}
 					viewStateStr = String.format("{\"cursor\":{\"line\":%d, \"ch\":0}}", cursorLine);
-				} catch (GitObjectNotFoundException e) {
+				} catch (ObjectNotFoundException e) {
 				}
 			}
 		}

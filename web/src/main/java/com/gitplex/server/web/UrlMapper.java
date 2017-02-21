@@ -1,4 +1,4 @@
-package com.gitplex.server.web.util.mapper;
+package com.gitplex.server.web;
 
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.IRequestHandler;
@@ -62,52 +62,55 @@ import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
 import com.gitplex.server.web.page.test.TestPage;
-import com.gitplex.server.web.util.NoVersionMountedMapper;
+import com.gitplex.server.web.util.mapper.DepotMapper;
+import com.gitplex.server.web.util.mapper.DepotResourceMapper;
+import com.gitplex.server.web.util.mapper.MapperUtils;
+import com.gitplex.server.web.util.mapper.WebPageMapper;
 import com.gitplex.server.web.util.resource.ArchiveResourceReference;
 import com.gitplex.server.web.util.resource.AttachmentResourceReference;
-import com.gitplex.server.web.util.resource.BlobResourceReference;
+import com.gitplex.server.web.util.resource.RawBlobResourceReference;
 
 public class UrlMapper extends CompoundRequestMapper {
 
 	public UrlMapper(WebApplication app) {
-		add(new NoVersionMountedMapper("init", ServerInitPage.class));
-		add(new NoVersionMountedMapper("welcome", WelcomePage.class));
+		add(new WebPageMapper("init", ServerInitPage.class));
+		add(new WebPageMapper("welcome", WelcomePage.class));
 		addAdministrationPages();
 		addAccountPages();
 		addDepotPages();
 		addSecurityPages();
 		
-		add(new NoVersionMountedMapper("test", TestPage.class));
-		add(new NoVersionMountedMapper("new-repository", CreateDepotPage.class));
+		add(new WebPageMapper("test", TestPage.class));
+		add(new WebPageMapper("new-repository", CreateDepotPage.class));
 		
 		addResources();
 	}
 
 	private void addResources() {
-		add(new DepotResourceMapper("${account}/${depot}/archive", new ArchiveResourceReference()));
-		add(new DepotResourceMapper("${account}/${depot}/raw", new BlobResourceReference()));
+		add(new DepotResourceMapper("${account}/${depot}/archive/${revision}", new ArchiveResourceReference()));
+		add(new DepotResourceMapper("${account}/${depot}/raw/${revision}/${path}", new RawBlobResourceReference()));
 		add(new DepotResourceMapper("${account}/${depot}/attachment/${uuid}/${attachment}", 
 				new AttachmentResourceReference()));
 	}
 	
 	private void addSecurityPages() {
-		add(new NoVersionMountedMapper("login", LoginPage.class));
-		add(new NoVersionMountedMapper("logout", LogoutPage.class));
-		add(new NoVersionMountedMapper("register", RegisterPage.class));
-		add(new NoVersionMountedMapper("forget", ForgetPage.class));
+		add(new WebPageMapper("login", LoginPage.class));
+		add(new WebPageMapper("logout", LogoutPage.class));
+		add(new WebPageMapper("register", RegisterPage.class));
+		add(new WebPageMapper("forget", ForgetPage.class));
 	}
 	
 	private void addAdministrationPages() {
-		add(new NoVersionMountedMapper("administration/users", UserListPage.class));
-		add(new NoVersionMountedMapper("administration/users/new", NewUserPage.class));
-		add(new NoVersionMountedMapper("administration/settings/system", SystemSettingPage.class));
-		add(new NoVersionMountedMapper("administration/settings/mail", MailSettingPage.class));
-		add(new NoVersionMountedMapper("administration/settings/backup", DatabaseBackupPage.class));
-		add(new NoVersionMountedMapper("administration/settings/security", SecuritySettingPage.class));
+		add(new WebPageMapper("administration/users", UserListPage.class));
+		add(new WebPageMapper("administration/users/new", NewUserPage.class));
+		add(new WebPageMapper("administration/settings/system", SystemSettingPage.class));
+		add(new WebPageMapper("administration/settings/mail", MailSettingPage.class));
+		add(new WebPageMapper("administration/settings/backup", DatabaseBackupPage.class));
+		add(new WebPageMapper("administration/settings/security", SecuritySettingPage.class));
 	}
 	
 	private void addAccountPages() {
-		add(new NoVersionMountedMapper("${account}", AccountOverviewPage.class) {
+		add(new WebPageMapper("${account}", AccountOverviewPage.class) {
 
 			@Override
 			public IRequestHandler mapRequest(Request request) {
@@ -119,38 +122,38 @@ public class UrlMapper extends CompoundRequestMapper {
 			
 		});
 		
-		add(new NoVersionMountedMapper("accounts/${account}/new-depot", NewDepotPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/new-organization", NewOrganizationPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/tasks", TaskListPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/settings/profile", ProfileEditPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/settings/avatar", AvatarEditPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/settings/password", PasswordEditPage.class));
+		add(new WebPageMapper("accounts/${account}/new-depot", NewDepotPage.class));
+		add(new WebPageMapper("accounts/${account}/new-organization", NewOrganizationPage.class));
+		add(new WebPageMapper("accounts/${account}/tasks", TaskListPage.class));
+		add(new WebPageMapper("accounts/${account}/settings/profile", ProfileEditPage.class));
+		add(new WebPageMapper("accounts/${account}/settings/avatar", AvatarEditPage.class));
+		add(new WebPageMapper("accounts/${account}/settings/password", PasswordEditPage.class));
 
-		add(new NoVersionMountedMapper("accounts/${account}/members", MemberListPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/members/${member}/teams", MemberTeamListPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/members/${member}/depots", MemberEffectivePrivilegePage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/members/${member}/depots/${depot}", MemberPrivilegeSourcePage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/members/new", NewMembersPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/teams", TeamListPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/teams/new", NewTeamPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/teams/${team}/setting", TeamEditPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/teams/${team}/members", TeamMemberListPage.class));
-		add(new NoVersionMountedMapper("accounts/${account}/teams/${team}/depots", TeamDepotListPage.class));
+		add(new WebPageMapper("accounts/${account}/members", MemberListPage.class));
+		add(new WebPageMapper("accounts/${account}/members/${member}/teams", MemberTeamListPage.class));
+		add(new WebPageMapper("accounts/${account}/members/${member}/depots", MemberEffectivePrivilegePage.class));
+		add(new WebPageMapper("accounts/${account}/members/${member}/depots/${depot}", MemberPrivilegeSourcePage.class));
+		add(new WebPageMapper("accounts/${account}/members/new", NewMembersPage.class));
+		add(new WebPageMapper("accounts/${account}/teams", TeamListPage.class));
+		add(new WebPageMapper("accounts/${account}/teams/new", NewTeamPage.class));
+		add(new WebPageMapper("accounts/${account}/teams/${team}/setting", TeamEditPage.class));
+		add(new WebPageMapper("accounts/${account}/teams/${team}/members", TeamMemberListPage.class));
+		add(new WebPageMapper("accounts/${account}/teams/${team}/depots", TeamDepotListPage.class));
 
-		add(new NoVersionMountedMapper("accounts/${account}/collaborators", AccountCollaboratorListPage.class));
-		add(new NoVersionMountedMapper(
+		add(new WebPageMapper("accounts/${account}/collaborators", AccountCollaboratorListPage.class));
+		add(new WebPageMapper(
 				"accounts/${account}/collaborators/${collaborator}/depots", 
 				CollaboratorDepotListPage.class));
-		add(new NoVersionMountedMapper(
+		add(new WebPageMapper(
 				"accounts/${account}/collaborators/${collaborator}/effective", 
 				CollaboratorEffectivePrivilegePage.class));
-		add(new NoVersionMountedMapper(
+		add(new WebPageMapper(
 				"accounts/${account}/collaborators/${collaborator}/effective/${depot}", 
 				CollaboratorPrivilegeSourcePage.class));
 	}
 
 	private void addDepotPages() {
-		add(new NoVersionMountedMapper("${account}/${depot}", DepotFilePage.class) {
+		add(new WebPageMapper("${account}/${depot}", DepotFilePage.class) {
 
 			@Override
 			public IRequestHandler mapRequest(Request request) {
@@ -162,8 +165,8 @@ public class UrlMapper extends CompoundRequestMapper {
 			
 		});
 
-		add(new DepotMapper("${account}/${depot}/files", DepotFilePage.class));
-		add(new DepotMapper("${account}/${depot}/commit", CommitDetailPage.class));
+		add(new DepotMapper("${account}/${depot}/blob/#{revision}/#{path}", DepotFilePage.class));
+		add(new DepotMapper("${account}/${depot}/commit/${revision}", CommitDetailPage.class));
 		add(new DepotMapper("${account}/${depot}/commits", DepotCommitsPage.class));
 		add(new DepotMapper("${account}/${depot}/compare", RevisionComparePage.class));
 

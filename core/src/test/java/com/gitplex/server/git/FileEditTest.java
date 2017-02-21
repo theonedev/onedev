@@ -14,10 +14,10 @@ import org.junit.Test;
 
 import com.gitplex.server.git.FileEdit;
 import com.gitplex.server.git.PathAndContent;
-import com.gitplex.server.git.exception.GitObjectAlreadyExistsException;
-import com.gitplex.server.git.exception.GitObjectNotFoundException;
-import com.gitplex.server.git.exception.NotGitFileException;
-import com.gitplex.server.git.exception.NotGitTreeException;
+import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
+import com.gitplex.server.git.exception.ObjectNotFoundException;
+import com.gitplex.server.git.exception.NotFileException;
+import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 
 public class FileEditTest extends AbstractGitTest {
@@ -66,7 +66,7 @@ public class FileEditTest extends AbstractGitTest {
 		try {
 			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test delete");
 			assertTrue("An ObjectNotExistException should be thrown", false);
-		} catch (GitObjectNotFoundException e) {
+		} catch (ObjectNotFoundException e) {
 		}
 	}
 	
@@ -116,7 +116,7 @@ public class FileEditTest extends AbstractGitTest {
 		try {
 			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
 			assertTrue("A NotFileException should be thrown", false);
-		} catch (NotGitFileException e) {
+		} catch (NotFileException e) {
 		}
 	}
 	
@@ -139,7 +139,7 @@ public class FileEditTest extends AbstractGitTest {
 		try {
 			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
 			assertTrue("A NotTreeException should be thrown", false);
-		} catch (NotGitTreeException e) {
+		} catch (NotTreeException e) {
 		}
 	}
 	
@@ -202,7 +202,7 @@ public class FileEditTest extends AbstractGitTest {
 		try {
 			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
 			assertTrue("An ObjectAlreadyExistException should be thrown", false);
-		} catch (GitObjectAlreadyExistsException e) {
+		} catch (ObjectAlreadyExistsException e) {
 		}
 	}
 	

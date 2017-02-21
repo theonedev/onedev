@@ -1,10 +1,10 @@
 package com.gitplex.server.git.exception;
 
-public class GitObjectNotFoundException extends GitException {
+public class ObjectNotFoundException extends GitException {
 
 	private static final long serialVersionUID = 1L;
 
-	public GitObjectNotFoundException(String message) {
+	public ObjectNotFoundException(String message) {
 		super(message);
 	}
 

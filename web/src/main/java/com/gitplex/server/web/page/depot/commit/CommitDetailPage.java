@@ -34,6 +34,7 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
@@ -446,7 +447,17 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		}
 		
 		public State(PageParameters params) {
-			revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+			List<String> revisionSegments = new ArrayList<>();
+			String segment = params.get(PARAM_REVISION).toString();
+			if (segment.length() != 0)
+				revisionSegments.add(segment);
+			for (int i=0; i<params.getIndexedCount(); i++) {
+				segment = params.get(i).toString();
+				if (segment.length() != 0)
+					revisionSegments.add(segment);
+			}
+			
+			revision = Joiner.on("/").join(revisionSegments);
 			compareWith = params.get(PARAM_COMPARE_WITH).toString();
 			whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 			pathFilter = params.get(PARAM_PATH_FILTER).toString();

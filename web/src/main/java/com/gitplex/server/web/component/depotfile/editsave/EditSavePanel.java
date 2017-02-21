@@ -38,8 +38,8 @@ import com.gitplex.server.git.BlobChange;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.FileEdit;
 import com.gitplex.server.git.PathAndContent;
-import com.gitplex.server.git.exception.GitObjectAlreadyExistsException;
-import com.gitplex.server.git.exception.NotGitTreeException;
+import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
+import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.model.Account;
@@ -326,12 +326,12 @@ public abstract class EditSavePanel extends Panel {
 					} catch (IOException e2) {
 						throw new RuntimeException(e2);
 					}
-				} catch (GitObjectAlreadyExistsException e) {
+				} catch (ObjectAlreadyExistsException e) {
 					EditSavePanel.this.error("A file with same name already exists. "
 							+ "Please choose a different name and try again.");
 					target.add(feedback);
 					break;
-				} catch (NotGitTreeException e) {
+				} catch (NotTreeException e) {
 					EditSavePanel.this.error("A file exists where you’re trying to create a subdirectory. "
 							+ "Choose a new path and try again..");
 					target.add(feedback);

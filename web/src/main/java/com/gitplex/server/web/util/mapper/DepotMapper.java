@@ -4,9 +4,7 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.component.IRequestablePage;
 
-import com.gitplex.server.web.util.NoVersionMountedMapper;
-
-public class DepotMapper extends NoVersionMountedMapper {
+public class DepotMapper extends WebPageMapper {
 
 	public DepotMapper(String mountPath, Class<? extends IRequestablePage> pageClass) {
 		super(mountPath, pageClass);

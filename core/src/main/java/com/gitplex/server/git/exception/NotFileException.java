@@ -1,10 +1,10 @@
 package com.gitplex.server.git.exception;
 
-public class NotGitFileException extends GitException {
+public class NotFileException extends GitException {
 
 	private static final long serialVersionUID = 1L;
 
-	public NotGitFileException(String message) {
+	public NotFileException(String message) {
 		super(message);
 	}
 	
