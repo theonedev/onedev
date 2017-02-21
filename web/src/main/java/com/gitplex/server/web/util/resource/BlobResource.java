@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import javax.persistence.EntityNotFoundException;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -72,6 +73,9 @@ public class BlobResource extends AbstractResource {
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(blob.getSize());
 		response.setContentType(blob.getMediaType().toString());
+		if (response.getContentType().equals(MediaType.TEXT_HTML)) {
+			response.setContentType(MediaType.TEXT_PLAIN);
+		}
 		
 		if (!GitUtils.isHash(revision))
 			response.disableCaching();
@@ -81,6 +85,7 @@ public class BlobResource extends AbstractResource {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+		
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override
