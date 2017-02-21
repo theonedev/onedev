@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.DefaultExceptionMapper;
+import org.apache.wicket.IRequestCycleProvider;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
@@ -36,7 +37,9 @@ import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.Url;
+import org.apache.wicket.request.UrlRenderer;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.cycle.RequestCycleContext;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
@@ -44,14 +47,15 @@ import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCac
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 import org.apache.wicket.util.IProvider;
 
-import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.bootstrap.Bootstrap;
+import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.util.ExceptionUtils;
 import com.gitplex.server.web.page.CommonPage;
 import com.gitplex.server.web.page.error.BaseErrorPage;
 import com.gitplex.server.web.page.error.ExpectedExceptionPage;
 import com.gitplex.server.web.page.error.UnexpectedExceptionPage;
 import com.gitplex.server.web.page.home.DashboardPage;
+import com.gitplex.server.web.util.AbsoluteUrlRenderer;
 import com.gitplex.server.web.util.mapper.UrlMapper;
 import com.gitplex.server.web.util.resourcebundle.PackageResourceBundler;
 import com.gitplex.server.web.websocket.WebSocketManager;
@@ -159,6 +163,22 @@ public class WicketConfig extends WebApplication {
 		
 		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));
 
+		setRequestCycleProvider(new IRequestCycleProvider() {
+
+			@Override
+			public RequestCycle get(RequestCycleContext context) {
+				return new RequestCycle(context) {
+
+					@Override
+					protected UrlRenderer newUrlRenderer() {
+						return new AbsoluteUrlRenderer(getRequest());
+					}
+					
+				};
+			}
+			
+		});
+		
 		mount(new UrlMapper(this));
 	}
 
