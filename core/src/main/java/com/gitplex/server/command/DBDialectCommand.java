@@ -14,10 +14,10 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.validation.EntityValidator;
 
 @Singleton
-public class DefaultDBDialectCommand extends DefaultPersistManager {
+public class DBDialectCommand extends DefaultPersistManager {
 
 	@Inject
-	public DefaultDBDialectCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public DBDialectCommand(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);

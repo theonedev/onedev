@@ -36,17 +36,17 @@ import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.launcher.bootstrap.Command;
 import com.gitplex.launcher.loader.AbstractPlugin;
 import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.launcher.loader.ImplementationProvider;
-import com.gitplex.server.command.DefaultApplyDBConstraintsCommand;
-import com.gitplex.server.command.DefaultBackupCommand;
-import com.gitplex.server.command.DefaultCheckDataVersionCommand;
-import com.gitplex.server.command.DefaultCleanCommand;
-import com.gitplex.server.command.DefaultDBDialectCommand;
-import com.gitplex.server.command.DefaultRestoreCommand;
-import com.gitplex.server.command.DefaultUpgradeCommand;
+import com.gitplex.server.command.CommandNames;
+import com.gitplex.server.command.ApplyDBConstraintsCommand;
+import com.gitplex.server.command.BackupDBCommand;
+import com.gitplex.server.command.CheckDataVersionCommand;
+import com.gitplex.server.command.CleanDBCommand;
+import com.gitplex.server.command.DBDialectCommand;
+import com.gitplex.server.command.RestoreDBCommand;
+import com.gitplex.server.command.UpgradeCommand;
 import com.gitplex.server.command.ResetAdminPasswordCommand;
 import com.gitplex.server.git.config.GitConfig;
 import com.gitplex.server.git.config.SpecifiedGit;
@@ -329,11 +329,6 @@ public class CoreModule extends AbstractPluginModule {
         });
         
 		bind(EntityValidator.class).to(DefaultEntityValidator.class);
-		
-		if (Bootstrap.command != null 
-				&& Bootstrap.command.getName().equals("reset_admin_password")) {
-			bind(PersistManager.class).to(ResetAdminPasswordCommand.class);
-		}
 	}
 
 	private void configurePersistence() {
@@ -450,22 +445,24 @@ public class CoreModule extends AbstractPluginModule {
 		}).in(Singleton.class);
 		
 		if (Bootstrap.command != null) {
-			if (Command.RESTORE.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DefaultRestoreCommand.class);
-			else if (Command.APPLY_DB_CONSTRAINTS.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DefaultApplyDBConstraintsCommand.class);
-			else if (Command.BACKUP.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DefaultBackupCommand.class);
-			else if (Command.CHECK_DATA_VERSION.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DefaultCheckDataVersionCommand.class);
-			else if (Command.UPGRADE.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DefaultUpgradeCommand.class);
-			else if (Command.CLEAN.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DefaultCleanCommand.class);
-			else if (Command.DB_DIALECT.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DefaultDBDialectCommand.class);
+			if (CommandNames.RESTORE.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(RestoreDBCommand.class);
+			else if (CommandNames.APPLY_DB_CONSTRAINTS.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(ApplyDBConstraintsCommand.class);
+			else if (CommandNames.BACKUP.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(BackupDBCommand.class);
+			else if (CommandNames.CHECK_DATA_VERSION.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(CheckDataVersionCommand.class);
+			else if (CommandNames.UPGRADE.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(UpgradeCommand.class);
+			else if (CommandNames.CLEAN.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(CleanDBCommand.class);
+			else if (CommandNames.DB_DIALECT.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(DBDialectCommand.class);
+			else if (CommandNames.RESET_ADMIN_PASSWORD.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(ResetAdminPasswordCommand.class);
 			else
-				bind(PersistManager.class).to(DefaultPersistManager.class);
+				throw new RuntimeException("Unrecognized command: " + Bootstrap.command.getName());
 		} else {
 			bind(PersistManager.class).to(DefaultPersistManager.class);
 		}		

@@ -17,12 +17,12 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.validation.EntityValidator;
 
 @Singleton
-public class DefaultCheckDataVersionCommand extends DefaultPersistManager {
+public class CheckDataVersionCommand extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultCheckDataVersionCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckDataVersionCommand.class);
 	
 	@Inject
-	public DefaultCheckDataVersionCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public CheckDataVersionCommand(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);

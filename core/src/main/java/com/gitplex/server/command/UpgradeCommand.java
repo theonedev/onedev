@@ -32,16 +32,16 @@ import com.gitplex.server.util.validation.EntityValidator;
 import com.google.common.base.Charsets;
 
 @Singleton
-public class DefaultUpgradeCommand extends DefaultPersistManager {
+public class UpgradeCommand extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultUpgradeCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(UpgradeCommand.class);
 	
 	private static final String BACKUP_DATETIME_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 	
 	private final String appName;
 	
 	@Inject
-	public DefaultUpgradeCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public UpgradeCommand(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator, PluginManager pluginManager) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);

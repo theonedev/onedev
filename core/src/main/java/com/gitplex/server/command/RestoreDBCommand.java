@@ -22,12 +22,12 @@ import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.validation.EntityValidator;
 
 @Singleton
-public class DefaultRestoreCommand extends DefaultPersistManager {
+public class RestoreDBCommand extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultRestoreCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(RestoreDBCommand.class);
 	
 	@Inject
-	public DefaultRestoreCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public RestoreDBCommand(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);

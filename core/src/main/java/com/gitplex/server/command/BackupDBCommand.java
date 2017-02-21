@@ -22,12 +22,12 @@ import com.gitplex.server.util.validation.EntityValidator;
 import com.google.common.base.Throwables;
 
 @Singleton
-public class DefaultBackupCommand extends DefaultPersistManager {
+public class BackupDBCommand extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultBackupCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(BackupDBCommand.class);
 	
 	@Inject
-	public DefaultBackupCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public BackupDBCommand(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
