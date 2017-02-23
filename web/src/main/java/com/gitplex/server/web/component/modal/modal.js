@@ -1,4 +1,4 @@
-gitplex.commons.modal = {
+gitplex.server.modal = {
 	init: function(containerId, closeCallback) {
 		var $modal = $("#" + containerId + ">.modal");
 		$modal.data("closeCallback", closeCallback);
@@ -8,7 +8,7 @@ gitplex.commons.modal = {
 					&& $(".select2-drop:visible").length == 0 
 					&& $("body>.floating").length == 0 
 					&& $(".atwho-view:visible").length == 0) {
-				gitplex.commons.modal.close($modal, true);
+				gitplex.server.modal.close($modal, true);
 			}
 		});
 		

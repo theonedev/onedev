@@ -50,7 +50,7 @@ import org.apache.wicket.util.IProvider;
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.util.ExceptionUtils;
-import com.gitplex.server.web.page.CommonPage;
+import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.error.BaseErrorPage;
 import com.gitplex.server.web.page.error.ExpectedExceptionPage;
 import com.gitplex.server.web.page.error.UnexpectedExceptionPage;
@@ -94,8 +94,8 @@ public class WicketConfig extends WebApplication {
 			public void onInstantiation(Component component) {
 				if ((component instanceof Page) 
 						&& !(component instanceof AbstractErrorPage) 
-						&& !(component instanceof CommonPage)) {
-					throw new RuntimeException("All page classes should extend from CommonPage.");
+						&& !(component instanceof BasePage)) {
+					throw new RuntimeException("All page classes should extend from BasePage.");
 				}
 			}
 		});
@@ -104,7 +104,7 @@ public class WicketConfig extends WebApplication {
 			
 			@Override
 			public void onBeforeRespond(Map<String, Component> map, AjaxRequestTarget target) {
-				CommonPage page = (CommonPage) target.getPage();
+				BasePage page = (BasePage) target.getPage();
 				if (page.getSessionFeedback().anyMessage())
 					target.add(page.getSessionFeedback());
 				

@@ -17,7 +17,7 @@ public class ViewStateAwareBehavior extends Behavior {
 		
 		response.render(JavaScriptHeaderItem.forReference(new URIResourceReference()));
 		String script = String.format(""
-				+ "var viewState = gitplex.commons.history.getViewState();"
+				+ "var viewState = gitplex.server.history.getViewState();"
 				+ "if (viewState) {"
 				+ "  var link = document.getElementById('%s');"
 				+ "  var uri = new URI(link);"

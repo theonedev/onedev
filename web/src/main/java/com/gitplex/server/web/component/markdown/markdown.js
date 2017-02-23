@@ -1,5 +1,5 @@
-gitplex.commons.initMarkdownPanel = function($preview, taskCallback) {
-	gitplex.commons.highlight($preview);
+gitplex.server.initMarkdownPanel = function($preview, taskCallback) {
+	gitplex.server.highlight($preview);
 	var $task = $preview.find('.task-list-item input');
 	if (taskCallback) {
 		$task.change(function() {

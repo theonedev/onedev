@@ -1,4 +1,4 @@
-gitplex.commons.codemirror = {
+gitplex.server.codemirror = {
 	clearMark: function(cm) {
 		var marks = cm.getAllMarks();
 		for (var i=0; i<marks.length; i++)  {
@@ -9,7 +9,7 @@ gitplex.commons.codemirror = {
     	cm.setCursor(cm.getCursor("from"));
 	},
 	mark: function(cm, mark, scroll) {
-		gitplex.commons.codemirror.clearMark(cm);
+		gitplex.server.codemirror.clearMark(cm);
 		cm.markText(
 				{line: mark.beginLine, ch: mark.beginChar}, 
 				{line: mark.endLine, ch: mark.endChar},
@@ -49,7 +49,7 @@ gitplex.commons.codemirror = {
 	},
 	initState: function(cm, viewState) {
 	    if (!viewState) {
-	    	viewState = gitplex.commons.history.getViewState();
+	    	viewState = gitplex.server.history.getViewState();
 	    }
 
 	    if (viewState) {

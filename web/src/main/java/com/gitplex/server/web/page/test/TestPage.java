@@ -6,11 +6,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.web.page.CommonPage;
+import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
-public class TestPage extends CommonPage {
+public class TestPage extends BasePage {
 
 	@Override
 	protected void onInitialize() {

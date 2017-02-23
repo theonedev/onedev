@@ -27,7 +27,7 @@ public abstract class ViewStateAwareAjaxLink<T> extends PreventDefaultAjaxLink<T
 		
 		String script = ""
 				+ "$('.autofit:visible').first().trigger('storeViewState');"
-				+ "var viewState = gitplex.commons.history.getViewState();"
+				+ "var viewState = gitplex.server.history.getViewState();"
 				+ "return viewState?JSON.stringify(viewState):'';";
 		attributes.getDynamicExtraParameters().add("return {view_state: function() {" + script + "}}");
 	}

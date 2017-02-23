@@ -1,4 +1,4 @@
-gitplex.commons.highlight = function($container) {
+gitplex.server.highlight = function($container) {
 	$container.find("pre>code").each(function() {
 		var $this = $(this);
 		$this.parent().addClass("highlight");

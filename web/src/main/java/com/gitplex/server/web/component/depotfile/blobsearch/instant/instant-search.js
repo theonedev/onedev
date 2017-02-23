@@ -19,7 +19,7 @@ gitplex.server.blobInstantSearch = {
 		});
 
 		$input.data("return", function() {
-			if (gitplex.commons.form.confirmLeave()) {
+			if (gitplex.server.form.confirmLeave()) {
 				var $hint = $input.data("hint");
 				if ($hint != null) {
 					var $active = $hint.find("li.hit.active");

@@ -1,21 +1,21 @@
-package com.gitplex.commons.wicket.util;
+package com.gitplex.web.util.resourcebundle;
 
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.gitplex.commons.wicket.util.testdata.a.Js1ResourceReferenceA;
-import com.gitplex.commons.wicket.util.testdata.a.Js2ResourceReferenceA;
-import com.gitplex.commons.wicket.util.testdata.a.Js3ResourceReferenceA;
-import com.gitplex.commons.wicket.util.testdata.b.Js1ResourceReferenceB;
-import com.gitplex.commons.wicket.util.testdata.b.Js2ResourceReferenceB;
-import com.gitplex.commons.wicket.util.testdata.b.Js3ResourceReferenceB;
-import com.gitplex.commons.wicket.util.testdata.c.Js1ResourceReferenceC;
-import com.gitplex.commons.wicket.util.testdata.c.Js2ResourceReferenceC;
-import com.gitplex.commons.wicket.util.testdata.c.Js3ResourceReferenceC;
-import com.gitplex.commons.wicket.util.testdata.c.Js4ResourceReferenceC;
 import com.gitplex.server.web.util.resourcebundle.PackageResourceBundler;
+import com.gitplex.web.util.resourcebundle.testdata.a.Js1ResourceReferenceA;
+import com.gitplex.web.util.resourcebundle.testdata.a.Js2ResourceReferenceA;
+import com.gitplex.web.util.resourcebundle.testdata.a.Js3ResourceReferenceA;
+import com.gitplex.web.util.resourcebundle.testdata.b.Js1ResourceReferenceB;
+import com.gitplex.web.util.resourcebundle.testdata.b.Js2ResourceReferenceB;
+import com.gitplex.web.util.resourcebundle.testdata.b.Js3ResourceReferenceB;
+import com.gitplex.web.util.resourcebundle.testdata.c.Js1ResourceReferenceC;
+import com.gitplex.web.util.resourcebundle.testdata.c.Js2ResourceReferenceC;
+import com.gitplex.web.util.resourcebundle.testdata.c.Js3ResourceReferenceC;
+import com.gitplex.web.util.resourcebundle.testdata.c.Js4ResourceReferenceC;
 
 public class PackageResourceBundlerTest {
 

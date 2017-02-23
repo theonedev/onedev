@@ -6,15 +6,15 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.gitplex.server.web.page.CommonDependentCssResourceReference;
-import com.gitplex.server.web.page.CommonDependentResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 import com.gitplex.server.web.util.resourcebundle.ResourceBundle;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 
 @ResourceBundle
-public class CodeMirrorResourceReference extends CommonDependentResourceReference {
+public class CodeMirrorResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
@@ -39,15 +39,15 @@ public class CodeMirrorResourceReference extends CommonDependentResourceReferenc
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/search/searchcursor.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/search/search.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/search/matchesonscrollbar.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new CommonDependentResourceReference(CodeMirrorResourceReference.class, "matchesonscrollbar2.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "matchesonscrollbar2.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/selection/active-line.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/scroll/annotatescrollbar.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/display/fullscreen.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new CommonDependentResourceReference(CodeMirrorResourceReference.class, "annotatescrollbar2.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new CommonDependentResourceReference(CodeMirrorResourceReference.class, "simplescrollbars.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new CommonDependentResourceReference(CodeMirrorResourceReference.class, "gotoline.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new CommonDependentResourceReference(CodeMirrorResourceReference.class, "identifier-highlighter.js"))); 
-		dependencies.add(JavaScriptHeaderItem.forReference(new CommonDependentResourceReference(CodeMirrorResourceReference.class, "highlight.js"))); 
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "annotatescrollbar2.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "simplescrollbars.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "gotoline.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "identifier-highlighter.js"))); 
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "highlight.js"))); 
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/mode/meta.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ModeUrlResourceReference()));
 		
@@ -58,8 +58,8 @@ public class CodeMirrorResourceReference extends CommonDependentResourceReferenc
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/scroll/simplescrollbars.css")));
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/search/matchesonscrollbar.css")));
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/display/fullscreen.css")));
-		dependencies.add(CssHeaderItem.forReference(new CommonDependentCssResourceReference(CodeMirrorResourceReference.class, "highlight.css")));
-		dependencies.add(CssHeaderItem.forReference(new CommonDependentCssResourceReference(CodeMirrorResourceReference.class, "codemirror.css")));
+		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(CodeMirrorResourceReference.class, "highlight.css")));
+		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(CodeMirrorResourceReference.class, "codemirror.css")));
 
 		return dependencies;
 	}

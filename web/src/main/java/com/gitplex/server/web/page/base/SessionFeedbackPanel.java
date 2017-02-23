@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page;
+package com.gitplex.server.web.page.base;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FeedbackMessage;
@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 @SuppressWarnings("serial")
-class SessionFeedbackPanel extends FeedbackPanel {
+public class SessionFeedbackPanel extends FeedbackPanel {
 
 	public SessionFeedbackPanel(String id) {
 		super(id, new IFeedbackMessageFilter() {
@@ -47,7 +47,7 @@ class SessionFeedbackPanel extends FeedbackPanel {
 		super.renderHead(response);
 		
 		// we delay show feedback with a timer as some other script may scroll the window 
-		response.render(OnDomReadyHeaderItem.forScript("setTimeout('gitplex.commons.showSessionFeedback();', 1);"));
+		response.render(OnDomReadyHeaderItem.forScript("setTimeout('gitplex.server.showSessionFeedback();', 1);"));
 	}
 
 }

@@ -8,9 +8,9 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.gitplex.server.web.assets.codemirror.CodeMirrorResourceReference;
-import com.gitplex.server.web.page.CommonDependentResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
-public class MarkdownResourceReference extends CommonDependentResourceReference {
+public class MarkdownResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 

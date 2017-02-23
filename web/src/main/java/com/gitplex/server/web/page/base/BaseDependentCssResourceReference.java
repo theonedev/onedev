@@ -4,10 +4,9 @@ import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
+import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.gitplex.server.web.page.CommonDependentCssResourceReference;
-
-public class BaseDependentCssResourceReference extends CommonDependentCssResourceReference {
+public class BaseDependentCssResourceReference extends CssResourceReference {
 
 	private static final long serialVersionUID = 1L;
 

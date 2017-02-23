@@ -1,4 +1,4 @@
-gitplex.commons.markdown = {
+gitplex.server.markdown = {
 	init: function(inputId, atWhoLimit, callback, uploadUrl, attachmentSupport, attachmentMaxSize) {
 		var $input = $("#" + inputId);
 		function onSelectUrl(isImage) {
@@ -190,7 +190,7 @@ gitplex.commons.markdown = {
 			function uploadFile(file) {
 				if (file.size> attachmentMaxSize) {
 					var message = "!!Upload should be less than " + Math.round(attachmentMaxSize/1024/1024) + " Mb!!";
-					gitplex.commons.markdown.updateUploadMessage($input, message);
+					gitplex.server.markdown.updateUploadMessage($input, message);
 				} else {
 					var xhr = new XMLHttpRequest();
 					var val = $input.val();
@@ -212,12 +212,12 @@ gitplex.commons.markdown = {
 						if (xhr.status == 200) { 
 							callback("insertUrl", xhr.responseText, xhr.replaceMessage);
 						} else { 
-							gitplex.commons.markdown.updateUploadMessage($input, 
+							gitplex.server.markdown.updateUploadMessage($input, 
 									"!!" + xhr.responseText + "!!", xhr.replaceMessage);
 						}
 					};
 					xhr.onerror = function() {
-						gitplex.commons.markdown.updateUploadMessage($input, 
+						gitplex.server.markdown.updateUploadMessage($input, 
 								"!!Unable to connect to server!!", xhr.replaceMessage);
 					};
 					xhr.open("POST", uploadUrl, true);
@@ -291,11 +291,11 @@ gitplex.commons.markdown = {
     	if (isImage)
     		message = "!" + message;
     	
-    	gitplex.commons.markdown.updateUploadMessage($input, message, replaceMessage);
+    	gitplex.server.markdown.updateUploadMessage($input, message, replaceMessage);
     	if (!name)
     		$input.range($input.caret()-message.length+1, $input.caret()-message.length+defaultDescription.length+1);
     	
-    	gitplex.commons.form.markDirty($input.closest("form.leave-confirm"));
+    	gitplex.server.form.markDirty($input.closest("form.leave-confirm"));
 	}, 
 	
 	updateUploadMessage: function($input, message, replaceMessage) {

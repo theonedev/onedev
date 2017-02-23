@@ -129,7 +129,7 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 	
 	public String getCloseScript() {
 		if (dropdown != null) {
-			return String.format("gitplex.commons.floating.close($('#%s'), true);", dropdown.getMarkupId());
+			return String.format("gitplex.server.floating.close($('#%s'), true);", dropdown.getMarkupId());
 		} else {
 			return "";
 		}

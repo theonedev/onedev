@@ -1,4 +1,4 @@
-gitplex.commons.dragdrop = {
+gitplex.server.dragdrop = {
 	setupDraggable: function(dragSelector, dragData, dragText) {
 		$(dragSelector).draggable({
 			cursor: 'move',

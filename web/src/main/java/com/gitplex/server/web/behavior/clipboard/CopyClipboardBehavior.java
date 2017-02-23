@@ -28,7 +28,7 @@ public class CopyClipboardBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		response.render(JavaScriptHeaderItem.forReference(new CopyClipboardResourceReference()));
-		String script = String.format("gitplex.commons.copyclipboard.init('%s', '%s');", 
+		String script = String.format("gitplex.server.copyclipboard.init('%s', '%s');", 
 				component.getMarkupId(true), JavaScriptEscape.escapeJavaScript(textModel.getObject()));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

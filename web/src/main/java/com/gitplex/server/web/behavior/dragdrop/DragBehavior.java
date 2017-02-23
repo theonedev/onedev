@@ -32,7 +32,7 @@ public class DragBehavior extends Behavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		response.render(JavaScriptReferenceHeaderItem.forReference(new DragDropResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.commons.dragdrop.setupDraggable('#%s', '%s', '%s');", 
+		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.server.dragdrop.setupDraggable('#%s', '%s', '%s');", 
 				component.getMarkupId(), dragData, dragText)));
 	}
 

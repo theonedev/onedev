@@ -7,9 +7,9 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import com.gitplex.server.web.assets.jqueryui.JQueryUIResourceReference;
-import com.gitplex.server.web.page.CommonDependentResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
-public class DragDropResourceReference extends CommonDependentResourceReference {
+public class DragDropResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 

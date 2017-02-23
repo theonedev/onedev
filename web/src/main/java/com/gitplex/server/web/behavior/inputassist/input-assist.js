@@ -1,4 +1,4 @@
-gitplex.commons.inputassist = {
+gitplex.server.inputassist = {
 	init: function(inputId, callback) {
 		var $input = $("#" + inputId);
 		
@@ -18,7 +18,7 @@ gitplex.commons.inputassist = {
 					callback("input", value, caret);
 			}
 			if (value.trim().length == 0)
-				gitplex.commons.inputassist.markErrors(inputId, []);
+				gitplex.server.inputassist.markErrors(inputId, []);
 		});
 		function onFocus() {
 			var value = $input.val();
@@ -60,7 +60,7 @@ gitplex.commons.inputassist = {
 					$dropdown.find("tr:not(.loading-indicator)").last().addClass("active");
 				}
 				$dropdown.find(".suggestions").scrollIntoView("tr.active");
-				gitplex.commons.inputassist.updateHelp($dropdown);
+				gitplex.server.inputassist.updateHelp($dropdown);
 				$dropdown.align($dropdown.data("alignment"));
 				return false;
 			}
@@ -80,7 +80,7 @@ gitplex.commons.inputassist = {
 					$dropdown.find("tr:not(.loading-indicator)").first().addClass("active");
 				}
 				$dropdown.find(".suggestions").scrollIntoView("tr.active");
-				gitplex.commons.inputassist.updateHelp($dropdown);
+				gitplex.server.inputassist.updateHelp($dropdown);
 				$dropdown.align($dropdown.data("alignment"));
 				return false;
 			}
@@ -166,7 +166,7 @@ gitplex.commons.inputassist = {
 		$dropdown.on("close", function() {
 			$input.data("dropdown", null);
 		});
-		gitplex.commons.inputassist.assistUpdated(inputId, dropdownId, inputContent);
+		gitplex.server.inputassist.assistUpdated(inputId, dropdownId, inputContent);
 	},
 	
 	assistUpdated: function(inputId, dropdownId, inputContent) {
@@ -181,7 +181,7 @@ gitplex.commons.inputassist = {
 			var $this = $(this);
 			$input.data("update")($this);
 		});
-		gitplex.commons.inputassist.updateHelp($dropdown);
+		gitplex.server.inputassist.updateHelp($dropdown);
 	},
 	
 	initInfiniteScroll: function(assistId, callback) {

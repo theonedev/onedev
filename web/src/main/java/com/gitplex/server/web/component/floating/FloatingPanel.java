@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.server.web.page.CommonPage;
+import com.gitplex.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public abstract class FloatingPanel extends Panel {
@@ -22,9 +22,9 @@ public abstract class FloatingPanel extends Panel {
 	private final AlignPlacement placement;
 	
 	public FloatingPanel(AjaxRequestTarget target, AlignTarget alignTarget, AlignPlacement placement) {
-		super(((CommonPage)target.getPage()).getRootComponents().newChildId());
+		super(((BasePage)target.getPage()).getRootComponents().newChildId());
 		
-		CommonPage page = (CommonPage) target.getPage(); 
+		BasePage page = (BasePage) target.getPage(); 
 		page.getRootComponents().add(this);
 		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
 		target.add(this);
@@ -53,7 +53,7 @@ public abstract class FloatingPanel extends Panel {
 
 				response.render(JavaScriptHeaderItem.forReference(new FloatingResourceReference()));
 				
-				String script = String.format("gitplex.commons.floating.init('%s', {target:%s, placement:%s}, %s);", 
+				String script = String.format("gitplex.server.floating.init('%s', {target:%s, placement:%s}, %s);", 
 						getMarkupId(true), alignTarget, placement, getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
@@ -73,7 +73,7 @@ public abstract class FloatingPanel extends Panel {
 	public final void close() {
 		AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 		if (target != null) {
-			String script = String.format("gitplex.commons.floating.close($('#%s'), false);", getMarkupId(true));
+			String script = String.format("gitplex.server.floating.close($('#%s'), false);", getMarkupId(true));
 			target.appendJavaScript(script);
 		} 
 		remove();

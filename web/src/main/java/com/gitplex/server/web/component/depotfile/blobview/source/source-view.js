@@ -41,7 +41,7 @@ gitplex.server.sourceview = {
 		$sourceView.on("storeViewState", function(event) {
 			event.stopPropagation();
 			if (cm) {
-		    	gitplex.commons.history.setViewState(gitplex.commons.codemirror.getViewState(cm));
+		    	gitplex.server.history.setViewState(gitplex.server.codemirror.getViewState(cm));
 			}
 		});
 		
@@ -87,7 +87,7 @@ gitplex.server.sourceview = {
 			if (!cm) {
 				var options = {
 					value: fileContent, 
-					readOnly: gitplex.commons.isDevice()?"nocursor":true,
+					readOnly: gitplex.server.isDevice()?"nocursor":true,
 					theme: "eclipse",
 					lineNumbers: true,
 					lineWrapping: lineWrapMode == "Soft wrap",
@@ -112,7 +112,7 @@ gitplex.server.sourceview = {
 				};
 
 				cm = CodeMirror($code[0], options);
-				gitplex.commons.codemirror.setMode(cm, filePath);
+				gitplex.server.codemirror.setMode(cm, filePath);
 
 		    	// add gutters with a timer to avoid the issue that occasionally 
 		    	// gutter becomes much wider than expected
@@ -154,9 +154,9 @@ gitplex.server.sourceview = {
 			    });
 				cm.setSize($code.width(), $code.height());
 			    if (mark)
-			    	gitplex.commons.codemirror.mark(cm, mark, true);
+			    	gitplex.server.codemirror.mark(cm, mark, true);
 				if (initState) // restore cursor and scroll
-					gitplex.commons.codemirror.initState(cm, viewState);
+					gitplex.server.codemirror.initState(cm, viewState);
 				cm.on("scroll", function() {
 					gitplex.server.symboltooltip.removeTooltip(document.getElementById(symbolTooltipId));					
 					gitplex.server.mouseState.moved = false;					
@@ -233,9 +233,9 @@ gitplex.server.sourceview = {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		var mark = $sourceView.data("mark");
 		if (mark) {
-			gitplex.commons.codemirror.mark(cm, mark, false);
+			gitplex.server.codemirror.mark(cm, mark, false);
 		} else {
-			gitplex.commons.codemirror.clearMark(cm);
+			gitplex.server.codemirror.clearMark(cm);
 		}
 	},
 	addCommentGutter: function(line, comments) {
@@ -273,7 +273,7 @@ gitplex.server.sourceview = {
 				$(".comment-popover[data-line='" + line + "'] a").each(function() {
 					$(this).mouseover(function() {
 						var comment = comments[$(this).index()];			        						
-						gitplex.commons.codemirror.mark(cm, comment.mark, false);
+						gitplex.server.codemirror.mark(cm, comment.mark, false);
 					});
 					$(this).mouseout(function() {
 						gitplex.server.sourceview.restoreMark();
@@ -294,7 +294,7 @@ gitplex.server.sourceview = {
 			$gutter.append("<a class='comment-trigger' title='Click to show comment of marked text'><i class='fa fa-commenting'></i></a>");
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
-				gitplex.commons.codemirror.mark(cm, comment.mark, false);
+				gitplex.server.codemirror.mark(cm, comment.mark, false);
 			});
 			$indicator.mouseout(function() {
 				gitplex.server.sourceview.restoreMark();
@@ -393,12 +393,12 @@ gitplex.server.sourceview = {
 		$(".source-view>.code").selectionPopover("close");
 
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		gitplex.commons.codemirror.clearSelection(cm);
+		gitplex.server.codemirror.clearSelection(cm);
 		gitplex.server.sourceview.onLayoutChange();
 
 		// mark and scroll after changing layout to make sure scroll 
 		// works correctly
-		gitplex.commons.codemirror.mark(cm, mark, true);
+		gitplex.server.codemirror.mark(cm, mark, true);
 		
 		gitplex.server.sourceview.highlightCommentTrigger();
 	},
@@ -469,10 +469,10 @@ gitplex.server.sourceview = {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		if (mark) {
 			$(".source-view").data("mark", mark);
-			gitplex.commons.codemirror.mark(cm, mark, scroll);
+			gitplex.server.codemirror.mark(cm, mark, scroll);
 		} else {
 			$(".source-view").removeData("mark");
-			gitplex.commons.codemirror.clearMark(cm);			
+			gitplex.server.codemirror.clearMark(cm);			
 		}
 	},
 	blame: function(blameInfos) {

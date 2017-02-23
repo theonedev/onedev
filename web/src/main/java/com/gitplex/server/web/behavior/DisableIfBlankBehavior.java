@@ -25,7 +25,7 @@ public class DisableIfBlankBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		
-		String script = String.format("gitplex.commons.disableIfBlank('%s', '%s');", 
+		String script = String.format("gitplex.server.disableIfBlank('%s', '%s');", 
 				component.getMarkupId(), button.getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

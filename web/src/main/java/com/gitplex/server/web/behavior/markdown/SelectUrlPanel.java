@@ -177,7 +177,7 @@ class SelectUrlPanel extends Panel {
 				public void renderHead(IHeaderResponse response) {
 					super.renderHead(response);
 					
-					String script = String.format("gitplex.commons.markdown.initFileUpload('%s', %d, '%s');", 
+					String script = String.format("gitplex.server.markdown.initFileUpload('%s', %d, '%s');", 
 							getMarkupId(), attachmentSupport.getAttachmentMaxSize(), 
 							FileUtils.byteCountToDisplaySize(attachmentSupport.getAttachmentMaxSize()));
 					response.render(OnDomReadyHeaderItem.forScript(script));

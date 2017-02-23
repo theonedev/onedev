@@ -18,7 +18,7 @@ public abstract class DropBehavior extends AbstractPostAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		response.render(JavaScriptReferenceHeaderItem.forReference(new DragDropResourceReference()));
-		String script = String.format("gitplex.commons.dragdrop.setupDroppable('#%s', %s, %s);", 
+		String script = String.format("gitplex.server.dragdrop.setupDroppable('#%s', %s, %s);", 
 				component.getMarkupId(), getAccept(), getCallbackFunction(explicit("dragData")));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

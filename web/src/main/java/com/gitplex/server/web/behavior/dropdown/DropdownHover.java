@@ -75,7 +75,7 @@ public abstract class DropdownHover extends AbstractPostAjaxBehavior {
 	
 					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 					if (target != null) {
-						String script = String.format("gitplex.commons.dropdownhover.closed('%s', '%s');", 
+						String script = String.format("gitplex.server.dropdownhover.closed('%s', '%s');", 
 								getComponent().getMarkupId(true), getMarkupId(true));
 						target.appendJavaScript(script);
 					}
@@ -84,7 +84,7 @@ public abstract class DropdownHover extends AbstractPostAjaxBehavior {
 				}
 	
 			};
-			String script = String.format("gitplex.commons.dropdownhover.opened('%s', '%s');", 
+			String script = String.format("gitplex.server.dropdownhover.opened('%s', '%s');", 
 					getComponent().getMarkupId(true), dropdown.getMarkupId(true));
 			target.appendJavaScript(script);
 		}
@@ -100,7 +100,7 @@ public abstract class DropdownHover extends AbstractPostAjaxBehavior {
 		super.renderHead(component, response);
 		
 		response.render(JavaScriptHeaderItem.forReference(new DropdownHoverResourceReference()));
-		String script = String.format("gitplex.commons.dropdownhover.init('%s', %s, %s);", 
+		String script = String.format("gitplex.server.dropdownhover.init('%s', %s, %s);", 
 				getComponent().getMarkupId(true), hoverDelay, getCallbackFunction());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.server.web.page.CommonPage;
+import com.gitplex.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public abstract class ModalPanel extends Panel {
@@ -26,11 +26,11 @@ public abstract class ModalPanel extends Panel {
 	}
 	
 	public ModalPanel(AjaxRequestTarget target, Size size) {
-		super(((CommonPage)target.getPage()).getRootComponents().newChildId());
+		super(((BasePage)target.getPage()).getRootComponents().newChildId());
 		
 		this.size = size;
 		
-		CommonPage page = (CommonPage) target.getPage(); 
+		BasePage page = (BasePage) target.getPage(); 
 		page.getRootComponents().add(this);
 		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
 		target.add(this);
@@ -64,7 +64,7 @@ public abstract class ModalPanel extends Panel {
 
 				response.render(JavaScriptHeaderItem.forReference(new ModalResourceReference()));
 				
-				String script = String.format("gitplex.commons.modal.init('%s', %s);", 
+				String script = String.format("gitplex.server.modal.init('%s', %s);", 
 						getMarkupId(true), getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
@@ -81,7 +81,7 @@ public abstract class ModalPanel extends Panel {
 	}
 	
 	public final void close(AjaxRequestTarget target) {
-		String script = String.format("gitplex.commons.modal.close($('#%s>.modal'), false);", getMarkupId(true));
+		String script = String.format("gitplex.server.modal.close($('#%s>.modal'), false);", getMarkupId(true));
 		target.appendJavaScript(script);
 		
 		remove();

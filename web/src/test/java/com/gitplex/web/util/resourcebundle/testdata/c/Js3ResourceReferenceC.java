@@ -1,4 +1,4 @@
-package com.gitplex.commons.wicket.util.testdata.c;
+package com.gitplex.web.util.resourcebundle.testdata.c;
 
 import java.util.ArrayList;
 import java.util.List;

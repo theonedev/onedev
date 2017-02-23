@@ -1,4 +1,4 @@
-gitplex.commons.floating = {
+gitplex.server.floating = {
 	init: function(floatingId, alignment, closeCallback) {
 		var $floating = $("#" + floatingId);
 		$floating.data("closeCallback", closeCallback);
@@ -21,14 +21,14 @@ gitplex.commons.floating = {
 		    if (!$floating.is(e.target) && $floating.has(e.target).length === 0 && !contains) {
 		    	var $trigger = $floating.data("trigger");
 			    if (!$trigger || !$trigger.is(e.target) && $trigger.has(e.target).length === 0) 
-			    	gitplex.commons.floating.close($floating, true);
+			    	gitplex.server.floating.close($floating, true);
 		    }
 		});
 		$(document).on("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
 		
 		$floating.data("keydown", function(e) {
 			if (e.keyCode == 27 && $(".select2-drop:visible").length == 0) {
-				gitplex.commons.floating.close($floating, true);
+				gitplex.server.floating.close($floating, true);
 			}
 		});
 		

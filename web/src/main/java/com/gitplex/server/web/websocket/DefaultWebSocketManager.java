@@ -23,7 +23,7 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.web.page.CommonPage;
+import com.gitplex.server.web.page.base.BasePage;
 
 @Singleton
 public class DefaultWebSocketManager implements WebSocketManager {
@@ -48,7 +48,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	}
 	
 	@Override
-	public void onRegionChange(CommonPage page) {
+	public void onRegionChange(BasePage page) {
 		String sessionId = page.getSession().getId();
 		if (sessionId != null) {
 			regions.put(new PageKey(sessionId, new PageIdKey(page.getPageId())), page.getWebSocketRegions());

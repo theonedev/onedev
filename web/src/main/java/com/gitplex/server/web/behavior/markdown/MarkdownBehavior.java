@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.util.markdown.MarkdownManager;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
-import com.gitplex.server.web.page.CommonPage;
+import com.gitplex.server.web.page.base.BasePage;
 import com.google.common.base.Charsets;
 
 @SuppressWarnings("serial")
@@ -57,7 +57,7 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 			String script = String.format(""
 					+ "var $preview=$('#%s~.md-preview');"
 					+ "$preview.html('%s');"
-					+ "gitplex.commons.initMarkdownPanel($preview);",
+					+ "gitplex.server.initMarkdownPanel($preview);",
 					getComponent().getMarkupId(), StringEscapeUtils.escapeEcmaScript(preview));
 			target.appendJavaScript(script);
 		} else if (type.equals("emojiQuery")){
@@ -116,11 +116,11 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 				throw new RuntimeException(e);
 			}
 
-			String script = String.format("gitplex.commons.markdown.onEmojisLoaded('%s', %s);", 
+			String script = String.format("gitplex.server.markdown.onEmojisLoaded('%s', %s);", 
 					getComponent().getMarkupId(), json);
 			target.appendJavaScript(script);
 		} else if (type.equals("selectImage") || type.equals("selectLink")) {
-			CommonPage page = (CommonPage) getComponent().getPage();
+			BasePage page = (BasePage) getComponent().getPage();
 			SelectUrlPanel urlSelector = new SelectUrlPanel(
 					page.getRootComponents().newChildId(), this, type.equals("selectImage"));
 			urlSelector.setOutputMarkupId(true);
@@ -144,7 +144,7 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 	
 	public void insertUrl(AjaxRequestTarget target, boolean isImage, String url, 
 			@Nullable String name, String replaceMessage) {
-		String script = String.format("gitplex.commons.markdown.insertUrl('%s', %s, '%s', %s, %s);",
+		String script = String.format("gitplex.server.markdown.insertUrl('%s', %s, '%s', %s, %s);",
 				getComponent().getMarkupId(), isImage, StringEscapeUtils.escapeEcmaScript(url), 
 				name!=null?"'"+StringEscapeUtils.escapeEcmaScript(name)+"'":"undefined", 
 				replaceMessage!=null?"'"+replaceMessage+"'":"undefined");
@@ -152,7 +152,7 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 	}
 	
 	public void closeUrlSelector(AjaxRequestTarget target, Component urlSelector) {
-		CommonPage page = (CommonPage) urlSelector.getPage();
+		BasePage page = (BasePage) urlSelector.getPage();
 		page.getRootComponents().remove(urlSelector);
 		String script = String.format("$('#%s-urlselector').closest('.modal').modal('hide');", 
 				getComponent().getMarkupId());
@@ -189,7 +189,7 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 			encodedAttachmentSupport = "undefined";
 		}
 		String uploadUrl = RequestCycle.get().getUrlRenderer().renderRelativeUrl(Url.parse("attachment_upload"));
-		String script = String.format("gitplex.commons.markdown.init('%s', %s, %s, '%s', %s, %d);", 
+		String script = String.format("gitplex.server.markdown.init('%s', %s, %s, '%s', %s, %d);", 
 				component.getMarkupId(true), 
 				ATWHO_LIMIT,
 				getCallbackFunction(explicit("type"), explicit("param"), explicit("param2")), 

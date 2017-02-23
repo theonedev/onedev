@@ -227,7 +227,7 @@ public abstract class EditSavePanel extends Panel {
 				save(target, feedback);
 				String script = String.format(""
 						+ "$('#%s').attr('disabled', 'disabled').val('Please wait...');"
-						+ "gitplex.commons.form.markClean($('form'));", getMarkupId());
+						+ "gitplex.server.form.markClean($('form'));", getMarkupId());
 				target.appendJavaScript(script);
 			}
 			

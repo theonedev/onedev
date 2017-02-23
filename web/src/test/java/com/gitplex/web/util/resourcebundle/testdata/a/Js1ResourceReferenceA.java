@@ -1,4 +1,4 @@
-package com.gitplex.commons.wicket.util.testdata.a;
+package com.gitplex.web.util.resourcebundle.testdata.a;
 
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 

@@ -1,4 +1,4 @@
-gitplex.commons.copyclipboard = {
+gitplex.server.copyclipboard = {
 	init: function(buttonId, text) {
 		var $button = $("#" + buttonId);
 		var clipboard = new Clipboard("#"+buttonId, {

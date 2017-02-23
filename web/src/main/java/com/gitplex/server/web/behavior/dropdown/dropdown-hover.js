@@ -1,11 +1,11 @@
-gitplex.commons.dropdownhover = {
+gitplex.server.dropdownhover = {
 	init: function(triggerId, hoverDelay, openCallback) {
 		var $trigger = $("#" + triggerId);
 		$trigger.addClass("dropdown-hover");
 		
 		$trigger.data("hide", function() {
 			if ($trigger.data("dropdown"))
-				gitplex.commons.floating.close($trigger.data("dropdown"), true);
+				gitplex.server.floating.close($trigger.data("dropdown"), true);
 			$trigger.data("hideTimer", null);
 		});
 		$trigger.data("prepareToHide", function() {

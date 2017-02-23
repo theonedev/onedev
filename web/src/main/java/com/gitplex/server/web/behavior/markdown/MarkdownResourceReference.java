@@ -12,9 +12,9 @@ import com.gitplex.server.web.assets.atwho.AtWhoResourceReference;
 import com.gitplex.server.web.assets.caret.CaretResourceReference;
 import com.gitplex.server.web.assets.codemirror.CodeMirrorResourceReference;
 import com.gitplex.server.web.assets.hotkeys.HotkeysResourceReference;
-import com.gitplex.server.web.page.CommonDependentResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
-public class MarkdownResourceReference extends CommonDependentResourceReference {
+public class MarkdownResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 

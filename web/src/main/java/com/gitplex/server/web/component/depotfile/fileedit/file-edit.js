@@ -20,7 +20,7 @@ gitplex.server.fileedit = {
 	    $fileEdit.on("storeViewState", function(e) {
 			e.stopPropagation();
 			if (cm) {
-				gitplex.commons.history.setViewState(gitplex.commons.codemirror.getViewState(cm));
+				gitplex.server.history.setViewState(gitplex.server.codemirror.getViewState(cm));
 			}
 	    });
 	    
@@ -75,10 +75,10 @@ gitplex.server.fileedit = {
 						$fileEdit.data("contentChanged", false);
 					}
 				});
-				gitplex.commons.codemirror.setMode(cm, filePath);
+				gitplex.server.codemirror.setMode(cm, filePath);
 				
 			    if (mark) 
-			    	gitplex.commons.codemirror.mark(cm, mark);
+			    	gitplex.server.codemirror.mark(cm, mark);
 			}
 			
 			if ($edit.is(":visible")) {
@@ -89,7 +89,7 @@ gitplex.server.fileedit = {
 					cm.setOption("fullScreen", false);
 				cm.setSize($edit.width(), $edit.height());
 				if (initState)
-					gitplex.commons.codemirror.initState(cm, viewState);
+					gitplex.server.codemirror.initState(cm, viewState);
 			} else {
 				$body.css("overflow", "auto");
 			}
@@ -103,7 +103,7 @@ gitplex.server.fileedit = {
 	},
 	setMode: function(containerId, filePath) {
 		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
-		gitplex.commons.codemirror.setMode(cm, filePath);
+		gitplex.server.codemirror.setMode(cm, filePath);
 	},
 	mark: function(containerId, mark) {
 		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
@@ -171,7 +171,7 @@ gitplex.server.fileedit = {
 				endLine: newEndLine, 
 				endChar: newEndChar
 			};
-			gitplex.commons.codemirror.mark(cm, newMark);
+			gitplex.server.codemirror.mark(cm, newMark);
 		}
 	},
 	selectTab: function($tab) {
@@ -191,7 +191,7 @@ gitplex.server.fileedit = {
     	var $cm = $fileEdit.find(">.body>div.edit>.CodeMirror");
     	if ($cm.is(":visible")) {
         	var cm = $cm[0].CodeMirror;		
-    		$fileEdit.find(">.body>div.save").data("viewState", gitplex.commons.codemirror.getViewState(cm));
+    		$fileEdit.find(">.body>div.save").data("viewState", gitplex.server.codemirror.getViewState(cm));
     	}
     	
 		$body.find(">div").hide();

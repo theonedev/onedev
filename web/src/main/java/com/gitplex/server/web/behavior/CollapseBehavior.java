@@ -39,7 +39,7 @@ public class CollapseBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 
-		String script = String.format("gitplex.commons.setupCollapse('%s', '%s')", component.getMarkupId(), target.getMarkupId());
+		String script = String.format("gitplex.server.setupCollapse('%s', '%s')", component.getMarkupId(), target.getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

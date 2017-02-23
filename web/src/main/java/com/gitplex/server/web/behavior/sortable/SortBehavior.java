@@ -123,7 +123,7 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 				.getParameterValue("toItem").toInt();
 		if (fromList != toList || fromItem != toItem) {
 			onSort(target, new SortPosition(fromList, fromItem), new SortPosition(toList, toItem));
-			String script = String.format("gitplex.commons.form.markDirty($('#%s').closest('form.leave-confirm'));", 
+			String script = String.format("gitplex.server.form.markDirty($('#%s').closest('form.leave-confirm'));", 
 					getComponent().getMarkupId(true));
 			target.appendJavaScript(script);
 			

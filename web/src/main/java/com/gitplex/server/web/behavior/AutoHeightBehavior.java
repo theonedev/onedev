@@ -24,7 +24,7 @@ public class AutoHeightBehavior extends Behavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 
-		String script = String.format("gitplex.commons.autoHeight('#%s', %d);", 
+		String script = String.format("gitplex.server.autoHeight('#%s', %d);", 
 					component.getMarkupId(), bottomOffset);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

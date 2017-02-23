@@ -1,4 +1,4 @@
-package com.gitplex.commons.wicket.util.testdata.c;
+package com.gitplex.web.util.resourcebundle.testdata.c;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +12,19 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import com.gitplex.server.web.util.resourcebundle.ResourceBundle;
 
 @ResourceBundle
-public class Js2ResourceReferenceC extends JavaScriptResourceReference {
+public class Js4ResourceReferenceC extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public Js2ResourceReferenceC() {
-		super(Js2ResourceReferenceC.class, "2.js");
+	public Js4ResourceReferenceC() {
+		super(Js4ResourceReferenceC.class, "4.js");
 	}
-	
+
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<>();
-		dependencies.add(JavaScriptHeaderItem.forReference(new Js1ResourceReferenceC()));
-		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(Js2ResourceReferenceC.class, "2.css")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new Js3ResourceReferenceC()));
+		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(Js4ResourceReferenceC.class, "4.css")));
 		return dependencies;
 	}
 	

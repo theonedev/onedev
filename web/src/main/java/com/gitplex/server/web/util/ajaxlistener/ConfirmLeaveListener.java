@@ -22,9 +22,9 @@ public class ConfirmLeaveListener implements IAjaxCallListener {
 	@Override
 	public CharSequence getPrecondition(Component component) {
 		if (dirtyContainer != null)
-			return String.format("return gitplex.commons.form.confirmLeave('%s');", dirtyContainer.getMarkupId(true));
+			return String.format("return gitplex.server.form.confirmLeave('%s');", dirtyContainer.getMarkupId(true));
 		else
-			return "return gitplex.commons.form.confirmLeave();";
+			return "return gitplex.server.form.confirmLeave();";
 	}
 
 	@Override

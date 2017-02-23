@@ -68,37 +68,36 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.getSessionHandler().getSessionManager().setMaxInactiveInterval(serverConfig.getSessionTimeout());
 		
-		FilterHolder filterHolder = new FilterHolder(hibernateFilter);
-		context.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
+		FilterHolder hibernateFilterHolder = new FilterHolder(hibernateFilter);
+		context.addFilter(hibernateFilterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 		
 		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, DefaultWebEnvironment.class.getName());
-		
 		context.addEventListener(new EnvironmentLoaderListener());
-
-		filterHolder = new FilterHolder(shiroFilter);
-		context.addFilter(filterHolder, "/*", EnumSet.allOf(DispatcherType.class));
+		FilterHolder shiroFilterHolder = new FilterHolder(shiroFilter);
+		context.addFilter(shiroFilterHolder, "/*", EnumSet.allOf(DispatcherType.class));
 		
-        filterHolder = new FilterHolder(gitFilter);
-        context.addFilter(filterHolder, "/*", EnumSet.allOf(DispatcherType.class));
+        FilterHolder gitFilterHolder = new FilterHolder(gitFilter);
+        context.addFilter(gitFilterHolder, "/*", EnumSet.allOf(DispatcherType.class));
 		
-		ServletHolder servletHolder = new ServletHolder(preReceiveServlet);
-		context.addServlet(servletHolder, GitPreReceiveCallback.PATH + "/*");
+		ServletHolder preReceiveServletHolder = new ServletHolder(preReceiveServlet);
+		context.addServlet(preReceiveServletHolder, GitPreReceiveCallback.PATH + "/*");
         
-		servletHolder = new ServletHolder(postReceiveServlet);
-        context.addServlet(servletHolder, GitPostReceiveCallback.PATH + "/*");
+		ServletHolder postReceiveServletHolder = new ServletHolder(postReceiveServlet);
+        context.addServlet(postReceiveServletHolder, GitPostReceiveCallback.PATH + "/*");
         
-		servletHolder = new ServletHolder(wicketServlet);
+		ServletHolder wicketServletHolder = new ServletHolder(wicketServlet);
 		
 		/*
 		 * Add wicket servlet as the default servlet which will serve all requests failed to 
 		 * match a path pattern
 		 */
-		context.addServlet(servletHolder, "/");
+		context.addServlet(wicketServletHolder, "/");
+		
 		context.addServlet(AttachmentUploadServlet.class, "/attachment_upload");
 		
-		servletHolder = new ServletHolder(new ClasspathAssetServlet(Assets.class));
-		context.addServlet(servletHolder, "/assets/*");
-		context.addServlet(servletHolder, "/favicon.ico");
+		ServletHolder assetServletHolder = new ServletHolder(new ClasspathAssetServlet(Assets.class));
+		context.addServlet(assetServletHolder, "/assets/*");
+		
 		context.getSessionHandler().addEventListener(new HttpSessionListener() {
 
 			@Override
@@ -116,9 +115,9 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		 * Configure a servlet to serve contents under site folder. Site folder can be used 
 		 * to hold site specific web assets.   
 		 */
-		servletHolder = new ServletHolder(new FileAssetServlet(Bootstrap.getSiteDir()));
-		context.addServlet(servletHolder, "/site/*");
-		context.addServlet(servletHolder, "/robots.txt");
+		ServletHolder fileServletHolder = new ServletHolder(new FileAssetServlet(Bootstrap.getSiteDir()));
+		context.addServlet(fileServletHolder, "/site/*");
+		context.addServlet(fileServletHolder, "/robots.txt");
 	}
 
 }

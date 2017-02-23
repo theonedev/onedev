@@ -35,7 +35,7 @@ public class AccordionPanel extends WebMarkupContainer {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		String script = String.format("gitplex.commons.setupAccordion('%s')", getMarkupId());
+		String script = String.format("gitplex.server.setupAccordion('%s')", getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

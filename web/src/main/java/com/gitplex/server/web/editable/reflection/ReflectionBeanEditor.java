@@ -144,6 +144,6 @@ public class ReflectionBeanEditor extends BeanEditor<Serializable> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.commons.editable.adjustReflectionEditor('%s')", getMarkupId())));
+		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.server.editable.adjustReflectionEditor('%s')", getMarkupId())));
 	}
 }

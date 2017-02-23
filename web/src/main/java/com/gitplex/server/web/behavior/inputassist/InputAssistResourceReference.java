@@ -10,10 +10,10 @@ import com.gitplex.server.web.assets.caret.CaretResourceReference;
 import com.gitplex.server.web.assets.hotkeys.HotkeysResourceReference;
 import com.gitplex.server.web.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.gitplex.server.web.assets.textareacaretposition.TextareaCaretPositionResourceReference;
-import com.gitplex.server.web.page.CommonDependentCssResourceReference;
-import com.gitplex.server.web.page.CommonDependentResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
-public class InputAssistResourceReference extends CommonDependentResourceReference {
+public class InputAssistResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
@@ -28,7 +28,8 @@ public class InputAssistResourceReference extends CommonDependentResourceReferen
 		dependencies.add(JavaScriptHeaderItem.forReference(new CaretResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new TextareaCaretPositionResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new CommonDependentCssResourceReference(InputAssistResourceReference.class, "input-assist.css")));
+		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
+				InputAssistResourceReference.class, "input-assist.css")));
 		return dependencies;
 	}
 

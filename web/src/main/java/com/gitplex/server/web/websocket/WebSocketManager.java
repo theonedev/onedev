@@ -2,7 +2,7 @@ package com.gitplex.server.web.websocket;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.web.page.CommonPage;
+import com.gitplex.server.web.page.base.BasePage;
 
 public interface WebSocketManager {
 	
@@ -14,7 +14,7 @@ public interface WebSocketManager {
 	
 	static final String KEEP_ALIVE = "KeepAlive";
 	
-	void onRegionChange(CommonPage page);
+	void onRegionChange(BasePage page);
 	
 	void onDestroySession(String sessionId);
 	

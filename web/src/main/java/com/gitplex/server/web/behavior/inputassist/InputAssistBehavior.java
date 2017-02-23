@@ -123,7 +123,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
-			String script = String.format("gitplex.commons.inputassist.markErrors('%s', %s);", 
+			String script = String.format("gitplex.server.inputassist.markErrors('%s', %s);", 
 					getComponent().getMarkupId(), json);
 			target.appendJavaScript(script);
 			
@@ -148,7 +148,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 							}
 							
 						};
-						script = String.format("gitplex.commons.inputassist.assistOpened('%s', '%s', '%s');", 
+						script = String.format("gitplex.server.inputassist.assistOpened('%s', '%s', '%s');", 
 								getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
 						target.appendJavaScript(script);
 					} else {
@@ -162,7 +162,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 						script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
 						target.prependJavaScript(script);
 						
-						script = String.format("gitplex.commons.inputassist.assistUpdated('%s', '%s', '%s');", 
+						script = String.format("gitplex.server.inputassist.assistUpdated('%s', '%s', '%s');", 
 								getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
 						target.appendJavaScript(script);
 					}
@@ -190,7 +190,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 		response.render(JavaScriptHeaderItem.forReference(new InputAssistResourceReference()));
 		
-		String script = String.format("gitplex.commons.inputassist.init('%s', %s);", 
+		String script = String.format("gitplex.server.inputassist.init('%s', %s);", 
 				getComponent().getMarkupId(true), 
 				getCallbackFunction(explicit("type"), explicit("input"), explicit("caret")));
 		

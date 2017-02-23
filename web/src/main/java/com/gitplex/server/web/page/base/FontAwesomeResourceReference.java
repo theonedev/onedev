@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page;
+package com.gitplex.server.web.page.base;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 
