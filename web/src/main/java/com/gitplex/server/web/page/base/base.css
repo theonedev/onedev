@@ -314,15 +314,15 @@ form>.test-feedback {
 /* ICONS */
 span.add.icon {
 	padding: 12px; 
-	background: url("image/add.png") no-repeat 50% 50%;
+	background: url("/assets/image/add.png") no-repeat 50% 50%;
 }
 span.delete.icon {
 	padding: 12px; 
-	background: url("image/delete.png") no-repeat 50% 50%;
+	background: url("/assets/image/delete.png") no-repeat 50% 50%;
 }
 span.move.icon {
 	padding: 12px;
-	background: url("image/move.png") no-repeat 50% 50%;
+	background: url("/assets/image/move.png") no-repeat 50% 50%;
 }
 
 /* WEB SOCKET ERROR */
@@ -340,7 +340,7 @@ span.move.icon {
 #websocket-error span {
 	width: 16px; 
 	height: 16px; 
-	background: url("image/error.png") 0 0 no-repeat;
+	background: url("/assets/image/error.png") 0 0 no-repeat;
 }
 
 /* FILE INPUT */

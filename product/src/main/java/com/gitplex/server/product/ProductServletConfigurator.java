@@ -97,6 +97,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		ServletHolder assetServletHolder = new ServletHolder(new ClasspathAssetServlet(Assets.class));
 		context.addServlet(assetServletHolder, "/assets/*");
+		context.addServlet(assetServletHolder, "/favicon.ico");
 		
 		context.getSessionHandler().addEventListener(new HttpSessionListener() {
 

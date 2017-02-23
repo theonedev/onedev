@@ -6,11 +6,11 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.gitplex.server.web.assets.codemirror.CodeMirrorResourceReference;
-import com.gitplex.server.web.assets.cookies.CookiesResourceReference;
-import com.gitplex.server.web.assets.hover.HoverResourceReference;
-import com.gitplex.server.web.assets.jqueryui.JQueryUIResourceReference;
-import com.gitplex.server.web.assets.selectionpopover.SelectionPopoverResourceReference;
+import com.gitplex.server.web.assets.js.codemirror.CodeMirrorResourceReference;
+import com.gitplex.server.web.assets.js.cookies.CookiesResourceReference;
+import com.gitplex.server.web.assets.js.hover.HoverResourceReference;
+import com.gitplex.server.web.assets.js.jqueryui.JQueryUIResourceReference;
+import com.gitplex.server.web.assets.js.selectionpopover.SelectionPopoverResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 

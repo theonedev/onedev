@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
-import com.gitplex.server.web.assets.uri.URIResourceReference;
+import com.gitplex.server.web.assets.js.uri.URIResourceReference;
 
 @SuppressWarnings("serial")
 public class ViewStateAwareBehavior extends Behavior {

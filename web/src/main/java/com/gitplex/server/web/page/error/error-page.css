@@ -1,6 +1,3 @@
-html.error, body.error {
-	background: #FF557F;
-}
 body.error .center-box {
 	width: 75%;
 	padding: 20px;

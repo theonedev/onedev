@@ -8,9 +8,9 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.gitplex.server.web.assets.align.AlignResourceReference;
-import com.gitplex.server.web.assets.areyousure.AreYouSureResourceReference;
-import com.gitplex.server.web.assets.autosize.AutoSizeResourceReference;
+import com.gitplex.server.web.assets.js.align.AlignResourceReference;
+import com.gitplex.server.web.assets.js.areyousure.AreYouSureResourceReference;
+import com.gitplex.server.web.assets.js.autosize.AutoSizeResourceReference;
 
 import de.agilecoders.wicket.core.Bootstrap;
 

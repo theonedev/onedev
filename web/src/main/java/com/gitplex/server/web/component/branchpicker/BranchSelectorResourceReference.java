@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.gitplex.server.web.assets.hotkeys.HotkeysResourceReference;
+import com.gitplex.server.web.assets.js.hotkeys.HotkeysResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class BranchSelectorResourceReference extends BaseDependentResourceReference {

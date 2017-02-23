@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.gitplex.server.web.assets.uri.URIResourceReference;
+import com.gitplex.server.web.assets.js.uri.URIResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class SearchResultResourceReference extends BaseDependentResourceReference {

@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.gitplex.server.web.assets.mousewheel.MouseWheelResourceReference;
+import com.gitplex.server.web.assets.js.mousewheel.MouseWheelResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class Select2ResourceReference extends BaseDependentResourceReference {

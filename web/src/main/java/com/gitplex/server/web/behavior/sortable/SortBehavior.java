@@ -9,7 +9,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.gitplex.server.web.assets.jqueryui.JQueryUIResourceReference;
+import com.gitplex.server.web.assets.js.jqueryui.JQueryUIResourceReference;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 
 public abstract class SortBehavior extends AbstractPostAjaxBehavior {

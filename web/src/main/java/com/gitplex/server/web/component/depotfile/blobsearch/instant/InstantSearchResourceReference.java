@@ -6,9 +6,9 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.gitplex.server.web.assets.doneevents.DoneEventsResourceReference;
-import com.gitplex.server.web.assets.hotkeys.HotkeysResourceReference;
-import com.gitplex.server.web.assets.scrollintoview.ScrollIntoViewResourceReference;
+import com.gitplex.server.web.assets.js.doneevents.DoneEventsResourceReference;
+import com.gitplex.server.web.assets.js.hotkeys.HotkeysResourceReference;
+import com.gitplex.server.web.assets.js.scrollintoview.ScrollIntoViewResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 

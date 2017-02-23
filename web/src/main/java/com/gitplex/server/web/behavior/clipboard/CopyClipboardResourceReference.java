@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.gitplex.server.web.assets.clipboard.ClipboardResourceReference;
+import com.gitplex.server.web.assets.js.clipboard.ClipboardResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class CopyClipboardResourceReference extends BaseDependentResourceReference {

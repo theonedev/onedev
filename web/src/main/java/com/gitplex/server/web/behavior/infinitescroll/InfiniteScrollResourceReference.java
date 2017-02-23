@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.gitplex.server.web.assets.scrollintoview.ScrollIntoViewResourceReference;
+import com.gitplex.server.web.assets.js.scrollintoview.ScrollIntoViewResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class InfiniteScrollResourceReference extends BaseDependentResourceReference {

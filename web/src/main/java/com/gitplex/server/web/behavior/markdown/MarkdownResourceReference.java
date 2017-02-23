@@ -8,10 +8,10 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.gitplex.server.web.assets.atwho.AtWhoResourceReference;
-import com.gitplex.server.web.assets.caret.CaretResourceReference;
-import com.gitplex.server.web.assets.codemirror.CodeMirrorResourceReference;
-import com.gitplex.server.web.assets.hotkeys.HotkeysResourceReference;
+import com.gitplex.server.web.assets.js.atwho.AtWhoResourceReference;
+import com.gitplex.server.web.assets.js.caret.CaretResourceReference;
+import com.gitplex.server.web.assets.js.codemirror.CodeMirrorResourceReference;
+import com.gitplex.server.web.assets.js.hotkeys.HotkeysResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class MarkdownResourceReference extends BaseDependentResourceReference {

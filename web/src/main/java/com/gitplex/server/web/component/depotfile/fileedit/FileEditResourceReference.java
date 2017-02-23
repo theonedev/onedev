@@ -7,8 +7,8 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.gitplex.server.web.assets.codemirror.CodeMirrorResourceReference;
-import com.gitplex.server.web.assets.diffmatchpatch.DiffMatchPatchResourceReference;
+import com.gitplex.server.web.assets.js.codemirror.CodeMirrorResourceReference;
+import com.gitplex.server.web.assets.js.diffmatchpatch.DiffMatchPatchResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class FileEditResourceReference extends BaseDependentResourceReference {

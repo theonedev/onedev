@@ -38,6 +38,7 @@ import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.model.Account;
+import com.gitplex.server.web.assets.Assets;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.page.init.ServerInitPage;
 import com.gitplex.server.web.page.security.LoginPage;
@@ -91,7 +92,7 @@ public abstract class BasePage extends WebPage {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				CharSequence url = urlFor(
-						new PackageResourceReference(BasePage.class, "image/favicon.ico"), 
+						new PackageResourceReference(Assets.class, "favicon.ico"), 
 						new PageParameters()); 
 				tag.put("href", url);
 			}
@@ -103,7 +104,7 @@ public abstract class BasePage extends WebPage {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				CharSequence url = urlFor(
-						new PackageResourceReference(BasePage.class, "image/apple-touch-icon.png"), 
+						new PackageResourceReference(Assets.class, "image/apple-touch-icon.png"), 
 						new PageParameters()); 
 				tag.put("href", url);
 			}
@@ -115,7 +116,7 @@ public abstract class BasePage extends WebPage {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				CharSequence url = urlFor(
-						new PackageResourceReference(BasePage.class, "image/apple-touch-icon.png"), 
+						new PackageResourceReference(Assets.class, "image/apple-touch-icon.png"), 
 						new PageParameters()); 
 				tag.put("href", url);
 			}

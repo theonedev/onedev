@@ -45,6 +45,13 @@ public class DiffUtils {
 	private static List<List<Token>> tokenize(List<String> lines, @Nullable String fileName) {
 		Tokenizer tokenizer = TokenizerRegistry.getTokenizer(fileName);
 		if (tokenizer != null) {
+			//TODO: Some tokenizers are not thread safe, and we are using a temporary fix here
+			try {
+				tokenizer = TokenizerRegistry.getTokenizer(fileName).getClass().newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+			
 			List<List<Token>> tokenizedLines = tokenizer.tokenize(lines);
 			List<List<Token>> refinedLines = new ArrayList<>();
 			for (List<Token> tokenizedLine: tokenizedLines) {
