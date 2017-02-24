@@ -20,13 +20,11 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -36,6 +34,7 @@ import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitplex.jsymbol.Range;
 import com.gitplex.jsyntax.Token;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blame;
@@ -54,27 +53,27 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.RangeUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.diff.DiffBlock;
+import com.gitplex.server.util.diff.DiffMatchPatch.Operation;
 import com.gitplex.server.util.diff.DiffUtils;
 import com.gitplex.server.util.diff.LineDiff;
-import com.gitplex.server.util.diff.DiffMatchPatch.Operation;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.blamemessage.BlameMessageBehavior;
-import com.gitplex.server.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.gitplex.server.web.component.diff.blob.SourceAware;
 import com.gitplex.server.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import com.gitplex.server.web.component.diff.diffstat.DiffStatBar;
 import com.gitplex.server.web.component.diff.difftitle.BlobDiffTitle;
 import com.gitplex.server.web.component.diff.revision.BlobCommentSupport;
 import com.gitplex.server.web.component.diff.revision.DiffViewMode;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
+import com.gitplex.server.web.page.depot.blob.RequestCompareInfo;
+import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.server.web.page.depot.file.RequestCompareInfo;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.gitplex.server.web.util.DateUtils;
-import com.gitplex.jsymbol.Range;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
@@ -195,13 +194,13 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		} else {
 			comment = null;
 		}
-		DepotFilePage.State viewState = new DepotFilePage.State();
+		DepotBlobPage.State viewState = new DepotBlobPage.State();
 		if (comment != null)
 			viewState.commentId = comment.getId();
 		viewState.blobIdent = change.getBlobIdent();
 		
-		PageParameters params = DepotFilePage.paramsOf(depot, viewState);
-		actions.add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
+		PageParameters params = DepotBlobPage.paramsOf(depot, viewState);
+		actions.add(new ViewStateAwarePageLink<Void>("viewFile", DepotBlobPage.class, params));
 		
 		if (change.getType() != ChangeType.DELETE) {
 			if (request != null 
@@ -214,7 +213,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 					@Override
 					public void onClick() {
-						DepotFilePage.State editState = new DepotFilePage.State();
+						DepotBlobPage.State editState = new DepotBlobPage.State();
 						editState.blobIdent.revision = request.getSourceBranch();
 						editState.blobIdent.path = change.getPath();
 						editState.mode = Mode.EDIT;
@@ -227,8 +226,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 							IntegrationPreviewPage page = (IntegrationPreviewPage) getPage();
 							editState.requestCompareInfo.previewState = page.getState();
 						}
-						PageParameters params = DepotFilePage.paramsOf(request.getSourceDepot(), editState);
-						setResponsePage(DepotFilePage.class, params);
+						PageParameters params = DepotBlobPage.paramsOf(request.getSourceDepot(), editState);
+						setResponsePage(DepotBlobPage.class, params);
 					}
 					
 				};
@@ -241,11 +240,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 					@Override
 					public void onClick() {
-						DepotFilePage.State editState = new DepotFilePage.State();
+						DepotBlobPage.State editState = new DepotBlobPage.State();
 						editState.blobIdent = change.getBlobIdent();
 						editState.mode = Mode.EDIT;
-						PageParameters params = DepotFilePage.paramsOf(depot, editState);
-						setResponsePage(DepotFilePage.class, params);
+						PageParameters params = DepotBlobPage.paramsOf(depot, editState);
+						setResponsePage(DepotBlobPage.class, params);
 					}
 					
 				};
@@ -351,13 +350,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				setResponsePage(DepotFilePage.class, getQueryHitParams(hit));
+				setResponsePage(DepotBlobPage.class, getQueryHitParams(hit));
 			}
 
 			@Override
 			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
-				WebSession.get().setMetaData(DepotFilePage.SEARCH_RESULT_KEY, (ArrayList<QueryHit>)hits);
-				setResponsePage(DepotFilePage.class, getFindOccurrencesParams());
+				setResponsePage(DepotBlobPage.class, getFindOccurrencesParams());
 			}
 
 			@Override

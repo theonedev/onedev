@@ -1,3 +1,15 @@
 <wicket:extend>
-	<a wicket:id="test">test</a>
+	<div class="autofit">content</div>
+	<script type="text/javascript">
+		$(function() {
+			$(window).resize(function() {
+				var state = {};
+				$(document).find(".autofit:visible").first().trigger("autofit", state);				
+				console.log(state.name);
+			});
+			$(".autofit").on("autofit", function(e, state) {
+				state.name = "robin";
+			});
+		});
+	</script>
 </wicket:extend>

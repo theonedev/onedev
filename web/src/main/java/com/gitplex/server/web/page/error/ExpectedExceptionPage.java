@@ -4,12 +4,12 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.util.string.Strings;
 
 import com.gitplex.server.util.WordUtils;
 import com.gitplex.server.web.component.MultilineLabel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.home.DashboardPage;
 
 @SuppressWarnings("serial")
@@ -39,7 +39,7 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 		container.add(new Label("title", title));
 		container.add(new Label("description", exception.getMessage()));
 		
-		container.add(new BookmarkablePageLink<Void>("dashboard", DashboardPage.class));
+		container.add(new ViewStateAwarePageLink<Void>("dashboard", DashboardPage.class));
 		
 		container.add(new AjaxLink<Void>("showDetail") {
 

@@ -14,7 +14,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -24,8 +23,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.OrganizationMembershipManager;
 import com.gitplex.server.manager.TeamMembershipManager;
@@ -37,6 +34,7 @@ import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.select2.ChoiceProvider;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
@@ -44,6 +42,8 @@ import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.page.account.members.MemberListPage;
 import com.gitplex.server.web.page.account.members.MemberTeamListPage;
 import com.gitplex.server.web.util.avatar.AvatarManager;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -231,12 +231,12 @@ public class TeamMemberListPage extends TeamPage {
 				OrganizationMembership membership = 
 						Preconditions.checkNotNull(getAccount().getOrganizationMembersMap().get(member));
 				PageParameters params = MemberTeamListPage.paramsOf(membership);
-				Link<Void> link = new BookmarkablePageLink<Void>("avatarLink", 
+				Link<Void> link = new ViewStateAwarePageLink<Void>("avatarLink", 
 						MemberTeamListPage.class, params);
 				link.add(new Avatar("avatar", member));
 				item.add(link);
 				
-				link = new BookmarkablePageLink<Void>("nameLink", 
+				link = new ViewStateAwarePageLink<Void>("nameLink", 
 						MemberTeamListPage.class, params);
 				link.add(new Label("name", member.getDisplayName()));
 				item.add(link);
@@ -312,7 +312,7 @@ public class TeamMemberListPage extends TeamPage {
 		noMembersContainer.setOutputMarkupPlaceholderTag(true);
 		add(noMembersContainer);
 		
-		add(new BookmarkablePageLink<Void>("organizationMembers", 
+		add(new ViewStateAwarePageLink<Void>("organizationMembers", 
 				MemberListPage.class, MemberListPage.paramsOf(getAccount())) {
 
 			@Override

@@ -18,7 +18,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
@@ -40,15 +39,16 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
-import com.gitplex.server.web.component.AccountLink;
-import com.gitplex.server.web.component.archivemenulink.ArchiveMenuLink;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
+import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.ArchiveMenuLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 
@@ -248,10 +248,10 @@ public class DepotTagsPage extends DepotPage {
 				RefInfo ref = item.getModelObject();
 				String tagName = GitUtils.ref2tag(ref.getRef().getName());
 				
-				DepotFilePage.State state = new DepotFilePage.State();
+				DepotBlobPage.State state = new DepotBlobPage.State();
 				state.blobIdent.revision = tagName;
-				AbstractLink link = new BookmarkablePageLink<Void>("tagLink", 
-						DepotFilePage.class, DepotFilePage.paramsOf(getDepot(), state));
+				AbstractLink link = new ViewStateAwarePageLink<Void>("tagLink", 
+						DepotBlobPage.class, DepotBlobPage.paramsOf(getDepot(), state));
 				link.add(new Label("name", tagName));
 				item.add(link);
 
@@ -281,14 +281,14 @@ public class DepotTagsPage extends DepotPage {
 				RevCommit commit = (RevCommit) ref.getPeeledObj();
 				PageParameters params = CommitDetailPage.paramsOf(getDepot(), commit.name());
 				
-				link = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+				link = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 				link.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 				item.add(link);
 				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 				
 				item.add(new ContributorPanel("contributor", commit.getAuthorIdent(), commit.getCommitterIdent(), true));
 				
-				link = new BookmarkablePageLink<Void>("messageLink", CommitDetailPage.class, params);
+				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
 				link.add(new Label("message", commit.getShortMessage()));
 				item.add(link);
 				

@@ -10,7 +10,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -26,6 +25,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 
@@ -106,13 +106,13 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 			protected void populateItem(ListItem<Account> item) {
 				Account collaborator = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<>("avatarLink", 
+				Link<Void> link = new ViewStateAwarePageLink<>("avatarLink", 
 						CollaboratorDepotListPage.class, 
 						CollaboratorDepotListPage.paramsOf(getAccount(), collaborator)); 
 				link.add(new Avatar("avatar", collaborator));
 				item.add(link);
 				
-				link = new BookmarkablePageLink<>("nameLink", 
+				link = new ViewStateAwarePageLink<>("nameLink", 
 						CollaboratorDepotListPage.class, 
 						CollaboratorDepotListPage.paramsOf(getAccount(), collaborator)); 
 				link.add(new Label("name", collaborator.getDisplayName()));

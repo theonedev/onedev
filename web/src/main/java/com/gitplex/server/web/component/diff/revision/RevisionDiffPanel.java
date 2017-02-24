@@ -74,7 +74,6 @@ import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.util.match.WildcardUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.comment.CodeCommentPanel;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
@@ -82,6 +81,7 @@ import com.gitplex.server.web.component.comment.comparecontext.CompareContextPan
 import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.blob.SourceAware;
 import com.gitplex.server.web.component.diff.diffstat.DiffStatBar;
+import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.util.SuggestionUtils;

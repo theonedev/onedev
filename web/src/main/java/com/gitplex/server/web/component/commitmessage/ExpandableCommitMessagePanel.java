@@ -9,7 +9,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -21,6 +20,7 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.Highlighter;
 import com.gitplex.server.util.Transformer;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 
 @SuppressWarnings("serial")
@@ -74,7 +74,7 @@ public class ExpandableCommitMessagePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		AbstractLink link = new BookmarkablePageLink<Void>("link",
+		AbstractLink link = new ViewStateAwarePageLink<Void>("link",
 				CommitDetailPage.class,
 				CommitDetailPage.paramsOf(depotModel.getObject(), commitModel.getObject().name()));
 		

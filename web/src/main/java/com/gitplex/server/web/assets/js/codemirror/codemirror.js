@@ -47,29 +47,17 @@ gitplex.server.codemirror = {
     	var scroll = {left: scrollInfo.left, top: scrollInfo.top};
 		return {cursor: cursor, scroll: scroll};		
 	},
-	initState: function(cm, viewState) {
-	    if (!viewState) {
-	    	viewState = gitplex.server.history.getViewState();
-	    }
-
-	    if (viewState) {
-	    	if (viewState.cursor) {
-	    		cm.setCursor(viewState.cursor);
-	    		if (!viewState.scroll) {
-	    			var h = cm.getScrollInfo().clientHeight;
-	    			var coords = cm.charCoords({line: viewState.cursor.line, ch: 0}, "local");
-	    			cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
-	    		}
-	    	}
-	    	if (viewState.scroll) {
-	    		// use a timeout to make sure we scroll after possible viewport resize
-	    		setTimeout(function() {
-		    		cm.scrollTo(viewState.scroll.left, viewState.scroll.top);
-	    		}, 10);
-	    	}
-	    }
-	    
-	    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
-	    cm.focus();
+	setViewState: function(cm, viewState) {
+    	if (viewState.cursor) {
+    		cm.setCursor(viewState.cursor);
+    		if (!viewState.scroll) {
+    			var h = cm.getScrollInfo().clientHeight;
+    			var coords = cm.charCoords({line: viewState.cursor.line, ch: 0}, "local");
+    			cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
+    		}
+    	}
+    	if (viewState.scroll) {
+	    	cm.scrollTo(viewState.scroll.left, viewState.scroll.top);
+    	}
 	} 
 };

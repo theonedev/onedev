@@ -43,7 +43,7 @@
 	color: #666;
 	font-size: 14px;
 	line-height: 12px;
-	margin-left: 8px;
+	margin: 4px 8px 0 0;
 }
 .code-comment>.section>.detail>.body {
 	padding-top: 8px;

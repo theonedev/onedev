@@ -22,7 +22,7 @@
         'silent' : false,
         'addRemoveFieldsMarksDirty' : false,
         'fieldEvents' : 'change keyup propertychange input',
-        'fieldSelector': ":input:not(input[type=submit]):not(input[type=button]):not(button)"
+        'fieldSelector': ":input:not(.no-dirtytrack):not(input[type=submit]):not(input[type=button]):not(button)"
       }, options);
 
     var getValue = function($field) {

@@ -52,21 +52,23 @@ gitplex.server.floating = {
 	}, 
 	
 	close: function($floating, callCloseCallback) {
-		if (callCloseCallback)
-			$floating.data("closeCallback")();
-		
-		var alignment = $floating.data("alignment");
-		
-		if (alignment.target.element)
-			$(alignment.target.element).removeClass("floating-aligned");
-		
-		$(document).off("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
-		$(document).off("keydown", $floating.data("keydown"));
-		$(document).off("elementReplaced", $floating.data("elementReplaced"));
-		
-		$floating.trigger("close");
-		
-		$floating.remove();
+		if ($floating.length != 0) { // floating might already been closed
+			if (callCloseCallback)
+				$floating.data("closeCallback")();
+			
+			var alignment = $floating.data("alignment");
+			
+			if (alignment.target.element)
+				$(alignment.target.element).removeClass("floating-aligned");
+			
+			$(document).off("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
+			$(document).off("keydown", $floating.data("keydown"));
+			$(document).off("elementReplaced", $floating.data("elementReplaced"));
+			
+			$floating.trigger("close");
+			
+			$floating.remove();
+		}
 	}
 	
 };

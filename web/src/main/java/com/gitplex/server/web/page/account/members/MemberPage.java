@@ -12,7 +12,6 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -20,16 +19,16 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.OrganizationMembershipManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.component.AccountLink;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.roleselection.RoleSelectionPanel;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
@@ -37,6 +36,7 @@ import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
+import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public abstract class MemberPage extends AccountLayoutPage {
@@ -156,7 +156,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new BookmarkablePageLink<Void>(linkId, MemberTeamListPage.class, 
+						return new ViewStateAwarePageLink<Void>(linkId, MemberTeamListPage.class, 
 								MemberTeamListPage.paramsOf(getMembership()));
 					}
 					
@@ -174,7 +174,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new BookmarkablePageLink<Void>(linkId, MemberEffectivePrivilegePage.class, 
+						return new ViewStateAwarePageLink<Void>(linkId, MemberEffectivePrivilegePage.class, 
 								MemberEffectivePrivilegePage.paramsOf(getMembership()));
 					}
 					

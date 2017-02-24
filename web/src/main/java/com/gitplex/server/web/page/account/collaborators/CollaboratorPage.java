@@ -6,24 +6,24 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
+import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public abstract class CollaboratorPage extends AccountLayoutPage {
@@ -70,7 +70,7 @@ public abstract class CollaboratorPage extends AccountLayoutPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new BookmarkablePageLink<Void>(linkId, CollaboratorDepotListPage.class, 
+						return new ViewStateAwarePageLink<Void>(linkId, CollaboratorDepotListPage.class, 
 								CollaboratorDepotListPage.paramsOf(getAccount(), collaboratorModel.getObject()));
 					}
 					
@@ -88,7 +88,7 @@ public abstract class CollaboratorPage extends AccountLayoutPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new BookmarkablePageLink<Void>(linkId, CollaboratorEffectivePrivilegePage.class, 
+						return new ViewStateAwarePageLink<Void>(linkId, CollaboratorEffectivePrivilegePage.class, 
 								CollaboratorEffectivePrivilegePage.paramsOf(getAccount(), collaboratorModel.getObject()));
 					}
 					

@@ -18,7 +18,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -47,6 +46,7 @@ import com.gitplex.server.web.behavior.TooltipBehavior;
 import com.gitplex.server.web.component.commitlist.CommitListPanel;
 import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.revisionpicker.AffinalRevisionPicker;
 import com.gitplex.server.web.component.tabbable.AjaxActionTab;
 import com.gitplex.server.web.component.tabbable.Tab;
@@ -327,12 +327,12 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		add(new WebMarkupContainer("mergeBaseTooltip").add(new TooltipBehavior(Model.of(tooltip))));
 
 		PageParameters params = CommitDetailPage.paramsOf(state.leftSide.getDepot(), state.leftSide.getCommit().name());
-		Link<Void> leftCommitLink = new BookmarkablePageLink<Void>("leftCommitLink", CommitDetailPage.class, params);
+		Link<Void> leftCommitLink = new ViewStateAwarePageLink<Void>("leftCommitLink", CommitDetailPage.class, params);
 		leftCommitLink.add(new Label("message", state.leftSide.getCommit().getShortMessage()));
 		add(leftCommitLink);
 		
 		params = CommitDetailPage.paramsOf(state.rightSide.getDepot(), state.rightSide.getCommit().name());
-		Link<Void> rightCommitLink = new BookmarkablePageLink<Void>("rightCommitLink", CommitDetailPage.class, params);
+		Link<Void> rightCommitLink = new ViewStateAwarePageLink<Void>("rightCommitLink", CommitDetailPage.class, params);
 		rightCommitLink.add(new Label("message", state.rightSide.getCommit().getShortMessage()));
 		add(rightCommitLink);
 		

@@ -32,7 +32,7 @@ import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.BlobIcon;
-import com.gitplex.server.web.component.PreventDefaultAjaxLink;
+import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
 public abstract class PathSelector extends Panel {

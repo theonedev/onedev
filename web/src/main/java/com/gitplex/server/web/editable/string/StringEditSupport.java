@@ -11,7 +11,7 @@ import com.gitplex.server.util.editable.annotation.Markdown;
 import com.gitplex.server.util.editable.annotation.Multiline;
 import com.gitplex.server.util.editable.annotation.Password;
 import com.gitplex.server.web.component.MultilineLabel;
-import com.gitplex.server.web.component.markdown.MarkdownPanel;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.EditSupport;
 import com.gitplex.server.web.editable.NotDefinedLabel;
@@ -46,7 +46,7 @@ public class StringEditSupport implements EditSupport {
 								if (propertyDescriptor.getPropertyGetter().getAnnotation(Multiline.class) != null) {
 									return new MultilineLabel(id, model.getObject());
 								} else if (propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) != null) {
-									return new MarkdownPanel(id, Model.of(model.getObject()), null);
+									return new MarkdownViewer(id, Model.of(model.getObject()), null);
 								} else { 
 									return new Label(id, model.getObject());
 								}

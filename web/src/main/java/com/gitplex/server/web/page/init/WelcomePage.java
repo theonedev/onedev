@@ -2,8 +2,8 @@ package com.gitplex.server.web.page.init;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.account.overview.NewDepotPage;
 import com.gitplex.server.web.page.account.overview.NewOrganizationPage;
 import com.gitplex.server.web.page.layout.LayoutPage;
@@ -15,10 +15,10 @@ public class WelcomePage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		add(new BookmarkablePageLink<Void>("addOrganization", NewOrganizationPage.class, 
+		add(new ViewStateAwarePageLink<Void>("addOrganization", NewOrganizationPage.class, 
 				NewOrganizationPage.paramsOf(getLoginUser())));
 		
-		add(new BookmarkablePageLink<Void>("addDepot", NewDepotPage.class, 
+		add(new ViewStateAwarePageLink<Void>("addDepot", NewDepotPage.class, 
 				NewDepotPage.paramsOf(getLoginUser())));
 	}
 

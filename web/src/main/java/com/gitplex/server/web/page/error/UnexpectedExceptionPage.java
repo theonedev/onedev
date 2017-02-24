@@ -27,7 +27,6 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
@@ -38,6 +37,7 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.home.DashboardPage;
 import com.gitplex.server.web.util.DateUtils;
 
@@ -119,8 +119,8 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 			}
 			
 		});
-		add(new BookmarkablePageLink<Void>("dashboardTop", DashboardPage.class));
-		add(new BookmarkablePageLink<Void>("dashboardBottom", DashboardPage.class));
+		add(new ViewStateAwarePageLink<Void>("dashboardTop", DashboardPage.class));
+		add(new ViewStateAwarePageLink<Void>("dashboardBottom", DashboardPage.class));
 		
 		add(new WebMarkupContainer("dashboardUrl") {
 

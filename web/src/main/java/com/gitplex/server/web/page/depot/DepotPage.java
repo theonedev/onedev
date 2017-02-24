@@ -16,7 +16,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
@@ -28,24 +27,24 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.component.DropdownLink;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.account.AccountPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;
 import com.gitplex.server.web.page.depot.comments.DepotCommentsPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.depot.moreinfo.MoreInfoPanel;
 import com.gitplex.server.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
@@ -53,6 +52,7 @@ import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage
 import com.gitplex.server.web.page.depot.setting.DepotSettingPage;
 import com.gitplex.server.web.page.depot.setting.general.GeneralSettingPage;
 import com.gitplex.server.web.page.depot.tags.DepotTagsPage;
+import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public abstract class DepotPage extends AccountPage {
@@ -131,7 +131,7 @@ public abstract class DepotPage extends AccountPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new DepotTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, DepotFilePage.class));
+		tabs.add(new DepotTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, DepotBlobPage.class));
 		tabs.add(new DepotTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
 				DepotCommitsPage.class, CommitDetailPage.class));
 		tabs.add(new DepotTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
@@ -190,13 +190,13 @@ public abstract class DepotPage extends AccountPage {
 	@Override
 	protected Component newContextHead(String componentId) {
 		Fragment fragment = new Fragment(componentId, "contextHeadFrag", this);
-		Link<Void> accountLink = new BookmarkablePageLink<>("accountLink", 
+		Link<Void> accountLink = new ViewStateAwarePageLink<>("accountLink", 
 				AccountOverviewPage.class, AccountOverviewPage.paramsOf(getAccount()));
 		accountLink.add(new Label("accountName", getAccount().getName()));
 		fragment.add(accountLink);
 		
-		Link<Void> depotLink = new BookmarkablePageLink<>("depotLink", 
-				DepotFilePage.class, DepotFilePage.paramsOf(getDepot()));
+		Link<Void> depotLink = new ViewStateAwarePageLink<>("depotLink", 
+				DepotBlobPage.class, DepotBlobPage.paramsOf(getDepot()));
 		depotLink.add(new Label("depotName", getDepot().getName()));
 		fragment.add(depotLink);
 		fragment.add(new DropdownLink("depotMoreInfo") {

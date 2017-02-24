@@ -12,7 +12,6 @@ import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -21,7 +20,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.model.Account;
@@ -30,14 +28,16 @@ import com.gitplex.server.model.PullRequestTask;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.web.WebConstants;
-import com.gitplex.server.web.component.BranchLink;
 import com.gitplex.server.web.component.datatable.DefaultDataTable;
 import com.gitplex.server.web.component.datatable.EntityDataProvider;
 import com.gitplex.server.web.component.datatable.SelectionColumn;
+import com.gitplex.server.web.component.link.BranchLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.util.DateUtils;
+import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public class TaskListPage extends AccountLayoutPage {
@@ -76,7 +76,7 @@ public class TaskListPage extends AccountLayoutPage {
 					String componentId, IModel<PullRequestTask> rowModel) {
 				PullRequestTask task = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "requestFrag", TaskListPage.this);
-				fragment.add(new BookmarkablePageLink<Void>("link", RequestOverviewPage.class, 
+				fragment.add(new ViewStateAwarePageLink<Void>("link", RequestOverviewPage.class, 
 						RequestOverviewPage.paramsOf(task.getRequest())) {
 
 					@Override

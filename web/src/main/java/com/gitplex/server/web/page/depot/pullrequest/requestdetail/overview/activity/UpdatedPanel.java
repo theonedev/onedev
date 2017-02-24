@@ -6,7 +6,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -30,9 +29,10 @@ import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.websocket.PullRequestChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -117,15 +117,15 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();
 				PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), commitState);
-				Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+				Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 				item.add(hashLink);
 				hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 
-				DepotFilePage.State browseState = new DepotFilePage.State();
+				DepotBlobPage.State browseState = new DepotBlobPage.State();
 				browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
-				params = DepotFilePage.paramsOf(depotModel.getObject(), browseState);
-				item.add(new BookmarkablePageLink<Void>("browseCode", DepotFilePage.class, params));
+				params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
+				item.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 				
 				if (getUpdate().getRequest().getTarget().getObjectId(false) != null) {
 					if (getUpdate().getRequest().getMergedCommits().contains(commit)) {

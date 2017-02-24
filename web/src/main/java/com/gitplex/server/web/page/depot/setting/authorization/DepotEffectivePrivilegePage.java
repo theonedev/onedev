@@ -11,7 +11,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -27,8 +26,9 @@ import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.gitplex.server.web.page.account.collaborators.CollaboratorDepotListPage;
 import com.gitplex.server.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
@@ -188,14 +188,14 @@ public class DepotEffectivePrivilegePage extends DepotSettingPage {
 						getAccount().getOrganizationMembersMap().get(permission.getUser());
 				if (membership != null) {
 					PageParameters params = MemberEffectivePrivilegePage.paramsOf(membership);
-					Link<Void> link = new BookmarkablePageLink<Void>(
+					Link<Void> link = new ViewStateAwarePageLink<Void>(
 							"avatarLink", 
 							MemberEffectivePrivilegePage.class, 
 							params);
 					link.add(new Avatar("avatar", permission.getUser()));
 					item.add(link);
 					
-					link = new BookmarkablePageLink<Void>(
+					link = new ViewStateAwarePageLink<Void>(
 							"nameLink", 
 							MemberEffectivePrivilegePage.class, 
 							params);
@@ -203,7 +203,7 @@ public class DepotEffectivePrivilegePage extends DepotSettingPage {
 					item.add(link);
 
 					params = MemberPrivilegeSourcePage.paramsOf(membership, depotModel.getObject());
-					link = new BookmarkablePageLink<Void>(
+					link = new ViewStateAwarePageLink<Void>(
 							"privilegeLink", 
 							MemberPrivilegeSourcePage.class, 
 							params);
@@ -213,14 +213,14 @@ public class DepotEffectivePrivilegePage extends DepotSettingPage {
 					PageParameters params = CollaboratorDepotListPage.paramsOf(
 							getAccount(), permission.getUser());
 	 
-					Link<Void> link = new BookmarkablePageLink<Void>(
+					Link<Void> link = new ViewStateAwarePageLink<Void>(
 							"avatarLink", 
 							CollaboratorDepotListPage.class, 
 							params);
 					link.add(new Avatar("avatar", permission.getUser()));
 					item.add(link);
 					
-					link = new BookmarkablePageLink<Void>(
+					link = new ViewStateAwarePageLink<Void>(
 							"nameLink", 
 							CollaboratorDepotListPage.class, 
 							params);
@@ -228,7 +228,7 @@ public class DepotEffectivePrivilegePage extends DepotSettingPage {
 					item.add(link);
 
 					params = CollaboratorPrivilegeSourcePage.paramsOf(depotModel.getObject(), permission.getUser());
-					link = new BookmarkablePageLink<Void>(
+					link = new ViewStateAwarePageLink<Void>(
 							"privilegeLink", 
 							CollaboratorPrivilegeSourcePage.class, 
 							params);

@@ -6,7 +6,6 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -16,6 +15,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.web.behavior.TooltipBehavior;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.account.AccountPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.util.avatar.AvatarManager;
@@ -23,7 +23,7 @@ import com.gitplex.server.web.util.avatar.AvatarManager;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
-public class AvatarLink extends BookmarkablePageLink<Void> {
+public class AvatarLink extends ViewStateAwarePageLink<Void> {
 
 	private final Long accountId;
 	

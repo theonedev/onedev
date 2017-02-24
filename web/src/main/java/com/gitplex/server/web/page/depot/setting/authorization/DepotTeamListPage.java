@@ -15,7 +15,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -32,8 +31,9 @@ import com.gitplex.server.model.TeamAuthorization;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.greaterprivilege.GreaterPrivilegesPanel;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.gitplex.server.web.component.select2.Response;
@@ -238,7 +238,7 @@ public class DepotTeamListPage extends DepotSettingPage {
 			protected void populateItem(ListItem<TeamAuthorization> item) {
 				TeamAuthorization authorization = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>("link", TeamDepotListPage.class, 
+				Link<Void> link = new ViewStateAwarePageLink<Void>("link", TeamDepotListPage.class, 
 						TeamDepotListPage.paramsOf(authorization.getTeam()));
 				link.add(new Label("name", authorization.getTeam().getName()));
 				item.add(link);

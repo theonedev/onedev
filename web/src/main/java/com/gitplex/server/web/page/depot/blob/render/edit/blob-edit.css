@@ -1,0 +1,37 @@
+.blob-edit>.head {
+	border-bottom: 1px solid #BBB;
+	height: 36px;
+	background: #F2F2F2;
+}
+.blob-edit>.head .tab {
+	padding: 4px 12px;
+	margin-top: 7px;
+}
+.blob-edit>.head .tab a {
+	color: #666;
+	text-decoration: none;
+}
+.blob-edit>.head .edit {
+	margin-left: 12px;
+}
+.blob-edit>.head .active.tab {
+	background: white;
+	border: 1px solid #BBB;
+	border-radius: 4px 4px 0 0;
+	border-bottom: 1px solid white;
+}
+.blob-edit>.head .active.tab a {
+	font-weight: bold;
+	color: #333;
+}
+.blob-edit>.head .cancel {
+	margin: 11px 0 0 12px;
+}
+.blob-edit>.body {
+	margin-top: 1px;
+}
+.blob-edit>.body>.content>.submit, 
+.blob-edit>.body>.commit-options, 
+.blob-edit>.body>.dirty-check {
+	display: none;
+}

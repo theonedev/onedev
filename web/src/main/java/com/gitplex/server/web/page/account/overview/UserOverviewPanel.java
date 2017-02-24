@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -16,8 +15,9 @@ import org.apache.wicket.model.IModel;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.roleselection.RoleSelectionPanel;
 
 @SuppressWarnings("serial")
@@ -49,7 +49,7 @@ public class UserOverviewPanel extends GenericPanel<Account> {
 		add(new Label("email", user.getEmail())
 				.add(AttributeAppender.append("href", "mailto:" + user.getEmail())));
 		
-		add(new BookmarkablePageLink<Void>("addOrganization", 
+		add(new ViewStateAwarePageLink<Void>("addOrganization", 
 				NewOrganizationPage.class, NewOrganizationPage.paramsOf(getUser())) {
 
 			@Override

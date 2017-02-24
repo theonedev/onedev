@@ -6,11 +6,11 @@ import java.util.List;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.account.collaborators.AccountCollaboratorListPage;
@@ -39,7 +39,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BookmarkablePageLink<Void> avatarLink = new BookmarkablePageLink<Void>("avatar", 
+		ViewStateAwarePageLink<Void> avatarLink = new ViewStateAwarePageLink<Void>("avatar", 
 				AvatarEditPage.class, AvatarEditPage.paramsOf(getAccount())) {
 
 			@Override

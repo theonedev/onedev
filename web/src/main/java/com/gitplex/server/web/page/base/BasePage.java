@@ -139,6 +139,7 @@ public abstract class BasePage extends WebPage {
 				byte[] bytes = Base64.decodeBase64(encodedData.getBytes());
 				Serializable data = (Serializable) SerializationUtils.deserialize(bytes);
 				onPopState(target, data);
+				target.appendJavaScript("gitplex.server.viewState.getFromHistoryAndSetToView();");
 			}
 			
 			@Override
@@ -198,6 +199,7 @@ public abstract class BasePage extends WebPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("gitplex.server.viewState.getFromHistoryAndSetToView();"));
 	}
 	
 	public Collection<WebSocketRegion> getWebSocketRegions() {

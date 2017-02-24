@@ -31,8 +31,8 @@ import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;
-import com.gitplex.server.web.component.PreventDefaultAjaxLink;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 
 @SuppressWarnings("serial")
 public abstract class DepotSelector extends Panel {
@@ -144,8 +144,8 @@ public abstract class DepotSelector extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						PageParameters params = DepotFilePage.paramsOf(item.getModelObject());
-						tag.put("href", urlFor(DepotFilePage.class, params).toString());
+						PageParameters params = DepotBlobPage.paramsOf(item.getModelObject());
+						tag.put("href", urlFor(DepotBlobPage.class, params).toString());
 					}
 					
 				};

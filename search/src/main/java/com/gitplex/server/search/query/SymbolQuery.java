@@ -123,14 +123,16 @@ public class SymbolQuery extends BlobQuery {
 		}
 		if (tooGeneral)
 			throw new TooGeneralQueryException();
-		
-		String fieldName;
-		if (primary)
-			fieldName = BLOB_PRIMARY_SYMBOLS.name();
-		else
-			fieldName = BLOB_SECONDARY_SYMBOLS.name();
-		
-		query.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), Occur.MUST);
+
+		if (primary != null) {
+			String fieldName;
+			if (primary)
+				fieldName = BLOB_PRIMARY_SYMBOLS.name();
+			else
+				fieldName = BLOB_SECONDARY_SYMBOLS.name();
+			
+			query.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), Occur.MUST);
+		}
 	}
 	
 	public static class Builder {

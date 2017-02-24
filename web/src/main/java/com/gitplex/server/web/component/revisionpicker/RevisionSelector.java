@@ -45,7 +45,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;
 import com.gitplex.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
-import com.gitplex.server.web.component.PreventDefaultAjaxLink;
+import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.tabbable.AjaxActionTab;
 import com.gitplex.server.web.component.tabbable.Tab;
@@ -348,7 +348,7 @@ public abstract class RevisionSelector extends Panel {
 		else
 			ref = itemValue;
 		
-		AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
+		AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {

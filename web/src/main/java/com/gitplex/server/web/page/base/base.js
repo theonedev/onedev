@@ -211,6 +211,7 @@ gitplex.server = {
 	setupAutoSize: function() {
 		var selector = "textarea:not(.no-autosize)";
 		autosize($(selector));
+		
 		$(document).on("elementReplaced", function(event, componentId) {
 			var $component = $("#" + componentId);
 			var $textarea = $component.find(selector);
@@ -367,6 +368,70 @@ gitplex.server = {
 		}
 	},
 
+	/*
+	 * View state represents scroll position and edit cursor. We restore view state
+	 * when page is backed, or in some cases carry over the view state from one page 
+	 * to another (such as scrolling the page to same position being viewed when edit 
+	 * a source code)
+	 */
+	viewState: {
+		getInnerMostAutoFit: function() {
+			var $innerMost;
+			var $autofits = $(".autofit:visible");
+			while ($autofits.length != 0) {
+				$innerMost = $autofits.first();
+				$autofits = $innerMost.find(".autofit:visible");
+			}
+			return $innerMost;
+		},
+		getFromView: function() {
+			var $innerMost = gitplex.server.viewState.getInnerMostAutoFit();
+			if ($innerMost) {
+				return $innerMost.triggerHandler("getViewState");
+			} else {
+				return undefined;
+			}
+		},
+		setToView: function(viewState) {
+			var $innerMost = gitplex.server.viewState.getInnerMostAutoFit();
+			if ($innerMost) {
+				$innerMost.triggerHandler("setViewState", viewState);
+			}
+		},
+		getFromHistory: function() {
+			if (history.state && history.state.viewState)
+				return history.state.viewState;
+			else
+				return undefined;
+		},
+		setToHistory: function(viewState) {
+			var state = history.state;
+			if (!state)
+				state = {};
+			var newState = {viewState: viewState, data: state.data, visited: state.visited};
+			history.replaceState(newState, '', window.location.href );
+			gitplex.server.history.current = {
+				state: newState,
+				url: window.location.href
+			};
+		},
+		getFromViewAndSetToHistory: function() {
+			var viewState = gitplex.server.viewState.getFromView();
+			if (viewState)
+				gitplex.server.viewState.setToHistory(viewState);
+			gitplex.server.viewState.carryOver = gitplex.server.viewState.getFromHistory();			
+		},
+		getFromHistoryAndSetToView: function() {
+			var viewState = gitplex.server.viewState.getFromHistory();
+			if (viewState)
+				gitplex.server.viewState.setToView(viewState);
+		},
+		getFromCarryOverAndSetToView: function() {
+			if (gitplex.server.viewState.carryOver)
+				gitplex.server.viewState.setToView(gitplex.server.viewState.carryOver)
+		}
+	},
+	
 	history: {
 		getHashlessUrl: function(url) {
 			var index = url.indexOf('#');
@@ -410,7 +475,6 @@ gitplex.server = {
 			};
 		},
 		pushState: function(url, data) {
-			$(".autofit:visible").first().trigger("storeViewState");			
 			var state = {data: data};
 			gitplex.server.history.current = {state: state, url: url};
 			history.pushState(state, '', url);
@@ -418,6 +482,7 @@ gitplex.server = {
 				gitplex.server.history.setVisited();
 			}, 100);
 		},
+		
 		/*
 		 * visited flag is used to determine whether or not a page is newly visited 
 		 * or loaded via back/forward button. If loaded via back/forward button we
@@ -440,23 +505,6 @@ gitplex.server = {
 		isVisited: function() {
 			return history.state && history.state.visited;
 		},
-		setViewState: function(viewState) {
-			var state = history.state;
-			if (!state)
-				state = {};
-			var newState = {viewState: viewState, data: state.data, visited: state.visited};
-			history.replaceState(newState, '', window.location.href );
-			gitplex.server.history.current = {
-				state: newState,
-				url: window.location.href
-			};
-		}, 
-		getViewState: function() {
-			if (history.state && history.state.viewState)
-				return history.state.viewState;
-			else
-				return undefined;
-		}
 	},
 	isDevice: function() {
 		var ua = navigator.userAgent.toLowerCase();
@@ -468,31 +516,8 @@ gitplex.server = {
 	mouseState: {
 		pressed: false, 
 		moved: false
-	}
-};
-
-$(function() {
-	gitplex.server.setupAutoSize();
-	gitplex.server.setupAjaxLoadingIndicator();
-	gitplex.server.form.setupDirtyCheck();
-	gitplex.server.focus.setupAutoFocus();
-	gitplex.server.websocket.setupCallback();
-});
-
-$(window).load(function() {
-	gitplex.server.history.setVisited();
-});
-
-// disable this as calling replaceState in beforeunload also affects state of 
-// the page to be loaded
-/* 
-$(window).on("beforeunload", function() {
-	$(".autofit:visible").first().trigger("storeViewState");	
-});
-*/
-
-$(document).ready(function() {
-	$(window).load(function() {
+	},
+	setupMouseStateTracker: function() {
 		$(document).mousedown(function() { 
 			gitplex.server.mouseState.pressed = true;
 			gitplex.server.mouseState.moved = false;
@@ -513,5 +538,26 @@ $(document).ready(function() {
 		$(document).scroll(function() {
 			gitplex.server.mouseState.moved = false;
 		});
-	});
+	}
+};
+
+$(function() {
+	gitplex.server.setupAjaxLoadingIndicator();
+	gitplex.server.form.setupDirtyCheck();
+	gitplex.server.focus.setupAutoFocus();
+	gitplex.server.websocket.setupCallback();
+	gitplex.server.setupMouseStateTracker();
 });
+
+$(window).load(function() {
+	gitplex.server.setupAutoSize();
+	gitplex.server.history.setVisited();
+});
+
+// disable this as calling replaceState in beforeunload also affects state of 
+// the page to be loaded
+/* 
+$(window).on("beforeunload", function() {
+	$(".autofit:visible").first().trigger("storeViewState");	
+});
+*/

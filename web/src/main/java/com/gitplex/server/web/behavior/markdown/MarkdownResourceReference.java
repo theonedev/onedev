@@ -6,12 +6,12 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.gitplex.server.web.assets.js.atwho.AtWhoResourceReference;
+import com.gitplex.server.web.assets.js.bootstrapmarkdown.BootstrapMarkdownResourceReference;
 import com.gitplex.server.web.assets.js.caret.CaretResourceReference;
-import com.gitplex.server.web.assets.js.codemirror.CodeMirrorResourceReference;
 import com.gitplex.server.web.assets.js.hotkeys.HotkeysResourceReference;
+import com.gitplex.server.web.assets.js.markdownpreview.MarkdownPreviewResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class MarkdownResourceReference extends BaseDependentResourceReference {
@@ -27,11 +27,11 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CaretResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AtWhoResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(MarkdownResourceReference.class, "bootstrap-markdown.js")));
-		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(MarkdownResourceReference.class, "bootstrap-markdown.min.css")));
-		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(MarkdownResourceReference.class, "markdown.css")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BootstrapMarkdownResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new MarkdownPreviewResourceReference()));
+		dependencies.add(CssHeaderItem.forReference(
+				new CssResourceReference(MarkdownResourceReference.class, "markdown.css")));
 		return dependencies;
 	}
 

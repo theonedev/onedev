@@ -21,7 +21,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -40,8 +39,9 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.web.WebConstants;
-import com.gitplex.server.web.component.AccountLink;
-import com.gitplex.server.web.component.BranchLink;
+import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.BranchLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.component.pullrequest.requeststatus.RequestStatusPanel;
@@ -317,7 +317,7 @@ public class RequestListPage extends DepotPage {
 				PullRequest request = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "requestFrag", RequestListPage.this);
 				fragment.add(new Label("number", "#" + request.getNumber()));
-				fragment.add(new BookmarkablePageLink<Void>("title", RequestOverviewPage.class, 
+				fragment.add(new ViewStateAwarePageLink<Void>("title", RequestOverviewPage.class, 
 						RequestOverviewPage.paramsOf(request)) {
 
 					@Override

@@ -19,7 +19,7 @@ import com.gitplex.server.web.component.accountchoice.AdministrativeAccountChoic
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 
 @SuppressWarnings("serial")
 abstract class ForkOptionPanel extends Panel {
@@ -82,7 +82,7 @@ abstract class ForkOptionPanel extends Panel {
 				} else {
 					depotManager.fork(getDepot(), depot);
 					Session.get().success("Repository forked");
-					setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
+					setResponsePage(DepotBlobPage.class, DepotBlobPage.paramsOf(depot));
 				}
 			}
 

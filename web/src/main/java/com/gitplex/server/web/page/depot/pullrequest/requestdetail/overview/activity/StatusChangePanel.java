@@ -25,12 +25,12 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
-import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
+import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.markdown.MarkdownEditSupport;
-import com.gitplex.server.web.component.markdown.MarkdownPanel;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.SinceChangesLink;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -68,7 +68,7 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 			} else {
 				editSupport = null;
 			}
-			viewer.add(new MarkdownPanel("content", new AbstractReadOnlyModel<String>() {
+			viewer.add(new MarkdownViewer("content", new AbstractReadOnlyModel<String>() {
 
 				@Override
 				public String getObject() {

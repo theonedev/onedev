@@ -20,7 +20,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -43,10 +42,10 @@ import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestReviewInvitation;
-import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.PullRequest.IntegrationStrategy;
 import com.gitplex.server.model.PullRequest.Status;
+import com.gitplex.server.model.PullRequestReviewInvitation;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.support.CloseInfo;
 import com.gitplex.server.model.support.CommentPos;
 import com.gitplex.server.model.support.DepotAndBranch;
@@ -54,13 +53,14 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
-import com.gitplex.server.web.component.BranchLink;
 import com.gitplex.server.web.component.branchpicker.AffinalBranchPicker;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.commitlist.CommitListPanel;
 import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
+import com.gitplex.server.web.component.link.BranchLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerChoice;
@@ -247,7 +247,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			
 		});
 		PageParameters params = CommitDetailPage.paramsOf(target.getDepot(), target.getObjectName());
-		Link<Void> targetCommitLink = new BookmarkablePageLink<Void>("targetCommitLink", CommitDetailPage.class, params);
+		Link<Void> targetCommitLink = new ViewStateAwarePageLink<Void>("targetCommitLink", CommitDetailPage.class, params);
 		targetCommitLink.add(new Label("message", target.getCommit().getShortMessage()));
 		add(targetCommitLink);
 		
@@ -262,7 +262,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			
 		});
 		params = CommitDetailPage.paramsOf(source.getDepot(), source.getObjectName());
-		Link<Void> sourceCommitLink = new BookmarkablePageLink<Void>("sourceCommitLink", CommitDetailPage.class, params);
+		Link<Void> sourceCommitLink = new ViewStateAwarePageLink<Void>("sourceCommitLink", CommitDetailPage.class, params);
 		sourceCommitLink.add(new Label("message", source.getCommit().getShortMessage()));
 		add(sourceCommitLink);
 		

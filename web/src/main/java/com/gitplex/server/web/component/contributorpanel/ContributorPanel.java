@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.gitplex.server.web.component.AccountLink;
+import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.util.DateUtils;
 
 @SuppressWarnings("serial")

@@ -26,7 +26,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -44,8 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.java.JavaEscape;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
@@ -62,15 +59,16 @@ import com.gitplex.server.web.component.commitgraph.CommitGraphResourceReference
 import com.gitplex.server.web.component.commitgraph.CommitGraphUtils;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.DepotPage;
-import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
-import com.gitplex.server.web.util.ajaxlistener.IndicateLoadingListener;
-import com.gitplex.server.web.util.model.CommitRefsModel;
-import com.gitplex.server.web.page.depot.commit.CommitQueryLexer;
-import com.gitplex.server.web.page.depot.commit.CommitQueryParser;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.commit.CommitQueryParser.CriteriaContext;
 import com.gitplex.server.web.page.depot.commit.CommitQueryParser.QueryContext;
+import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
+import com.gitplex.server.web.util.ajaxlistener.IndicateLoadingListener;
+import com.gitplex.server.web.util.model.CommitRefsModel;
+import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import jersey.repackaged.com.google.common.collect.Lists;
@@ -442,11 +440,11 @@ public class DepotCommitsPage extends DepotPage {
 				}
 			}
 
-			DepotFilePage.State browseState = new DepotFilePage.State();
+			DepotBlobPage.State browseState = new DepotBlobPage.State();
 			browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
 			browseState.blobIdent.path = path;
-			PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), browseState);
-			item.add(new BookmarkablePageLink<Void>("browseCode", DepotFilePage.class, params));
+			PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
+			item.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 			
 			if (state.getCompareWith() != null) {
 				RevisionComparePage.State compareState = new RevisionComparePage.State();
@@ -456,7 +454,7 @@ public class DepotCommitsPage extends DepotPage {
 				compareState.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 				
 				params = RevisionComparePage.paramsOf(getDepot(), compareState);
-				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
+				item.add(new ViewStateAwarePageLink<Void>("compare", RevisionComparePage.class, params));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}
@@ -464,7 +462,7 @@ public class DepotCommitsPage extends DepotPage {
 			CommitDetailPage.State commitState = new CommitDetailPage.State();
 			commitState.revision = commit.name();
 			params = CommitDetailPage.paramsOf(depotModel.getObject(), commitState);
-			Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+			Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 			item.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));

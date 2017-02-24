@@ -16,7 +16,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -25,7 +24,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.OrganizationMembershipManager;
 import com.gitplex.server.model.Account;
@@ -34,13 +32,15 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.roleselection.RoleSelectionPanel;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.collaborators.AccountCollaboratorListPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.page.account.setting.ProfileEditPage;
+import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -240,12 +240,12 @@ public class MemberListPage extends AccountLayoutPage {
 			protected void populateItem(ListItem<OrganizationMembership> item) {
 				OrganizationMembership membership = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<>("avatarLink", MemberTeamListPage.class, 
+				Link<Void> link = new ViewStateAwarePageLink<>("avatarLink", MemberTeamListPage.class, 
 						MemberTeamListPage.paramsOf(membership)); 
 				link.add(new Avatar("avatar", membership.getUser()));
 				item.add(link);
 				
-				link = new BookmarkablePageLink<>("nameLink", MemberTeamListPage.class, 
+				link = new ViewStateAwarePageLink<>("nameLink", MemberTeamListPage.class, 
 						MemberTeamListPage.paramsOf(membership)); 
 				link.add(new Label("name", membership.getUser().getDisplayName()));
 				item.add(link);
@@ -385,7 +385,7 @@ public class MemberListPage extends AccountLayoutPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(new BookmarkablePageLink<Void>("organizationProfile", 
+				add(new ViewStateAwarePageLink<Void>("organizationProfile", 
 						ProfileEditPage.class, ProfileEditPage.paramsOf(getAccount())) {
 
 					@Override

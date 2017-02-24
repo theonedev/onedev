@@ -4,18 +4,18 @@ import java.util.Date;
 
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
-public class SinceChangesLink extends BookmarkablePageLink<Void> {
+public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 
 	private final IModel<PullRequest> requestModel;
 	

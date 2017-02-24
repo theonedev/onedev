@@ -29,7 +29,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -46,7 +45,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
@@ -63,18 +61,20 @@ import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.branchchoice.BranchChoiceProvider;
 import com.gitplex.server.web.component.branchchoice.BranchSingleChoice;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.SearchOption;
-import com.gitplex.server.web.page.depot.pullrequest.requestlist.SortOption;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.SearchOption.Status;
+import com.gitplex.server.web.page.depot.pullrequest.requestlist.SortOption;
+import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -416,10 +416,10 @@ public class DepotBranchesPage extends DepotPage {
 				RefInfo ref = item.getModelObject();
 				String branch = GitUtils.ref2branch(ref.getRef().getName());
 				
-				DepotFilePage.State state = new DepotFilePage.State();
+				DepotBlobPage.State state = new DepotBlobPage.State();
 				state.blobIdent.revision = branch;
-				AbstractLink link = new BookmarkablePageLink<Void>("branchLink", 
-						DepotFilePage.class, DepotFilePage.paramsOf(getDepot(), state));
+				AbstractLink link = new ViewStateAwarePageLink<Void>("branchLink", 
+						DepotBlobPage.class, DepotBlobPage.paramsOf(getDepot(), state));
 				link.add(new Label("name", branch));
 				item.add(link);
 				
@@ -453,13 +453,13 @@ public class DepotBranchesPage extends DepotPage {
 				RevCommit lastCommit = getDepot().getRevCommit(ref.getRef().getObjectId());
 				PageParameters params = CommitDetailPage.paramsOf(getDepot(), lastCommit.name());
 
-				link = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+				link = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 				link.add(new Label("hash", GitUtils.abbreviateSHA(lastCommit.name())));
 				item.add(link);
 				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(lastCommit.name()))));
 				
 				item.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent(), true));
-				link = new BookmarkablePageLink<Void>("messageLink", CommitDetailPage.class, params);
+				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
 				link.add(new Label("message", lastCommit.getShortMessage()));
 				item.add(link);
 				
@@ -641,7 +641,7 @@ public class DepotBranchesPage extends DepotPage {
 							searchOption.setStatus(Status.OPEN);
 							searchOption.setBranch(branch);
 							PageParameters params = RequestListPage.paramsOf(getDepot(), searchOption, new SortOption());
-							bodyFrag.add(new BookmarkablePageLink<Void>("openRequests", RequestListPage.class, params));
+							bodyFrag.add(new ViewStateAwarePageLink<Void>("openRequests", RequestListPage.class, params));
 							bodyFrag.add(new Label("branch", branch));
 							fragment.add(bodyFrag);
 						} else {

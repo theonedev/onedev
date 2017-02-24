@@ -40,7 +40,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -55,24 +54,24 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.PullRequest.Status;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.model.support.IntegrationPreview;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
-import com.gitplex.server.web.component.AccountLink;
-import com.gitplex.server.web.component.BranchLink;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
+import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.BranchLink;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
@@ -91,6 +90,7 @@ import com.gitplex.server.web.websocket.PullRequestChanged;
 import com.gitplex.server.web.websocket.PullRequestChangedRegion;
 import com.gitplex.server.web.websocket.WebSocketRegion;
 import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
+import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -936,7 +936,7 @@ public abstract class RequestDetailPage extends DepotPage {
 		public Component render(String componentId) {
 			if (getMainPageClass() == RequestCodeCommentsPage.class) {
 				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", RequestDetailPage.this);
-				Link<Void> link = new BookmarkablePageLink<Void>("link", RequestCodeCommentsPage.class, paramsOf(getPullRequest())) {
+				Link<Void> link = new ViewStateAwarePageLink<Void>("link", RequestCodeCommentsPage.class, paramsOf(getPullRequest())) {
 
 					@Override
 					public void onEvent(IEvent<?> event) {
@@ -967,7 +967,7 @@ public abstract class RequestDetailPage extends DepotPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new BookmarkablePageLink<Void>(linkId, pageClass, paramsOf(getPullRequest()));
+						return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getPullRequest()));
 					}
 					
 				};

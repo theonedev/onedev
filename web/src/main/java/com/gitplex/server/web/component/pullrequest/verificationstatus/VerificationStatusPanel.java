@@ -19,7 +19,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestVerification;
-import com.gitplex.server.web.component.DropdownLink;
+import com.gitplex.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
 public class VerificationStatusPanel extends Panel {

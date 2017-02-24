@@ -21,7 +21,8 @@ public class AlignResourceReference extends JavaScriptResourceReference {
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<>();
-		dependencies.add(JavaScriptHeaderItem.forReference(Application.get().getJavaScriptLibrarySettings().getJQueryReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(
+				Application.get().getJavaScriptLibrarySettings().getJQueryReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new TextareaCaretPositionResourceReference()));
 		return dependencies;
 	}

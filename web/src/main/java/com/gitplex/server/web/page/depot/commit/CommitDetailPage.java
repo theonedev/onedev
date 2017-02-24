@@ -20,7 +20,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -34,8 +33,6 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
@@ -55,10 +52,13 @@ import com.gitplex.server.web.component.createbranch.CreateBranchLink;
 import com.gitplex.server.web.component.createtag.CreateTagLink;
 import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.DepotPage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.depot.tags.DepotTagsPage;
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public class CommitDetailPage extends DepotPage implements CommentSupport {
@@ -113,10 +113,10 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		
 		add(new CommitMessageLabel("text", depotModel, Model.of(getCommit().getShortMessage())));
 		
-		DepotFilePage.State browseState = new DepotFilePage.State();
+		DepotBlobPage.State browseState = new DepotBlobPage.State();
 		browseState.blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
-		PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), browseState);
-		add(new BookmarkablePageLink<Void>("browseCode", DepotFilePage.class, params));
+		PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
+		add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 		
 		add(new CreateBranchLink("createBranch", depotModel, state.revision) {
 
@@ -178,19 +178,19 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 						String ref = item.getModelObject().getRef().getName();
 						String branch = GitUtils.ref2branch(ref); 
 						if (branch != null) {
-							DepotFilePage.State state = new DepotFilePage.State();
+							DepotBlobPage.State state = new DepotBlobPage.State();
 							state.blobIdent.revision = branch;
-							Link<Void> link = new BookmarkablePageLink<Void>("link", DepotFilePage.class, 
-									DepotFilePage.paramsOf(depotModel.getObject(), state));
+							Link<Void> link = new ViewStateAwarePageLink<Void>("link", DepotBlobPage.class, 
+									DepotBlobPage.paramsOf(depotModel.getObject(), state));
 							link.add(new Label("label", branch));
 							item.add(link);
 							item.add(AttributeAppender.append("class", "branch"));
 						} else {
 							String tag = Preconditions.checkNotNull(GitUtils.ref2tag(ref));
-							DepotFilePage.State state = new DepotFilePage.State();
+							DepotBlobPage.State state = new DepotBlobPage.State();
 							state.blobIdent.revision = tag;
-							Link<Void> link = new BookmarkablePageLink<Void>("link", DepotFilePage.class, 
-									DepotFilePage.paramsOf(depotModel.getObject(), state));
+							Link<Void> link = new ViewStateAwarePageLink<Void>("link", DepotBlobPage.class, 
+									DepotBlobPage.paramsOf(depotModel.getObject(), state));
 							link.add(new Label("label", tag));
 							item.add(link);
 							item.add(AttributeAppender.append("class", "tag"));
@@ -227,7 +227,7 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 			newState.revision = parent.name();
 			newState.whitespaceOption = state.whitespaceOption;
 			newState.pathFilter = state.pathFilter;
-			Link<Void> link = new BookmarkablePageLink<Void>("parent", CommitDetailPage.class, 
+			Link<Void> link = new ViewStateAwarePageLink<Void>("parent", CommitDetailPage.class, 
 					paramsOf(depotModel.getObject(), newState));
 			link.add(new Label("label", GitUtils.abbreviateSHA(parent.name())));
 			parentsContainer.add(link);
@@ -253,7 +253,7 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 					newState.whitespaceOption = state.whitespaceOption;
 					newState.pathFilter = state.pathFilter;
 					
-					Link<Void> link = new BookmarkablePageLink<Void>("link", CommitDetailPage.class, 
+					Link<Void> link = new ViewStateAwarePageLink<Void>("link", CommitDetailPage.class, 
 							paramsOf(depotModel.getObject(), newState));
 					link.add(new Label("label", GitUtils.abbreviateSHA(parent.name())));
 					item.add(link);

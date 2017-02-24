@@ -80,6 +80,7 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		return (FileMode.TYPE_MASK & mode) == FileMode.TYPE_FILE;
 	}
 	
+	@Nullable
 	public String getName() {
 		if (path != null) {
 			return path.substring(path.lastIndexOf('/')+1);

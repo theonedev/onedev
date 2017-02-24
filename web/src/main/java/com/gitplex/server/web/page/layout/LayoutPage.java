@@ -15,7 +15,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -30,17 +29,18 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.floating.AlignPlacement;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.page.account.overview.NewOrganizationPage;
 import com.gitplex.server.web.page.account.setting.ProfileEditPage;
 import com.gitplex.server.web.page.account.tasks.TaskListPage;
 import com.gitplex.server.web.page.admin.SystemSettingPage;
 import com.gitplex.server.web.page.base.BasePage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
@@ -67,7 +67,7 @@ public abstract class LayoutPage extends BasePage {
 		WebMarkupContainer head = new WebMarkupContainer("mainHead");
 		add(head);
 		
-		head.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
+		head.add(new ViewStateAwarePageLink<Void>("home", getApplication().getHomePage()));
 		
 		head.add(newContextHead("context"));
 		
@@ -77,8 +77,8 @@ public abstract class LayoutPage extends BasePage {
 				@Override
 				protected Component newContent(String id) {
 					Fragment fragment = new Fragment(id, "createNewFrag", LayoutPage.this);
-					fragment.add(new BookmarkablePageLink<Void>("createNewDepot", CreateDepotPage.class));
-					fragment.add(new BookmarkablePageLink<Void>("createNewOrganization", 
+					fragment.add(new ViewStateAwarePageLink<Void>("createNewDepot", CreateDepotPage.class));
+					fragment.add(new ViewStateAwarePageLink<Void>("createNewOrganization", 
 							NewOrganizationPage.class, NewOrganizationPage.paramsOf(getLoginUser())));
 					return fragment;
 				}
@@ -103,10 +103,10 @@ public abstract class LayoutPage extends BasePage {
 		}.setVisible(!signedIn));
 		
 		boolean enableSelfRegister = GitPlex.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister();
-		head.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn && enableSelfRegister));
-		head.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
+		head.add(new ViewStateAwarePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn && enableSelfRegister));
+		head.add(new ViewStateAwarePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
 		if (user != null) {
-			head.add(new BookmarkablePageLink<Void>("tasks", TaskListPage.class, TaskListPage.paramsOf(user)) {
+			head.add(new ViewStateAwarePageLink<Void>("tasks", TaskListPage.class, TaskListPage.paramsOf(user)) {
 	
 				@Override
 				protected void onInitialize() {
@@ -155,7 +155,7 @@ public abstract class LayoutPage extends BasePage {
 					if (!organizations.isEmpty()) {
 						for (Account organization: organizations) {
 							WebMarkupContainer item = new WebMarkupContainer(organizationsView.newChildId());
-							Link<Void> link = new BookmarkablePageLink<Void>("link", 
+							Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
 									AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
 							link.add(new Avatar("avatar", organization));
 							link.add(new Label("name", organization.getDisplayName()));
@@ -166,8 +166,8 @@ public abstract class LayoutPage extends BasePage {
 						organizationsView.setVisible(false);
 					}
 
-					fragment.add(new BookmarkablePageLink<Void>("profile", ProfileEditPage.class, ProfileEditPage.paramsOf(user)));
-					fragment.add(new BookmarkablePageLink<Void>("administration", SystemSettingPage.class) {
+					fragment.add(new ViewStateAwarePageLink<Void>("profile", ProfileEditPage.class, ProfileEditPage.paramsOf(user)));
+					fragment.add(new ViewStateAwarePageLink<Void>("administration", SystemSettingPage.class) {
 
 						@Override
 						protected void onConfigure() {
@@ -176,7 +176,7 @@ public abstract class LayoutPage extends BasePage {
 						}
 						
 					});
-					fragment.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class));
+					fragment.add(new ViewStateAwarePageLink<Void>("logout", LogoutPage.class));
 					
 					return fragment;
 				}
@@ -242,7 +242,7 @@ public abstract class LayoutPage extends BasePage {
 	}
 	
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
-		setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
+		setResponsePage(DepotBlobPage.class, DepotBlobPage.paramsOf(depot));
 	}
 
 	@Override

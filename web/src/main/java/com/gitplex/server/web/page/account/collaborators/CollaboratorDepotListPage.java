@@ -16,7 +16,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -33,9 +32,10 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.depotchoice.AbstractDepotChoiceProvider;
 import com.gitplex.server.web.component.depotchoice.DepotChoiceResourceReference;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
@@ -270,7 +270,7 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 			protected void populateItem(ListItem<UserAuthorization> item) {
 				UserAuthorization authorization = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>(
+				Link<Void> link = new ViewStateAwarePageLink<Void>(
 						"depotLink", 
 						DepotCollaboratorListPage.class, 
 						DepotCollaboratorListPage.paramsOf(authorization.getDepot()));
@@ -290,7 +290,7 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 					
 				};
 				
-				greaterPrivileges.add(new BookmarkablePageLink<Void>("detail", 
+				greaterPrivileges.add(new ViewStateAwarePageLink<Void>("detail", 
 						CollaboratorPrivilegeSourcePage.class, 
 						CollaboratorPrivilegeSourcePage.paramsOf(authorization.getDepot(), authorization.getUser())));
 				

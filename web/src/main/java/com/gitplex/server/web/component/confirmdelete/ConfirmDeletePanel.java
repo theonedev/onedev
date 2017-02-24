@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-import com.gitplex.server.web.component.PreventDefaultAjaxLink;
+import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
 abstract class ConfirmDeletePanel extends Panel {

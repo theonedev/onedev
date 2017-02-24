@@ -45,9 +45,9 @@ import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.RunTaskBehavior;
-import com.gitplex.server.web.component.PreventDefaultAjaxLink;
-import com.gitplex.server.web.component.depotfile.blobsearch.result.SearchResultPanel;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
+import com.gitplex.server.web.page.depot.blob.search.result.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
@@ -101,7 +101,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 				};
 
-				CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, getQueryHitParams(hit));
+				CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, getQueryHitParams(hit));
 				link.add(AttributeAppender.replace("href", url.toString()));
 				link.add(hit.render("label"));
 				link.add(new Label("scope", hit.getNamespace()).setVisible(hit.getNamespace()!=null));
@@ -173,7 +173,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 				super.onComponentTag(tag);
 
 				// set href in onComponentTag in order to keep it up to date with symbol value
-				CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, getFindOccurrencesParams());
+				CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, getFindOccurrencesParams());
 				tag.put("href", url.toString());
 			}
 
@@ -296,19 +296,19 @@ public abstract class SymbolTooltipPanel extends Panel {
 	}
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
-		DepotFilePage.State state = new DepotFilePage.State();
+		DepotBlobPage.State state = new DepotBlobPage.State();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = hit.getBlobPath();
 		state.mark = TextRange.of(hit.getTokenPos());
-		return DepotFilePage.paramsOf(depotModel.getObject(), state);
+		return DepotBlobPage.paramsOf(depotModel.getObject(), state);
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
-		DepotFilePage.State state = new DepotFilePage.State();
+		DepotBlobPage.State state = new DepotBlobPage.State();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = getBlobPath();
 		state.query = symbolName;
-		return DepotFilePage.paramsOf(depotModel.getObject(), state);
+		return DepotBlobPage.paramsOf(depotModel.getObject(), state);
 	}
 	
 	public String getSymbol() {

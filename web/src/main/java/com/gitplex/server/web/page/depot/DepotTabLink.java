@@ -3,9 +3,10 @@ package com.gitplex.server.web.page.depot;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
+
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 
 @SuppressWarnings("serial")
 public class DepotTabLink extends Panel {
@@ -23,7 +24,7 @@ public class DepotTabLink extends Panel {
 		super.onInitialize();
 		
 		DepotPage page = (DepotPage) getPage();
-		Link<Void> link = new BookmarkablePageLink<Void>("link", 
+		Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
 				tab.getMainPageClass(), DepotPage.paramsOf(page.getDepot()));
 		link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
 		

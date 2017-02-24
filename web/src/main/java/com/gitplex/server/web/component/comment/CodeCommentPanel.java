@@ -49,10 +49,10 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ClassUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
-import com.gitplex.server.web.component.AccountLink;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.markdown.MarkdownEditSupport;
-import com.gitplex.server.web.component.markdown.MarkdownPanel;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.util.DateUtils;
@@ -176,7 +176,7 @@ public abstract class CodeCommentPanel extends Panel {
 		} else {
 			editSupport = null;
 		}
-		commentContainer.add(new MarkdownPanel("content", new AbstractReadOnlyModel<String>() {
+		commentContainer.add(new MarkdownViewer("content", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -397,7 +397,7 @@ public abstract class CodeCommentPanel extends Panel {
 			} else {
 				editSupport = null;
 			}
-			activityContainer.add(new MarkdownPanel("content", new LoadableDetachableModel<String>() {
+			activityContainer.add(new MarkdownViewer("content", new LoadableDetachableModel<String>() {
 
 				@Override
 				protected String load() {

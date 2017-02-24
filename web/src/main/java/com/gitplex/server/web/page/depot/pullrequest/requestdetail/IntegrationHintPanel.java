@@ -2,7 +2,6 @@ package com.gitplex.server.web.page.depot.pullrequest.requestdetail;
 
 import java.util.Collection;
 
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -10,6 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.web.component.comment.CodeCommentFilter;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 
 @SuppressWarnings("serial")
@@ -27,7 +27,7 @@ public class IntegrationHintPanel extends GenericPanel<PullRequest> {
 		
 		PageParameters params = RequestCodeCommentsPage.paramsOf(request);
 		getFilter().fillPageParams(params);
-		add(new BookmarkablePageLink<Void>("link", RequestCodeCommentsPage.class, params));
+		add(new ViewStateAwarePageLink<Void>("link", RequestCodeCommentsPage.class, params));
 	}
 	
 	private CodeCommentFilter getFilter() {

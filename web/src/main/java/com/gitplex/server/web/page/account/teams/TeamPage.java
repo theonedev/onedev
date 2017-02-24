@@ -7,26 +7,26 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.TeamManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Team;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.component.markdown.MarkdownPanel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
+import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public abstract class TeamPage extends AccountLayoutPage {
@@ -63,7 +63,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 
 		add(new Label("teamName", teamModel.getObject().getName()));
 		if (teamModel.getObject().getDescription() != null) {
-			add(new MarkdownPanel("teamDescription", Model.of(teamModel.getObject().getDescription()), null));
+			add(new MarkdownViewer("teamDescription", Model.of(teamModel.getObject().getDescription()), null));
 		} else {
 			add(new Label("teamDescription", "<i>No description</i>").setEscapeModelStrings(false));
 		}
@@ -108,7 +108,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new BookmarkablePageLink<Void>(linkId, TeamMemberListPage.class, 
+						return new ViewStateAwarePageLink<Void>(linkId, TeamMemberListPage.class, 
 								TeamMemberListPage.paramsOf(teamModel.getObject()));
 					}
 					
@@ -124,7 +124,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new BookmarkablePageLink<Void>(linkId, TeamDepotListPage.class, 
+						return new ViewStateAwarePageLink<Void>(linkId, TeamDepotListPage.class, 
 								TeamDepotListPage.paramsOf(teamModel.getObject()));
 					}
 					

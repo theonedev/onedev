@@ -11,7 +11,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -37,8 +36,9 @@ import com.gitplex.server.web.component.commitgraph.CommitGraphResourceReference
 import com.gitplex.server.web.component.commitgraph.CommitGraphUtils;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.util.model.CommitRefsModel;
 
 @SuppressWarnings("serial")
@@ -146,15 +146,15 @@ public class CommitListPanel extends Panel {
 					CommitDetailPage.State commitState = new CommitDetailPage.State();
 					commitState.revision = commit.name();
 					PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), commitState);
-					Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+					Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 					fragment.add(hashLink);
 					hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 					fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 
-					DepotFilePage.State browseState = new DepotFilePage.State();
+					DepotBlobPage.State browseState = new DepotBlobPage.State();
 					browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
-					params = DepotFilePage.paramsOf(depotModel.getObject(), browseState);
-					fragment.add(new BookmarkablePageLink<Void>("browseCode", DepotFilePage.class, params));
+					params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
+					fragment.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 					
 					item.add(AttributeAppender.append("class", "commit clearfix commit-item-" + itemIndex++));
 				} else {

@@ -7,9 +7,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 
 import com.gitplex.server.gatekeeper.GateKeeper;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.floating.AlignPlacement;
 import com.gitplex.server.web.component.floating.FloatingPanel;
+import com.gitplex.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
 abstract class GateKeeperLink extends DropdownLink {

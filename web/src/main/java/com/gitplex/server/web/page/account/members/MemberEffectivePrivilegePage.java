@@ -9,7 +9,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -24,7 +23,8 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.component.DropdownLink;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
 import com.gitplex.server.web.util.depotaccess.DepotAccess;
@@ -170,14 +170,14 @@ public class MemberEffectivePrivilegePage extends MemberPage {
 			protected void populateItem(ListItem<DepotPermission> item) {
 				DepotPermission permission = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>(
+				Link<Void> link = new ViewStateAwarePageLink<Void>(
 						"depotLink", 
 						DepotEffectivePrivilegePage.class, 
 						DepotEffectivePrivilegePage.paramsOf(permission.getDepot()));
 				link.add(new Label("name", permission.getDepot().getName()));
 				item.add(link);
 
-				link = new BookmarkablePageLink<Void>(
+				link = new ViewStateAwarePageLink<Void>(
 						"privilegeLink", 
 						MemberPrivilegeSourcePage.class, 
 						MemberPrivilegeSourcePage.paramsOf(getMembership(), permission.getDepot()));

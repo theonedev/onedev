@@ -14,7 +14,7 @@ import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 
 @SuppressWarnings("serial")
 public class NewDepotPage extends AccountLayoutPage {
@@ -51,7 +51,7 @@ public class NewDepotPage extends AccountLayoutPage {
 				} else {
 					depotManager.save(depot, null, null);
 					Session.get().success("New repository created");
-					setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
+					setResponsePage(DepotBlobPage.class, DepotBlobPage.paramsOf(depot));
 				}
 			}
 			

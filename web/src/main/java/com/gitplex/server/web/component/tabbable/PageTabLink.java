@@ -2,9 +2,10 @@ package com.gitplex.server.web.component.tabbable;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
+
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 
 public class PageTabLink extends Panel {
 
@@ -19,7 +20,7 @@ public class PageTabLink extends Panel {
 	}
 
 	protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-		return new BookmarkablePageLink<Void>("link", pageClass);
+		return new ViewStateAwarePageLink<Void>("link", pageClass);
 	}
 
 }

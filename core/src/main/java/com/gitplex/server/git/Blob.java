@@ -27,8 +27,8 @@ public class Blob {
 	
 	private transient Optional<Text> optionalText;
 	
-	public Blob(BlobIdent ident, ObjectId id, byte[] bytes) {
-		this(ident, id, bytes, bytes.length);
+	public Blob(BlobIdent ident, ObjectId blobId, byte[] bytes) {
+		this(ident, blobId, bytes, bytes.length);
 	}
 	
 	public Blob(BlobIdent ident, ObjectId blobId, byte[] bytes, long size) {

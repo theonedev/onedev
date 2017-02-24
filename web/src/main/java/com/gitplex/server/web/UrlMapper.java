@@ -33,13 +33,13 @@ import com.gitplex.server.web.page.admin.SystemSettingPage;
 import com.gitplex.server.web.page.admin.account.NewUserPage;
 import com.gitplex.server.web.page.admin.account.UserListPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;
 import com.gitplex.server.web.page.depot.comments.CodeCommentPage;
 import com.gitplex.server.web.page.depot.comments.DepotCommentsPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
@@ -153,7 +153,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addDepotPages() {
-		add(new WebPageMapper("${account}/${depot}", DepotFilePage.class) {
+		add(new WebPageMapper("${account}/${depot}", DepotBlobPage.class) {
 
 			@Override
 			public IRequestHandler mapRequest(Request request) {
@@ -165,7 +165,7 @@ public class UrlMapper extends CompoundRequestMapper {
 			
 		});
 
-		add(new DepotMapper("${account}/${depot}/blob/#{revision}/#{path}", DepotFilePage.class));
+		add(new DepotMapper("${account}/${depot}/blob/#{revision}/#{path}", DepotBlobPage.class));
 		add(new DepotMapper("${account}/${depot}/commit/${revision}", CommitDetailPage.class));
 		add(new DepotMapper("${account}/${depot}/commits", DepotCommitsPage.class));
 		add(new DepotMapper("${account}/${depot}/compare", RevisionComparePage.class));

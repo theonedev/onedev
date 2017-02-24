@@ -1,13 +1,13 @@
 package com.gitplex.server.web.util.depotaccess;
 
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.model.TeamMembership;
 import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.account.teams.TeamDepotListPage;
 import com.gitplex.server.web.page.account.teams.TeamMemberListPage;
 
@@ -28,14 +28,14 @@ public class IsTeamMemberPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Link<Void> memberListLink = new BookmarkablePageLink<Void>(
+		Link<Void> memberListLink = new ViewStateAwarePageLink<Void>(
 				"memberListLink", 
 				TeamMemberListPage.class, 
 				TeamMemberListPage.paramsOf(membershipModel.getObject().getTeam()));
 		memberListLink.add(new Label("name", membershipModel.getObject().getTeam().getName()));
 		add(memberListLink);
 		
-		Link<Void> depotListLink = new BookmarkablePageLink<Void>(
+		Link<Void> depotListLink = new ViewStateAwarePageLink<Void>(
 				"depotListLink", 
 				TeamDepotListPage.class, 
 				TeamDepotListPage.paramsOf(membershipModel.getObject().getTeam()));

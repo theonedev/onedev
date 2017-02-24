@@ -25,10 +25,10 @@ public class WebAccountNameReservation implements AccountNameReservation {
 
 	private final Provider<ServletContextHandler> servletContextHandlerProvider;
 	
-	private final WicketConfig webApp;
+	private final GitPlexWebApplication webApp;
 	
 	@Inject
-	public WebAccountNameReservation(Provider<ServletContextHandler> servletContextHandlerProvider, WicketConfig webApp) {
+	public WebAccountNameReservation(Provider<ServletContextHandler> servletContextHandlerProvider, GitPlexWebApplication webApp) {
 		this.servletContextHandlerProvider = servletContextHandlerProvider;
 		this.webApp = webApp;
 	}

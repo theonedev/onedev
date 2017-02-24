@@ -15,7 +15,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -32,10 +31,11 @@ import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.accountchoice.AbstractAccountChoiceProvider;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
@@ -242,12 +242,12 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 			protected void populateItem(ListItem<UserAuthorization> item) {
 				UserAuthorization authorization = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>("avatarLink", CollaboratorDepotListPage.class, 
+				Link<Void> link = new ViewStateAwarePageLink<Void>("avatarLink", CollaboratorDepotListPage.class, 
 						CollaboratorDepotListPage.paramsOf(getAccount(), authorization.getUser()));
 				link.add(new Avatar("avatar", authorization.getUser()));
 				item.add(link);
 				
-				link = new BookmarkablePageLink<Void>("nameLink", CollaboratorDepotListPage.class, 
+				link = new ViewStateAwarePageLink<Void>("nameLink", CollaboratorDepotListPage.class, 
 						CollaboratorDepotListPage.paramsOf(getAccount(), authorization.getUser()));
 				link.add(new Label("name", authorization.getUser().getDisplayName()));
 				item.add(link);
@@ -265,7 +265,7 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 					
 				};
 				
-				greaterPrivileges.add(new BookmarkablePageLink<Void>("detail", 
+				greaterPrivileges.add(new ViewStateAwarePageLink<Void>("detail", 
 						CollaboratorPrivilegeSourcePage.class, 
 						CollaboratorPrivilegeSourcePage.paramsOf(authorization.getDepot(), authorization.getUser())));
 				

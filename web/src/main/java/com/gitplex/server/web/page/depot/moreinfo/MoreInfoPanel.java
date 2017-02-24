@@ -10,7 +10,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -24,13 +23,14 @@ import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.depotselector.DepotSelector;
-import com.gitplex.server.web.component.markdown.MarkdownPanel;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.depot.tags.DepotTagsPage;
 
 @SuppressWarnings("serial")
@@ -48,8 +48,8 @@ public abstract class MoreInfoPanel extends Panel {
 		super.onInitialize();
 		
 		if (getDepot().getForkedFrom() != null) {
-			Link<Void> link = new BookmarkablePageLink<Void>("forkedFromLink", 
-					DepotFilePage.class, DepotFilePage.paramsOf(getDepot().getForkedFrom()));
+			Link<Void> link = new ViewStateAwarePageLink<Void>("forkedFromLink", 
+					DepotBlobPage.class, DepotBlobPage.paramsOf(getDepot().getForkedFrom()));
 			link.add(new Label("name", getDepot().getForkedFrom().getFQN()));
 			add(link);
 		} else {
@@ -66,12 +66,12 @@ public abstract class MoreInfoPanel extends Panel {
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
 		
 		if (getDepot().getDescription() != null) {
-			add(new MarkdownPanel("description", Model.of(getDepot().getDescription()), null));
+			add(new MarkdownViewer("description", Model.of(getDepot().getDescription()), null));
 		} else {
 			add(new WebMarkupContainer("description").setVisible(false));
 		}
 		
-		add(new BookmarkablePageLink<Void>("commitsLink", 
+		add(new ViewStateAwarePageLink<Void>("commitsLink", 
 				DepotCommitsPage.class, DepotCommitsPage.paramsOf(getDepot())) {
 
 			@Override
@@ -89,7 +89,7 @@ public abstract class MoreInfoPanel extends Panel {
 			
 		});
 		
-		add(new BookmarkablePageLink<Void>("branchesLink", 
+		add(new ViewStateAwarePageLink<Void>("branchesLink", 
 				DepotBranchesPage.class, DepotBranchesPage.paramsOf(getDepot())) {
 
 			@Override
@@ -100,7 +100,7 @@ public abstract class MoreInfoPanel extends Panel {
 			
 		});
 		
-		add(new BookmarkablePageLink<Void>("tagsLink", 
+		add(new ViewStateAwarePageLink<Void>("tagsLink", 
 				DepotTagsPage.class, DepotTagsPage.paramsOf(getDepot())) {
 
 			@Override
@@ -149,7 +149,7 @@ public abstract class MoreInfoPanel extends Panel {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Depot depot) {
-							setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
+							setResponsePage(DepotBlobPage.class, DepotBlobPage.paramsOf(depot));
 						}
 
 					};

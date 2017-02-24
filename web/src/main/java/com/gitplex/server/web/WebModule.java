@@ -30,12 +30,12 @@ import com.gitplex.server.util.validation.TeamNameReservation;
 import com.gitplex.server.web.behavior.markdown.EmojiTransformer;
 import com.gitplex.server.web.component.comment.MentionTransformer;
 import com.gitplex.server.web.component.comment.PullRequestTransformer;
-import com.gitplex.server.web.component.depotfile.blobview.BlobRenderer;
 import com.gitplex.server.web.component.diff.DiffRenderer;
 import com.gitplex.server.web.editable.DefaultEditSupportRegistry;
 import com.gitplex.server.web.editable.EditSupport;
 import com.gitplex.server.web.editable.EditSupportLocator;
 import com.gitplex.server.web.editable.EditSupportRegistry;
+import com.gitplex.server.web.page.depot.blob.render.BlobRendererContribution;
 import com.gitplex.server.web.util.avatar.AvatarManager;
 import com.gitplex.server.web.util.avatar.DefaultAvatarManager;
 import com.gitplex.server.web.util.commitmessagetransform.CommitMessageTransformer;
@@ -93,8 +93,8 @@ public class WebModule extends AbstractPluginModule {
 			}
 		});
 		
-		bind(WebApplication.class).to(WicketConfig.class);
-		bind(Application.class).to(WicketConfig.class);
+		bind(WebApplication.class).to(GitPlexWebApplication.class);
+		bind(Application.class).to(GitPlexWebApplication.class);
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
@@ -107,7 +107,7 @@ public class WebModule extends AbstractPluginModule {
 		bind(CommitIndexedBroadcaster.class);
 		
 		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
-		contributeFromPackage(BlobRenderer.class, BlobRenderer.class);
+		contributeFromPackage(BlobRendererContribution.class, BlobRendererContribution.class);
 		
 		contribute(MarkdownExtension.class, new MarkdownExtension() {
 			

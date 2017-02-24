@@ -10,7 +10,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -22,7 +21,8 @@ import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.layout.LayoutPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -92,8 +92,8 @@ public class DashboardPage extends LayoutPage {
 			@Override
 			protected void populateItem(ListItem<Depot> item) {
 				Depot depot = item.getModelObject();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", 
-						DepotFilePage.class, DepotFilePage.paramsOf(depot)); 
+				Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
+						DepotBlobPage.class, DepotBlobPage.paramsOf(depot)); 
 				link.add(new Label("name", depot.getFQN()));
 				item.add(link);
 			}

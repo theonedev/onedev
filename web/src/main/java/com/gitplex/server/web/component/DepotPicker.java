@@ -10,8 +10,8 @@ import org.apache.wicket.model.Model;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.depotselector.DepotSelector;
+import com.gitplex.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
 public abstract class DepotPicker extends DropdownLink {

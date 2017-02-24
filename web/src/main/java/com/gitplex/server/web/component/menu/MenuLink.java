@@ -7,9 +7,9 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.floating.AlignPlacement;
 import com.gitplex.server.web.component.floating.FloatingPanel;
+import com.gitplex.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
 public abstract class MenuLink extends DropdownLink {

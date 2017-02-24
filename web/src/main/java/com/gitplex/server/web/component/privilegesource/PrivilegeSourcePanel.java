@@ -1,7 +1,6 @@
 package com.gitplex.server.web.component.privilegesource;
 
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -9,8 +8,9 @@ import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.web.component.AccountLink;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.util.depotaccess.DepotAccess;
 import com.gitplex.server.web.util.depotaccess.PrivilegeSource;
 
@@ -38,8 +38,8 @@ public class PrivilegeSourcePanel extends Panel {
 
 		add(new Label("privilege", access.getGreatestPrivilege()));
 		
-		Link<Void> depotLink = new BookmarkablePageLink<Void>("depotLink", 
-				DepotFilePage.class, DepotFilePage.paramsOf(depotModel.getObject()));
+		Link<Void> depotLink = new ViewStateAwarePageLink<Void>("depotLink", 
+				DepotBlobPage.class, DepotBlobPage.paramsOf(depotModel.getObject()));
 		depotLink.add(new Label("name", depotModel.getObject().getName()));
 		add(depotLink);
 		

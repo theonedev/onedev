@@ -57,7 +57,7 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 			String script = String.format(""
 					+ "var $preview=$('#%s~.md-preview');"
 					+ "$preview.html('%s');"
-					+ "gitplex.server.initMarkdownPanel($preview);",
+					+ "gitplex.server.initMarkdownPreview($preview);",
 					getComponent().getMarkupId(), StringEscapeUtils.escapeEcmaScript(preview));
 			target.appendJavaScript(script);
 		} else if (type.equals("emojiQuery")){

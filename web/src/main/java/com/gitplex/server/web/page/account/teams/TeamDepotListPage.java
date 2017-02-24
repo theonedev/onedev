@@ -16,7 +16,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -25,7 +24,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.TeamAuthorizationManager;
 import com.gitplex.server.model.Account;
@@ -36,10 +34,11 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.component.DropdownLink;
 import com.gitplex.server.web.component.depotchoice.AbstractDepotChoiceProvider;
 import com.gitplex.server.web.component.depotchoice.DepotChoiceResourceReference;
 import com.gitplex.server.web.component.greaterprivilege.GreaterPrivilegesPanel;
+import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.gitplex.server.web.component.select2.Response;
@@ -47,6 +46,7 @@ import com.gitplex.server.web.component.select2.ResponseFiller;
 import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotTeamListPage;
 import com.gitplex.server.web.util.depotaccess.DepotAccess;
+import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -270,7 +270,7 @@ public class TeamDepotListPage extends TeamPage {
 			protected void populateItem(ListItem<TeamAuthorization> item) {
 				TeamAuthorization authorization = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>("link", DepotTeamListPage.class, 
+				Link<Void> link = new ViewStateAwarePageLink<Void>("link", DepotTeamListPage.class, 
 						DepotTeamListPage.paramsOf(authorization.getDepot()));
 				link.add(new Label("name", authorization.getDepot().getName()));
 				item.add(link);

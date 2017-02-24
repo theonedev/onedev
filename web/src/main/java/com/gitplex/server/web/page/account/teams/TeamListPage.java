@@ -10,7 +10,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -19,7 +18,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.TeamManager;
 import com.gitplex.server.manager.TeamMembershipManager;
@@ -28,9 +26,11 @@ import com.gitplex.server.model.Team;
 import com.gitplex.server.model.TeamMembership;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.account.AccountLayoutPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
+import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -120,7 +120,7 @@ public class TeamListPage extends AccountLayoutPage {
 			protected void populateItem(ListItem<Team> item) {
 				Team team = item.getModelObject();
 				
-				Link<Void> link = new BookmarkablePageLink<>("link", TeamMemberListPage.class, 
+				Link<Void> link = new ViewStateAwarePageLink<>("link", TeamMemberListPage.class, 
 						TeamMemberListPage.paramsOf(team)); 
 				link.add(new Label("name", team.getName()));
 				item.add(link);

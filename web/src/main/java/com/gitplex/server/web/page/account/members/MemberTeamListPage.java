@@ -13,7 +13,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -22,8 +21,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.TeamManager;
 import com.gitplex.server.manager.TeamMembershipManager;
@@ -32,12 +29,15 @@ import com.gitplex.server.model.Team;
 import com.gitplex.server.model.TeamMembership;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.select2.ChoiceProvider;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
 import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.component.teamchoice.TeamChoiceResourceReference;
 import com.gitplex.server.web.page.account.teams.TeamMemberListPage;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class MemberTeamListPage extends MemberPage {
@@ -191,7 +191,7 @@ public class MemberTeamListPage extends MemberPage {
 			protected void populateItem(ListItem<TeamMembership> item) {
 				Team team = item.getModelObject().getTeam();
 
-				Link<Void> teamLink = new BookmarkablePageLink<Void>("link", 
+				Link<Void> teamLink = new ViewStateAwarePageLink<Void>("link", 
 						TeamMemberListPage.class, TeamMemberListPage.paramsOf(team));
 				teamLink.add(new Label("name", team.getName()));
 				item.add(teamLink);

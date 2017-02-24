@@ -9,8 +9,8 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.CodeCommentRelation;
 import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.web.page.depot.DepotPage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 
 @SuppressWarnings("serial")
@@ -43,8 +43,8 @@ public class CodeCommentPage extends DepotPage {
 					RevisionComparePage.paramsOf(getDepot(), comment, anchor));
 		} else {
 			throw new RestartResponseException(
-					DepotFilePage.class, 
-					DepotFilePage.paramsOf(getDepot(), comment, anchor));
+					DepotBlobPage.class, 
+					DepotBlobPage.paramsOf(getDepot(), comment, anchor));
 		}
 	}
 

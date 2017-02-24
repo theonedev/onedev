@@ -42,11 +42,11 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.WebConstants;
-import com.gitplex.server.web.component.AccountLink;
+import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.depot.DepotPage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.util.DateUtils;
 
@@ -145,7 +145,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					if (!compareContext.getCompareCommit().equals(comment.getCommentPos().getCommit())) {
 						setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(depot, comment, null));
 					} else {
-						setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot, comment, null));
+						setResponsePage(DepotBlobPage.class, DepotBlobPage.paramsOf(depot, comment, null));
 					}
 				}				
 			}

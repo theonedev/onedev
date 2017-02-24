@@ -13,7 +13,6 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,7 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.web.WebSession;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.base.BasePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -174,7 +174,7 @@ public class LoginPage extends BasePage {
 		
 		add(form);
 		
-		add(new BookmarkablePageLink<Void>("forgetPassword", ForgetPage.class) {
+		add(new ViewStateAwarePageLink<Void>("forgetPassword", ForgetPage.class) {
 
 			@Override
 			protected void onConfigure() {
@@ -185,7 +185,7 @@ public class LoginPage extends BasePage {
 		});
 
 		boolean enableSelfRegister = GitPlex.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister();
-		add(new BookmarkablePageLink<Void>("registerAccount", RegisterPage.class).setVisible(enableSelfRegister));
+		add(new ViewStateAwarePageLink<Void>("registerAccount", RegisterPage.class).setVisible(enableSelfRegister));
 	}
 
 	@Override

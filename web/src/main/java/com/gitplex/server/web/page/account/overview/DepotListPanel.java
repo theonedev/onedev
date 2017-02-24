@@ -8,7 +8,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -24,7 +23,8 @@ import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.page.depot.file.DepotFilePage;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
@@ -130,8 +130,8 @@ public class DepotListPanel extends GenericPanel<Account> {
 			protected void populateItem(final ListItem<Depot> item) {
 				Depot depot = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<>("depotLink", 
-						DepotFilePage.class, DepotFilePage.paramsOf(depot)); 
+				Link<Void> link = new ViewStateAwarePageLink<>("depotLink", 
+						DepotBlobPage.class, DepotBlobPage.paramsOf(depot)); 
 				link.add(new Label("depotName", depot.getName()));
 				item.add(link);
 						

@@ -1,0 +1,16 @@
+.blob-view .markdown-viewer {
+	padding: 20px;
+	max-width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.blob-edit .md-editor {
+	border: none;
+}
+
+.blob-edit .md-preview {
+	overflow: hidden;
+	height: auto !important;
+	width: auto !important;
+}

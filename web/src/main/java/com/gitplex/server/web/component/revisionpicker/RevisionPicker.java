@@ -10,7 +10,7 @@ import org.apache.wicket.model.Model;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.support.DepotAndRevision;
-import com.gitplex.server.web.component.DropdownLink;
+import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
