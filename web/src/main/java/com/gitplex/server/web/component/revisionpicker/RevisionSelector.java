@@ -452,8 +452,13 @@ public abstract class RevisionSelector extends Panel {
 				target.add(feedback);
 			}
 		} catch (Exception e) {
-			feedbackMessage = Throwables.getRootCause(e).getMessage();
-			target.add(feedback);
+			// revision selector might be closed in onSelect handler
+			if (findPage() != null) {
+				feedbackMessage = Throwables.getRootCause(e).getMessage();
+				target.add(feedback);
+			} else {
+				Throwables.propagate(e);
+			}
 		}
 	}
 	

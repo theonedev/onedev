@@ -191,6 +191,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			if (!SecurityUtils.canModify(getDepot(), state.blobIdent.revision, path))
 				unauthorized();
 		}
+		
 	}
 	
 	@Override
@@ -490,16 +491,16 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				BlobIdent newBlobIdent = new BlobIdent();
+				BlobIdent newBlobIdent = new BlobIdent(state.blobIdent);
 				newBlobIdent.revision = revision;
-				if (state.blobIdent.path != null) {
+				if (newBlobIdent.path != null) {
 					try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 						RevTree revTree = getDepot().getRevCommit(revision, true).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(getDepot().getRepository(), state.blobIdent.path, revTree);
+						TreeWalk treeWalk = TreeWalk.forPath(getDepot().getRepository(), newBlobIdent.path, revTree);
 						if (treeWalk != null) {
-							newBlobIdent.path = state.blobIdent.path;
 							newBlobIdent.mode = treeWalk.getRawMode(0);
 						} else {
+							newBlobIdent.path = null;
 							newBlobIdent.mode = FileMode.TREE.getBits();
 						}
 					} catch (IOException e) {
