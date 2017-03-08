@@ -58,7 +58,8 @@ public abstract class CommentInput extends TextArea<String> {
 					for (Account user: queryUsers(userQuery, ATWHO_LIMIT)) {
 						Map<String, String> userMap = new HashMap<>();
 						userMap.put("name", user.getName());
-						userMap.put("fullName", user.getFullName());
+						if (user.getFullName() != null)
+							userMap.put("fullName", user.getFullName());
 						if (user.getNoSpaceFullName() != null)
 							userMap.put("searchKey", user.getNoSpaceName() + " " + user.getNoSpaceFullName());
 						else
@@ -129,6 +130,7 @@ public abstract class CommentInput extends TextArea<String> {
 					Restrictions.ilike("noSpaceName", query, MatchMode.ANYWHERE), 
 					Restrictions.ilike("noSpaceFullName", query, MatchMode.ANYWHERE)));
 		}
+		criteria.add(Restrictions.eq("organization", false));
 		criteria.addOrder(Order.asc("name"));
 		return GitPlex.getInstance(Dao.class).findRange(criteria, 0, count);
 	}

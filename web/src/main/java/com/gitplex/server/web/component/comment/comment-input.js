@@ -19,7 +19,13 @@ gitplex.server.comment = function(inputId, atWhoLimit, callback) {
             	callback("userQuery", query);
         	}
         },
-        displayTpl: "<li><span class='avatar'><img src='${avatarUrl}'/></span> ${name} <small>${fullName}</small></li>",
+        displayTpl: function(dataItem) {
+        	if (dataItem.fullName) {
+        		return "<li><span class='avatar'><img src='${avatarUrl}'/></span> ${name} <small>${fullName}</small></li>";
+        	} else {
+        		return "<li><span class='avatar'><img src='${avatarUrl}'/></span> ${name}</li>";
+        	}
+        },
         limit: atWhoLimit
     });	
     
