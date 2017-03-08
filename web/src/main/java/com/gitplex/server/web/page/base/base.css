@@ -30,6 +30,10 @@ html body {
 	margin-bottom: 0;
 }
 
+.scrollable {
+	overflow: auto;
+}
+
 /* FEEDBACK */
 #session-feedback {
 	position:absolute; 
