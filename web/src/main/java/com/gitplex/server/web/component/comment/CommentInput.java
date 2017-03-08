@@ -1,6 +1,7 @@
 package com.gitplex.server.web.component.comment;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,8 @@ import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.behavior.markdown.MarkdownBehavior;
@@ -124,15 +127,19 @@ public abstract class CommentInput extends TextArea<String> {
 	}
 	
 	protected List<Account> queryUsers(String query, int count) {
-		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
-		if (StringUtils.isNotBlank(query)) {
-			criteria.add(Restrictions.or(
-					Restrictions.ilike("noSpaceName", query, MatchMode.ANYWHERE), 
-					Restrictions.ilike("noSpaceFullName", query, MatchMode.ANYWHERE)));
+		List<Account> users = new ArrayList<>();
+		for (Account user: SecurityUtils.findUsersCan(getDepot(), DepotPrivilege.READ)) {
+			if (users.size() < count) {
+				if (StringUtils.deleteWhitespace(user.getName()).toLowerCase().contains(query) 
+						|| user.getFullName() != null && StringUtils.deleteWhitespace(user.getFullName()).toLowerCase().contains(query)) {
+					users.add(user);
+				}
+			} else {
+				break;
+			}
 		}
-		criteria.add(Restrictions.eq("organization", false));
-		criteria.addOrder(Order.asc("name"));
-		return GitPlex.getInstance(Dao.class).findRange(criteria, 0, count);
+		users.sort(Comparator.comparing(Account::getName));
+		return users;
 	}
 
 	protected List<PullRequest> queryRequests(String query, int count) {
