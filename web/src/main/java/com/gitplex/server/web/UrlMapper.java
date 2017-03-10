@@ -1,8 +1,10 @@
 package com.gitplex.server.web;
 
+import org.apache.wicket.core.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.gitplex.server.web.page.account.collaborators.AccountCollaboratorListPage;
@@ -165,7 +167,25 @@ public class UrlMapper extends CompoundRequestMapper {
 			
 		});
 
-		add(new DepotMapper("${account}/${depot}/blob/#{revision}/#{path}", DepotBlobPage.class));
+		add(new DepotMapper("${account}/${depot}/blob/#{revision}/#{path}", DepotBlobPage.class) {
+			
+			/*
+			 * This logic is added to prevent url "/<account>/<depot>" from being redirected to 
+			 * "/<account>/<depot>/blob"
+			 */
+			@Override
+			public Url mapHandler(IRequestHandler requestHandler) {
+				if (requestHandler instanceof IPageClassRequestHandler) {
+					IPageClassRequestHandler pageClassRequestHandler = (IPageClassRequestHandler) requestHandler;
+					if (pageClassRequestHandler.getPageClass() == DepotBlobPage.class 
+							&& pageClassRequestHandler.getPageParameters().get("revision").toString() == null) {
+						return null;
+					}
+				}
+				return super.mapHandler(requestHandler);
+			}
+			
+		});
 		add(new DepotMapper("${account}/${depot}/commit/${revision}", CommitDetailPage.class));
 		add(new DepotMapper("${account}/${depot}/commits", DepotCommitsPage.class));
 		add(new DepotMapper("${account}/${depot}/compare", RevisionComparePage.class));
