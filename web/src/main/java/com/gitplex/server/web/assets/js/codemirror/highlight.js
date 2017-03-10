@@ -5,7 +5,7 @@ gitplex.server.highlight = function($container) {
 		var text = $this.text().trim();
 		$this.empty();
 		var cm = CodeMirror(this, {
-			readOnly: "nocursor",
+			readOnly: gitplex.server.isDevice()?"nocursor":true,
 			value: text, 
 			highlightIdentifiers: {delay: 500},
 			theme: "eclipse",
