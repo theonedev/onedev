@@ -12,7 +12,6 @@ import javax.inject.Singleton;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
@@ -44,11 +43,11 @@ public class DefaultAvatarManager implements AvatarManager {
 	@Override
 	public String getAvatarUrl(Account account) {
 		if (account == null) 
-			return renderRelativeUrl(AVATARS_BASE_URL + "default.png");
+			return AVATARS_BASE_URL + "default.png";
 		
 		File avatarFile = getUploaded(account);
 		if (avatarFile.exists()) { 
-			return renderRelativeUrl(AVATARS_BASE_URL + "uploaded/" + account.getId() + "?version=" + avatarFile.lastModified());
+			return AVATARS_BASE_URL + "uploaded/" + account.getId() + "?version=" + avatarFile.lastModified();
 		}
 		
 		if (configManager.getSystemSetting().isGravatarEnabled() && !account.isOrganization())
@@ -81,11 +80,7 @@ public class DefaultAvatarManager implements AvatarManager {
 			}
 		}
 		
-		return renderRelativeUrl(AVATARS_BASE_URL + "generated/" +encoded);
-	}
-	
-	private String renderRelativeUrl(String url) {
-		return RequestCycle.get().getUrlRenderer().renderContextRelativeUrl(url);
+		return AVATARS_BASE_URL + "generated/" + encoded;
 	}
 	
 	@Override

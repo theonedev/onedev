@@ -1,5 +1,5 @@
 gitplex.server.markdown = {
-	init: function(inputId, atWhoLimit, callback, uploadUrl, attachmentSupport, attachmentMaxSize) {
+	init: function(inputId, atWhoLimit, callback, attachmentSupport, attachmentMaxSize) {
 		var $input = $("#" + inputId);
 		function onSelectUrl(isImage) {
      	   var $modal = $("" +
@@ -220,7 +220,7 @@ gitplex.server.markdown = {
 						gitplex.server.markdown.updateUploadMessage($input, 
 								"!!Unable to connect to server!!", xhr.replaceMessage);
 					};
-					xhr.open("POST", uploadUrl, true);
+					xhr.open("POST", "/attachment_upload", true);
 					xhr.setRequestHeader("File-Name", encodeURIComponent(file.name));
 					xhr.setRequestHeader("Attachment-Support", attachmentSupport);
 					xhr.send(file);

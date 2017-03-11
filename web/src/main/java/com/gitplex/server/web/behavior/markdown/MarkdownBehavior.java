@@ -22,7 +22,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
@@ -188,12 +187,10 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 		} else {
 			encodedAttachmentSupport = "undefined";
 		}
-		String uploadUrl = RequestCycle.get().getUrlRenderer().renderRelativeUrl(Url.parse("attachment_upload"));
-		String script = String.format("gitplex.server.markdown.init('%s', %s, %s, '%s', %s, %d);", 
+		String script = String.format("gitplex.server.markdown.init('%s', %s, %s, %s, %d);", 
 				component.getMarkupId(true), 
 				ATWHO_LIMIT,
 				getCallbackFunction(explicit("type"), explicit("param"), explicit("param2")), 
-				uploadUrl, 
 				encodedAttachmentSupport, 
 				attachmentSupport!=null?attachmentSupport.getAttachmentMaxSize():0);
 		response.render(OnDomReadyHeaderItem.forScript(script));
