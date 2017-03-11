@@ -1,35 +1,5 @@
-$(window).load(function() {
-	if ($("#depot-blob").length != 0) {
-		var cookieKey = "repoFile.searchResult.height";
-		$("body").css("overflow", "hidden");
-		var $searchResult = $("#depot-blob>.search-result");
-		var height = Cookies.get(cookieKey);
-		if (height) 
-			$searchResult.outerHeight(height);
-		$searchResult.resizable({
-			autoHide: false,
-			handles: {"n": "#search-result-resize-handle"},
-			minHeight: 75,
-			resize: function(e, ui) {
-				var $blobContent = $("#depot-blob>.blob-content");
-				var blobContentHeight = $blobContent.outerHeight();
-			    if(blobContentHeight < 100)
-			    	$(this).resizable({maxHeight: ui.size.height});
-			},
-			stop: function(e, ui) {
-				$(this).resizable({maxHeight: undefined});
-				Cookies.set(cookieKey, ui.size.height, {expires: Infinity});
-			}
-		});
-		
-		if (location.hash) { // scroll anchors into view (for instance the markdown headline)
-			setTimeout(function() {
-				var element = document.getElementsByName(decodeURIComponent(location.hash.slice(1)))[0];
-				if (element)
-					element.scrollIntoView();
-			}, 0);
-		}
-		
+gitplex.server.depotBlob = {
+	onDomReady: function() {
 		$(window).resize(function(e) {
 			e.stopPropagation();
 			
@@ -62,6 +32,7 @@ $(window).load(function() {
 			var height = $(window).height()-$blobContent.offset().top;
 			if ($("#main>.foot").length != 0) 
 				height -= $("#main>.foot").outerHeight();
+			var $searchResult = $("#depot-blob>.search-result");
 			if ($searchResult.is(":visible")) {
 				$searchResult.outerWidth(width);
 				var $searchResultBody = $searchResult.find(".search-result>.body");
@@ -74,6 +45,38 @@ $(window).load(function() {
 			$blobContent.outerWidth(width).outerHeight(height-1);
 			$blobContent.find(".autofit:visible").first().triggerHandler("autofit", [$blobContent.width(), $blobContent.height()]);
 		});
-		$(window).resize();
+	},
+	onWindowLoad: function() {
+		var cookieKey = "repoFile.searchResult.height";
+		
+		// hide browser scrollbar as we will manage it in blob content container 
+		$("body").css("overflow", "hidden");
+		
+		var $searchResult = $("#depot-blob>.search-result");
+		var height = Cookies.get(cookieKey);
+		if (height) 
+			$searchResult.outerHeight(height);
+		$searchResult.resizable({
+			autoHide: false,
+			handles: {"n": "#search-result-resize-handle"},
+			minHeight: 75,
+			resize: function(e, ui) {
+				var $blobContent = $("#depot-blob>.blob-content");
+				var blobContentHeight = $blobContent.outerHeight();
+			    if(blobContentHeight < 100)
+			    	$(this).resizable({maxHeight: ui.size.height});
+			},
+			stop: function(e, ui) {
+				$(this).resizable({maxHeight: undefined});
+				Cookies.set(cookieKey, ui.size.height, {expires: Infinity});
+			}
+		});
+		
+		if (location.hash && !gitplex.server.viewState.getFromHistory()) {
+			// Scroll anchors into view (for instance the markdown headline)
+			var element = document.getElementsByName(decodeURIComponent(location.hash.slice(1)))[0];
+			if (element)
+				element.scrollIntoView();
+		}
 	}
-});
+}

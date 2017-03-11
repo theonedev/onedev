@@ -14,6 +14,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -169,6 +170,7 @@ public abstract class DepotPage extends AccountPage {
 		super.renderHead(response);
 
 		response.render(JavaScriptHeaderItem.forReference(new DepotResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("gitplex.server.depot();"));
 	}
 
 	@Override

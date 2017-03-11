@@ -296,20 +296,6 @@ gitplex.server = {
 		
 	},
 
-	// Disable specified button if value of specified input is blank 
-	disableIfBlank: function(inputId, buttonId) {
-		var $input = $("#" + inputId);
-		$input.bind("input propertychange keyup", function() {
-			var value = $(this).val();
-			var $button = $("#" + buttonId);
-			if (value.trim().length != 0)
-				$button.removeAttr("disabled");
-			else
-				$button.attr("disabled", "disabled");
-		});
-		$input.trigger("input");
-	},
-	
 	autoHeight: function(targetSelector, bottomOffset) {
 		var adjustHeight = function() {
 			$(targetSelector).css("max-height", $(document).scrollTop() + $(window).height()
@@ -339,33 +325,29 @@ gitplex.server = {
 	},
 	
 	choiceFormatter: {
-		id: {
-			formatSelection: function(choice) {
-				return choice.id;
-			},
-			
-			formatResult: function(choice) {
-				return choice.id;
-			},
-			
-			escapeMarkup: function(m) {
-				return m;
-			}
+		formatSelection: function(choice) {
+			return choice.id;
+		},
+		
+		formatResult: function(choice) {
+			return choice.id;
+		},
+		
+		escapeMarkup: function(m) {
+			return m;
 		}
 	},	
 	
-	websocket: {
-		setupCallback: function() {
-			Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
-				if (message == "RenderCallback")
-					Wicket.WebSocket.send(message);
-				else if (message == "ErrorMessage")
-					$("#websocket-error").show();
-			});
-			Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
-				Wicket.WebSocket.send("ConnectCallback");
-			});
-		}
+	setupWebsocketCallback: function() {
+		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
+			if (message == "RenderCallback")
+				Wicket.WebSocket.send(message);
+			else if (message == "ErrorMessage")
+				$("#websocket-error").show();
+		});
+		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
+			Wicket.WebSocket.send("ConnectCallback");
+		});
 	},
 
 	/*
@@ -466,6 +448,8 @@ gitplex.server = {
 							history.pushState(gitplex.server.history.current.state, '' , 
 									gitplex.server.history.current.url);
 						}
+					} else {
+						gitplex.server.viewState.getFromHistoryAndSetToView();
 					}
 				};
 			}, 100);
@@ -478,6 +462,8 @@ gitplex.server = {
 			var state = {data: data};
 			gitplex.server.history.current = {state: state, url: url};
 			history.pushState(state, '', url);
+			
+			// Let others have a chance to do something before marking the page as visited
 			setTimeout(function() {
 				gitplex.server.history.setVisited();
 			}, 100);
@@ -493,7 +479,7 @@ gitplex.server = {
 			var state = history.state;
 			if (!state)
 				state = {};
-			if (!state.loaded) {
+			if (!state.visited) {
 				var newState = {viewState: state.viewState, data: state.data, visited: true};
 				history.replaceState(newState, '', window.location.href);
 				gitplex.server.history.current = {
@@ -503,7 +489,7 @@ gitplex.server = {
 			}
 		},
 		isVisited: function() {
-			return history.state && history.state.visited;
+			return history.state != undefined && history.state.visited === true;
 		},
 	},
 	isDevice: function() {
@@ -515,49 +501,61 @@ gitplex.server = {
 	},
 	mouseState: {
 		pressed: false, 
-		moved: false
+		moved: false,
+		track: function() {
+			$(document).mousedown(function() { 
+				gitplex.server.mouseState.pressed = true;
+				gitplex.server.mouseState.moved = false;
+			});
+			$(document).mouseup(function() {
+				gitplex.server.mouseState.pressed = false;
+				gitplex.server.mouseState.moved = false;
+			});	
+			$(document).mousemove(function(e) {
+				// IE fires mouse move event after mouse click sometimes, so we check 
+				// if mouse is really moved here
+				if (e.clientX != self.clientX || e.clientY != self.clientY) {
+					gitplex.server.mouseState.moved = true;
+					self.clientX = e.clientX;
+					self.clientY = e.clientY;
+				}
+			});
+			$(document).scroll(function() {
+				gitplex.server.mouseState.moved = false;
+			});
+		}
 	},
-	setupMouseStateTracker: function() {
-		$(document).mousedown(function() { 
-			gitplex.server.mouseState.pressed = true;
-			gitplex.server.mouseState.moved = false;
+	
+	onDomReady: function() {
+		gitplex.server.setupAjaxLoadingIndicator();
+		gitplex.server.form.setupDirtyCheck();
+		gitplex.server.focus.setupAutoFocus();
+		gitplex.server.setupWebsocketCallback();
+		gitplex.server.mouseState.track();
+	},
+	
+	onWindowLoad: function() {
+		gitplex.server.setupAutoSize();
+		/*
+		 * Browser will also issue resize event after window is loaded, but that is too late, 
+		 * as getFromHistoryAndSetToView() must be happened after view size has been adjusted
+		 */
+		$(window).resize(); 
+		gitplex.server.viewState.getFromHistoryAndSetToView();
+
+		// Let others have a chance to do something before marking the page as visited
+		setTimeout(function() {
+			gitplex.server.history.setVisited();
+		}, 100);
+		
+		/*
+		 * Disable this as calling replaceState in beforeunload also affects 
+		 * state of the page to be loaded
+		 */
+		/*
+		$(window).on("beforeunload", function() {
+			gitplex.server.viewState.getFromViewAndSetToHistory();	
 		});
-		$(document).mouseup(function() {
-			gitplex.server.mouseState.pressed = false;
-			gitplex.server.mouseState.moved = false;
-		});	
-		$(document).mousemove(function(e) {
-			// IE fires mouse move event after mouse click sometimes, so we check 
-			// if mouse is really moved here
-			if (e.clientX != self.clientX || e.clientY != self.clientY) {
-				gitplex.server.mouseState.moved = true;
-				self.clientX = e.clientX;
-				self.clientY = e.clientY;
-			}
-		});
-		$(document).scroll(function() {
-			gitplex.server.mouseState.moved = false;
-		});
+		*/
 	}
 };
-
-$(function() {
-	gitplex.server.setupAjaxLoadingIndicator();
-	gitplex.server.form.setupDirtyCheck();
-	gitplex.server.focus.setupAutoFocus();
-	gitplex.server.websocket.setupCallback();
-	gitplex.server.setupMouseStateTracker();
-});
-
-$(window).load(function() {
-	gitplex.server.setupAutoSize();
-	gitplex.server.history.setVisited();
-});
-
-// disable this as calling replaceState in beforeunload also affects state of 
-// the page to be loaded
-/* 
-$(window).on("beforeunload", function() {
-	$(".autofit:visible").first().trigger("storeViewState");	
-});
-*/

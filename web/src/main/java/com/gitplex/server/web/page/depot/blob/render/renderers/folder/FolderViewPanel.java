@@ -279,7 +279,7 @@ public class FolderViewPanel extends Panel {
 				context.getBlobIdent().revision, context.getBlobIdent().path); 
 		String lastCommitsUrl = urlFor(new LastCommitsResourceReference(), params).toString();
 		response.render(OnDomReadyHeaderItem.forScript(
-				String.format("gitplex.server.folderView.init('%s', '%s')", getMarkupId(), lastCommitsUrl)));
+				String.format("gitplex.server.folderView('%s', '%s')", getMarkupId(), lastCommitsUrl)));
 	}
 
 	private ObjectId getCommitId() {

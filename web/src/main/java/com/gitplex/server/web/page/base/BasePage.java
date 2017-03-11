@@ -22,6 +22,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
@@ -199,7 +200,8 @@ public abstract class BasePage extends WebPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("gitplex.server.viewState.getFromHistoryAndSetToView();"));
+		response.render(OnDomReadyHeaderItem.forScript("gitplex.server.onDomReady();"));
+		response.render(OnLoadHeaderItem.forScript("gitplex.server.onWindowLoad();"));
 	}
 	
 	public Collection<WebSocketRegion> getWebSocketRegions() {

@@ -22,4 +22,8 @@ gitplex.server.initMarkdownPreview = function($preview, taskCallback) {
 			$this.append("<a href='#" + anchorName + "' class='permalink'><i class='fa fa-link'></i></a>");
 		}
 	});
+
+	$preview.find("a").click(function() {
+		gitplex.server.viewState.getFromViewAndSetToHistory();
+	});
 };

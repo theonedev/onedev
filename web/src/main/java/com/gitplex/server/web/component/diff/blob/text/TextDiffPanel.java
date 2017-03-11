@@ -18,6 +18,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -302,7 +303,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					
 					String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
 					expanded = StringUtils.replace(expanded, "\n", "");
-					String script = String.format("gitplex.server.textdiff.expand('%s', %d, \"%s\");",
+					String script = String.format("gitplex.server.textDiff.expand('%s', %d, \"%s\");",
 							getMarkupId(), index, expanded);
 					target.appendJavaScript(script);
 					break;
@@ -311,7 +312,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 							params.getParameterValue("param1").toInt(), 
 							params.getParameterValue("param2").toInt());
 					CommentPos mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
-					script = String.format("gitplex.server.textdiff.openSelectionPopover('%s', %s, %s, '%s', %s);", 
+					script = String.format("gitplex.server.textDiff.openSelectionPopover('%s', %s, %s, '%s', %s);", 
 							getMarkupId(), jsonOfPosition, getJson(mark), markSupport.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
@@ -321,7 +322,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					
 					mark = getMark(params, "param1", "param2", "param3", "param4", "param5");
 					markSupport.onAddComment(target, mark);
-					script = String.format("gitplex.server.textdiff.onAddComment($('#%s'), %s);", 
+					script = String.format("gitplex.server.textDiff.onAddComment($('#%s'), %s);", 
 							getMarkupId(), getJson(mark));
 					target.appendJavaScript(script);
 					break;
@@ -329,7 +330,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					Long commentId = params.getParameterValue("param1").toLong();
 					CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(commentId);
 					markSupport.onOpenComment(target, comment);
-					script = String.format("gitplex.server.textdiff.onOpenComment($('#%s'), %s);", 
+					script = String.format("gitplex.server.textDiff.onOpenComment($('#%s'), %s);", 
 							getMarkupId(), getJsonOfComment(comment));
 					target.appendJavaScript(script);
 					break;
@@ -509,15 +510,19 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
-		String script = String.format("gitplex.server.textdiff.init('%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s');", 
-				getMarkupId(), symbolTooltip.getMarkupId(), 
+		String script = String.format("gitplex.server.textDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s, %s, "
+				+ "%s, %s, %s, %s, '%s');", getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
-				RequestCycle.get().find(AjaxRequestTarget.class) == null, 
 				callback, blameMessageBehavior.getCallback(),
 				markSupport!=null, jsonOfMark, jsonOfCommentInfo, 
 				jsonOfOldCommentInfos, jsonOfNewCommentInfos, dirtyContainerId, 
 				GitPlex.getInstance().getDocLink());
+		
 		response.render(OnDomReadyHeaderItem.forScript(script));
+
+		script = String.format("gitplex.server.textDiff.onWindowLoad('%s', %b, %s);", 
+				getMarkupId(), RequestCycle.get().find(AjaxRequestTarget.class) != null, jsonOfMark);
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 	
 	private String renderDiffs() {
@@ -1137,7 +1142,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	@Override
 	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
-		String script = String.format("gitplex.server.textdiff.onCommentDeleted($('#%s'), %s);", 
+		String script = String.format("gitplex.server.textDiff.onCommentDeleted($('#%s'), %s);", 
 				getMarkupId(), getJsonOfComment(comment));
 		target.appendJavaScript(script);
 		mark(target, null);
@@ -1145,14 +1150,14 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 	@Override
 	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
-		String script = String.format("gitplex.server.textdiff.onCloseComment($('#%s'));", getMarkupId());
+		String script = String.format("gitplex.server.textDiff.onCloseComment($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
 		mark(target, null);
 	}
 
 	@Override
 	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
-		String script = String.format("gitplex.server.textdiff.onCommentAdded($('#%s'), %s);", 
+		String script = String.format("gitplex.server.textDiff.onCommentAdded($('#%s'), %s);", 
 				getMarkupId(), getJsonOfComment(comment));
 		target.appendJavaScript(script);
 	}
@@ -1164,13 +1169,13 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			script = String.format(""
 				+ "var $container = $('#%s');"
 				+ "var mark = %s;"
-				+ "gitplex.server.textdiff.scroll($container, mark);"
-				+ "gitplex.server.textdiff.mark($container, mark);", 
+				+ "gitplex.server.textDiff.scroll($container, mark);"
+				+ "gitplex.server.textDiff.mark($container, mark);", 
 				getMarkupId(), getJson(mark));
 		} else {
 			script = String.format(""
 				+ "var $container = $('#%s');"
-				+ "gitplex.server.textdiff.clearMark($container);"
+				+ "gitplex.server.textDiff.clearMark($container);"
 				+ "$container.removeData('mark');", 
 				getMarkupId());
 		}

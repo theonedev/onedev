@@ -91,9 +91,9 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         	protected void onInitialize() {
         		super.onInitialize();
         		getSettings().setPlaceholder("Select " + WordUtils.uncamel(enumClass.getSimpleName()).toLowerCase() + "(s)...");
-        		getSettings().setFormatResult("gitplex.server.choiceFormatter.id.formatResult");
-        		getSettings().setFormatSelection("gitplex.server.choiceFormatter.id.formatSelection");
-        		getSettings().setEscapeMarkup("gitplex.server.choiceFormatter.id.escapeMarkup");
+        		getSettings().setFormatResult("gitplex.server.choiceFormatter.formatResult");
+        		getSettings().setFormatSelection("gitplex.server.choiceFormatter.formatSelection");
+        		getSettings().setEscapeMarkup("gitplex.server.choiceFormatter.escapeMarkup");
         		
         		setConvertEmptyInputStringToNull(true);
         	}

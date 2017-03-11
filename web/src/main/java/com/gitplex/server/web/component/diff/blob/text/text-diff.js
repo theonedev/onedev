@@ -1,6 +1,6 @@
-gitplex.server.textdiff = {
+gitplex.server.textDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute",
-	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll, callback, blameMessageCallback,
+	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, callback, blameMessageCallback,
 			markSupport, mark, openComment, oldComments, newComments, dirtyContainerId, doclink) {
 		var $container = $("#" + containerId);
 		$container.data("dirtyContainerId", dirtyContainerId);
@@ -35,11 +35,11 @@ gitplex.server.textdiff = {
 				}
 			}
 		});
-		var $symbols = $container.find(gitplex.server.textdiff.symbolClasses); 
+		var $symbols = $container.find(gitplex.server.textDiff.symbolClasses); 
 		$symbols.mouseover($container.data("symbolHover"));
 		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
 
-		gitplex.server.textdiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
+		gitplex.server.textDiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
 		
 		if (markSupport) {
 			$container.selectionPopover("init", function() {
@@ -422,25 +422,29 @@ gitplex.server.textdiff = {
 			}
 			for (var line in oldComments) {
 			    if (oldComments.hasOwnProperty(line)) {
-			    	gitplex.server.textdiff.addCommentIndicator($container, true, line, oldComments[line][1]);
+			    	gitplex.server.textDiff.addCommentIndicator($container, true, line, oldComments[line][1]);
 			    }
 			}
 			for (var line in newComments) {
 			    if (newComments.hasOwnProperty(line)) {
-			    	gitplex.server.textdiff.addCommentIndicator($container, false, line, newComments[line][1]);
+			    	gitplex.server.textDiff.addCommentIndicator($container, false, line, newComments[line][1]);
 			    }
 			}
 
-			gitplex.server.textdiff.highlightCommentTrigger($container);				
+			gitplex.server.textDiff.highlightCommentTrigger($container);				
 			
 			if (mark) {
 				$container.data("mark", mark);
-				gitplex.server.textdiff.mark($container, mark);	
-				if (scroll && !gitplex.server.history.isVisited())
-					gitplex.server.textdiff.scroll($container, mark);
+				gitplex.server.textDiff.mark($container, mark);	
 			}			
 		}
 
+	},
+	onWindowLoad: function(containerId, ajax, mark) {
+		var $container = $("#" + containerId);
+		if (!ajax && mark && !gitplex.server.history.isVisited()) {
+			gitplex.server.textDiff.scroll($container, mark);
+		}
 	},
 	initBlameTooltip: function(containerId, $hashLink) {
 		var $container = $("#" + containerId);
@@ -503,7 +507,7 @@ gitplex.server.textdiff = {
 		} else {
 			$expandedTrs = $nextTr.prevAll();
 		}
-		var $symbols = $expandedTrs.find(gitplex.server.textdiff.symbolClasses); 
+		var $symbols = $expandedTrs.find(gitplex.server.textDiff.symbolClasses); 
 		$symbols.mouseover($container.data("symbolHover"));
 		$expandedTrs.find("td.content").mouseover($container.data("onMouseOverContent"));
 		var $firstExpandedTr = $expandedTrs.first();
@@ -547,7 +551,7 @@ gitplex.server.textdiff = {
 			processBlames(1);
 		}
 		
-		gitplex.server.textdiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
+		gitplex.server.textDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
 		
 		$(window).resize();
 	},
@@ -586,28 +590,25 @@ gitplex.server.textdiff = {
 		};
 	},
 	scroll: function($container, mark) {
-		// use a timer to scroll after possible view port resize 
-		setTimeout(function() {
-			var markInfo = gitplex.server.textdiff.getMarkInfo($container, mark);
-			var $startTd = markInfo.startTd;
-			var $endTd = markInfo.endTd;
-			if ($startTd && $endTd) {
-				var top = $startTd.offset().top;
-				var bottom = $endTd.offset().top + $endTd.outerHeight();
-				var markHeight = bottom - top;
-				var windowHeight = $(window).height();
-				if (windowHeight <= markHeight) {
-					$(window).scrollTop(top-50);
-				} else {
-					$(window).scrollTop((top+bottom-windowHeight)/2);
-				}
+		var markInfo = gitplex.server.textDiff.getMarkInfo($container, mark);
+		var $startTd = markInfo.startTd;
+		var $endTd = markInfo.endTd;
+		if ($startTd && $endTd) {
+			var top = $startTd.offset().top;
+			var bottom = $endTd.offset().top + $endTd.outerHeight();
+			var markHeight = bottom - top;
+			var windowHeight = $(window).height();
+			if (windowHeight <= markHeight) {
+				$(window).scrollTop(top-50);
+			} else {
+				$(window).scrollTop((top+bottom-windowHeight)/2);
 			}
-		}, 0);
+		}
 	},
 	mark: function($container, mark) {
-		gitplex.server.textdiff.clearMark($container);
+		gitplex.server.textDiff.clearMark($container);
 		
-		var markInfo = gitplex.server.textdiff.getMarkInfo($container, mark);
+		var markInfo = gitplex.server.textDiff.getMarkInfo($container, mark);
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) {
@@ -726,21 +727,21 @@ gitplex.server.textdiff = {
 			$this.removeClass("content-mark");
 			$this.removeData("beforemark");
 			$container = $this.closest(".text-diff").parent();
-			$this.find(gitplex.server.textdiff.symbolClasses).mouseover($container.data("symbolHover"));
+			$this.find(gitplex.server.textDiff.symbolClasses).mouseover($container.data("symbolHover"));
 		});
 	},
 	restoreMark: function($container) {
 		var mark = $container.data("mark");
 		if (mark) {
-			gitplex.server.textdiff.mark($container, mark);
+			gitplex.server.textDiff.mark($container, mark);
 		} else {
-			gitplex.server.textdiff.clearMark($container);
+			gitplex.server.textDiff.clearMark($container);
 		}
 	},
 	addCommentIndicator: function($container, leftSide, line, comments) {
 		var oldOrNew = leftSide?"old":"new";
 		$container.find("." + oldOrNew + ".comment-popover[data-line='" + line + "']").remove();
-		var $lineNumTd = gitplex.server.textdiff.getLineNumTd($container, leftSide, line);
+		var $lineNumTd = gitplex.server.textDiff.getLineNumTd($container, leftSide, line);
 		
 		var callback = $container.data("callback");
 		
@@ -773,10 +774,10 @@ gitplex.server.textdiff = {
 				$("." + oldOrNew + ".comment-popover[data-line='" + line + "'] a").each(function() {
 					$(this).mouseover(function() {
 						var comment = comments[$(this).index()];			        						
-						gitplex.server.textdiff.mark($container, comment.mark);
+						gitplex.server.textDiff.mark($container, comment.mark);
 					});
 					$(this).mouseout(function() {
-						gitplex.server.textdiff.restoreMark($container);
+						gitplex.server.textDiff.restoreMark($container);
 					});
 					$(this).click(function() {
     					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
@@ -787,17 +788,17 @@ gitplex.server.textdiff = {
 						callback("openComment", comment.id);
 					});
 				});
-				gitplex.server.textdiff.highlightCommentTrigger($container);				
+				gitplex.server.textDiff.highlightCommentTrigger($container);				
 			});
 		} else {
 			var comment = comments[0];
 			$indicator.addClass("comment-trigger").attr("title", "Click to show comment of marked text");
 			$indicator.append("<i class='fa fa-commenting'></i>");
 			$indicator.mouseover(function() {
-				gitplex.server.textdiff.mark($container, comment.mark);
+				gitplex.server.textDiff.mark($container, comment.mark);
 			});
 			$indicator.mouseout(function() {
-				gitplex.server.textdiff.restoreMark($container);
+				gitplex.server.textDiff.restoreMark($container);
 			});
 			$indicator.click(function() {
 				if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
@@ -828,7 +829,7 @@ gitplex.server.textdiff = {
 		var openComment = $container.data("openComment");
 		if (openComment) {
 			var line = parseInt(openComment.mark.beginLine);
-			var $indicator = gitplex.server.textdiff.getLineNumTd($container, openComment.mark.leftSide, line).children(".comment-indicator");
+			var $indicator = gitplex.server.textDiff.getLineNumTd($container, openComment.mark.leftSide, line).children(".comment-indicator");
 			if ($indicator.length != 0) {
 				var comments = $indicator.data("comments");
 				if (comments.length == 1) {
@@ -852,7 +853,7 @@ gitplex.server.textdiff = {
 		var line = parseInt(comment.mark.beginLine);		
 		var leftSide = comment.mark.leftSide;
 		
-		var $indicator = gitplex.server.textdiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
+		var $indicator = gitplex.server.textDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
 		var comments;
 		if ($indicator.length != 0) {
 			comments = $indicator.data("comments");
@@ -860,15 +861,15 @@ gitplex.server.textdiff = {
 			comments = [];
 		} 
 		comments.push(comment);
-		gitplex.server.textdiff.addCommentIndicator($container, leftSide, line, comments);
-		gitplex.server.textdiff.highlightCommentTrigger($container);				
+		gitplex.server.textDiff.addCommentIndicator($container, leftSide, line, comments);
+		gitplex.server.textDiff.highlightCommentTrigger($container);				
 	},
 	onCommentDeleted: function($container, comment) {
 		$container.removeData("openComment");
 		
 		var line = parseInt(comment.mark.beginLine);
 		var leftSide = comment.mark.leftSide;
-		var $indicator = gitplex.server.textdiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
+		var $indicator = gitplex.server.textDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
 		var comments = $indicator.data("comments");
 		if (comments.length == 1) {
 			$indicator.remove();
@@ -880,20 +881,20 @@ gitplex.server.textdiff = {
 					break;
 				}
 			}
-			gitplex.server.textdiff.addCommentIndicator($container, leftSide, line, comments);
+			gitplex.server.textDiff.addCommentIndicator($container, leftSide, line, comments);
 		}
-		gitplex.server.textdiff.highlightCommentTrigger($container);				
+		gitplex.server.textDiff.highlightCommentTrigger($container);				
 	},
 	onOpenComment: function($container, comment) {
 		$container.data("openComment", comment);
 		$container.data("mark", comment.mark);
-		gitplex.server.textdiff.highlightCommentTrigger($container);
-		gitplex.server.textdiff.mark($container, comment.mark);
-		gitplex.server.textdiff.scroll($container, comment.mark);
+		gitplex.server.textDiff.highlightCommentTrigger($container);
+		gitplex.server.textDiff.mark($container, comment.mark);
+		gitplex.server.textDiff.scroll($container, comment.mark);
 	},
 	onCloseComment: function($container) {
 		$container.removeData("openComment");
-		gitplex.server.textdiff.highlightCommentTrigger($container);
+		gitplex.server.textDiff.highlightCommentTrigger($container);
 	},
 	onAddComment: function($container, mark) {
 		$container.removeData("openComment");
@@ -905,9 +906,9 @@ gitplex.server.textdiff = {
 		// continue to operate DOM in a timer to give browser a chance to 
 		// clear selections
 		setTimeout(function() {
-			gitplex.server.textdiff.highlightCommentTrigger($container);
-			gitplex.server.textdiff.mark($container, mark);
-			gitplex.server.textdiff.scroll($container, mark);
+			gitplex.server.textDiff.highlightCommentTrigger($container);
+			gitplex.server.textDiff.mark($container, mark);
+			gitplex.server.textDiff.scroll($container, mark);
 		}, 100);
 	}
 };
