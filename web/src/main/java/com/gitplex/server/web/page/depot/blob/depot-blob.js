@@ -1,5 +1,8 @@
 gitplex.server.depotBlob = {
 	onDomReady: function() {
+		// hide browser scrollbar as we will manage it in blob content container 
+		$("body").css("overflow", "hidden");
+		
 		$(window).resize(function(e) {
 			e.stopPropagation();
 			
@@ -48,9 +51,6 @@ gitplex.server.depotBlob = {
 	},
 	onWindowLoad: function() {
 		var cookieKey = "repoFile.searchResult.height";
-		
-		// hide browser scrollbar as we will manage it in blob content container 
-		$("body").css("overflow", "hidden");
 		
 		var $searchResult = $("#depot-blob>.search-result");
 		var height = Cookies.get(cookieKey);

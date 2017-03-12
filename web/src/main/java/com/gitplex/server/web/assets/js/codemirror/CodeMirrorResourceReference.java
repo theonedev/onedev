@@ -6,6 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
+import com.gitplex.server.web.assets.js.hotkeys.HotkeysResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 import com.gitplex.server.web.util.resourcebundle.ResourceBundle;
@@ -51,6 +52,8 @@ public class CodeMirrorResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "highlight.js"))); 
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/mode/meta.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ModeUrlResourceReference()));
+		
+		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/lib/codemirror.css")));
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));

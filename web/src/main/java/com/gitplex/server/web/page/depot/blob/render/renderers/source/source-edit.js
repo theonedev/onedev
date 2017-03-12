@@ -31,7 +31,7 @@ gitplex.server.sourceEdit = {
 		        }
 			}
 		});
-	    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
+	    CodeMirror.keyMap.default["Ctrl-G"] = "gotoLine";
 		
 		gitplex.server.codemirror.setMode(cm, filePath);
 		
@@ -47,6 +47,19 @@ gitplex.server.sourceEdit = {
 			gitplex.server.codemirror.mark(cm, mark);
 		
 		cm.oldDocValue = cm.doc.getValue();
+
+		gitplex.server.codemirror.bindKeys();
+		
+		function hideParentScrollBar() {
+			var $scrollable = $sourceEdit.closest(".scrollable");
+			/*
+			 * Hide scroll bar of parent scrollable as we will be using 
+			 * CodeMirror scroll bar
+			 */
+			$scrollable.css("overflow", "visible");
+		}
+		
+		hideParentScrollBar();
 		
 		cm.on("change", function() {
 			$sourceEdit.closest("form").addClass("dirty");
@@ -70,16 +83,6 @@ gitplex.server.sourceEdit = {
 			cm.setSize($sourceEdit.width(), $sourceEdit.height());
 		});
 		
-		function hideParentScrollBar() {
-			var $scrollable = $sourceEdit.closest(".scrollable");
-			/*
-			 * Hide scroll bar of parent scrollable as we will be using 
-			 * CodeMirror scroll bar
-			 */
-			$scrollable.css("overflow", "visible");
-		}
-		
-		hideParentScrollBar();
 		$sourceEdit.on("show", hideParentScrollBar);
 	},
 	onWindowLoad: function(containerId, mark) {

@@ -32,6 +32,7 @@ gitplex.server.sourceView = {
 		        }
 			}
 		};
+	    CodeMirror.keyMap.default["Ctrl-G"] = "gotoLine";
 
 		var cm = CodeMirror($code[0], options);
 		gitplex.server.codemirror.setMode(cm, filePath);
@@ -63,7 +64,9 @@ gitplex.server.sourceView = {
 		if (blameInfos) {
 	    	gitplex.server.sourceView.blame(blameInfos);
     	}
-		gitplex.server.sourceView.highlightCommentTrigger();				
+		gitplex.server.sourceView.highlightCommentTrigger();	
+
+		gitplex.server.codemirror.bindKeys();
 	    
 	    $code.selectionPopover("init", function() {
 	    	if (cm.hasFocus()) {

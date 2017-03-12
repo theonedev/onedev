@@ -503,6 +503,9 @@ gitplex.server = {
 				|| ua.indexOf("ipad") != -1 
 				|| ua.indexOf("windows phone") != -1; 
 	},
+	isMac: function() {
+		return navigator.userAgent.indexOf('Mac') != -1;		
+	},
 	mouseState: {
 		pressed: false, 
 		moved: false,
