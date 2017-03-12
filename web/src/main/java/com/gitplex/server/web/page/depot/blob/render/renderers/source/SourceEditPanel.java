@@ -8,6 +8,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.unbescape.javascript.JavaScriptEscape;
@@ -137,15 +138,21 @@ public class SourceEditPanel extends BlobEditPanel implements MarkSupport {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new SourceEditResourceReference()));
-		String script = String.format("gitplex.server.sourceEdit.init('%s', '%s', %s, '%s', %s, '%s', %b);", 
+		
+		String jsonOfMark = context.getMark()!=null?getJson(context.getMark()):"undefined"; 
+		String script = String.format("gitplex.server.sourceEdit.onDomReady('%s', '%s', %s, '%s', %s, '%s', %b);", 
 				sourceFormComponent.getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(context.getNewPath()), 
-				context.getMark()!=null?getJson(context.getMark()):"undefined",
+				jsonOfMark,
 				sourceFormat.getIndentType(), 
 				sourceFormat.getTabSize(), 
 				sourceFormat.getLineWrapMode(), 
 				context.getMode() == Mode.EDIT);
 		response.render(OnDomReadyHeaderItem.forScript(script));
+		
+		script = String.format("gitplex.server.sourceEdit.onWindowLoad('%s', %s);", 
+				sourceFormComponent.getMarkupId(), jsonOfMark);
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
 	private String getJson(TextRange mark) {
@@ -158,8 +165,14 @@ public class SourceEditPanel extends BlobEditPanel implements MarkSupport {
 	
 	@Override
 	public void mark(AjaxRequestTarget target, TextRange mark) {
-		String script = String.format("gitplex.server.sourceEdit.mark('%s', %s);", 
-				sourceFormComponent.getMarkupId(), getJson(mark));
+		String script;
+		if (mark != null) {
+			script = String.format("gitplex.server.sourceEdit.mark('%s', %s);", 
+					sourceFormComponent.getMarkupId(), getJson(mark));
+		} else {
+			script = String.format("gitplex.server.sourceEdit.mark('%s', undefined);", 
+					sourceFormComponent.getMarkupId());
+		}
 		target.appendJavaScript(script);
 	}
 

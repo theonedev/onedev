@@ -127,8 +127,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	public DepotBlobPage(final PageParameters params) {
 		super(params);
 		
-		System.out.println(RequestCycle.get().getRequest().getUrl());
-		
 		if (getDepot().getDefaultBranch() == null) 
 			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 

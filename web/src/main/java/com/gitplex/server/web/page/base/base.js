@@ -386,6 +386,9 @@ gitplex.server = {
 			else
 				return undefined;
 		},
+		getFromCarryOver: function() {
+			return gitplex.server.viewState.carryOver;
+		},
 		setToHistory: function(viewState) {
 			var state = history.state;
 			if (!state)
@@ -409,8 +412,9 @@ gitplex.server = {
 				gitplex.server.viewState.setToView(viewState);
 		},
 		getFromCarryOverAndSetToView: function() {
-			if (gitplex.server.viewState.carryOver)
-				gitplex.server.viewState.setToView(gitplex.server.viewState.carryOver)
+			var viewState = gitplex.server.viewState.getFromCarryOver();
+			if (viewState)
+				gitplex.server.viewState.setToView(viewState);
 		}
 	},
 	

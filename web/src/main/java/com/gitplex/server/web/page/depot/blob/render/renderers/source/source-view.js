@@ -1,5 +1,5 @@
 gitplex.server.sourceView = {
-	init: function(filePath, fileContent, openComment, mark, symbolTooltipId, 
+	onDomReady: function(filePath, fileContent, openComment, mark, symbolTooltipId, 
 			revision, blameInfos, comments, callback, blameMessageCallback, 
 			loggedIn, anchor, tabSize, lineWrapMode) {
 		
@@ -39,44 +39,31 @@ gitplex.server.sourceView = {
 		$sourceView.data("callback", callback);
 		$sourceView.data("blameMessageCallback", blameMessageCallback);
 		
-		// hide scroll bar of parent scrollable as we will be using 
+		// Hide scroll bar of parent scrollable as we will be using 
 		// CodeMirror scroll bar
 		$sourceView.closest(".scrollable").css("overflow", "visible");
 		
 	    if (mark) {
-	    	gitplex.server.codemirror.mark(cm, mark, true);
+	    	gitplex.server.codemirror.mark(cm, mark);
 			$sourceView.data("mark", mark);
 	    }
 
 	    if (openComment)
 			$sourceView.data("openComment", openComment);
 	    
-		if (anchor) {
-			var $anchor = $("#"+anchor);
-			if ($anchor.length != 0) {
-				setTimeout(function() {
-					$anchor.closest(".code-comment").parent().scrollIntoView($anchor);
-				}, 0);
-			}
-		} 
-		
-    	// add gutters with a timer to avoid the issue that occasionally 
-    	// gutter becomes much wider than expected
-	    setTimeout(function() {
-			var gutters = cm.getOption("gutters").slice();
-			gutters.splice(0, 0, "CodeMirror-comments");
-			cm.setOption("gutters", gutters);
-			for (var line in comments) {
-			    if (comments.hasOwnProperty(line)) {
-			    	gitplex.server.sourceView.addCommentGutter(line, comments[line][1]);
-			    }
-			}
+		var gutters = cm.getOption("gutters").slice();
+		gutters.splice(0, 0, "CodeMirror-comments");
+		cm.setOption("gutters", gutters);
+		for (var line in comments) {
+		    if (comments.hasOwnProperty(line)) {
+		    	gitplex.server.sourceView.addCommentGutter(line, comments[line][1]);
+		    }
+		}
 
-			if (blameInfos) {
-		    	gitplex.server.sourceView.blame(blameInfos);
-	    	}
-			gitplex.server.sourceView.highlightCommentTrigger();				
-	    }, 10);
+		if (blameInfos) {
+	    	gitplex.server.sourceView.blame(blameInfos);
+    	}
+		gitplex.server.sourceView.highlightCommentTrigger();				
 	    
 	    $code.selectionPopover("init", function() {
 	    	if (cm.hasFocus()) {
@@ -173,6 +160,13 @@ gitplex.server.sourceView = {
 			});
 		}
 	},
+	onWindowLoad: function(mark) {
+		if (mark && gitplex.server.viewState.getFromHistory() === undefined
+				&& gitplex.server.viewState.getFromCarryOver() === undefined) {
+			var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+			gitplex.server.codemirror.scrollTo(cm, mark);
+		}		
+	},
 	initComment: function() {
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
@@ -234,7 +228,7 @@ gitplex.server.sourceView = {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		var mark = $sourceView.data("mark");
 		if (mark) {
-			gitplex.server.codemirror.mark(cm, mark, false);
+			gitplex.server.codemirror.mark(cm, mark);
 		} else {
 			gitplex.server.codemirror.clearMark(cm);
 		}
@@ -274,7 +268,7 @@ gitplex.server.sourceView = {
 				$(".comment-popover[data-line='" + line + "'] a").each(function() {
 					$(this).mouseover(function() {
 						var comment = comments[$(this).index()];			        						
-						gitplex.server.codemirror.mark(cm, comment.mark, false);
+						gitplex.server.codemirror.mark(cm, comment.mark);
 					});
 					$(this).mouseout(function() {
 						gitplex.server.sourceView.restoreMark();
@@ -295,7 +289,7 @@ gitplex.server.sourceView = {
 			$gutter.append("<a class='comment-trigger' title='Click to show comment of marked text'><i class='fa fa-commenting'></i></a>");
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
-				gitplex.server.codemirror.mark(cm, comment.mark, false);
+				gitplex.server.codemirror.mark(cm, comment.mark);
 			});
 			$indicator.mouseout(function() {
 				gitplex.server.sourceView.restoreMark();
@@ -381,7 +375,7 @@ gitplex.server.sourceView = {
 		gitplex.server.sourceView.highlightCommentTrigger();				
 		gitplex.server.sourceView.onLayoutChange();
 		
-		gitplex.server.sourceView.mark(undefined, false);
+		gitplex.server.sourceView.mark(undefined);
 	},
 	onLayoutChange: function() {
 		$sourceView = $('.source-view');
@@ -398,9 +392,8 @@ gitplex.server.sourceView = {
 		gitplex.server.codemirror.clearSelection(cm);
 		gitplex.server.sourceView.onLayoutChange();
 
-		// mark and scroll after changing layout to make sure scroll 
-		// works correctly
-		gitplex.server.codemirror.mark(cm, mark, true);
+		// Mark again to make sure marked text still exists in viewport after layout change
+		gitplex.server.sourceView.mark(cm, mark);
 		
 		gitplex.server.sourceView.highlightCommentTrigger();
 	},
@@ -412,16 +405,15 @@ gitplex.server.sourceView = {
 		gitplex.server.sourceView.highlightCommentTrigger();
 		gitplex.server.sourceView.onLayoutChange();
 		
-		// mark and scroll after changing layout to make sure scroll 
-		// works correctly
-		gitplex.server.sourceView.mark(comment.mark, true);
+		// Mark again to make sure marked text still exists in viewport after layout change
+		gitplex.server.sourceView.mark(comment.mark);
 	},
 	onCloseComment: function() {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		gitplex.server.sourceView.highlightCommentTrigger();
 		gitplex.server.sourceView.onLayoutChange();
-		gitplex.server.sourceView.mark(undefined, false);
+		gitplex.server.sourceView.mark(undefined);
 	},
 	onToggleOutline: function() {
 		gitplex.server.sourceView.exitFullScreen();
@@ -469,11 +461,12 @@ gitplex.server.sourceView = {
 			}
 		}
 	},
-	mark: function(mark, scroll) {
+	mark: function(mark) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		if (mark) {
 			$(".source-view").data("mark", mark);
-			gitplex.server.codemirror.mark(cm, mark, scroll);
+			gitplex.server.codemirror.mark(cm, mark);
+			gitplex.server.codemirror.scrollTo(cm, mark);
 		} else {
 			$(".source-view").removeData("mark");
 			gitplex.server.codemirror.clearMark(cm);			

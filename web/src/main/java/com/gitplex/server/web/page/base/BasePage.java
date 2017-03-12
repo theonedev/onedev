@@ -69,7 +69,22 @@ public abstract class BasePage extends WebPage {
 		if (!isPermitted())
 			unauthorized();
 		
-		add(new Label("pageTitle", getPageTitle()));
+		add(new Label("pageTitle", getPageTitle()) {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				/* 
+				 * Render page resources in first child to make sure every other resources appears after it, 
+				 * including onDomReady and onWindowLoad call
+				 */
+				response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
+				response.render(OnDomReadyHeaderItem.forScript("gitplex.server.onDomReady();"));
+				response.render(OnLoadHeaderItem.forScript("gitplex.server.onWindowLoad();"));
+			}
+			
+		});
 
 		add(new WebMarkupContainer("pageRefresh") {
 
@@ -196,14 +211,6 @@ public abstract class BasePage extends WebPage {
 		super.onAfterRender();
 	}
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("gitplex.server.onDomReady();"));
-		response.render(OnLoadHeaderItem.forScript("gitplex.server.onWindowLoad();"));
-	}
-	
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		return new ArrayList<>();
 	}

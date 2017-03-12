@@ -443,7 +443,7 @@ gitplex.server.textDiff = {
 	onWindowLoad: function(containerId, ajax, mark) {
 		var $container = $("#" + containerId);
 		if (!ajax && mark && !gitplex.server.history.isVisited()) {
-			gitplex.server.textDiff.scroll($container, mark);
+			gitplex.server.textDiff.scrollTo($container, mark);
 		}
 	},
 	initBlameTooltip: function(containerId, $hashLink) {
@@ -589,7 +589,7 @@ gitplex.server.textDiff = {
 			oldOrNew: oldOrNew
 		};
 	},
-	scroll: function($container, mark) {
+	scrollTo: function($container, mark) {
 		var markInfo = gitplex.server.textDiff.getMarkInfo($container, mark);
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
@@ -890,7 +890,7 @@ gitplex.server.textDiff = {
 		$container.data("mark", comment.mark);
 		gitplex.server.textDiff.highlightCommentTrigger($container);
 		gitplex.server.textDiff.mark($container, comment.mark);
-		gitplex.server.textDiff.scroll($container, comment.mark);
+		gitplex.server.textDiff.scrollTo($container, comment.mark);
 	},
 	onCloseComment: function($container) {
 		$container.removeData("openComment");
@@ -908,7 +908,7 @@ gitplex.server.textDiff = {
 		setTimeout(function() {
 			gitplex.server.textDiff.highlightCommentTrigger($container);
 			gitplex.server.textDiff.mark($container, mark);
-			gitplex.server.textDiff.scroll($container, mark);
+			gitplex.server.textDiff.scrollTo($container, mark);
 		}, 100);
 	}
 };

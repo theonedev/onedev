@@ -27,6 +27,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -216,16 +217,6 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 		target.appendJavaScript("gitplex.server.sourceView.onToggleOutline();");
 	}
 
-	private void mark(AjaxRequestTarget target, @Nullable TextRange mark, boolean scroll) {
-		String script;
-		if (mark != null) {
-			script = String.format("gitplex.server.sourceView.mark(%s, %s);", getJson(mark), scroll);
-		} else {
-			script = String.format("gitplex.server.sourceView.mark(undefined, false);");
-		}
-		target.appendJavaScript(script);
-	}
-	
 	private String getJson(TextRange mark) {
 		try {
 			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(mark);
@@ -295,7 +286,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 				} else {
 					mark = (TextRange) commentContainer.getDefaultModelObject();
 				}
-				mark(target, mark, true);
+				mark(target, mark);
 				context.onMark(target, mark);
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
@@ -485,7 +476,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							clearComment(target);
-							target.appendJavaScript("gitplex.server.sourceView.mark(undefined, false);");
+							target.appendJavaScript("gitplex.server.sourceView.mark(undefined);");
 							target.appendJavaScript("gitplex.server.sourceView.onLayoutChange();");
 							context.onMark(target, null);
 						}
@@ -854,15 +845,18 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
+		
+		String jsonOfMark = context.getMark()!=null?getJson(context.getMark()):"undefined";
+			
 		CharSequence callback = ajaxBehavior.getCallbackFunction(
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"));
-		String script = String.format("gitplex.server.sourceView.init('%s', '%s', %s, %s, '%s', '%s', "
+		String script = String.format("gitplex.server.sourceView.onDomReady('%s', '%s', %s, %s, '%s', '%s', "
 				+ "%s, %s, %s, %s, %s, '%s', %s, '%s');", 
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				context.getOpenComment()!=null?getJsonOfComment(context.getOpenComment()):"undefined",
-				context.getMark()!=null?getJson(context.getMark()):"undefined",
+				jsonOfMark,
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
 				jsonOfBlameInfos, 
@@ -874,6 +868,9 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 				sourceFormat.getTabSize(),
 				sourceFormat.getLineWrapMode());
 		response.render(OnDomReadyHeaderItem.forScript(script));
+		
+		script = String.format("gitplex.server.sourceView.onWindowLoad(%s);", jsonOfMark);
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
 	@Override
@@ -919,7 +916,13 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 
 	@Override
 	public void mark(AjaxRequestTarget target, TextRange mark) {
-		mark(target, mark, true);
+		String script;
+		if (mark != null) {
+			script = String.format("gitplex.server.sourceView.mark(%s);", getJson(mark));
+		} else {
+			script = String.format("gitplex.server.sourceView.mark(undefined);");
+		}
+		target.appendJavaScript(script);
 	}
 	
 }

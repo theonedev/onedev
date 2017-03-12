@@ -1,6 +1,8 @@
 package com.gitplex.server.web;
 
+import org.apache.wicket.core.request.handler.BookmarkablePageRequestHandler;
 import org.apache.wicket.core.request.handler.IPageClassRequestHandler;
+import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
@@ -175,7 +177,8 @@ public class UrlMapper extends CompoundRequestMapper {
 			 */
 			@Override
 			public Url mapHandler(IRequestHandler requestHandler) {
-				if (requestHandler instanceof IPageClassRequestHandler) {
+				if (requestHandler instanceof BookmarkablePageRequestHandler 
+						|| requestHandler instanceof RenderPageRequestHandler) {
 					IPageClassRequestHandler pageClassRequestHandler = (IPageClassRequestHandler) requestHandler;
 					if (pageClassRequestHandler.getPageClass() == DepotBlobPage.class 
 							&& pageClassRequestHandler.getPageParameters().get("revision").toString() == null) {

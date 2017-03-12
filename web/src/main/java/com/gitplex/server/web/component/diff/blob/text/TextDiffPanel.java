@@ -1169,7 +1169,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			script = String.format(""
 				+ "var $container = $('#%s');"
 				+ "var mark = %s;"
-				+ "gitplex.server.textDiff.scroll($container, mark);"
+				+ "gitplex.server.textDiff.scrollTo($container, mark);"
 				+ "gitplex.server.textDiff.mark($container, mark);", 
 				getMarkupId(), getJson(mark));
 		} else {
