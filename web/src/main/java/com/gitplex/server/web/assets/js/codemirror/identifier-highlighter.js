@@ -72,9 +72,9 @@
 		  	  	  				state.overlay = null;
 		  	  	  			}
 		  					var query = line.slice(token.start, token.end);
-		  					if (query.startsWith("'") || query.startsWith("\""))
+		  					if (query.indexOf('\'') === 0 || query.indexOf('"') === 0)
 		  						query = query.substring(1);
-		  					if (query.endsWith("'") || query.endsWith("\""))
+		  					if (query.indexOf('\'') === 0 || query.indexOf('"') === 0)
 		  						query = query.substring(0, query.length-1);
 		  					if (query.length != 0) {
 			  					cm.addOverlay(state.overlay = makeOverlay(query, re, state.style));

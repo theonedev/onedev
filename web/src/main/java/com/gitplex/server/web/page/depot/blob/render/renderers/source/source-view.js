@@ -396,7 +396,7 @@ gitplex.server.sourceView = {
 		gitplex.server.sourceView.onLayoutChange();
 
 		// Mark again to make sure marked text still exists in viewport after layout change
-		gitplex.server.sourceView.mark(cm, mark);
+		gitplex.server.sourceView.mark(mark);
 		
 		gitplex.server.sourceView.highlightCommentTrigger();
 	},

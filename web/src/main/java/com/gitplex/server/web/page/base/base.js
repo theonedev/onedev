@@ -539,6 +539,11 @@ gitplex.server = {
 		gitplex.server.focus.setupAutoFocus();
 		gitplex.server.setupWebsocketCallback();
 		gitplex.server.mouseState.track();
+		
+		$(document).keydown(function(e) {
+			if (e.keyCode == 27)
+				e.preventDefault();
+		});
 	},
 	
 	onWindowLoad: function() {
