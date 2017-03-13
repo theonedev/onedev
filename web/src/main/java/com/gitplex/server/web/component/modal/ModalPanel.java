@@ -64,7 +64,7 @@ public abstract class ModalPanel extends Panel {
 
 				response.render(JavaScriptHeaderItem.forReference(new ModalResourceReference()));
 				
-				String script = String.format("gitplex.server.modal.init('%s', %s);", 
+				String script = String.format("gitplex.server.modal.onDomReady('%s', %s);", 
 						getMarkupId(true), getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}

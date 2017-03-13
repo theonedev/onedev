@@ -18,20 +18,9 @@ gitplex.server.sourceEdit = {
 			foldGutter: true,
 			matchBrackets: true,
 			scrollbarStyle: "simple",
-			highlightIdentifiers: {delay: 500},
-			extraKeys: {
-				"F11": function(cm) {
-					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-				},
-				"Esc": function(cm) {
-					if (cm.getOption("fullScreen")) {
-						cm.setOption("fullScreen", false);
-						$(window).resize();
-					}
-		        }
-			}
+			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+			highlightIdentifiers: {delay: 500}
 		});
-	    CodeMirror.keyMap.default["Ctrl-G"] = "gotoLine";
 		
 		gitplex.server.codemirror.setMode(cm, filePath);
 		
@@ -48,7 +37,7 @@ gitplex.server.sourceEdit = {
 		
 		cm.oldDocValue = cm.doc.getValue();
 
-		gitplex.server.codemirror.bindKeys();
+		gitplex.server.codemirror.bindKeys(cm);
 		
 		function hideParentScrollBar() {
 			var $scrollable = $sourceEdit.closest(".scrollable");

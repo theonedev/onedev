@@ -1,5 +1,5 @@
 gitplex.server.modal = {
-	init: function(containerId, closeCallback) {
+	onDomReady: function(containerId, closeCallback) {
 		var $modal = $("#" + containerId + ">.modal");
 		$modal.data("closeCallback", closeCallback);
 		
@@ -12,7 +12,7 @@ gitplex.server.modal = {
 			}
 		});
 		
-		// use keydown as keypress does not work in chrome/safari
+		// Use keydown as keypress does not work in chrome/safari
 		$(document).on("keydown", $modal.data("keydown"));
 		
 		$modal.modal({backdrop: "static", "keyboard": false});

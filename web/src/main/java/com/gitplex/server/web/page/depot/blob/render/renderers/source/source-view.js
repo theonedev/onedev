@@ -5,7 +5,8 @@ gitplex.server.sourceView = {
 		
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
-		var options = {
+
+		var cm = CodeMirror($code[0], {
 			value: fileContent,
 			readOnly: gitplex.server.isDevice()?"nocursor":true,
 			theme: "eclipse",
@@ -19,22 +20,9 @@ gitplex.server.sourceView = {
 			matchBrackets: true,
 			scrollbarStyle: "simple",
 			highlightIdentifiers: {delay: 500},
-			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-			extraKeys: {
-				"F11": function(cm) {
-					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-				},
-				"Esc": function(cm) {
-					if (cm.getOption("fullScreen")) {
-						cm.setOption("fullScreen", false);
-						$(window).resize();
-					}
-		        }
-			}
-		};
-	    CodeMirror.keyMap.default["Ctrl-G"] = "gotoLine";
-
-		var cm = CodeMirror($code[0], options);
+			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+		});
+		
 		gitplex.server.codemirror.setMode(cm, filePath);
 
 		$sourceView.data("callback", callback);
@@ -66,7 +54,7 @@ gitplex.server.sourceView = {
     	}
 		gitplex.server.sourceView.highlightCommentTrigger();	
 
-		gitplex.server.codemirror.bindKeys();
+		gitplex.server.codemirror.bindKeys(cm);
 	    
 	    $code.selectionPopover("init", function() {
 	    	if (cm.hasFocus()) {
@@ -396,7 +384,7 @@ gitplex.server.sourceView = {
 		gitplex.server.sourceView.onLayoutChange();
 
 		// Mark again to make sure marked text still exists in viewport after layout change
-		gitplex.server.sourceView.mark(cm, mark);
+		gitplex.server.sourceView.mark(mark);
 		
 		gitplex.server.sourceView.highlightCommentTrigger();
 	},

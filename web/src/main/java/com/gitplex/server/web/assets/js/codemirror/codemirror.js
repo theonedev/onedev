@@ -57,7 +57,24 @@ gitplex.server.codemirror = {
 	    	cm.scrollTo(viewState.scroll.left, viewState.scroll.top);
     	}
 	}, 
-	bindKeys: function() {
+	bindKeys: function(cm) {
+		cm.setOption("extraKeys", {
+			"F11": function(cm) {
+				cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+			},
+			"Esc": function(cm) {
+				if (cm.getOption("fullScreen")) {
+					cm.setOption("fullScreen", false);
+					$(window).resize();
+				}
+	        }
+		});
+		if (gitplex.server.isMac()) {
+		    CodeMirror.keyMap.default["Cmd-L"] = "gotoLine";
+		} else {
+		    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
+		}
+		
 		if (!($(document).data("CodeMirrorKeyBinded"))) {
 			$(document).data("CodeMirrorKeyBinded", true);
 			
@@ -122,28 +139,20 @@ gitplex.server.codemirror = {
 				}
 			}
 			if (gitplex.server.isMac()) {
-				$(document).keydown(function(e) {
-					if (e.metaKey && !e.ctrlKey && !e.altKey) {
-						if (!e.shiftKey && e.keyCode == 70) 
-							return find();
-						else if (e.shiftKey && e.keyCode == 71)
-							return findPrev();
-						else if (!e.shiftKey && e.keyCode == 71)
-							return findNext();
-						else if (!e.shiftKey && e.keyCode == 38)
-							return goDocStart();
-						else if (!e.shiftKey && e.keyCode == 40)
-							return goDocEnd();
-					}
-				});
+				$(document).bind("keydown", "Meta+f", find);
+				$(document).bind("keydown", "Meta+g", findNext);
+				$(document).bind("keydown", "Meta+Shift+g", findPrev);
+				$(document).bind("keydown", "Meta+up", goDocStart);
+				$(document).bind("keydown", "Meta+down", goDocEnd);
+				$(document).bind("keydown", "Meta+l", gotoLine);
 			} else {
 				$(document).bind("keydown", "Ctrl+f", find);
 				$(document).bind("keydown", "Ctrl+g", findNext);
 				$(document).bind("keydown", "Ctrl+Shift+g", findPrev);
 				$(document).bind("keydown", "Ctrl+home", goDocStart);
 				$(document).bind("keydown", "Ctrl+end", goDocEnd);
+				$(document).bind("keydown", "Ctrl+l", gotoLine);
 			}
-			$(document).bind("keydown", "Ctrl+g", gotoLine);
 			$(document).bind("keydown", "pageup", goPageUp);
 			$(document).bind("keydown", "pagedown", goPageDown);
 			$(document).bind("keydown", "up", goLineUp);

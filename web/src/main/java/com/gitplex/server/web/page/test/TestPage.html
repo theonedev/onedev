@@ -1,15 +1,8 @@
 <wicket:extend>
-	<div class="autofit">content</div>
+	<div id="code"></div>
 	<script type="text/javascript">
 		$(function() {
-			$(window).resize(function() {
-				var state = {};
-				$(document).find(".autofit:visible").first().trigger("autofit", state);				
-				console.log(state.name);
-			});
-			$(".autofit").on("autofit", function(e, state) {
-				state.name = "robin";
-			});
+			CodeMirror(document.getElementById("code"));				
 		});
 	</script>
 </wicket:extend>
