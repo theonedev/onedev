@@ -11,6 +11,7 @@ import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.MarkdownAware;
 import com.gitplex.server.event.pullrequest.PullRequestChangeEvent;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestReferenceManager;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestReference;
@@ -18,7 +19,6 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
-import com.gitplex.server.util.markdown.MarkdownManager;
 import com.gitplex.server.util.markdown.PullRequestParser;
 
 @Singleton
@@ -43,7 +43,7 @@ public class DefaultPullRequestReferenceManager extends AbstractEntityManager<Pu
 		if (event instanceof MarkdownAware) {
 			String markdown = ((MarkdownAware)event).getMarkdown();
 			if (markdown != null) {
-				String html = markdownManager.parse(markdown);
+				String html = markdownManager.render(markdown, false);
 				
 				for (PullRequest referenced: new PullRequestParser().parseRequests(html)) {
 					if (!referenced.equals(event.getRequest())) {

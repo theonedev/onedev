@@ -1,4 +1,4 @@
-package com.gitplex.server.web.behavior.markdown;
+package com.gitplex.server.web.behavior.markdown.emoji;
 
 import java.io.IOException;
 import java.io.InputStream;

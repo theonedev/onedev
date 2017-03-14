@@ -19,7 +19,7 @@ import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Team;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.component.markdown.MarkdownViewer;
+import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
 import com.gitplex.server.web.component.tabbable.Tabbable;

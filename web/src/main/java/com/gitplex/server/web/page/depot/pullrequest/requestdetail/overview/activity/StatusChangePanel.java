@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -25,12 +24,12 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
+import com.gitplex.server.web.behavior.markdown.ResponsiveTaskBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.link.AccountLink;
-import com.gitplex.server.web.component.markdown.MarkdownEditSupport;
-import com.gitplex.server.web.component.markdown.MarkdownViewer;
+import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.SinceChangesLink;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -49,33 +48,37 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 		
 		String note = getStatusChange().getNote();
 		if (StringUtils.isNotBlank(note)) {
-			MarkdownEditSupport editSupport;
+			ResponsiveTaskBehavior responsiveTaskBehavior;
 			if (SecurityUtils.canModify(getStatusChange())) {
-				editSupport = new MarkdownEditSupport() {
+				responsiveTaskBehavior = new ResponsiveTaskBehavior() {
 
 					@Override
-					public void setContent(String content) {
-						getStatusChange().setNote(content);
-						GitPlex.getInstance(PullRequestStatusChangeManager.class).save(getStatusChange());				
-					}
-
-					@Override
-					public long getVersion() {
+					public long getContentVersion() {
 						return getStatusChange().getVersion();
 					}
 					
 				};
 			} else {
-				editSupport = null;
+				responsiveTaskBehavior = null;
 			}
-			viewer.add(new MarkdownViewer("content", new AbstractReadOnlyModel<String>() {
+			viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
 				@Override
 				public String getObject() {
 					return getStatusChange().getNote();
 				}
 
-			}, editSupport));
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public void setObject(String object) {
+					getStatusChange().setNote(object);
+					GitPlex.getInstance(PullRequestStatusChangeManager.class).save(getStatusChange());				
+				}
+
+			}, responsiveTaskBehavior));
 		} else {
 			viewer.add(new Label("content", "<i>No note</i>").setEscapeModelStrings(false));
 		}

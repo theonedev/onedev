@@ -1,5 +1,5 @@
 package com.gitplex.server.model;
 
-public class EntityLocator {
+public class ModelLocator {
 
 }

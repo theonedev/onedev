@@ -6,5 +6,5 @@ import com.gitplex.launcher.loader.ExtensionPoint;
 
 @ExtensionPoint
 public interface HtmlTransformer {
-	Element transform(Element body);
+	void transform(Element body);
 }

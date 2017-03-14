@@ -31,23 +31,21 @@ import org.hibernate.Interceptor;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.type.Type;
-import org.pegdown.Parser;
-import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.launcher.loader.AbstractPlugin;
 import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.launcher.loader.ImplementationProvider;
-import com.gitplex.server.command.CommandNames;
 import com.gitplex.server.command.ApplyDBConstraintsCommand;
 import com.gitplex.server.command.BackupDBCommand;
 import com.gitplex.server.command.CheckDataVersionCommand;
 import com.gitplex.server.command.CleanDBCommand;
+import com.gitplex.server.command.CommandNames;
 import com.gitplex.server.command.DBDialectCommand;
+import com.gitplex.server.command.ResetAdminPasswordCommand;
 import com.gitplex.server.command.RestoreDBCommand;
 import com.gitplex.server.command.UpgradeCommand;
-import com.gitplex.server.command.ResetAdminPasswordCommand;
 import com.gitplex.server.git.config.GitConfig;
 import com.gitplex.server.git.config.SpecifiedGit;
 import com.gitplex.server.git.config.SystemGit;
@@ -66,6 +64,7 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.MailManager;
+import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.OrganizationMembershipManager;
 import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.manager.PullRequestInfoManager;
@@ -99,6 +98,7 @@ import com.gitplex.server.manager.impl.DefaultConfigManager;
 import com.gitplex.server.manager.impl.DefaultDataManager;
 import com.gitplex.server.manager.impl.DefaultDepotManager;
 import com.gitplex.server.manager.impl.DefaultMailManager;
+import com.gitplex.server.manager.impl.DefaultMarkdownManager;
 import com.gitplex.server.manager.impl.DefaultOrganizationMembershipManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestCommentManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestInfoManager;
@@ -146,11 +146,6 @@ import com.gitplex.server.util.jackson.ObjectMapperProvider;
 import com.gitplex.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
 import com.gitplex.server.util.jetty.DefaultJettyRunner;
 import com.gitplex.server.util.jetty.JettyRunner;
-import com.gitplex.server.util.markdown.DefaultMarkdownManager;
-import com.gitplex.server.util.markdown.HtmlTransformer;
-import com.gitplex.server.util.markdown.MarkdownExtension;
-import com.gitplex.server.util.markdown.MarkdownManager;
-import com.gitplex.server.util.markdown.NormalizeTransformer;
 import com.gitplex.server.util.schedule.DefaultTaskScheduler;
 import com.gitplex.server.util.schedule.TaskScheduler;
 import com.gitplex.server.util.validation.AccountNameReservation;
@@ -158,7 +153,6 @@ import com.gitplex.server.util.validation.DefaultEntityValidator;
 import com.gitplex.server.util.validation.DepotNameReservation;
 import com.gitplex.server.util.validation.EntityValidator;
 import com.gitplex.server.util.validation.ValidatorProvider;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
@@ -199,32 +193,9 @@ public class CoreModule extends AbstractPluginModule {
 		
 		bind(Validator.class).toProvider(ValidatorProvider.class).in(Singleton.class);
 		
-		// put your guice bindings here
 		bind(TaskScheduler.class).to(DefaultTaskScheduler.class);
-		
-		contribute(MarkdownExtension.class, new MarkdownExtension() {
-			
-			@Override
-			public Collection<Class<? extends Parser>> getInlineParsers() {
-				return null;
-			}
-			
-			@Override
-			public Collection<ToHtmlSerializerPlugin> getHtmlSerializers() {
-				return null;
-			}
-			
-			@Override
-			public Collection<Class<? extends Parser>> getBlockParsers() {
-				return null;
-			}
 
-			@Override
-			public Collection<HtmlTransformer> getHtmlTransformers() {
-				return Lists.newArrayList((HtmlTransformer)new NormalizeTransformer());
-			}
-			
-		});
+		// configure markdown
 		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		
 		
 		configurePersistence();
@@ -391,7 +362,6 @@ public class CoreModule extends AbstractPluginModule {
 			}
 		});
 	    
-		// put your guice bindings here
 		bind(XStream.class).toProvider(new com.google.inject.Provider<XStream>() {
 
 			@SuppressWarnings("rawtypes")

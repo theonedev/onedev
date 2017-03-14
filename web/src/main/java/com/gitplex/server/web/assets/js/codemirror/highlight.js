@@ -13,6 +13,8 @@ gitplex.server.highlight = function($container) {
 		});
 		var modeHint = $this.attr("class");
 		if (modeHint) {
+			if (modeHint.indexOf("language-") == 0)
+				modeHint = modeHint.substring("language-".length);
 			var modeInfo = CodeMirror.findModeByExtension(modeHint);
 			if (!modeInfo)
 				modeInfo = CodeMirror.findModeByName(modeHint);

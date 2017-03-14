@@ -11,9 +11,8 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.Requ
 public class PullRequestTransformer extends PullRequestParser implements HtmlTransformer {
 	
 	@Override
-	public Element transform(Element body) {
+	public void transform(Element body) {
 		parseRequests(body);
-		return body;
 	}
 
 	@Override

@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.hibernate.StaleStateException;
@@ -23,11 +22,11 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
+import com.gitplex.server.web.behavior.markdown.ResponsiveTaskBehavior;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.link.AccountLink;
-import com.gitplex.server.web.component.markdown.MarkdownEditSupport;
-import com.gitplex.server.web.component.markdown.MarkdownViewer;
+import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
@@ -45,33 +44,37 @@ class OpenedPanel extends GenericPanel<PullRequest> {
 		
 		String description = getPullRequest().getDescription();
 		if (StringUtils.isNotBlank(description)) {
-			MarkdownEditSupport editSupport;
+			ResponsiveTaskBehavior responsiveTaskBehavior;
 			if (SecurityUtils.canModify(getPullRequest())) {
-				editSupport = new MarkdownEditSupport() {
+				responsiveTaskBehavior = new ResponsiveTaskBehavior() {
 
 					@Override
-					public void setContent(String content) {
-						getPullRequest().setDescription(content);
-						GitPlex.getInstance(PullRequestManager.class).save(getPullRequest());				
-					}
-
-					@Override
-					public long getVersion() {
+					public long getContentVersion() {
 						return getPullRequest().getVersion();
 					}
 					
 				};
 			} else {
-				editSupport = null;
+				responsiveTaskBehavior = null;
 			}
-			viewer.add(new MarkdownViewer("content", new AbstractReadOnlyModel<String>() {
+			viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
 				@Override
 				public String getObject() {
 					return getPullRequest().getDescription();
 				}
 
-			}, editSupport));
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public void setObject(String object) {
+					getPullRequest().setDescription(object);
+					GitPlex.getInstance(PullRequestManager.class).save(getPullRequest());				
+				}
+
+			}, responsiveTaskBehavior));
 		} else {
 			viewer.add(new Label("content", "<i>No description</i>").setEscapeModelStrings(false));
 		}

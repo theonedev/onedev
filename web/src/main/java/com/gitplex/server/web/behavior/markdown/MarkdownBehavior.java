@@ -30,8 +30,9 @@ import org.apache.wicket.util.crypt.Base64;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.util.markdown.MarkdownManager;
+import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.server.web.behavior.markdown.emoji.EmojiOnes;
 import com.gitplex.server.web.page.base.BasePage;
 import com.google.common.base.Charsets;
 
@@ -49,15 +50,17 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 			String markdown = params.getParameterValue("param").toOptionalString();
 			String preview;
 			if (StringUtils.isNotBlank(markdown)) {
-				preview = AppLoader.getInstance(MarkdownManager.class).parseAndProcess(markdown);
+				preview = AppLoader.getInstance(MarkdownManager.class).render(markdown, true);
 			} else { 
 				preview = "<i>Nothing to preview.</i>";
 			}
 			String script = String.format(""
 					+ "var $preview=$('#%s~.md-preview');"
 					+ "$preview.html('%s');"
-					+ "gitplex.server.initMarkdownPreview($preview);",
-					getComponent().getMarkupId(), StringEscapeUtils.escapeEcmaScript(preview));
+					+ "gitplex.server.markdown.initRendered('%s');",
+					getComponent().getMarkupId(), 
+					StringEscapeUtils.escapeEcmaScript(preview), 
+					getComponent().getMarkupId());
 			target.appendJavaScript(script);
 		} else if (type.equals("emojiQuery")){
 			List<String> emojiNames = new ArrayList<>();
@@ -82,7 +85,7 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 				if (emojis.size() < ATWHO_LIMIT) {
 					String emojiCode = EmojiOnes.getInstance().all().get(emojiName);
 					CharSequence url = RequestCycle.get().urlFor(new PackageResourceReference(
-							EmojiOnes.class, "emoji/" + emojiCode + ".png"), new PageParameters());
+							EmojiOnes.class, "icon/" + emojiCode + ".png"), new PageParameters());
 					Map<String, String> emoji = new HashMap<>();
 					emoji.put("name", emojiName);
 					emoji.put("url", url.toString());
@@ -104,7 +107,7 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 				Map<String, String> emoji = new HashMap<>();
 				emoji.put("name", entry.getKey());
 				emoji.put("url", RequestCycle.get().urlFor(new PackageResourceReference(
-						EmojiOnes.class, "emoji/" + entry.getValue() + ".png"), new PageParameters()).toString());
+						EmojiOnes.class, "icon/" + entry.getValue() + ".png"), new PageParameters()).toString());
 				emojis.add(emoji);
 			}
 
@@ -187,7 +190,7 @@ public class MarkdownBehavior extends AbstractPostAjaxBehavior {
 		} else {
 			encodedAttachmentSupport = "undefined";
 		}
-		String script = String.format("gitplex.server.markdown.init('%s', %s, %s, %s, %d);", 
+		String script = String.format("gitplex.server.markdown.onDomReady('%s', %s, %s, %s, %d);", 
 				component.getMarkupId(true), 
 				ATWHO_LIMIT,
 				getCallbackFunction(explicit("type"), explicit("param"), explicit("param2")), 

@@ -15,19 +15,17 @@ import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.StaleStateException;
 import org.hibernate.exception.ConstraintViolationException;
-import org.pegdown.Parser;
-import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import com.gitplex.launcher.loader.AbstractPlugin;
 import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.server.git.exception.GitException;
 import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.util.markdown.HtmlTransformer;
-import com.gitplex.server.util.markdown.MarkdownExtension;
 import com.gitplex.server.util.validation.AccountNameReservation;
 import com.gitplex.server.util.validation.DepotNameReservation;
 import com.gitplex.server.util.validation.TeamNameReservation;
-import com.gitplex.server.web.behavior.markdown.EmojiTransformer;
+import com.gitplex.server.web.behavior.markdown.ResponsiveTaskBehavior;
+import com.gitplex.server.web.behavior.markdown.emoji.EmojiExtension;
 import com.gitplex.server.web.component.comment.MentionTransformer;
 import com.gitplex.server.web.component.comment.PullRequestTransformer;
 import com.gitplex.server.web.component.diff.DiffRenderer;
@@ -47,6 +45,7 @@ import com.gitplex.server.web.websocket.PullRequestChangeBroadcaster;
 import com.gitplex.server.web.websocket.TaskChangeBroadcaster;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.google.common.collect.Lists;
+import com.vladsch.flexmark.Extension;
 
 import jersey.repackaged.com.google.common.collect.Sets;
 
@@ -70,29 +69,6 @@ public class WebModule extends AbstractPluginModule {
 		
 		contributeFromPackage(EditSupport.class, EditSupport.class);
 		
-		contribute(MarkdownExtension.class, new MarkdownExtension() {
-			
-			@Override
-			public Collection<Class<? extends Parser>> getInlineParsers() {
-				return null;
-			}
-			
-			@Override
-			public Collection<HtmlTransformer> getHtmlTransformers() {
-				return Lists.newArrayList((HtmlTransformer)new EmojiTransformer());
-			}
-			
-			@Override
-			public Collection<ToHtmlSerializerPlugin> getHtmlSerializers() {
-				return null;
-			}
-			
-			@Override
-			public Collection<Class<? extends Parser>> getBlockParsers() {
-				return null;
-			}
-		});
-		
 		bind(WebApplication.class).to(GitPlexWebApplication.class);
 		bind(Application.class).to(GitPlexWebApplication.class);
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
@@ -108,30 +84,12 @@ public class WebModule extends AbstractPluginModule {
 		
 		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
 		contributeFromPackage(BlobRendererContribution.class, BlobRendererContribution.class);
-		
-		contribute(MarkdownExtension.class, new MarkdownExtension() {
-			
-			@Override
-			public Collection<Class<? extends Parser>> getInlineParsers() {
-				return null;
-			}
-			
-			@Override
-			public Collection<ToHtmlSerializerPlugin> getHtmlSerializers() {
-				return null;
-			}
-			
-			@Override
-			public Collection<Class<? extends Parser>> getBlockParsers() {
-				return null;
-			}
 
-			@Override
-			public Collection<HtmlTransformer> getHtmlTransformers() {
-				return Lists.newArrayList(new MentionTransformer(), new PullRequestTransformer());
-			}
-			
-		});
+		contribute(Extension.class, new EmojiExtension());
+		contribute(Extension.class, ResponsiveTaskBehavior.newMarkdownExtension());
+		contribute(HtmlTransformer.class, new MentionTransformer());
+		contribute(HtmlTransformer.class, new PullRequestTransformer());
+
 		contribute(ResourcePackScopeContribution.class, new ResourcePackScopeContribution() {
 			
 			@Override

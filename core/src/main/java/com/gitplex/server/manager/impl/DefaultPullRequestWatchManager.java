@@ -29,6 +29,7 @@ import com.gitplex.server.git.NameAndEmail;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.BranchWatchManager;
 import com.gitplex.server.manager.MailManager;
+import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestWatchManager;
 import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.manager.VisitInfoManager;
@@ -43,7 +44,6 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.editable.EditableUtils;
-import com.gitplex.server.util.markdown.MarkdownManager;
 import com.gitplex.server.util.markdown.MentionParser;
 
 @Singleton
@@ -124,7 +124,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			if (markdown != null) {
-				String html = markdownManager.parse(markdown);
+				String html = markdownManager.render(markdown, false);
 				mentionUsers.addAll(new MentionParser().parseMentions(html));
 				for (Account mention: mentionUsers) {
 					watch(request, mention, "You are set to watch this pull request as you are mentioned in code comment.");

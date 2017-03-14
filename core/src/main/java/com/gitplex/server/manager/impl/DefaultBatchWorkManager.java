@@ -20,7 +20,7 @@ import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.WorkExecutor;
-import com.gitplex.server.manager.support.BatchWorker;
+import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.concurrent.Prioritized;
 import com.gitplex.server.util.concurrent.PrioritizedRunnable;
 

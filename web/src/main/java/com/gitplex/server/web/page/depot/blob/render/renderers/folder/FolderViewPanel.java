@@ -34,7 +34,7 @@ import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
-import com.gitplex.server.web.component.markdown.MarkdownViewer;
+import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;

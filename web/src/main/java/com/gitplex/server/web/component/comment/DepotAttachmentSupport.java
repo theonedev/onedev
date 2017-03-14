@@ -7,11 +7,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AttachmentManager;
 import com.gitplex.server.manager.DepotManager;
@@ -22,6 +20,7 @@ import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.util.resource.AttachmentResource;
 import com.gitplex.server.web.util.resource.AttachmentResourceReference;
+import com.google.common.base.Preconditions;
 
 import jersey.repackaged.com.google.common.base.Throwables;
 
@@ -45,8 +44,7 @@ public class DepotAttachmentSupport implements AttachmentSupport {
 	@Override
 	public String getAttachmentUrl(String attachment) {
 		PageParameters params = AttachmentResource.paramsOf(getDepot(), attachmentDirUUID, attachment);
-		String url = RequestCycle.get().urlFor(new AttachmentResourceReference(), params).toString();
-		return RequestCycle.get().getUrlRenderer().renderFullUrl(Url.parse(url));
+		return RequestCycle.get().urlFor(new AttachmentResourceReference(), params).toString();
 	}
 	
 	@Override

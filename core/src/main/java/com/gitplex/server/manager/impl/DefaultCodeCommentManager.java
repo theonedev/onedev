@@ -28,6 +28,7 @@ import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentStatusChangeManager;
 import com.gitplex.server.manager.MailManager;
+import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.model.Account;
@@ -42,7 +43,6 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
-import com.gitplex.server.util.markdown.MarkdownManager;
 import com.gitplex.server.util.markdown.MentionParser;
 
 @Singleton
@@ -187,7 +187,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		if (event.getMarkdown() != null) {
 			CodeComment comment = event.getComment();
 			Collection<Account> mentionedUsers = new HashSet<>();
-			for (Account user: new MentionParser().parseMentions(markdownManager.parse(event.getMarkdown()))) {
+			for (Account user: new MentionParser().parseMentions(markdownManager.render(event.getMarkdown(), false))) {
 				mentionedUsers.add(user);
 			}
 			String subject = "You are mentioned in a code comment on file " + comment.getCommentPos().getPath();

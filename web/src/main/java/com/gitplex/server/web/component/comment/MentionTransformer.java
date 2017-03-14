@@ -11,9 +11,8 @@ import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 public class MentionTransformer extends MentionParser implements HtmlTransformer {
 	
 	@Override
-	public Element transform(Element body) {
+	public void transform(Element body) {
 		parseMentions(body);
-		return body;
 	}
 
 	@Override

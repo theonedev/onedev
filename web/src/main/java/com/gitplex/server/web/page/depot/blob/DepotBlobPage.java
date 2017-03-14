@@ -573,8 +573,15 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		PageParameters params = paramsOf(depot);
 		if (state.blobIdent.revision != null)
 			params.set(PARAM_REVISION, state.blobIdent.revision);
-		if (state.blobIdent.path != null)
+		if (state.mode == Mode.ADD) {
+			// Without this, relative links in markdown file will not work 
+			if (state.blobIdent.path != null)
+				params.set(PARAM_PATH, state.blobIdent.path + "/newfile");
+			else
+				params.set(PARAM_PATH, "newfile");
+		} else if (state.blobIdent.path != null) {
 			params.set(PARAM_PATH, state.blobIdent.path);
+		}
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
 		if (state.anchor != null)

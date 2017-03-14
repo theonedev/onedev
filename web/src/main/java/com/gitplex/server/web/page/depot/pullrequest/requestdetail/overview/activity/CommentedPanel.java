@@ -23,11 +23,11 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
+import com.gitplex.server.web.behavior.markdown.ResponsiveTaskBehavior;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.link.AccountLink;
-import com.gitplex.server.web.component.markdown.MarkdownEditSupport;
-import com.gitplex.server.web.component.markdown.MarkdownViewer;
+import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.SinceChangesLink;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -66,33 +66,37 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 	private Component newViewer() {
 		Fragment viewer = new Fragment("body", "viewFrag", this);
 		
-		MarkdownEditSupport editSupport;
+		ResponsiveTaskBehavior responsiveTaskBehavior;
 		if (SecurityUtils.canModify(getComment())) {
-			editSupport = new MarkdownEditSupport() {
+			responsiveTaskBehavior = new ResponsiveTaskBehavior() {
 
 				@Override
-				public void setContent(String content) {
-					getComment().setContent(content);
-					GitPlex.getInstance(PullRequestCommentManager.class).save(getComment());				
-				}
-
-				@Override
-				public long getVersion() {
+				public long getContentVersion() {
 					return getComment().getVersion();
 				}
 				
 			};
 		} else {
-			editSupport = null;
+			responsiveTaskBehavior = null;
 		}
-		viewer.add(new MarkdownViewer("content", new AbstractReadOnlyModel<String>() {
+		viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
 			@Override
 			public String getObject() {
 				return getComment().getContent();
 			}
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public void setObject(String object) {
+				getComment().setContent(object);
+				GitPlex.getInstance(PullRequestCommentManager.class).save(getComment());				
+			}
 			
-		}, editSupport));
+		}, responsiveTaskBehavior));
 		
 		WebMarkupContainer actions = new WebMarkupContainer("actions");
 		actions.setVisible(SecurityUtils.canModify(getComment()));

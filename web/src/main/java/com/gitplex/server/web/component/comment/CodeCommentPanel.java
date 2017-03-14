@@ -23,7 +23,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
@@ -49,10 +49,10 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ClassUtils;
 import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
+import com.gitplex.server.web.behavior.markdown.ResponsiveTaskBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.AccountLink;
-import com.gitplex.server.web.component.markdown.MarkdownEditSupport;
-import com.gitplex.server.web.component.markdown.MarkdownViewer;
+import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.util.DateUtils;
@@ -156,34 +156,38 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}.add(AttributeAppender.append("title", "This comment is added in a different compare context, click to show")));
 
-		MarkdownEditSupport editSupport;
+		ResponsiveTaskBehavior responsiveTaskBehavior;
 		if (SecurityUtils.canModify(getComment())) {
-			editSupport = new MarkdownEditSupport() {
+			responsiveTaskBehavior = new ResponsiveTaskBehavior() {
 
 				@Override
-				public void setContent(String content) {
-					CodeComment comment = getComment();
-					comment.setContent(content);
-					GitPlex.getInstance(CodeCommentManager.class).save(comment);				
-				}
-
-				@Override
-				public long getVersion() {
+				public long getContentVersion() {
 					return getComment().getVersion();
 				}
 				
 			};
 		} else {
-			editSupport = null;
+			responsiveTaskBehavior = null;
 		}
-		commentContainer.add(new MarkdownViewer("content", new AbstractReadOnlyModel<String>() {
+		commentContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
 			@Override
 			public String getObject() {
 				return getComment().getContent();
 			}
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public void setObject(String object) {
+				CodeComment comment = getComment();
+				comment.setContent(object);
+				GitPlex.getInstance(CodeCommentManager.class).save(comment);				
+			}
 			
-		}, editSupport));
+		}, responsiveTaskBehavior));
 
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
 		foot.setVisible(SecurityUtils.canModify(getComment()));
@@ -372,40 +376,46 @@ public abstract class CodeCommentPanel extends Panel {
 		}.add(AttributeAppender.append("title", "This reply is added in a different compare context, click to show")));		
 
 		if (StringUtils.isNotBlank(activity.getNote())) {
-			MarkdownEditSupport editSupport;
+			ResponsiveTaskBehavior responsiveTaskBehavior;
 			if (SecurityUtils.canModify(getComment())) {
-				editSupport = new MarkdownEditSupport() {
+				responsiveTaskBehavior = new ResponsiveTaskBehavior() {
 					
 					@Override
-					public void setContent(String content) {
-						if (identity.clazz == CodeCommentReply.class) {
-							CodeCommentReply reply = (CodeCommentReply) activity;
-							reply.setContent(content);
-							GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);				
-						} else {
-							CodeCommentStatusChange statusChange = (CodeCommentStatusChange) activity;
-							statusChange.setNote(content);
-							GitPlex.getInstance(CodeCommentStatusChangeManager.class).save(statusChange);				
-						}
-					}
-					
-					@Override
-					public long getVersion() {
+					public long getContentVersion() {
 						return identity.getActivity().getVersion();
 					}
-					
+
 				};
 			} else {
-				editSupport = null;
+				responsiveTaskBehavior = null;
 			}
-			activityContainer.add(new MarkdownViewer("content", new LoadableDetachableModel<String>() {
+			activityContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
 				@Override
-				protected String load() {
+				public void detach() {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public String getObject() {
 					return identity.getActivity().getNote();
 				}
+
+				@Override
+				public void setObject(String object) {
+					if (identity.clazz == CodeCommentReply.class) {
+						CodeCommentReply reply = (CodeCommentReply) activity;
+						reply.setContent(object);
+						GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);				
+					} else {
+						CodeCommentStatusChange statusChange = (CodeCommentStatusChange) activity;
+						statusChange.setNote(object);
+						GitPlex.getInstance(CodeCommentStatusChangeManager.class).save(statusChange);				
+					}
+				}
 				
-			}, editSupport));			
+			}, responsiveTaskBehavior));			
 			
 		} else {
 			activityContainer.add(new Label("content", "<div class='no-note'>No note</div>").setEscapeModelStrings(false));

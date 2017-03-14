@@ -32,13 +32,13 @@ import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.PullRequestInfoManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.manager.support.BatchWorker;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityPersisted;
+import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.concurrent.Prioritized;
 

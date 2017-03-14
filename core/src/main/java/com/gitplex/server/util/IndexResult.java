@@ -1,4 +1,4 @@
-package com.gitplex.server.manager.support;
+package com.gitplex.server.util;
 
 public class IndexResult {
 	

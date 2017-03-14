@@ -32,13 +32,13 @@ import com.gitplex.server.manager.CodeCommentInfoManager;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.manager.support.BatchWorker;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.concurrent.Prioritized;
 

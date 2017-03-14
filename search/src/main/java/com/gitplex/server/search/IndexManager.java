@@ -2,8 +2,8 @@ package com.gitplex.server.search;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.manager.support.IndexResult;
 import com.gitplex.server.model.Depot;
+import com.gitplex.server.util.IndexResult;
 
 public interface IndexManager {
 	

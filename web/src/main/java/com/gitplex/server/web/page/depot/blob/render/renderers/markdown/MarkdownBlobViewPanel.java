@@ -5,7 +5,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.git.Blob;
-import com.gitplex.server.web.component.markdown.MarkdownViewer;
+import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.view.BlobViewPanel;
 
