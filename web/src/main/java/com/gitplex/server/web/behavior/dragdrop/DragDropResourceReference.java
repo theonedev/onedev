@@ -7,6 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import com.gitplex.server.web.assets.js.jqueryui.JQueryUIResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class DragDropResourceReference extends BaseDependentResourceReference {
@@ -21,7 +22,8 @@ public class DragDropResourceReference extends BaseDependentResourceReference {
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new DragDropCssResourceReference()));
+		dependencies.add(CssHeaderItem.forReference(
+				new BaseDependentCssResourceReference(DragDropResourceReference.class, "dragdrop.css")));
 		return dependencies;
 	}
 

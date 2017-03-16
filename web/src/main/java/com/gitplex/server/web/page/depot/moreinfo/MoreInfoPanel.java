@@ -26,7 +26,7 @@ import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.depotselector.DepotSelector;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;

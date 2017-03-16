@@ -209,15 +209,22 @@ gitplex.server = {
 		}
 	},
 	setupAutoSize: function() {
-		var selector = "textarea:not(.no-autosize)";
-		autosize($(selector));
+		function doAutosize($textarea) {
+			$textarea.each(function() {
+				if ($(this).closest(".no-autosize").length == 0) {
+					autosize($(this));
+				}
+			});
+		}
+		
+		doAutosize($("textarea"));
 		
 		$(document).on("elementReplaced", function(event, componentId) {
 			var $component = $("#" + componentId);
-			var $textarea = $component.find(selector);
-			if ($component.is(selector))
+			var $textarea = $component.find("textarea");
+			if ($component.is("textarea"))
 				$textarea = $textarea.add($component);
-			autosize($textarea);
+			doAutosize($textarea);
 		});
 	},	
 	setupAjaxLoadingIndicator: function() {

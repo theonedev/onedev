@@ -5,12 +5,20 @@
 	margin-right: auto;
 }
 
-.blob-edit .md-editor {
-	border: none;
+.blob-edit .markdown-editor>.body.edit-mode>.input, 
+.blob-edit .markdown-editor>.body.preview-mode>.preview, 
+.blob-edit .markdown-editor>.body.split-mode>.preview {
+	border-bottom: none;
+	border-left: none;
+	border-right: none;
 }
-
-.blob-edit .md-preview {
-	overflow: hidden;
-	height: auto !important;
-	width: auto !important;
+.blob-edit .markdown-editor>.body.split-mode>.input, 
+.blob-edit .markdown-editor>.body>.preview {
+	border-bottom: none;
+	border-left: none;
+}
+.blob-edit .markdown-editor>.body>.input {
+	min-height: none;
+	max-height: none;
+	resize: none;
 }

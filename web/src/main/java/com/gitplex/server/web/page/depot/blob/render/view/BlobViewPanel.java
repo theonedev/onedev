@@ -194,7 +194,7 @@ public abstract class BlobViewPanel extends Panel {
 		
 		response.render(JavaScriptHeaderItem.forReference(new BlobViewResourceReference()));
 		
-		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.server.blobView('%s');", getMarkupId())));
+		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.server.blobView.onDomReady('%s');", getMarkupId())));
 	}
 
 	public BlobRenderContext getContext() {

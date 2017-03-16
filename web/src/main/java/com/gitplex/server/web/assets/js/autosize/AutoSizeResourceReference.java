@@ -13,7 +13,7 @@ public class AutoSizeResourceReference extends JavaScriptResourceReference {
 	private static final long serialVersionUID = 1L;
 
 	public AutoSizeResourceReference() {
-		super(AutoSizeResourceReference.class, "autosize-patched.js");
+		super(AutoSizeResourceReference.class, "autosize.js");
 	}
 
 	@Override

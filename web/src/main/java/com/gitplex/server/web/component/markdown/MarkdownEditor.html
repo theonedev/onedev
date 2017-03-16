@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="markdown-editor autofit">
+		<div class="head clearfix">
+			<div class="btn-group pull-right">
+				<a class="edit active btn btn-default btn-xs" title="Edit"><i class="fa fa-font"></i></a>
+				<a class="preview btn btn-default btn-xs" title="Preview"><i class="fa fa-eye"></i></a>
+				<a class="split btn btn-default btn-xs" title="Split view"><i wicket:id="splitIcon" class="fa fa-columns"></i></a>
+			</div>						
+		</div>
+		<div wicket:id="body" class="body edit-mode clearfix">
+			<textarea wicket:id="input" class="input"></textarea>
+			<div class="preview markdown-rendered"></div>
+		</div>
+	</div>
+</wicket:panel>

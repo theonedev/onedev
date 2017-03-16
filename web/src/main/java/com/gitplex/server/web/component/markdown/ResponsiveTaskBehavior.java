@@ -1,4 +1,4 @@
-package com.gitplex.server.web.behavior.markdown;
+package com.gitplex.server.web.component.markdown;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -15,23 +15,12 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
-import com.vladsch.flexmark.Extension;
-import com.vladsch.flexmark.ast.Node;
+import com.gitplex.server.web.behavior.markdown.MarkdownResourceReference;
+import com.gitplex.server.web.behavior.markdown.SourcePositionTrackExtension;
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
-import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem;
-import com.vladsch.flexmark.html.AttributeProvider;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.html.HtmlRenderer.Builder;
-import com.vladsch.flexmark.html.IndependentAttributeProviderFactory;
-import com.vladsch.flexmark.html.renderer.AttributablePart;
-import com.vladsch.flexmark.html.renderer.NodeRendererContext;
-import com.vladsch.flexmark.util.html.Attributes;
-import com.vladsch.flexmark.util.options.MutableDataHolder;
 
 @SuppressWarnings("serial")
 public abstract class ResponsiveTaskBehavior extends AbstractPostAjaxBehavior {
-
-	private static final String SOURCE_POSITION_DATA_ATTRIBUTE = "sourceposition";
 
 	private static final String TASK_CHECKED = "taskchecked";
 	
@@ -44,7 +33,7 @@ public abstract class ResponsiveTaskBehavior extends AbstractPostAjaxBehavior {
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-		int taskPosition = params.getParameterValue(SOURCE_POSITION_DATA_ATTRIBUTE).toInt();
+		int taskPosition = params.getParameterValue(SourcePositionTrackExtension.DATA_START_ATTRIBUTE).toInt();
 		boolean taskChecked = params.getParameterValue(TASK_CHECKED).toBoolean();
 		String markdown = getComponent().getDefaultModelObjectAsString();
 		String beforeTask = markdown.substring(0, taskPosition);
@@ -71,11 +60,13 @@ public abstract class ResponsiveTaskBehavior extends AbstractPostAjaxBehavior {
 		super.renderHead(component, response);
 		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
 		
-		CharSequence callback = getCallbackFunction(explicit(SOURCE_POSITION_DATA_ATTRIBUTE), explicit(TASK_CHECKED));
+		CharSequence callback = getCallbackFunction(
+				explicit(SourcePositionTrackExtension.DATA_START_ATTRIBUTE), 
+				explicit(TASK_CHECKED));
 		
 		String taskItemClass = GitPlex.getInstance(MarkdownManager.class).getOptions().get(TaskListExtension.ITEM_CLASS);
 		String script = String.format("gitplex.server.markdown.initResponsiveTask('%s', %s, '%s', '%s');", 
-				getComponent().getMarkupId(), callback, taskItemClass, SOURCE_POSITION_DATA_ATTRIBUTE);
+				getComponent().getMarkupId(), callback, taskItemClass, SourcePositionTrackExtension.DATA_START_ATTRIBUTE);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
@@ -86,36 +77,5 @@ public abstract class ResponsiveTaskBehavior extends AbstractPostAjaxBehavior {
 	}
 
 	protected abstract long getContentVersion();
-	
-	public static Extension newMarkdownExtension() {
-		
-		return new HtmlRenderer.HtmlRendererExtension() {
-
-			@Override
-			public void rendererOptions(MutableDataHolder options) {
-			}
-
-			@Override
-			public void extend(Builder rendererBuilder, String rendererType) {
-				rendererBuilder.attributeProviderFactory(new IndependentAttributeProviderFactory() {
-					
-					@Override
-					public AttributeProvider create(NodeRendererContext context) {
-						return new AttributeProvider() {
-
-							@Override
-							public void setAttributes(Node node, AttributablePart part, Attributes attributes) {
-								if (node instanceof TaskListItem) {
-									attributes.addValue("data-" + SOURCE_POSITION_DATA_ATTRIBUTE, String.valueOf(node.getStartOffset()));
-								}
-							}
-							
-						};
-					}
-				});
-			}
-			
-		};
-	}
 	
 }

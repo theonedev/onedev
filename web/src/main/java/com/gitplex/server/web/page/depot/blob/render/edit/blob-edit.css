@@ -29,6 +29,7 @@
 }
 .blob-edit>.body {
 	margin-top: 1px;
+	overflow: auto;
 }
 .blob-edit>.body>.content>.submit, 
 .blob-edit>.body>.commit-options, 

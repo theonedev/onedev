@@ -28,10 +28,6 @@ gitplex.server.sourceView = {
 		$sourceView.data("callback", callback);
 		$sourceView.data("blameMessageCallback", blameMessageCallback);
 		
-		// Hide scroll bar of parent scrollable as we will be using 
-		// CodeMirror scroll bar
-		$sourceView.closest(".scrollable").css("overflow", "visible");
-		
 	    if (mark) {
 	    	gitplex.server.codemirror.mark(cm, mark);
 			$sourceView.data("mark", mark);

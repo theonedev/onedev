@@ -1,6 +1,5 @@
 .commit-option {
 	padding: 20px;
-	overflow: auto;
 }
 .commit-option>.head {
 	font-weight: bold;

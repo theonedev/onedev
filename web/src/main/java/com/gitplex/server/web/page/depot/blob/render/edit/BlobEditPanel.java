@@ -149,7 +149,7 @@ public abstract class BlobEditPanel extends Panel {
 
 		response.render(JavaScriptHeaderItem.forReference(new BlobEditResourceReference()));
 		
-		String script = String.format("gitplex.server.blobEdit.init('%s');", getMarkupId()); 
+		String script = String.format("gitplex.server.blobEdit.onDomReady('%s');", getMarkupId()); 
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

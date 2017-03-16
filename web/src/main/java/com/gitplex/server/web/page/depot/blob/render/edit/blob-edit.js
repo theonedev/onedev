@@ -1,5 +1,5 @@
 gitplex.server.blobEdit = {
-	init: function(containerId) {
+	onDomReady: function(containerId) {
 		var $container = $("#" + containerId);
 		var $blobEdit = $container.children(".blob-edit");
 		var $head = $blobEdit.children(".head");
@@ -12,6 +12,9 @@ gitplex.server.blobEdit = {
 	    $head.find(".save>a").click(function() {
 	    	$body.children(".content").children(".submit").click();
 	    });
+	    
+	    if ($body.find(".autofit").length != 0)
+	    	$body.css("overflow", "visible");
 	    
 	    $blobEdit.on("getViewState", function(e) {
 	    	if ($content.is(":visible"))
@@ -46,13 +49,20 @@ gitplex.server.blobEdit = {
     	var $body = $blobEdit.children(".body");
     	
 		$body.children().hide();
+
 		if ($tab.hasClass("edit")) {
-			$body.children(".content").show().find(".autofit:visible").first().triggerHandler("show");
+			$body.children(".content").show();
 		} else {
-			/*
-			 * Show scroll bar in case it is hidden in edit tab by sub class
-			 */
+			$body.children(".commit-options").show();
+		}
+		if ($body.find(".autofit").length != 0)
+			$body.css("overflow", "visible");
+		else
 			$body.css("overflow", "auto");
+		
+		if ($tab.hasClass("edit")) {
+			$body.children(".content").show();
+		} else {
 			$body.children(".commit-options").show();
 		}
 	},

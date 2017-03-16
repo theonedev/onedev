@@ -2,6 +2,9 @@
 	border-bottom: 1px solid #BBB; 
 	padding: 6px 12px;
 }
+.blob-view>.body {
+	overflow: auto;
+}
 .blob-view>.head>.info {
 	color: #666;
 }

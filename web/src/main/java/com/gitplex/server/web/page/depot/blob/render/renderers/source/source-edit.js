@@ -39,17 +39,6 @@ gitplex.server.sourceEdit = {
 
 		gitplex.server.codemirror.bindKeys(cm);
 		
-		function hideParentScrollBar() {
-			var $scrollable = $sourceEdit.closest(".scrollable");
-			/*
-			 * Hide scroll bar of parent scrollable as we will be using 
-			 * CodeMirror scroll bar
-			 */
-			$scrollable.css("overflow", "visible");
-		}
-		
-		hideParentScrollBar();
-		
 		cm.on("change", function() {
 			$sourceEdit.closest("form").addClass("dirty");
 		});
@@ -71,8 +60,6 @@ gitplex.server.sourceEdit = {
 				cm.setOption("fullScreen", false);
 			cm.setSize($sourceEdit.width(), $sourceEdit.height());
 		});
-		
-		$sourceEdit.on("show", hideParentScrollBar);
 	},
 	onWindowLoad: function(containerId, mark) {
 		var cm = gitplex.server.sourceEdit.getCodeMirror(containerId);

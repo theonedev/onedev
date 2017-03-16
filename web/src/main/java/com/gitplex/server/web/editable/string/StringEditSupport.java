@@ -11,7 +11,7 @@ import com.gitplex.server.util.editable.annotation.Markdown;
 import com.gitplex.server.util.editable.annotation.Multiline;
 import com.gitplex.server.util.editable.annotation.Password;
 import com.gitplex.server.web.component.MultilineLabel;
-import com.gitplex.server.web.component.markdownviewer.MarkdownViewer;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.EditSupport;
 import com.gitplex.server.web.editable.NotDefinedLabel;

@@ -23,7 +23,7 @@ public class MarkdownBlobEditPanel extends BlobEditPanel {
 
 	@Override
 	protected FormComponentPanel<byte[]> newContentEditor(String componentId, byte[] initialContent) {
-		return new MarkdownFormComponent(componentId, initialContent, context.getMode() == Mode.EDIT);
+		return new MarkdownBlobEditor(componentId, initialContent, context.getMode() == Mode.EDIT);
 	}
 
 }

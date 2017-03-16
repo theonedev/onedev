@@ -1,7 +1,10 @@
-package com.gitplex.server.web.component.markdownviewer;
+package com.gitplex.server.web.component.markdown;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
@@ -9,8 +12,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.manager.MarkdownManager;
-import com.gitplex.server.web.behavior.markdown.MarkdownInitRenderedBehavior;
-import com.gitplex.server.web.behavior.markdown.ResponsiveTaskBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -44,13 +45,34 @@ public class MarkdownViewer extends GenericPanel<String> {
 					return null;
 				}
 			}
-		}).setEscapeModelStrings(false));
+			
+		}) {
 
-		add(new MarkdownInitRenderedBehavior());
-		if (responsiveTaskBehavior != null)
-			add(responsiveTaskBehavior);
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				if (responsiveTaskBehavior != null)
+					add(responsiveTaskBehavior);
+			}
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				String script = String.format("gitplex.server.markdown.initRendered($('#%s'));", getMarkupId(true));
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		}.setEscapeModelStrings(false));
 		
 		setOutputMarkupId(true);
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
 	}
 
 }

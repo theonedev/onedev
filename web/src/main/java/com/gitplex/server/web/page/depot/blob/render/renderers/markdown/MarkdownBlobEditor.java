@@ -3,20 +3,19 @@ package com.gitplex.server.web.page.depot.blob.render.renderers.markdown;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.server.web.behavior.markdown.MarkdownBehavior;
+import com.gitplex.server.web.component.markdown.MarkdownEditor;
 import com.google.common.base.Charsets;
 
 @SuppressWarnings("serial")
-public class MarkdownFormComponent extends FormComponentPanel<byte[]> {
+class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 	private final boolean autoFocus;
 	
-	private TextArea<String> input;
+	private MarkdownEditor input;
 	
-	public MarkdownFormComponent(String id, byte[] initialContent, boolean autoFocus) {
+	public MarkdownBlobEditor(String id, byte[] initialContent, boolean autoFocus) {
 		super(id, Model.of(initialContent));
 		this.autoFocus = autoFocus;
 	}
@@ -25,10 +24,8 @@ public class MarkdownFormComponent extends FormComponentPanel<byte[]> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new TextArea<String>("input", Model.of(new String(getModelObject(), Charsets.UTF_8)));
-		
-		input.add(new MarkdownBehavior());
-		add(input);
+		add(input = new MarkdownEditor("input", Model.of(new String(getModelObject(), Charsets.UTF_8)), false));
+		input.setOutputMarkupId(true);
 	}
 
 	@Override
@@ -44,7 +41,7 @@ public class MarkdownFormComponent extends FormComponentPanel<byte[]> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		if (autoFocus) {
-			String script = String.format("$('#%s').focus();", input.getMarkupId());
+			String script = String.format("$('#%s textarea').focus();", input.getMarkupId());
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		}
 	}

@@ -337,51 +337,6 @@ gitplex.server.markdown = {
 				$upload.next().click();
 			}
 		})
-	}, 
-	
-	getRendered: function(containerId) {
-		var $container = $("#" + containerId);
-		if ($container.is("textarea") || $container.is("input")) {
-			return $container.nextAll(".md-preview");
-		} else {
-			return $container.find(".md-preview");
-		}
-	},
-	
-	initRendered: function(containerId) {
-		var $rendered = gitplex.server.markdown.getRendered(containerId);
-		
-		gitplex.server.highlight($rendered);
-
-		$rendered.find("h1, h2, h3, h4, h5, h6").each(function() {
-			var $this = $(this);
-			var $anchor = $this.find(">a[name]");
-			if ($anchor.length != 0) {
-				$this.addClass("permalinked").append($anchor.html());
-				$anchor.empty();
-				$this.append("<a href='#" + $anchor.attr("name") + "' class='permalink'><i class='fa fa-link'></i></a>");
-			} else {
-				var anchorName = encodeURIComponent($this.text());
-				$this.addClass("permalinked").prepend("<a name='" + anchorName + "'></a>");
-				$this.append("<a href='#" + anchorName + "' class='permalink'><i class='fa fa-link'></i></a>");
-			}
-		});
-		
-		$rendered.find("a").click(function() {
-			gitplex.server.viewState.getFromViewAndSetToHistory();
-		});
-	},
-	
-	initResponsiveTask: function(containerId, taskCallback, taskClass, 
-			taskSourcePositionDataAttribute) {
-		var $rendered = gitplex.server.markdown.getRendered(containerId);
-		
-		var $task = $rendered.find("." + taskClass);
-		var $taskCheckbox = $task.children("input");
-		$taskCheckbox.removeAttr("disabled").removeAttr("readonly");
-		$taskCheckbox.change(function() {
-			taskCallback($(this).parent().data(taskSourcePositionDataAttribute), $(this).prop("checked"));
-		});	
 	}
 	
 };

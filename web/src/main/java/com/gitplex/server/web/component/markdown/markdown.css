@@ -1,0 +1,115 @@
+.markdown-editor>.head {
+	padding: 4px 8px;
+}
+.markdown-editor>.body>.preview {
+	border: 1px solid #BBB;
+	padding: 8px;
+	background: white;
+	display: none;
+}
+.markdown-editor>.body>.preview>.markdown-rendered>.message {
+	text-align: center;
+	font-size: 24px;
+	font-style: italic;
+}
+.markdown-editor>.body>.input {
+	float: left;
+	width: 100%;
+	resizabe: vertical;
+	border-radius: 0;
+	overflow: auto;
+}
+.markdown-editor>.body>.preview {
+	float: left;
+	width: 49%;
+	overflow: auto;
+}
+.markdown-editor>.body>.preview .focusing {
+	background: #FCF5DA;
+}
+.markdown-editor>.body.compact>* {
+	float: none;
+	width: 100%;
+}
+
+.markdown-rendered {
+	font-size: 16px;
+	line-height: 1.5;
+}
+.markdown-rendered li {
+	margin-bottom: 6px;
+}
+.markdown-rendered .emoji {
+	width: 20px; 
+	height: 20px;
+}
+.markdown-rendered table {
+	width: auto; 
+	margin-bottom: 10px;
+}
+.markdown-rendered table th, .markdown-rendered table td {
+	padding: 4px 8px; 
+	border: 1px solid #C8C8C8;
+}
+.markdown-rendered table tr:nth-child(even) td {
+	background: #F5F5F5;
+}
+.markdown-rendered h1, .markdown-rendered h2, .markdown-rendered h3, 
+.markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
+	font-weight: bold;
+}
+.markdown-rendered h1 a, .markdown-rendered h2 a, .markdown-rendered h3 a, 
+.markdown-rendered h4 a, .markdown-rendered h5 a, .markdown-rendered h6 a {
+	color: #333;
+	text-decoration: none;
+}
+.markdown-rendered blockquote {
+	font-size: 15px; 
+	border-left: 4px solid #ddd; 
+	color: #777; 
+	padding: 0 16px;
+}
+.markdown-rendered code {
+	color: #333;
+	background: rgba(0, 0, 0, 0.04);
+}
+.markdown-rendered img {
+	max-width: 100%;
+}
+.markdown-rendered .task-list-item {
+	list-style: none;
+	margin-left: -21px;
+}
+.markdown-rendered .task-list-item input {
+	margin-right: 8px;
+}
+.markdown-rendered .permalinked a.permalink {
+	display: none;
+}
+.markdown-rendered .permalinked:hover a.permalink {
+	display: inline;
+}
+.markdown-rendered h1.permalinked a.permalink {
+	margin-left: 12px;
+	font-size: 24px;
+}
+.markdown-rendered h2.permalinked a.permalink {
+	margin-left: 10px;
+	font-size: 20px;
+}
+.markdown-rendered h3.permalinked a.permalink {
+	margin-left: 8px;
+	font-size: 16px;
+}
+.markdown-rendered h4.permalinked a.permalink {
+	margin-left: 6px;
+	font-size: 14px;
+}
+.markdown-rendered h5.permalinked a.permalink {
+	margin-left: 4px;
+	font-size: 12px;
+}
+.markdown-rendered h6.permalinked a.permalink {
+	margin-left: 2px;
+	font-size: 10px;
+}

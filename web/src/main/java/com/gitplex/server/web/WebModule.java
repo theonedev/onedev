@@ -24,7 +24,7 @@ import com.gitplex.server.util.markdown.HtmlTransformer;
 import com.gitplex.server.util.validation.AccountNameReservation;
 import com.gitplex.server.util.validation.DepotNameReservation;
 import com.gitplex.server.util.validation.TeamNameReservation;
-import com.gitplex.server.web.behavior.markdown.ResponsiveTaskBehavior;
+import com.gitplex.server.web.behavior.markdown.SourcePositionTrackExtension;
 import com.gitplex.server.web.behavior.markdown.emoji.EmojiExtension;
 import com.gitplex.server.web.component.comment.MentionTransformer;
 import com.gitplex.server.web.component.comment.PullRequestTransformer;
@@ -86,7 +86,7 @@ public class WebModule extends AbstractPluginModule {
 		contributeFromPackage(BlobRendererContribution.class, BlobRendererContribution.class);
 
 		contribute(Extension.class, new EmojiExtension());
-		contribute(Extension.class, ResponsiveTaskBehavior.newMarkdownExtension());
+		contribute(Extension.class, new SourcePositionTrackExtension());
 		contribute(HtmlTransformer.class, new MentionTransformer());
 		contribute(HtmlTransformer.class, new PullRequestTransformer());
 

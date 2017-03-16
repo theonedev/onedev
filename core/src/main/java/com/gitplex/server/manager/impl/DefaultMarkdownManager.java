@@ -110,6 +110,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	public String render(String markdown, boolean postProcess) {
 		Node document = parser.parse(markdown);
 		String html = htmlRenderer.render(document);
+
 		if (postProcess)
 			html = postProcess(html);
 		return html;
