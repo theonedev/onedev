@@ -6,14 +6,14 @@
     $.fn.doneEvents = function(monitorEvents, callback, timeout) {
     	if (timeout == undefined)
     		timeout = 250;
+    	var doneTimer;
 		this.on(monitorEvents, function(e) {
 			var $this = $(this);
-			var doneTimer = $this.data("doneTimer");
 			if (doneTimer) 
 				clearTimeout(doneTimer);
-			$this.data("doneTimer", setTimeout(function() {
+			doneTimer = setTimeout(function() {
 				callback.call($this[0], e);
-			}, timeout));
+			}, timeout);
 		});
     	
     	return this;

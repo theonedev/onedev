@@ -126,7 +126,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 
 		for (HtmlTransformer transformer : htmlTransformers)
 			transformer.transform(body);
-		return body.html();
+		return body.body().html();
 	}
 
 	@Override

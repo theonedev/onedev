@@ -17,6 +17,7 @@
 	width: 100%;
 	resizabe: vertical;
 	border-radius: 0;
+	border: 1px solid #BBB;
 	overflow: auto;
 }
 .markdown-editor>.body>.preview {

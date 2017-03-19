@@ -69,17 +69,56 @@ gitplex.server.markdown = {
 		$input.on("autosize:resized", function() {
 			$preview.outerHeight($input.outerHeight());
 		});
-		
+
 		$input.doneEvents("input", function() {
 			if ($preview.is(":visible")) {
 				callback("render", $input.val());
 			}
 		}, 500);
 		
-		$input.doneEvents("keydown click focus", function() {
-			if ($preview.is(":visible"))
+		$input.doneEvents("keydown", function(e) {
+			if (e.keyCode>=33 && e.keyCode<=40 && $preview.is(":visible")) {
+				// Only sync preview scroll when we moved cursor
 				gitplex.server.markdown.syncPreviewScroll(containerId);
+			}
 		}, 500);
+		
+		$input.doneEvents("click focus", function(e) {
+			if ($preview.is(":visible")) {
+				gitplex.server.markdown.syncPreviewScroll(containerId);
+			}
+		}, 500);
+		
+		/*
+		 * Padding same leading spaces as last line when add a new line. This is useful when 
+		 * add several list items 
+		 */
+		$input.on("keydown", function(e) {
+			if (e.keyCode == 13) {
+				e.preventDefault();
+				var input = $input.val();
+				var caret = $input.caret();
+				var inputBeforeCaret = input.substring(0, caret);
+				var inputAfterCaret = input.substring(caret);
+				var lastLineBreak = inputBeforeCaret.lastIndexOf('\n');
+				var spaces = "";
+				for (var i=lastLineBreak+1; i<inputBeforeCaret.length; i++) {
+					if (inputBeforeCaret[i] == ' ') {
+						spaces += " ";
+					} else {
+						break;
+					}
+				}
+				if (lastLineBreak + spaces.length + 1 == inputBeforeCaret.length) {
+					$input.val(inputBeforeCaret + "\n" + inputAfterCaret);
+					$input.caret(caret+1);
+				} else {
+					$input.val(inputBeforeCaret + "\n" + spaces + inputAfterCaret);
+					$input.caret(caret + 1 + spaces.length);
+				}
+				$input.trigger("input", e);
+			}
+		});
 		
 		$markdownEditor.on("autofit", function(e, width, height) {
 			height -= $head.outerHeight();
@@ -173,6 +212,7 @@ gitplex.server.markdown = {
 		} else {
 			scrollTop = 0;
 		}
+
 		$preview.scrollTop(scrollTop);
     },
 	onWindowLoad: function(containerId) {
