@@ -7,11 +7,6 @@
 	background: white;
 	display: none;
 }
-.markdown-editor>.body>.preview>.markdown-rendered>.message {
-	text-align: center;
-	font-size: 24px;
-	font-style: italic;
-}
 .markdown-editor>.body>.input {
 	float: left;
 	width: 100%;

@@ -45,7 +45,7 @@ import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.RunTaskBehavior;
-import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
+import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.blob.search.result.SearchResultPanel;
 
@@ -89,7 +89,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 			protected void populateItem(ListItem<QueryHit> item) {
 				final QueryHit hit = item.getModelObject();
 				item.add(hit.renderIcon("icon"));
-				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
+				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -117,7 +117,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 			
 		});
 		
-		content.add(new PreventDefaultAjaxLink<Void>("findOccurrences") {
+		content.add(new ViewStateAwareAjaxLink<Void>("findOccurrences") {
 
 			private RunTaskBehavior runTaskBehavior;
 			
