@@ -139,3 +139,7 @@
 .CodeMirror-activeline .CodeMirror-annotation {
 	background: #E8F2FE;	
 }
+
+.source-view .comment textarea {
+	max-height: 250px;
+}

@@ -393,9 +393,6 @@ gitplex.server = {
 			else
 				return undefined;
 		},
-		getFromCarryOver: function() {
-			return gitplex.server.viewState.carryOver;
-		},
 		setToHistory: function(viewState) {
 			var state = history.state;
 			if (!state)
@@ -411,15 +408,9 @@ gitplex.server = {
 			var viewState = gitplex.server.viewState.getFromView();
 			if (viewState)
 				gitplex.server.viewState.setToHistory(viewState);
-			gitplex.server.viewState.carryOver = gitplex.server.viewState.getFromHistory();			
 		},
 		getFromHistoryAndSetToView: function() {
 			var viewState = gitplex.server.viewState.getFromHistory();
-			if (viewState)
-				gitplex.server.viewState.setToView(viewState);
-		},
-		getFromCarryOverAndSetToView: function() {
-			var viewState = gitplex.server.viewState.getFromCarryOver();
 			if (viewState)
 				gitplex.server.viewState.setToView(viewState);
 		}

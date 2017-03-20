@@ -2,26 +2,13 @@ package com.gitplex.server.web.component.comment;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
@@ -31,132 +18,62 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
-import com.gitplex.server.web.behavior.markdown.MarkdownBehavior;
-import com.gitplex.server.web.util.avatar.AvatarManager;
+import com.gitplex.server.web.component.markdown.MarkdownEditor;
+import com.gitplex.server.web.component.markdown.PullRequestReferenceSupport;
+import com.gitplex.server.web.component.markdown.UserMentionSupport;
 
 @SuppressWarnings("serial")
-public abstract class CommentInput extends TextArea<String> {
+public abstract class CommentInput extends MarkdownEditor {
 
-	public CommentInput(String id, IModel<String> contentModel) {
-		super(id, contentModel);
+	public CommentInput(String id, IModel<String> model, boolean compactMode) {
+		super(id, model, compactMode);
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		add(new MarkdownBehavior() {
+	protected UserMentionSupport getUserMentionSupport() {
+		return new UserMentionSupport() {
+
+			@Override
+			public List<Account> findUsers(String query, int count) {
+				List<Account> users = new ArrayList<>();
+				for (Account user: SecurityUtils.findUsersCan(getDepot(), DepotPrivilege.READ)) {
+					if (users.size() < count) {
+						if (StringUtils.deleteWhitespace(user.getName()).toLowerCase().contains(query) 
+								|| user.getFullName() != null && StringUtils.deleteWhitespace(user.getFullName()).toLowerCase().contains(query)) {
+							users.add(user);
+						}
+					} else {
+						break;
+					}
+				}
+				users.sort(Comparator.comparing(Account::getName));
+				return users;
+			}
 			
+		};
+	}
+
+	@Override
+	protected PullRequestReferenceSupport getPullRequestReferenceSupport() {
+		return new PullRequestReferenceSupport() {
+
 			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				String type = params.getParameterValue("type").toString();
-				
-				if (type.equals("userQuery")) {
-					String userQuery = params.getParameterValue("param").toOptionalString();
-
-					AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-					List<Map<String, String>> userList = new ArrayList<>();
-					for (Account user: queryUsers(userQuery, ATWHO_LIMIT)) {
-						Map<String, String> userMap = new HashMap<>();
-						userMap.put("name", user.getName());
-						if (user.getFullName() != null)
-							userMap.put("fullName", user.getFullName());
-						if (user.getNoSpaceFullName() != null)
-							userMap.put("searchKey", user.getNoSpaceName() + " " + user.getNoSpaceFullName());
-						else
-							userMap.put("searchKey", user.getNoSpaceName());
-						String avatarUrl = avatarManager.getAvatarUrl(user);
-						userMap.put("avatarUrl", avatarUrl);
-						userList.add(userMap);
-					}
-					
-					String json;
-					try {
-						json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(userList);
-					} catch (JsonProcessingException e) {
-						throw new RuntimeException(e);
-					}
-					String script = String.format("$('#%s').data('atWhoUserRenderCallback')(%s);",
-							getComponent().getMarkupId(), json);
-					target.appendJavaScript(script);
-				} else if (type.equals("requestQuery")) {
-					String requestQuery = params.getParameterValue("param").toOptionalString();
-
-					List<Map<String, String>> requestList = new ArrayList<>();
-					for (PullRequest request: queryRequests(requestQuery, ATWHO_LIMIT)) {
-						Map<String, String> requestMap = new HashMap<>();
-						requestMap.put("requestNumber", request.getNumberStr());
-						requestMap.put("requestTitle", request.getTitle());
-						requestMap.put("searchKey", request.getNumberStr() + " " + request.getNoSpaceTitle());
-						requestList.add(requestMap);
-					}
-					
-					String json;
-					try {
-						json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(requestList);
-					} catch (JsonProcessingException e) {
-						throw new RuntimeException(e);
-					}
-					String script = String.format("$('#%s').data('atWhoRequestRenderCallback')(%s);", 
-							getComponent().getMarkupId(), json);
-					target.appendJavaScript(script);
-				} else {
-					super.respond(target);
+			public List<PullRequest> findRequests(String query, int count) {
+				EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+				criteria.add(Restrictions.eq("targetDepot", getDepot()));
+				if (StringUtils.isNotBlank(query)) {
+					query = StringUtils.deleteWhitespace(query);
+					criteria.add(Restrictions.or(
+							Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
+							Restrictions.ilike("numberStr", query, MatchMode.START)));
 				}
+				criteria.addOrder(Order.desc("number"));
+				return GitPlex.getInstance(Dao.class).findRange(criteria, 0, count);
 			}
-
-			@Override
-			public AttachmentSupport getAttachmentSupport() {
-				return CommentInput.this.getAttachmentSupport();
-			}
-
-			@Override
-			public void renderHead(Component component, IHeaderResponse response) {
-				super.renderHead(component, response);
-				
-				response.render(JavaScriptHeaderItem.forReference(new CommentInputResourceReference()));
-				String script = String.format("gitplex.server.comment('%s', %s, %s);", 
-						component.getMarkupId(true), ATWHO_LIMIT,
-						getCallbackFunction(CallbackParameter.explicit("type"), CallbackParameter.explicit("param")));
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-
-		});
-	}
-	
-	protected List<Account> queryUsers(String query, int count) {
-		List<Account> users = new ArrayList<>();
-		for (Account user: SecurityUtils.findUsersCan(getDepot(), DepotPrivilege.READ)) {
-			if (users.size() < count) {
-				if (StringUtils.deleteWhitespace(user.getName()).toLowerCase().contains(query) 
-						|| user.getFullName() != null && StringUtils.deleteWhitespace(user.getFullName()).toLowerCase().contains(query)) {
-					users.add(user);
-				}
-			} else {
-				break;
-			}
-		}
-		users.sort(Comparator.comparing(Account::getName));
-		return users;
+			
+		};
 	}
 
-	protected List<PullRequest> queryRequests(String query, int count) {
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(Restrictions.eq("targetDepot", getDepot()));
-		if (StringUtils.isNotBlank(query)) {
-			query = StringUtils.deleteWhitespace(query);
-			criteria.add(Restrictions.or(
-					Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
-					Restrictions.ilike("numberStr", query, MatchMode.START)));
-		}
-		criteria.addOrder(Order.desc("number"));
-		return GitPlex.getInstance(Dao.class).findRange(criteria, 0, count);
-	}
-	
-	protected abstract AttachmentSupport getAttachmentSupport();
-	
 	protected abstract Depot getDepot();
 	
 }

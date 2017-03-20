@@ -64,7 +64,7 @@ gitplex.server.sourceEdit = {
 	onWindowLoad: function(containerId, mark) {
 		var cm = gitplex.server.sourceEdit.getCodeMirror(containerId);
 		if (mark && gitplex.server.viewState.getFromHistory() === undefined 
-				&& gitplex.server.viewState.getFromCarryOver() === undefined) {
+				&& gitplex.server.viewState.carryOver === undefined) {
 			gitplex.server.codemirror.scrollTo(cm, mark);					
 		}
 	},

@@ -5,14 +5,20 @@
 	margin-right: auto;
 }
 
-.blob-edit .markdown-editor>.body.edit-mode>.input, 
-.blob-edit .markdown-editor>.body.preview-mode>.preview, 
-.blob-edit .markdown-editor>.body.split-mode>.preview {
+.blob-edit .markdown-editor>.head {
+	padding: 8px;
+} 
+.blob-edit .markdown-editor>.body>* {
+	border-radius: 0 !important;
+} 
+.blob-edit .markdown-editor.edit-mode>.body>.input, 
+.blob-edit .markdown-editor.preview-mode>.body>.preview, 
+.blob-edit .markdown-editor.split-mode>.body>.preview {
 	border-bottom: none;
 	border-left: none;
 	border-right: none;
 }
-.blob-edit .markdown-editor>.body.split-mode>.input, 
+.blob-edit .markdown-editor.split-mode>.body>.input, 
 .blob-edit .markdown-editor>.body>.preview {
 	border-bottom: none;
 	border-left: none;

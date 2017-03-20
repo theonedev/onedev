@@ -1,4 +1,4 @@
-package com.gitplex.server.web.behavior.markdown.emoji;
+package com.gitplex.server.web.component.markdown.emoji;
 
 import com.vladsch.flexmark.ast.CustomNode;
 import com.vladsch.flexmark.ast.DelimitedNode;

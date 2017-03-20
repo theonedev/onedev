@@ -22,12 +22,12 @@ import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.markdown.AttachmentSupport;
+import com.gitplex.server.web.component.markdown.ContentVersionSupport;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
-import com.gitplex.server.web.component.markdown.ResponsiveTaskBehavior;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.SinceChangesLink;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -66,18 +66,18 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 	private Component newViewer() {
 		Fragment viewer = new Fragment("body", "viewFrag", this);
 		
-		ResponsiveTaskBehavior responsiveTaskBehavior;
+		ContentVersionSupport contentVersionSuppport;
 		if (SecurityUtils.canModify(getComment())) {
-			responsiveTaskBehavior = new ResponsiveTaskBehavior() {
+			contentVersionSuppport = new ContentVersionSupport() {
 
 				@Override
-				public long getContentVersion() {
+				public long getVersion() {
 					return getComment().getVersion();
 				}
 				
 			};
 		} else {
-			responsiveTaskBehavior = null;
+			contentVersionSuppport = null;
 		}
 		viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -96,7 +96,7 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 				GitPlex.getInstance(PullRequestCommentManager.class).save(getComment());				
 			}
 			
-		}, responsiveTaskBehavior));
+		}, contentVersionSuppport));
 		
 		WebMarkupContainer actions = new WebMarkupContainer("actions");
 		actions.setVisible(SecurityUtils.canModify(getComment()));
@@ -113,7 +113,7 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
-				CommentInput input = new CommentInput("input", Model.of(getComment().getContent())) {
+				CommentInput input = new CommentInput("input", Model.of(getComment().getContent()), false) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {

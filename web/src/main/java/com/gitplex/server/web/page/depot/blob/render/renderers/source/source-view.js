@@ -149,7 +149,7 @@ gitplex.server.sourceView = {
 	},
 	onWindowLoad: function(mark) {
 		if (mark && gitplex.server.viewState.getFromHistory() === undefined
-				&& gitplex.server.viewState.getFromCarryOver() === undefined) {
+				&& gitplex.server.viewState.carryOver === undefined) {
 			var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 			gitplex.server.codemirror.scrollTo(cm, mark);
 		}		

@@ -17,7 +17,7 @@ import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
+import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.util.resource.AttachmentResource;
 import com.gitplex.server.web.util.resource.AttachmentResourceReference;
 import com.google.common.base.Preconditions;

@@ -65,13 +65,13 @@ import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.model.support.IntegrationPreview;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
@@ -91,6 +91,7 @@ import com.gitplex.server.web.websocket.PullRequestChangedRegion;
 import com.gitplex.server.web.websocket.WebSocketRegion;
 import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -654,7 +655,7 @@ public abstract class RequestDetailPage extends DepotPage {
 		Preconditions.checkNotNull(source);
 		
 		FormComponent<String> noteInput;
-		form.add(noteInput = new CommentInput("note", Model.of("")) {
+		form.add(noteInput = new CommentInput("note", Model.of(""), false) {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
@@ -666,9 +667,13 @@ public abstract class RequestDetailPage extends DepotPage {
 			protected Depot getDepot() {
 				return requestModel.getObject().getTargetDepot();
 			}
+
+			@Override
+			protected List<AttributeModifier> getInputModifiers() {
+				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a note"));
+			}
 			
 		});
-		noteInput.add(AttributeModifier.replace("placeholder", "Leave a note"));
 		form.add(operation.newHinter("hint", request));
 		form.add(new NotificationPanel("feedback", form));
 		form.add(new AjaxButton("submit") {

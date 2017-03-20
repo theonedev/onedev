@@ -1,4 +1,4 @@
-package com.gitplex.server.web.behavior.markdown.emoji;
+package com.gitplex.server.web.component.markdown.emoji;
 
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;

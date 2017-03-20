@@ -23,13 +23,13 @@ import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.markdown.AttachmentSupport;
+import com.gitplex.server.web.component.markdown.ContentVersionSupport;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
-import com.gitplex.server.web.component.markdown.ResponsiveTaskBehavior;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.SinceChangesLink;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -48,18 +48,18 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 		
 		String note = getStatusChange().getNote();
 		if (StringUtils.isNotBlank(note)) {
-			ResponsiveTaskBehavior responsiveTaskBehavior;
+			ContentVersionSupport contentVersionSupport;
 			if (SecurityUtils.canModify(getStatusChange())) {
-				responsiveTaskBehavior = new ResponsiveTaskBehavior() {
+				contentVersionSupport = new ContentVersionSupport() {
 
 					@Override
-					public long getContentVersion() {
+					public long getVersion() {
 						return getStatusChange().getVersion();
 					}
 					
 				};
 			} else {
-				responsiveTaskBehavior = null;
+				contentVersionSupport = null;
 			}
 			viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -78,7 +78,7 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 					GitPlex.getInstance(PullRequestStatusChangeManager.class).save(getStatusChange());				
 				}
 
-			}, responsiveTaskBehavior));
+			}, contentVersionSupport));
 		} else {
 			viewer.add(new Label("content", "<i>No note</i>").setEscapeModelStrings(false));
 		}
@@ -100,7 +100,7 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 				form.add(feedback);
 				
 				long lastVersion = getStatusChange().getVersion();
-				CommentInput input = new CommentInput("input", Model.of(getStatusChange().getNote())) {
+				CommentInput input = new CommentInput("input", Model.of(getStatusChange().getNote()), false) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {

@@ -1,4 +1,4 @@
-package com.gitplex.server.web.behavior.markdown;
+package com.gitplex.server.web.component.markdown;
 
 import java.io.IOException;
 import java.net.URLDecoder;

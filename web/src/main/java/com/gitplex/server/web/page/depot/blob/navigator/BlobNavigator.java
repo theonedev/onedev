@@ -1,8 +1,6 @@
 package com.gitplex.server.web.page.depot.blob.navigator;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,13 +35,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.git.BlobIdentFilter;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.BlobIcon;
@@ -55,7 +49,6 @@ import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 @SuppressWarnings("serial")
@@ -162,27 +155,7 @@ public class BlobNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getRoots() {
-								Repository repository = context.getDepot().getRepository();
-								try (RevWalk revWalk = new RevWalk(repository)) {
-									RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-									TreeWalk treeWalk;
-									if (blobIdent.path != null) {
-										treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(repository, blobIdent.path, revTree));
-										treeWalk.enterSubtree();
-									} else {
-										treeWalk = new TreeWalk(repository);
-										treeWalk.addTree(revTree);
-									}
-									treeWalk.setRecursive(false);
-									
-									List<BlobIdent> roots = new ArrayList<>();
-									while (treeWalk.next()) 
-										roots.add(new BlobIdent(context.getBlobIdent().revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
-									Collections.sort(roots);
-									return roots.iterator();
-								} catch (IOException e) {
-									throw new RuntimeException(e);
-								}
+								return context.getDepot().getChildren(blobIdent, BlobIdentFilter.ALL).iterator();
 							}
 
 							@Override
@@ -192,7 +165,7 @@ public class BlobNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getChildren(BlobIdent blobIdent) {
-								return BlobNavigator.this.getChildren(blobIdent).iterator();
+								return context.getDepot().getChildren(blobIdent, BlobIdentFilter.ALL).iterator();
 							}
 
 							@Override
@@ -212,7 +185,7 @@ public class BlobNavigator extends Panel {
 							public void expand(BlobIdent blobIdent) {
 								super.expand(blobIdent);
 								
-								List<BlobIdent> children = getChildren(blobIdent);
+								List<BlobIdent> children = context.getDepot().getChildren(blobIdent, BlobIdentFilter.ALL);
 								if (children.size() == 1 && children.get(0).isTree()) 
 									expand(children.get(0));
 							}
@@ -330,28 +303,6 @@ public class BlobNavigator extends Panel {
 		
 		String script = String.format("$('#%s form').submit(false);", getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
-	}
-
-	private ObjectId getCommitId() {
-		return context.getDepot().getObjectId(context.getBlobIdent().revision);
-	}
-
-	private List<BlobIdent> getChildren(BlobIdent blobIdent) {
-		Repository repository = context.getDepot().getRepository();
-		try (RevWalk revWalk = new RevWalk(repository)) {
-			RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-			TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
-			treeWalk.setRecursive(false);
-			treeWalk.enterSubtree();
-			
-			List<BlobIdent> children = new ArrayList<>();
-			while (treeWalk.next()) 
-				children.add(new BlobIdent(context.getBlobIdent().revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
-			Collections.sort(children);
-			return children;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	@Nullable

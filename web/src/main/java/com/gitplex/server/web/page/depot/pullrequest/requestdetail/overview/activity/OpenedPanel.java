@@ -21,12 +21,12 @@ import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.markdown.AttachmentSupport;
+import com.gitplex.server.web.component.markdown.ContentVersionSupport;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
-import com.gitplex.server.web.component.markdown.ResponsiveTaskBehavior;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
@@ -44,18 +44,18 @@ class OpenedPanel extends GenericPanel<PullRequest> {
 		
 		String description = getPullRequest().getDescription();
 		if (StringUtils.isNotBlank(description)) {
-			ResponsiveTaskBehavior responsiveTaskBehavior;
+			ContentVersionSupport contentVersionSupport;
 			if (SecurityUtils.canModify(getPullRequest())) {
-				responsiveTaskBehavior = new ResponsiveTaskBehavior() {
+				contentVersionSupport = new ContentVersionSupport() {
 
 					@Override
-					public long getContentVersion() {
+					public long getVersion() {
 						return getPullRequest().getVersion();
 					}
 					
 				};
 			} else {
-				responsiveTaskBehavior = null;
+				contentVersionSupport = null;
 			}
 			viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -74,7 +74,7 @@ class OpenedPanel extends GenericPanel<PullRequest> {
 					GitPlex.getInstance(PullRequestManager.class).save(getPullRequest());				
 				}
 
-			}, responsiveTaskBehavior));
+			}, contentVersionSupport));
 		} else {
 			viewer.add(new Label("content", "<i>No description</i>").setEscapeModelStrings(false));
 		}
@@ -96,7 +96,7 @@ class OpenedPanel extends GenericPanel<PullRequest> {
 				form.add(feedback);
 				
 				long lastVersion = getPullRequest().getVersion();
-				CommentInput input = new CommentInput("input", Model.of(getPullRequest().getDescription())) {
+				CommentInput input = new CommentInput("input", Model.of(getPullRequest().getDescription()), false) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {

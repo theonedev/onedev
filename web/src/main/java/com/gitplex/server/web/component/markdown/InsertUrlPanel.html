@@ -1,0 +1,55 @@
+<wicket:panel>
+	<div class="modal-header">
+		<button wicket:id="close" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<h4 wicket:id="title" class="modal-title"></h4>
+	</div>
+	<div class="modal-body insert-url">
+		<div class="section">
+			<div class="content">
+				<label>Input Url</label>
+				<form wicket:id="urlForm" class="form-inline url">
+					<div wicket:id="feedback" class="feedback"></div>
+					<div class="form-group">
+						<input wicket:id="url" class="form-control focusable url"></input>
+						<button wicket:id="ok" type="submit" class="btn btn-primary">OK</button>
+					</div>		
+				</form>
+			</div>
+		</div>
+		<wicket:enclosure child="blobPicker">
+		<div class="section">
+			<div class="or">-OR-</div>
+			<div class="content">
+				<a wicket:id="blobPicker" class="btn btn-default">Select File in Repository...</a>
+			</div>
+		</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="uploadForm">
+		<div class="section">
+			<div class="or">-OR-</div>
+			<div class="content">
+				<form wicket:id="uploadForm" class="upload">
+					<div wicket:id="feedback" class="feedback"></div>
+				    <span class="btn btn-default btn-file">
+				        Upload File... <input wicket:id="file" type="file"></input> <button wicket:id="submit" class="hidden">submit</button>
+				    </span>		
+				</form>
+			</div>
+		</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="attachments">
+		<div class="section">
+			<div class="or">-OR-</div>
+			<div class="content">
+				<label>Select Uploaded File</label>
+				<ul class="attachments list-unstyled">
+					<li wicket:id="attachments" class="attachment">
+						<a wicket:id="select" title="Select this attachment" class="select"></a>
+						<a wicket:id="delete" title="Remove this attachment" class="delete"><i class="fa fa-trash"></i></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		</wicket:enclosure>
+	</div>
+</wicket:panel>

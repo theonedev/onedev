@@ -8,6 +8,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -48,11 +49,11 @@ import com.gitplex.server.model.support.DepotAndRevision;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ClassUtils;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.markdown.AttachmentSupport;
+import com.gitplex.server.web.component.markdown.ContentVersionSupport;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
-import com.gitplex.server.web.component.markdown.ResponsiveTaskBehavior;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.util.DateUtils;
@@ -61,6 +62,7 @@ import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentPanel extends Panel {
@@ -156,18 +158,18 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}.add(AttributeAppender.append("title", "This comment is added in a different compare context, click to show")));
 
-		ResponsiveTaskBehavior responsiveTaskBehavior;
+		ContentVersionSupport contentVersionSupport;
 		if (SecurityUtils.canModify(getComment())) {
-			responsiveTaskBehavior = new ResponsiveTaskBehavior() {
+			contentVersionSupport = new ContentVersionSupport() {
 
 				@Override
-				public long getContentVersion() {
+				public long getVersion() {
 					return getComment().getVersion();
 				}
 				
 			};
 		} else {
-			responsiveTaskBehavior = null;
+			contentVersionSupport = null;
 		}
 		commentContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -187,7 +189,7 @@ public abstract class CodeCommentPanel extends Panel {
 				GitPlex.getInstance(CodeCommentManager.class).save(comment);				
 			}
 			
-		}, responsiveTaskBehavior));
+		}, contentVersionSupport));
 
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
 		foot.setVisible(SecurityUtils.canModify(getComment()));
@@ -199,7 +201,7 @@ public abstract class CodeCommentPanel extends Panel {
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				
-				CommentInput contentInput = new CommentInput("content", Model.of(getComment().getContent())) {
+				CommentInput contentInput = new CommentInput("content", Model.of(getComment().getContent()), true) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -376,18 +378,18 @@ public abstract class CodeCommentPanel extends Panel {
 		}.add(AttributeAppender.append("title", "This reply is added in a different compare context, click to show")));		
 
 		if (StringUtils.isNotBlank(activity.getNote())) {
-			ResponsiveTaskBehavior responsiveTaskBehavior;
+			ContentVersionSupport contentVersionSupport;
 			if (SecurityUtils.canModify(getComment())) {
-				responsiveTaskBehavior = new ResponsiveTaskBehavior() {
+				contentVersionSupport = new ContentVersionSupport() {
 					
 					@Override
-					public long getContentVersion() {
+					public long getVersion() {
 						return identity.getActivity().getVersion();
 					}
 
 				};
 			} else {
-				responsiveTaskBehavior = null;
+				contentVersionSupport = null;
 			}
 			activityContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -415,7 +417,7 @@ public abstract class CodeCommentPanel extends Panel {
 					}
 				}
 				
-			}, responsiveTaskBehavior));			
+			}, contentVersionSupport));			
 			
 		} else {
 			activityContainer.add(new Label("content", "<div class='no-note'>No note</div>").setEscapeModelStrings(false));
@@ -431,7 +433,8 @@ public abstract class CodeCommentPanel extends Panel {
 				Fragment fragment = new Fragment(activityContainer.getId(), "activityEditFrag", 
 						CodeCommentPanel.this, Model.of(identity.id));
 				Form<?> form = new Form<Void>("form");
-				CommentInput contentInput = new CommentInput("content", Model.of(identity.getActivity().getNote())) {
+				CommentInput contentInput = new CommentInput("content", Model.of(identity.getActivity().getNote()), 
+						true) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -550,7 +553,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onAddReply(target, false);
+				onAddReply(target, false, null);
 			}
 			
 		});
@@ -654,10 +657,10 @@ public abstract class CodeCommentPanel extends Panel {
 		response.render(CssHeaderItem.forReference(new CodeCommentResourceReference()));
 	}
 
-	private void onAddReply(AjaxRequestTarget target, boolean changeStatus) {
+	private void onAddReply(AjaxRequestTarget target, boolean changeStatus, @Nullable String placeholder) {
 		Fragment fragment = new Fragment("addReply", "activityEditFrag", CodeCommentPanel.this);
 		Form<?> form = new Form<Void>("form");
-		CommentInput contentInput = new CommentInput("content", Model.of("")) {
+		CommentInput contentInput = new CommentInput("content", Model.of(""), true) {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
@@ -667,6 +670,14 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected Depot getDepot() {
 				return getComment().getDepot();
+			}
+
+			@Override
+			protected List<AttributeModifier> getInputModifiers() {
+				if (placeholder != null)
+					return Lists.newArrayList(AttributeAppender.append("placeholder", placeholder));
+				else
+					return super.getInputModifiers();
 			}
 			
 		};
@@ -750,7 +761,7 @@ public abstract class CodeCommentPanel extends Panel {
 	}
 	
 	public void onChangeStatus(AjaxRequestTarget target) {
-		onAddReply(target, true);
+		onAddReply(target, true, "Leave a note");
 	}
 	
 	private void onStatusChanged(AjaxRequestTarget target, Fragment fragment, CodeCommentStatusChange statusChange) {

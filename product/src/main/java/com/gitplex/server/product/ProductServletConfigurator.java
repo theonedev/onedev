@@ -26,7 +26,7 @@ import com.gitplex.server.util.jetty.FileAssetServlet;
 import com.gitplex.server.util.jetty.ServletConfigurator;
 import com.gitplex.server.util.serverconfig.ServerConfig;
 import com.gitplex.server.web.assets.Assets;
-import com.gitplex.server.web.behavior.markdown.AttachmentUploadServlet;
+import com.gitplex.server.web.component.markdown.AttachmentUploadServlet;
 import com.gitplex.server.web.websocket.WebSocketManager;
 
 public class ProductServletConfigurator implements ServletConfigurator {

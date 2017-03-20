@@ -1,14 +1,66 @@
 <wicket:panel>
-	<div class="markdown-editor autofit">
+	<div wicket:id="container" class="markdown-editor edit-mode autofit">
 		<div class="head clearfix">
-			<div class="btn-group pull-right">
-				<a class="edit active btn btn-default btn-xs" title="Edit"><i class="fa fa-font"></i></a>
-				<a class="preview btn btn-default btn-xs" title="Preview"><i class="fa fa-eye"></i></a>
-				<a class="split btn btn-default btn-xs" title="Split view"><i wicket:id="splitIcon" class="fa fa-columns"></i></a>
+			<div wicket:id="normal" class="pull-left">
+				<div class="btn-group">
+					<a class="do-bold btn btn-default btn-sm" title="Bold"><i class="fa fa-bold"></i></a>
+					<a class="do-italic btn btn-default btn-sm" title="Italic"><i class="fa fa-italic"></i></a>
+					<a class="do-header btn btn-default btn-sm" title="Heading"><i class="fa fa-header"></i></a>
+				</div>
+				<div class="btn-group">
+					<a class="do-link btn btn-default btn-sm" title="Link"><i class="fa fa-link"></i></a>
+					<a class="do-image btn btn-default btn-sm" title="Image"><i class="fa fa-picture-o"></i></a>
+				</div>
+				<div class="btn-group">
+					<a class="do-list btn btn-default btn-sm" title="Unordered List"><i class="fa fa-list"></i></a>
+					<a class="do-orderlist btn btn-default btn-sm" title="Ordered List"><i class="fa fa-list-ol"></i></a>
+					<a class="do-code btn btn-default btn-sm" title="Code"><i class="fa fa-code"></i></a>
+					<a class="do-quote btn btn-default btn-sm" title="Quote"><i class="fa fa-quote-left"></i></a>
+				</div>
+				<div class="btn-group">
+					<a class="do-emoji btn btn-default btn-sm" title="Show Emojis"><i class="fa fa-smile-o"></i></a>
+					<a class="do-mention btn btn-default btn-sm" title="Mention Someone"><i class="fa fa-at"></i></a>
+					<a class="do-hashtag btn btn-default btn-sm" title="Reference Pull Request"><i class="fa fa-hashtag"></i></a>
+				</div>
+			</div>
+			<div wicket:id="compact" class="pull-left dropdown">
+				<button class="btn btn-default btn-sm" data-toggle="dropdown" type="button"><i class="fa fa-navicon"></i></button>
+				<ul class="dropdown-menu" aria-labelledby="dLabel">
+					<li><a class="do-bold"><i class="fa fa-bold fa-fw"></i> Bold</a></li>
+			    	<li><a class="do-italic"><i class="fa fa-italic fa-fw"></i> Italic</a></li>
+					<li><a class="do-header"><i class="fa fa-header fa-fw"></i> Heading</a></li>
+					<li role="separator" class="divider"></li>
+					<li><a class="do-link"><i class="fa fa-link fa-fw"></i> Link</a></li>
+					<li><a class="do-image"><i class="fa fa-picture-o fa-fw"></i> Image</a></li>
+					<li role="separator" class="divider"></li>
+					<li><a class="do-list"><i class="fa fa-list fa-fw"></i> Unordered List</a></li>
+					<li><a class="do-orderlist"><i class="fa fa-list-ol fa-fw"></i> Ordered List</a></li>
+					<li><a class="do-code"><i class="fa fa-code fa-fw"></i> Code</a></li>
+					<li><a class="do-quote"><i class="fa fa-quote-left fa-fw"></i> Quote</a></li>
+					<li role="separator" class="divider"></li>
+					<li><a class="do-emoji"><i class="fa fa-smile-o fa-fw"></i> Show Emojis</a></li>
+					<li><a class="do-mention"><i class="fa fa-at fa-fw"></i> Mention Someone</a></li>
+					<li><a class="do-hashtag"><i class="fa fa-hashtag fa-fw"></i> Reference Pull Request</a></li>
+				</ul>
+			</div>
+			<div class="pull-right">
+				<div class="btn-group">
+					<a class="do-help btn btn-default btn-sm" title="Help"><i class="fa fa-question"></i></a>
+				</div>						
+				<div class="btn-group">
+					<a class="edit active btn btn-default btn-sm" title="Edit"><i class="fa fa-font"></i></a>
+					<a class="preview btn btn-default btn-sm" title="Preview"><i class="fa fa-eye"></i></a>
+					<a class="split btn btn-default btn-sm" title="Split view"><i wicket:id="splitIcon" class="fa fa-columns"></i></a>
+				</div>						
 			</div>						
 		</div>
-		<div wicket:id="body" class="body edit-mode clearfix">
-			<textarea wicket:id="input" class="input"></textarea>
+		<div class="emojis"></div>
+		<div class="help">
+			<a href="https://guides.github.com/features/mastering-markdown/" target="_blank">GitHub flavored markdown</a> is accepted. 
+			<span wicket:id="canAttachFile">You may drag and drop file/image to the input box, or paste image from clipboard</span>
+		</div>
+		<div class="body clearfix">
+			<textarea wicket:id="input" class="input" rows=5></textarea>
 			<div class="preview markdown-rendered"></div>
 		</div>
 	</div>

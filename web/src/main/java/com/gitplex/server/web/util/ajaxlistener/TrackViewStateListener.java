@@ -18,7 +18,13 @@ public class TrackViewStateListener implements IAjaxCallListener {
 
 	@Override
 	public CharSequence getBeforeHandler(Component component) {
-		return "gitplex.server.viewState.getFromViewAndSetToHistory();";
+		String script = "gitplex.server.viewState.getFromViewAndSetToHistory();";
+		if (carryOver) {
+			script += "gitplex.server.viewState.carryOver = gitplex.server.viewState.getFromHistory();";
+		} else {
+			script += "gitplex.server.viewState.carryOver = undefined;";
+		}
+		return script;
 	}
 
 	@Override
@@ -48,11 +54,9 @@ public class TrackViewStateListener implements IAjaxCallListener {
 
 	@Override
 	public CharSequence getCompleteHandler(Component component) {
-		if (carryOver) {
-			return "gitplex.server.viewState.getFromCarryOverAndSetToView();";
-		} else {
-			return null;
-		}
+		return ""
+				+ "if (gitplex.server.viewState.carryOver)"
+				+ "  gitplex.server.viewState.setToView(gitplex.server.viewState.carryOver);";
 	}
 
 	@Override

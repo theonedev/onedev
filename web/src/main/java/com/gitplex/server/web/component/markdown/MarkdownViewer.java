@@ -1,7 +1,10 @@
 package com.gitplex.server.web.component.markdown;
 
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
 import javax.annotation.Nullable;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -9,21 +12,35 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.hibernate.StaleStateException;
 
 import com.gitplex.launcher.loader.AppLoader;
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.MarkdownManager;
+import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class MarkdownViewer extends GenericPanel<String> {
 
-	private final ResponsiveTaskBehavior responsiveTaskBehavior;
+	private static final String TASK_CHECKED = "taskchecked";
 	
-	public MarkdownViewer(String id, IModel<String> model, @Nullable ResponsiveTaskBehavior responsiveTaskBehavior) {
+	private final ContentVersionSupport contentVersionSupport;
+	
+	private long lastContentVersion;
+	
+	private AbstractPostAjaxBehavior behavior;
+	
+	public MarkdownViewer(String id, IModel<String> model, @Nullable ContentVersionSupport contentVersionSupport) {
 		super(id, model);
-		
-		this.responsiveTaskBehavior = responsiveTaskBehavior;
+		this.contentVersionSupport = contentVersionSupport;
+		if (contentVersionSupport != null)
+			lastContentVersion = contentVersionSupport.getVersion();
 	}
 	
 	@Override
@@ -46,25 +63,36 @@ public class MarkdownViewer extends GenericPanel<String> {
 				}
 			}
 			
-		}) {
-
+		}).setEscapeModelStrings(false));
+		
+		add(behavior = new AbstractPostAjaxBehavior() {
+			
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				if (responsiveTaskBehavior != null)
-					add(responsiveTaskBehavior);
-			}
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
+				int taskPosition = params.getParameterValue(SourcePositionTrackExtension.DATA_START_ATTRIBUTE).toInt();
+				boolean taskChecked = params.getParameterValue(TASK_CHECKED).toBoolean();
+				String markdown = getComponent().getDefaultModelObjectAsString();
+				String beforeTask = markdown.substring(0, taskPosition);
+				String fromTask = markdown.substring(taskPosition);
+				String beforeBracket = StringUtils.substringBefore(fromTask, "[");
+				String afterBracket = StringUtils.substringAfter(fromTask, "]");
+				String taskStatus = taskChecked?"x":" ";
+				markdown = beforeTask + beforeBracket + "[" + taskStatus + "]" + afterBracket;
 
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				
-				String script = String.format("gitplex.server.markdown.initRendered($('#%s'));", getMarkupId(true));
-				response.render(OnDomReadyHeaderItem.forScript(script));
+				try {
+					if (contentVersionSupport.getVersion() != lastContentVersion)
+						throw new StaleStateException("");
+					setDefaultModelObject(markdown);
+				} catch (StaleStateException e) {
+					warn("Some one changed the content you are editing. The content has now been reloaded, "
+							+ "please try again.");
+				}
+				target.add(MarkdownViewer.this);
+				lastContentVersion = contentVersionSupport.getVersion();
 			}
 			
-		}.setEscapeModelStrings(false));
+		});
 		
 		setOutputMarkupId(true);
 	}
@@ -73,6 +101,15 @@ public class MarkdownViewer extends GenericPanel<String> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
+		
+		CharSequence callback = behavior.getCallbackFunction(
+				explicit(SourcePositionTrackExtension.DATA_START_ATTRIBUTE), 
+				explicit(TASK_CHECKED));
+		
+		String taskItemClass = GitPlex.getInstance(MarkdownManager.class).getOptions().get(TaskListExtension.ITEM_CLASS);
+		String script = String.format("gitplex.server.markdown.onViewerDomReady('%s', %s, '%s', '%s');", 
+				getMarkupId(), callback, taskItemClass, SourcePositionTrackExtension.DATA_START_ATTRIBUTE);
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 }

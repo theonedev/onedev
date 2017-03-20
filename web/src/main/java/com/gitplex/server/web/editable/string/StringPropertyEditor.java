@@ -17,7 +17,7 @@ import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.editable.annotation.Markdown;
 import com.gitplex.server.util.editable.annotation.Multiline;
 import com.gitplex.server.util.editable.annotation.OmitName;
-import com.gitplex.server.web.behavior.markdown.MarkdownBehavior;
+import com.gitplex.server.web.component.markdown.MarkdownEditor;
 import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.editable.PropertyDescriptor;
@@ -38,9 +38,8 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		
 		Method getter = getPropertyDescriptor().getPropertyGetter();
 		if (getter.getAnnotation(Markdown.class) != null) {
-			Fragment fragment = new Fragment("content", "multiLineFrag", this);
-			fragment.add(input = new TextArea<String>("input", Model.of(getModelObject())));
-			input.add(new MarkdownBehavior());
+			Fragment fragment = new Fragment("content", "markdownFrag", this);
+			fragment.add(input = new MarkdownEditor("input", Model.of(getModelObject()), false));
 			add(fragment);
 		} else if (getter.getAnnotation(Multiline.class) != null) {
 			Fragment fragment = new Fragment("content", "multiLineFrag", this);

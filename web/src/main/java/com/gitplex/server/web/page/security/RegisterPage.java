@@ -1,5 +1,6 @@
 package com.gitplex.server.web.page.security;
 
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -8,6 +9,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.link.Link;
 
+import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.ConfigManager;
@@ -56,6 +58,7 @@ public class RegisterPage extends BasePage {
 							.addError("This email has already been used by another account.");
 				} 
 				if (!editor.hasErrors(true)) {
+					account.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(account.getPassword()));
 					accountManager.save(account, null);
 					Session.get().success("New account registered");
 					SecurityUtils.getSubject().runAs(account.getPrincipals());

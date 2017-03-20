@@ -55,7 +55,7 @@ gitplex.server.blobEdit = {
 		} else {
 			$body.children(".commit-options").show();
 		}
-		if ($body.find(".autofit").length != 0)
+		if ($body.find(".autofit:visible").length != 0)
 			$body.css("overflow", "visible");
 		else
 			$body.css("overflow", "auto");

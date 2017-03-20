@@ -1,9 +1,53 @@
 .markdown-editor>.head {
-	padding: 4px 8px;
+	padding: 8px 0;
 }
+.markdown-editor>.head .pull-left .btn-group {
+	margin-right: 4px;
+}
+.markdown-editor>.head .pull-right .btn-group {
+	margin-left: 4px;
+}
+.markdown-editor>.head .dropdown .active:BEFORE {
+	font-family: "FontAwesome";
+	content: "\f00c";
+	position: absolute;
+	left: 4px;
+}
+
+.markdown-editor>.emojis {
+	margin-bottom: 8px; 
+	display: none;
+}
+.markdown-editor>.emojis.loaded {
+	font-size: 12px; 
+	line-height: 24px; 
+	height: 200px; 
+	overflow: auto;
+}
+.markdown-editor>.emojis.loading {
+	font-size: 16px;
+	color: #888;
+}
+.markdown-editor>.emojis .emoji {
+	margin-right: 12px;
+}
+.markdown-editor>.emojis .emoji img {
+	width: 16px; 
+	height: 16px;
+}
+.markdown-editor.preview-mode>.emojis .emoji img {
+	opacity: 0.5;
+}
+
+.markdown-editor>.help {
+	margin-bottom: 8px; 
+	display: none;
+}
+
 .markdown-editor>.body>.preview {
 	border: 1px solid #BBB;
 	padding: 8px;
+	border-radius: 4px;
 	background: white;
 	display: none;
 }
@@ -11,8 +55,8 @@
 	float: left;
 	width: 100%;
 	resizabe: vertical;
-	border-radius: 0;
 	border: 1px solid #BBB;
+	border-radius: 4px;
 	overflow: auto;
 }
 .markdown-editor>.body>.preview {
@@ -20,17 +64,86 @@
 	width: 49%;
 	overflow: auto;
 }
+.markdown-editor>.body>.preview>.message {
+	color: #999;
+}
 .markdown-editor>.body>.preview .focusing {
 	background: #FCF5DA;
 }
-.markdown-editor>.body.compact>* {
-	float: none;
+.markdown-editor.compact>.body>* {
 	width: 100%;
+}
+.markdown-editor.normal.split-mode>.body>.input {
+	border-radius: 4px 0 0 4px;
+}
+.markdown-editor.normal.split-mode>.body>.preview {
+	border-left: none;
+	border-radius: 0 4px 4px 0;
+}
+.markdown-editor.compact.split-mode>.body>.input {
+	border-radius: 4px 4px 0 0;
+}
+.markdown-editor.compact.split-mode>.body>.preview {
+	border-top: none;
+	border-radius: 0 0 4px 4px;
+}
+
+.atwho-view .emoji {
+	display: inline-block; 
+	height: 20px; 
+	width: 20px; 
+	vertical-align: middle; 
+	background-repeat: no-repeat; 
+	background-size: 20px 20px;
+}
+.atwho-view .avatar img {
+	display: inline-block; 
+	width: 20px; 
+	height: 20px; 
+	vertical-align: middle;
+}
+.atwho-view .cur .text-muted {
+	color: inherit;	
+}
+
+.insert-url>.section>.or {
+	font-size: 16px;
+	font-weight: bold;
+	margin: 12px 0;
+}
+.insert-url input.url {
+	width: 495px;
+	margin-right: 7px;
+}
+.insert-url .attachments {
+	max-height: 300px;
+	overflow: auto;
+	margin-bottom: 20px;
+}
+.insert-url .attachments img {
+	max-width: 100%;
+}
+.insert-url .attachment a {
+	color: #666;
+}
+.insert-url .attachment a.select {
+	margin-right: 6px;
+}
+.insert-url .alert-info {
+	margin-top: 20px;
+}
+
+.markdown-editor>.body>.input.drag-over {
+	border: 2px solid #69B7F7;
 }
 
 .markdown-rendered {
 	font-size: 16px;
 	line-height: 1.5;
+}
+.markdown-rendered .mention {
+	font-weight: bold;
+	color: #444;
 }
 .markdown-rendered li {
 	margin-bottom: 6px;
@@ -109,3 +222,4 @@
 	margin-left: 2px;
 	font-size: 10px;
 }
+

@@ -746,7 +746,7 @@ public class RevisionDiffPanel extends Panel {
 							String uuid = UUID.randomUUID().toString();
 							
 							CommentInput contentInput;
-							form.add(contentInput = new CommentInput("content", Model.of("")) {
+							form.add(contentInput = new CommentInput("content", Model.of(""), true) {
 
 								@Override
 								protected DepotAttachmentSupport getAttachmentSupport() {

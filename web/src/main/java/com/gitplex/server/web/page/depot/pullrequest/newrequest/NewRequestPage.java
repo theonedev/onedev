@@ -52,7 +52,6 @@ import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.util.diff.WhitespaceOption;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.branchpicker.AffinalBranchPicker;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
@@ -61,6 +60,7 @@ import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerChoice;
@@ -596,7 +596,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 				getPullRequest().setDescription(object);
 			}
 			
-		}) {
+		}, false) {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {

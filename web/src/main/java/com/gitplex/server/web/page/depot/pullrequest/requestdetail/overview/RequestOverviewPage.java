@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -35,6 +36,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
@@ -53,11 +55,11 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.TooltipBehavior;
-import com.gitplex.server.web.behavior.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
+import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerChoice;
@@ -319,7 +321,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		Form<?> form = new Form<Void>("form");
 		addComment.add(form);
 		
-		CommentInput input = new CommentInput("input", Model.of("")) {
+		CommentInput input = new CommentInput("input", Model.of(""), false) {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
@@ -329,6 +331,11 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected Depot getDepot() {
 				return RequestOverviewPage.this.getDepot();
+			}
+			
+			@Override
+			protected List<AttributeModifier> getInputModifiers() {
+				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
 			}
 			
 		};

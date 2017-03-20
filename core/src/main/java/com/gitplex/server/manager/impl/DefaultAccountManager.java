@@ -8,12 +8,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.authc.credential.PasswordService;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.launcher.loader.Listen;
+import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStarting;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.manager.AccountManager;
@@ -36,6 +38,8 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 
     private final PullRequestManager pullRequestManager;
     
+    private final PasswordService passwordService;
+    
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     		
 	private final BiMap<String, Long> emailToId = HashBiMap.create();
@@ -43,10 +47,11 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultAccountManager(Dao dao, PullRequestManager pullRequestManager) {
+    public DefaultAccountManager(Dao dao, PullRequestManager pullRequestManager, PasswordService passwordService) {
         super(dao);
         
         this.pullRequestManager = pullRequestManager;
+        this.passwordService = passwordService;
     }
 
     @Transactional
@@ -238,6 +243,18 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 			Account user = event.getStatusChange().getUser();
 			user.setReviewEffort(user.getReviewEffort()+1);
 			save(user);
+		}
+	}
+
+	@Listen
+	public void on(SystemStarted event) {
+		// Fix a critical issue that password of self-registered users are not hashed
+		for (Account account: findAll()) {
+			if (account.getPassword() != null && !account.getPassword().startsWith("$2a$10") 
+					&& !account.getPassword().startsWith("@hash^prefix@")) {
+				account.setPassword(passwordService.encryptPassword(account.getPassword()));
+				save(account);
+			}
 		}
 	}
 

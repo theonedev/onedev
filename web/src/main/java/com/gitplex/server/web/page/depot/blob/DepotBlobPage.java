@@ -29,6 +29,8 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.eclipse.jgit.lib.FileMode;
@@ -78,6 +80,7 @@ import com.gitplex.server.web.page.depot.blob.search.result.SearchResultPanel;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
+import com.gitplex.server.web.util.resource.RawBlobResourceReference;
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.PullRequestChangedRegion;
@@ -194,6 +197,12 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 				unauthorized();
 		}
 		
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		String accept = request.getHeader("Accept");
+		if (accept != null && !accept.startsWith("text/html")) {
+			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
+					new ResourceReferenceRequestHandler(new RawBlobResourceReference(), getPageParameters()));
+		}
 	}
 	
 	@Override

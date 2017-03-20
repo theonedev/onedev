@@ -142,3 +142,6 @@
 	margin: 12px;
 }
 
+.revision-diff .comment textarea {
+	max-height: 250px;
+}

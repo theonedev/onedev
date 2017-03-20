@@ -5,11 +5,12 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
+import com.gitplex.server.web.component.markdown.BlobReferenceSupport;
 import com.gitplex.server.web.component.markdown.MarkdownEditor;
 import com.google.common.base.Charsets;
 
 @SuppressWarnings("serial")
-class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
+abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 	private final boolean autoFocus;
 	
@@ -24,7 +25,14 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(input = new MarkdownEditor("input", Model.of(new String(getModelObject(), Charsets.UTF_8)), false));
+		add(input = new MarkdownEditor("input", Model.of(new String(getModelObject(), Charsets.UTF_8)), false) {
+
+			@Override
+			protected BlobReferenceSupport getBlobReferenceSupport() {
+				return MarkdownBlobEditor.this.getBlobReferenceSupport();
+			}
+			
+		});
 		input.setOutputMarkupId(true);
 	}
 
@@ -46,4 +54,5 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 		}
 	}
 
+	protected abstract BlobReferenceSupport getBlobReferenceSupport();
 }

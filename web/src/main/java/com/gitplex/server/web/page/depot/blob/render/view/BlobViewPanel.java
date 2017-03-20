@@ -163,6 +163,12 @@ public abstract class BlobViewPanel extends Panel {
 			}
 			
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(context.getDepot().getBlob(context.getBlobIdent()).getText() != null);
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				if (context.getMode() == Mode.BLAME)
 					context.onModeChange(target, Mode.VIEW);

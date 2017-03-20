@@ -11,8 +11,6 @@ import com.gitplex.server.web.assets.js.caret.CaretResourceReference;
 import com.gitplex.server.web.assets.js.codemirror.CodeMirrorResourceReference;
 import com.gitplex.server.web.assets.js.cookies.CookiesResourceReference;
 import com.gitplex.server.web.assets.js.doneevents.DoneEventsResourceReference;
-import com.gitplex.server.web.assets.js.hotkeys.HotkeysResourceReference;
-import com.gitplex.server.web.assets.js.scrollintoview.ScrollIntoViewResourceReference;
 import com.gitplex.server.web.assets.js.textareacaretposition.TextareaCaretPositionResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
@@ -28,9 +26,7 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CaretResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AtWhoResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new TextareaCaretPositionResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));

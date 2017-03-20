@@ -73,6 +73,7 @@ import com.gitplex.server.gatekeeper.AndGateKeeper;
 import com.gitplex.server.gatekeeper.GateKeeper;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.git.BlobIdentFilter;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.git.Submodule;
@@ -960,6 +961,33 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			return getName().compareTo(depot.getName());
 		} else {
 			return getAccount().compareTo(depot.getAccount());
+		}
+	}
+	
+	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter) {
+		Repository repository = getRepository();
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			RevTree revTree = revWalk.parseCommit(getObjectId(blobIdent.revision)).getTree();
+			
+			TreeWalk treeWalk;
+			if (blobIdent.path != null) {
+				treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
+				treeWalk.enterSubtree();
+			} else {
+				treeWalk = new TreeWalk(repository);
+				treeWalk.addTree(revTree);
+			}
+			
+			List<BlobIdent> children = new ArrayList<>();
+			while (treeWalk.next()) { 
+				BlobIdent child = new BlobIdent(blobIdent.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)); 
+				if (blobIdentFilter.filter(child))
+					children.add(child);
+			}
+			Collections.sort(children);
+			return children;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
