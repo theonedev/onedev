@@ -99,6 +99,17 @@ gitplex.server.markdown = {
 			}
 		}, 500);
 		
+		function dispatchInputEvent() {
+			if(document.createEventObject) {
+				$input[0].fireEvent("input");
+			} else {
+			    var evt = document.createEvent("HTMLEvents");
+			    evt.initEvent("input", false, true);
+			    $input[0].dispatchEvent(evt);
+			}
+		}
+		
+	    var fontSize = parseInt(getComputedStyle($input[0]).getPropertyValue('font-size'));
 		/*
 		 * Padding same leading spaces as last line when add a new line. This is useful when 
 		 * add several list items 
@@ -124,8 +135,13 @@ gitplex.server.markdown = {
 				} else {
 					$input.caret("\n" + spaces);
 				}
-				$input[0].dispatchEvent(new Event("input"));
-				$input.scrollTop(getCaretCoordinates($input[0], $input.caret()).top + 18);
+				
+				var caretBottom = getCaretCoordinates($input[0], $input.caret()).top + fontSize;
+				if (caretBottom > $input.scrollTop() + $input.height()) {
+					$input.scrollTop(caretBottom - $input.height());
+				}
+				
+				dispatchInputEvent();
 			}
 		});
 		
@@ -194,7 +210,7 @@ gitplex.server.markdown = {
 				$input.range("**strong text**").range(selected.start+2, selected.end+2+"strong text".length);
 			}
 			$input.focus();
-			$input[0].dispatchEvent(new Event("input"));
+			dispatchInputEvent();
 		});
 		
 		$head.find(".do-italic").click(function() {
@@ -205,7 +221,7 @@ gitplex.server.markdown = {
 				$input.range("_emphasized text_").range(selected.start+1, selected.end+1+"emphasized text".length);
 			}
 			$input.focus();
-			$input[0].dispatchEvent(new Event("input"));
+			dispatchInputEvent();
 		});
 		
 		$head.find(".do-header").click(function() {
@@ -216,7 +232,7 @@ gitplex.server.markdown = {
 				$input.range("### heading text").range(selected.start+4, selected.end+4+"heading text".length);
 			}
 			$input.focus();
-			$input[0].dispatchEvent(new Event("input"));
+			dispatchInputEvent();
 		});
 		
 		$head.find(".do-list, .do-orderlist").click(function() {
@@ -235,7 +251,7 @@ gitplex.server.markdown = {
 				$input.range(leading + " list text here").range(selected.start+leading.length+1, selected.start+leading.length+1+"list text here".length);
 			}
 			$input.focus();
-			$input[0].dispatchEvent(new Event("input"));
+			dispatchInputEvent();
 		});
 
 		$head.find(".do-code").click(function() {
@@ -253,7 +269,7 @@ gitplex.server.markdown = {
 				$input.range("`code text here`").range(selected.start+1, selected.end+1+"code text here".length);
 			}
 			$input.focus();
-			$input[0].dispatchEvent(new Event("input"));
+			dispatchInputEvent();
 		});
 		
 		$head.find(".do-quote").click(function() {
@@ -263,7 +279,7 @@ gitplex.server.markdown = {
 			else
 				$input.range("> quote here").range(selected.start+2, selected.start+2+"quote here".length);
 			$input.focus();
-			$input[0].dispatchEvent(new Event("input"));
+			dispatchInputEvent();
 		});
 		
 		$head.find(".do-emoji").click(function() {
@@ -299,7 +315,7 @@ gitplex.server.markdown = {
 				$input.caret(" " + atChar);
 			}
 			$input.atwho("run");
-			$input[0].dispatchEvent(new Event("input"));
+			dispatchInputEvent();
 		});
 		
 		$head.find(".do-image, .do-link").click(function() {
@@ -613,7 +629,7 @@ gitplex.server.markdown = {
 				return;
 			
 			$input.caret(":" + $(this).attr("title") + ": ");
-			$input[0].dispatchEvent(new Event("input"));
+			dispatchInputEvent();
 		});
 		$(window).resize();
 	},
@@ -639,7 +655,7 @@ gitplex.server.markdown = {
     		$input.range($input.caret()-message.length+offset, $input.caret()-message.length+defaultDescription.length+offset);
     	}
     	
-		$input[0].dispatchEvent(new Event("input"));
+		dispatchInputEvent();
 	}, 
 	updateUploadMessage: function($input, message, replaceMessage) {
 		var isError = message.indexOf("!!") == 0;
