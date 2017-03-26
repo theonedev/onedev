@@ -20,6 +20,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -125,8 +126,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	
 	private WebMarkupContainer searchResultContainer;
 	
-	private ObjectId commitId;
-	
 	public DepotBlobPage(final PageParameters params) {
 		super(params);
 		
@@ -155,7 +154,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		resolvedRevision = getDepot().getObjectId(state.blobIdent.revision);
 		
 		RevCommit commit = getDepot().getRevCommit(state.blobIdent.revision);
-		commitId = commit.copy();
 		
 		if (state.blobIdent.path != null) {
 			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
@@ -226,9 +224,10 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			protected void onConfigure() {
 				super.onConfigure();
 
+				RevCommit commit = getDepot().getRevCommit(resolvedRevision);
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
-				if (!indexManager.isIndexed(getDepot(), commitId)) {
-					GitPlex.getInstance(IndexManager.class).indexAsync(getDepot(), commitId);
+				if (!indexManager.isIndexed(getDepot(), commit)) {
+					GitPlex.getInstance(IndexManager.class).indexAsync(getDepot(), commit);
 					setVisible(true);
 				} else {
 					setVisible(false);
@@ -251,7 +250,8 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 					.build();
 			try {
 				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-				queryHits = searchManager.search(depotModel.getObject(), commitId, query);
+				queryHits = searchManager.search(depotModel.getObject(), getDepot().getRevCommit(resolvedRevision), 
+						query);
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}								
@@ -548,7 +548,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		 */
 		resolvedRevision = null;
 		resolvedRevision = getDepot().getObjectId(state.blobIdent.revision);
-		commitId = getDepot().getRevCommit(state.blobIdent.revision).copy();
+		
 		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
 		newRevisionPicker(target);
 		target.add(revisionIndexing);
@@ -777,7 +777,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(getDepot().getId(), commitId));
+		regions.add(new CommitIndexedRegion(getDepot().getId(), getDepot().getRevCommit(resolvedRevision)));
 		if (state.commentId != null)
 			regions.add(new CodeCommentChangedRegion(state.commentId));
 		
@@ -844,12 +844,17 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	@Override
 	public void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
 		String refName = GitUtils.branch2ref(state.blobIdent.revision);
+		Depot depot = getDepot();
+		String branch = state.blobIdent.revision;
 		BlobIdent newBlobIdent;
+		getDepot().cacheObjectId(branch, newCommit);
+
+		Subject subject = SecurityUtils.getSubject();
+		Long depotId = depot.getId();
+		ObjectId oldCommitId = oldCommit.copy();
+		ObjectId newCommitId = newCommit.copy();
+		
 		if (state.mode == Mode.DELETE) {
-			Depot depot = getDepot();
-			String branch = state.blobIdent.revision;
-			depot.cacheObjectId(branch, newCommit);
-			resolvedRevision = newCommit;
 			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 				RevTree revTree = getDepot().getRevCommit(newCommit).getTree();
 				String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
@@ -861,62 +866,30 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 						break;
 					}
 				}
-
-				Long depotId = depot.getId();
-				Subject subject = SecurityUtils.getSubject();
-				ObjectId oldCommitId = oldCommit.copy();
-				ObjectId newCommitId = newCommit.copy();
-				GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						ThreadContext.bind(subject);
-						try {
-							Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
-							depot.cacheObjectId(branch, newCommitId);
-							RefUpdated event = new RefUpdated(depot, refName, oldCommitId, newCommitId);
-							GitPlex.getInstance(ListenerRegistry.class).post(event);
-						} finally {
-							ThreadContext.unbindSubject();
-						}
-					}
-					
-				});
-				
 				newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
-				
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}	
 		} else {
-			Depot depot = getDepot();
-			String branch = state.blobIdent.revision;
-			depot.cacheObjectId(branch, newCommit);
-			resolvedRevision = newCommit;
 			newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
-			
-			Subject subject = SecurityUtils.getSubject();
-			
-			Long depotId = depot.getId();
-			ObjectId oldCommitId = oldCommit.copy();
-			ObjectId newCommitId = newCommit.copy();
-			GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
-
-				@Override
-				public void run() {
-					ThreadContext.bind(subject);
-					try {
-						Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
-						depot.cacheObjectId(branch, oldCommitId);
-						RefUpdated event = new RefUpdated(depot, refName, oldCommitId, newCommitId);
-						GitPlex.getInstance(ListenerRegistry.class).post(event);
-					} finally {
-						ThreadContext.unbindSubject();
-					}
-				}
-				
-			});
 		}
+		
+		GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+
+			@Override
+			public void run() {
+				ThreadContext.bind(subject);
+				try {
+					Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
+					depot.cacheObjectId(branch, newCommitId);
+					RefUpdated event = new RefUpdated(depot, refName, oldCommitId, newCommitId);
+					GitPlex.getInstance(ListenerRegistry.class).post(event);
+				} finally {
+					ThreadContext.unbindSubject();
+				}
+			}
+			
+		});
 		
 		if (state.requestCompareInfo != null) {
 			showRequestChanges(target, oldCommit, newCommit);
@@ -932,11 +905,21 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		// fix the issue that sometimes indexing indicator of new commit does not disappear 
 		target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 	}
-
+	
 	@Override
 	public String getNewPath() {
 		BlobNavigator blobNavigator = (BlobNavigator) get(BLOB_NAVIGATOR_ID);
 		return blobNavigator.getNewPath();
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		if (event.getPayload() instanceof RevisionResolveEvent) {
+			RevisionResolveEvent revisionResolveEvent = (RevisionResolveEvent) event.getPayload();
+			
+			resolvedRevision = revisionResolveEvent.getResolvedRevision();
+		}
 	}
 	
 }

@@ -187,6 +187,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
     
+    private transient Map<ObjectId, Optional<RevCommit>> commitCache;
+    
     private transient Map<String, Optional<Ref>> refCache;
     
     private transient Optional<String> defaultBranch;
@@ -761,19 +763,12 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	@Nullable
 	public RevCommit getRevCommit(String revision, boolean mustExist) {
-		RevCommit commit;
 		ObjectId revId = getObjectId(revision, mustExist);
 		if (revId != null) {
-			try (RevWalk revWalk = new RevWalk(getRepository())) {
-				commit = GitUtils.parseCommit(revWalk, revId);
-			}
+			return getRevCommit(revId, mustExist);
 		} else {
-			commit = null;
+			return null;
 		}
-		if (mustExist && commit == null)
-			throw new ObjectNotFoundException("Unable to find commit: " + revision);
-		else
-			return commit;
 	}
 	
 	public RevCommit getRevCommit(String revision) {
@@ -782,13 +777,22 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	@Nullable
 	public RevCommit getRevCommit(ObjectId revId, boolean mustExist) {
-		try (RevWalk revWalk = new RevWalk(getRepository())) {
-			RevCommit commit = GitUtils.parseCommit(revWalk, revId);
-			if (mustExist && commit == null)
-				throw new ObjectNotFoundException("Unable to find commit: " + revId.name());
-			else
-				return commit;
+		if (commitCache == null)
+			commitCache = new HashMap<>();
+		RevCommit commit;
+		Optional<RevCommit> optional = commitCache.get(revId);
+		if (optional == null) {
+			try (RevWalk revWalk = new RevWalk(getRepository())) {
+				optional = Optional.fromNullable(GitUtils.parseCommit(revWalk, revId));
+			}
+			commitCache.put(revId, optional);
 		}
+		commit = optional.orNull();
+		
+		if (mustExist && commit == null)
+			throw new ObjectNotFoundException("Unable to find commit associated with object id: " + revId);
+		else
+			return commit;
 	}
 	
 	public RevCommit getRevCommit(ObjectId revId) {

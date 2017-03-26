@@ -5,22 +5,25 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.junit.Test;
 
-import com.gitplex.server.git.BlobEdit;
-import com.gitplex.server.git.PathAndContent;
+import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObjectNotFoundException;
-import com.gitplex.server.git.exception.NotFileException;
-import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
-public class BlobEditTest extends AbstractGitTest {
+public class BlobEditsTest extends AbstractGitTest {
 
 	@Test
 	public void testRemoveFile() throws IOException {
@@ -36,8 +39,8 @@ public class BlobEditTest extends AbstractGitTest {
 		String refName = "refs/heads/master";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
-		BlobEdit edit = new BlobEdit("/server/src/com/example/a//a.java", null);
-		ObjectId newCommitId = edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test delete");
+		BlobEdits edits = new BlobEdits(Sets.newHashSet("/server/src/com/example/a//a.java"), Maps.newHashMap());
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test delete");
 		
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
@@ -62,16 +65,16 @@ public class BlobEditTest extends AbstractGitTest {
 		String refName = "refs/heads/master";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
-		BlobEdit edit = new BlobEdit("/server/src/com/example/c//c.java", null);
+		BlobEdits edits = new BlobEdits(Sets.newHashSet("/server/src/com/example/c//c.java"), Maps.newHashMap());
 		try {
-			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test delete");
+			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test delete");
 			assertTrue("An ObjectNotExistException should be thrown", false);
 		} catch (ObjectNotFoundException e) {
 		}
 	}
 	
 	@Test
-	public void testRenameFile() throws IOException {
+	public void testMoveFiles() throws IOException {
 		createDir("client");
 		addFileAndCommit("client/a.java", "a", "add a");
 		addFileAndCommit("client/b.java", "b", "add b");
@@ -84,16 +87,21 @@ public class BlobEditTest extends AbstractGitTest {
 		String refName = "refs/heads/master";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
-		BlobEdit edit = new BlobEdit("server/src/com/example/a/a.java", 
-				new PathAndContent.Immutable("client/c.java", "a".getBytes()));
-		ObjectId newCommitId = edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename");
+		Set<String> oldPaths = Sets.newHashSet("server/src/com/example/a/a.java", 
+				"server/src/com/example/b/b.java");
+		Map<String, BlobContent> newBlobs = new HashMap<>();
+		newBlobs.put("client/c.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/d.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		BlobEdits edits = new BlobEdits(oldPaths, newBlobs);
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename");
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/a.java", revTree));
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/b.java", revTree));
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/c.java", revTree));
+			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/d.java", revTree));
 			assertNull(TreeWalk.forPath(git.getRepository(), "server/src/com/example/a", revTree));
-			assertNotNull(TreeWalk.forPath(git.getRepository(), "server/src/com/example/b/b.java", revTree));
+			assertNull(TreeWalk.forPath(git.getRepository(), "server/src/com/example/b", revTree));
 		}
 	}
 	
@@ -111,12 +119,15 @@ public class BlobEditTest extends AbstractGitTest {
 		String refName = "refs/heads/master";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
-		BlobEdit edit = new BlobEdit("server/src/com/example/a", 
-				new PathAndContent.Immutable("client/c.java", "a".getBytes()));
-		try {
-			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
-			assertTrue("A NotFileException should be thrown", false);
-		} catch (NotFileException e) {
+		Map<String, BlobContent> newBlobs = new HashMap<>();
+		newBlobs.put("client/c.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		BlobEdits edits = new BlobEdits(Sets.newHashSet("server/src/com/example/a"), newBlobs);
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, 
+				"test rename");
+		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
+			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
+			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/c.java", revTree));
+			assertNull(TreeWalk.forPath(git.getRepository(), "server/src/com/example/a", revTree));
 		}
 	}
 	
@@ -134,10 +145,11 @@ public class BlobEditTest extends AbstractGitTest {
 		String refName = "refs/heads/master";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
-		BlobEdit edit = new BlobEdit("server/src/com/example/a/a.java", 
-				new PathAndContent.Immutable("client/a.java/a.java", "a".getBytes()));
+		Map<String, BlobContent> newBlobs = new HashMap<>();
+		newBlobs.put("client/a.java/a.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		BlobEdits edits = new BlobEdits(Sets.newHashSet("server/src/com/example/a/a.java"), newBlobs);
 		try {
-			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
+			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
 			assertTrue("A NotTreeException should be thrown", false);
 		} catch (NotTreeException e) {
 		}
@@ -156,22 +168,27 @@ public class BlobEditTest extends AbstractGitTest {
 		
 		String refName = "refs/heads/master";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
-		
-		BlobEdit edit = new BlobEdit(null, new PathAndContent.Immutable("/server/src/com/example/c/c.java", "c".getBytes()));
-		ObjectId newCommitId = edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
+
+		Map<String, BlobContent> newBlobs = new HashMap<>();
+		newBlobs.put("/server/src/com/example/c/c.java", new BlobContent.Immutable("c".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("/server/src/com/example/d/d.java", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
 		
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "server/src/com/example/a/a.java", revTree));
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "server/src/com/example/b/b.java", revTree));
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "server/src/com/example/c/c.java", revTree));
+			assertNotNull(TreeWalk.forPath(git.getRepository(), "server/src/com/example/d/d.java", revTree));
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/a.java", revTree));
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/b.java", revTree));
 		}
 		
 		oldCommitId = newCommitId;
-		edit = new BlobEdit(null, new PathAndContent.Immutable("/common/common.java", "common".getBytes()));
-		newCommitId = edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
+		newBlobs = new HashMap<>();
+		newBlobs.put("/common/common.java", new BlobContent.Immutable("common".getBytes(), FileMode.REGULAR_FILE));
+		newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
 		
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
@@ -198,9 +215,11 @@ public class BlobEditTest extends AbstractGitTest {
 		String refName = "refs/heads/master";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
-		BlobEdit edit = new BlobEdit(null, new PathAndContent.Immutable("client/a.java", "a".getBytes()));
+		Map<String, BlobContent> newBlobs = new HashMap<>();
+		newBlobs.put("client/a.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
 		try {
-			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
+			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
 			assertTrue("An ObjectAlreadyExistException should be thrown", false);
 		} catch (ObjectAlreadyExistsException e) {
 		}
@@ -217,9 +236,11 @@ public class BlobEditTest extends AbstractGitTest {
 		
 		ObjectId newCommitId = git.getRepository().resolve(refName);
 
-		BlobEdit edit = new BlobEdit(null, new PathAndContent.Immutable("/server/src/com/example/c/c.java", "c".getBytes()));
+		Map<String, BlobContent> newBlobs = new HashMap<>();
+		newBlobs.put("/server/src/com/example/c/c.java", new BlobContent.Immutable("c".getBytes(), FileMode.REGULAR_FILE));
+		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
 		try {
-			edit.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
+			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
 			assertTrue("An ObsoleteCommitException should be thrown", false);
 		} catch (ObsoleteCommitException e) {
 			assertTrue(newCommitId.equals(e.getOldCommitId()));

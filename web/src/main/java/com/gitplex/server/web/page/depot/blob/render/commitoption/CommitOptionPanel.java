@@ -2,6 +2,10 @@ package com.gitplex.server.web.page.depot.blob.render.commitoption;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -11,6 +15,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -25,6 +30,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -35,10 +41,10 @@ import org.unbescape.javascript.JavaScriptEscape;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobChange;
-import com.gitplex.server.git.BlobEdit;
+import com.gitplex.server.git.BlobContent;
+import com.gitplex.server.git.BlobEdits;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.git.PathAndContent;
 import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
@@ -51,6 +57,7 @@ import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.revision.DiffViewMode;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
+import com.gitplex.server.web.page.depot.blob.RevisionResolveEvent;
 import com.gitplex.server.web.page.depot.blob.navigator.BlobNameChanging;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
@@ -66,9 +73,7 @@ public class CommitOptionPanel extends Panel {
 
 	private final BlobRenderContext context;
 	
-	private BlobEdit blobEdit;
-	
-	private ObjectId currentCommitId;
+	private final Provider<byte[]> newContentProvider;
 	
 	private String summaryCommitMessage;
 	
@@ -78,47 +83,37 @@ public class CommitOptionPanel extends Panel {
 	
 	private boolean contentModified;
 	
+	private Set<String> oldPaths;
+	
 	public CommitOptionPanel(String id, BlobRenderContext context, @Nullable Provider<byte[]> newContentProvider) {
 		super(id);
 
 		this.context = context;
+		this.newContentProvider = newContentProvider;
 
-		PathAndContent newBlob;
-		if (newContentProvider != null) {
-			newBlob = new PathAndContent() {
+		oldPaths = new HashSet<>();
+		String oldPath = getOldPath();
+		if (oldPath != null)
+			oldPaths.add(oldPath);
+	}
 
-				@Override
-				public String getPath() {
-					return context.getNewPath();
-				}
-
-				@Override
-				public byte[] getContent() {
-					return newContentProvider.get();
-				}
-
-			};
-		} else {
-			newBlob = null;
-		}
-		
-		String oldPath = context.getBlobIdent().isFile()?context.getBlobIdent().path:null;
-		this.blobEdit = new BlobEdit(oldPath, newBlob);
+	@Nullable
+	private String getOldPath() {
+		return context.getBlobIdent().isFile()?context.getBlobIdent().path:null;
 	}
 	
 	private String getDefaultCommitMessage() {
-		String oldPath = blobEdit.getOldPath();
+		String oldPath = getOldPath();
 		String oldName;
 		if (oldPath != null && oldPath.contains("/"))
 			oldName = StringUtils.substringAfterLast(oldPath, "/");
 		else
 			oldName = oldPath;
 		
-		PathAndContent newBlob = blobEdit.getNewBlob();
-		if (newBlob == null) { 
+		if (newContentProvider == null) { 
 			return "Delete " + oldName;
 		} else {
-			String newPath = newBlob.getPath();
+			String newPath = context.getNewPath();
 
 			String newName;
 			if (newPath != null && newPath.contains("/"))
@@ -270,7 +265,7 @@ public class CommitOptionPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(blobEdit.getNewBlob() == null);
+				setVisible(newContentProvider == null);
 			}
 
 			@Override
@@ -293,8 +288,7 @@ public class CommitOptionPanel extends Panel {
 	private boolean save(AjaxRequestTarget target, FeedbackPanel feedback) {
 		change = null;
 		
-		PathAndContent newBlob = blobEdit.getNewBlob();
-		if (newBlob != null && StringUtils.isBlank(newBlob.getPath())) {
+		if (newContentProvider != null && StringUtils.isBlank(context.getNewPath())) {
 			CommitOptionPanel.this.error("Please specify file name.");
 			target.add(feedback);
 			return false;
@@ -308,60 +302,34 @@ public class CommitOptionPanel extends Panel {
 
 			String refName = GitUtils.branch2ref(context.getBlobIdent().revision);
 			ObjectId prevCommitId = context.getDepot().getObjectId(context.getBlobIdent().revision);
+			
 			Repository repository = context.getDepot().getRepository();
 			ObjectId newCommitId = null;
+
+			Map<String, BlobContent> newBlobs = new HashMap<>();
+			if (newContentProvider != null) {
+				newBlobs.put(context.getNewPath(), new BlobContent() {
+
+					@Override
+					public byte[] getBytes() {
+						return newContentProvider.get();
+					}
+
+					@Override
+					public FileMode getMode() {
+						if (context.getBlobIdent().isFile())
+							return FileMode.fromBits(context.getBlobIdent().mode);
+						else
+							return FileMode.REGULAR_FILE;
+					}
+
+				});
+			}
+			
 			while(newCommitId == null) {
 				try {
-					newCommitId = blobEdit.commit(repository, refName, 
+					newCommitId = new BlobEdits(oldPaths, newBlobs).commit(repository, refName, 
 							prevCommitId, prevCommitId, user.asPerson(), commitMessage);
-				} catch (ObsoleteCommitException e) {
-					currentCommitId = e.getOldCommitId();
-					try (RevWalk revWalk = new RevWalk(repository)) {
-						RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
-						RevCommit currentCommit = revWalk.parseCommit(currentCommitId);
-						prevCommitId = currentCommitId;
-
-						String oldPath = blobEdit.getOldPath();
-						if (oldPath != null) {
-							TreeWalk treeWalk = TreeWalk.forPath(repository, oldPath, 
-									prevCommit.getTree().getId(), currentCommit.getTree().getId());
-							if (treeWalk != null) {
-								if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
-										|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
-									// mark changed if original file exists and content or mode has been modified
-									// by others
-									if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-										if (newBlob != null) {
-											blobEdit = new BlobEdit(null, newBlob);
-											change = getChange(treeWalk, prevCommit, currentCommit);
-											break;
-										} else {
-											newCommitId = currentCommitId;
-											break;
-										}
-									} else {
-										change = getChange(treeWalk, prevCommit, currentCommit);
-										break;
-									}
-								}
-							}
-						}
-						if (newBlob != null && !newBlob.getPath().equals(oldPath)) { 
-							TreeWalk treeWalk = TreeWalk.forPath(repository, newBlob.getPath(), 
-									prevCommit.getTree().getId(), currentCommit.getTree().getId());
-							if (treeWalk != null) {
-								if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
-										|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
-									// if added/renamed file exists and content or mode has been modified 
-									// by others
-									change = getChange(treeWalk, prevCommit, currentCommit);
-									break;
-								}
-							}
-						} 
-					} catch (IOException e2) {
-						throw new RuntimeException(e2);
-					}
 				} catch (ObjectAlreadyExistsException e) {
 					CommitOptionPanel.this.error("A file with same name already exists. "
 							+ "Please choose a different name and try again.");
@@ -372,6 +340,38 @@ public class CommitOptionPanel extends Panel {
 							+ "Choose a new path and try again..");
 					target.add(feedback);
 					break;
+				} catch (ObsoleteCommitException e) {
+					try (RevWalk revWalk = new RevWalk(repository)) {
+						RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
+						send(this, Broadcast.BUBBLE, new RevisionResolveEvent(target, e.getOldCommitId()));
+						RevCommit currentCommit = revWalk.parseCommit(e.getOldCommitId());
+						prevCommitId = e.getOldCommitId();
+
+						if (!oldPaths.isEmpty()) {
+							TreeWalk treeWalk = TreeWalk.forPath(repository, oldPaths.iterator().next(), 
+									prevCommit.getTree().getId(), currentCommit.getTree().getId());
+							Preconditions.checkNotNull(treeWalk);
+							if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
+									|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
+								// mark changed if original file exists and content or mode has been modified
+								// by others
+								if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
+									if (newContentProvider != null) {
+										oldPaths.clear();
+										change = getChange(treeWalk, prevCommit, currentCommit);
+										break;
+									} else {
+										newCommitId = e.getOldCommitId();
+									}
+								} else {
+									change = getChange(treeWalk, prevCommit, currentCommit);
+									break;
+								}
+							} 
+						} 
+					} catch (IOException e2) {
+						throw new RuntimeException(e2);
+					}
 				}
 			}
 			if (newCommitId != null) {
@@ -421,14 +421,14 @@ public class CommitOptionPanel extends Panel {
 	}
 	
 	public void onContentChange(IPartialPageRequestHandler partialPageRequestHandler) {
-		Preconditions.checkNotNull(blobEdit.getNewBlob());
+		Preconditions.checkNotNull(newContentProvider);
 		
 		if (context.getMode() == Mode.EDIT) {
 			contentModified = !Arrays.equals(
-					blobEdit.getNewBlob().getContent(), 
+					newContentProvider.get(), 
 					context.getDepot().getBlob(context.getBlobIdent()).getBytes());
 		} else {
-			contentModified = blobEdit.getNewBlob().getContent().length != 0;
+			contentModified = newContentProvider.get().length != 0;
 		}
 		onBlobChange(partialPageRequestHandler);
 	}
