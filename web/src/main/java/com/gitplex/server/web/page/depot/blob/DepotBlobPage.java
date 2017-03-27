@@ -17,7 +17,6 @@ import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
@@ -26,7 +25,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -67,6 +65,9 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.PrioritizedComponentRenderer;
 import com.gitplex.server.web.component.link.ArchiveMenuLink;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.menu.MenuItem;
+import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
 import com.gitplex.server.web.page.depot.DepotPage;
@@ -194,10 +195,10 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			if (!SecurityUtils.canModify(getDepot(), state.blobIdent.revision, path))
 				unauthorized();
 		}
-		
+	
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		String accept = request.getHeader("Accept");
-		if (accept != null && !accept.startsWith("text/html")) {
+		if (accept != null && !accept.startsWith("text/html") && state.blobIdent.isFile()) {
 			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
 					new ResourceReferenceRequestHandler(new RawBlobResourceReference(), getPageParameters()));
 		}
@@ -309,17 +310,85 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		WebMarkupContainer blobOperations = new WebMarkupContainer("blobOperations");
 		blobOperations.setOutputMarkupId(true);
 		
-		blobOperations.add(new ViewStateAwareAjaxLink<Void>("add") {
+		blobOperations.add(new MenuLink("add") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onModeChange(target, Mode.ADD);
-			}
+			protected List<MenuItem> getMenuItems() {
+				List<MenuItem> menuItems = new ArrayList<>();
+				menuItems.add(new MenuItem() {
 
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-			}
+					@Override
+					public String getIconClass() {
+						return null;
+					}
 
+					@Override
+					public String getLabel() {
+						return "Create New File";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new ViewStateAwareAjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								onModeChange(target, Mode.ADD);
+								closeDropdown();
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getIconClass() {
+						return null;
+					}
+
+					@Override
+					public String getLabel() {
+						return "Upload Files";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new ModalLink(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								super.onClick(target);
+								closeDropdown();
+							}
+
+							@Override
+							protected Component newContent(String id) {
+								return new BlobUploadPanel(id, DepotBlobPage.this) {
+
+									@Override
+									void onCancel(AjaxRequestTarget target) {
+										closeModal();
+									}
+
+									@Override
+									void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
+										DepotBlobPage.this.onCommitted(target, oldCommit, newCommit);
+										closeModal();
+									}
+									
+								};
+							}
+							
+						};
+					}
+					
+				});
+				return menuItems;
+			}
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -372,12 +441,12 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 					protected void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
 						newSearchResult(target, hits);
 						resizeWindow(target);
-						close(target);
+						closeModal();
 					}
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						close(target);
+						closeModal();
 					}
 
 					@Override
@@ -390,15 +459,17 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			
 		});
 
-		blobOperations.add(new Link<Void>("history") {
+		DepotCommitsPage.State commitsState = new DepotCommitsPage.State();
+		commitsState.setCompareWith(resolvedRevision.name());
+		if (state.blobIdent.path != null)
+			commitsState.setQuery(String.format("path(%s)", DepotBlobPage.this.state.blobIdent.path));
+		blobOperations.add(new ViewStateAwarePageLink<Void>("history", DepotCommitsPage.class, 
+				DepotCommitsPage.paramsOf(getDepot(), commitsState)) {
 
 			@Override
-			public void onClick() {
-				DepotCommitsPage.State state = new DepotCommitsPage.State();
-				state.setCompareWith(resolvedRevision.name());
-				if (DepotBlobPage.this.state.blobIdent.path != null) 
-					state.setQuery(String.format("path(%s)", DepotBlobPage.this.state.blobIdent.path));
-				setResponsePage(DepotCommitsPage.class, DepotCommitsPage.paramsOf(getDepot(), state));				
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(state.blobIdent.isTree());
 			}
 			
 		});
@@ -408,6 +479,12 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			@Override
 			protected String getRevision() {
 				return state.blobIdent.revision;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(state.blobIdent.path == null);
 			}
 
 		});
@@ -766,7 +843,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 
 	@Override
 	public RevCommit getCommit() {
-		return getDepot().getRevCommit(getBlobIdent().revision);
+		return getDepot().getRevCommit(resolvedRevision);
 	}
 	
 	@Override
@@ -870,8 +947,11 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}	
-		} else {
+		} else if (state.mode == Mode.EDIT) {
 			newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
+		} else { 
+			// We've uploaded some files
+			newBlobIdent = null;
 		}
 		
 		GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
@@ -893,13 +973,15 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		
 		if (state.requestCompareInfo != null) {
 			showRequestChanges(target, oldCommit, newCommit);
-		} else {
+		} else if (newBlobIdent != null) {
 			state.blobIdent = newBlobIdent;
 			state.mark = null;
 			state.commentId = null;
 			state.mode = Mode.VIEW;
 			onResolvedRevisionChange(target);
 			pushState(target);
+		} else {
+			onResolvedRevisionChange(target);
 		}
 
 		// fix the issue that sometimes indexing indicator of new commit does not disappear 

@@ -5,6 +5,15 @@ gitplex.server.markdown = {
 		else
 			return "markdownEditor.splitView";
 	},
+	dispatchInputEvent: function($input) {
+		if(document.createEventObject) {
+			$input[0].fireEvent("input");
+		} else {
+		    var evt = document.createEvent("HTMLEvents");
+		    evt.initEvent("input", false, true);
+		    $input[0].dispatchEvent(evt);
+		}
+	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, attachmentMaxSize, 
 			canMentionUser, canReferencePullRequest) {
 		var $container = $("#" + containerId);
@@ -99,16 +108,6 @@ gitplex.server.markdown = {
 			}
 		}, 500);
 		
-		function dispatchInputEvent() {
-			if(document.createEventObject) {
-				$input[0].fireEvent("input");
-			} else {
-			    var evt = document.createEvent("HTMLEvents");
-			    evt.initEvent("input", false, true);
-			    $input[0].dispatchEvent(evt);
-			}
-		}
-		
 	    var fontSize = parseInt(getComputedStyle($input[0]).getPropertyValue('font-size'));
 		/*
 		 * Padding same leading spaces as last line when add a new line. This is useful when 
@@ -141,7 +140,7 @@ gitplex.server.markdown = {
 					$input.scrollTop(caretBottom - $input.height());
 				}
 				
-				dispatchInputEvent();
+				gitplex.server.markdown.dispatchInputEvent($input);
 			}
 		});
 		
@@ -210,7 +209,7 @@ gitplex.server.markdown = {
 				$input.range("**strong text**").range(selected.start+2, selected.end+2+"strong text".length);
 			}
 			$input.focus();
-			dispatchInputEvent();
+			gitplex.server.markdown.dispatchInputEvent($input);
 		});
 		
 		$head.find(".do-italic").click(function() {
@@ -221,7 +220,7 @@ gitplex.server.markdown = {
 				$input.range("_emphasized text_").range(selected.start+1, selected.end+1+"emphasized text".length);
 			}
 			$input.focus();
-			dispatchInputEvent();
+			gitplex.server.markdown.dispatchInputEvent($input);
 		});
 		
 		$head.find(".do-header").click(function() {
@@ -232,7 +231,7 @@ gitplex.server.markdown = {
 				$input.range("### heading text").range(selected.start+4, selected.end+4+"heading text".length);
 			}
 			$input.focus();
-			dispatchInputEvent();
+			gitplex.server.markdown.dispatchInputEvent($input);
 		});
 		
 		$head.find(".do-list, .do-orderlist").click(function() {
@@ -251,7 +250,7 @@ gitplex.server.markdown = {
 				$input.range(leading + " list text here").range(selected.start+leading.length+1, selected.start+leading.length+1+"list text here".length);
 			}
 			$input.focus();
-			dispatchInputEvent();
+			gitplex.server.markdown.dispatchInputEvent($input);
 		});
 
 		$head.find(".do-code").click(function() {
@@ -269,7 +268,7 @@ gitplex.server.markdown = {
 				$input.range("`code text here`").range(selected.start+1, selected.end+1+"code text here".length);
 			}
 			$input.focus();
-			dispatchInputEvent();
+			gitplex.server.markdown.dispatchInputEvent($input);
 		});
 		
 		$head.find(".do-quote").click(function() {
@@ -279,7 +278,7 @@ gitplex.server.markdown = {
 			else
 				$input.range("> quote here").range(selected.start+2, selected.start+2+"quote here".length);
 			$input.focus();
-			dispatchInputEvent();
+			gitplex.server.markdown.dispatchInputEvent($input);
 		});
 		
 		$head.find(".do-emoji").click(function() {
@@ -315,7 +314,7 @@ gitplex.server.markdown = {
 				$input.caret(" " + atChar);
 			}
 			$input.atwho("run");
-			dispatchInputEvent();
+			gitplex.server.markdown.dispatchInputEvent($input);
 		});
 		
 		$head.find(".do-image, .do-link").click(function() {
@@ -490,7 +489,6 @@ gitplex.server.markdown = {
 			if (sourceStart <= caret) {
 				$blockNearCaret = $(this);
 			}
-			$(this).removeClass("focusing");
 		});
 		
 		if ($blockNearCaret) {
@@ -522,8 +520,6 @@ gitplex.server.markdown = {
 					scrollTop = blockTop; 
 				}
 			}
-			// Highlight the block so that user can easily find matching block while editing
-			$blockNearCaret.addClass("focusing");
 		} else {
 			scrollTop = 0;
 		}
@@ -629,7 +625,7 @@ gitplex.server.markdown = {
 				return;
 			
 			$input.caret(":" + $(this).attr("title") + ": ");
-			dispatchInputEvent();
+			gitplex.server.markdown.dispatchInputEvent($input);
 		});
 		$(window).resize();
 	},
@@ -655,7 +651,7 @@ gitplex.server.markdown = {
     		$input.range($input.caret()-message.length+offset, $input.caret()-message.length+defaultDescription.length+offset);
     	}
     	
-		dispatchInputEvent();
+		gitplex.server.markdown.dispatchInputEvent($input);
 	}, 
 	updateUploadMessage: function($input, message, replaceMessage) {
 		var isError = message.indexOf("!!") == 0;
@@ -686,12 +682,13 @@ gitplex.server.markdown = {
 	onFileUploadDomReady: function(uploadId, maxSize, maxSizeForDisplay) {
 		var $upload = $('#' + uploadId);
 		$upload.change(function() {
+			var $feedback = $upload.closest('form').find(".feedback");
 			if ($upload[0].files[0].size>maxSize) {
-				$upload.closest('form').prepend("<div class='alert alert-danger'>Size of upload file should be less than " 
+				$feedback.html("<div class='alert alert-danger'>Size of upload file should be less than " 
 						+ maxSizeForDisplay + "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>" +
 								"<span aria-hidden='true'>&times;</span></button></div>");
 			} else {
-				$upload.closest('form').children(".alert").remove();
+				$feedback.empty();
 				$upload.next().click();
 			}
 		})

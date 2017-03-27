@@ -184,7 +184,7 @@ public class DepotTagsPage extends DepotPage {
 							target.add(form);
 						} else {
 							getDepot().tag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
-							close(target);
+							closeModal();
 							target.add(tagsContainer);
 							target.add(pagingNavigator);
 							target.add(noTagsContainer);
@@ -198,7 +198,7 @@ public class DepotTagsPage extends DepotPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						close(target);
+						closeModal();
 					}
 					
 				});

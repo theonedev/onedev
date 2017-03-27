@@ -39,13 +39,13 @@ public abstract class CreateTagLink extends ModalLink {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String tag) {
-				close(target);
+				closeModal();
 				CreateTagLink.this.onCreate(target, tag);
 			}
 
 			@Override
 			protected void onCancel(AjaxRequestTarget target) {
-				close(target);
+				closeModal();
 			}
 			
 		};

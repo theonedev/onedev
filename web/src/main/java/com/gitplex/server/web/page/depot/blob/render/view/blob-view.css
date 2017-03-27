@@ -1,11 +1,12 @@
 .blob-view>.head {
 	border-bottom: 1px solid #BBB; 
-	padding: 6px 12px;
+	padding: 4px 12px;
 }
 .blob-view>.body {
 	overflow: auto;
 }
 .blob-view>.head>.info {
+	margin-top: 4px;
 	color: #666;
 }
 .blob-view>.head>.info .separator {

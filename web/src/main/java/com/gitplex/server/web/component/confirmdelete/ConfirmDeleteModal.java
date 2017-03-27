@@ -18,13 +18,13 @@ public abstract class ConfirmDeleteModal extends ModalPanel {
 			
 			@Override
 			protected void onDelete(AjaxRequestTarget target) {
-				close(target);
+				close();
 				doDelete(target);
 			}
 			
 			@Override
 			protected void onCancel(AjaxRequestTarget target) {
-				close(target);
+				close();
 			}
 
 			@Override

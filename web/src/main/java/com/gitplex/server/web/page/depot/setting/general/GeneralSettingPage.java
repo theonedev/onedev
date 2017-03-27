@@ -174,7 +174,7 @@ public class GeneralSettingPage extends DepotSettingPage {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								close(target);
+								close();
 							}
 							
 						});		

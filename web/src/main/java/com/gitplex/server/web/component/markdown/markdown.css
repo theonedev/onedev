@@ -67,9 +67,6 @@
 .markdown-editor>.body>.preview>.message {
 	color: #999;
 }
-.markdown-editor>.body>.preview .focusing {
-	background: #FCF5DA;
-}
 .markdown-editor.compact>.body>* {
 	width: 100%;
 }
@@ -111,8 +108,19 @@
 	font-weight: bold;
 	margin: 12px 0;
 }
+.insert-url>.section>.content {
+	padding: 12px;
+	border: 1px dashed #AAA;
+	border-radius: 4px;
+	background: #F9F9F9;
+}
+.insert-url>.section>.content .alert {
+	margin-bottom: 0;
+	margin-top: 20px;
+}
+
 .insert-url input.url {
-	width: 495px;
+	width: 480px;
 	margin-right: 7px;
 }
 .insert-url .attachments {

@@ -40,7 +40,7 @@ public abstract class RevisionPicker extends DropdownLink {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				close();
+				closeDropdown();
 				RevisionPicker.this.revision = revision;
 				target.add(RevisionPicker.this);
 				
@@ -50,7 +50,7 @@ public abstract class RevisionPicker extends DropdownLink {
 			@Override
 			protected void onModalOpened(AjaxRequestTarget target, ModalPanel modal) {
 				super.onModalOpened(target, modal);
-				close();
+				closeDropdown();
 			}
 
 			@Override

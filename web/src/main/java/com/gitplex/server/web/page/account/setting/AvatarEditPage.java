@@ -23,7 +23,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public class AvatarEditPage extends AccountSettingPage {
 
-	private static final int MAX_IMAGE_SIZE = 2*1024*1024;
+	private static final int MAX_IMAGE_SIZE = 10*1024*1024;
 	
 	public AvatarEditPage(PageParameters params) {
 		super(params);

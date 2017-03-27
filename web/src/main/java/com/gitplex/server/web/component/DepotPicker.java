@@ -33,7 +33,7 @@ public abstract class DepotPicker extends DropdownLink {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot) {
-				close();
+				closeDropdown();
 				target.add(DepotPicker.this);
 				DepotPicker.this.onSelect(target, depot);
 			}

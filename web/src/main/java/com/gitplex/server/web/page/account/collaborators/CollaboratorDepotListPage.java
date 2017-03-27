@@ -115,7 +115,7 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-						close();
+						closeDropdown();
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(depotsContainer);
@@ -317,7 +317,7 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 							
 							@Override
 							protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-								close();
+								closeDropdown();
 								UserAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
 								GitPlex.getInstance(UserAuthorizationManager.class).save(authorization);

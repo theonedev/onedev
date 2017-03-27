@@ -28,7 +28,7 @@ public class DepotAttachmentSupport implements AttachmentSupport {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_FILE_SIZE = 50*1024*1024; // mega bytes
+	private static final int MAX_FILE_SIZE = 20*1024*1024; // mega bytes
 	
 	private static final int BUFFER_SIZE = 1024*64;
 	

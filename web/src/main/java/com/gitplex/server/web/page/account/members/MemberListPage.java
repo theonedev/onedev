@@ -115,7 +115,7 @@ public class MemberListPage extends AccountLayoutPage {
 
 					@Override
 					protected void onSelectAdmin(AjaxRequestTarget target) {
-						close();
+						closeDropdown();
 						filterRole = ROLE_ADMIN;
 						target.add(filterContainer);
 						target.add(membersContainer);
@@ -125,7 +125,7 @@ public class MemberListPage extends AccountLayoutPage {
 
 					@Override
 					protected void onSelectOrdinary(AjaxRequestTarget target) {
-						close();
+						closeDropdown();
 						filterRole = ROLE_MEMBER;
 						target.add(filterContainer);
 						target.add(membersContainer);
@@ -282,7 +282,7 @@ public class MemberListPage extends AccountLayoutPage {
 							
 							@Override
 							protected void onSelectOrdinary(AjaxRequestTarget target) {
-								close();
+								closeDropdown();
 								membership.setAdmin(false);
 								GitPlex.getInstance(OrganizationMembershipManager.class).save(membership);
 								target.add(pagingNavigator);
@@ -293,7 +293,7 @@ public class MemberListPage extends AccountLayoutPage {
 							
 							@Override
 							protected void onSelectAdmin(AjaxRequestTarget target) {
-								close();
+								closeDropdown();
 								membership.setAdmin(true);
 								GitPlex.getInstance(OrganizationMembershipManager.class).save(membership);
 								target.add(pagingNavigator);

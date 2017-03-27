@@ -209,7 +209,7 @@ public abstract class DepotPage extends AccountPage {
 
 					@Override
 					protected void onPromptForkOption(AjaxRequestTarget target) {
-						close();
+						closeDropdown();
 					}
 					
 				};

@@ -490,7 +490,7 @@ public class RevisionDiffPanel extends Panel {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									close();
+									closeDropdown();
 									whitespaceOptionModel.setObject(each);
 									target.add(body);
 								}

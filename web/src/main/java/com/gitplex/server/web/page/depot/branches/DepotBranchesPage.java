@@ -374,7 +374,7 @@ public class DepotBranchesPage extends DepotPage {
 							target.add(form);
 						} else {
 							depotModel.getObject().createBranch(branchName, branchRevision);
-							close(target);
+							closeModal();
 							target.add(branchesContainer);
 							target.add(pagingNavigator);
 							target.add(noBranchesContainer);
@@ -388,7 +388,7 @@ public class DepotBranchesPage extends DepotPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						close(target);
+						closeModal();
 					}
 					
 				});
@@ -659,7 +659,7 @@ public class DepotBranchesPage extends DepotPage {
 								target.add(pagingNavigator);
 								target.add(branchesContainer);
 								target.add(noBranchesContainer);
-								close(target);
+								closeModal();
 							}
 							
 						});
@@ -667,7 +667,7 @@ public class DepotBranchesPage extends DepotPage {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								close(target);
+								closeModal();
 							}
 							
 						});

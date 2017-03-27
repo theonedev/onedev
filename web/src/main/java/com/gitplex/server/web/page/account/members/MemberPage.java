@@ -108,7 +108,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 					
 					@Override
 					protected void onSelectOrdinary(AjaxRequestTarget target) {
-						close();
+						closeDropdown();
 						getMembership().setAdmin(false);
 						GitPlex.getInstance(OrganizationMembershipManager.class).save(getMembership());
 						setResponsePage(getPageClass(), getPageParameters());
@@ -117,7 +117,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 					
 					@Override
 					protected void onSelectAdmin(AjaxRequestTarget target) {
-						close();
+						closeDropdown();
 						getMembership().setAdmin(true);
 						GitPlex.getInstance(OrganizationMembershipManager.class).save(getMembership());
 						setResponsePage(getPageClass(), getPageParameters());

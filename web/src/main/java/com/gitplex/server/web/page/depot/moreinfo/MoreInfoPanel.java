@@ -172,7 +172,7 @@ public abstract class MoreInfoPanel extends Panel {
 
 					@Override
 					protected void onClose(AjaxRequestTarget target) {
-						close(target);
+						closeModal();
 					}
 					
 				};

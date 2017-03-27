@@ -318,13 +318,13 @@ public abstract class RevisionSelector extends Panel {
 
 						@Override
 						protected void onCreate(AjaxRequestTarget target, String tagName) {
-							close(target);
+							close();
 							onSelect(target, tagName);
 						}
 
 						@Override
 						protected void onCancel(AjaxRequestTarget target) {
-							close(target);
+							close();
 						}
 						
 					};

@@ -29,7 +29,7 @@ public abstract class BranchPicker extends DropdownLink {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String branch) {
-				close();
+				closeDropdown();
 				BranchPicker.this.branch = branch;
 				target.add(BranchPicker.this);
 				

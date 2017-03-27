@@ -20,8 +20,10 @@ import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
+import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.resource.RawBlobResource;
 import com.gitplex.server.web.util.resource.RawBlobResourceReference;
@@ -187,6 +189,12 @@ public abstract class BlobViewPanel extends Panel {
 			}
 			
 		})));
+
+		DepotCommitsPage.State state = new DepotCommitsPage.State();
+		state.setCompareWith(context.getCommit().name());
+		state.setQuery(String.format("path(%s)", context.getBlobIdent().path));
+		add(new ViewStateAwarePageLink<>("history", DepotCommitsPage.class, 
+				DepotCommitsPage.paramsOf(context.getDepot(), state)));
 		
 		add(newAdditionalActions("extraActions"));
 		newChangeActions(null);

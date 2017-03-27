@@ -510,3 +510,7 @@ input.search {
 .dropdown-menu li a i {
 	margin-right: 4px;
 }
+
+.wicket-mfu-caption {
+	margin-top: 4px;
+}

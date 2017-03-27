@@ -26,8 +26,8 @@ public abstract class ModalLink extends AjaxLink<Void> {
 				}
 
 				@Override
-				protected void onClosed(AjaxRequestTarget target) {
-					super.onClosed(target);
+				protected void onClosed() {
+					super.onClosed();
 					modal = null;
 				}
 				
@@ -35,9 +35,9 @@ public abstract class ModalLink extends AjaxLink<Void> {
 		}
 	}
 
-	protected void close(AjaxRequestTarget target) {
+	protected void closeModal() {
 		if (modal != null)
-			modal.close(target);
+			modal.close();
 	}
 	
 	protected abstract Component newContent(String id);

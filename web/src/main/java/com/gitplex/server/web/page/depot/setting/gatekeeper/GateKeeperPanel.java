@@ -84,12 +84,12 @@ abstract class GateKeeperPanel extends Panel {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						close(target);
+						closeModal();
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-						close(target);
+						closeModal();
 						GateKeeperPanel.this.onChange(target, gateKeeper);
 					}
 					
@@ -186,12 +186,12 @@ abstract class GateKeeperPanel extends Panel {
 
 									@Override
 									protected void onCancel(AjaxRequestTarget target) {
-										close(target);
+										close();
 									}
 
 									@Override
 									protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-										close(target);
+										close();
 										fragment.replace(new WebMarkupContainer("childEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 										andOrGateKeeper.getGateKeepers().add(gateKeeper);
 										GateKeeperPanel.this.onChange(target, andOrGateKeeper);
@@ -237,12 +237,12 @@ abstract class GateKeeperPanel extends Panel {
 
 										@Override
 										protected void onCancel(AjaxRequestTarget target) {
-											close(target);
+											close();
 										}
 
 										@Override
 										protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-											close(target);
+											close();
 											fragment.replace(new WebMarkupContainer("gateKeeperEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											notGateKeeper.setGateKeeper(gateKeeper);
 											GateKeeperPanel.this.onChange(target, notGateKeeper);
@@ -311,12 +311,12 @@ abstract class GateKeeperPanel extends Panel {
 
 										@Override
 										protected void onCancel(AjaxRequestTarget target) {
-											close(target);
+											close();
 										}
 
 										@Override
 										protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-											close(target);
+											close();
 											fragment.replace(new WebMarkupContainer("ifEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											ifThenGateKeeper.setIfGate(gateKeeper);
 											GateKeeperPanel.this.onChange(target, ifThenGateKeeper);
@@ -381,12 +381,12 @@ abstract class GateKeeperPanel extends Panel {
 
 										@Override
 										protected void onCancel(AjaxRequestTarget target) {
-											close(target);
+											close();
 										}
 
 										@Override
 										protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-											close(target);
+											close();
 											fragment.replace(new WebMarkupContainer("thenEditor").setOutputMarkupPlaceholderTag(true).setVisible(true));
 											ifThenGateKeeper.setThenGate(gateKeeper);
 											GateKeeperPanel.this.onChange(target, ifThenGateKeeper);

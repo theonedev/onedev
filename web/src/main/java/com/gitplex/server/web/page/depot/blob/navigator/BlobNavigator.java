@@ -208,7 +208,7 @@ public class BlobNavigator extends Panel {
 									@Override
 									public void onClick(AjaxRequestTarget target) {
 										context.onSelect(target, model.getObject(), null);
-										close();
+										closeDropdown();
 									}
 
 									@Override

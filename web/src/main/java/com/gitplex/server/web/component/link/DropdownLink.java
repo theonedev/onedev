@@ -122,7 +122,7 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 		}
 	}
 
-	public void close() {
+	public void closeDropdown() {
 		if (dropdown != null)
 			dropdown.close();
 	}

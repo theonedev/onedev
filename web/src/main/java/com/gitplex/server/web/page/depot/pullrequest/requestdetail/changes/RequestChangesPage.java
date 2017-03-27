@@ -235,7 +235,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 						target.add(head);
 						newRevisionDiff(target);
 						pushState(target);
-						close();
+						closeDropdown();
 					}
 					
 				};

@@ -8,11 +8,11 @@
 			<div class="content">
 				<label>Input Url</label>
 				<form wicket:id="urlForm" class="form-inline url">
-					<div wicket:id="feedback" class="feedback"></div>
 					<div class="form-group">
 						<input wicket:id="url" class="form-control focusable url"></input>
-						<button wicket:id="ok" type="submit" class="btn btn-primary">OK</button>
+						<button wicket:id="ok" type="submit" class="btn btn-default">OK</button>
 					</div>		
+					<div wicket:id="feedback" class="feedback"></div>
 				</form>
 			</div>
 		</div>
@@ -29,10 +29,10 @@
 			<div class="or">-OR-</div>
 			<div class="content">
 				<form wicket:id="uploadForm" class="upload">
-					<div wicket:id="feedback" class="feedback"></div>
-				    <span class="btn btn-default btn-file">
+				    <div class="btn btn-default btn-file">
 				        Upload File... <input wicket:id="file" type="file"></input> <button wicket:id="submit" class="hidden">submit</button>
-				    </span>		
+				    </div>		
+					<div wicket:id="feedback" class="feedback"></div>
 				</form>
 			</div>
 		</div>

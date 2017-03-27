@@ -120,7 +120,7 @@ public class TeamDepotListPage extends TeamPage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-						close();
+						closeDropdown();
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(depotsContainer);
@@ -303,7 +303,7 @@ public class TeamDepotListPage extends TeamPage {
 
 							@Override
 							protected void onClose(AjaxRequestTarget target) {
-								close(target);
+								closeModal();
 							}
 							
 						};
@@ -333,7 +333,7 @@ public class TeamDepotListPage extends TeamPage {
 							
 							@Override
 							protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-								close();
+								closeDropdown();
 								TeamAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
 								GitPlex.getInstance(TeamAuthorizationManager.class).save(authorization);

@@ -165,7 +165,7 @@ class InsertUrlPanel extends Panel {
 								String relativePath = relativized.toString().replace('\\', '/').substring("../".length());
 								markdownEditor.insertUrl(target, isImage, relativePath, blobIdent.getName(), null);
 								markdownEditor.closeUrlSelector(target, InsertUrlPanel.this);
-								close();
+								closeDropdown();
 							}
 
 							@Override
@@ -298,7 +298,7 @@ class InsertUrlPanel extends Panel {
 		if (attachmentSupport != null) 
 			uploadForm.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
 		uploadForm.setMultiPart(true);
-		uploadForm.add(new NotificationPanel("feedback", uploadForm));
+		uploadForm.add(new NotificationPanel("feedback", uploadForm).setOutputMarkupPlaceholderTag(true));
 		uploadForm.add(uploadField);
 		uploadForm.add(new AjaxButton("submit") {});
 		uploadForm.setVisible(attachmentSupport != null);

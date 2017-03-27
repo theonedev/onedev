@@ -44,7 +44,7 @@ abstract class GateKeeperLink extends DropdownLink {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
-				close();
+				closeDropdown();
 				GateKeeperLink.this.onSelect(target, gateKeeperClass);
 			}
 		};

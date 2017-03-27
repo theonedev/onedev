@@ -73,12 +73,12 @@ public class GateKeeperPage extends DepotSettingPage {
 
 								@Override
 								protected void onCancel(AjaxRequestTarget target) {
-									close(target);
+									close();
 								}
 
 								@Override
 								protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-									close(target);
+									close();
 									getDepot().getGateKeepers().add(gateKeeper);
 									onGateKeeperChanged(target);
 								}

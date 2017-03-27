@@ -38,13 +38,13 @@ public abstract class CreateBranchLink extends ModalLink {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
-				close(target);
+				closeModal();
 				CreateBranchLink.this.onCreate(target, branch);
 			}
 
 			@Override
 			protected void onCancel(AjaxRequestTarget target) {
-				close(target);
+				closeModal();
 			}
 			
 		};

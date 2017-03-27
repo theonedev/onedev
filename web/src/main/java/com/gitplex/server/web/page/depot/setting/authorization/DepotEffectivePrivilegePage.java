@@ -106,7 +106,7 @@ public class DepotEffectivePrivilegePage extends DepotSettingPage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-						close();
+						closeDropdown();
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(usersContainer);

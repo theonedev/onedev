@@ -99,7 +99,7 @@ public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-						close();
+						closeDropdown();
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(depotsContainer);
