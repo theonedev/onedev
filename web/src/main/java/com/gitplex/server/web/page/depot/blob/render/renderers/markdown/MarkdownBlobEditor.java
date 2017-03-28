@@ -25,7 +25,7 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(input = new MarkdownEditor("input", Model.of(new String(getModelObject(), Charsets.UTF_8)), false) {
+		add(input = new MarkdownEditor("input", Model.of(new String(getModelObject(), Charsets.UTF_8)), false, false) {
 
 			@Override
 			protected BlobReferenceSupport getBlobReferenceSupport() {

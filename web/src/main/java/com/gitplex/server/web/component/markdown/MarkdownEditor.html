@@ -1,7 +1,7 @@
 <wicket:panel>
-	<div wicket:id="container" class="markdown-editor edit-mode autofit">
+	<div wicket:id="container" class="markdown-editor edit-mode autofit no-autosize">
 		<div class="head clearfix">
-			<div wicket:id="normal" class="pull-left">
+			<div wicket:id="normalMode" class="pull-left">
 				<div class="btn-group">
 					<a class="do-bold btn btn-default btn-sm" title="Bold"><i class="fa fa-bold"></i></a>
 					<a class="do-italic btn btn-default btn-sm" title="Italic"><i class="fa fa-italic"></i></a>
@@ -23,7 +23,7 @@
 					<a class="do-hashtag btn btn-default btn-sm" title="Reference Pull Request"><i class="fa fa-hashtag"></i></a>
 				</div>
 			</div>
-			<div wicket:id="compact" class="pull-left dropdown">
+			<div wicket:id="compactMode" class="pull-left dropdown">
 				<button class="btn btn-default btn-sm" data-toggle="dropdown" type="button"><i class="fa fa-navicon"></i></button>
 				<ul class="dropdown-menu" aria-labelledby="dLabel">
 					<li><a class="do-bold"><i class="fa fa-bold fa-fw"></i> Bold</a></li>
@@ -60,8 +60,14 @@
 			<span wicket:id="canAttachFile">You may drop file/image to the input box, or paste image from clipboard</span>
 		</div>
 		<div class="body clearfix">
-			<textarea wicket:id="input" class="input" rows=5></textarea>
-			<div class="preview markdown-rendered"></div>
+			<div class="edit">
+				<textarea wicket:id="input" rows=5></textarea>
+				<div wicket:id="editResizer" class="ui-resizable-handle ui-resizable-s"></div>
+			</div>
+			<div class="preview">
+				<div class="markdown-rendered"></div>
+				<div wicket:id="previewResizer" class="ui-resizable-handle ui-resizable-s"></div>
+			</div>
 		</div>
 	</div>
 </wicket:panel>

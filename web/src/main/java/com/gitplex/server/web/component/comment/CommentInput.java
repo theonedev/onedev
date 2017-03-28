@@ -26,7 +26,7 @@ import com.gitplex.server.web.component.markdown.UserMentionSupport;
 public abstract class CommentInput extends MarkdownEditor {
 
 	public CommentInput(String id, IModel<String> model, boolean compactMode) {
-		super(id, model, compactMode);
+		super(id, model, compactMode, true);
 	}
 
 	@Override

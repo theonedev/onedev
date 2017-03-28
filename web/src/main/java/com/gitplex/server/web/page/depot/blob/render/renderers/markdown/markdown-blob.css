@@ -8,22 +8,23 @@
 .blob-edit .markdown-editor>.head {
 	padding: 8px;
 } 
-.blob-edit .markdown-editor>.body>* {
+.blob-edit .markdown-editor>.body>.edit>textarea, 
+.blob-edit .markdown-editor>.body>.preview>.markdown-rendered {
 	border-radius: 0 !important;
 } 
-.blob-edit .markdown-editor.edit-mode>.body>.input, 
-.blob-edit .markdown-editor.preview-mode>.body>.preview, 
-.blob-edit .markdown-editor.split-mode>.body>.preview {
+.blob-edit .markdown-editor.edit-mode>.body>.edit>textarea, 
+.blob-edit .markdown-editor.preview-mode>.body>.preview>.markdown-rendered, 
+.blob-edit .markdown-editor.split-mode>.body>.preview>.markdown-rendered {
 	border-bottom: none;
 	border-left: none;
 	border-right: none;
 }
-.blob-edit .markdown-editor.split-mode>.body>.input, 
-.blob-edit .markdown-editor>.body>.preview {
+.blob-edit .markdown-editor.split-mode>.body>.edit>textarea, 
+.blob-edit .markdown-editor>.body>.preview>.markdown-rendered {
 	border-bottom: none;
 	border-left: none;
 }
-.blob-edit .markdown-editor>.body>.input {
+.blob-edit .markdown-editor>.body>.edit>textarea {
 	min-height: none;
 	max-height: none;
 	resize: none;

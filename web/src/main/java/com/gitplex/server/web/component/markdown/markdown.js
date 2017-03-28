@@ -1,9 +1,9 @@
 gitplex.server.markdown = {
-	getSplitCookieKey: function($container) {
-		if ($container.hasClass("compact"))
-			return "markdownEditor.compactSplitView";
+	getCookiePrefix: function($container) {
+		if ($container.hasClass("compact-mode"))
+			return "markdownEditor.compactMode";
 		else
-			return "markdownEditor.splitView";
+			return "markdownEditor.normalMode";
 	},
 	dispatchInputEvent: function($input) {
 		if(document.createEventObject) {
@@ -15,7 +15,7 @@ gitplex.server.markdown = {
 		}
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, attachmentMaxSize, 
-			canMentionUser, canReferencePullRequest) {
+			canMentionUser, canReferencePullRequest, resizable, editResizerId, previewResizerId) {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
@@ -24,8 +24,10 @@ gitplex.server.markdown = {
 		var $splitLink = $head.find(".split");
 		var $emojis = $container.children(".emojis");
 		var $help = $container.children(".help");
-		var $input = $body.children(".input");
+		var $edit = $body.children(".edit");
+		var $input = $edit.children("textarea");
 		var $preview = $body.children(".preview");
+		var $rendered = $preview.children(".markdown-rendered");
 		
 		$head.find(".dropdown>button").dropdown();
 		
@@ -35,13 +37,14 @@ gitplex.server.markdown = {
 			$head.find(".pull-left .btn").removeAttr("disabled");
 			
 			$preview.hide();
-			$input.show().focus();
+			$edit.show();
+			$input.focus();
 			$editLink.addClass("active");
 			$previewLink.removeClass("active");
 			$splitLink.removeClass("active");
 			$container.removeClass("preview-mode").removeClass("split-mode").addClass("edit-mode");
 			onLayoutChange();
-			Cookies.set(gitplex.server.markdown.getSplitCookieKey($body), false, {expires: Infinity});
+			Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".split", false, {expires: Infinity});
 		});
 		$previewLink.click(function() {
 			$head.find(".pull-left .btn").attr("disabled", "disabled");
@@ -57,12 +60,12 @@ gitplex.server.markdown = {
 			} else {
 				caretOffset = getCaretCoordinates($input[0], caret).top - $input.scrollTop();
 			}
-			$preview.data("caret", caret);
-			$preview.data("caretOffset", caretOffset);
+			$rendered.data("caret", caret);
+			$rendered.data("caretOffset", caretOffset);
 			
-			$preview.html("<div class='message'>Loading...</div>");
+			$rendered.html("<div class='message'>Loading...</div>");
 			$preview.show();
-			$input.hide();
+			$edit.hide();
 			$editLink.removeClass("active");
 			$previewLink.addClass("active");
 			$splitLink.removeClass("active");
@@ -73,8 +76,9 @@ gitplex.server.markdown = {
 		$splitLink.click(function() {
 			$head.find(".pull-left .btn").removeAttr("disabled");
 			
-			$input.show().focus();
-			$preview.html("<div class='message'>Loading...</div>");
+			$edit.show();
+			$input.focus();
+			$rendered.html("<div class='message'>Loading...</div>");
 			$preview.show();
 			$editLink.removeClass("active");
 			$previewLink.removeClass("active");
@@ -82,13 +86,9 @@ gitplex.server.markdown = {
 			$container.removeClass("edit-mode").removeClass("preview-mode").addClass("split-mode");
 			onLayoutChange();
 			callback("render", $input.val());
-			Cookies.set(gitplex.server.markdown.getSplitCookieKey($body), true, {expires: Infinity});
+			Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".split", true, {expires: Infinity});
 		});
 		
-		$input.on("autosize:resized", function() {
-			$preview.outerHeight($input.outerHeight());
-		});
-
 		$input.doneEvents("input inserted.atwho", function() {
 			if ($preview.is(":visible")) {
 				callback("render", $input.val());
@@ -143,30 +143,78 @@ gitplex.server.markdown = {
 				gitplex.server.markdown.dispatchInputEvent($input);
 			}
 		});
-		
-		$container.on("autofit", function(e, width, height) {
-			height -= $head.outerHeight();
-			if ($emojis.is(":visible"))
-				height -= $emojis.outerHeight();
-			if ($help.is(":visible"))
-				height -= $help.outerHeight();
-			if ($container.hasClass("compact")) {
-				$input.outerHeight(height/2);
-			} else {
+
+		if (resizable) {
+			$edit.resizable({
+				autoHide: false,
+				handles: {"s": "#" + editResizerId},
+				minHeight: 75,
+				resize: function(e, ui) {
+					$input.outerHeight($edit.height());
+					if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+						$rendered.outerHeight($input.outerHeight());
+						$preview.outerHeight($edit.outerHeight());
+					}
+				},
+				stop: function(e, ui) {
+					Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight", 
+							$input.outerHeight(), {expires: Infinity});
+					if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+						Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight", 
+								$rendered.outerHeight(), {expires: Infinity});
+					}
+				}
+			});
+			
+			$preview.resizable({
+				handles: {"s": "#" + previewResizerId},
+				minHeight: 75,
+				resize: function(e, ui) {
+					$rendered.outerHeight($preview.height());
+					if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+						$input.outerHeight($rendered.outerHeight());
+						$edit.outerHeight($preview.outerHeight());
+					}
+				},
+				stop: function(e, ui) {
+					Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight", 
+							$rendered.outerHeight(), {expires: Infinity});
+					if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+						Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight", 
+								$input.outerHeight(), {expires: Infinity});
+					}
+				}
+			});
+		}
+
+		if (!resizable) {
+			$container.on("autofit", function(e, width, height) {
+				height -= $head.outerHeight();
+				if ($emojis.is(":visible"))
+					height -= $emojis.outerHeight();
+				if ($help.is(":visible"))
+					height -= $help.outerHeight();
+				if ($container.hasClass("compact-mode")) {
+					height = height/2;
+				}
 				$input.outerHeight(height);
-			}
-			$preview.outerHeight($input.outerHeight());
-		});
+				$rendered.outerHeight($input.outerHeight());
+			});
+		}
 
 		function onLayoutChange() {
-			if (!($container.hasClass("compact"))) {
-				if ($preview.is(":visible") && $input.is(":visible")) {
+			if ($container.hasClass("normal-mode")) {
+				if ($preview.is(":visible") && $edit.is(":visible")) {
 					$preview.css("width", "50%");
-					$input.css("width", "50%");
+					$edit.css("width", "50%");
 				} else if ($preview.is(":visible")) {
 					$preview.css("width", "100%");
 				} else {
-					$input.css("width", "100%");
+					$edit.css("width", "100%");
+				}
+				if ($container.hasClass("split-mode")) {
+					$rendered.outerHeight($input.outerHeight());
+					$preview.outerHeight($edit.outerHeight());
 				}
 			}
 		}
@@ -299,7 +347,7 @@ gitplex.server.markdown = {
 		});
 		
 		$head.find(".do-mention, .do-hashtag").click(function() {
-			if (!$input.is(":visible")) 
+			if (!$edit.is(":visible")) 
 				return;
 
 			var atChar = $(this).hasClass("do-mention")? "@": "#";
@@ -464,10 +512,12 @@ gitplex.server.markdown = {
 	 */ 
 	syncPreviewScroll: function(containerId) {
 		var $preview = $("#" + containerId + ">.body>.preview");
-		var $input = $("#" + containerId + ">.body>.input");
+		var $rendered = $preview.children(".markdown-rendered");
+		var $edit = $("#" + containerId + ">.body>.edit");
+		var $input = $edit.children("textarea");
 		var caret;
 		var caretOffset; // offset in pixel from caret to input top border
-		if ($input.is(":visible")) {
+		if ($edit.is(":visible")) {
 			caret = $input.caret();
 			if ($input.val().substring(0, caret).trim().length == 0) {
 				/*
@@ -480,11 +530,11 @@ gitplex.server.markdown = {
 				caretOffset = getCaretCoordinates($input[0], caret).top - $input.scrollTop();
 			}
 		} else {
-			caret = $preview.data("caret");
-			caretOffset = $preview.data("caretOffset");
+			caret = $rendered.data("caret");
+			caretOffset = $rendered.data("caretOffset");
 		}
 		var $blockNearCaret;
-		$preview.find("[data-sourcestart]").each(function() {
+		$rendered.find("[data-sourcestart]").each(function() {
 			var sourceStart = parseInt($(this).data("sourcestart"));
 			if (sourceStart <= caret) {
 				$blockNearCaret = $(this);
@@ -497,7 +547,7 @@ gitplex.server.markdown = {
 			 * the block is visible and try to adjust its position to stay on the same height with
 			 * input caret for better user experience  
 			 */
-			var blockTop = $blockNearCaret.offset().top + $preview.scrollTop() - $preview.offset().top;
+			var blockTop = $blockNearCaret.offset().top + $rendered.scrollTop() - $rendered.offset().top;
 			var blockBottom = blockTop + $blockNearCaret.outerHeight();
 
 			var scrollTop;
@@ -507,8 +557,8 @@ gitplex.server.markdown = {
 				 * always visible
 				 */
 				scrollTop = blockTop - caretOffset;
-				if (blockBottom - scrollTop > $preview.height()) {
-					scrollTop = blockBottom - $preview.height(); 
+				if (blockBottom - scrollTop > $rendered.height()) {
+					scrollTop = blockBottom - $rendered.height(); 
 				}
 			} else {
 				/*
@@ -524,23 +574,33 @@ gitplex.server.markdown = {
 			scrollTop = 0;
 		}
 
-		$preview.scrollTop(scrollTop);
+		$rendered.scrollTop(scrollTop);
     },
 	onWindowLoad: function(containerId) {
-		var $head = $("#" + containerId + ">.head");
-		var $body = $("#" + containerId + ">.body");
-		var $preview = $body.children(".preview");
-		var $input = $body.children(".input");
-		$preview.outerHeight($input.outerHeight());
-
-		if (Cookies.get(gitplex.server.markdown.getSplitCookieKey($body)) === "true")
+		var $container = $("#" + containerId);
+		var $head = $container.children(".head");
+		var $body = $container.children(".body");
+		var $rendered = $body.find(">.preview>.markdown-rendered");
+		var $input = $body.find(">.edit>textarea");
+		var inputHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight");
+		if (inputHeight) {
+			$input.outerHeight(parseInt(inputHeight));
+		}
+		var renderedHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight");
+		if (renderedHeight) {
+			$rendered.outerHeight(parseInt(renderedHeight));
+		} else {
+			$rendered.outerHeight($input.outerHeight());
+		}
+		if (Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".split") === "true")
 			$head.find(".split").trigger("click");
 	},
 	onRendered: function(containerId, html) {
 		var $preview = $("#" + containerId + ">.body>.preview");
-
+		var $rendered = $preview.children(".markdown-rendered");
+		
 		var existingImages = {};
-		$preview.find("img").each(function() {
+		$rendered.find("img").each(function() {
 			var key = this.outerHTML;
 			var elements = existingImages[key];
 			if (!elements)
@@ -549,11 +609,11 @@ gitplex.server.markdown = {
 			existingImages[key] = elements;
 		});
 		
-		$preview.html(html);
-		gitplex.server.markdown.initRendered($preview);
+		$rendered.html(html);
+		gitplex.server.markdown.initRendered($rendered);
 
 		// Avoid loading existing image
-		$preview.find("img").each(function() {
+		$rendered.find("img").each(function() {
 			var key = this.outerHTML;
 			var elements = existingImages[key];
 			if (elements) {
@@ -567,7 +627,7 @@ gitplex.server.markdown = {
 		
 		gitplex.server.markdown.syncPreviewScroll(containerId);
 		
-        $preview.find("img").load(function() {
+		$rendered.find("img").load(function() {
             gitplex.server.markdown.syncPreviewScroll(containerId);
         });
         
@@ -609,7 +669,8 @@ gitplex.server.markdown = {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
-		var $input = $body.children(".input");
+		var $edit = $body.children(".edit");
+		var $input = $edit.children("textarea");
 		var $emojis = $container.children(".emojis");
 		
 		var contentHtml = "";
@@ -621,7 +682,7 @@ gitplex.server.markdown = {
 		$emojis.removeClass("loading");
 		$emojis.addClass("loaded");
 		$emojis.find(".emoji").click(function() {
-			if (!$input.is(":visible")) 
+			if (!$edit.is(":visible")) 
 				return;
 			
 			$input.caret(":" + $(this).attr("title") + ": ");
@@ -632,7 +693,7 @@ gitplex.server.markdown = {
 	insertUrl: function(containerId, isImage, url, name, replaceMessage) {
 		var $head = $("#" + containerId + ">.head");
 		var $body = $("#" + containerId + ">.body");
-		var $input = $body.children(".input");
+		var $input = $body.find(">.edit>textarea");
 
     	var sanitizedUrl = $('<div>'+url+'</div>').text();
     	var message;

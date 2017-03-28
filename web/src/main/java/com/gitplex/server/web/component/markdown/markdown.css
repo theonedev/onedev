@@ -13,6 +13,11 @@
 	position: absolute;
 	left: 4px;
 }
+.markdown-editor .ui-resizable-handle {
+	background: #EEE url(hgrabber.png) no-repeat scroll center top;
+    cursor: s-resize;
+    height: 4px;
+}
 
 .markdown-editor>.emojis {
 	margin-bottom: 8px; 
@@ -35,7 +40,7 @@
 	width: 16px; 
 	height: 16px;
 }
-.markdown-editor.preview-mode>.emojis .emoji img {
+.markdown-editor.preview>.emojis .emoji img {
 	opacity: 0.5;
 }
 
@@ -44,45 +49,49 @@
 	display: none;
 }
 
-.markdown-editor>.body>.preview {
+.markdown-editor>.body>.preview>.markdown-rendered {
 	border: 1px solid #BBB;
 	padding: 8px;
 	border-radius: 4px;
 	background: white;
-	display: none;
 }
-.markdown-editor>.body>.input {
+.markdown-editor>.body>.edit {
 	float: left;
 	width: 100%;
-	resizabe: vertical;
+}
+.markdown-editor>.body>.edit>textarea {
 	border: 1px solid #BBB;
 	border-radius: 4px;
 	overflow: auto;
+	width: 100%;
+	display: block;
+	resize: none;
 }
 .markdown-editor>.body>.preview {
 	float: left;
 	width: 49%;
+	display: none;
+}
+.markdown-editor>.body>.preview>.markdown-rendered {
 	overflow: auto;
 }
-.markdown-editor>.body>.preview>.message {
+.markdown-editor>.body>.preview>.markdown-rendered>.message {
 	color: #999;
 }
-.markdown-editor.compact>.body>* {
+.markdown-editor.compact-mode>.body>* {
 	width: 100%;
 }
-.markdown-editor.normal.split-mode>.body>.input {
+.markdown-editor.normal-mode.split-mode>.body>.edit>textarea {
 	border-radius: 4px 0 0 4px;
 }
-.markdown-editor.normal.split-mode>.body>.preview {
+.markdown-editor.normal-mode.split-mode>.body>.preview>.markdown-rendered {
 	border-left: none;
 	border-radius: 0 4px 4px 0;
 }
-.markdown-editor.compact.split-mode>.body>.input {
-	border-radius: 4px 4px 0 0;
-}
-.markdown-editor.compact.split-mode>.body>.preview {
-	border-top: none;
-	border-radius: 0 0 4px 4px;
+.markdown-editor.compact-mode.split-mode>.body>.preview {
+	margin-top: 8px;
+	border-left: none;
+	border-radius: 0 4px 4px 0;
 }
 
 .atwho-view .emoji {
@@ -141,7 +150,7 @@
 	margin-top: 20px;
 }
 
-.markdown-editor>.body>.input.drag-over {
+.markdown-editor>.body>.edit>textarea>.drag-over {
 	border: 2px solid #69B7F7;
 }
 

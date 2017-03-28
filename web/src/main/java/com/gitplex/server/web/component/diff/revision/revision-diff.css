@@ -141,7 +141,3 @@
 .revision-diff>.body>.detail>.comment>.content>.body>* {
 	margin: 12px;
 }
-
-.revision-diff .comment textarea {
-	max-height: 360px;
-}
