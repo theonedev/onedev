@@ -17,6 +17,7 @@
 	background: #EEE url(hgrabber.png) no-repeat scroll center top;
     cursor: s-resize;
     height: 4px;
+    bottom: -2px;
 }
 
 .markdown-editor>.emojis {

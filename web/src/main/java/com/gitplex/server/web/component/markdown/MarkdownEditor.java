@@ -53,10 +53,6 @@ import com.google.common.base.Charsets;
 @SuppressWarnings("serial")
 public class MarkdownEditor extends FormComponentPanel<String> {
 
-	private static final String EDIT_RESIZER = "editResizer";
-	
-	private static final String PREVIEW_RESIZER = "previewResizer";
-	
 	protected static final int ATWHO_LIMIT = 5;
 	
 	private final boolean compactMode;
@@ -268,9 +264,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			}
 			
 		});
-		
-		container.add(new WebMarkupContainer(EDIT_RESIZER).setOutputMarkupId(true).setVisible(resizable));
-		container.add(new WebMarkupContainer(PREVIEW_RESIZER).setOutputMarkupId(true).setVisible(resizable));
 	}
 	
 	@Override
@@ -300,7 +293,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		String callback = ajaxBehavior.getCallbackFunction(explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3")).toString();
 		
-		String script = String.format("gitplex.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, %b, '%s', '%s');", 
+		String script = String.format("gitplex.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, %b);", 
 				container.getMarkupId(), 
 				callback, 
 				ATWHO_LIMIT, 
@@ -308,9 +301,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				getAttachmentSupport()!=null?getAttachmentSupport().getAttachmentMaxSize():0,
 				getUserMentionSupport() != null,
 				getPullRequestReferenceSupport() != null, 
-				resizable,
-				container.get(EDIT_RESIZER).getMarkupId(), 
-				container.get(PREVIEW_RESIZER).getMarkupId());
+				resizable);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		script = String.format("gitplex.server.markdown.onWindowLoad('%s');", container.getMarkupId());

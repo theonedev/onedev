@@ -18,7 +18,7 @@ public class JQueryUIResourceReference extends JavaScriptResourceReference {
 	private static final long serialVersionUID = 1L;
 
 	public JQueryUIResourceReference() {
-		super(JQueryUIResourceReference.class, "jquery-ui.js");
+		super(JQueryUIResourceReference.class, "jquery-ui.min.js");
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class JQueryUIResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(
 				Application.get().getJavaScriptLibrarySettings().getJQueryReference()));
 		dependencies.add(CssHeaderItem.forReference(
-				new CssResourceReference(JQueryUIResourceReference.class, "jquery-ui.css")));
+				new CssResourceReference(JQueryUIResourceReference.class, "jquery-ui.min.css")));
 		return dependencies;
 	}
 	

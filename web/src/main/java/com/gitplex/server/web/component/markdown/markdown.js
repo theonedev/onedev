@@ -15,7 +15,7 @@ gitplex.server.markdown = {
 		}
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, attachmentMaxSize, 
-			canMentionUser, canReferencePullRequest, resizable, editResizerId, previewResizerId) {
+			canMentionUser, canReferencePullRequest, resizable) {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
@@ -147,7 +147,7 @@ gitplex.server.markdown = {
 		if (resizable) {
 			$edit.resizable({
 				autoHide: false,
-				handles: {"s": "#" + editResizerId},
+				handles: {"s": $edit.children(".ui-resizable-handle")},
 				minHeight: 75,
 				resize: function(e, ui) {
 					$input.outerHeight($edit.height());
@@ -167,7 +167,7 @@ gitplex.server.markdown = {
 			});
 			
 			$preview.resizable({
-				handles: {"s": "#" + previewResizerId},
+				handles: {"s": $preview.children(".ui-resizable-handle")},
 				minHeight: 75,
 				resize: function(e, ui) {
 					$rendered.outerHeight($preview.height());
@@ -185,9 +185,9 @@ gitplex.server.markdown = {
 					}
 				}
 			});
-		}
+		} else {
+			$container.find(".ui-resizable-handle").hide();
 
-		if (!resizable) {
 			$container.on("autofit", function(e, width, height) {
 				height -= $head.outerHeight();
 				if ($emojis.is(":visible"))
@@ -582,15 +582,18 @@ gitplex.server.markdown = {
 		var $body = $container.children(".body");
 		var $rendered = $body.find(">.preview>.markdown-rendered");
 		var $input = $body.find(">.edit>textarea");
-		var inputHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight");
-		if (inputHeight) {
-			$input.outerHeight(parseInt(inputHeight));
-		}
-		var renderedHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight");
-		if (renderedHeight) {
-			$rendered.outerHeight(parseInt(renderedHeight));
-		} else {
-			$rendered.outerHeight($input.outerHeight());
+		
+		if ($container.find(".ui-resizable-handle").is(":visible")) {
+			var inputHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight");
+			if (inputHeight) {
+				$input.outerHeight(parseInt(inputHeight));
+			}
+			var renderedHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight");
+			if (renderedHeight) {
+				$rendered.outerHeight(parseInt(renderedHeight));
+			} else {
+				$rendered.outerHeight($input.outerHeight());
+			}
 		}
 		if (Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".split") === "true")
 			$head.find(".split").trigger("click");

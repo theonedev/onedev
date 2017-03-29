@@ -117,15 +117,13 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 
 	private static final String BLOB_CONTENT_ID = "blobContent";
 	
-	private static final String SEARCH_RESULD_ID = "searchResult";
-
 	private State state = new State();
 	
 	private ObjectId resolvedRevision;
 	
 	private Component revisionIndexing;
 	
-	private WebMarkupContainer searchResultContainer;
+	private WebMarkupContainer searchResult;
 	
 	public DepotBlobPage(final PageParameters params) {
 		super(params);
@@ -239,7 +237,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 
 		newBlobContent(null);
 
-		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
+		add(searchResult = new WebMarkupContainer("searchResult"));
 
 		List<QueryHit> queryHits;
 		if (state.query != null) {
@@ -684,9 +682,9 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	}
 	
 	private void newSearchResult(@Nullable AjaxRequestTarget target, @Nullable List<QueryHit> hits) {
-		Component searchResult;
+		Component content;
 		if (hits != null) {
-			searchResult = new SearchResultPanel(SEARCH_RESULD_ID, this, hits) {
+			content = new SearchResultPanel("content", this, hits) {
 				
 				@Override
 				protected void onClose(AjaxRequestTarget target) {
@@ -701,17 +699,17 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 						+ "$('#depot-blob .search-result>.body').focus();");
 			}
 		} else {
-			searchResult = new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true);
+			content = new WebMarkupContainer("content").setOutputMarkupId(true);
 			if (target != null) 
 				target.appendJavaScript("$('#depot-blob>.search-result').hide();");
 			else 
-				searchResultContainer.add(AttributeAppender.replace("style", "display: none;"));
+				searchResult.add(AttributeAppender.replace("style", "display: none;"));
 		}
 		if (target != null) {
-			searchResultContainer.replace(searchResult);
-			target.add(searchResult);
+			searchResult.replace(content);
+			target.add(content);
 		} else {
-			searchResultContainer.add(searchResult);
+			searchResult.add(content);
 		}
 	}
 	
