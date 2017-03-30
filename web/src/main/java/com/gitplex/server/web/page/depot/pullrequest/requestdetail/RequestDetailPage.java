@@ -27,6 +27,7 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -77,6 +78,7 @@ import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
 import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
+import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
@@ -85,6 +87,7 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpr
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.WicketUtils;
+import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.model.EntityModel;
 import com.gitplex.server.web.websocket.PullRequestChanged;
 import com.gitplex.server.web.websocket.PullRequestChangedRegion;
@@ -654,6 +657,7 @@ public abstract class RequestDetailPage extends DepotPage {
 		DepotAndBranch source = request.getSource();
 		Preconditions.checkNotNull(source);
 		
+		String autosaveKey = "autosave:pullRequestOperation:" + getPullRequest().getId();
 		FormComponent<String> noteInput;
 		form.add(noteInput = new CommentInput("note", Model.of(""), false) {
 
@@ -668,6 +672,11 @@ public abstract class RequestDetailPage extends DepotPage {
 				return requestModel.getObject().getTargetDepot();
 			}
 
+			@Override
+			protected String getAutosaveKey() {
+				return autosaveKey;
+			}
+			
 			@Override
 			protected List<AttributeModifier> getInputModifiers() {
 				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a note"));
@@ -689,7 +698,9 @@ public abstract class RequestDetailPage extends DepotPage {
 					target.appendJavaScript("$(window).resize();");
 				} else {
 					operation.operate(request, noteInput.getModelObject());
-					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
+					PageParameters params = RequestOverviewPage.paramsOf(getPullRequest());
+					params.add(BasePage.PARAM_AUTOSAVE_KEY_TO_CLEAR, autosaveKey);
+					setResponsePage(RequestOverviewPage.class, params);
 				}
 			}
 
@@ -714,6 +725,12 @@ public abstract class RequestDetailPage extends DepotPage {
 			
 		})));
 		form.add(new AjaxLink<Void>("cancel") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {

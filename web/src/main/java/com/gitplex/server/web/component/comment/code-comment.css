@@ -75,3 +75,7 @@
 .code-comment>.add-reply>a:hover {
 	color: inherit;
 }
+.code-comment .markdown-rendered {
+	font-size: inherit;
+	line-height: inherit;
+}

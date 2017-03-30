@@ -58,7 +58,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	private final boolean compactMode;
 	
 	private final boolean resizable;
-
+	
 	private WebMarkupContainer container;
 	
 	private TextArea<String> input;
@@ -78,6 +78,12 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		super(id, model);
 		this.compactMode = compactMode;
 		this.resizable = resizable;
+	}
+
+	@Override
+	protected void onModelChanged() {
+		super.onModelChanged();
+		input.setModelObject(getModelObject());
 	}
 
 	@Override
@@ -293,7 +299,13 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		String callback = ajaxBehavior.getCallbackFunction(explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3")).toString();
 		
-		String script = String.format("gitplex.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, %b);", 
+		String autosaveKey = getAutosaveKey();
+		if (autosaveKey != null)
+			autosaveKey = "'" + JavaScriptEscape.escapeJavaScript(autosaveKey) + "'";
+		else
+			autosaveKey = "undefined";
+		
+		String script = String.format("gitplex.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, %b, %s);", 
 				container.getMarkupId(), 
 				callback, 
 				ATWHO_LIMIT, 
@@ -301,7 +313,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				getAttachmentSupport()!=null?getAttachmentSupport().getAttachmentMaxSize():0,
 				getUserMentionSupport() != null,
 				getPullRequestReferenceSupport() != null, 
-				resizable);
+				resizable, 
+				autosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		script = String.format("gitplex.server.markdown.onWindowLoad('%s');", container.getMarkupId());
@@ -350,6 +363,11 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	}
 	
 	protected BlobReferenceSupport getBlobReferenceSupport() {
+		return null;
+	}
+	
+	@Nullable
+	protected String getAutosaveKey() {
 		return null;
 	}
 	

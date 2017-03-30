@@ -138,20 +138,22 @@ public class SourceEditPanel extends BlobEditPanel implements MarkSupport {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new SourceEditResourceReference()));
-		
+
+		String autosaveKey = JavaScriptEscape.escapeJavaScript(context.getAutosaveKey());
 		String jsonOfMark = context.getMark()!=null?getJson(context.getMark()):"undefined"; 
-		String script = String.format("gitplex.server.sourceEdit.onDomReady('%s', '%s', %s, '%s', %s, '%s', %b);", 
+		String script = String.format("gitplex.server.sourceEdit.onDomReady('%s', '%s', %s, '%s', %s, '%s', %b, '%s');", 
 				sourceFormComponent.getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(context.getNewPath()), 
 				jsonOfMark,
 				sourceFormat.getIndentType(), 
 				sourceFormat.getTabSize(), 
 				sourceFormat.getLineWrapMode(), 
-				context.getMode() == Mode.EDIT);
+				context.getMode() == Mode.EDIT, 
+				autosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
-		script = String.format("gitplex.server.sourceEdit.onWindowLoad('%s', %s);", 
-				sourceFormComponent.getMarkupId(), jsonOfMark);
+		script = String.format("gitplex.server.sourceEdit.onWindowLoad('%s', %s, '%s');", 
+				sourceFormComponent.getMarkupId(), jsonOfMark, autosaveKey);
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 

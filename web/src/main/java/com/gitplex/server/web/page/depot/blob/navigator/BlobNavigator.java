@@ -273,7 +273,7 @@ public class BlobNavigator extends Panel {
 			});
 			
 			if (context.getMode() == Mode.ADD)
-				nameInput.add(AttributeAppender.append("class", "focusable"));
+				nameInput.add(AttributeAppender.append("class", "autofocus"));
 			lastSegment.add(AttributeAppender.append("class", "input"));
 		} else if (file.isTree()) {
 			lastSegment = new WebMarkupContainer(LAST_SEGMENT_ID);

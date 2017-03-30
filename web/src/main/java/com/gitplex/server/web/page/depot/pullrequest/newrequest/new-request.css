@@ -70,7 +70,7 @@
 #new-request>.body>.status>.can-send form>table .reviewers li a:hover {
 	text-decoration: none;
 }
-#new-request>.body>.status>.can-send form .alert {
+#new-request>.body>.status>.can-send form .alert-danger {
 	margin-bottom: 0; 
 	margin-top: 16px;
 }

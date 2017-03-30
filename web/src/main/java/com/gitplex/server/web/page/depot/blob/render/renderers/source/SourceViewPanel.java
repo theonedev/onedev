@@ -445,6 +445,8 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 					
 					String uuid = UUID.randomUUID().toString();
 					
+					String autosaveKey = "autosave:addCodeCommentOnSource:" + context.getDepot().getId() 
+							+ ":" + context.getBlobIdent().path;
 					CommentInput contentInput;
 					form.add(contentInput = new CommentInput("content", Model.of(""), true) {
 
@@ -453,6 +455,11 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 							return new DepotAttachmentSupport(context.getDepot(), uuid);
 						}
 
+						@Override
+						protected String getAutosaveKey() {
+							return autosaveKey;
+						}
+						
 						@Override
 						protected Depot getDepot() {
 							return context.getDepot();
@@ -534,9 +541,13 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 							commentContainer.replace(commentPanel);
 							target.add(commentContainer);
 
-							String script = String.format("gitplex.server.sourceView.onCommentAdded(%s);", 
-									getJsonOfComment(comment));
+							String script = String.format(""
+									+ "gitplex.server.sourceView.onCommentAdded(%s);"
+									+ "localStorage.removeItem('%s');", 
+									getJsonOfComment(comment),
+									autosaveKey);
 							target.appendJavaScript(script);
+							
 							context.onCommentOpened(target, comment);
 						}
 

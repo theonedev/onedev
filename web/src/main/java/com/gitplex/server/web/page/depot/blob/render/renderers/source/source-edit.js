@@ -1,7 +1,9 @@
 gitplex.server.sourceEdit = {
-	onDomReady: function(containerId, filePath, mark, indentType, tabSize, lineWrapMode, autoFocus) {
+	onDomReady: function(containerId, filePath, mark, indentType, tabSize, lineWrapMode, 
+			autoFocus, autosaveKey) {
 		var $container = $("#" + containerId);
 		var $sourceEdit = $container.children(".source-edit");
+		var $warning = $sourceEdit.children(".warning");
 		var $code = $sourceEdit.children(".code");
 
 		var cm = CodeMirror($code[0], {
@@ -39,8 +41,16 @@ gitplex.server.sourceEdit = {
 
 		gitplex.server.codemirror.bindKeys(cm);
 		
+    	var doneTimer;
 		cm.on("change", function() {
 			$sourceEdit.closest("form").addClass("dirty");
+			if (doneTimer) 
+				clearTimeout(doneTimer);
+			doneTimer = setTimeout(function() {
+				var content = cm.doc.getValue();
+				if (content.trim().length != 0)
+					localStorage.setItem(autosaveKey, content);
+			}, 500);
 		});
 		
 		$sourceEdit.on("getViewState", function(e) {
@@ -56,13 +66,26 @@ gitplex.server.sourceEdit = {
 			
 			$sourceEdit.outerWidth(width);
 			$sourceEdit.outerHeight(height);
-			if (cm.getOption("fullScreen"))
-				cm.setOption("fullScreen", false);
-			cm.setSize($sourceEdit.width(), $sourceEdit.height());
+			if ($warning.is(":visible"))
+				cm.setSize($sourceEdit.width(), $sourceEdit.height()-$warning.outerHeight());
+			else
+				cm.setSize($sourceEdit.width(), $sourceEdit.height());
 		});
+		$warning.on("closed.bs.alert", function () {
+			$(window).resize();
+		})
 	},
-	onWindowLoad: function(containerId, mark) {
+	onWindowLoad: function(containerId, mark, autosaveKey) {
+		var $container = $("#" + containerId);
+		var $warning = $container.find(">.source-edit>.warning");
 		var cm = gitplex.server.sourceEdit.getCodeMirror(containerId);
+		gitplex.server.form.registerAutosaveKey($container.closest("form.leave-confirm"), autosaveKey);
+		var autosaveValue = localStorage.getItem(autosaveKey);
+		if (autosaveValue) {
+			cm.doc.setValue(autosaveValue);
+			$warning.show();				
+		}
+		
 		if (mark && gitplex.server.viewState.getFromHistory() === undefined 
 				&& gitplex.server.viewState.carryOver === undefined) {
 			gitplex.server.codemirror.scrollTo(cm, mark);					

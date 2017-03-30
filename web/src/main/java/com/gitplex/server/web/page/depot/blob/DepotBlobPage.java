@@ -131,6 +131,10 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		if (getDepot().getDefaultBranch() == null) 
 			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
 
+		String modeStr = params.get(PARAM_MODE).toString();
+		if (modeStr != null)
+			state.mode = Mode.valueOf(modeStr.toUpperCase());
+
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		String segment = params.get(PARAM_REVISION).toString();
 		if (segment != null && segment.length() != 0)
@@ -145,7 +149,17 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 				revisionAndPathSegments.add(segment);
 		}
 		
-		state.blobIdent = new BlobIdent(getDepot(), revisionAndPathSegments);
+		if (state.mode == Mode.ADD) {
+			/*
+			 * In add mode, the url has a suffix "/newfile" which is added in order to 
+			 * make relative path referencing in markdown working, and here we need to 
+			 * trim it off to get the real blob path
+			 */
+			state.blobIdent = new BlobIdent(getDepot(), 
+					revisionAndPathSegments.subList(0, revisionAndPathSegments.size()-1));
+		} else {
+			state.blobIdent = new BlobIdent(getDepot(), revisionAndPathSegments);
+		}
 		
 		if (state.blobIdent.revision == null)
 			state.blobIdent.revision = getDepot().getDefaultBranch();
@@ -169,10 +183,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		} else {
 			state.blobIdent.mode = FileMode.TREE.getBits();
 		}
-		
-		String modeStr = params.get(PARAM_MODE).toString();
-		if (modeStr != null)
-			state.mode = Mode.valueOf(modeStr.toUpperCase());
 		
 		state.mark = TextRange.of(params.get(PARAM_MARK).toString());
 		state.anchor = params.get(PARAM_ANCHOR).toString();
@@ -979,6 +989,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			onResolvedRevisionChange(target);
 			pushState(target);
 		} else {
+			state.mode = Mode.VIEW;
 			onResolvedRevisionChange(target);
 		}
 
@@ -1001,5 +1012,19 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			resolvedRevision = revisionResolveEvent.getResolvedRevision();
 		}
 	}
-	
+
+	@Override
+	public String getAutosaveKey() {
+		if (state.mode == Mode.ADD) {
+			return String.format("autosave:addBlob:%d:%s:%s", 
+					getDepot().getId(), state.blobIdent.revision, getNewPath());
+		} else if (state.mode == Mode.EDIT) {
+			return String.format("autosave:editBlob:%d:%s:%s:%s", 
+					getDepot().getId(), state.blobIdent.revision, 
+					state.blobIdent.path, getDepot().getBlob(state.blobIdent).getBlobId());
+		} else {
+			throw new IllegalStateException();
+		}
+	}
+
 }

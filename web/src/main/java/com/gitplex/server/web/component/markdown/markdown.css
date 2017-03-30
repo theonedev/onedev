@@ -1,3 +1,9 @@
+.markdown-editor>.warning {
+	margin-bottom: 4px;
+	display: none;
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
 .markdown-editor>.head {
 	padding: 8px 0;
 }
@@ -16,8 +22,8 @@
 .markdown-editor .ui-resizable-handle {
 	background: #EEE url(hgrabber.png) no-repeat scroll center top;
     cursor: s-resize;
-    height: 4px;
-    bottom: -2px;
+    height: 2px;
+    bottom: -3px;
 }
 
 .markdown-editor>.emojis {

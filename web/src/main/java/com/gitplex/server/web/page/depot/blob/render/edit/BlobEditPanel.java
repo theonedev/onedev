@@ -44,6 +44,9 @@ public abstract class BlobEditPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new WebMarkupContainer("saveTab")
+				.setVisible(context.getMode() != Mode.ADD || context.getNewPath() != null));
+		
 		add(new ViewStateAwareAjaxLink<Void>("cancelLink", true) {
 
 			@Override

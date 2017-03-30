@@ -1,5 +1,9 @@
 <wicket:panel>
 	<div wicket:id="container" class="markdown-editor edit-mode autofit no-autosize">
+		<div class="warning alert alert-warning">
+			<button class="close" data-dismiss="alert"><span>&times;</span></button>
+			<div class="message"><i class="fa fa-warning"></i> Below content is restored from an unsaved change</div>
+		</div>
 		<div class="head clearfix">
 			<div wicket:id="normalMode" class="pull-left">
 				<div class="btn-group">
@@ -61,7 +65,7 @@
 		</div>
 		<div class="body clearfix">
 			<div class="edit">
-				<textarea wicket:id="input" rows=5></textarea>
+				<textarea wicket:id="input" rows=5 class="autofocus"></textarea>
 				<div class="ui-resizable-handle ui-resizable-s"></div>
 			</div>
 			<div class="preview">

@@ -13,7 +13,14 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new MarkdownEditor("markdownEditor", Model.of(""), false, true));
+		add(new MarkdownEditor("markdownEditor", Model.of(""), false, true) {
+
+			@Override
+			protected String getAutosaveKey() {
+				return "test";
+			}
+			
+		});
 	}
 
 	@Override

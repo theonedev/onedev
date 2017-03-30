@@ -99,6 +99,7 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
+				String autosaveKey = "autosave:editPullRequestStatusChange:" + getStatusChange().getId();
 				long lastVersion = getStatusChange().getVersion();
 				CommentInput input = new CommentInput("input", Model.of(getStatusChange().getNote()), false) {
 
@@ -111,6 +112,11 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 					@Override
 					protected Depot getDepot() {
 						return getStatusChange().getRequest().getTargetDepot();
+					}
+					
+					@Override
+					protected String getAutosaveKey() {
+						return autosaveKey;
 					}
 					
 				};
@@ -135,6 +141,7 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);
 							target.add(viewer);
+							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);

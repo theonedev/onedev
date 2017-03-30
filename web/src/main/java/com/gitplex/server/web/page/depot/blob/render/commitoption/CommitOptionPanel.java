@@ -85,6 +85,8 @@ public class CommitOptionPanel extends Panel {
 	
 	private Set<String> oldPaths;
 	
+	private String autosaveKey;
+	
 	public CommitOptionPanel(String id, BlobRenderContext context, @Nullable Provider<byte[]> newContentProvider) {
 		super(id);
 
@@ -95,6 +97,8 @@ public class CommitOptionPanel extends Panel {
 		String oldPath = getOldPath();
 		if (oldPath != null)
 			oldPaths.add(oldPath);
+		
+		autosaveKey = context.getAutosaveKey();
 	}
 
 	@Nullable
@@ -376,6 +380,7 @@ public class CommitOptionPanel extends Panel {
 			}
 			if (newCommitId != null) {
 				context.onCommitted(target, prevCommitId, newCommitId);
+				target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 				return true;
 			} else {
 				newChangedContainer(target);

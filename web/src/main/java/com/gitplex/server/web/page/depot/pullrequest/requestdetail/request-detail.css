@@ -101,8 +101,7 @@
 #request-detail>.summary>.operations>.confirm>form>input {
 	margin-right: 12px;
 } 
-#request-detail>.summary>.operations>.confirm>form>textarea, 
-#request-detail>.summary>.operations>.confirm>form>.delete-source {
+#request-detail>.summary>.operations>.confirm>form .markdown-editor {
 	margin-bottom: 16px;
 } 
 

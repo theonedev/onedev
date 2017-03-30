@@ -8,6 +8,10 @@
 .blob-edit .markdown-editor>.head {
 	padding: 8px;
 } 
+.blob-edit .markdown-editor>.emojis, .blob-edit .markdown-editor>.help {
+	padding-left: 8px;
+	padding-right: 8px;
+} 
 .blob-edit .markdown-editor>.body>.edit>textarea, 
 .blob-edit .markdown-editor>.body>.preview>.markdown-rendered {
 	border-radius: 0 !important;
@@ -24,8 +28,6 @@
 	border-bottom: none;
 	border-left: none;
 }
-.blob-edit .markdown-editor>.body>.edit>textarea {
-	min-height: none;
-	max-height: none;
-	resize: none;
+.blob-edit .markdown-editor>.warning {
+	margin: 12px 8px 4px 8px;
 }

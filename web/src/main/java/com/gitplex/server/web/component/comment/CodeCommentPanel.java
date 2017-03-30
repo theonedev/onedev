@@ -201,6 +201,8 @@ public abstract class CodeCommentPanel extends Panel {
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				
+				String autosaveKey = "autosave:editCodeComment:" + commentId;
+				
 				CommentInput contentInput = new CommentInput("content", Model.of(getComment().getContent()), true) {
 
 					@Override
@@ -211,6 +213,11 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected Depot getDepot() {
 						return getComment().getDepot();
+					}
+					
+					@Override
+					protected String getAutosaveKey() {
+						return autosaveKey;
 					}
 					
 				};
@@ -261,6 +268,7 @@ public abstract class CodeCommentPanel extends Panel {
 							fragment.replaceWith(commentContainer);
 							target.add(commentContainer);
 							onSaveComment(target, comment);
+							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));							
 						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
@@ -433,6 +441,7 @@ public abstract class CodeCommentPanel extends Panel {
 				Fragment fragment = new Fragment(activityContainer.getId(), "activityEditFrag", 
 						CodeCommentPanel.this, Model.of(identity.id));
 				Form<?> form = new Form<Void>("form");
+				String autosaveKey = "autosave:editCodeCommentActivity:" + identity.id;
 				CommentInput contentInput = new CommentInput("content", Model.of(identity.getActivity().getNote()), 
 						true) {
 
@@ -444,6 +453,11 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected Depot getDepot() {
 						return getComment().getDepot();
+					}
+
+					@Override
+					protected String getAutosaveKey() {
+						return autosaveKey;
 					}
 					
 				};
@@ -501,8 +515,9 @@ public abstract class CodeCommentPanel extends Panel {
 							WebMarkupContainer activityContainer = newActivityContainer(componentId, identity.getActivity());
 							fragment.replaceWith(activityContainer);
 							target.add(activityContainer);
+							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));							
 						} catch (StaleStateException e) {
-							error("Some one changed the content you are editing. Reload the page and try again.");
+							error("Someone changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
 						}
 					}
@@ -660,6 +675,9 @@ public abstract class CodeCommentPanel extends Panel {
 	private void onAddReply(AjaxRequestTarget target, boolean changeStatus, @Nullable String placeholder) {
 		Fragment fragment = new Fragment("addReply", "activityEditFrag", CodeCommentPanel.this);
 		Form<?> form = new Form<Void>("form");
+
+		String autosaveKey = "autosave:addCodeCommentReply:" + commentId;
+		
 		CommentInput contentInput = new CommentInput("content", Model.of(""), true) {
 
 			@Override
@@ -670,6 +688,11 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected Depot getDepot() {
 				return getComment().getDepot();
+			}
+
+			@Override
+			protected String getAutosaveKey() {
+				return autosaveKey;
 			}
 
 			@Override
@@ -743,6 +766,7 @@ public abstract class CodeCommentPanel extends Panel {
 					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply, true);
 					onReplyAdded(target, fragment, reply);
 				}
+				target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));							
 			}
 
 		};

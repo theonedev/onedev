@@ -35,14 +35,13 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.joda.time.DateTime;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequest.IntegrationStrategy;
 import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.model.PullRequestReference;
 import com.gitplex.server.model.PullRequestReview;
@@ -50,7 +49,6 @@ import com.gitplex.server.model.PullRequestReviewInvitation;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.PullRequestWatch;
-import com.gitplex.server.model.PullRequest.IntegrationStrategy;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.security.SecurityUtils;
@@ -76,6 +74,8 @@ import com.gitplex.server.web.util.ConfirmOnClick;
 import com.gitplex.server.web.util.model.EntityModel;
 import com.gitplex.server.web.util.model.ReviewersModel;
 import com.gitplex.server.web.websocket.PullRequestChanged;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -321,6 +321,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 		Form<?> form = new Form<Void>("form");
 		addComment.add(form);
 		
+		String autosaveKey = "autosave:addPullRequestComment:" + getPullRequest().getId();
+		
 		CommentInput input = new CommentInput("input", Model.of(""), false) {
 
 			@Override
@@ -331,6 +333,11 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected Depot getDepot() {
 				return RequestOverviewPage.this.getDepot();
+			}
+			
+			@Override
+			protected String getAutosaveKey() {
+				return autosaveKey;
 			}
 			
 			@Override
@@ -368,6 +375,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 						newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
 				target.prependJavaScript(script);
 				target.add(newActivityRow);
+				target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 			}
 
 			@Override

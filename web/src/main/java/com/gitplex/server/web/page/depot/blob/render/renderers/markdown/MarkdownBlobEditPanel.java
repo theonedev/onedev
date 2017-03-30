@@ -44,7 +44,12 @@ public class MarkdownBlobEditPanel extends BlobEditPanel {
 					
 				};
 			}
-			
+
+			@Override
+			protected String getAutosaveKey() {
+				return context.getAutosaveKey();
+			}
+
 		};
 	}
 

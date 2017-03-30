@@ -113,6 +113,7 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
+				String autosaveKey = "autosave:editPullRequestComment:" + getComment().getId();
 				CommentInput input = new CommentInput("input", Model.of(getComment().getContent()), false) {
 
 					@Override
@@ -120,6 +121,11 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 						return new DepotAttachmentSupport(getDepot(), getComment().getRequest().getUUID());
 					}
 
+					@Override
+					protected String getAutosaveKey() {
+						return autosaveKey;
+					}
+					
 					@Override
 					protected Depot getDepot() {
 						return getComment().getDepot();
@@ -144,6 +150,7 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);
 							target.add(viewer);
+							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);

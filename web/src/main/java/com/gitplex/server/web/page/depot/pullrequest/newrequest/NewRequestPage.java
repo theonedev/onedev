@@ -67,6 +67,7 @@ import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerChoi
 import com.gitplex.server.web.component.tabbable.AjaxActionTab;
 import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
+import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
@@ -507,8 +508,10 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 
 	private Fragment newCanSendFrag() {
 		Fragment fragment = new Fragment("status", "canSendFrag", this);
-		final Form<?> form = new Form<Void>("form");
+		Form<?> form = new Form<Void>("form");
 		fragment.add(form);
+		
+		String autosaveKey = "autosave:newPullRequest:" + getDepot().getId();
 		
 		form.add(new Button("send") {
 
@@ -533,8 +536,11 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 					
 					GitPlex.getInstance(PullRequestManager.class).open(getPullRequest());
 					
-					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
-				}
+					PageParameters params = RequestOverviewPage.paramsOf(getPullRequest());
+					params.add(BasePage.PARAM_AUTOSAVE_KEY_TO_CLEAR, autosaveKey);
+					setResponsePage(RequestOverviewPage.class, params);
+				}			
+				
 			}
 			
 		});
@@ -606,6 +612,11 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			@Override
 			protected Depot getDepot() {
 				return NewRequestPage.this.getDepot();
+			}
+			
+			@Override
+			protected String getAutosaveKey() {
+				return autosaveKey;
 			}
 			
 		});

@@ -66,4 +66,5 @@ public interface BlobRenderContext extends Serializable {
 	@Nullable
 	String getNewPath();
 	
+	String getAutosaveKey();
 }

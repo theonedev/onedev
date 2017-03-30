@@ -1,5 +1,6 @@
 package com.gitplex.server.web.page.depot.blob.render.renderers.markdown;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
@@ -31,8 +32,16 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			protected BlobReferenceSupport getBlobReferenceSupport() {
 				return MarkdownBlobEditor.this.getBlobReferenceSupport();
 			}
+
+			@Override
+			protected String getAutosaveKey() {
+				return MarkdownBlobEditor.this.getAutosaveKey();
+			}
 			
 		});
+		if (!autoFocus) {
+			input.add(AttributeAppender.append("class", "no-autofocus"));
+		}
 		input.setOutputMarkupId(true);
 	}
 
@@ -55,4 +64,7 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 	}
 
 	protected abstract BlobReferenceSupport getBlobReferenceSupport();
+	
+	protected abstract String getAutosaveKey();
+	
 }

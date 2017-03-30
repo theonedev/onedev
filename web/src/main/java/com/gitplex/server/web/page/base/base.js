@@ -201,11 +201,27 @@ gitplex.server = {
 				$container = $("#" + containerId);
 			else
 				$container = $(document);
-			var dirty = "form.leave-confirm.dirty";
-			if ($container.is(dirty) || $container.find(dirty).length != 0) 
-				return confirm("There are unsaved changes, do you want to discard and continue?");
-			else
+			var selector = "form.leave-confirm.dirty";
+			var $dirtyForms = $container.find(selector).addBack(selector);
+			if ($dirtyForms.length != 0) {
+				if (confirm("There are unsaved changes, do you want to discard and continue?")) {
+					gitplex.server.form.clearAutosavings($dirtyForms);
+				} else {
+					return false;
+				}
+			} else {
 				return true;
+			}
+		},
+		clearAutosavings: function($dirtyForms) {
+			$dirtyForms.each(function() {
+				var autosaveKey = $(this).data("autosaveKey");
+				if (autosaveKey)
+					localStorage.removeItem(autosaveKey);
+			});
+		},
+		registerAutosaveKey: function($form, autosaveKey) {
+			$form.data("autosaveKey", autosaveKey);
 		}
 	},
 	setupAutoSize: function() {
@@ -262,13 +278,15 @@ gitplex.server = {
 		},
 		
 		doFocus: function($containers) {
-			var $inError = $containers.find(".has-error:first .focusable");
-			if ($inError.length != 0) {
+			var selector = ".has-error:visible:first .autofocus";
+			var $inError = $containers.find(selector).addBack(selector);
+			if ($inError.length != 0 && $inError.closest(".no-autofocus").length == 0) {
 				$inError.focus();
 			} else {
-				$containers.find(".focusable:visible").each(function() {
+				selector = ".autofocus:visible";
+				$containers.find(selector).addBack(selector).each(function() {
 					var $this = $(this);
-					if ($this.parents(".nofocus").length == 0) {
+					if ($this.closest(".no-autofocus").length == 0) {
 						$this.focus();
 						return false;
 					}
@@ -531,17 +549,24 @@ gitplex.server = {
 		}
 	},
 	
-	onDomReady: function() {
+	onDomReady: function(autosaveKeyToClear) {
 		gitplex.server.setupAjaxLoadingIndicator();
 		gitplex.server.form.setupDirtyCheck();
 		gitplex.server.focus.setupAutoFocus();
 		gitplex.server.setupWebsocketCallback();
 		gitplex.server.mouseState.track();
 		
+		if (autosaveKeyToClear)
+			localStorage.removeItem(autosaveKeyToClear);
+		
 		$(document).keydown(function(e) {
 			if (e.keyCode == 27)
 				e.preventDefault();
 		});
+		
+		window.onunload = function() {
+			gitplex.server.form.clearAutosavings($("form.leave-confirm.dirty"));
+		};
 	},
 	
 	onWindowLoad: function() {

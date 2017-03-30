@@ -393,6 +393,9 @@ table.table>thead>tr>th>a {
 	text-decoration: underline;
 }
 
+textarea {
+	resize: none;
+}
 form>.actions {
 	margin-top: 20px;
 }

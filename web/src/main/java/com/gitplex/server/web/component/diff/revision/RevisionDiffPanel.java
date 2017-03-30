@@ -745,6 +745,8 @@ public class RevisionDiffPanel extends Panel {
 							
 							String uuid = UUID.randomUUID().toString();
 							
+							String autosaveKey = "autosave:addCodeCommentOnDiff:" + depotModel.getObject().getId() 
+									+ ":" + change.getPath();
 							CommentInput contentInput;
 							form.add(contentInput = new CommentInput("content", Model.of(""), true) {
 
@@ -756,6 +758,11 @@ public class RevisionDiffPanel extends Panel {
 								@Override
 								protected Depot getDepot() {
 									return depotModel.getObject();
+								}
+								
+								@Override
+								protected String getAutosaveKey() {
+									return autosaveKey;
 								}
 								
 							});
@@ -843,7 +850,10 @@ public class RevisionDiffPanel extends Panel {
 										sourceAware.onCommentAdded(target, comment);
 
 									commentSupport.onCommentOpened(target, comment);
-									target.appendJavaScript("gitplex.server.revisionDiff.reposition();");
+									target.appendJavaScript(String.format(""
+											+ "gitplex.server.revisionDiff.reposition();"
+											+ "localStorage.removeItem('%s');", 
+											autosaveKey));							
 								}
 
 							});

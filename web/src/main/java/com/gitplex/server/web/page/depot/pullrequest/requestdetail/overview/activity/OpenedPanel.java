@@ -95,13 +95,18 @@ class OpenedPanel extends GenericPanel<PullRequest> {
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
+				String autosaveKey = "autosave:editPullRequestDescription:" + getPullRequest().getId(); 
 				long lastVersion = getPullRequest().getVersion();
 				CommentInput input = new CommentInput("input", Model.of(getPullRequest().getDescription()), false) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getPullRequest().getTargetDepot(), 
-								getPullRequest().getUUID());
+						return new DepotAttachmentSupport(getPullRequest().getTargetDepot(), getPullRequest().getUUID());
+					}
+
+					@Override
+					protected String getAutosaveKey() {
+						return autosaveKey;
 					}
 
 					@Override
@@ -131,6 +136,7 @@ class OpenedPanel extends GenericPanel<PullRequest> {
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);
 							target.add(viewer);
+							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);

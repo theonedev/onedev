@@ -34,6 +34,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.time.Duration;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
@@ -49,6 +50,8 @@ import com.gitplex.server.web.websocket.WebSocketRegion;
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
 
+	public static final String PARAM_AUTOSAVE_KEY_TO_CLEAR = "autosaveKeyToClear";
+	
 	private FeedbackPanel sessionFeedback;
 	
 	private RepeatingView rootComponents;
@@ -80,7 +83,14 @@ public abstract class BasePage extends WebPage {
 				 * including onDomReady and onWindowLoad call
 				 */
 				response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
-				response.render(OnDomReadyHeaderItem.forScript("gitplex.server.onDomReady();"));
+				
+				String autosaveKeyToClear = getPageParameters().get(PARAM_AUTOSAVE_KEY_TO_CLEAR).toString();
+				if (autosaveKeyToClear != null)
+					autosaveKeyToClear = "'" + JavaScriptEscape.escapeJavaScript(autosaveKeyToClear) + "'";
+				else
+					autosaveKeyToClear = "undefined";
+				response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.server.onDomReady(%s);", 
+						autosaveKeyToClear)));
 				response.render(OnLoadHeaderItem.forScript("gitplex.server.onWindowLoad();"));
 			}
 			
