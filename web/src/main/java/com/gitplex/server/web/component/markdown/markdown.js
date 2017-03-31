@@ -14,55 +14,6 @@ gitplex.server.markdown = {
 		    $input[0].dispatchEvent(evt);
 		}
 	},
-	onSplit: function($container, focus) {
-		var $head = $container.children(".head");
-		var $body = $container.children(".body");
-		var $editLink = $head.find(".edit");
-		var $previewLink = $head.find(".preview");
-		var $splitLink = $head.find(".split");
-		var $edit = $body.children(".edit");
-		var $input = $edit.children("textarea");
-		var $preview = $body.children(".preview");
-		var $rendered = $preview.children(".markdown-rendered");
-		
-		$head.find(".pull-left .btn").removeAttr("disabled");
-		
-		$edit.show();
-		if (focus)
-			$input.focus();
-		
-		$rendered.html("<div class='message'>Loading...</div>");
-		$preview.show();
-		$editLink.removeClass("active");
-		$previewLink.removeClass("active");
-		$splitLink.addClass("active");
-		$container.removeClass("edit-mode").removeClass("preview-mode").addClass("split-mode");
-		gitplex.server.markdown.onLayoutChange($container);
-		$container.data("callback")("render", $input.val());
-		Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".split", true, {expires: Infinity});
-	},
-	onLayoutChange: function($container) {
-		var $body = $container.children(".body");
-		var $edit = $body.children(".edit");
-		var $input = $edit.children("textarea");
-		var $preview = $body.children(".preview");
-		var $rendered = $preview.children(".markdown-rendered");
-		
-		if ($container.hasClass("normal-mode")) {
-			if ($preview.is(":visible") && $edit.is(":visible")) {
-				$preview.css("width", "50%");
-				$edit.css("width", "50%");
-			} else if ($preview.is(":visible")) {
-				$preview.css("width", "100%");
-			} else {
-				$edit.css("width", "100%");
-			}
-			if ($container.hasClass("split-mode")) {
-				$rendered.outerHeight($input.outerHeight());
-				$preview.outerHeight($edit.outerHeight());
-			}
-		}
-	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, attachmentMaxSize, 
 			canMentionUser, canReferencePullRequest, resizable, autosaveKey) {
 		var $container = $("#" + containerId);
@@ -79,7 +30,6 @@ gitplex.server.markdown = {
 		var $preview = $body.children(".preview");
 		var $rendered = $preview.children(".markdown-rendered");
 
-		$container.data("callback", callback);
 		$container.data("autosaveKey", autosaveKey);
 		
 		$head.find(".dropdown>button").dropdown();
@@ -94,7 +44,7 @@ gitplex.server.markdown = {
 			$previewLink.removeClass("active");
 			$splitLink.removeClass("active");
 			$container.removeClass("preview-mode").removeClass("split-mode").addClass("edit-mode");
-			gitplex.server.markdown.onLayoutChange($container);
+			onLayoutChange();
 			Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".split", false, {expires: Infinity});
 		});
 		$previewLink.click(function() {
@@ -121,12 +71,42 @@ gitplex.server.markdown = {
 			$previewLink.addClass("active");
 			$splitLink.removeClass("active");
 			$container.removeClass("edit-mode").removeClass("split-mode").addClass("preview-mode");
-			gitplex.server.markdown.onLayoutChange($container);
+			onLayoutChange();
 			callback("render", $input.val());
 		});
 		$splitLink.click(function() {
-			gitplex.server.markdown.onSplit($container, true);
+			$head.find(".pull-left .btn").removeAttr("disabled");
+			
+			$edit.show();
+			$input.focus();
+			
+			$rendered.html("<div class='message'>Loading...</div>");
+			$preview.show();
+			$editLink.removeClass("active");
+			$previewLink.removeClass("active");
+			$splitLink.addClass("active");
+			$container.removeClass("edit-mode").removeClass("preview-mode").addClass("split-mode");
+			onLayoutChange();
+			callback("render", $input.val());
+			Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".split", true, {expires: Infinity});
 		});
+		
+		function onLayoutChange() {
+			if ($container.hasClass("normal-mode")) {
+				if ($preview.is(":visible") && $edit.is(":visible")) {
+					$preview.css("width", "50%");
+					$edit.css("width", "50%");
+				} else if ($preview.is(":visible")) {
+					$preview.css("width", "100%");
+				} else {
+					$edit.css("width", "100%");
+				}
+				if ($container.hasClass("split-mode")) {
+					$rendered.outerHeight($input.outerHeight());
+					$preview.outerHeight($edit.outerHeight());
+				}
+			}
+		}
 		
 		$input.doneEvents("input inserted.atwho", function() {
 			if ($preview.is(":visible")) {
@@ -642,10 +622,6 @@ gitplex.server.markdown = {
 		}
 		if ($input.is(":focus"))
 			$input.caret(0);
-		
-		if (Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".split") === "true") {
-			gitplex.server.markdown.onSplit($container, false);
-		}
 	},
 	onRendered: function(containerId, html) {
 		var $preview = $("#" + containerId + ">.body>.preview");
@@ -679,7 +655,7 @@ gitplex.server.markdown = {
 		
 		gitplex.server.markdown.syncPreviewScroll(containerId);
 		
-		$rendered.find("img").load(function() {
+		$rendered.find("img").on("load", function() {
             gitplex.server.markdown.syncPreviewScroll(containerId);
         });
         

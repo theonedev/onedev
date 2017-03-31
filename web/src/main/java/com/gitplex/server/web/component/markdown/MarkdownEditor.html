@@ -1,5 +1,5 @@
 <wicket:panel>
-	<div wicket:id="container" class="markdown-editor edit-mode autofit no-autosize">
+	<div wicket:id="container" class="markdown-editor autofit no-autosize">
 		<div class="warning alert alert-warning">
 			<button class="close" data-dismiss="alert"><span>&times;</span></button>
 			<div class="message"><i class="fa fa-warning"></i> Below content is restored from an unsaved change</div>
@@ -52,9 +52,9 @@
 					<a class="do-help btn btn-default btn-sm" title="Help"><i class="fa fa-question"></i></a>
 				</div>						
 				<div class="btn-group">
-					<a class="edit active btn btn-default btn-sm" title="Edit"><i class="fa fa-font"></i></a>
+					<a wicket:id="editLink" class="edit btn btn-default btn-sm" title="Edit"><i class="fa fa-font"></i></a>
 					<a class="preview btn btn-default btn-sm" title="Preview"><i class="fa fa-eye"></i></a>
-					<a class="split btn btn-default btn-sm" title="Split view"><i wicket:id="splitIcon" class="fa fa-columns"></i></a>
+					<a wicket:id="splitLink" class="split btn btn-default btn-sm" title="Split view"><i wicket:id="icon" class="fa fa-columns"></i></a>
 				</div>						
 			</div>						
 		</div>
@@ -64,12 +64,12 @@
 			<span wicket:id="canAttachFile">You may drop file/image to the input box, or paste image from clipboard</span>
 		</div>
 		<div class="body clearfix">
-			<div class="edit">
+			<div wicket:id="edit" class="edit">
 				<textarea wicket:id="input" rows=5 class="autofocus"></textarea>
 				<div class="ui-resizable-handle ui-resizable-s"></div>
 			</div>
-			<div class="preview">
-				<div class="markdown-rendered"></div>
+			<div wicket:id="preview" class="preview">
+				<div wicket:id="rendered" class="markdown-rendered"></div>
 				<div class="ui-resizable-handle ui-resizable-s"></div>
 			</div>
 		</div>

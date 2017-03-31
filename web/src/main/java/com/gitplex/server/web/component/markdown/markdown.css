@@ -77,7 +77,6 @@
 .markdown-editor>.body>.preview {
 	float: left;
 	width: 49%;
-	display: none;
 }
 .markdown-editor>.body>.preview>.markdown-rendered {
 	overflow: auto;

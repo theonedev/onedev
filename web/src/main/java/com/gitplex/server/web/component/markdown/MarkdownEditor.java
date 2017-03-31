@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -26,12 +27,14 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.crypt.Base64;
@@ -59,6 +62,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	
 	private final boolean resizable;
 	
+	private final boolean initialSplit;
+	
 	private WebMarkupContainer container;
 	
 	private TextArea<String> input;
@@ -78,14 +83,33 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		super(id, model);
 		this.compactMode = compactMode;
 		this.resizable = resizable;
+		
+		String cookieKey;
+		if (compactMode)
+			cookieKey = "markdownEditor.compactMode.split";
+		else
+			cookieKey = "markdownEditor.normalMode.split";
+		
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie(cookieKey);
+		initialSplit = cookie!=null && "true".equals(cookie.getValue());
 	}
-
+	
 	@Override
 	protected void onModelChanged() {
 		super.onModelChanged();
 		input.setModelObject(getModelObject());
 	}
 
+	private String render(String markdown) {
+		if (StringUtils.isNotBlank(markdown)) {
+			MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
+			return markdownManager.render(markdown, true);
+		} else {
+			return "<div class='message'>Nothing to preview</div>";
+		}
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -98,16 +122,40 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		container.add(new WebMarkupContainer("normalMode").setVisible(!compactMode));
 		container.add(new WebMarkupContainer("compactMode").setVisible(compactMode));
 		
-		WebMarkupContainer splitIcon = new WebMarkupContainer("splitIcon");
-		container.add(splitIcon);
+		WebMarkupContainer editLink = new WebMarkupContainer("editLink");
+		WebMarkupContainer splitLink = new WebMarkupContainer("splitLink");
+		WebMarkupContainer preview = new WebMarkupContainer("preview");
+		WebMarkupContainer edit = new WebMarkupContainer("edit");
+		container.add(editLink);
+		container.add(splitLink);
+		container.add(preview);
+		container.add(edit);
+		
+		WebMarkupContainer splitIcon = new WebMarkupContainer("icon");
+		splitLink.add(splitIcon);
 		if (compactMode)
 			splitIcon.add(AttributeAppender.append("class", "fa-rotate-270"));
 
 		container.add(AttributeAppender.append("class", compactMode?"compact-mode":"normal-mode"));
 			
-		container.add(input = new TextArea<String>("input", Model.of(getModelObject())));
+		edit.add(input = new TextArea<String>("input", Model.of(getModelObject())));
 		for (AttributeModifier modifier: getInputModifiers()) {
 			input.add(modifier);
+		}
+
+		if (initialSplit) {
+			container.add(AttributeAppender.append("class", "split-mode"));
+			preview.add(new Label("rendered", render(getModelObject())).setEscapeModelStrings(false));
+			splitLink.add(AttributeAppender.append("class", "active"));
+			if (!compactMode) {
+				edit.add(AttributeAppender.append("style", "width: 50%;"));
+				preview.add(AttributeAppender.append("style", "width: 50%;"));
+			}
+		} else {
+			container.add(AttributeAppender.append("class", "edit-mode"));
+			preview.add(new WebMarkupContainer("rendered"));
+			editLink.add(AttributeAppender.append("class", "active"));
+			preview.add(AttributeAppender.append("style", "display: none;"));
 		}
 		
 		container.add(new WebMarkupContainer("canAttachFile").setVisible(getAttachmentSupport()!=null));
@@ -127,13 +175,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				switch (action) {
 				case "render":
 					String markdown = params.getParameterValue("param1").toString();
-					String rendered;
-					if (StringUtils.isNotBlank(markdown)) {
-						MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
-						rendered = markdownManager.render(markdown, true);
-					} else {
-						rendered = "<div class='message'>Nothing to preview</div>";
-					}
+					String rendered = render(markdown);
 					String script = String.format("gitplex.server.markdown.onRendered('%s', '%s');", 
 							container.getMarkupId(), JavaScriptEscape.escapeJavaScript(rendered));
 					target.appendJavaScript(script);
