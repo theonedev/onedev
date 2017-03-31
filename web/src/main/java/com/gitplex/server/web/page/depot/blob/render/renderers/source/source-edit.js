@@ -29,7 +29,7 @@ gitplex.server.sourceEdit = {
 		/*
 		 * AreYouSure can not track dirty correctly for CodeMirror generated
 		 * textarea, and it will always mark the form as clean even if we 
-		 * mark it as dirty explicitly. So we use no-dirtycheck class to 
+		 * mark it as dirty explicitly. So we use no-dirtytrack class to 
 		 * disable automatic dirty track
 		 */
 		$sourceEdit.closest("form").find("textarea").addClass("no-dirtytrack");
