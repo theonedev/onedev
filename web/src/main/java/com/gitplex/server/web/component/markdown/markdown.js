@@ -295,8 +295,14 @@ gitplex.server.markdown = {
 			gitplex.server.markdown.fireInputEvent($input);
 		});
 		
-		$head.find(".do-list, .do-orderlist").click(function() {
-			var leading = $(this).hasClass("do-list")?"-":"1.";
+		$head.find(".do-list, .do-orderlist, .do-tasklist").click(function() {
+			var leading;
+			if ($(this).hasClass(".do-list"))
+				leading = "-";
+			else if ($(this).hasClass(".do-tasklist"))
+				leading = "1.";
+			else
+				leading = "- [ ]";
 			var selected = $input.range();
 			if (selected.length != 0) {
 				var splitted = selected.text.split("\n");
@@ -308,7 +314,12 @@ gitplex.server.markdown = {
 				}
 				$input.range(insert).range(selected.start+leading.length+1, selected.start+leading.length+1+splitted[0].length);
 			} else {
-				$input.range(leading + " list text here").range(selected.start+leading.length+1, selected.start+leading.length+1+"list text here".length);
+				var text;
+				if ($(this).hasClass("do-tasklist"))
+					text = " task text here";
+				else
+					text = " list text here";
+				$input.range(leading + text).range(selected.start+leading.length+1, selected.start+leading.length+1+text.length);
 			}
 			$input.focus();
 			gitplex.server.markdown.fireInputEvent($input);
