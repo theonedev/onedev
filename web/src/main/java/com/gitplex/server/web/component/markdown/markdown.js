@@ -144,19 +144,67 @@ gitplex.server.markdown = {
 				var caret = $input.caret();
 				var inputBeforeCaret = input.substring(0, caret);
 				var inputAfterCaret = input.substring(caret);
-				var lastLineBreak = inputBeforeCaret.lastIndexOf('\n');
+				var lastLineBreakPos = inputBeforeCaret.lastIndexOf('\n');
 				var spaces = "";
-				for (var i=lastLineBreak+1; i<inputBeforeCaret.length; i++) {
+				for (var i=lastLineBreakPos+1; i<inputBeforeCaret.length; i++) {
 					if (inputBeforeCaret[i] == ' ') {
 						spaces += " ";
 					} else {
 						break;
 					}
 				}
-				if (lastLineBreak + spaces.length + 1 == inputBeforeCaret.length) {
-					$input.caret("\n");
+				
+				var nonSpacePosInCurrentLine = lastLineBreakPos + spaces.length + 1;
+				var nonSpaceInCurrentLine = input.substring(nonSpacePosInCurrentLine, caret);
+				
+				function clearLastLine() {
+					var newInputBeforeCaret;
+					if (lastLineBreakPos != -1) {
+						newInputBeforeCaret = input.substring(0, lastLineBreakPos) + "\n\n";
+					} else {
+						newInputBeforeCaret = "\n";
+					}
+					$input.val(newInputBeforeCaret + inputAfterCaret);
+					$input.caret(newInputBeforeCaret.length);
+				}
+				
+				var match = /^[-*]\s+\[[x ]\] /.exec(nonSpaceInCurrentLine);
+				if (match != null) {
+					if (nonSpaceInCurrentLine.length > match[0].length) {
+						if (nonSpaceInCurrentLine.indexOf("*") == 0)
+							$input.caret("\n" + spaces + "* [ ] ");
+						else
+							$input.caret("\n" + spaces + "- [ ] ");
+					} else {
+						clearLastLine();
+					}
 				} else {
-					$input.caret("\n" + spaces);
+					if (nonSpaceInCurrentLine.indexOf("* ") == 0) {
+						if (nonSpaceInCurrentLine.length > 2) {
+							$input.caret("\n" + spaces + "* ");
+						} else {
+							clearLastLine();
+						}
+					} else if (nonSpaceInCurrentLine.indexOf("- ") == 0) {
+						if (nonSpaceInCurrentLine.length > 2) {
+							$input.caret("\n" + spaces + "- ");
+						} else {
+							clearLastLine();
+						}
+					} else {
+						match = /^\d+\. /.exec(nonSpaceInCurrentLine);
+						if (match != null) {
+							if (nonSpaceInCurrentLine.length > match[0].length) {
+								$input.caret("\n" + spaces + (parseInt(match[0])+1) +". ");
+							} else {
+								clearLastLine();
+							}
+						} else if (nonSpacePosInCurrentLine == inputBeforeCaret.length) {
+							$input.caret("\n");
+						} else {
+							$input.caret("\n" + spaces);
+						}
+					}
 				}
 				
 				var caretBottom = getCaretCoordinates($input[0], $input.caret()).top + fontSize;
