@@ -188,6 +188,7 @@ public class BlobEditsTest extends AbstractGitTest {
 		oldCommitId = newCommitId;
 		newBlobs = new HashMap<>();
 		newBlobs.put("/common/common.java", new BlobContent.Immutable("common".getBytes(), FileMode.REGULAR_FILE));
+		edits = new BlobEdits(Sets.newHashSet(), newBlobs);
 		newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
 		
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
