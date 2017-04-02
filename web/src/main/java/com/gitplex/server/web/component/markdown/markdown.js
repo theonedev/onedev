@@ -14,8 +14,40 @@ gitplex.server.markdown = {
 		    $input[0].dispatchEvent(evt);
 		}
 	},
-	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, attachmentMaxSize, 
-			canMentionUser, canReferencePullRequest, resizable, autosaveKey) {
+	autofit: function(containerId, width, height) {
+		var $container = $("#" + containerId);
+		var $head = $container.children(".head");
+		var $body = $container.children(".body");
+		var $emojis = $container.children(".emojis");
+		var $help = $container.children(".help");
+		var $warning = $container.children(".warning");
+		var $edit = $body.children(".edit");
+		var $input = $edit.children("textarea");
+		var $preview = $body.children(".preview");
+		var $rendered = $preview.children(".markdown-rendered");
+
+		$container.outerWidth(width).outerHeight(height);
+
+		width = $container.width();
+		height = $container.height();
+		
+		height -= $head.outerHeight();
+		if ($warning.is(":visible"))
+			height -= $warning.outerHeight(true);
+		if ($emojis.is(":visible"))
+			height -= $emojis.outerHeight(true);
+		if ($help.is(":visible"))
+			height -= $help.outerHeight(true);
+		if ($container.hasClass("compact-mode")) {
+			height = height/2;
+		}
+		$input.outerHeight(height);
+		$edit.outerHeight($input.outerHeight());
+		$rendered.outerHeight($input.outerHeight());
+		$preview.outerHeight($rendered.outerHeight());
+	},
+	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, 
+			attachmentMaxSize, canMentionUser, canReferencePullRequest, autosaveKey) {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
@@ -29,26 +61,25 @@ gitplex.server.markdown = {
 		var $input = $edit.children("textarea");
 		var $preview = $body.children(".preview");
 		var $rendered = $preview.children(".markdown-rendered");
+		var $resizeHandles = $container.find(".ui-resizable-handle");
 
 		$container.data("autosaveKey", autosaveKey);
 		
 		$head.find(".dropdown>button").dropdown();
 		
 		$editLink.click(function() {
+			$container.removeClass("preview-mode").removeClass("split-mode").addClass("edit-mode");
 			$head.find(".pull-left .btn").removeAttr("disabled");
-			
-			$preview.hide();
-			$edit.show();
 			$input.focus();
 			$editLink.addClass("active");
 			$previewLink.removeClass("active");
 			$splitLink.removeClass("active");
-			$container.removeClass("preview-mode").removeClass("split-mode").addClass("edit-mode");
 			onLayoutChange();
 			Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".split", false, {expires: Infinity});
 		});
 		$previewLink.click(function() {
-			$head.find(".pull-left .btn").prop("disabled", "disabled");
+			$container.removeClass("edit-mode").removeClass("split-mode").addClass("preview-mode");
+			$head.find(".pull-left .btn").attr("disabled", "disabled");
 			
 			var caret = $input.caret();
 			if ($input.val().substring(0, caret).trim().length == 0) {
@@ -65,46 +96,31 @@ gitplex.server.markdown = {
 			$rendered.data("caretOffset", caretOffset);
 			
 			$rendered.html("<div class='message'>Loading...</div>");
-			$preview.show();
-			$edit.hide();
 			$editLink.removeClass("active");
 			$previewLink.addClass("active");
 			$splitLink.removeClass("active");
-			$container.removeClass("edit-mode").removeClass("split-mode").addClass("preview-mode");
 			onLayoutChange();
 			callback("render", $input.val());
 		});
 		$splitLink.click(function() {
+			$container.removeClass("edit-mode").removeClass("preview-mode").addClass("split-mode");
 			$head.find(".pull-left .btn").removeAttr("disabled");
 			
-			$edit.show();
 			$input.focus();
 			
 			$rendered.html("<div class='message'>Loading...</div>");
-			$preview.show();
 			$editLink.removeClass("active");
 			$previewLink.removeClass("active");
 			$splitLink.addClass("active");
-			$container.removeClass("edit-mode").removeClass("preview-mode").addClass("split-mode");
 			onLayoutChange();
 			callback("render", $input.val());
 			Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".split", true, {expires: Infinity});
 		});
 		
 		function onLayoutChange() {
-			if ($container.hasClass("normal-mode")) {
-				if ($preview.is(":visible") && $edit.is(":visible")) {
-					$preview.css("width", "50%");
-					$edit.css("width", "50%");
-				} else if ($preview.is(":visible")) {
-					$preview.css("width", "100%");
-				} else {
-					$edit.css("width", "100%");
-				}
-				if ($container.hasClass("split-mode")) {
-					$rendered.outerHeight($input.outerHeight());
-					$preview.outerHeight($edit.outerHeight());
-				}
+			if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+				$rendered.outerHeight($input.outerHeight());
+				$preview.outerHeight($edit.outerHeight());
 			}
 		}
 		
@@ -133,9 +149,39 @@ gitplex.server.markdown = {
 		}, 500);
 		
 	    var fontSize = parseInt(getComputedStyle($input[0]).getPropertyValue('font-size'));
+	    
 		/*
-		 * Padding same leading spaces as last line when add a new line. This is useful when 
-		 * add several list items 
+		 * We intercept the "Enter" key event to do below things to make editing more conveniently:
+		 * 
+		 * 1. When there is a list item in current line, then add an empty list item automatically 
+		 *    to next line. For instance, if current input is:
+		 *    
+		 *    - item
+		 *    
+		 *    The new input will be as below upon "Enter":
+		 * 
+		 *    - item
+		 *    -  
+		 * 
+		 * 2. When there is an empty item in current line, then remove that empty item upon "Enter":
+		 *    
+		 *    - item
+		 *    (blank line)
+		 *    (blank line)
+		 * 
+		 * 3. When current line has leading spaces, make new line has same leading spaces as well. 
+		 *    For instance if current line is:
+		 *    
+		 *    void main() {
+		 *      for (int i=0; i<100; i++) {
+		 *      
+		 *    The new input will be as below upon "Enter":
+		 *
+		 *    void main() {
+		 *      for (int i=0; i<100; i++) {
+		 *      (line starts here)
+		 *    
+		 * 
 		 */
 		$input.on("keydown", function(e) {
 			if (e.keyCode == 13) {
@@ -167,7 +213,8 @@ gitplex.server.markdown = {
 					$input.val(newInputBeforeCaret + inputAfterCaret);
 					$input.caret(newInputBeforeCaret.length);
 				}
-				
+
+				// match against task items
 				var match = /^[-*]\s+\[[x ]\] /.exec(nonSpaceInCurrentLine);
 				if (match != null) {
 					if (nonSpaceInCurrentLine.length > match[0].length) {
@@ -192,6 +239,7 @@ gitplex.server.markdown = {
 							clearLastLine();
 						}
 					} else {
+						// match against ordered list items
 						match = /^\d+\. /.exec(nonSpaceInCurrentLine);
 						if (match != null) {
 							if (nonSpaceInCurrentLine.length > match[0].length) {
@@ -207,6 +255,7 @@ gitplex.server.markdown = {
 					}
 				}
 				
+				// Scroll if necessary to make cursor visible
 				var caretBottom = getCaretCoordinates($input[0], $input.caret()).top + fontSize;
 				if (caretBottom > $input.scrollTop() + $input.height()) {
 					$input.scrollTop(caretBottom - $input.height());
@@ -216,69 +265,56 @@ gitplex.server.markdown = {
 			}
 		});
 
-		if (resizable) {
-			$edit.resizable({
-				autoHide: false,
-				handles: {"s": $edit.children(".ui-resizable-handle")},
-				minHeight: 75,
-				resize: function(e, ui) {
-					$input.outerHeight($edit.height());
-					if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-						$rendered.outerHeight($input.outerHeight());
-						$preview.outerHeight($edit.outerHeight());
-					}
-				},
-				stop: function(e, ui) {
-					Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight", 
-							$input.outerHeight(), {expires: Infinity});
-					if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-						Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight", 
-								$rendered.outerHeight(), {expires: Infinity});
-					}
+		$edit.resizable({
+			autoHide: false,
+			handles: {"s": $edit.children(".ui-resizable-handle")},
+			minHeight: 75,
+			resize: function(e, ui) {
+				$input.outerHeight($edit.height());
+				if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+					$rendered.outerHeight($input.outerHeight());
+					$preview.outerHeight($edit.outerHeight());
 				}
-			});
-			
-			$preview.resizable({
-				handles: {"s": $preview.children(".ui-resizable-handle")},
-				minHeight: 75,
-				resize: function(e, ui) {
-					$rendered.outerHeight($preview.height());
-					if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-						$input.outerHeight($rendered.outerHeight());
-						$edit.outerHeight($preview.outerHeight());
-					}
-				},
-				stop: function(e, ui) {
+			},
+			stop: function(e, ui) {
+				Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight", 
+						$input.outerHeight(), {expires: Infinity});
+				if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
 					Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight", 
 							$rendered.outerHeight(), {expires: Infinity});
-					if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-						Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight", 
-								$input.outerHeight(), {expires: Infinity});
-					}
 				}
-			});
-		} else {
-			$warning.on("closed.bs.alert", function () {
-				$(window).resize();
-			})
-			
-			$container.find(".ui-resizable-handle").hide();
+			}
+		});
+		
+		$preview.resizable({
+			handles: {"s": $preview.children(".ui-resizable-handle")},
+			minHeight: 75,
+			resize: function(e, ui) {
+				$rendered.outerHeight($preview.height());
+				if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+					$input.outerHeight($rendered.outerHeight());
+					$edit.outerHeight($preview.outerHeight());
+				}
+			},
+			stop: function(e, ui) {
+				Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight", 
+						$rendered.outerHeight(), {expires: Infinity});
+				if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+					Cookies.set(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight", 
+							$input.outerHeight(), {expires: Infinity});
+				}
+			}
+		});
 
-			$container.on("autofit", function(e, width, height) {
-				height -= $head.outerHeight();
-				if ($warning.is(":visible"))
-					height -= $warning.outerHeight(true);
-				if ($emojis.is(":visible"))
-					height -= $emojis.outerHeight();
-				if ($help.is(":visible"))
-					height -= $help.outerHeight();
-				if ($container.hasClass("compact-mode")) {
-					height = height/2;
-				}
-				$input.outerHeight(height);
-				$rendered.outerHeight($input.outerHeight());
-			});
-		}
+		$warning.on("closed.bs.alert", function () {
+			if (!$resizeHandles.is(":visible"))
+				gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
+		})
+		
+		$container.on("autofit", function(e, width, height) {
+			$resizeHandles.hide();
+			gitplex.server.markdown.autofit(containerId, width, height);
+		});
 
 		function onSelectUrl(isImage) {
 			var $modal = $("" +
@@ -408,14 +444,73 @@ gitplex.server.markdown = {
 				callback("loadEmojis");
 			}
 			$emojis.toggle();
-			$(this).toggleClass("active");
-			$(window).resize();
+			$head.find(".do-emoji").toggleClass("active");
+			if (!$resizeHandles.is(":visible"))
+				gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
 		});
 		
 		$head.find(".do-help").click(function() {
 			$(this).toggleClass("active");
 			$help.toggle();
-			$(window).resize();
+			if (!$resizeHandles.is(":visible"))
+				gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
+		});
+
+		function getReplacement() {
+			var $replacement = $container.closest("form");
+			if ($replacement.length == 0)
+				$replacement = $container;
+			return $replacement;
+		}
+		
+		$head.find(".do-fullscreen").click(function() {
+			var $replacement = getReplacement();
+			if ($container.hasClass("fullscreen")) {
+				$container.removeClass("fullscreen");
+				var $placeholder = $("#" + containerId + "-placeholder");
+				
+				$replacement.insertBefore($placeholder);
+				$placeholder.remove();
+				
+				$(this).removeClass("active");
+				if ($container.data("compactModePreviously")) {
+					$container.removeClass("normal-mode");
+					$container.addClass("compact-mode");
+				} 
+				if ($container.data("resizeHandlesVisiblePreviously"))  
+					$resizeHandles.show();
+				
+				if ($resizeHandles.is(":visible")) {
+					$container.css("width", "inherit").css("height", "inherit");
+					gitplex.server.markdown.restoreSizeFromCookie($container);
+				} else {
+					$(window).resize();
+				}
+			} else {
+				$container.addClass("fullscreen");
+				$container.data("resizeHandlesVisiblePreviously", $resizeHandles.is(":visible"));
+				if ($container.hasClass("compact-mode")) {
+					$container.removeClass("compact-mode");
+					$container.addClass("normal-mode");
+					$container.data("compactModePreviously", true);
+				} else {
+					$container.data("compactModePreviously", false);
+				}
+				$resizeHandles.hide();
+				var $placeholder = $("<div id='" + containerId + "-placeholder'></div>");
+				$placeholder.insertAfter($replacement);
+				$("body").append($replacement);
+				$(this).addClass("active");
+				$(window).resize();
+			}
+			if ($input.is(":visible"))
+				$input.focus();
+		});
+		
+		$(window).resize(function() {
+			if ($container.hasClass("fullscreen")) {
+				gitplex.server.markdown.autofit(containerId, $(window).width(), $(window).height());
+			}
 		});
 		
 		$head.find(".do-mention, .do-hashtag").click(function() {
@@ -648,6 +743,28 @@ gitplex.server.markdown = {
 
 		$rendered.scrollTop(scrollTop);
     },
+    restoreSizeFromCookie: function($container) {
+    	var $body = $container.children(".body");
+		var $edit = $body.children(".edit");
+		var $input = $edit.children("textarea");
+		var $preview = $body.children(".preview");
+		var $rendered = $preview.children(".markdown-rendered");
+
+		var inputHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight");
+		if (inputHeight) {
+			$input.outerHeight(parseInt(inputHeight));
+		} else {
+			$input.outerHeight(100);
+		}
+		$edit.outerHeight($input.outerHeight());
+		var renderedHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight");
+		if (renderedHeight) {
+			$rendered.outerHeight(parseInt(renderedHeight));
+		} else {
+			$rendered.outerHeight(100);
+		}
+		$preview.outerHeight($rendered.outerHeight());
+    },
 	onWindowLoad: function(containerId) {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
@@ -655,18 +772,10 @@ gitplex.server.markdown = {
 		var $warning = $container.children(".warning");
 		var $rendered = $body.find(">.preview>.markdown-rendered");
 		var $input = $body.find(">.edit>textarea");
-		
-		if ($container.find(".ui-resizable-handle").is(":visible")) {
-			var inputHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".inputHeight");
-			if (inputHeight) {
-				$input.outerHeight(parseInt(inputHeight));
-			}
-			var renderedHeight = Cookies.get(gitplex.server.markdown.getCookiePrefix($container)+".renderedHeight");
-			if (renderedHeight) {
-				$rendered.outerHeight(parseInt(renderedHeight));
-			} else {
-				$rendered.outerHeight($input.outerHeight());
-			}
+		var $resizeHandles = $container.find(".ui-resizable-handle");
+
+		if ($resizeHandles.is(":visible")) {
+			gitplex.server.markdown.restoreSizeFromCookie($container);
 		}
 		
 		var autosaveKey = $container.data("autosaveKey");
@@ -675,12 +784,21 @@ gitplex.server.markdown = {
 			var autosaveValue = localStorage.getItem(autosaveKey);
 			if (autosaveValue) {
 				$input.val(autosaveValue);
-				$warning.show();				
+				$warning.show();		
+				gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
 				gitplex.server.markdown.fireInputEvent($input);
 			}
 		}
-		if ($input.is(":focus"))
-			$input.caret(0);
+		
+		/*
+		 * Caret may moves to end of input when auto-saved value is restored, or loaded via Firefox. For better 
+		 * usage experience, we force it to change to begin of input while preserving previous focus  
+		 */
+		var prevActive = document.activeElement;
+		$input.caret(0);
+		if (prevActive)
+			$(prevActive).focus();
+		$input.scrollTop(0);
 	},
 	onRendered: function(containerId, html) {
 		var $preview = $("#" + containerId + ">.body>.preview");
@@ -775,7 +893,7 @@ gitplex.server.markdown = {
 			$input.caret(":" + $(this).attr("title") + ": ");
 			gitplex.server.markdown.fireInputEvent($input);
 		});
-		$(window).resize();
+		gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
 	},
 	insertUrl: function(containerId, isImage, url, name, replaceMessage) {
 		var $head = $("#" + containerId + ">.head");

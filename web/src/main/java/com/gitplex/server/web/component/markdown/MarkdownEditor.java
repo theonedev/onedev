@@ -60,8 +60,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	
 	private final boolean compactMode;
 	
-	private final boolean resizable;
-	
 	private final boolean initialSplit;
 	
 	private WebMarkupContainer container;
@@ -79,10 +77,9 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	 * 			editor in compact mode occupies horizontal space and is suitable 
 	 * 			to be used in places such as comment aside the code
 	 */
-	public MarkdownEditor(String id, IModel<String> model, boolean compactMode, boolean resizable) {
+	public MarkdownEditor(String id, IModel<String> model, boolean compactMode) {
 		super(id, model);
 		this.compactMode = compactMode;
-		this.resizable = resizable;
 		
 		String cookieKey;
 		if (compactMode)
@@ -119,9 +116,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		
 		add(container);
 		
-		container.add(new WebMarkupContainer("normalMode").setVisible(!compactMode));
-		container.add(new WebMarkupContainer("compactMode").setVisible(compactMode));
-		
 		WebMarkupContainer editLink = new WebMarkupContainer("editLink");
 		WebMarkupContainer splitLink = new WebMarkupContainer("splitLink");
 		WebMarkupContainer preview = new WebMarkupContainer("preview");
@@ -133,8 +127,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		
 		WebMarkupContainer splitIcon = new WebMarkupContainer("icon");
 		splitLink.add(splitIcon);
-		if (compactMode)
-			splitIcon.add(AttributeAppender.append("class", "fa-rotate-270"));
 
 		container.add(AttributeAppender.append("class", compactMode?"compact-mode":"normal-mode"));
 			
@@ -145,17 +137,23 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 
 		if (initialSplit) {
 			container.add(AttributeAppender.append("class", "split-mode"));
-			preview.add(new Label("rendered", render(getModelObject())).setEscapeModelStrings(false));
+			preview.add(new Label("rendered", render(getModelObject())) {
+
+				@Override
+				public void renderHead(IHeaderResponse response) {
+					super.renderHead(response);
+					String script = String.format(
+							"gitplex.server.markdown.initRendered($('#%s>.body>.preview>.markdown-rendered'));", 
+							container.getMarkupId());
+					response.render(OnDomReadyHeaderItem.forScript(script));
+				}
+				
+			}.setEscapeModelStrings(false));
 			splitLink.add(AttributeAppender.append("class", "active"));
-			if (!compactMode) {
-				edit.add(AttributeAppender.append("style", "width: 50%;"));
-				preview.add(AttributeAppender.append("style", "width: 50%;"));
-			}
 		} else {
 			container.add(AttributeAppender.append("class", "edit-mode"));
 			preview.add(new WebMarkupContainer("rendered"));
 			editLink.add(AttributeAppender.append("class", "active"));
-			preview.add(AttributeAppender.append("style", "display: none;"));
 		}
 		
 		container.add(new WebMarkupContainer("canAttachFile").setVisible(getAttachmentSupport()!=null));
@@ -347,7 +345,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		else
 			autosaveKey = "undefined";
 		
-		String script = String.format("gitplex.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, %b, %s);", 
+		String script = String.format("gitplex.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, %s);", 
 				container.getMarkupId(), 
 				callback, 
 				ATWHO_LIMIT, 
@@ -355,7 +353,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				getAttachmentSupport()!=null?getAttachmentSupport().getAttachmentMaxSize():0,
 				getUserMentionSupport() != null,
 				getPullRequestReferenceSupport() != null, 
-				resizable, 
 				autosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		

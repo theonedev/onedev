@@ -5,7 +5,7 @@
 			<div class="message"><i class="fa fa-warning"></i> Below content is restored from an unsaved change</div>
 		</div>
 		<div class="head clearfix">
-			<div wicket:id="normalMode" class="pull-left">
+			<div class="pull-left normal-mode">
 				<div class="btn-group">
 					<a class="do-bold btn btn-default btn-sm" title="Bold"><i class="fa fa-bold"></i></a>
 					<a class="do-italic btn btn-default btn-sm" title="Italic"><i class="fa fa-italic"></i></a>
@@ -28,7 +28,7 @@
 					<a class="do-hashtag btn btn-default btn-sm" title="Reference Pull Request"><i class="fa fa-hashtag"></i></a>
 				</div>
 			</div>
-			<div wicket:id="compactMode" class="pull-left dropdown">
+			<div class="pull-left dropdown compact-mode">
 				<button class="btn btn-default btn-sm" data-toggle="dropdown" type="button"><i class="fa fa-navicon"></i></button>
 				<ul class="dropdown-menu" aria-labelledby="dLabel">
 					<li><a class="do-bold"><i class="fa fa-bold fa-fw"></i> Bold</a></li>
@@ -51,6 +51,9 @@
 			</div>
 			<div class="pull-right">
 				<div class="btn-group">
+					<a class="do-fullscreen btn btn-default btn-sm" title="Full screen"><i class="fa fa-expand"></i></a>
+				</div>						
+				<div class="btn-group">
 					<a class="do-help btn btn-default btn-sm" title="Help"><i class="fa fa-question"></i></a>
 				</div>						
 				<div class="btn-group">
@@ -67,7 +70,7 @@
 		</div>
 		<div class="body clearfix">
 			<div wicket:id="edit" class="edit">
-				<textarea wicket:id="input" rows=5 class="autofocus"></textarea>
+				<textarea wicket:id="input" class="autofocus"></textarea>
 				<div class="ui-resizable-handle ui-resizable-s"></div>
 			</div>
 			<div wicket:id="preview" class="preview">

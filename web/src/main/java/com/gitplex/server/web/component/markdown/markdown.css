@@ -1,11 +1,27 @@
-.markdown-editor>.warning {
-	margin-bottom: 4px;
+.markdown-editor.compact-mode .normal-mode, .markdown-editor.normal-mode .compact-mode {
 	display: none;
+}
+.markdown-editor.fullscreen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	z-index: 1000;
+	padding: 20px;
+	background: white;
+}
+.markdown-editor.compact-mode>.head .split .fa {
+	transform: rotate(270deg);
+} 
+
+.markdown-editor>.warning {
+	margin-bottom: 8px;
 	padding-top: 8px;
 	padding-bottom: 8px;
+	display: none;
 }
 .markdown-editor>.head {
-	padding: 8px 0;
+	padding-bottom: 8px;
 }
 .markdown-editor>.head .pull-left .btn-group {
 	margin-right: 4px;
@@ -62,10 +78,47 @@
 	border-radius: 4px;
 	background: white;
 }
-.markdown-editor>.body>.edit {
-	float: left;
+
+.markdown-editor.normal-mode.edit-mode>.body>.edit {
 	width: 100%;
 }
+.markdown-editor.normal-mode.edit-mode>.body>.preview {
+	display: none;
+}
+.markdown-editor.normal-mode.preview-mode>.body>.edit {
+	display: none;
+}
+.markdown-editor.normal-mode.preview-mode>.body>.preview {
+	width: 100%;
+}
+.markdown-editor.normal-mode.split-mode>.body>.edit {
+	float: left;
+	width: 50%;
+}
+.markdown-editor.normal-mode.split-mode>.body>.preview {
+	float: left;
+	width: 50%;
+}
+
+.markdown-editor.compact-mode.edit-mode>.body>.edit {
+	width: 100%;
+}
+.markdown-editor.compact-mode.edit-mode>.body>.preview {
+	display: none;
+}
+.markdown-editor.compact-mode.preview-mode>.body>.edit {
+	display: none;
+}
+.markdown-editor.compact-mode.preview-mode>.body>.preview {
+	width: 100%;
+}
+.markdown-editor.compact-mode.split-mode>.body>.edit {
+	width: 100%;
+}
+.markdown-editor.compact-mode.split-mode>.body>.preview {
+	width: 100%;
+}
+
 .markdown-editor>.body>.edit>textarea {
 	border: 1px solid #BBB;
 	border-radius: 4px;
@@ -74,18 +127,11 @@
 	display: block;
 	resize: none;
 }
-.markdown-editor>.body>.preview {
-	float: left;
-	width: 49%;
-}
 .markdown-editor>.body>.preview>.markdown-rendered {
 	overflow: auto;
 }
 .markdown-editor>.body>.preview>.markdown-rendered>.message {
 	color: #999;
-}
-.markdown-editor.compact-mode>.body>* {
-	width: 100%;
 }
 .markdown-editor.normal-mode.split-mode>.body>.edit>textarea {
 	border-radius: 4px 0 0 4px;
