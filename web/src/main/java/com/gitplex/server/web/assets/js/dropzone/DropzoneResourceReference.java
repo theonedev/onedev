@@ -7,7 +7,6 @@ import org.apache.wicket.Application;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
@@ -26,7 +25,6 @@ public class DropzoneResourceReference extends JavaScriptResourceReference {
 				Application.get().getJavaScriptLibrarySettings().getJQueryReference()));
 		dependencies.add(CssHeaderItem.forReference(
 				new CssResourceReference(DropzoneResourceReference.class, "dropzone.css")));
-		dependencies.add(OnDomReadyHeaderItem.forScript("Dropzone.autoDiscover = false;"));
 		
 		return dependencies;
 	}

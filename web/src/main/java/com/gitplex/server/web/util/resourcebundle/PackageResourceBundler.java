@@ -1,5 +1,6 @@
 package com.gitplex.server.web.util.resourcebundle;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,12 +14,23 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Application;
+import org.apache.wicket.javascript.IJavaScriptCompressor;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.IReferenceHeaderItem;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.IResourceReferenceFactory;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.apache.wicket.resource.ITextResourceCompressor;
+import org.apache.wicket.resource.bundles.ConcatBundleResource;
+import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
+import org.apache.wicket.util.io.ByteArrayOutputStream;
+import org.apache.wicket.util.io.IOUtils;
+import org.apache.wicket.util.resource.IResourceStream;
+import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
 
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.util.DependencyAware;
@@ -237,7 +249,50 @@ public class PackageResourceBundler {
 
 	public void install(Application application) {
 		for (BundleInfo<JavaScriptResourceReference> bundle: javaScriptBundles) {
-			application.getResourceBundles().addJavaScriptBundle(bundle.getScope(), bundle.getName(), bundle.getReferences());
+			List<JavaScriptReferenceHeaderItem> items = new ArrayList<JavaScriptReferenceHeaderItem>();
+			for (JavaScriptResourceReference curReference : bundle.getReferences()) {
+				items.add(JavaScriptHeaderItem.forReference(curReference));
+			}
+			
+			@SuppressWarnings("serial")
+			ConcatResourceBundleReference<JavaScriptReferenceHeaderItem> bundleReference = 
+					new ConcatResourceBundleReference<JavaScriptReferenceHeaderItem>(bundle.getScope(), bundle.getName(), items) {
+
+				@Override
+				public IResource getResource() {
+					ConcatBundleResource bundleResource = new ConcatBundleResource(items) {
+
+						@Override
+						protected byte[] readAllResources(List<IResourceStream> resources)
+								throws IOException, ResourceStreamNotFoundException {
+							ByteArrayOutputStream output = new ByteArrayOutputStream();
+							for (IResourceStream curStream : resources) {
+								IOUtils.copy(curStream.getInputStream(), output);
+								output.write(";".getBytes());
+							}
+
+							byte[] bytes = output.toByteArray();
+
+							if (getCompressor() != null) {
+								String nonCompressed = new String(bytes, "UTF-8");
+								bytes = getCompressor().compress(nonCompressed).getBytes("UTF-8");
+							}
+
+							return bytes;
+						}
+						
+					};
+					ITextResourceCompressor compressor = getCompressor();
+					if (compressor != null) {
+						bundleResource.setCompressor(compressor);
+					}
+					return bundleResource;
+				}
+				
+			};
+			IJavaScriptCompressor javaScriptCompressor = application.getResourceSettings().getJavaScriptCompressor();
+			bundleReference.setCompressor(javaScriptCompressor);
+			application.getResourceBundles().addBundle(JavaScriptHeaderItem.forReference(bundleReference));
 		}
 		for (BundleInfo<CssResourceReference> bundle: cssBundles) {
 			application.getResourceBundles().addCssBundle(bundle.getScope(), bundle.getName(), bundle.getReferences());

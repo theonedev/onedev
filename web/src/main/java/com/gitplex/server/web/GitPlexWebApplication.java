@@ -263,5 +263,5 @@ public class GitPlexWebApplication extends WebApplication {
 		
 		return new UnexpectedExceptionPage(e);
 	}
-	
+
 }

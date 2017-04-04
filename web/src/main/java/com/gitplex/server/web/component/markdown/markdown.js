@@ -960,4 +960,4 @@ gitplex.server.markdown = {
 		})
 	}
 	
-}
+};

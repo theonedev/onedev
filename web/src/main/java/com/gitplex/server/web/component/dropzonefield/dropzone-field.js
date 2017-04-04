@@ -14,4 +14,4 @@ gitplex.server.onDropzoneDomReady = function(containerId, uploadUrl, deleteCallb
 			"Wicket-Ajax-BaseURL": Wicket.Ajax.baseUrl
 		}
 	});
-};
+}

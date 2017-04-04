@@ -556,6 +556,8 @@ gitplex.server = {
 		gitplex.server.setupWebsocketCallback();
 		gitplex.server.mouseState.track();
 		
+		Dropzone.autoDiscover = false;
+		
 		if (autosaveKeyToClear)
 			localStorage.removeItem(autosaveKeyToClear);
 		
