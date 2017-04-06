@@ -8,13 +8,15 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.markup.head.CssReferenceHeaderItem;
+import org.apache.wicket.markup.head.IReferenceHeaderItem;
+import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
 import org.apache.wicket.request.resource.IResourceReferenceFactory;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResource;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.request.resource.ResourceReference.Key;
+import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
 
 /*
  * When css is bundled, and its access url can be changed (unless its resource is annotated with @ResourceBundle), 
@@ -24,10 +26,10 @@ import org.apache.wicket.request.resource.ResourceReference.Key;
  */
 class BundleAwareResourceReferenceFactory implements IResourceReferenceFactory {
 
-	private final List<BundleInfo<? extends ResourceReference>> bundles = new ArrayList<>();
+	private final List<ConcatResourceBundleReference<? extends IReferenceHeaderItem>> bundles = new ArrayList<>();
 	
-	public BundleAwareResourceReferenceFactory(List<BundleInfo<JavaScriptResourceReference>> javaScriptBundles, 
-			List<BundleInfo<CssResourceReference>> cssBundles) {
+	public BundleAwareResourceReferenceFactory(List<ConcatResourceBundleReference<JavaScriptReferenceHeaderItem>> javaScriptBundles, 
+			List<ConcatResourceBundleReference<CssReferenceHeaderItem>> cssBundles) {
 		bundles.addAll(javaScriptBundles);
 		bundles.addAll(cssBundles);
 	}
@@ -38,7 +40,7 @@ class BundleAwareResourceReferenceFactory implements IResourceReferenceFactory {
 			return new PackageResourceReference(key);
 		} else {
 			Path keyPath = Paths.get(key.getName());
-			for (BundleInfo<? extends ResourceReference> bundle: bundles) {
+			for (ConcatResourceBundleReference<? extends IReferenceHeaderItem> bundle: bundles) {
 				if (bundle.getScope().getName().equals(key.getScope())) {
 					Path bundleParentPath = getParentPath(bundle.getName());
 					Path relativePath;
@@ -46,8 +48,8 @@ class BundleAwareResourceReferenceFactory implements IResourceReferenceFactory {
 						relativePath = bundleParentPath.relativize(keyPath);
 					else
 						relativePath = keyPath;
-					for (ResourceReference reference: bundle.getReferences()) {
-						Path referenceParentPath = getParentPath(reference.getName());
+					for (IReferenceHeaderItem headerItem: bundle.getProvidedResources()) {
+						Path referenceParentPath = getParentPath(headerItem.getReference().getName());
 						String possibleName;
 						if (referenceParentPath != null)
 							possibleName = referenceParentPath.resolve(relativePath).toString();
@@ -56,7 +58,8 @@ class BundleAwareResourceReferenceFactory implements IResourceReferenceFactory {
 						possibleName = FilenameUtils.normalize(possibleName);
 						if (possibleName != null) {
 							possibleName = possibleName.replace('\\', '/');
-							Key possibleKey = new Key(reference.getScope().getName(), possibleName, key.getLocale(), key.getStyle(), key.getVariation());
+							Key possibleKey = new Key(headerItem.getReference().getScope().getName(), possibleName, 
+									key.getLocale(), key.getStyle(), key.getVariation());
 							if (PackageResource.exists(possibleKey)) {
 								return new PackageResourceReference(possibleKey);
 							}

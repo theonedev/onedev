@@ -11,7 +11,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import com.gitplex.server.web.assets.js.align.AlignResourceReference;
 import com.gitplex.server.web.assets.js.areyousure.AreYouSureResourceReference;
 import com.gitplex.server.web.assets.js.autosize.AutoSizeResourceReference;
-import com.gitplex.server.web.assets.js.dropzone.DropzoneResourceReference;
 
 import de.agilecoders.wicket.core.Bootstrap;
 
@@ -32,7 +31,6 @@ public class BaseResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new AlignResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AutoSizeResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AreYouSureResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new DropzoneResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseCssResourceReference()));
 		
 		return dependencies;

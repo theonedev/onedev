@@ -37,6 +37,7 @@ public class DependencyUtils {
 	public static <K, T extends DependencyAware<K>> Set<K> getTransitiveDependents(
 			Map<K, Set<K>> dependentMap, K dependency) {
 		Set<K> transitiveDependents = new HashSet<>();
+		
 		transitiveDependents.addAll(Preconditions.checkNotNull(dependentMap.get(dependency)));
 		while (true) {
 			Set<K> newTransitiveDependents = new HashSet<>(transitiveDependents);

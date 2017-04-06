@@ -56,7 +56,7 @@ import com.gitplex.server.web.page.error.ExpectedExceptionPage;
 import com.gitplex.server.web.page.error.UnexpectedExceptionPage;
 import com.gitplex.server.web.page.home.DashboardPage;
 import com.gitplex.server.web.util.AbsoluteUrlRenderer;
-import com.gitplex.server.web.util.resourcebundle.PackageResourceBundler;
+import com.gitplex.server.web.util.resourcebundle.ResourceBundleReferences;
 import com.gitplex.server.web.websocket.WebSocketManager;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
@@ -157,7 +157,7 @@ public class GitPlexWebApplication extends WebApplication {
 			for (ResourcePackScopeContribution contribution: AppLoader.getExtensions(ResourcePackScopeContribution.class)) {
 				resourcePackScopes.addAll(contribution.getResourcePackScopes());
 			}
-			new PackageResourceBundler(WebModule.class, resourcePackScopes.toArray(new Class<?>[resourcePackScopes.size()])).install(this);
+			new ResourceBundleReferences(WebModule.class, resourcePackScopes.toArray(new Class<?>[resourcePackScopes.size()])).installInto(this);
 		}
 		
 		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));

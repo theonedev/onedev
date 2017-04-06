@@ -1,6 +1,5 @@
 package com.gitplex.server.web.util.resourcebundle;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,31 +11,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Application;
+import org.apache.wicket.css.ICssCompressor;
 import org.apache.wicket.javascript.IJavaScriptCompressor;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.CssReferenceHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.IReferenceHeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.IResourceReferenceFactory;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
-import org.apache.wicket.resource.ITextResourceCompressor;
-import org.apache.wicket.resource.bundles.ConcatBundleResource;
 import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
-import org.apache.wicket.util.io.ByteArrayOutputStream;
-import org.apache.wicket.util.io.IOUtils;
-import org.apache.wicket.util.resource.IResourceStream;
-import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
 
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.util.DependencyAware;
 import com.gitplex.server.util.DependencyUtils;
 
-public class PackageResourceBundler {
+public class ResourceBundleReferences {
 
 	private final Map<ResourceReference, DependencyAware<ResourceReference>> dependencyMap;
 	
@@ -44,11 +38,11 @@ public class PackageResourceBundler {
 	
 	private final List<ResourceReference> sorted;
 	
-	private final List<BundleInfo<JavaScriptResourceReference>> javaScriptBundles = new ArrayList<>();
+	private final List<ConcatResourceBundleReference<JavaScriptReferenceHeaderItem>> javaScriptBundleReferences = new ArrayList<>();
 	
-	private final List<BundleInfo<CssResourceReference>> cssBundles = new ArrayList<>();
+	private final List<ConcatResourceBundleReference<CssReferenceHeaderItem>> cssBundleReferences = new ArrayList<>();
 	
-	public PackageResourceBundler(Class<?> packageScope, Class<?>... additionalPackageScopes) {
+	public ResourceBundleReferences(Class<?> packageScope, Class<?>... additionalPackageScopes) {
 		List<Class<?>> packageScopes = new ArrayList<>();
 		packageScopes.add(packageScope);
 		packageScopes.addAll(Arrays.asList(additionalPackageScopes));
@@ -57,40 +51,42 @@ public class PackageResourceBundler {
 		sorted = DependencyUtils.sortDependencies(dependencyMap);
 
 		for (int i=sorted.size()-1; i>=0; i--) {
-			ResourceReference resource = sorted.get(i);
-			if (resource.getClass().isAnnotationPresent(ResourceBundle.class)) {
-				/* 
-				 * A resource marked with ResourceBundle annotation will be a separate bundle, together 
-				 * with all other resources depending on it, and any dependencies used only by these 
-				 * resources
-				 */
-				Set<ResourceReference> resources = DependencyUtils.getTransitiveDependents(dependentMap, resource);
-				resources.add(resource);
-				resources = includeSoleDependencies(resources);
+			ResourceReference resourceReference = sorted.get(i);
+			DependencyAware<ResourceReference> dependencyAware = dependencyMap.get(resourceReference);
+			if (dependencyAware != null) {
+				if (dependencyAware.getDependencies().size() != resourceReference.getDependencies().size() 
+						|| resourceReference.getClass().isAnnotationPresent(ResourceBundle.class)) {
+					/* 
+					 * Create separate resource bundle in two cases:
+					 * 
+					 * 1. A resource is marked with ResourceBundle annotation explicitly
+					 * 2. Some of the resource's dependencies are not being included in dependencyMap. For instance 
+					 * dependency of type OnDomReadyHeaderItem is not included, and we should create separate bundle to 
+					 * avoid possible circular bundle dependencies   
+					 *  
+					 * Besides current resource, A bundle also includes all resources depending on it, and any 
+					 * dependencies used only by these resources
+					 */
+					Set<ResourceReference> resourceReferences = DependencyUtils.getTransitiveDependents(dependentMap, resourceReference);
+					resourceReferences.add(resourceReference);
+					resourceReferences = includeSoleDependencies(resourceReferences);
 
-				String name = StringUtils.stripStart(resource.getName(), "/");
-				String cssExt = ".css";
-				if (name.endsWith(cssExt))
-					name = name.substring(0, name.length()-cssExt.length());
-				String jsExt = ".js";
-				if (name.endsWith(jsExt))
-					name = name.substring(0, name.length()-jsExt.length());
-
-				createBundles(resource.getScope(), resources);
-				
-				dependencyMap.keySet().removeAll(resources);
-				for (DependencyAware<ResourceReference> each: dependencyMap.values())
-					each.getDependencies().removeAll(resources);
-				dependentMap.keySet().removeAll(resources);
-				for (Set<ResourceReference> each: dependentMap.values())
-					each.removeAll(resources);
+					createBundles(resourceReference.getScope(), resourceReferences);
+					
+					dependencyMap.keySet().removeAll(resourceReferences);
+					for (DependencyAware<ResourceReference> each: dependencyMap.values())
+						each.getDependencies().removeAll(resourceReferences);
+					dependentMap.keySet().removeAll(resourceReferences);
+					for (Set<ResourceReference> each: dependentMap.values())
+						each.removeAll(resourceReferences);
+				}
 			}
 		}
 		
 		createBundles(Application.class, dependencyMap.keySet());
 	}
 	
-	private void createBundles(Class<?> scope, Set<ResourceReference> resources) {
+	private void createBundles(Class<?> scope, Set<ResourceReference> resourceReferences) {
 		/*
 		 * Some bundled css file may contain resources relative to parent paths of the css url, 
 		 * for instance, a css may define below style:
@@ -106,29 +102,24 @@ public class PackageResourceBundler {
 		 */
 		String name = "a/l/o/n/g/p/a/t/h/bundle";
 		
-		List<ResourceReference> resourceList = new ArrayList<>(resources);
-		resourceList.sort((o1, o2)->sorted.indexOf(o1)-sorted.indexOf(o2));
+		List<ResourceReference> resourceReferenceList = new ArrayList<>(resourceReferences);
+		resourceReferenceList.sort((o1, o2)->sorted.indexOf(o1)-sorted.indexOf(o2));
 		
-		List<JavaScriptResourceReference> jsResources = new ArrayList<>();
-		List<CssResourceReference> cssResources = new ArrayList<>();
-		for (ResourceReference resource: resourceList) {
-			if (resource instanceof JavaScriptResourceReference) {
-				jsResources.add((JavaScriptResourceReference) resource);
-			} else if (resource instanceof CssResourceReference) {
-				cssResources.add((CssResourceReference) resource);
+		List<JavaScriptReferenceHeaderItem> javaScriptResourceReferences = new ArrayList<>();
+		List<CssReferenceHeaderItem> cssResourceReferences = new ArrayList<>();
+		for (ResourceReference resourceReference: resourceReferenceList) {
+			if (resourceReference instanceof JavaScriptResourceReference) {
+				javaScriptResourceReferences.add(JavaScriptReferenceHeaderItem.forReference(resourceReference));
+			} else if (resourceReference instanceof CssResourceReference) {
+				cssResourceReferences.add(CssReferenceHeaderItem.forReference(resourceReference));
 			}
 		}
 		
-		if (!jsResources.isEmpty()) {
-			javaScriptBundles.add(new BundleInfo<JavaScriptResourceReference>(scope, name + ".js",
-					jsResources.toArray(new JavaScriptResourceReference[jsResources.size()])));
-		} 
+		if (!javaScriptResourceReferences.isEmpty())
+			javaScriptBundleReferences.add(new JavaScriptConcatResourceBundleReference(scope, name + ".js", javaScriptResourceReferences));			
 		
-		if (!cssResources.isEmpty()) {
-			cssBundles.add(new BundleInfo<CssResourceReference>(scope, name + ".css",
-					cssResources.toArray(new CssResourceReference[cssResources.size()])));
-		} 
-		
+		if (!cssResourceReferences.isEmpty()) 
+			cssBundleReferences.add(new ConcatResourceBundleReference<CssReferenceHeaderItem>(scope, name + ".css", cssResourceReferences));			
 	}
 
 	private Set<ResourceReference> includeSoleDependencies(Set<ResourceReference> dependents) {
@@ -239,66 +230,27 @@ public class PackageResourceBundler {
 		};
 	}
 	
-	public List<BundleInfo<JavaScriptResourceReference>> getJavaScriptBundles() {
-		return javaScriptBundles;
+	public List<ConcatResourceBundleReference<JavaScriptReferenceHeaderItem>> getJavaScriptBundles() {
+		return javaScriptBundleReferences;
 	}
 
-	public List<BundleInfo<CssResourceReference>> getCssBundles() {
-		return cssBundles;
+	public List<ConcatResourceBundleReference<CssReferenceHeaderItem>> getCssBundles() {
+		return cssBundleReferences;
 	}
 
-	public void install(Application application) {
-		for (BundleInfo<JavaScriptResourceReference> bundle: javaScriptBundles) {
-			List<JavaScriptReferenceHeaderItem> items = new ArrayList<JavaScriptReferenceHeaderItem>();
-			for (JavaScriptResourceReference curReference : bundle.getReferences()) {
-				items.add(JavaScriptHeaderItem.forReference(curReference));
-			}
-			
-			@SuppressWarnings("serial")
-			ConcatResourceBundleReference<JavaScriptReferenceHeaderItem> bundleReference = 
-					new ConcatResourceBundleReference<JavaScriptReferenceHeaderItem>(bundle.getScope(), bundle.getName(), items) {
-
-				@Override
-				public IResource getResource() {
-					ConcatBundleResource bundleResource = new ConcatBundleResource(items) {
-
-						@Override
-						protected byte[] readAllResources(List<IResourceStream> resources)
-								throws IOException, ResourceStreamNotFoundException {
-							ByteArrayOutputStream output = new ByteArrayOutputStream();
-							for (IResourceStream curStream : resources) {
-								IOUtils.copy(curStream.getInputStream(), output);
-								output.write(";".getBytes());
-							}
-
-							byte[] bytes = output.toByteArray();
-
-							if (getCompressor() != null) {
-								String nonCompressed = new String(bytes, "UTF-8");
-								bytes = getCompressor().compress(nonCompressed).getBytes("UTF-8");
-							}
-
-							return bytes;
-						}
-						
-					};
-					ITextResourceCompressor compressor = getCompressor();
-					if (compressor != null) {
-						bundleResource.setCompressor(compressor);
-					}
-					return bundleResource;
-				}
-				
-			};
+	public void installInto(Application application) {
+		for (ConcatResourceBundleReference<JavaScriptReferenceHeaderItem> bundleReference: javaScriptBundleReferences) {
 			IJavaScriptCompressor javaScriptCompressor = application.getResourceSettings().getJavaScriptCompressor();
 			bundleReference.setCompressor(javaScriptCompressor);
 			application.getResourceBundles().addBundle(JavaScriptHeaderItem.forReference(bundleReference));
 		}
-		for (BundleInfo<CssResourceReference> bundle: cssBundles) {
-			application.getResourceBundles().addCssBundle(bundle.getScope(), bundle.getName(), bundle.getReferences());
+		for (ConcatResourceBundleReference<CssReferenceHeaderItem> bundleReference: cssBundleReferences) {
+			ICssCompressor cssCompressor = application.getResourceSettings().getCssCompressor();
+			bundleReference.setCompressor(cssCompressor);
+			application.getResourceBundles().addBundle(CssHeaderItem.forReference(bundleReference));
 		}
 		
-		IResourceReferenceFactory factory = new BundleAwareResourceReferenceFactory(javaScriptBundles, cssBundles);
+		IResourceReferenceFactory factory = new BundleAwareResourceReferenceFactory(javaScriptBundleReferences, cssBundleReferences);
 		application.getResourceReferenceRegistry().setResourceReferenceFactory(factory);
 	}
 	
