@@ -405,9 +405,9 @@ public abstract class SearchResultPanel extends Panel {
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));
 						
-						DepotBlobPage.State state = new DepotBlobPage.State();
-						state.blobIdent.revision = context.getBlobIdent().revision;
-						state.blobIdent.path = blobPath;
+						BlobIdent blobIdent = new BlobIdent(context.getBlobIdent().revision, blobPath, 
+								FileMode.REGULAR_FILE.getBits());
+						DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 						PageParameters params = DepotBlobPage.paramsOf(context.getDepot(), state);
 						CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, params);
 						add(AttributeAppender.replace("href", url.toString()));
@@ -456,10 +456,10 @@ public abstract class SearchResultPanel extends Panel {
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));
 
-								DepotBlobPage.State state = new DepotBlobPage.State();
+								BlobIdent blobIdent = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
+										FileMode.REGULAR_FILE.getBits());
+								DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 								state.mark = TextRange.of(hit.getTokenPos());
-								state.blobIdent.revision = context.getBlobIdent().revision;
-								state.blobIdent.path = hit.getBlobPath();
 								PageParameters params = DepotBlobPage.paramsOf(context.getDepot(), state);
 								CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, params);
 								add(AttributeAppender.replace("href", url.toString()));

@@ -440,9 +440,13 @@ public class DepotCommitsPage extends DepotPage {
 				}
 			}
 
-			DepotBlobPage.State browseState = new DepotBlobPage.State();
-			browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
-			browseState.blobIdent.path = path;
+			BlobIdent blobIdent;
+			if (path != null) {
+				blobIdent = new BlobIdent(commit.name(), path, null);
+			} else {
+				blobIdent = new BlobIdent(commit.name(), null, FileMode.TREE.getBits());
+			}
+			DepotBlobPage.State browseState = new DepotBlobPage.State(blobIdent);
 			PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
 			item.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 			

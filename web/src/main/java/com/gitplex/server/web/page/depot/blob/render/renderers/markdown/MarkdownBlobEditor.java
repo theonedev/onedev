@@ -45,6 +45,11 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			protected String getAutosaveKey() {
 				return MarkdownBlobEditor.this.getAutosaveKey();
 			}
+
+			@Override
+			protected String getBaseUrl() {
+				return MarkdownBlobEditor.this.getBaseUrl();
+			}
 			
 		});
 		if (!autoFocus) {
@@ -75,4 +80,5 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 	
 	protected abstract String getAutosaveKey();
 	
+	protected abstract String getBaseUrl();
 }

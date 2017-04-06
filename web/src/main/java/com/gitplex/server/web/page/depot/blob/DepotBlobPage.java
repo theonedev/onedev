@@ -46,7 +46,6 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.git.exception.ObjectNotFoundException;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.PullRequestManager;
@@ -125,16 +124,12 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	
 	private WebMarkupContainer searchResult;
 	
-	public DepotBlobPage(final PageParameters params) {
+	public DepotBlobPage(PageParameters params) {
 		super(params);
 		
 		if (getDepot().getDefaultBranch() == null) 
 			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getDepot()));
-
-		String modeStr = params.get(PARAM_MODE).toString();
-		if (modeStr != null)
-			state.mode = Mode.valueOf(modeStr.toUpperCase());
-
+		
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		String segment = params.get(PARAM_REVISION).toString();
 		if (segment != null && segment.length() != 0)
@@ -148,41 +143,15 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			if (segment.length() != 0)
 				revisionAndPathSegments.add(segment);
 		}
-		
-		if (state.mode == Mode.ADD) {
-			/*
-			 * In add mode, the url has a suffix "/newfile" which is added in order to 
-			 * make relative path referencing in markdown working, and here we need to 
-			 * trim it off to get the real blob path
-			 */
-			state.blobIdent = new BlobIdent(getDepot(), 
-					revisionAndPathSegments.subList(0, revisionAndPathSegments.size()-1));
-		} else {
-			state.blobIdent = new BlobIdent(getDepot(), revisionAndPathSegments);
-		}
-		
-		if (state.blobIdent.revision == null)
-			state.blobIdent.revision = getDepot().getDefaultBranch();
+
+		BlobIdent blobIdent = new BlobIdent(getDepot(), revisionAndPathSegments); 
+		state = new State(blobIdent);
+
+		String modeStr = params.get(PARAM_MODE).toString();
+		if (modeStr != null)
+			state.mode = Mode.valueOf(modeStr.toUpperCase());
 
 		resolvedRevision = getDepot().getObjectId(state.blobIdent.revision);
-		
-		RevCommit commit = getDepot().getRevCommit(state.blobIdent.revision);
-		
-		if (state.blobIdent.path != null) {
-			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
-				RevTree revTree = commit.getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(getDepot().getRepository(), state.blobIdent.path, revTree);
-				if (treeWalk == null) {
-					throw new ObjectNotFoundException("Unable to find blob path '" + state.blobIdent.path
-							+ "' in revision '" + state.blobIdent.revision + "'");
-				}
-				state.blobIdent.mode = treeWalk.getRawMode(0);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			state.blobIdent.mode = FileMode.TREE.getBits();
-		}
 		
 		state.mark = TextRange.of(params.get(PARAM_MARK).toString());
 		state.anchor = params.get(PARAM_ANCHOR).toString();
@@ -579,8 +548,8 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 
 			@Override
 			protected String getRevisionUrl(String revision) {
-				State state = new State();
-				state.blobIdent.revision = revision;
+				BlobIdent blobIdent = new BlobIdent(revision, null, FileMode.TREE.getBits());
+				State state = new State(blobIdent);
 				PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), state);
 				return urlFor(DepotBlobPage.class, params).toString();
 			}
@@ -653,29 +622,26 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	}
 
 	public static PageParameters paramsOf(Depot depot, CodeComment comment, @Nullable String anchor) {
-		DepotBlobPage.State state = new DepotBlobPage.State();
-		state.blobIdent.revision = comment.getCommentPos().getCommit();
-		state.blobIdent.path = comment.getCommentPos().getPath();
-		state.blobIdent.mode = FileMode.TYPE_FILE;
+		BlobIdent blobIdent = new BlobIdent(comment.getCommentPos().getCommit(), comment.getCommentPos().getPath(), 
+				FileMode.REGULAR_FILE.getBits());
+		DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 		state.commentId = comment.getId();
 		state.mark = comment.getCommentPos().getRange();
 		state.anchor = anchor;
 		return paramsOf(depot, state);
 	}
 	
+	public static PageParameters paramsOf(Depot depot, BlobIdent blobIdent) {
+		return paramsOf(depot, new State(blobIdent));
+	}
+	
 	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
+		
 		if (state.blobIdent.revision != null)
 			params.set(PARAM_REVISION, state.blobIdent.revision);
-		if (state.mode == Mode.ADD) {
-			// Without this, relative links in markdown file will not work 
-			if (state.blobIdent.path != null)
-				params.set(PARAM_PATH, state.blobIdent.path + "/newfile");
-			else
-				params.set(PARAM_PATH, "newfile");
-		} else if (state.blobIdent.path != null) {
+		if (state.blobIdent.path != null)
 			params.set(PARAM_PATH, state.blobIdent.path);
-		}
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
 		if (state.anchor != null)
@@ -878,9 +844,9 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		
 		private static final long serialVersionUID = 1L;
 
-		public Long commentId;
+		public BlobIdent blobIdent;
 		
-		public BlobIdent blobIdent = new BlobIdent();
+		public Long commentId;
 		
 		public TextRange mark;
 		
@@ -891,6 +857,14 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		public RequestCompareInfo requestCompareInfo;
 		
 		public String query;
+
+		public State(BlobIdent blobIdent) {
+			this.blobIdent = blobIdent;
+		}
+
+		public State() {
+			blobIdent = new BlobIdent();
+		}
 		
 	}
 

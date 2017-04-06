@@ -306,9 +306,9 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 			@Override
 			protected String load() {
 				if (context.getOpenComment() != null) {
-					DepotBlobPage.State state = new DepotBlobPage.State();
-					state.blobIdent = new BlobIdent(context.getBlobIdent());
-					state.blobIdent.revision = context.getCommit().name();
+					BlobIdent blobIdent = new BlobIdent(context.getBlobIdent());
+					blobIdent.revision = context.getCommit().name();
+					DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 					state.commentId = context.getOpenComment().getId();
 					state.mark = context.getOpenComment().getCommentPos().getRange();
 					return urlFor(DepotBlobPage.class, DepotBlobPage.paramsOf(context.getDepot(), state)).toString();
@@ -672,8 +672,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 					}
 					
 				};
-				DepotBlobPage.State state = new DepotBlobPage.State();
-				state.blobIdent = context.getBlobIdent();
+				DepotBlobPage.State state = new DepotBlobPage.State(context.getBlobIdent());
 				state.commentId = CodeComment.idOf(context.getOpenComment());
 				state.mark = TextRange.of(symbol.getPosition());
 				PageParameters params = DepotBlobPage.paramsOf(context.getDepot(), state);

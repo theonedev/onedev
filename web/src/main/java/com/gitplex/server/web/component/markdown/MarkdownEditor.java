@@ -101,7 +101,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	private String render(String markdown) {
 		if (StringUtils.isNotBlank(markdown)) {
 			MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
-			return markdownManager.render(markdown, true);
+			return markdownManager.render(markdown, getBaseUrl(), true);
 		} else {
 			return "<div class='message'>Nothing to preview</div>";
 		}
@@ -409,5 +409,9 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	protected String getAutosaveKey() {
 		return null;
 	}
+	
+	protected String getBaseUrl() {
+		return null;
+	};
 	
 }

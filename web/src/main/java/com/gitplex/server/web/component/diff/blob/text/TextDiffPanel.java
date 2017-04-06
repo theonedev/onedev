@@ -30,6 +30,7 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
@@ -40,6 +41,7 @@ import com.gitplex.jsyntax.Token;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blame;
 import com.gitplex.server.git.BlobChange;
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.BriefCommit;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.BlameCommand;
@@ -195,10 +197,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		} else {
 			comment = null;
 		}
-		DepotBlobPage.State viewState = new DepotBlobPage.State();
+		DepotBlobPage.State viewState = new DepotBlobPage.State(change.getBlobIdent());
 		if (comment != null)
 			viewState.commentId = comment.getId();
-		viewState.blobIdent = change.getBlobIdent();
 		
 		PageParameters params = DepotBlobPage.paramsOf(depot, viewState);
 		actions.add(new ViewStateAwarePageLink<Void>("viewFile", DepotBlobPage.class, params));
@@ -209,14 +210,14 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					&& request.getSource().getObjectName(false) != null
 					&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), change.getPath())
 					&& (getPage() instanceof RequestChangesPage || getPage() instanceof IntegrationPreviewPage)) { 
-				// we are in context of a pull request and pull request source branch exists, so we edit source branch instead
+				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 
 					@Override
 					public void onClick() {
-						DepotBlobPage.State editState = new DepotBlobPage.State();
-						editState.blobIdent.revision = request.getSourceBranch();
-						editState.blobIdent.path = change.getPath();
+						BlobIdent blobIdent = new BlobIdent(request.getSourceBranch(), change.getPath(), 
+								FileMode.REGULAR_FILE.getBits());
+						DepotBlobPage.State editState = new DepotBlobPage.State(blobIdent);
 						editState.mode = Mode.EDIT;
 						editState.requestCompareInfo = new RequestCompareInfo();
 						editState.requestCompareInfo.requestId = request.getId();
@@ -241,8 +242,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 					@Override
 					public void onClick() {
-						DepotBlobPage.State editState = new DepotBlobPage.State();
-						editState.blobIdent = change.getBlobIdent();
+						DepotBlobPage.State editState = new DepotBlobPage.State(change.getBlobIdent());
 						editState.mode = Mode.EDIT;
 						PageParameters params = DepotBlobPage.paramsOf(depot, editState);
 						setResponsePage(DepotBlobPage.class, params);

@@ -6,6 +6,7 @@ import org.apache.wicket.model.Model;
 
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.view.BlobViewPanel;
 
@@ -21,7 +22,15 @@ public class MarkdownBlobViewPanel extends BlobViewPanel {
 		super.onInitialize();
 		
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
-		add(new MarkdownViewer("markdown", Model.of(blob.getText().getContent()), null));
+		add(new MarkdownViewer("markdown", Model.of(blob.getText().getContent()), null) {
+
+			@Override
+			protected String getBaseUrl() {
+				DepotBlobPage.State state = new DepotBlobPage.State(context.getBlobIdent());
+				return urlFor(DepotBlobPage.class, DepotBlobPage.paramsOf(context.getDepot(), state)).toString();
+			}
+			
+		});
 	}
 	
 	@Override

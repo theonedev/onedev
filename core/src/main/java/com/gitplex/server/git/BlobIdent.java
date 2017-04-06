@@ -26,9 +26,6 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	@Nullable
 	public Integer mode;
 	
-	public BlobIdent() {
-	}
-	
 	public BlobIdent(BlobIdent blobIdent) {
 		revision = blobIdent.revision;
 		path = blobIdent.path;
@@ -39,6 +36,9 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		this.revision = revision;
 		this.path = path;
 		this.mode = mode;
+	}
+	
+	public BlobIdent() {
 	}
 	
 	public BlobIdent(Depot depot, List<String> urlSegments) {
@@ -55,13 +55,21 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 						pathBuilder.append("/");
 					pathBuilder.append(urlSegments.get(j));
 				}
-				if (pathBuilder.length() != 0)
+				if (pathBuilder.length() != 0) {
 					path = pathBuilder.toString();
+					mode = depot.getMode(revision, path);
+				} else {
+					mode = FileMode.TREE.getBits();
+				}
 				return;
 			}
 		}
-		if (revisionBuilder.length() != 0)
+		if (revisionBuilder.length() != 0) {
 			throw new ObjectNotFoundException("Revision not found: " + revisionBuilder.toString());
+		} else {
+			revision = depot.getDefaultBranch();
+			mode = FileMode.TREE.getBits();
+		}
 	}
 	
 	public boolean isTree() {

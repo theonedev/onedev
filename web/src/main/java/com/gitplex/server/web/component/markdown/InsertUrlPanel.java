@@ -44,6 +44,7 @@ import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.component.depotfilepicker.DepotFilePicker;
 import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -133,7 +134,7 @@ class InsertUrlPanel extends Panel {
 				
 			};
 			
-			BlobIdent rootBlobIdent = new BlobIdent(blobReferenceSupport.getBaseBlobIdent().revision, null, 
+			BlobIdent rootBlobIdent = new BlobIdent(blobReferenceSupport.getRevision(), null, 
 					FileMode.TYPE_TREE);
 			if (!blobReferenceSupport.getDepot().getChildren(rootBlobIdent, blobIdentFilter).isEmpty()) {
 				add(new DropdownLink("blobPicker") {
@@ -147,21 +148,14 @@ class InsertUrlPanel extends Panel {
 								return blobReferenceSupport.getDepot();
 							}
 							
-						}, blobReferenceSupport.getBaseBlobIdent().revision) {
+						}, blobReferenceSupport.getRevision()) {
 
 							@Override
 							protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-								BlobIdent baseBlobIdent = blobReferenceSupport.getBaseBlobIdent();
-								String basePath;
-								if (baseBlobIdent.isTree()) {
-									if (baseBlobIdent.path != null)
-										basePath = baseBlobIdent.path + "/newfile";
-									else
-										basePath = "newfile";
-								} else {
-									basePath = blobReferenceSupport.getBaseBlobIdent().path;
-								}
-								Path relativized = Paths.get(basePath).relativize(Paths.get(blobIdent.path));							
+								String baseUrl = markdownEditor.getBaseUrl();
+								String referenceUrl = urlFor(DepotBlobPage.class, 
+										DepotBlobPage.paramsOf(blobReferenceSupport.getDepot(), blobIdent)).toString();
+								Path relativized = Paths.get(baseUrl).relativize(Paths.get(referenceUrl));							
 								String relativePath = relativized.toString().replace('\\', '/').substring("../".length());
 								markdownEditor.insertUrl(target, isImage, relativePath, blobIdent.getName(), null);
 								markdownEditor.closeUrlSelector(target, InsertUrlPanel.this);

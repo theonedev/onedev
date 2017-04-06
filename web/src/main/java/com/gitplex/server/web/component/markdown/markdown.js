@@ -858,15 +858,17 @@ gitplex.server.markdown = {
 			gitplex.server.viewState.getFromViewAndSetToHistory();
 		});
 	},
-	onViewerDomReady: function(containerId, taskCallback, taskClass, taskSourcePositionDataAttribute) {
+	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute) {
 		var $container = $("#" + containerId);
 		
-		var $task = $container.find("." + taskClass);
-		var $taskCheckbox = $task.children("input");
-		$taskCheckbox.removeAttr("disabled").removeAttr("readonly");
-		$taskCheckbox.change(function() {
-			taskCallback($(this).parent().data(taskSourcePositionDataAttribute), $(this).prop("checked"));
-		});	
+		if (taskCallback) {
+			var $task = $container.find(".task-list-item");
+			var $taskCheckbox = $task.children("input");
+			$taskCheckbox.removeAttr("disabled").removeAttr("readonly");
+			$taskCheckbox.change(function() {
+				taskCallback($(this).parent().data(taskSourcePositionDataAttribute), $(this).prop("checked"));
+			});	
+		}
 		
 		gitplex.server.markdown.initRendered($container.find(".markdown-rendered"));
 	},

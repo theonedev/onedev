@@ -17,6 +17,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.git.Blob;
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
@@ -40,21 +41,27 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		if (targetPath != null && (targetPath.startsWith("/") || new File(targetPath).isAbsolute())) 
 			targetPath = null;
 
+		BlobIdent targetBlobIdent;
 		if (targetPath != null) {
 			Repository repository = context.getDepot().getRepository();				
 			try (RevWalk revWalk = new RevWalk(repository)) {
 				ObjectId commitId = context.getDepot().getObjectId(context.getBlobIdent().revision);
 				RevTree revTree = revWalk.parseCommit(commitId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(repository, targetPath, revTree);
-				if (treeWalk == null)
-					targetPath = null;
+				if (treeWalk != null) {
+					targetBlobIdent = new BlobIdent(context.getBlobIdent().revision, targetPath, treeWalk.getRawMode(0));
+				} else {
+					targetBlobIdent = null;
+				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+		} else {
+			targetBlobIdent = null;
 		}
 
 		WebMarkupContainer link;
-		if (targetPath == null) {
+		if (targetBlobIdent == null) {
 			link = new Link<Void>("link") {
 
 				@Override
@@ -64,9 +71,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 			};
 			link.setEnabled(false);
 		} else {
-			DepotBlobPage.State state = new DepotBlobPage.State();
-			state.blobIdent.revision = context.getBlobIdent().revision;
-			state.blobIdent.path = targetPath;
+			DepotBlobPage.State state = new DepotBlobPage.State(targetBlobIdent);
 			link = new ViewStateAwarePageLink<Void>("link", DepotBlobPage.class, 
 					DepotBlobPage.paramsOf(context.getDepot(), state));
 		} 

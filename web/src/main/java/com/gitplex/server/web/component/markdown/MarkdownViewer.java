@@ -17,11 +17,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.StaleStateException;
 
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
-import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -57,7 +55,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 			protected String load() {
 				String markdown = MarkdownViewer.this.getModelObject();
 				if (markdown != null) {
-					return AppLoader.getInstance(MarkdownManager.class).render(markdown, true);
+					return AppLoader.getInstance(MarkdownManager.class).render(markdown, getBaseUrl(), true);
 				} else {
 					return null;
 				}
@@ -96,6 +94,10 @@ public class MarkdownViewer extends GenericPanel<String> {
 		
 		setOutputMarkupId(true);
 	}
+	
+	protected String getBaseUrl() {
+		return null; 
+	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
@@ -106,9 +108,10 @@ public class MarkdownViewer extends GenericPanel<String> {
 				explicit(SourcePositionTrackExtension.DATA_START_ATTRIBUTE), 
 				explicit(TASK_CHECKED));
 		
-		String taskItemClass = GitPlex.getInstance(MarkdownManager.class).getOptions().get(TaskListExtension.ITEM_CLASS);
-		String script = String.format("gitplex.server.markdown.onViewerDomReady('%s', %s, '%s', '%s');", 
-				getMarkupId(), callback, taskItemClass, SourcePositionTrackExtension.DATA_START_ATTRIBUTE);
+		String script = String.format("gitplex.server.markdown.onViewerDomReady('%s', %s, '%s');", 
+				getMarkupId(), 
+				contentVersionSupport!=null?callback:"undefined", 
+				SourcePositionTrackExtension.DATA_START_ATTRIBUTE);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

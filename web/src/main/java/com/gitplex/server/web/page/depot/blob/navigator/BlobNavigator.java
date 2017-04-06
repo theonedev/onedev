@@ -117,8 +117,7 @@ public class BlobNavigator extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						DepotBlobPage.State state = new DepotBlobPage.State();
-						state.blobIdent = blobIdent;
+						DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 						PageParameters params = DepotBlobPage.paramsOf(context.getDepot(), state);
 						tag.put("href", urlFor(DepotBlobPage.class, params));
 					}
@@ -215,8 +214,7 @@ public class BlobNavigator extends Panel {
 									protected void onComponentTag(ComponentTag tag) {
 										super.onComponentTag(tag);
 										
-										DepotBlobPage.State state = new DepotBlobPage.State();
-										state.blobIdent = model.getObject();
+										DepotBlobPage.State state = new DepotBlobPage.State(model.getObject());
 										PageParameters params = DepotBlobPage.paramsOf(context.getDepot(), state);
 										tag.put("href", urlFor(DepotBlobPage.class, params));
 									}

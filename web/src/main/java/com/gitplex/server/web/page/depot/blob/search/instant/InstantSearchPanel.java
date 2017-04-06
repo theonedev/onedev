@@ -28,9 +28,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.SearchManager;
@@ -257,9 +259,9 @@ public abstract class InstantSearchPanel extends Panel {
 						link.add(new Label("scope", hit.getNamespace()).setVisible(hit.getNamespace()!=null));
 						item.add(link);
 
-						DepotBlobPage.State state = new DepotBlobPage.State();
-						state.blobIdent.revision = revisionModel.getObject();
-						state.blobIdent.path = hit.getBlobPath();
+						BlobIdent blobIdent = new BlobIdent(revisionModel.getObject(), hit.getBlobPath(), 
+								FileMode.REGULAR_FILE.getBits());
+						DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 						state.mark = TextRange.of(hit.getTokenPos());
 						PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), state);
 						CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, params);

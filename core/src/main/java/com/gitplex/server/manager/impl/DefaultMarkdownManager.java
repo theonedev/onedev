@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -18,6 +19,8 @@ import org.jsoup.safety.Whitelist;
 
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.util.markdown.HtmlTransformer;
+import com.gitplex.server.util.markdown.RelativeUrlResolveExtension;
+import com.google.common.base.Preconditions;
 import com.vladsch.flexmark.Extension;
 import com.vladsch.flexmark.ast.Node;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
@@ -51,36 +54,16 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	private static final String[] SAFE_ANCHOR_SCHEMES = new String[] { "http", "https", "mailto", };
 
 	private final Whitelist whiteList;
+
+	private final Set<Extension> contributedExtensions;
 	
 	private final Set<HtmlTransformer> htmlTransformers;
-
-	private final MutableDataHolder options;
-
-	private final Parser parser;
-
-	private final HtmlRenderer htmlRenderer;
-
+	
 	@Inject
 	public DefaultMarkdownManager(Set<Extension> contributedExtensions, Set<HtmlTransformer> htmlTransformers) {
+		this.contributedExtensions = contributedExtensions;
 		this.htmlTransformers = htmlTransformers;
 
-		List<Extension> extensions = new ArrayList<>();
-		extensions.add(TablesExtension.create());
-		extensions.add(TaskListExtension.create());
-		extensions.add(DefinitionExtension.create());
-		extensions.add(TocExtension.create());
-		extensions.add(AutolinkExtension.create());
-		extensions.addAll(contributedExtensions);
-
-		options = new MutableDataSet();
-		options.set(Parser.SPACE_IN_LINK_URLS, true).setFrom(ParserEmulationProfile.GITHUB_DOC)
-				.set(TablesExtension.COLUMN_SPANS, false).set(TablesExtension.APPEND_MISSING_COLUMNS, true)
-				.set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
-				.set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true).set(Parser.EXTENSIONS, extensions);
-
-		parser = Parser.builder(options).build();
-		htmlRenderer = HtmlRenderer.builder(options).build();
-		
 		whiteList = new Whitelist() {
 
 			@Override
@@ -107,12 +90,36 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	}
 
 	@Override
-	public String render(String markdown, boolean postProcess) {
+	public String render(String markdown, @Nullable String baseUrl, boolean postProcess) {
+		Preconditions.checkArgument(baseUrl == null || baseUrl.startsWith("/"));
+		
+		List<Extension> extensions = new ArrayList<>();
+		extensions.add(TablesExtension.create());
+		extensions.add(TaskListExtension.create());
+		extensions.add(DefinitionExtension.create());
+		extensions.add(TocExtension.create());
+		extensions.add(AutolinkExtension.create());
+		extensions.add(new RelativeUrlResolveExtension());
+		extensions.addAll(contributedExtensions);
+
+		MutableDataHolder options = new MutableDataSet();
+		options.set(Parser.SPACE_IN_LINK_URLS, true).setFrom(ParserEmulationProfile.GITHUB_DOC)
+				.set(TablesExtension.COLUMN_SPANS, false).set(TablesExtension.APPEND_MISSING_COLUMNS, true)
+				.set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
+				.set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
+				.set(RelativeUrlResolveExtension.BASE_URL, baseUrl)
+				.set(Parser.EXTENSIONS, extensions);
+
+		Parser parser = Parser.builder(options).build();
+
+		HtmlRenderer htmlRenderer = HtmlRenderer.builder(options).build();
+		
 		Node document = parser.parse(markdown);
 		String html = htmlRenderer.render(document);
 
 		if (postProcess)
 			html = postProcess(html);
+		
 		return html;
 	}
 
@@ -134,11 +141,6 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		markdown = StringEscapeUtils.escapeHtml4(markdown);
 		markdown = StringUtils.replace(markdown, "\n", "<br>");
 		return markdown;
-	}
-
-	@Override
-	public MutableDataHolder getOptions() {
-		return options;
 	}
 
 }

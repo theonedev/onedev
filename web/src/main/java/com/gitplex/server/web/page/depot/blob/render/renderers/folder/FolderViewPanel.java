@@ -149,8 +149,7 @@ public class FolderViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				DepotBlobPage.State state = new DepotBlobPage.State();
-				state.blobIdent = parentIdent;
+				DepotBlobPage.State state = new DepotBlobPage.State(parentIdent);
 				PageParameters params = DepotBlobPage.paramsOf(context.getDepot(), state); 
 				tag.put("href", urlFor(DepotBlobPage.class, params));
 			}
@@ -184,8 +183,7 @@ public class FolderViewPanel extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						DepotBlobPage.State state = new DepotBlobPage.State();
-						state.blobIdent = blobIdent;
+						DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 						PageParameters params = DepotBlobPage.paramsOf(context.getDepot(), state); 
 						tag.put("href", urlFor(DepotBlobPage.class, params));
 					}
@@ -234,8 +232,7 @@ public class FolderViewPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				DepotBlobPage.State state = new DepotBlobPage.State();
-				state.blobIdent = readmeModel.getObject();
+				DepotBlobPage.State state = new DepotBlobPage.State(readmeModel.getObject());
 				state.mode = Mode.EDIT;
 				setResponsePage(DepotBlobPage.class, DepotBlobPage.paramsOf(context.getDepot(), state));
 			}
@@ -262,7 +259,15 @@ public class FolderViewPanel extends Panel {
 					return "This seems like a binary file!";
 			}
 			
-		}, null));
+		}, null) {
+
+			@Override
+			protected String getBaseUrl() {
+				DepotBlobPage.State state = new DepotBlobPage.State(readmeModel.getObject());
+				return urlFor(DepotBlobPage.class, DepotBlobPage.paramsOf(context.getDepot(), state)).toString();
+			}
+			
+		});
 		
 		add(readmeContainer);
 		

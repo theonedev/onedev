@@ -151,8 +151,8 @@ public class CommitListPanel extends Panel {
 					hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 					fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 
-					DepotBlobPage.State browseState = new DepotBlobPage.State();
-					browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
+					DepotBlobPage.State browseState = new DepotBlobPage.State(
+							new BlobIdent(commit.name(), null, FileMode.TYPE_TREE));
 					params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
 					fragment.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 					

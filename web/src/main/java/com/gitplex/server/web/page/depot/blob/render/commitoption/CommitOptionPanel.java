@@ -395,21 +395,19 @@ public class CommitOptionPanel extends Panel {
 	
 	private BlobChange getChange(TreeWalk treeWalk, RevCommit oldCommit, RevCommit newCommit) {
 		DiffEntry.ChangeType changeType = DiffEntry.ChangeType.MODIFY;
-		BlobIdent oldBlobIdent = new BlobIdent();
-		oldBlobIdent.revision = oldCommit.name();
+		BlobIdent oldBlobIdent;
 		if (!treeWalk.getObjectId(0).equals(ObjectId.zeroId())) {
-			oldBlobIdent.path = treeWalk.getPathString();
-			oldBlobIdent.mode = treeWalk.getRawMode(0);
+			oldBlobIdent = new BlobIdent(oldCommit.name(), treeWalk.getPathString(), treeWalk.getRawMode(0));
 		} else {
+			oldBlobIdent = new BlobIdent(oldCommit.name(), null, FileMode.TREE.getBits());
 			changeType = DiffEntry.ChangeType.ADD;
 		}
 		
-		BlobIdent newBlobIdent = new BlobIdent();
-		newBlobIdent.revision = newCommit.name();
+		BlobIdent newBlobIdent;
 		if (!treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-			newBlobIdent.path = treeWalk.getPathString();
-			newBlobIdent.mode = treeWalk.getRawMode(1);
+			newBlobIdent = new BlobIdent(newCommit.name(), treeWalk.getPathString(), treeWalk.getRawMode(1));
 		} else {
+			newBlobIdent = new BlobIdent(newCommit.name(), null, FileMode.TREE.getBits());
 			changeType = DiffEntry.ChangeType.DELETE;
 		}
 		

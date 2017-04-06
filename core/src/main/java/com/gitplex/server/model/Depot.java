@@ -1016,4 +1016,22 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		}
 	}
 
+	public int getMode(String revision, @Nullable String path) {
+		if (path != null) {
+			RevCommit commit = getRevCommit(revision);
+			try {
+				TreeWalk treeWalk = TreeWalk.forPath(getRepository(), path, commit.getTree());
+				if (treeWalk != null) {
+					return treeWalk.getRawMode(0);
+				} else {
+					throw new ObjectNotFoundException("Unable to find blob path '" + path
+							+ "' in revision '" + revision + "'");
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return FileMode.TREE.getBits();
+		}
+	}
 }

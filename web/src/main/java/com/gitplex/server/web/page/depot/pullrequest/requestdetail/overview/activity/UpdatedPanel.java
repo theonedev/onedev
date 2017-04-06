@@ -122,8 +122,8 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 
-				DepotBlobPage.State browseState = new DepotBlobPage.State();
-				browseState.blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
+				BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
+				DepotBlobPage.State browseState = new DepotBlobPage.State(blobIdent);
 				params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
 				item.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 				

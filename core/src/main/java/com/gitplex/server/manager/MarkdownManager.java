@@ -1,6 +1,6 @@
 package com.gitplex.server.manager;
 
-import com.vladsch.flexmark.util.options.MutableDataHolder;
+import javax.annotation.Nullable;
 
 public interface MarkdownManager {
 	
@@ -9,12 +9,11 @@ public interface MarkdownManager {
 	 * 
 	 * @param markdown
 	 * 			markdown to be rendered
-	 * @param postProcess
-	 * 			whether or not to post-process rendered html
+	 * 			
 	 * @return
 	 * 			rendered html
 	 */
-	String render(String markdown, boolean postProcess);
+	String render(String markdown, @Nullable String baseUrl, boolean postProcess);
 
 	/**
 	 * Sanitize and transform specified html.
@@ -36,7 +35,5 @@ public interface MarkdownManager {
 	 * 			escaped markdown plain text
 	 */
 	String escape(String markdown);
-	
-	MutableDataHolder getOptions();
 	
 }

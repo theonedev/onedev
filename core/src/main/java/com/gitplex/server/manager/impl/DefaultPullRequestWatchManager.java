@@ -124,7 +124,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			if (markdown != null) {
-				String html = markdownManager.render(markdown, false);
+				String html = markdownManager.render(markdown, null, false);
 				mentionUsers.addAll(new MentionParser().parseMentions(html));
 				for (Account mention: mentionUsers) {
 					watch(request, mention, "You are set to watch this pull request as you are mentioned in code comment.");

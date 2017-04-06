@@ -187,7 +187,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		if (event.getMarkdown() != null) {
 			CodeComment comment = event.getComment();
 			Collection<Account> mentionedUsers = new HashSet<>();
-			for (Account user: new MentionParser().parseMentions(markdownManager.render(event.getMarkdown(), false))) {
+			for (Account user: new MentionParser().parseMentions(markdownManager.render(event.getMarkdown(), null, false))) {
 				mentionedUsers.add(user);
 			}
 			String subject = "You are mentioned in a code comment on file " + comment.getCommentPos().getPath();

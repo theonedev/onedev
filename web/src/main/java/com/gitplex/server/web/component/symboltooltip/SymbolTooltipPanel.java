@@ -296,17 +296,15 @@ public abstract class SymbolTooltipPanel extends Panel {
 	}
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
-		DepotBlobPage.State state = new DepotBlobPage.State();
-		state.blobIdent.revision = revision;
-		state.blobIdent.path = hit.getBlobPath();
+		BlobIdent blobIdent = new BlobIdent(revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
+		DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 		state.mark = TextRange.of(hit.getTokenPos());
 		return DepotBlobPage.paramsOf(depotModel.getObject(), state);
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
-		DepotBlobPage.State state = new DepotBlobPage.State();
-		state.blobIdent.revision = revision;
-		state.blobIdent.path = getBlobPath();
+		BlobIdent blobIdent = new BlobIdent(revision, getBlobPath(), FileMode.REGULAR_FILE.getBits());
+		DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 		state.query = symbolName;
 		return DepotBlobPage.paramsOf(depotModel.getObject(), state);
 	}

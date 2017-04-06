@@ -4,7 +4,9 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
@@ -15,13 +17,13 @@ public class BranchLink extends ViewStateAwarePageLink<Void> {
 	private final DepotAndBranch depotAndBranch;
 	
 	public BranchLink(String id, DepotAndBranch depotAndBranch) {
-		super(id, DepotBlobPage.class, getPageParams(depotAndBranch));
+		super(id, DepotBlobPage.class, paramsOf(depotAndBranch));
 		this.depotAndBranch = depotAndBranch;
 	}
 	
-	private static PageParameters getPageParams(DepotAndBranch depotAndBranch) {
-		DepotBlobPage.State state = new DepotBlobPage.State();
-		state.blobIdent.revision = depotAndBranch.getBranch();
+	private static PageParameters paramsOf(DepotAndBranch depotAndBranch) {
+		BlobIdent blobIdent = new BlobIdent(depotAndBranch.getBranch(), null, FileMode.TREE.getBits());
+		DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 		return DepotBlobPage.paramsOf(depotAndBranch.getDepot(), state);
 	}
 

@@ -39,6 +39,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -46,6 +47,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.gitplex.server.GitPlex;
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.BranchWatchManager;
@@ -416,8 +418,8 @@ public class DepotBranchesPage extends DepotPage {
 				RefInfo ref = item.getModelObject();
 				String branch = GitUtils.ref2branch(ref.getRef().getName());
 				
-				DepotBlobPage.State state = new DepotBlobPage.State();
-				state.blobIdent.revision = branch;
+				BlobIdent blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
+				DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 				AbstractLink link = new ViewStateAwarePageLink<Void>("branchLink", 
 						DepotBlobPage.class, DepotBlobPage.paramsOf(getDepot(), state));
 				link.add(new Label("name", branch));

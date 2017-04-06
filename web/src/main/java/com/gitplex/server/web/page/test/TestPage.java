@@ -1,9 +1,8 @@
 package com.gitplex.server.web.page.test;
 
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.Model;
 
-import com.gitplex.server.web.component.markdown.MarkdownEditor;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -13,19 +12,14 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new MarkdownEditor("markdownEditor", Model.of(""), false) {
+		add(new MarkdownViewer("markdown", Model.of("abc [child](img/child.png)"), null) {
 
 			@Override
-			protected String getAutosaveKey() {
-				return "test";
+			protected String getBaseUrl() {
+				return "/hello";
 			}
 			
 		});
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
 	}
 
 }

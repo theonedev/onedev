@@ -112,9 +112,9 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		super.onInitialize();
 		
 		add(new CommitMessageLabel("text", depotModel, Model.of(getCommit().getShortMessage())));
-		
-		DepotBlobPage.State browseState = new DepotBlobPage.State();
-		browseState.blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
+
+		BlobIdent blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
+		DepotBlobPage.State browseState = new DepotBlobPage.State(blobIdent);
 		PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
 		add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 		
@@ -178,8 +178,8 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 						String ref = item.getModelObject().getRef().getName();
 						String branch = GitUtils.ref2branch(ref); 
 						if (branch != null) {
-							DepotBlobPage.State state = new DepotBlobPage.State();
-							state.blobIdent.revision = branch;
+							BlobIdent blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
+							DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 							Link<Void> link = new ViewStateAwarePageLink<Void>("link", DepotBlobPage.class, 
 									DepotBlobPage.paramsOf(depotModel.getObject(), state));
 							link.add(new Label("label", branch));
@@ -187,8 +187,8 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 							item.add(AttributeAppender.append("class", "branch"));
 						} else {
 							String tag = Preconditions.checkNotNull(GitUtils.ref2tag(ref));
-							DepotBlobPage.State state = new DepotBlobPage.State();
-							state.blobIdent.revision = tag;
+							BlobIdent blobIdent = new BlobIdent(tag, null, FileMode.TREE.getBits());
+							DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
 							Link<Void> link = new ViewStateAwarePageLink<Void>("link", DepotBlobPage.class, 
 									DepotBlobPage.paramsOf(depotModel.getObject(), state));
 							link.add(new Label("label", tag));
