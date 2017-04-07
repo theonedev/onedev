@@ -23,6 +23,7 @@ import com.gitplex.server.util.markdown.UrlResolveExtension;
 import com.google.common.base.Preconditions;
 import com.vladsch.flexmark.Extension;
 import com.vladsch.flexmark.ast.Node;
+import com.vladsch.flexmark.ext.anchorlink.AnchorLinkExtension;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.definition.DefinitionExtension;
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
@@ -94,6 +95,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		Preconditions.checkArgument(baseUrl == null || baseUrl.startsWith("/"));
 		
 		List<Extension> extensions = new ArrayList<>();
+		extensions.add(AnchorLinkExtension.create());
 		extensions.add(TablesExtension.create());
 		extensions.add(TaskListExtension.create());
 		extensions.add(DefinitionExtension.create());
@@ -102,9 +104,15 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		extensions.add(new UrlResolveExtension());
 		extensions.addAll(contributedExtensions);
 
-		MutableDataHolder options = new MutableDataSet();
-		options.set(Parser.SPACE_IN_LINK_URLS, true).setFrom(ParserEmulationProfile.GITHUB_DOC)
-				.set(TablesExtension.COLUMN_SPANS, false).set(TablesExtension.APPEND_MISSING_COLUMNS, true)
+		MutableDataHolder options = new MutableDataSet()
+				.set(HtmlRenderer.GENERATE_HEADER_ID, true)
+				.set(AnchorLinkExtension.ANCHORLINKS_SET_NAME, true)
+				.set(AnchorLinkExtension.ANCHORLINKS_ANCHOR_CLASS, "header-anchor")
+				.set(AnchorLinkExtension.ANCHORLINKS_TEXT_SUFFIX, "<i class='fa fa-link'></i>")
+				.set(Parser.SPACE_IN_LINK_URLS, true)
+				.setFrom(ParserEmulationProfile.GITHUB_DOC)
+				.set(TablesExtension.COLUMN_SPANS, false)
+				.set(TablesExtension.APPEND_MISSING_COLUMNS, true)
 				.set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
 				.set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
 				.set(UrlResolveExtension.BASE_URL, baseUrl)

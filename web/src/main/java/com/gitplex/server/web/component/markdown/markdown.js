@@ -841,20 +841,6 @@ gitplex.server.markdown = {
 	initRendered: function($rendered) {
 		gitplex.server.highlight($rendered);
 
-		$rendered.find("h1, h2, h3, h4, h5, h6").each(function() {
-			var $this = $(this);
-			var $anchor = $this.find(">a[name]");
-			if ($anchor.length != 0) {
-				$this.addClass("permalinked").append($anchor.html());
-				$anchor.empty();
-				$this.append("<a href='#" + $anchor.attr("name") + "' class='permalink'><i class='fa fa-link'></i></a>");
-			} else {
-				var anchorName = encodeURIComponent($this.text());
-				$this.addClass("permalinked").prepend("<a name='" + anchorName + "'></a>");
-				$this.append("<a href='#" + anchorName + "' class='permalink'><i class='fa fa-link'></i></a>");
-			}
-		});
-		
 		$rendered.find("a").click(function() {
 			gitplex.server.viewState.getFromViewAndSetToHistory();
 		});
@@ -916,7 +902,9 @@ gitplex.server.markdown = {
     	if (isImage)
     		message = "!" + message;
     	
-    	gitplex.server.markdown.updateUploadMessage($input, message, replaceMessage);
+    	// Use range instead of caret here to avoid scrolling to bottom in Chrome
+    	$input.range(message);
+    	
     	if (!name) {
     		var offset = isImage?2:1;
     		$input.range($input.caret()-message.length+offset, $input.caret()-message.length+defaultDescription.length+offset);

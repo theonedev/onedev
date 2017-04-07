@@ -62,6 +62,8 @@ public class DefaultJettyRunner implements JettyRunner, Provider<ServletContextH
         servletContextHandler.setErrorHandler(new ErrorPageErrorHandler());
         servletContextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
+        servletContextHandler.getSessionHandler().getSessionManager().setSessionIdPathParameterName(null);
+        
         /*
          * By default contributions is in reverse dependency order. We reverse the order so that 
          * servlet and filter contributions in dependency plugins comes first. 

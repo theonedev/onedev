@@ -204,6 +204,11 @@
         </dependency>
         <dependency>
         	<groupId>com.vladsch.flexmark</groupId>
+        	<artifactId>flexmark-ext-anchorlink</artifactId>
+        	<version>${flexmark.version}</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.vladsch.flexmark</groupId>
         	<artifactId>flexmark-ext-definition</artifactId>
         	<version>${flexmark.version}</version>
         </dependency>

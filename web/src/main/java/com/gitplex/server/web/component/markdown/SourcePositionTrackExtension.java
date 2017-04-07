@@ -35,24 +35,26 @@ public class SourcePositionTrackExtension implements HtmlRenderer.HtmlRendererEx
 							int startOffset = node.getStartOffset();
 							int endOffset = node.getEndOffset();
 							Node document = node.getDocument();
-							int leadingWhitespaces = 0;
-							for (int i=startOffset; i<endOffset; i++) {
-								if (Character.isWhitespace(document.getChars().charAt(i))) {
-									leadingWhitespaces++;
-								} else {
-									break;
+							if (document != null) {
+								int leadingWhitespaces = 0;
+								for (int i=startOffset; i<endOffset; i++) {
+									if (Character.isWhitespace(document.getChars().charAt(i))) {
+										leadingWhitespaces++;
+									} else {
+										break;
+									}
 								}
-							}
-							int trailingWhitespaces = 0;
-							for (int i=endOffset-1; i>=startOffset; i--) {
-								if (Character.isWhitespace(document.getChars().charAt(i))) {
-									trailingWhitespaces++;
-								} else {
-									break;
+								int trailingWhitespaces = 0;
+								for (int i=endOffset-1; i>=startOffset; i--) {
+									if (Character.isWhitespace(document.getChars().charAt(i))) {
+										trailingWhitespaces++;
+									} else {
+										break;
+									}
 								}
+								attributes.addValue("data-" + DATA_START_ATTRIBUTE, String.valueOf(startOffset+leadingWhitespaces));
+								attributes.addValue("data-" + DATA_END_ATTRIBUTE, String.valueOf(endOffset-trailingWhitespaces));
 							}
-							attributes.addValue("data-" + DATA_START_ATTRIBUTE, String.valueOf(startOffset+leadingWhitespaces));
-							attributes.addValue("data-" + DATA_END_ATTRIBUTE, String.valueOf(endOffset-trailingWhitespaces));
 						}
 					}
 					

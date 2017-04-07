@@ -261,33 +261,33 @@
 .markdown-rendered .task-list-item input {
 	margin-right: 8px;
 }
-.markdown-rendered .permalinked a.permalink {
+.markdown-rendered .header-anchor>i {
 	display: none;
 }
-.markdown-rendered .permalinked:hover a.permalink {
+.markdown-rendered .header-anchor:hover>i {
 	display: inline;
 }
-.markdown-rendered h1.permalinked a.permalink {
+.markdown-rendered h1 .header-anchor>i {
 	margin-left: 12px;
 	font-size: 24px;
 }
-.markdown-rendered h2.permalinked a.permalink {
+.markdown-rendered h2 .header-anchor>i {
 	margin-left: 10px;
 	font-size: 20px;
 }
-.markdown-rendered h3.permalinked a.permalink {
+.markdown-rendered h3 .header-anchor>i {
 	margin-left: 8px;
 	font-size: 16px;
 }
-.markdown-rendered h4.permalinked a.permalink {
+.markdown-rendered h4 .header-anchor>i {
 	margin-left: 6px;
 	font-size: 14px;
 }
-.markdown-rendered h5.permalinked a.permalink {
+.markdown-rendered h5 .header-anchor>i {
 	margin-left: 4px;
 	font-size: 12px;
 }
-.markdown-rendered h6.permalinked a.permalink {
+.markdown-rendered h6 .header-anchor>i {
 	margin-left: 2px;
 	font-size: 10px;
 }
