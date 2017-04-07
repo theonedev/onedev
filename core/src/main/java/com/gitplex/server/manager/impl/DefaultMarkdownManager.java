@@ -19,7 +19,7 @@ import org.jsoup.safety.Whitelist;
 
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.util.markdown.HtmlTransformer;
-import com.gitplex.server.util.markdown.RelativeUrlResolveExtension;
+import com.gitplex.server.util.markdown.UrlResolveExtension;
 import com.google.common.base.Preconditions;
 import com.vladsch.flexmark.Extension;
 import com.vladsch.flexmark.ast.Node;
@@ -99,7 +99,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		extensions.add(DefinitionExtension.create());
 		extensions.add(TocExtension.create());
 		extensions.add(AutolinkExtension.create());
-		extensions.add(new RelativeUrlResolveExtension());
+		extensions.add(new UrlResolveExtension());
 		extensions.addAll(contributedExtensions);
 
 		MutableDataHolder options = new MutableDataSet();
@@ -107,7 +107,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 				.set(TablesExtension.COLUMN_SPANS, false).set(TablesExtension.APPEND_MISSING_COLUMNS, true)
 				.set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
 				.set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
-				.set(RelativeUrlResolveExtension.BASE_URL, baseUrl)
+				.set(UrlResolveExtension.BASE_URL, baseUrl)
 				.set(Parser.EXTENSIONS, extensions);
 
 		Parser parser = Parser.builder(options).build();

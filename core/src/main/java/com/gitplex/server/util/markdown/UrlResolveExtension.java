@@ -20,7 +20,7 @@ import com.vladsch.flexmark.util.options.DataHolder;
 import com.vladsch.flexmark.util.options.DataKey;
 import com.vladsch.flexmark.util.options.MutableDataHolder;
 
-public class RelativeUrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
+public class UrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
 	
     public static final DataKey<String> BASE_URL = new DataKey<>("BASE_URL", (String)null);
     
@@ -74,7 +74,7 @@ public class RelativeUrlResolveExtension implements HtmlRenderer.HtmlRendererExt
     }
     
     private String resolveUrl(String baseUrl, String urlToResolve) {
-    	if (urlToResolve.contains(":") || urlToResolve.startsWith("/")) {
+    	if (urlToResolve.contains(":") || urlToResolve.startsWith("/") || urlToResolve.startsWith("#")) {
     		return urlToResolve;
     	} else {
         	Path resolvedPath = Paths.get(baseUrl).resolveSibling(urlToResolve);

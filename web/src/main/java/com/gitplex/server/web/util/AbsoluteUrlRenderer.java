@@ -15,26 +15,7 @@ public class AbsoluteUrlRenderer extends UrlRenderer {
 	}
 
 	@Override
-	public String renderUrl(Url url) {
-		String renderedUrl;
-		if (shouldRenderAsFull(url)) {
-			if (!(url.isFull() || url.isContextAbsolute())) {
-				String relativeUrl = renderRelativeUrl(url);
-				Url relative = Url.parse(relativeUrl, url.getCharset());
-				relative.setHost(url.getHost());
-				relative.setPort(url.getPort());
-				relative.setProtocol(url.getProtocol());
-				renderedUrl = renderFullUrl(relative);
-			} else {
-				renderedUrl = renderFullUrl(url);
-			}
-		} else {
-			renderedUrl = renderAbsoluteUrl(url);
-		}
-		return renderedUrl;
-	}
-
-	private String renderAbsoluteUrl(Url url) {
+	public String renderRelativeUrl(Url url) {
 		if (url.isFull()) {
 			return url.toString();
 		} else if (url.getSegments().isEmpty()) {
