@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0-EAP-build41</version> 
+        <version>1.0-EAP-build42</version> 
     </parent>  
     <build> 
         <plugins> 
