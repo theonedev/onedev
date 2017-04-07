@@ -785,7 +785,8 @@ gitplex.server.markdown = {
 			if (autosaveValue) {
 				$input.val(autosaveValue);
 				$warning.show();		
-				gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
+				if (!$resizeHandles.is(":visible"))
+					gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
 				gitplex.server.markdown.fireInputEvent($input);
 			}
 		}
@@ -879,6 +880,7 @@ gitplex.server.markdown = {
 		var $edit = $body.children(".edit");
 		var $input = $edit.children("textarea");
 		var $emojis = $container.children(".emojis");
+		var $resizeHandles = $container.find(".ui-resizable-handle");
 		
 		var contentHtml = "";
 		for (var i in emojis) {
@@ -895,7 +897,8 @@ gitplex.server.markdown = {
 			$input.caret(":" + $(this).attr("title") + ": ");
 			gitplex.server.markdown.fireInputEvent($input);
 		});
-		gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
+		if (!$resizeHandles.is(":visible"))
+			gitplex.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
 	},
 	insertUrl: function(containerId, isImage, url, name, replaceMessage) {
 		var $head = $("#" + containerId + ">.head");
