@@ -144,13 +144,17 @@ public class RevListCommand extends GitCommand<List<String>> {
     public List<String> call() {
         Commandline cmd = cmd();
         cmd.addArgs("rev-list");
-        
+
+        boolean hasRevisions = false;
         if (!revisions.isEmpty()) {
-        	for (String revision: revisions)
+        	for (String revision: revisions) {
         		cmd.addArgs(revision);
-        } else {
+        		if (!revision.startsWith("^"))
+        			hasRevisions = true;
+        	}
+        } 
+        if (!hasRevisions)
         	cmd.addArgs("--branches");
-        }
         
         if (before != null) 
         	cmd.addArgs("--before", before);

@@ -191,8 +191,8 @@ public abstract class BlobViewPanel extends Panel {
 		})));
 
 		DepotCommitsPage.State state = new DepotCommitsPage.State();
-		state.setCompareWith(context.getCommit().name());
-		state.setQuery(String.format("path(%s)", context.getBlobIdent().path));
+		state.compareWith = context.getCommit().name();
+		state.query = String.format("path(%s)", context.getBlobIdent().path);
 		add(new ViewStateAwarePageLink<>("history", DepotCommitsPage.class, 
 				DepotCommitsPage.paramsOf(context.getDepot(), state)));
 		

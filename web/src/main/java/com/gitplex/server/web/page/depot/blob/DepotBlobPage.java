@@ -437,9 +437,9 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		});
 
 		DepotCommitsPage.State commitsState = new DepotCommitsPage.State();
-		commitsState.setCompareWith(resolvedRevision.name());
+		commitsState.compareWith = resolvedRevision.name();
 		if (state.blobIdent.path != null)
-			commitsState.setQuery(String.format("path(%s)", DepotBlobPage.this.state.blobIdent.path));
+			commitsState.query = String.format("path(%s)", DepotBlobPage.this.state.blobIdent.path);
 		blobOperations.add(new ViewStateAwarePageLink<Void>("history", DepotCommitsPage.class, 
 				DepotCommitsPage.paramsOf(getDepot(), commitsState)) {
 

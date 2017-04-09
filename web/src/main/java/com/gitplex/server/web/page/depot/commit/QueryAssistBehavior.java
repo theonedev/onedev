@@ -51,7 +51,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, int count) {
+	protected List<InputSuggestion> suggest(ParentedElement expectedElement, String matchWith, int count) {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value")) {
@@ -121,7 +121,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "value needs to be enclosed in brackets";
+						return "value needs to be enclosed in parenthesis";
 					}
 					
 				}.suggest(expectedElement.getSpec(), matchWith, count);
@@ -144,7 +144,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 				} else if (tokenType == CommitQueryParser.PATH) {
 					hints.add("Use * to match any part of path");
 				} else if (tokenType == CommitQueryParser.MESSAGE) {
-					hints.add("Git log basic regular expression is accepted here");
+					hints.add("Use * to match any part of message");
 					hints.add("Use '\\\\' to escape special characters in regular expression");
 					hints.add("Use '\\(' and '\\)' to represent brackets in message");
 				}
@@ -166,14 +166,8 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 			String suggestedLiteral, boolean complete) {
 		String description;
 		switch (suggestedLiteral) {
-		case "branch": 
-			description = "commits of branch";
-			break;
-		case "tag":
-			description = "commits of tag";
-			break;
-		case "id":
-			description = "commits of hash";
+		case "revision":
+			description = "any revision string"; 
 			break;
 		case "committer":
 			description = "committed by";
@@ -192,13 +186,6 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 			break;
 		case "path":
 			description = "touching specified path";
-			break;
-		case "^":
-			description = "exclude revision";
-			break;
-		case "..":
-		case "...":
-			description = "revision range";
 			break;
 		case " ":
 			description = "space";

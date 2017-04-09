@@ -10,8 +10,10 @@ import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -63,15 +65,17 @@ import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.commit.CommitQueryParser.CriteriaContext;
+import com.gitplex.server.web.page.depot.commit.CommitQueryParser.FuzzyCriteriaContext;
 import com.gitplex.server.web.page.depot.commit.CommitQueryParser.QueryContext;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.util.ajaxlistener.IndicateLoadingListener;
 import com.gitplex.server.web.util.model.CommitRefsModel;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import jersey.repackaged.com.google.common.collect.Lists;
+import jersey.repackaged.com.google.common.base.Joiner;
 
 @SuppressWarnings("serial")
 public class DepotCommitsPage extends DepotPage {
@@ -100,6 +104,8 @@ public class DepotCommitsPage extends DepotPage {
 	
 	private Form<?> queryForm;
 	
+	private transient Optional<QueryContext> queryContext;
+	
 	private RepeatingView commitsView;
 	
 	private NotificationPanel feedback;
@@ -116,7 +122,56 @@ public class DepotCommitsPage extends DepotPage {
 			try {
 				RevListCommand command = new RevListCommand(getDepot().getDirectory());
 				command.ignoreCase(true);
-				state.applyTo(command);
+				
+				if (state.page > MAX_STEPS)
+					throw new RuntimeException("Step should be no more than " + MAX_STEPS);
+				
+				command.count(state.page*COUNT);
+
+				QueryContext queryContext = getQueryContext();
+				if (queryContext != null) {
+					for (CriteriaContext criteria: queryContext.criteria()) {
+						if (criteria.authorCriteria() != null) {
+							String value = criteria.authorCriteria().Value().getText();
+							value = StringUtils.replace(JavaEscape.unescapeJava(removeParens(value)), "*", ".*");
+							command.authors().add(value);
+						} else if (criteria.committerCriteria() != null) {
+							String value = criteria.committerCriteria().Value().getText();
+							value = StringUtils.replace(JavaEscape.unescapeJava(removeParens(value)), "*", ".*");
+							command.committers().add(value);
+						} else if (criteria.pathCriteria() != null) {
+							command.paths().add(removeParens(criteria.pathCriteria().Value().getText()));
+						} else if (criteria.beforeCriteria() != null) {
+							command.before(removeParens(criteria.beforeCriteria().Value().getText()));
+						} else if (criteria.afterCriteria() != null) {
+							command.after(removeParens(criteria.afterCriteria().Value().getText()));
+						} 
+					}
+					command.messages(getMessages(queryContext));
+					
+					boolean ranged = false;
+					for (Revision revision: getRevisions(queryContext)) {
+						if (revision.since) {
+							command.revisions().add("^" + revision.value);
+							ranged = true;
+						} else if (revision.until) {
+							command.revisions().add(revision.value);
+							ranged = true;
+						} else if (getDepot().getBranchRef(revision.value) != null) {
+							ranged = true;
+							command.revisions().add(revision.value);
+						} else {
+							command.revisions().add(revision.value);
+						}
+					}
+					if (command.revisions().size() == 1 && !ranged) {
+						command.count(1);
+					}
+				}
+				
+				if (command.revisions().isEmpty() && state.compareWith != null)
+					command.revisions(Lists.newArrayList(state.compareWith));
+				
 				commitHashes = GitPlex.getInstance(WorkExecutor.class).submit(new PrioritizedCallable<List<String>>(LOG_PRIORITY) {
 
 					@Override
@@ -134,10 +189,10 @@ public class DepotCommitsPage extends DepotPage {
 				}
 			}
 			
-			hasMore = commitHashes.size() == state.getStep()*COUNT;
+			hasMore = commitHashes.size() == state.page*COUNT;
 			
 			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
-				int lastMaxCount = (state.getStep()-1)*COUNT;
+				int lastMaxCount = (state.page-1)*COUNT;
 
 				commits.last = new ArrayList<>();
 				
@@ -169,7 +224,11 @@ public class DepotCommitsPage extends DepotPage {
 	public DepotCommitsPage(PageParameters params) {
 		super(params);
 		
-		state = new State(params);
+		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();
+		state.query = params.get(PARAM_QUERY).toString();
+		Integer step = params.get(PARAM_STEP).toOptionalInteger();
+		if (step != null)
+			state.page = step.intValue();		
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -185,6 +244,8 @@ public class DepotCommitsPage extends DepotPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		TextField<String> queryInput = new TextField<String>("input", Model.of(state.query));
+		
 		queryForm = new Form<Void>("query") {
 
 			@Override
@@ -193,14 +254,16 @@ public class DepotCommitsPage extends DepotPage {
 
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				try {
-					state.getParseTree(); // validate query
+					String query = queryInput.getModelObject();
+					queryContext = Optional.fromNullable(parse(query)); // validate query
+					state.query = query;
 					updateCommits(target);
 				} catch (Exception e) {
-					logger.error("Error parsing commit query string: " + state.getQuery(), e);
+					logger.error("Error parsing commit query string: " + state.query, e);
 					if (StringUtils.isNotBlank(e.getMessage()))
 						error(e.getMessage());
 					else
-						error("Syntax error");
+						error("Malformed commit query");
 					target.add(feedback);
 				}
 			}
@@ -213,23 +276,8 @@ public class DepotCommitsPage extends DepotPage {
 			}
 
 		};
-		queryForm.add(new TextField<String>("input", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return state.getQuery();
-			}
-
-			@Override
-			public void setObject(String object) {
-				state.setQuery(object);
-			}
-			
-		}).add(new QueryAssistBehavior(depotModel)));
+		
+		queryForm.add(queryInput.add(new QueryAssistBehavior(depotModel)));
 		
 		queryForm.add(new AjaxButton("submit") {});
 		queryForm.setOutputMarkupId(true);
@@ -265,7 +313,7 @@ public class DepotCommitsPage extends DepotPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				state.setStep(state.getStep()+1);
+				state.page = state.page+1;
 				
 				Commits commits = commitsModel.getObject();
 				int commitIndex = 0;
@@ -314,7 +362,7 @@ public class DepotCommitsPage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(hasMore && state.getStep() < MAX_STEPS);
+				setVisible(hasMore && state.page < MAX_STEPS);
 			}
 			
 		});
@@ -323,7 +371,7 @@ public class DepotCommitsPage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(state.getStep() == MAX_STEPS);
+				setVisible(state.page == MAX_STEPS);
 			}
 			
 		});
@@ -331,7 +379,7 @@ public class DepotCommitsPage extends DepotPage {
 	}
 	
 	private void updateCommits(AjaxRequestTarget target) {
-		state.setStep(1);
+		state.page = 1;
 
 		target.add(feedback);
 		body.replace(commitsView = newCommitsView());
@@ -388,16 +436,10 @@ public class DepotCommitsPage extends DepotPage {
 				@Override
 				protected List<Pattern> load() {
 					List<Pattern> patterns =  new ArrayList<>();
-					QueryContext parseTree = state.getParseTree();
-					if (parseTree != null) {
-						for (CriteriaContext criteria: parseTree.criteria()) {
-							if (criteria.message() != null) {
-								String message = criteria.message().Value().getText();
-								message = message.substring(1);
-								message = message.substring(0, message.length()-1);
-								message = JavaEscape.unescapeJava(message);
-								patterns.add(Pattern.compile(message, Pattern.CASE_INSENSITIVE));
-							}
+					QueryContext queryContext = getQueryContext();
+					if (queryContext != null) {
+						for (String message: getMessages(queryContext)) {
+							patterns.add(Pattern.compile(message, Pattern.CASE_INSENSITIVE));
 						}
 					}
 					return patterns;
@@ -423,11 +465,11 @@ public class DepotCommitsPage extends DepotPage {
 			 */
 			String path = null;
 			
-			QueryContext parseTree = state.getParseTree();
-			if (parseTree != null) {
-				for (CriteriaContext criteria: parseTree.criteria()) {
-					if (criteria.path() != null) {
-						String value = criteria.path().Value().getText();
+			QueryContext queryContext = getQueryContext();
+			if (queryContext != null) {
+				for (CriteriaContext criteria: queryContext.criteria()) {
+					if (criteria.pathCriteria() != null) {
+						String value = criteria.pathCriteria().Value().getText();
 						value = value.substring(1);
 						value = value.substring(0, value.length()-1);
 						if (value.contains("*") || path != null) {
@@ -450,10 +492,10 @@ public class DepotCommitsPage extends DepotPage {
 			PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
 			item.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 			
-			if (state.getCompareWith() != null) {
+			if (state.compareWith != null) {
 				RevisionComparePage.State compareState = new RevisionComparePage.State();
 				compareState.leftSide = new DepotAndRevision(getDepot(), commit.name());
-				compareState.rightSide = new DepotAndRevision(getDepot(), DepotCommitsPage.this.state.getCompareWith());
+				compareState.rightSide = new DepotAndRevision(getDepot(), state.compareWith);
 				compareState.pathFilter = path;
 				compareState.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 				
@@ -485,12 +527,12 @@ public class DepotCommitsPage extends DepotPage {
 	
 	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
-		if (state.getCompareWith() != null)
-			params.set(PARAM_COMPARE_WITH, state.getCompareWith());
-		if (state.getQuery() != null)
-			params.set(PARAM_QUERY, state.getQuery());
-		if (state.getStep() != 1)
-			params.set(PARAM_STEP, state.getStep());
+		if (state.compareWith != null)
+			params.set(PARAM_COMPARE_WITH, state.compareWith);
+		if (state.query != null)
+			params.set(PARAM_QUERY, state.query);
+		if (state.page != 1)
+			params.set(PARAM_STEP, state.page);
 		return params;
 	}
 	
@@ -571,90 +613,118 @@ public class DepotCommitsPage extends DepotPage {
 		List<RevCommit> current;
 	}
 	
+	private String removeParens(String value) {
+		if (value.startsWith("("))
+			value = value.substring(1);
+		if (value.endsWith(")"))
+			value = value.substring(0, value.length()-1);
+		return value;
+	}
+	
+	private List<String> getMessages(QueryContext queryContext) {
+		List<String> messages = new ArrayList<>();
+		List<String> fuzzyMessages = new ArrayList<>();
+		for (CriteriaContext criteria: queryContext.criteria()) {
+			if (criteria.messageCriteria() != null) {
+				String message = JavaEscape.unescapeJava(removeParens(criteria.messageCriteria().Value().getText()));
+				messages.add(StringUtils.replace(message, "*", ".*"));
+			} else {
+				FuzzyCriteriaContext fuzzyCriteria = criteria.fuzzyCriteria();
+				if (fuzzyCriteria != null && fuzzyCriteria.UNTIL() == null 
+						&& fuzzyCriteria.SINCE() == null 
+						&& getDepot().getObjectId(fuzzyCriteria.getText(), false) == null) {
+					fuzzyMessages.add(fuzzyCriteria.getText());
+				}
+			}
+		}
+		if (!fuzzyMessages.isEmpty()) 
+			messages.add(Joiner.on(".*").join(fuzzyMessages));
+		return messages;
+	}
+	
+	private List<Revision> getRevisions(QueryContext queryContext) {
+		List<Revision> revisions = new ArrayList<>();
+		for (CriteriaContext criteria: queryContext.criteria()) {
+			if (criteria.revisionCriteria() != null) {
+				Revision revision = new Revision();
+				revision.value = removeParens(criteria.revisionCriteria().Value().getText());
+				if (criteria.revisionCriteria().SINCE() != null)
+					revision.since = true;
+				else if (criteria.revisionCriteria().UNTIL() != null)
+					revision.until = true;
+				revisions.add(revision);
+			} else {
+				FuzzyCriteriaContext fuzzyCriteria = criteria.fuzzyCriteria();
+				if (fuzzyCriteria != null && getDepot().getObjectId(fuzzyCriteria.FuzzyValue().getText(), false) != null) {
+					Revision revision = new Revision();
+					revision.value = fuzzyCriteria.FuzzyValue().getText();
+					if (fuzzyCriteria.SINCE() != null)
+						revision.since = true;
+					else if (fuzzyCriteria.UNTIL() != null)
+						revision.until = true;
+					revisions.add(revision);
+				}
+			}
+		}
+		return revisions;
+	}
+	
+	@Nullable
+	private QueryContext getQueryContext() {
+		if (queryContext == null)
+			queryContext = Optional.fromNullable(parse(state.query));
+		return queryContext.orNull();
+	}
+	
+	@Nullable
+	private QueryContext parse(@Nullable String query) {
+		if (query != null) {
+			ANTLRInputStream is = new ANTLRInputStream(query); 
+			CommitQueryLexer lexer = new CommitQueryLexer(is);
+			lexer.removeErrorListeners();
+			lexer.addErrorListener(new BaseErrorListener() {
+
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+						int charPositionInLine, String msg, RecognitionException e) {
+					if (e != null) {
+						logger.error("Error lexing commit query", e);
+					} else if (msg != null) {
+						logger.error("Error lexing commit query: " + msg);
+					}
+					throw new RuntimeException("Malformed commit query");
+				}
+				
+			});
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			CommitQueryParser parser = new CommitQueryParser(tokens);
+			parser.removeErrorListeners();
+			parser.setErrorHandler(new BailErrorStrategy());
+			return parser.query();
+		} else {
+			return null;
+		}
+	}
+	
 	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 
-		private String compareWith;
+		public String compareWith;
 		
-		private String query;
+		public String query;
 		
-		private int step = 1;
-		
-		private transient Optional<QueryContext> parseTree;
-		
-		public State() {
-		}
-		
-		public State(PageParameters params) {
-			compareWith = params.get(PARAM_COMPARE_WITH).toString();
-			query = params.get(PARAM_QUERY).toString();
-			
-			Integer step = params.get(PARAM_STEP).toOptionalInteger();
-			if (step != null)
-				this.step = step.intValue();		
-		}
-
-		public String getCompareWith() {
-			return compareWith;
-		}
-
-		public void setCompareWith(String compareWith) {
-			this.compareWith = compareWith;
-		}
-
-		public String getQuery() {
-			return query;
-		}
-
-		public void setQuery(String query) {
-			this.query = query;
-			parseTree = null;
-		}
-
-		public int getStep() {
-			return step;
-		}
-
-		public void setStep(int step) {
-			this.step = step;
-		}
-		
-		@Nullable
-		public QueryContext getParseTree() {
-			if (parseTree == null) {
-				if (query != null) {
-					ANTLRInputStream is = new ANTLRInputStream(query); 
-					CommitQueryLexer lexer = new CommitQueryLexer(is);
-					lexer.removeErrorListeners();
-					CommonTokenStream tokens = new CommonTokenStream(lexer);
-					CommitQueryParser parser = new CommitQueryParser(tokens);
-					parser.removeErrorListeners();
-					parser.setErrorHandler(new BailErrorStrategy());
-					parseTree = Optional.of(parser.query());
-				} else {
-					parseTree = Optional.fromNullable(null);
-				}
-			}
-			return parseTree.orNull();
-		}
-		
-		public void applyTo(RevListCommand command) {
-			if (step > MAX_STEPS)
-				throw new RuntimeException("Step should be no more than " + MAX_STEPS);
-			
-			command.count(step*COUNT);
-
-			QueryContext parseTree = getParseTree();
-			if (parseTree != null) { 
-				new ParseTreeWalker().walk(new RevListCommandFiller(command), parseTree);
-				if (command.revisions().isEmpty() && compareWith != null)
-					command.revisions(Lists.newArrayList(compareWith));
-			} else if (compareWith != null) {
-				command.revisions(Lists.newArrayList(compareWith));
-			}
-		}
+		public int page = 1;
 		
 	}
 
+	private static class Revision implements Serializable {
+		
+		public boolean since;
+		
+		public boolean until;
+		
+		public String value;
+		
+	}
 }
