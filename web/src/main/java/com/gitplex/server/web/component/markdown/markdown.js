@@ -512,7 +512,12 @@ gitplex.server.markdown = {
 				gitplex.server.markdown.autofit(containerId, $(window).width(), $(window).height());
 			}
 		});
-		
+
+		if (!canMentionUser)
+			$head.find(".do-mention").remove();
+		if (!canReferencePullRequest)
+			$head.find(".do-hashtag").remove();
+			
 		$head.find(".do-mention, .do-hashtag").click(function() {
 			if (!$edit.is(":visible")) 
 				return;
