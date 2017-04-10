@@ -39,12 +39,12 @@ abstract class GateKeeperLink extends DropdownLink {
 	}
 
 	@Override
-	protected Component newContent(String id) {
+	protected Component newContent(String id, FloatingPanel dropdown) {
 		return new GateKeeperSelector(id) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
-				closeDropdown();
+				dropdown.close();
 				GateKeeperLink.this.onSelect(target, gateKeeperClass);
 			}
 		};

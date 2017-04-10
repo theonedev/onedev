@@ -46,6 +46,7 @@ import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
@@ -224,7 +225,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		DropdownLink selectedCommitsLink = new DropdownLink("comparingCommits") {
 			
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				AbstractPostAjaxBehavior callbackBehavior = new AbstractPostAjaxBehavior() {
 					
 					@Override
@@ -235,7 +236,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 						target.add(head);
 						newRevisionDiff(target);
 						pushState(target);
-						closeDropdown();
+						dropdown.close();
 					}
 					
 				};

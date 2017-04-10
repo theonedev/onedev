@@ -29,6 +29,21 @@
 	<wicket:fragment wicket:id="outlineNodeFrag">
 		<img wicket:id="icon"></img> <a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>
+	<wicket:fragment wicket:id="outlineSearchFrag">
+	<div class="outline-search">
+		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
+			<h4 class="modal-title">Outline Search</h4>
+		</div>
+		<div class="modal-body">
+			<input wicket:id="input" class="form-control autofocus"></input>
+			<div wicket:id="result" class="result"></div>
+		</div>
+	</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="outlineSearchNodeFrag">
+		<a wicket:id="link" class="selectable"><img wicket:id="icon"></img> <span wicket:id="label"></span></a>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="newCommentFrag">
 		<form wicket:id="form" class="new-comment leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
@@ -42,6 +57,6 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
-		<a wicket:id="outline" class="btn btn-default btn-sm outline-toggle"><i class="fa fa-list-ul"></i> Outline</a>
+		<input type="checkbox" wicket:id="outline" class="outline-toggle"> Outline</input>
 	</wicket:fragment>
 </wicket:extend>

@@ -369,9 +369,9 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		target.appendJavaScript(script);
 	}
 	
-	public void closeUrlSelector(AjaxRequestTarget target, Component urlSelector) {
-		BasePage page = (BasePage) urlSelector.getPage();
-		page.getRootComponents().remove(urlSelector);
+	public void closeUrlInserter(AjaxRequestTarget target, Component urlInserter) {
+		BasePage page = (BasePage) urlInserter.getPage();
+		page.getRootComponents().remove(urlInserter);
 		String script = String.format("$('#%s-urlselector').closest('.modal').modal('hide');", container.getMarkupId());
 		target.appendJavaScript(script);
 	}

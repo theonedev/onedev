@@ -17,6 +17,7 @@ import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
@@ -27,11 +28,14 @@ import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
+import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -62,12 +66,15 @@ import com.gitplex.server.search.query.BlobQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.PrioritizedComponentRenderer;
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.ArchiveMenuLink;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
@@ -75,8 +82,9 @@ import com.gitplex.server.web.page.depot.blob.navigator.BlobNavigator;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRendererContribution;
 import com.gitplex.server.web.page.depot.blob.render.view.MarkSupport;
+import com.gitplex.server.web.page.depot.blob.search.SearchMenuContributor;
 import com.gitplex.server.web.page.depot.blob.search.advanced.AdvancedSearchPanel;
-import com.gitplex.server.web.page.depot.blob.search.instant.InstantSearchPanel;
+import com.gitplex.server.web.page.depot.blob.search.quick.QuickSearchPanel;
 import com.gitplex.server.web.page.depot.blob.search.result.SearchResultPanel;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
@@ -123,6 +131,8 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	private Component revisionIndexing;
 	
 	private WebMarkupContainer searchResult;
+	
+	private AbstractPostAjaxBehavior ajaxBehavior;
 	
 	public DepotBlobPage(PageParameters params) {
 		super(params);
@@ -238,6 +248,40 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		}
 		
 		newSearchResult(null, queryHits);
+
+		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
+			
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters(); 
+				String action = params.getParameterValue("action").toString();
+				switch (action) {
+				case "quickSearch": 
+					new ModalPanel(target) {
+						
+						@Override
+						protected Component newContent(String id) {
+							return newQuickSearchPanel(id, this);
+						}
+						
+					};
+					break;
+				case "advancedSearch":
+					new ModalPanel(target) {
+						
+						@Override
+						protected Component newContent(String id) {
+							return newAdvancedSearchPanel(id, this);
+						}
+						
+					};
+					break;
+				default:
+					throw new IllegalStateException("Unexpected action: " + action);
+				}
+			}
+			
+		});
 		
 		add(new WebSocketRenderBehavior() {
 			
@@ -290,14 +334,9 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		blobOperations.add(new MenuLink("add") {
 
 			@Override
-			protected List<MenuItem> getMenuItems() {
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getIconClass() {
-						return null;
-					}
 
 					@Override
 					public String getLabel() {
@@ -311,7 +350,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								onModeChange(target, Mode.ADD);
-								closeDropdown();
+								dropdown.close();
 							}
 							
 						};
@@ -320,11 +359,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 				});
 				
 				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getIconClass() {
-						return null;
-					}
 
 					@Override
 					public String getLabel() {
@@ -338,22 +372,22 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								super.onClick(target);
-								closeDropdown();
+								dropdown.close();
 							}
 
 							@Override
-							protected Component newContent(String id) {
+							protected Component newContent(String id, ModalPanel modal) {
 								return new BlobUploadPanel(id, DepotBlobPage.this) {
 
 									@Override
 									void onCancel(AjaxRequestTarget target) {
-										closeModal();
+										modal.close();
 									}
 
 									@Override
 									void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
 										DepotBlobPage.this.onCommitted(target, oldCommit, newCommit);
-										closeModal();
+										modal.close();
 									}
 									
 								};
@@ -377,79 +411,98 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			
 		});
 		
-		blobOperations.add(new InstantSearchPanel("instantSearch", depotModel, new AbstractReadOnlyModel<String>() {
+		blobOperations.add(new MenuLink("search") {
 
 			@Override
-			public String getObject() {
-				return state.blobIdent.revision;
-			}
-			
-		}) {
-			
-			@Override
-			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				BlobIdent selected = new BlobIdent(state.blobIdent.revision, hit.getBlobPath(), 
-						FileMode.REGULAR_FILE.getBits()); 
-				DepotBlobPage.this.onSelect(target, selected, hit.getTokenPos());
-			}
-			
-			@Override
-			protected void onMoreQueried(AjaxRequestTarget target, List<QueryHit> hits) {
-				newSearchResult(target, hits);
-				resizeWindow(target);
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				List<MenuItem> menuItems = new ArrayList<>();
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getShortcut() {
+						return "Alt+Shift+F";
+					}
+
+					@Override
+					public String getLabel() {
+						return "File and Symbol Search";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new ModalLink(id) {
+							
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								super.onClick(target);
+								dropdown.close();
+							}
+
+							@Override
+							protected Component newContent(String id, ModalPanel modal) {
+								return newQuickSearchPanel(id, modal);
+							}
+							
+						};
+					}
+					
+				});
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getShortcut() {
+						return "Alt+Shift+T";
+					}
+
+					@Override
+					public String getLabel() {
+						return "Text and Advanced Search";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new ModalLink(id) {
+							
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								super.onClick(target);
+								dropdown.close();
+							}
+
+							@Override
+							protected Component newContent(String id, ModalPanel modal) {
+								return newAdvancedSearchPanel(id, modal);
+							}
+							
+						};
+					}
+					
+				});
+				
+				IVisitor<Component, Component> visitor = new IVisitor<Component, Component>() {
+
+					@Override
+					public void component(Component object, IVisit<Component> visit) {
+						visit.stop(object);
+					}
+					
+				};
+				SearchMenuContributor contributor = (SearchMenuContributor) getPage().visitChildren(
+						SearchMenuContributor.class, visitor);
+				if (contributor != null)
+					menuItems.addAll(contributor.getMenuItems(dropdown));
+				
+				return menuItems;
 			}
 			
 		});
 		
-		blobOperations.add(new ModalLink("advancedSearch") {
-
-			@Override
-			protected Component newContent(String id) {
-				return new AdvancedSearchPanel(id, depotModel, new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return state.blobIdent.revision;
-					}
-					
-				}) {
-
-					@Override
-					protected void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
-						newSearchResult(target, hits);
-						resizeWindow(target);
-						closeModal();
-					}
-
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						closeModal();
-					}
-
-					@Override
-					protected BlobIdent getCurrentBlob() {
-						return state.blobIdent;
-					}
-					
-				};
-			}
-			
-		});
-
 		DepotCommitsPage.State commitsState = new DepotCommitsPage.State();
 		commitsState.compareWith = resolvedRevision.name();
 		if (state.blobIdent.path != null)
 			commitsState.query = String.format("path(%s)", DepotBlobPage.this.state.blobIdent.path);
 		blobOperations.add(new ViewStateAwarePageLink<Void>("history", DepotCommitsPage.class, 
-				DepotCommitsPage.paramsOf(getDepot(), commitsState)) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(state.blobIdent.isTree());
-			}
-			
-		});
+				DepotCommitsPage.paramsOf(getDepot(), commitsState)));
 		
 		blobOperations.add(new ArchiveMenuLink("download", depotModel) {
 
@@ -472,6 +525,69 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		} else {
 			add(blobOperations);
 		}
+	}
+
+	private QuickSearchPanel newQuickSearchPanel(String id, ModalPanel modal) {
+		return new QuickSearchPanel(id, depotModel, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return state.blobIdent.revision;
+			}
+			
+		}) {
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+				BlobIdent selected = new BlobIdent(state.blobIdent.revision, hit.getBlobPath(), 
+						FileMode.REGULAR_FILE.getBits()); 
+				DepotBlobPage.this.onSelect(target, selected, hit.getTokenPos());
+				modal.close();
+			}
+			
+			@Override
+			protected void onMoreQueried(AjaxRequestTarget target, List<QueryHit> hits) {
+				newSearchResult(target, hits);
+				resizeWindow(target);
+				modal.close();
+			}
+
+			@Override
+			protected void onCancel(AjaxRequestTarget target) {
+				modal.close();
+			}
+			
+		};
+	}
+	
+	private AdvancedSearchPanel newAdvancedSearchPanel(String id, ModalPanel modal) {
+		return new AdvancedSearchPanel(id, depotModel, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return state.blobIdent.revision;
+			}
+			
+		}) {
+
+			@Override
+			protected void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
+				newSearchResult(target, hits);
+				resizeWindow(target);
+				modal.close();
+			}
+
+			@Override
+			protected void onCancel(AjaxRequestTarget target) {
+				modal.close();
+			}
+
+			@Override
+			protected BlobIdent getCurrentBlob() {
+				return state.blobIdent;
+			}
+			
+		};
 	}
 	
 	private void newBlobContent(@Nullable AjaxRequestTarget target) {
@@ -617,7 +733,12 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		super.renderHead(response);
 
 		response.render(JavaScriptHeaderItem.forReference(new DepotBlobResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("gitplex.server.depotBlob.onDomReady();"));
+		
+		String callback = ajaxBehavior.getCallbackFunction(explicit("action")).toString();
+		String script = String.format("gitplex.server.depotBlob.onDomReady(%s);", callback);
+		
+		response.render(OnDomReadyHeaderItem.forScript(script));
+		
 		response.render(OnLoadHeaderItem.forScript("gitplex.server.depotBlob.onWindowLoad();"));
 	}
 

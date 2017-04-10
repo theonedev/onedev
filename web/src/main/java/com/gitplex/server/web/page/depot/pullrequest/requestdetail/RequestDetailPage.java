@@ -68,6 +68,7 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.DropdownLink;
@@ -439,7 +440,7 @@ public abstract class RequestDetailPage extends DepotPage {
 					}
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, FloatingPanel dropdown) {
 						return new ResolveConflictInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
 					}
 					

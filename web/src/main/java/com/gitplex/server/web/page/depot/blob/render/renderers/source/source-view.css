@@ -142,3 +142,9 @@
 .CodeMirror-activeline .CodeMirror-annotation {
 	background: #E8F2FE;	
 }
+
+.outline-search .result {
+	margin-top: 20px;
+	height: 400px;
+	overflow: auto;
+}

@@ -39,7 +39,7 @@ gitplex.server.sourceEdit = {
 		
 		cm.oldDocValue = cm.doc.getValue();
 
-		gitplex.server.codemirror.bindKeys(cm);
+		gitplex.server.codemirror.bindShortcuts(cm);
 		
     	var doneTimer;
 		cm.on("change", function() {

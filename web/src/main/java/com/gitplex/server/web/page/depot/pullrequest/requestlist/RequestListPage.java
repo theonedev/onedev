@@ -39,6 +39,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -85,18 +86,13 @@ public class RequestListPage extends DepotPage {
 		add(new MenuLink("filters") {
 
 			@Override
-			protected List<MenuItem> getMenuItems() {
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 
 				Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 				if (currentUser != null) {
-					final String userName = currentUser.getName();
+					String userName = currentUser.getName();
 					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getIconClass() {
-							return null;
-						}
 
 						@Override
 						public String getLabel() {
@@ -121,11 +117,6 @@ public class RequestListPage extends DepotPage {
 						
 					});
 					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getIconClass() {
-							return null;
-						}
 
 						@Override
 						public String getLabel() {
@@ -153,11 +144,6 @@ public class RequestListPage extends DepotPage {
 				menuItems.add(new MenuItem() {
 
 					@Override
-					public String getIconClass() {
-						return null;
-					}
-
-					@Override
 					public String getLabel() {
 						return "All open requests";
 					}
@@ -179,11 +165,6 @@ public class RequestListPage extends DepotPage {
 					
 				});
 				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getIconClass() {
-						return null;
-					}
 
 					@Override
 					public String getLabel() {
@@ -208,11 +189,6 @@ public class RequestListPage extends DepotPage {
 					
 				});
 				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getIconClass() {
-						return null;
-					}
 
 					@Override
 					public String getLabel() {
@@ -244,7 +220,7 @@ public class RequestListPage extends DepotPage {
 		add(new MenuLink("sortBy") {
 
 			@Override
-			protected List<MenuItem> getMenuItems() {
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 				
 				for (Map.Entry<SortOption, String> entry: sortNames.entrySet()) {

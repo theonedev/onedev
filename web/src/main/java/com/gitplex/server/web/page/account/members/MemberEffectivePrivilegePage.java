@@ -23,6 +23,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
@@ -94,12 +95,12 @@ public class MemberEffectivePrivilegePage extends MemberPage {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new PrivilegeSelectionPanel(id, true, filterPrivilege) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-						closeDropdown();
+						dropdown.close();
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(depotsContainer);

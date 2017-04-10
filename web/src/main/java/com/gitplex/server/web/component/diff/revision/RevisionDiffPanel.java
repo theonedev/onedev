@@ -81,6 +81,7 @@ import com.gitplex.server.web.component.comment.comparecontext.CompareContextPan
 import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.blob.SourceAware;
 import com.gitplex.server.web.component.diff.diffstat.DiffStatBar;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
@@ -465,7 +466,7 @@ public class RevisionDiffPanel extends Panel {
 		add(new MenuLink("whitespaceOption") {
 
 			@Override
-			protected List<MenuItem> getMenuItems() {
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 				
 				for (WhitespaceOption each: WhitespaceOption.values()) {
@@ -490,7 +491,7 @@ public class RevisionDiffPanel extends Panel {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									closeDropdown();
+									dropdown.close();
 									whitespaceOptionModel.setObject(each);
 									target.add(body);
 								}
@@ -1011,7 +1012,7 @@ public class RevisionDiffPanel extends Panel {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new CompareContextPanel(id, requestModel, new AbstractReadOnlyModel<CodeComment>() {
 
 					@Override

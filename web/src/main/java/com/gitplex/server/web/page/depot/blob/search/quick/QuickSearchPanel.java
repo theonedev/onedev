@@ -1,9 +1,11 @@
-package com.gitplex.server.web.page.depot.blob.search.instant;
+package com.gitplex.server.web.page.depot.blob.search.quick;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -21,7 +23,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -44,34 +45,27 @@ import com.gitplex.server.search.query.TooGeneralQueryException;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.RunTaskBehavior;
-import com.gitplex.server.web.component.floating.AlignPlacement;
-import com.gitplex.server.web.component.floating.ComponentTarget;
-import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.blob.search.result.SearchResultPanel;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
-public abstract class InstantSearchPanel extends Panel {
+public abstract class QuickSearchPanel extends Panel {
 
 	private static final int MAX_QUERY_ENTRIES = 15;
 	
-	final IModel<Depot> depotModel;
+	private final IModel<Depot> depotModel;
 	
-	final IModel<String> revisionModel;
-	
-	private TextField<String> searchField;
+	private final IModel<String> revisionModel;
 	
 	private String searchInput;
 	
-	private FloatingPanel searchHint;
-	
-	private List<QueryHit> symbolHits;
+	private List<QueryHit> symbolHits = new ArrayList<>();
 	
 	private RunTaskBehavior moreSymbolHitsBehavior;
 	
-	public InstantSearchPanel(String id, IModel<Depot> depotModel, IModel<String> revisionModel) {
+	public QuickSearchPanel(String id, IModel<Depot> depotModel, IModel<String> revisionModel) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -150,13 +144,25 @@ public abstract class InstantSearchPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		searchField = new TextField<>("input");
-		searchField.add(new AbstractPostAjaxBehavior() {
+		add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCancel(target);
+			}
+			
+		});
+		
+		TextField<String> searchField = new TextField<>("input");
+		add(searchField);
+		newSearchResult(null);
+		
+		add(new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.setChannel(new AjaxChannel("blob-instant-search-input", AjaxChannel.Type.DROP));
+				attributes.setChannel(new AjaxChannel("blob-quick-search-input", AjaxChannel.Type.DROP));
 			}
 
 			@Override
@@ -168,16 +174,10 @@ public abstract class InstantSearchPanel extends Panel {
 					searchInput = params.getParameterValue("param").toString();
 					if (StringUtils.isNotBlank(searchInput)) {
 						symbolHits = querySymbols(searchInput, MAX_QUERY_ENTRIES);
-						if (searchHint == null)
-							newSearchHint(target);
-						else
-							target.add(searchHint.getContent());
 					} else {
 						symbolHits = new ArrayList<>();
-						
-						if (searchHint != null)
-							searchHint.close();
 					}
+					newSearchResult(target);
 				} else if (key.equals("return")) {
 					int activeHitIndex = params.getParameterValue("param").toInt();
 					QueryHit activeHit = getActiveHit(activeHitIndex);
@@ -185,7 +185,7 @@ public abstract class InstantSearchPanel extends Panel {
 						if (activeHit instanceof MoreSymbolHit) 
 							moreSymbolHitsBehavior.requestRun(target);
 						else 
-							selectHit(target, activeHit);
+							onSelect(target, activeHit);
 					}
 				} else {
 					throw new IllegalStateException("Unrecognized key: " + key);
@@ -196,136 +196,127 @@ public abstract class InstantSearchPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				String script = String.format(
-						"gitplex.server.blobInstantSearch.init('%s', %s);", 
-						searchField.getMarkupId(), 
+						"gitplex.server.onQuickSearchDomReady('%s', %s);", 
+						getMarkupId(), 
 						getCallbackFunction(explicit("key"), explicit("param")));
 				
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		});
-		searchField.setOutputMarkupId(true);
-		add(searchField);
+		
+		setOutputMarkupId(true);
 	}
 	
-	private void newSearchHint(AjaxRequestTarget target) {
-		searchHint = new FloatingPanel(target, new ComponentTarget(searchField), AlignPlacement.bottom(0)) {
+	private void newSearchResult(@Nullable AjaxRequestTarget target) {
+		WebMarkupContainer result = new WebMarkupContainer("result");
+		result.setOutputMarkupId(true);
+		
+		result.add(new ListView<QueryHit>("symbolHits", new AbstractReadOnlyModel<List<QueryHit>>() {
+
+			@Override
+			public List<QueryHit> getObject() {
+				return symbolHits;
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!symbolHits.isEmpty());
+			}
+
+			@Override
+			protected void populateItem(ListItem<QueryHit> item) {
+				QueryHit hit = item.getModelObject();
+				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+					}
+					
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						onSelect(target, hit);
+					}
+					
+				};
+				link.add(hit.renderIcon("icon"));
+				link.add(hit.render("label"));
+				link.add(new Label("scope", hit.getNamespace()).setVisible(hit.getNamespace()!=null));
+				item.add(link);
+
+				BlobIdent blobIdent = new BlobIdent(revisionModel.getObject(), hit.getBlobPath(), 
+						FileMode.REGULAR_FILE.getBits());
+				DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
+				state.mark = TextRange.of(hit.getTokenPos());
+				PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), state);
+				CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, params);
+				link.add(AttributeAppender.replace("href", url.toString()));
+
+				if (item.getIndex() == 0)
+					item.add(AttributeModifier.append("class", "active"));
+			}
+			
+		});
+		result.add(new AjaxLink<Void>("moreSymbolHits") {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(AttributeAppender.append("class", "instant-search-dropdown"));
+				add(moreSymbolHitsBehavior = new RunTaskBehavior() {
+					
+					@Override
+					protected void runTask(AjaxRequestTarget target) {
+						List<QueryHit> hits = querySymbols(searchInput, SearchResultPanel.MAX_QUERY_ENTRIES);
+						onMoreQueried(target, hits);
+					}
+					
+				});
 			}
 
 			@Override
-			protected Component newContent(String id) {
-				WebMarkupContainer searchResult = new Fragment(id, "resultFrag", InstantSearchPanel.this);
-				searchResult.setOutputMarkupId(true);
-				
-				searchResult.add(new ListView<QueryHit>("symbolHits", new AbstractReadOnlyModel<List<QueryHit>>() {
-
-					@Override
-					public List<QueryHit> getObject() {
-						return symbolHits;
-					}
-					
-				}) {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!symbolHits.isEmpty());
-					}
-
-					@Override
-					protected void populateItem(ListItem<QueryHit> item) {
-						QueryHit hit = item.getModelObject();
-						AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
-
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-							}
-							
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								selectHit(target, hit);
-							}
-							
-						};
-						link.add(hit.renderIcon("icon"));
-						link.add(hit.render("label"));
-						link.add(new Label("scope", hit.getNamespace()).setVisible(hit.getNamespace()!=null));
-						item.add(link);
-
-						BlobIdent blobIdent = new BlobIdent(revisionModel.getObject(), hit.getBlobPath(), 
-								FileMode.REGULAR_FILE.getBits());
-						DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
-						state.mark = TextRange.of(hit.getTokenPos());
-						PageParameters params = DepotBlobPage.paramsOf(depotModel.getObject(), state);
-						CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, params);
-						link.add(AttributeAppender.replace("href", url.toString()));
-
-						if (item.getIndex() == 0)
-							item.add(AttributeModifier.append("class", "active"));
-					}
-					
-				});
-				searchResult.add(new AjaxLink<Void>("moreSymbolHits") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(moreSymbolHitsBehavior = new RunTaskBehavior() {
-							
-							@Override
-							protected void runTask(AjaxRequestTarget target) {
-								List<QueryHit> hits = querySymbols(searchInput, SearchResultPanel.MAX_QUERY_ENTRIES);
-								onMoreQueried(target, hits);
-								close();
-							}
-							
-						});
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(symbolHits.size() == MAX_QUERY_ENTRIES);
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						moreSymbolHitsBehavior.requestRun(target);
-					}
-					
-				});
-				
-				searchResult.add(new WebMarkupContainer("noMatches") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(symbolHits.isEmpty());
-					}
-					
-				});
-				
-				return searchResult;
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(symbolHits.size() == MAX_QUERY_ENTRIES);
 			}
 
 			@Override
-			protected void onClosed() {
-				super.onClosed();
-				searchHint = null;
+			public void onClick(AjaxRequestTarget target) {
+				moreSymbolHitsBehavior.requestRun(target);
 			}
 			
-		};	
+		});
 		
-		String script = String.format("gitplex.server.blobInstantSearch.hintOpened('%s', '%s');", 
-				searchField.getMarkupId(true), searchHint.getMarkupId(true));
-		target.appendJavaScript(script);
+		result.add(new WebMarkupContainer("noMatches") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(StringUtils.isNotBlank(searchInput) && symbolHits.isEmpty());
+			}
+			
+		});
+
+		result.add(new WebMarkupContainer("help") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(StringUtils.isBlank(searchInput) && symbolHits.isEmpty());
+			}
+			
+		});
+		
+		if (target != null) {
+			replace(result);
+			target.add(result);
+		} else {
+			add(result);
+		}
 	}
 	
 	private QueryHit getActiveHit(int activeHitIndex) {
@@ -347,7 +338,7 @@ public abstract class InstantSearchPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new InstantSearchResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new QuickSearchResourceReference()));
 	}
 
 	@Override
@@ -358,12 +349,7 @@ public abstract class InstantSearchPanel extends Panel {
 		super.onDetach();
 	}
 
-	private void selectHit(AjaxRequestTarget target, QueryHit hit) {
-		target.appendJavaScript(String.format("$('#%s').hide();", searchField.getMarkupId(true)));
-		if (searchHint != null)
-			searchHint.close();
-		onSelect(target, hit);
-	}
+	protected abstract void onCancel(AjaxRequestTarget target);
 	
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 	

@@ -1,5 +1,5 @@
 gitplex.server.depotBlob = {
-	onDomReady: function() {
+	onDomReady: function(callback) {
 		// hide browser scrollbar as we will manage it in blob content container 
 		$("body").css("overflow", "hidden");
 		
@@ -9,6 +9,7 @@ gitplex.server.depotBlob = {
 		var height = Cookies.get(cookieKey);
 		if (height) 
 			$searchResult.outerHeight(height);
+		
 		$searchResult.resizable({
 			autoHide: false,
 			handles: {"n": "#search-result-resize-handle"},
@@ -36,7 +37,7 @@ gitplex.server.depotBlob = {
 			var headWidth = $("#depot").width() - $("#depot>.sidebar>table>tbody>tr>td.nav").outerWidth();
 			
 			// below code moves file navigator to bottom if it is too wide
-			var maxWidth = headWidth - $revisionPicker.outerWidth() - 110;
+			var maxWidth = headWidth - $revisionPicker.outerWidth() - 130;
 			var maxHeight = $head.height();
 
 			var $blobNavigator = $head.find(">.blob-navigator");
@@ -72,6 +73,18 @@ gitplex.server.depotBlob = {
 			$blobContent.outerWidth(width).outerHeight(height);
 			$blobContent.find(".autofit:visible").first().triggerHandler(
 					"autofit", [$blobContent.width(), $blobContent.height()]);
+		});
+		
+		document.addEventListener("keydown", function(e) {
+			if (e.altKey && e.shiftKey && $(".modal:visible").length == 0) {
+				if (e.keyCode === 70) {
+					e.preventDefault();
+					callback("quickSearch");
+				} else if (e.keyCode === 84) {
+					e.preventDefault();
+					callback("advancedSearch");
+				}
+			}
 		});
 	},
 	getClientHeight: function() {

@@ -93,7 +93,6 @@ public abstract class ModalPanel extends Panel {
 	}
 	
 	protected void onClosed() {
-		
 	}
 	
 }

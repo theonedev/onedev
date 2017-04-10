@@ -26,6 +26,7 @@ import com.gitplex.server.model.Account;
 import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -103,12 +104,12 @@ public abstract class MemberPage extends AccountLayoutPage {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new RoleSelectionPanel(id, getMembership().isAdmin()?ROLE_ADMIN:ROLE_MEMBER) {
 					
 					@Override
 					protected void onSelectOrdinary(AjaxRequestTarget target) {
-						closeDropdown();
+						dropdown.close();
 						getMembership().setAdmin(false);
 						GitPlex.getInstance(OrganizationMembershipManager.class).save(getMembership());
 						setResponsePage(getPageClass(), getPageParameters());
@@ -117,7 +118,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 					
 					@Override
 					protected void onSelectAdmin(AjaxRequestTarget target) {
-						closeDropdown();
+						dropdown.close();
 						getMembership().setAdmin(true);
 						GitPlex.getInstance(OrganizationMembershipManager.class).save(getMembership());
 						setResponsePage(getPageClass(), getPageParameters());

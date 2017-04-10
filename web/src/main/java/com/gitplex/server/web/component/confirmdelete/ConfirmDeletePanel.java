@@ -22,6 +22,14 @@ abstract class ConfirmDeletePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCancel(target);
+			}
+			
+		});
 		add(new Label("message", new AbstractReadOnlyModel<String>() {
 
 			@Override

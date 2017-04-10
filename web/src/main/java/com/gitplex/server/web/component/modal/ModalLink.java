@@ -22,7 +22,7 @@ public abstract class ModalLink extends AjaxLink<Void> {
 	
 				@Override
 				protected Component newContent(String id) {
-					return ModalLink.this.newContent(id);
+					return ModalLink.this.newContent(id, this);
 				}
 
 				@Override
@@ -35,10 +35,5 @@ public abstract class ModalLink extends AjaxLink<Void> {
 		}
 	}
 
-	protected void closeModal() {
-		if (modal != null)
-			modal.close();
-	}
-	
-	protected abstract Component newContent(String id);
+	protected abstract Component newContent(String id, ModalPanel modal);
 }

@@ -34,6 +34,7 @@ import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
@@ -204,12 +205,12 @@ public abstract class DepotPage extends AccountPage {
 		fragment.add(new DropdownLink("depotMoreInfo") {
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new MoreInfoPanel(id, depotModel) {
 
 					@Override
 					protected void onPromptForkOption(AjaxRequestTarget target) {
-						closeDropdown();
+						dropdown.close();
 					}
 					
 				};

@@ -46,6 +46,7 @@ import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.link.ArchiveMenuLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
@@ -121,7 +122,7 @@ public class DepotTagsPage extends DepotPage {
 			}
 			
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "createTagFrag", DepotTagsPage.this);
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
@@ -186,7 +187,7 @@ public class DepotTagsPage extends DepotPage {
 							target.add(form);
 						} else {
 							getDepot().tag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
-							closeModal();
+							modal.close();
 							target.add(tagsContainer);
 							target.add(pagingNavigator);
 							target.add(noTagsContainer);
@@ -200,7 +201,7 @@ public class DepotTagsPage extends DepotPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						closeModal();
+						modal.close();
 					}
 					
 				});

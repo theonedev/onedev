@@ -19,8 +19,21 @@
 	font-weight: normal; 
 	line-height: 20px; 
 	text-decoration: none; 
-	padding: 6px 24px 6px 32px; 
+	padding: 6px 24px; 
 	white-space: nowrap;
+}
+.floating.menu .shortcut {
+	font-weight: bold;
+	color: #666;
+	position: absolute;
+	right: 12px;
+}
+
+.floating.menu .has-icons ul>li>a {
+	padding-left: 32px; 
+}
+.floating.menu .has-shortcuts ul>li>a {
+	padding-right: 120px;
 }
 .floating.menu ul>li>a>.icon {
 	position: absolute;

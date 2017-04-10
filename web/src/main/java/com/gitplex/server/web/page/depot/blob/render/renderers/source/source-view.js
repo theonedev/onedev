@@ -50,7 +50,20 @@ gitplex.server.sourceView = {
     	}
 		gitplex.server.sourceView.highlightCommentTrigger();	
 
-		gitplex.server.codemirror.bindKeys(cm);
+		gitplex.server.codemirror.bindShortcuts(cm);
+
+		if (!($(document).data("SourceViewShortcutsBinded"))) {
+			$(document).data("SourceViewShortcutsBinded", true);
+
+			document.addEventListener("keydown", function(e) {
+				if (e.altKey && e.shiftKey && e.keyCode === 79 && $(".modal:visible").length == 0) {
+					e.preventDefault();
+					var $sourceView = $(".source-view");
+					if ($sourceView.length != 0)
+						$sourceView.data("callback")("outlineSearch");
+				}
+			});
+		}
 	    
 	    $code.selectionPopover("init", function() {
 	    	if (cm.hasFocus()) {
@@ -427,7 +440,7 @@ gitplex.server.sourceView = {
 	onToggleOutline: function() {
 		gitplex.server.sourceView.exitFullScreen();
 		gitplex.server.sourceView.onLayoutChange();
-		$(".outline-toggle").toggleClass("active");
+		$(".outline-toggle").prop("checked", $(".source-view>.outline").is(":visible"));
 	},
 	highlightCommentTrigger: function() {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
@@ -545,5 +558,58 @@ gitplex.server.sourceView = {
 	onTabSizeChange: function(tabSize) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		cm.setOption("tabSize", tabSize);
+	},
+	onOutlineSearchDomReady: function(containerId, callback) {
+		var $body = $("#" + containerId + ">.outline-search>.modal-body");
+		
+		var $input = $body.children("input");
+		
+		$input.doneEvents("inputchange", function() {
+			callback("input", $(this).val());
+		}, 100);
+
+		function onReturn() {
+			if (gitplex.server.form.confirmLeave()) {
+				var $result = $body.children(".result");
+				var $active = $result.find("a.active");
+				if ($active.length != 0) {
+					callback("return", $active.data("symbolindex"));
+				}
+			}
+		}
+		
+		function onKeyup(e) {
+			e.preventDefault();
+			var $result = $body.children(".result");
+			var $active = $result.find("a.active");
+			var $selectables = $result.find("a.selectable");
+			var index = $selectables.index($active);
+			if (index > 0) {
+				index--;
+				var $prev = $selectables.eq(index);
+				$active.removeClass("active");
+				$prev.addClass("active");
+				$result.scrollIntoView("a.active", 36, 36);
+			}
+		};
+		
+		function onKeydown(e) {
+			e.preventDefault();
+			var $result = $body.children(".result");
+			var $active = $result.find("a.active");
+			var $selectables = $result.find("a.selectable");
+			var index = $selectables.index($active);
+			if (index < $selectables.length-1) {
+				index++;
+				var $next = $selectables.eq(index);
+				$active.removeClass("active");
+				$next.addClass("active");
+				$result.scrollIntoView("a.active", 36, 36);
+			}
+		};
+		
+		$body.children().bind("keydown", "return", onReturn);
+		$body.children().bind("keydown", "up", onKeyup);
+		$body.children().bind("keydown", "down", onKeydown);		
 	}
 };

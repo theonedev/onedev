@@ -65,6 +65,7 @@ import com.gitplex.server.web.component.branchchoice.BranchSingleChoice;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
@@ -328,7 +329,7 @@ public class DepotBranchesPage extends DepotPage {
 			}
 			
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "createBranchFrag", DepotBranchesPage.this);
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
@@ -376,7 +377,7 @@ public class DepotBranchesPage extends DepotPage {
 							target.add(form);
 						} else {
 							depotModel.getObject().createBranch(branchName, branchRevision);
-							closeModal();
+							modal.close();
 							target.add(branchesContainer);
 							target.add(pagingNavigator);
 							target.add(noBranchesContainer);
@@ -390,7 +391,7 @@ public class DepotBranchesPage extends DepotPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						closeModal();
+						modal.close();
 					}
 					
 				});
@@ -634,7 +635,7 @@ public class DepotBranchesPage extends DepotPage {
 				actionsContainer.add(new ModalLink("delete") {
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, ModalPanel modal) {
 						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", DepotBranchesPage.this);
 						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 						if (!pullRequestManager.findAllOpen(new DepotAndBranch(getDepot(), branch)).isEmpty()) {
@@ -661,7 +662,7 @@ public class DepotBranchesPage extends DepotPage {
 								target.add(pagingNavigator);
 								target.add(branchesContainer);
 								target.add(noBranchesContainer);
-								closeModal();
+								modal.close();
 							}
 							
 						});
@@ -669,7 +670,7 @@ public class DepotBranchesPage extends DepotPage {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								closeModal();
+								modal.close();
 							}
 							
 						});

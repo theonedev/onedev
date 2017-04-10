@@ -7,7 +7,6 @@
 }
 
 #repo-commits>.body .no-commits {
-	font-style: italic;
 	font-size: 16px;
 }
 #repo-commits>.body li {

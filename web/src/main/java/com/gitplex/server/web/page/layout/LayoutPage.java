@@ -32,6 +32,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.floating.AlignPlacement;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
@@ -75,7 +76,7 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new DropdownLink("createNewDropdown") {
 
 				@Override
-				protected Component newContent(String id) {
+				protected Component newContent(String id, FloatingPanel dropdown) {
 					Fragment fragment = new Fragment(id, "createNewFrag", LayoutPage.this);
 					fragment.add(new ViewStateAwarePageLink<Void>("createNewDepot", CreateDepotPage.class));
 					fragment.add(new ViewStateAwarePageLink<Void>("createNewOrganization", 
@@ -141,7 +142,7 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new DropdownLink("userMenuTrigger", new AlignPlacement(50, 100, 50, 0, 8)) {
 
 				@Override
-				protected Component newContent(String id) {
+				protected Component newContent(String id, FloatingPanel dropdown) {
 					Fragment fragment = new Fragment(id, "userMenuFrag", LayoutPage.this);
 					List<Account> organizations = SecurityUtils.getAccount().getOrganizations()
 							.stream()

@@ -62,6 +62,15 @@ abstract class BlobUploadPanel extends Panel {
 		form.setFileMaxSize(Bytes.megabytes(MAX_FILE_SIZE));
 		add(form);
 		
+		form.add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCancel(target);
+			}
+			
+		});
+		
 		NotificationPanel feedback = new NotificationPanel("feedback", form);
 		feedback.setOutputMarkupPlaceholderTag(true);
 		form.add(feedback);

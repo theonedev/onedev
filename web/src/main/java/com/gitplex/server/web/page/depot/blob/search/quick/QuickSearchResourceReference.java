@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page.depot.blob.search.instant;
+package com.gitplex.server.web.page.depot.blob.search.quick;
 
 import java.util.List;
 
@@ -12,12 +12,12 @@ import com.gitplex.server.web.assets.js.scrollintoview.ScrollIntoViewResourceRef
 import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
-public class InstantSearchResourceReference extends BaseDependentResourceReference {
+public class QuickSearchResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public InstantSearchResourceReference() {
-		super(InstantSearchResourceReference.class, "instant-search.js");
+	public QuickSearchResourceReference() {
+		super(QuickSearchResourceReference.class, "quick-search.js");
 	}
 
 	@Override
@@ -26,7 +26,8 @@ public class InstantSearchResourceReference extends BaseDependentResourceReferen
 		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(InstantSearchResourceReference.class, "instant-search.css")));
+		dependencies.add(CssHeaderItem.forReference(
+				new BaseDependentCssResourceReference(QuickSearchResourceReference.class, "quick-search.css")));
 		return dependencies;
 	}
 

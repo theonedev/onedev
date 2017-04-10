@@ -37,12 +37,12 @@ public abstract class MenuLink extends DropdownLink {
 	}
 
 	@Override
-	protected Component newContent(String id) {
+	protected Component newContent(String id, FloatingPanel dropdown) {
 		return new MenuPanel(id) {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
-				return MenuLink.this.getMenuItems();
+				return MenuLink.this.getMenuItems(dropdown);
 			}
 			
 		};
@@ -54,5 +54,5 @@ public abstract class MenuLink extends DropdownLink {
 		response.render(CssHeaderItem.forReference(new MenuResourceReference()));
 	}
 
-	protected abstract List<MenuItem> getMenuItems();
+	protected abstract List<MenuItem> getMenuItems(FloatingPanel dropdown);
 }

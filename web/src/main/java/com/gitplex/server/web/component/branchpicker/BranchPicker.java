@@ -7,6 +7,7 @@ import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
 import com.gitplex.server.model.Depot;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
@@ -24,12 +25,12 @@ public abstract class BranchPicker extends DropdownLink {
 	}
 
 	@Override
-	protected Component newContent(String id) {
+	protected Component newContent(String id, FloatingPanel dropdown) {
 		return new BranchSelector(id, depotModel, branch) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String branch) {
-				closeDropdown();
+				dropdown.close();
 				BranchPicker.this.branch = branch;
 				target.add(BranchPicker.this);
 				

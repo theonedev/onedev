@@ -31,10 +31,12 @@ import com.gitplex.server.model.TeamAuthorization;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.greaterprivilege.GreaterPrivilegesPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
@@ -89,12 +91,12 @@ public class DepotTeamListPage extends DepotSettingPage {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new PrivilegeSelectionPanel(id, false, filterPrivilege) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-						closeDropdown();
+						dropdown.close();
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(teamsContainer);
@@ -266,12 +268,12 @@ public class DepotTeamListPage extends DepotSettingPage {
 				greaterPrivileges.add(new ModalLink("detail") {
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, ModalPanel modal) {
 						return new GreaterPrivilegesPanel(id, item.getModel()) {
 
 							@Override
 							protected void onClose(AjaxRequestTarget target) {
-								closeModal();
+								modal.close();
 							}
 							
 						};
@@ -296,12 +298,12 @@ public class DepotTeamListPage extends DepotSettingPage {
 					}
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, FloatingPanel dropdown) {
 						return new PrivilegeSelectionPanel(id, false, item.getModelObject().getPrivilege()) {
 							
 							@Override
 							protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-								closeDropdown();
+								dropdown.close();
 								TeamAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
 								GitPlex.getInstance(TeamAuthorizationManager.class).save(authorization);

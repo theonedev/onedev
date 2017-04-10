@@ -11,10 +11,16 @@ public abstract class MenuItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Nullable
-	public abstract String getIconClass();
+	public String getIconClass() {
+		return null;
+	}
 	
 	public abstract String getLabel();
 	
 	public abstract WebMarkupContainer newLink(String id);
 	
+	@Nullable
+	public String getShortcut() {
+		return null;
+	};
 }

@@ -79,17 +79,17 @@ abstract class GateKeeperPanel extends Panel {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, ModalPanel modal) {
 				return new GateKeeperEditor(id, gateKeeper) {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						closeModal();
+						modal.close();
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-						closeModal();
+						modal.close();
 						GateKeeperPanel.this.onChange(target, gateKeeper);
 					}
 					

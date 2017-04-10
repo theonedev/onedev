@@ -24,10 +24,12 @@ import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.depotselector.DepotSelector;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
@@ -137,7 +139,7 @@ public abstract class MoreInfoPanel extends Panel {
 				}
 
 				@Override
-				protected Component newContent(String id) {
+				protected Component newContent(String id, FloatingPanel dropdown) {
 					return new DepotSelector(id, new LoadableDetachableModel<Collection<Depot>>() {
 
 						@Override
@@ -167,12 +169,12 @@ public abstract class MoreInfoPanel extends Panel {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, ModalPanel modal) {
 				return new ForkOptionPanel(id, depotModel) {
 
 					@Override
 					protected void onClose(AjaxRequestTarget target) {
-						closeModal();
+						modal.close();
 					}
 					
 				};

@@ -14,6 +14,7 @@ gitplex.server.codemirror = {
 				{line: mark.beginLine, ch: mark.beginChar}, 
 				{line: mark.endLine, ch: mark.endChar},
 				{className: "CodeMirror-mark"});
+		cm.setCursor({line: mark.beginLine, ch: mark.beginChar});
 	},
 	scrollTo: function(cm, mark) {
 		var top = cm.charCoords({line: mark.beginLine, ch: 0}, "local").top;
@@ -57,7 +58,7 @@ gitplex.server.codemirror = {
 	    	cm.scrollTo(viewState.scroll.left, viewState.scroll.top);
     	}
 	}, 
-	bindKeys: function(cm) {
+	bindShortcuts: function(cm) {
 		cm.setOption("extraKeys", {
 			"F11": function(cm) {
 				cm.setOption("fullScreen", !cm.getOption("fullScreen"));
@@ -75,8 +76,8 @@ gitplex.server.codemirror = {
 		    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
 		}
 		
-		if (!($(document).data("CodeMirrorKeyBinded"))) {
-			$(document).data("CodeMirrorKeyBinded", true);
+		if (!($(document).data("CodeMirrorShortcutsBinded"))) {
+			$(document).data("CodeMirrorShortcutsBinded", true);
 			
 			function find() {
 				if ($(".code>.CodeMirror").length != 0) {

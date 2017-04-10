@@ -145,7 +145,7 @@ public class BlobNavigator extends Panel {
 					}
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, FloatingPanel dropdown) {
 						return new NestedTree<BlobIdent>(id, new ITreeProvider<BlobIdent>() {
 
 							@Override
@@ -207,7 +207,7 @@ public class BlobNavigator extends Panel {
 									@Override
 									public void onClick(AjaxRequestTarget target) {
 										context.onSelect(target, model.getObject(), null);
-										closeDropdown();
+										dropdown.close();
 									}
 
 									@Override

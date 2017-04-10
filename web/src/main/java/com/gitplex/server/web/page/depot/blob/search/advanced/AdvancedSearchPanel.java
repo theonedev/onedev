@@ -96,6 +96,15 @@ public abstract class AdvancedSearchPanel extends Panel {
 		form.setOutputMarkupId(true);
 		add(form);
 		
+		form.add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCancel(target);
+			}
+			
+		});
+		
 		List<Tab> tabs = new ArrayList<Tab>();
 		tabs.add(new AjaxActionTab(Model.of("Text occurrences")) {
 			

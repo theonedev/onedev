@@ -1,12 +1,11 @@
 .blob-view>.head {
 	border-bottom: 1px solid #BBB; 
-	padding: 4px 12px;
+	padding: 4px 8px;
 }
 .blob-view>.body {
 	overflow: auto;
 }
 .blob-view>.head>.info {
-	margin-top: 4px;
 	color: #666;
 }
 .blob-view>.head>.info .separator {
@@ -15,6 +14,11 @@
 .blob-view>.head>.actions {
 	white-space: nowrap;
 }
-.blob-view>.head>.actions>div {
+.blob-view>.head>.actions>* {
+	color: #333;
 	margin-left: 12px;
+	margin-right: 0;
+}
+.blob-view>.head>.actions>input {
+	vertical-align: top;
 }

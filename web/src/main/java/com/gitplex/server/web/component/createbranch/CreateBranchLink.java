@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
 public abstract class CreateBranchLink extends ModalLink {
@@ -33,18 +34,18 @@ public abstract class CreateBranchLink extends ModalLink {
 	}
 	
 	@Override
-	protected Component newContent(String id) {
+	protected Component newContent(String id, ModalPanel modal) {
 		return new CreateBranchPanel(id, depotModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
-				closeModal();
+				modal.close();
 				CreateBranchLink.this.onCreate(target, branch);
 			}
 
 			@Override
 			protected void onCancel(AjaxRequestTarget target) {
-				closeModal();
+				modal.close();
 			}
 			
 		};

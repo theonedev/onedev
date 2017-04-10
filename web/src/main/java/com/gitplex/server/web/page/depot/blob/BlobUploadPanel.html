@@ -1,6 +1,7 @@
 <wicket:panel>
 	<form wicket:id="form" class="upload-blobs">
 		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
 			<h4 class="modal-title">Upload Files</h4>
 		</div>
 		<div class="modal-body">
@@ -18,10 +19,8 @@
 			</div>			
 		</div>
 		<div class="modal-footer">
-			<div class="form-group">
-				<button wicket:id="upload" class="btn btn-primary">Upload</button>
-				<button wicket:id="cancel" class="btn btn-default">Cancel</button>
-			</div>
+			<button wicket:id="upload" class="btn btn-primary">Upload</button>
+			<button wicket:id="cancel" class="btn btn-default">Cancel</button>
 		</div>
 	</form>
 </wicket:panel>

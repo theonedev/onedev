@@ -34,6 +34,7 @@ import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.accountchoice.AbstractAccountChoiceProvider;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPanel;
@@ -89,12 +90,12 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new PrivilegeSelectionPanel(id, false, filterPrivilege) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-						closeDropdown();
+						dropdown.close();
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(collaboratorsContainer);
@@ -287,12 +288,12 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 					}
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, FloatingPanel dropdown) {
 						return new PrivilegeSelectionPanel(id, false, item.getModelObject().getPrivilege()) {
 							
 							@Override
 							protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
-								closeDropdown();
+								dropdown.close();
 								UserAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
 								GitPlex.getInstance(UserAuthorizationManager.class).save(authorization);

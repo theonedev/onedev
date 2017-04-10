@@ -10,6 +10,7 @@ import org.apache.wicket.model.Model;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.support.DepotAndRevision;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 
@@ -35,12 +36,12 @@ public abstract class RevisionPicker extends DropdownLink {
 	}
 
 	@Override
-	protected Component newContent(String id) {
+	protected Component newContent(String id, FloatingPanel dropdown) {
 		return new RevisionSelector(id, depotModel, revision, canCreateRef) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				closeDropdown();
+				dropdown.close();
 				RevisionPicker.this.revision = revision;
 				target.add(RevisionPicker.this);
 				
@@ -50,7 +51,7 @@ public abstract class RevisionPicker extends DropdownLink {
 			@Override
 			protected void onModalOpened(AjaxRequestTarget target, ModalPanel modal) {
 				super.onModalOpened(target, modal);
-				closeDropdown();
+				dropdown.close();
 			}
 
 			@Override

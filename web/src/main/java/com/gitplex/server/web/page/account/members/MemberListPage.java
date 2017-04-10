@@ -33,6 +33,7 @@ import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.Avatar;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.roleselection.RoleSelectionPanel;
@@ -110,12 +111,12 @@ public class MemberListPage extends AccountLayoutPage {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new RoleSelectionPanel(id, filterRole) {
 
 					@Override
 					protected void onSelectAdmin(AjaxRequestTarget target) {
-						closeDropdown();
+						dropdown.close();
 						filterRole = ROLE_ADMIN;
 						target.add(filterContainer);
 						target.add(membersContainer);
@@ -125,7 +126,7 @@ public class MemberListPage extends AccountLayoutPage {
 
 					@Override
 					protected void onSelectOrdinary(AjaxRequestTarget target) {
-						closeDropdown();
+						dropdown.close();
 						filterRole = ROLE_MEMBER;
 						target.add(filterContainer);
 						target.add(membersContainer);
@@ -277,12 +278,12 @@ public class MemberListPage extends AccountLayoutPage {
 					}
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, FloatingPanel dropdown) {
 						return new RoleSelectionPanel(id, item.getModelObject().isAdmin()?ROLE_ADMIN:ROLE_MEMBER) {
 							
 							@Override
 							protected void onSelectOrdinary(AjaxRequestTarget target) {
-								closeDropdown();
+								dropdown.close();
 								membership.setAdmin(false);
 								GitPlex.getInstance(OrganizationMembershipManager.class).save(membership);
 								target.add(pagingNavigator);
@@ -293,7 +294,7 @@ public class MemberListPage extends AccountLayoutPage {
 							
 							@Override
 							protected void onSelectAdmin(AjaxRequestTarget target) {
-								closeDropdown();
+								dropdown.close();
 								membership.setAdmin(true);
 								GitPlex.getInstance(OrganizationMembershipManager.class).save(membership);
 								target.add(pagingNavigator);

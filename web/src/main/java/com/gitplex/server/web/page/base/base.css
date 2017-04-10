@@ -427,7 +427,7 @@ div.center {
 
 li.selectable a, a.selectable {
 	border: 1px solid white;
-	text-decoration: none;
+	text-decoration: none !important;
 	display: block;
 	padding: 2px 4px;
 	color: #333;
@@ -510,6 +510,6 @@ input.search {
 	margin-right: 4px;
 }
 
-.wicket-mfu-caption {
-	margin-top: 4px;
+.modal-header .close {
+	font-family: sans-serif;
 }

@@ -8,6 +8,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import com.gitplex.server.web.assets.js.codemirror.CodeMirrorResourceReference;
 import com.gitplex.server.web.assets.js.cookies.CookiesResourceReference;
+import com.gitplex.server.web.assets.js.doneevents.DoneEventsResourceReference;
+import com.gitplex.server.web.assets.js.hotkeys.HotkeysResourceReference;
 import com.gitplex.server.web.assets.js.hover.HoverResourceReference;
 import com.gitplex.server.web.assets.js.jqueryui.JQueryUIResourceReference;
 import com.gitplex.server.web.assets.js.scrollintoview.ScrollIntoViewResourceReference;
@@ -30,6 +32,8 @@ public class SourceViewResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(

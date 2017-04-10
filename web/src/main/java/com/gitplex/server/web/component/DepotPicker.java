@@ -11,6 +11,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.web.component.depotselector.DepotSelector;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
@@ -28,12 +29,12 @@ public abstract class DepotPicker extends DropdownLink {
 	}
 
 	@Override
-	protected Component newContent(String id) {
+	protected Component newContent(String id, FloatingPanel dropdown) {
 		return new DepotSelector(id, depotsModel, currentDepotId) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot) {
-				closeDropdown();
+				dropdown.close();
 				target.add(DepotPicker.this);
 				DepotPicker.this.onSelect(target, depot);
 			}

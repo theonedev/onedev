@@ -15,8 +15,11 @@ import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -29,7 +32,9 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -76,8 +81,12 @@ import com.gitplex.server.web.component.comment.CodeCommentPanel;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.comment.comparecontext.CompareContextPanel;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
+import com.gitplex.server.web.component.menu.MenuItem;
+import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.sourceformat.OptionChangeCallback;
 import com.gitplex.server.web.component.sourceformat.SourceFormatPanel;
 import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
@@ -86,6 +95,7 @@ import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.page.depot.blob.render.view.BlobViewPanel;
 import com.gitplex.server.web.page.depot.blob.render.view.MarkSupport;
+import com.gitplex.server.web.page.depot.blob.search.SearchMenuContributor;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -101,7 +111,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
  *
  */
 @SuppressWarnings("serial")
-public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
+public class SourceViewPanel extends BlobViewPanel implements MarkSupport, SearchMenuContributor {
 
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
 	
@@ -124,7 +134,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 
 	private WebMarkupContainer commentContainer;
 	
-	private WebMarkupContainer outlineContainer;
+	private WebMarkupContainer outline;
 	
 	private SourceFormatPanel sourceFormat;
 	
@@ -178,24 +188,20 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 	public WebMarkupContainer newAdditionalActions(String id) {
 		WebMarkupContainer actions = new Fragment(id, "actionsFrag", this);
 		if (!symbols.isEmpty()) {
-			actions.add(new AjaxLink<Void>("outline") {
+			actions.add(new CheckBox("outline", Model.of(isOutlineVisibleInitially())).add(new OnChangeAjaxBehavior() {
 
 				@Override
-				public void onClick(AjaxRequestTarget target) {
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.setMethod(Method.POST);
+				}
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
 					toggleOutline(target);
 				}
 				
-			}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-				@Override
-				public String getObject() {
-					if (outlineContainer.isVisible())
-						return "active";
-					else
-						return "";
-				}
-				
-			})));
+			}));
 		} else {
 			actions.add(new WebMarkupContainer("outline").setVisible(false));
 		}
@@ -205,16 +211,16 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 	private void toggleOutline(AjaxRequestTarget target) {
 		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 		Cookie cookie;
-		if (outlineContainer.isVisible()) {
+		if (outline.isVisible()) {
 			cookie = new Cookie(COOKIE_OUTLINE, "no");
-			outlineContainer.setVisible(false);
+			outline.setVisible(false);
 		} else {
 			cookie = new Cookie(COOKIE_OUTLINE, "yes");
-			outlineContainer.setVisible(true);
+			outline.setVisible(true);
 		}
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		response.addCookie(cookie);
-		target.add(outlineContainer);
+		target.add(outline);
 		target.appendJavaScript("gitplex.server.sourceView.onToggleOutline();");
 	}
 
@@ -263,7 +269,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 			}
 
 			@Override
-			protected Component newContent(String id) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				CompareContext compareContext = context.getOpenComment().getCompareContext();
 				return new CompareContextPanel(id, Model.of((PullRequest)null), new AbstractReadOnlyModel<CodeComment>() {
 
@@ -593,6 +599,16 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 					target.appendJavaScript(script);
 					context.onCommentOpened(target, comment);
 					break;
+				case "outlineSearch":
+					new ModalPanel(target) {
+
+						@Override
+						protected Component newContent(String id) {
+							return newOutlineSearchPanel(id, this);
+						}
+						
+					};
+					break;
 				case "syncOutline": 
 					int line = params.getParameterValue("param1").toInt();
 					int ch = params.getParameterValue("param2").toInt();
@@ -614,13 +630,14 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 					}
 					if (closest != null) {
 						@SuppressWarnings("unchecked")
-						NestedTree<Symbol> tree = (NestedTree<Symbol>) outlineContainer.get(BODY_ID);
+						NestedTree<Symbol> tree = (NestedTree<Symbol>) outline.get(BODY_ID);
 						Symbol current = closest;
 						while (current != null) {
 							tree.expand(current);
 							current = current.getParent();
 						}
-						script = String.format("gitplex.server.sourceView.syncOutline('%s');", getSymbolId(closest));
+						script = String.format("gitplex.server.sourceView.syncOutline('%s');", 
+								getSymbolId(symbols, closest));
 						target.appendJavaScript(script);
 					}
 					break;
@@ -637,7 +654,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 			}
 		});
 		
-		outlineContainer = new WebMarkupContainer("outline") {
+		outline = new WebMarkupContainer("outline") {
 
 			@Override
 			public void renderHead(IHeaderResponse response) {
@@ -646,7 +663,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 			}
 			
 		};
-		outlineContainer.add(new AjaxLink<Void>("close") {
+		outline.add(new AjaxLink<Void>("close") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -654,34 +671,8 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 			}
 			
 		});
-		NestedTree<Symbol> tree;
-		outlineContainer.add(tree = new NestedTree<Symbol>(BODY_ID, new ITreeProvider<Symbol>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Iterator<? extends Symbol> getRoots() {
-				return getChildSymbols(null).iterator();
-			}
-
-			@Override
-			public boolean hasChildren(Symbol symbol) {
-				return !getChildSymbols(symbol).isEmpty();
-			}
-
-			@Override
-			public Iterator<? extends Symbol> getChildren(Symbol symbol) {
-				return getChildSymbols(symbol).iterator();
-			}
-
-			@Override
-			public IModel<Symbol> model(Symbol symbol) {
-				return Model.of(symbol);
-			}
-			
-		}) {
+		
+		NestedTree<Symbol> tree = new NestedTree<Symbol>(BODY_ID, newSymbolTreeProvider(symbols)) {
 
 			@Override
 			protected void onInitialize() {
@@ -694,7 +685,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 				Symbol symbol = nodeModel.getObject();
 				
 				Fragment fragment = new Fragment(id, "outlineNodeFrag", SourceViewPanel.this);
-				fragment.setMarkupId(getSymbolId(symbol));
+				fragment.setMarkupId(getSymbolId(symbols, symbol));
 				fragment.setOutputMarkupId(true);
 				
 				fragment.add(symbol.renderIcon("icon"));
@@ -707,33 +698,23 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 					}
 					
 				};
-				DepotBlobPage.State state = new DepotBlobPage.State(context.getBlobIdent());
-				state.commentId = CodeComment.idOf(context.getOpenComment());
-				state.mark = TextRange.of(symbol.getPosition());
-				PageParameters params = DepotBlobPage.paramsOf(context.getDepot(), state);
-				link.add(AttributeAppender.replace("href", urlFor(DepotBlobPage.class, params).toString()));
 				link.add(symbol.render("label", null));
 				fragment.add(link);
 				
 				return fragment;
 			}
 			
-		});		
+		};		
 		
-		for (Symbol root: getChildSymbols(null))
+		for (Symbol root: getChildSymbols(symbols, null))
 			tree.expand(root);
 		
-		outlineContainer.setOutputMarkupPlaceholderTag(true);
-		add(outlineContainer);
+		outline.add(tree);
 		
-		if (!symbols.isEmpty()) {
-			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-			Cookie cookie = request.getCookie(COOKIE_OUTLINE);
-			if (cookie!=null && cookie.getValue().equals("no"))
-				outlineContainer.setVisible(false);
-		} else {
-			outlineContainer.setVisible(false);
-		}
+		outline.setOutputMarkupPlaceholderTag(true);
+		add(outline);
+		
+		outline.setVisible(isOutlineVisibleInitially());
 		
 		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip", new AbstractReadOnlyModel<Depot>() {
 
@@ -764,6 +745,16 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 		});
 	}
 
+	private boolean isOutlineVisibleInitially() {
+		if (!symbols.isEmpty()) {
+			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+			Cookie cookie = request.getCookie(COOKIE_OUTLINE);
+			return cookie==null || !cookie.getValue().equals("no");
+		} else {
+			return false;
+		}
+	}
+	
 	private boolean contains(TokenPosition scope, int line, int ch) {
 		int fromLine = scope.getFromLine();
 		int toLine = scope.getToLine();
@@ -814,7 +805,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 		context.onCommentOpened(target, null);
 	}
 	
-	private List<Symbol> getChildSymbols(@Nullable Symbol parentSymbol) {
+	private List<Symbol> getChildSymbols(List<Symbol> symbols, @Nullable Symbol parentSymbol) {
 		List<Symbol> children = new ArrayList<>();
 		for (Symbol symbol: symbols) {
 			if (symbol.getOutlineParent() == parentSymbol)
@@ -948,7 +939,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 		List<Range> ranges;
 	}
 	
-	private String getSymbolId(Symbol symbol) {
+	private String getSymbolId(List<Symbol> symbols, Symbol symbol) {
 		return "outline-symbol-" + symbols.indexOf(symbol);
 	}
 	
@@ -980,6 +971,207 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 			script = String.format("gitplex.server.sourceView.mark(undefined);");
 		}
 		target.appendJavaScript(script);
+	}
+
+	private ITreeProvider<Symbol> newSymbolTreeProvider(List<Symbol> symbols) {
+		return new ITreeProvider<Symbol>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Iterator<? extends Symbol> getRoots() {
+				return getChildSymbols(symbols, null).iterator();
+			}
+
+			@Override
+			public boolean hasChildren(Symbol symbol) {
+				return !getChildSymbols(symbols, symbol).isEmpty();
+			}
+
+			@Override
+			public Iterator<? extends Symbol> getChildren(Symbol symbol) {
+				return getChildSymbols(symbols, symbol).iterator();
+			}
+
+			@Override
+			public IModel<Symbol> model(Symbol symbol) {
+				return Model.of(symbol);
+			}
+			
+		};		
+	}
+	
+	private boolean matches(Symbol symbol, @Nullable String searchInput) {
+		if (searchInput != null)
+			return symbol.getName().toLowerCase().startsWith(searchInput.trim().toLowerCase());
+		else
+			return true;
+	}
+	
+	private NestedTree<Symbol> newOutlineSearchSymbolTree(ModalPanel modal, List<Symbol> symbols, 
+			@Nullable String searchInput) {
+		NestedTree<Symbol> tree = new NestedTree<Symbol>("result", newSymbolTreeProvider(symbols)) {
+
+			private boolean matchFound;
+			
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new HumanTheme());				
+			}
+
+			@Override
+			protected Component newContentComponent(String id, IModel<Symbol> nodeModel) {
+				Symbol symbol = nodeModel.getObject();
+				
+				Fragment fragment = new Fragment(id, "outlineSearchNodeFrag", SourceViewPanel.this);
+				fragment.setOutputMarkupId(true);
+				
+				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+						context.onSelect(target, context.getBlobIdent(), symbol.getPosition());
+					}
+					
+				};
+				link.add(symbol.renderIcon("icon"));
+				link.add(symbol.render("label", null));
+				link.add(AttributeAppender.append("data-symbolindex", symbols.indexOf(symbol)));
+				
+				fragment.add(link);
+				
+				if (!matchFound && matches(symbol, searchInput)) {
+					link.add(AttributeAppender.append("class", "active"));
+					matchFound = true;
+				}
+				
+				return fragment;
+			}
+			
+		};		
+		
+		for (Symbol root: getChildSymbols(symbols, null))
+			tree.expand(root);
+		
+		tree.setOutputMarkupId(true);
+		
+		return tree;
+	}
+	
+	private Component newOutlineSearchPanel(String id, ModalPanel modal) {
+		Fragment fragment = new Fragment(id, "outlineSearchFrag", SourceViewPanel.this);
+		fragment.add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				modal.close();
+			}
+			
+		});
+		
+		TextField<String> searchField = new TextField<>("input");
+		fragment.add(searchField);
+		fragment.add(newOutlineSearchSymbolTree(modal, symbols, null));
+		
+		fragment.add(new AbstractPostAjaxBehavior() {
+			
+			private List<Symbol> filteredSymbols = new ArrayList<Symbol>(symbols);
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setChannel(new AjaxChannel("outline-search-input", AjaxChannel.Type.DROP));
+			}
+
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
+				String key = params.getParameterValue("key").toString();
+
+				if (key.equals("input")) {
+					String searchInput = params.getParameterValue("param").toString();
+					filteredSymbols = new ArrayList<>();
+					for (Symbol symbol: symbols) {
+						if (matches(symbol, searchInput)) {
+							Symbol current = symbol;
+							do {
+								if (!filteredSymbols.contains(current))
+									filteredSymbols.add(current);
+								current = current.getOutlineParent();
+							} while (current != null);
+						}
+					}
+					NestedTree<Symbol> tree = newOutlineSearchSymbolTree(modal, filteredSymbols, searchInput);
+					fragment.replace(tree);
+					target.add(tree);
+				} else if (key.equals("return")) {
+					int symbolIndex = params.getParameterValue("param").toInt();
+					Symbol symbol = filteredSymbols.get(symbolIndex); 
+					context.onSelect(target, context.getBlobIdent(), symbol.getPosition());
+					modal.close();
+				} else {
+					throw new IllegalStateException("Unrecognized key: " + key);
+				}
+			}
+
+			@Override
+			public void renderHead(Component component, IHeaderResponse response) {
+				super.renderHead(component, response);
+				String script = String.format(
+						"gitplex.server.sourceView.onOutlineSearchDomReady('%s', %s);", 
+						fragment.getMarkupId(), 
+						getCallbackFunction(explicit("key"), explicit("param")));
+				
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		});	
+		fragment.setOutputMarkupId(true);
+		
+		return fragment;
+	}
+	
+	@Override
+	public List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+		List<MenuItem> menuItems = new ArrayList<>();
+		if (!symbols.isEmpty()) {
+			menuItems.add(new MenuItem() {
+
+				@Override
+				public String getShortcut() {
+					return "Alt+Shift+O";
+				}
+
+				@Override
+				public String getLabel() {
+					return "Outline Search";
+				}
+
+				@Override
+				public WebMarkupContainer newLink(String id) {
+					return new ModalLink(id) {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							super.onClick(target);
+							dropdown.close();
+						}
+						
+						@Override
+						protected Component newContent(String id, ModalPanel modal) {
+							return newOutlineSearchPanel(id, modal);
+						}
+						
+					};
+				}
+				
+			});
+		} 
+		return menuItems;
 	}
 	
 }

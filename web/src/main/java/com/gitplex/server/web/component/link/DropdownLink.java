@@ -94,7 +94,7 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 
 				@Override
 				protected Component newContent(String id) {
-					return DropdownLink.this.newContent(id);
+					return DropdownLink.this.newContent(id, this);
 				}
 
 				@Override
@@ -122,11 +122,6 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 		}
 	}
 
-	public void closeDropdown() {
-		if (dropdown != null)
-			dropdown.close();
-	}
-	
 	public String getCloseScript() {
 		if (dropdown != null) {
 			return String.format("gitplex.server.floating.close($('#%s'), true);", dropdown.getMarkupId());
@@ -150,5 +145,5 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract Component newContent(String id);
+	protected abstract Component newContent(String id, FloatingPanel dropdown);
 }

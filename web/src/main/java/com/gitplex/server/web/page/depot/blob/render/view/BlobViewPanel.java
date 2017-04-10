@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -12,19 +14,20 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.Model;
 
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
-import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
-import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import com.gitplex.server.web.util.ajaxlistener.TrackViewStateListener;
 import com.gitplex.server.web.util.resource.RawBlobResource;
 import com.gitplex.server.web.util.resource.RawBlobResourceReference;
 import com.google.common.base.Preconditions;
@@ -156,13 +159,7 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(new ResourceLink<Void>("raw", new RawBlobResourceReference(), 
 				RawBlobResource.paramsOf(context.getDepot(), context.getBlobIdent())));
-		add(new ViewStateAwareAjaxLink<Void>("blame", true) {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-			}
+		add(new CheckBox("blame", Model.of(context.getMode() == Mode.BLAME)) {
 			
 			@Override
 			protected void onConfigure() {
@@ -170,32 +167,26 @@ public abstract class BlobViewPanel extends Panel {
 				setVisible(context.getDepot().getBlob(context.getBlobIdent()).getText() != null);
 			}
 
+		}.add(new OnChangeAjaxBehavior() {
+			
 			@Override
-			public void onClick(AjaxRequestTarget target) {
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setMethod(Method.POST);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+				attributes.getAjaxCallListeners().add(new TrackViewStateListener(true));
+			}
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
 				if (context.getMode() == Mode.BLAME)
 					context.onModeChange(target, Mode.VIEW);
 				else
 					context.onModeChange(target, Mode.BLAME);
 			}
-
-		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (context.getMode() == Mode.BLAME)
-					return "active";
-				else
-					return "";
-			}
 			
-		})));
+		}));
 
-		DepotCommitsPage.State state = new DepotCommitsPage.State();
-		state.compareWith = context.getCommit().name();
-		state.query = String.format("path(%s)", context.getBlobIdent().path);
-		add(new ViewStateAwarePageLink<>("history", DepotCommitsPage.class, 
-				DepotCommitsPage.paramsOf(context.getDepot(), state)));
-		
 		add(newAdditionalActions("extraActions"));
 		newChangeActions(null);
 		

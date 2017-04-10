@@ -24,6 +24,21 @@ abstract class MenuPanel extends Panel {
 		super.onInitialize();
 		
 		setOutputMarkupId(true);
+
+		List<MenuItem> menuItems = getMenuItems();
+		boolean hasIcons = false;
+		boolean hasShortcuts = false;
+		for (MenuItem menuItem: menuItems) {
+			if (menuItem.getIconClass() != null)
+				hasIcons = true;
+			if (menuItem.getShortcut() != null)
+				hasShortcuts = true;
+		}
+		
+		if (hasIcons)
+			add(AttributeAppender.append("class", "has-icons"));
+		if (hasShortcuts)
+			add(AttributeAppender.append("class", "has-shortcuts"));
 		
 		add(new ListView<MenuItem>("items", new LoadableDetachableModel<List<MenuItem>>() {
 
@@ -47,6 +62,7 @@ abstract class MenuPanel extends Panel {
 					}
 					link.add(icon);
 					link.add(new Label("label", menuItem.getLabel()));
+					link.add(new Label("shortcut", menuItem.getShortcut()));
 					fragment.add(link);
 					item.add(fragment);
 				} else {

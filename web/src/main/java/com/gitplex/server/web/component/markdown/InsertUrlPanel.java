@@ -43,6 +43,7 @@ import com.gitplex.server.git.BlobIdentFilter;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.component.depotfilepicker.DepotFilePicker;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 
@@ -68,6 +69,15 @@ class InsertUrlPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				markdownEditor.closeUrlInserter(target, this);
+			}
+			
+		});
 		
 		if (isImage)
 			add(new Label("title", "Insert Image"));
@@ -108,7 +118,7 @@ class InsertUrlPanel extends Panel {
 					target.add(InsertUrlPanel.this);
 				} else {
 					markdownEditor.insertUrl(target, isImage, url, null, null);
-					markdownEditor.closeUrlSelector(target, InsertUrlPanel.this);
+					markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
 				}
 			}
 			
@@ -140,7 +150,7 @@ class InsertUrlPanel extends Panel {
 				add(new DropdownLink("blobPicker") {
 
 					@Override
-					protected Component newContent(String id) {
+					protected Component newContent(String id, FloatingPanel dropdown) {
 						return new DepotFilePicker(id, new AbstractReadOnlyModel<Depot>() {
 
 							@Override
@@ -158,8 +168,8 @@ class InsertUrlPanel extends Panel {
 								Path relativized = Paths.get(baseUrl).relativize(Paths.get(referenceUrl));							
 								String relativePath = relativized.toString().replace('\\', '/').substring("../".length());
 								markdownEditor.insertUrl(target, isImage, relativePath, blobIdent.getName(), null);
-								markdownEditor.closeUrlSelector(target, InsertUrlPanel.this);
-								closeDropdown();
+								markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
+								dropdown.close();
 							}
 
 							@Override
@@ -204,7 +214,7 @@ class InsertUrlPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						markdownEditor.insertUrl(target, isImage, attachmentUrl, attachmentName, null);
-						markdownEditor.closeUrlSelector(target, InsertUrlPanel.this);
+						markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
 					}
 
 					@Override
@@ -276,7 +286,7 @@ class InsertUrlPanel extends Panel {
 					}
 					markdownEditor.insertUrl(target, isImage, 
 							attachmentSupport.getAttachmentUrl(attachmentName), attachmentName, null);
-					markdownEditor.closeUrlSelector(target, InsertUrlPanel.this);
+					markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
 				} else {
 					error("Please select a non-empty file");
 					target.add(InsertUrlPanel.this);						
@@ -298,15 +308,6 @@ class InsertUrlPanel extends Panel {
 		uploadForm.setVisible(attachmentSupport != null);
 		add(uploadForm);
 		
-		add(new AjaxLink<Void>("close") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				markdownEditor.closeUrlSelector(target, InsertUrlPanel.this);
-			}
-			
-		});
-
 		setOutputMarkupId(true);
 	}
 

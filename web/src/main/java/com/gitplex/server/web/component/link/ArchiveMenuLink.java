@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.model.Depot;
+import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.util.resource.ArchiveResource;
@@ -24,14 +25,9 @@ public abstract class ArchiveMenuLink extends MenuLink {
 	}
 
 	@Override
-	protected List<MenuItem> getMenuItems() {
+	protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 		List<MenuItem> menuItems = new ArrayList<>();
 		menuItems.add(new MenuItem() {
-
-			@Override
-			public String getIconClass() {
-				return null;
-			}
 
 			@Override
 			public String getLabel() {
@@ -53,11 +49,6 @@ public abstract class ArchiveMenuLink extends MenuLink {
 
 		});
 		menuItems.add(new MenuItem() {
-
-			@Override
-			public String getIconClass() {
-				return null;
-			}
 
 			@Override
 			public String getLabel() {

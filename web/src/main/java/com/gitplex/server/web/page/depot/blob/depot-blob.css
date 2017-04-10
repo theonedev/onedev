@@ -50,38 +50,13 @@
 }					
 	
 #depot-blob>.head>.operations {
+	margin-top: 4px;
 	position: absolute;
-	margin-top: 5px;
-	right: 6px;
+	right: 0;
 }
-#depot-blob>.head>.operations>a, #depot-blob>.head>.operations>span {
-	color: #666;
-	margin-right: 8px;
-}
-#depot-blob>.head>.operations .fa-download {
-	font-size: 16px;
-	vertical-align: bottom;
-}
-#depot-blob>.head>.operations .fa-history {
-	font-size: 16px;
-	vertical-align: middle;
-}
-#depot-blob>.head>.operations .fa-plus {
-	font-size: 16px;
-	vertical-align: middle;
-}
-#depot-blob>.head>.operations input {
-	border-radius: 0;
-	border-color: #BBB;
-	height: 30px;
-	border-top: none;
-	border-bottom: none;
-	top: -5px;
-	padding: 0px 8px;
-	position: absolute;
-	width: 250px;
-	left: -260px;
-	font-size: 14px;
+#depot-blob>.head>.operations>a {
+	padding: 4px 8px;
+	color: #333;	
 }
 
 #depot-blob>.blob-navigator {

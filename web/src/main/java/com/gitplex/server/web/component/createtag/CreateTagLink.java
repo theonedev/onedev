@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.modal.ModalLink;
+import com.gitplex.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
 public abstract class CreateTagLink extends ModalLink {
@@ -34,18 +35,18 @@ public abstract class CreateTagLink extends ModalLink {
 	}
 	
 	@Override
-	protected Component newContent(String id) {
+	protected Component newContent(String id, ModalPanel modal) {
 		return new CreateTagPanel(id, depotModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String tag) {
-				closeModal();
+				modal.close();
 				CreateTagLink.this.onCreate(target, tag);
 			}
 
 			@Override
 			protected void onCancel(AjaxRequestTarget target) {
-				closeModal();
+				modal.close();
 			}
 			
 		};
