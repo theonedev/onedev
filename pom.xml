@@ -8,7 +8,7 @@
 		<relativePath>../launcher</relativePath>
     </parent>
     <artifactId>server-parent</artifactId>  
-    <version>1.0-EAP-build43</version>  
+    <version>1.0-EAP-build44</version>  
     <packaging>pom</packaging>  
     <build>
     	<pluginManagement>
