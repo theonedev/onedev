@@ -78,6 +78,19 @@ gitplex.server.sourceView = {
 			gitplex.server.mouseState.moved = false;					
 			repositionCommentPopovers();					
 		});
+		
+    	var cursorActivityTimer;
+		cm.on("cursorActivity", function() {
+			if (cursorActivityTimer) 
+				clearTimeout(cursorActivityTimer);
+			cursorActivityTimer = setTimeout(function() {
+				var $outline = $sourceView.children(".outline");
+				if ($outline.is(":visible")) {
+					var cursor = cm.getCursor();
+					callback("syncOutline", cursor.line, cursor.ch);
+				}
+			}, 500);
+		});
 			
 		$sourceView.on("getViewState", function() {
 		    return gitplex.server.codemirror.getViewState(cm);
@@ -209,6 +222,15 @@ gitplex.server.sourceView = {
 				Cookies.set(outlineWidthCookieKey, ui.size.width, {expires: Infinity});
 			}
 		});
+	},
+	syncOutline: function(symbolId) {
+		var $symbol = $("#" + symbolId);
+		var $body = $(".source-view>.outline>.content>.body");
+		$body.scrollIntoView($symbol, 20, 20);
+		$body.find(".tree-content").removeClass("active");
+		$symbol.addClass("active");
+		
+		$(window).resize();
 	},
 	restoreMark: function() {
 		var $sourceView = $(".source-view");

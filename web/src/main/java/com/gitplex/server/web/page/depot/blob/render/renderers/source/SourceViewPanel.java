@@ -54,6 +54,7 @@ import com.gitplex.jsymbol.Range;
 import com.gitplex.jsymbol.Symbol;
 import com.gitplex.jsymbol.SymbolExtractor;
 import com.gitplex.jsymbol.SymbolExtractorRegistry;
+import com.gitplex.jsymbol.TokenPosition;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blame;
 import com.gitplex.server.git.Blob;
@@ -592,6 +593,37 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 					target.appendJavaScript(script);
 					context.onCommentOpened(target, comment);
 					break;
+				case "syncOutline": 
+					int line = params.getParameterValue("param1").toInt();
+					int ch = params.getParameterValue("param2").toInt();
+					Symbol closest = null;
+					for (Symbol symbol: symbols) {
+						TokenPosition scope = symbol.getScope();
+						if (scope != null) {
+							if (contains(scope, line, ch)) {
+								if (closest != null) {
+									if (contains(closest.getScope(), scope.getFromLine(), scope.getFromCh()) 
+											&& contains(closest.getScope(), scope.getToLine(), scope.getToCh())) {
+										closest = symbol;
+									}
+								} else {
+									closest = symbol;
+								}
+							}
+						}
+					}
+					if (closest != null) {
+						@SuppressWarnings("unchecked")
+						NestedTree<Symbol> tree = (NestedTree<Symbol>) outlineContainer.get(BODY_ID);
+						Symbol current = closest;
+						while (current != null) {
+							tree.expand(current);
+							current = current.getParent();
+						}
+						script = String.format("gitplex.server.sourceView.syncOutline('%s');", getSymbolId(closest));
+						target.appendJavaScript(script);
+					}
+					break;
 				}
 			}
 			
@@ -659,8 +691,11 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 
 			@Override
 			protected Component newContentComponent(String id, IModel<Symbol> nodeModel) {
-				Fragment fragment = new Fragment(id, "outlineNodeFrag", SourceViewPanel.this);
 				Symbol symbol = nodeModel.getObject();
+				
+				Fragment fragment = new Fragment(id, "outlineNodeFrag", SourceViewPanel.this);
+				fragment.setMarkupId(getSymbolId(symbol));
+				fragment.setOutputMarkupId(true);
 				
 				fragment.add(symbol.renderIcon("icon"));
 				
@@ -727,6 +762,14 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 			}
 			
 		});
+	}
+
+	private boolean contains(TokenPosition scope, int line, int ch) {
+		int fromLine = scope.getFromLine();
+		int toLine = scope.getToLine();
+		int fromCh = scope.getFromCh();
+		int toCh = scope.getToCh();
+		return (fromLine < line || fromLine == line && fromCh<=ch) && (toLine > line || toLine == line && toCh >= ch);
 	}
 	
 	private TextRange getMark(IRequestParameters params, String beginLineParam, String beginCharParam, 
@@ -903,6 +946,10 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport {
 		String commitDate;
 		
 		List<Range> ranges;
+	}
+	
+	private String getSymbolId(Symbol symbol) {
+		return "outline-symbol-" + symbols.indexOf(symbol);
 	}
 	
 	@SuppressWarnings("unused")

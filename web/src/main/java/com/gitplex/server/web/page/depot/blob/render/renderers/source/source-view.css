@@ -87,6 +87,9 @@
 	padding: 4px;
 	overflow: auto; 
 }
+.source-view>.outline>.content>.body .tree-content.active {
+	background: #FCF5DA;
+}
 
 .CodeMirror-comments {
 	width: 20px;
