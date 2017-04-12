@@ -5,6 +5,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -672,7 +674,8 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 			
 		});
 		
-		NestedTree<Symbol> tree = new NestedTree<Symbol>(BODY_ID, newSymbolTreeProvider(symbols)) {
+		IModel<HashSet<Symbol>> state = new Model<HashSet<Symbol>>(new HashSet<>(getChildSymbols(symbols, null)));
+		NestedTree<Symbol> tree = new NestedTree<Symbol>(BODY_ID, newSymbolTreeProvider(symbols), state) {
 
 			@Override
 			protected void onInitialize() {
@@ -705,9 +708,6 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 			}
 			
 		};		
-		
-		for (Symbol root: getChildSymbols(symbols, null))
-			tree.expand(root);
 		
 		outline.add(tree);
 		
@@ -1012,7 +1012,13 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 	
 	private NestedTree<Symbol> newOutlineSearchSymbolTree(ModalPanel modal, List<Symbol> symbols, 
 			@Nullable String searchInput) {
-		NestedTree<Symbol> tree = new NestedTree<Symbol>("result", newSymbolTreeProvider(symbols)) {
+		IModel<HashSet<Symbol>> state;
+		if (StringUtils.isNotBlank(searchInput)) {
+			state = new Model<HashSet<Symbol>>(new HashSet<>(symbols));
+		} else {
+			state = new Model<HashSet<Symbol>>(new HashSet<>(getChildSymbols(symbols, null)));
+		}
+		NestedTree<Symbol> tree = new NestedTree<Symbol>("result", newSymbolTreeProvider(symbols), state) {
 
 			private boolean matchFound;
 			
@@ -1053,9 +1059,6 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 			}
 			
 		};		
-		
-		for (Symbol root: getChildSymbols(symbols, null))
-			tree.expand(root);
 		
 		tree.setOutputMarkupId(true);
 		
