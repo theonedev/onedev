@@ -9,8 +9,10 @@ import com.gitplex.server.web.WebConstants;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
+	private static final PrettyTime PRETTY_TIME = new PrettyTime();
+	
     public static String formatAge(Date date) {
-    	return new PrettyTime().format(date);
+    	return PRETTY_TIME.format(date);
     }
 
     public static String formatDate(Date date) {

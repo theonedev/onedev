@@ -10,6 +10,7 @@ import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar.Type;
 
 @SuppressWarnings("serial")
 public class ServerInformationPage extends AdministrationPage {
@@ -50,7 +51,7 @@ public class ServerInformationPage extends AdministrationPage {
 						/ Runtime.getRuntime().maxMemory() * 100);
 			}
 			
-		}, true));
+		}, Type.SUCCESS, true));
 		
 		add(new Label("osUserName", System.getProperty("user.name")));
 		
