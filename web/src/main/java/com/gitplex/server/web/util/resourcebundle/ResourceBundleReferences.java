@@ -115,11 +115,15 @@ public class ResourceBundleReferences {
 			}
 		}
 		
-		if (!javaScriptResourceReferences.isEmpty())
-			javaScriptBundleReferences.add(new JavaScriptConcatResourceBundleReference(scope, name + ".js", javaScriptResourceReferences));			
+		if (!javaScriptResourceReferences.isEmpty()) {
+			javaScriptBundleReferences.add(new JavaScriptConcatResourceBundleReference(
+					scope, name + ".js", javaScriptResourceReferences));			
+		}
 		
-		if (!cssResourceReferences.isEmpty()) 
-			cssBundleReferences.add(new ConcatResourceBundleReference<CssReferenceHeaderItem>(scope, name + ".css", cssResourceReferences));			
+		if (!cssResourceReferences.isEmpty()) {
+			cssBundleReferences.add(new CachedDependenciesConcatResourceBundleReference<CssReferenceHeaderItem>(
+					scope, name + ".css", cssResourceReferences));			
+		}
 	}
 
 	private Set<ResourceReference> includeSoleDependencies(Set<ResourceReference> dependents) {

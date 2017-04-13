@@ -1,6 +1,9 @@
 .markdown-editor.compact-mode .normal-mode, .markdown-editor.normal-mode .compact-mode {
 	display: none;
 }
+body.fullscreen {
+	overflow: hidden;
+}
 .markdown-editor.fullscreen {
 	position: absolute;
 	left: 0;
@@ -14,22 +17,43 @@
 	transform: rotate(270deg);
 } 
 
-.markdown-editor>.warning {
-	margin-bottom: 8px;
+.markdown-editor>.head>.warning {
+	margin-bottom: 0;
 	padding-top: 8px;
 	padding-bottom: 8px;
 	display: none;
 }
-.markdown-editor>.head {
-	padding-bottom: 8px;
+.markdown-editor>.head>.warning, .markdown-editor>.head>.help, .markdown-editor>.head>.emojis {
+	margin: 4px;
 }
-.markdown-editor>.head .pull-left .btn-group {
+.markdown-editor>.head {
+	border: 1px solid #CCC;	
+	border-bottom: none;
+	border-radius: 4px 4px 0 0;
+	padding: 4px;
+}
+.markdown-editor>.head>.actions>div>a {
+	color: #777;
+	padding: 2px;
+	border: 1px solid white;
+	border-radius: 2px;
+	display: block;
+	width: 24px;
+	text-align: center;
 	margin-right: 4px;
 }
-.markdown-editor>.head .pull-right .btn-group {
-	margin-left: 4px;
+.markdown-editor>.head>.actions .separator {
+	display: block;
+	border-left: 1px solid #CCC;
+	margin-right: 4px;
+	height: 24px;
 }
-.markdown-editor>.head .dropdown .active:BEFORE {
+.markdown-editor>.head>.actions>div>a:hover, .markdown-editor>.head>.actions>div>a.active {
+	background: #EEE;
+	border: 1px solid #CCC;
+}
+
+.markdown-editor>.head>.actions .dropdown .active:BEFORE {
 	font-family: "FontAwesome";
 	content: "\f00c";
 	position: absolute;
@@ -42,24 +66,23 @@
     bottom: -3px;
 }
 
-.markdown-editor>.emojis {
-	margin-bottom: 8px; 
+.markdown-editor>.head>.emojis {
 	display: none;
 }
-.markdown-editor>.emojis.loaded {
+.markdown-editor>.head>.emojis.loaded {
 	font-size: 12px; 
 	line-height: 24px; 
 	height: 200px; 
 	overflow: auto;
 }
-.markdown-editor>.emojis.loading {
+.markdown-editor>.head>.emojis.loading {
 	font-size: 16px;
 	color: #888;
 }
-.markdown-editor>.emojis .emoji {
+.markdown-editor>.head>.emojis .emoji {
 	margin-right: 12px;
 }
-.markdown-editor>.emojis .emoji img {
+.markdown-editor>.head>.emojis .emoji img {
 	width: 16px; 
 	height: 16px;
 }
@@ -67,15 +90,14 @@
 	opacity: 0.5;
 }
 
-.markdown-editor>.help {
-	margin-bottom: 8px; 
+.markdown-editor>.head>.help {
 	display: none;
 }
 
 .markdown-editor>.body>.preview>.markdown-rendered {
-	border: 1px solid #BBB;
+	border: 1px solid #CCC;
 	padding: 8px;
-	border-radius: 4px;
+	border-radius: 0 0 4px 4px;
 	background: white;
 }
 
@@ -120,8 +142,8 @@
 }
 
 .markdown-editor>.body>.edit>textarea {
-	border: 1px solid #BBB;
-	border-radius: 4px;
+	border: 1px solid #CCC;
+	border-radius: 0 0 4px 4px;
 	overflow: auto;
 	width: 100%;
 	display: block;
@@ -134,16 +156,16 @@
 	color: #999;
 }
 .markdown-editor.normal-mode.split-mode>.body>.edit>textarea {
-	border-radius: 4px 0 0 4px;
+	border-radius: 0 0 0 4px;
 }
 .markdown-editor.normal-mode.split-mode>.body>.preview>.markdown-rendered {
 	border-left: none;
-	border-radius: 0 4px 4px 0;
+	border-radius: 0 0 4px 0;
 }
 .markdown-editor.compact-mode.split-mode>.body>.preview {
 	margin-top: 8px;
 	border-left: none;
-	border-radius: 0 4px 4px 0;
+	border-radius: 0 0 4px 0;
 }
 
 .atwho-view .emoji {
@@ -181,7 +203,7 @@
 }
 
 .insert-url input.url {
-	width: 480px;
+	width: 470px;
 	margin-right: 7px;
 }
 .insert-url .attachments {

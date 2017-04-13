@@ -43,8 +43,6 @@ import org.apache.wicket.request.cycle.RequestCycleContext;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
-import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
-import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 import org.apache.wicket.util.IProvider;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
@@ -83,7 +81,7 @@ public class GitPlexWebApplication extends WebApplication {
 		getMarkupSettings().setStripWicketTags(true);
 		
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
-
+		
 		BootstrapSettings bootstrapSettings = new BootstrapSettings();
 		bootstrapSettings.setAutoAppendResources(false);
 		de.agilecoders.wicket.core.Bootstrap.install(this, bootstrapSettings);
@@ -160,8 +158,6 @@ public class GitPlexWebApplication extends WebApplication {
 			new ResourceBundleReferences(WebModule.class, resourcePackScopes.toArray(new Class<?>[resourcePackScopes.size()])).installInto(this);
 		}
 		
-		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));
-
 		setRequestCycleProvider(new IRequestCycleProvider() {
 
 			@Override

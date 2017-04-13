@@ -18,9 +18,6 @@ gitplex.server.markdown = {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
-		var $emojis = $container.children(".emojis");
-		var $help = $container.children(".help");
-		var $warning = $container.children(".warning");
 		var $edit = $body.children(".edit");
 		var $input = $edit.children("textarea");
 		var $preview = $body.children(".preview");
@@ -32,12 +29,6 @@ gitplex.server.markdown = {
 		height = $container.height();
 		
 		height -= $head.outerHeight();
-		if ($warning.is(":visible"))
-			height -= $warning.outerHeight(true);
-		if ($emojis.is(":visible"))
-			height -= $emojis.outerHeight(true);
-		if ($help.is(":visible"))
-			height -= $help.outerHeight(true);
 		if ($container.hasClass("compact-mode")) {
 			height = height/2;
 		}
@@ -54,9 +45,9 @@ gitplex.server.markdown = {
 		var $editLink = $head.find(".edit");
 		var $previewLink = $head.find(".preview");
 		var $splitLink = $head.find(".split");
-		var $emojis = $container.children(".emojis");
-		var $help = $container.children(".help");
-		var $warning = $container.children(".warning");
+		var $emojis = $head.children(".emojis");
+		var $help = $head.children(".help");
+		var $warning = $head.children(".warning");
 		var $edit = $body.children(".edit");
 		var $input = $edit.children("textarea");
 		var $preview = $body.children(".preview");
@@ -69,7 +60,6 @@ gitplex.server.markdown = {
 		
 		$editLink.click(function() {
 			$container.removeClass("preview-mode").removeClass("split-mode").addClass("edit-mode");
-			$head.find(".pull-left .btn").removeAttr("disabled");
 			$input.focus();
 			$editLink.addClass("active");
 			$previewLink.removeClass("active");
@@ -79,7 +69,6 @@ gitplex.server.markdown = {
 		});
 		$previewLink.click(function() {
 			$container.removeClass("edit-mode").removeClass("split-mode").addClass("preview-mode");
-			$head.find(".pull-left .btn").attr("disabled", "disabled");
 			
 			var caret = $input.caret();
 			if ($input.val().substring(0, caret).trim().length == 0) {
@@ -104,7 +93,6 @@ gitplex.server.markdown = {
 		});
 		$splitLink.click(function() {
 			$container.removeClass("edit-mode").removeClass("preview-mode").addClass("split-mode");
-			$head.find(".pull-left .btn").removeAttr("disabled");
 			
 			$input.focus();
 			
@@ -466,6 +454,7 @@ gitplex.server.markdown = {
 		$head.find(".do-fullscreen").click(function() {
 			var $replacement = getReplacement();
 			if ($container.hasClass("fullscreen")) {
+				$("body").removeClass("fullscreen");
 				$container.removeClass("fullscreen");
 				var $placeholder = $("#" + containerId + "-placeholder");
 				
@@ -499,7 +488,7 @@ gitplex.server.markdown = {
 				$resizeHandles.hide();
 				var $placeholder = $("<div id='" + containerId + "-placeholder'></div>");
 				$placeholder.insertAfter($replacement);
-				$("body").append($replacement);
+				$("body").append($replacement).addClass("fullscreen");
 				$(this).addClass("active");
 				$(window).resize();
 			}
@@ -774,7 +763,7 @@ gitplex.server.markdown = {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
-		var $warning = $container.children(".warning");
+		var $warning = $head.children(".warning");
 		var $rendered = $body.find(">.preview>.markdown-rendered");
 		var $input = $body.find(">.edit>textarea");
 		var $resizeHandles = $container.find(".ui-resizable-handle");
@@ -795,16 +784,6 @@ gitplex.server.markdown = {
 				gitplex.server.markdown.fireInputEvent($input);
 			}
 		}
-		
-		/*
-		 * Caret may moves to end of input when auto-saved value is restored, or loaded via Firefox. For better 
-		 * usage experience, we force it to change to begin of input while preserving previous focus  
-		 */
-		var prevActive = document.activeElement;
-		$input.caret(0);
-		if (prevActive)
-			$(prevActive).focus();
-		$input.scrollTop(0);
 	},
 	onRendered: function(containerId, html) {
 		var $preview = $("#" + containerId + ">.body>.preview");
@@ -870,7 +849,7 @@ gitplex.server.markdown = {
 		var $body = $container.children(".body");
 		var $edit = $body.children(".edit");
 		var $input = $edit.children("textarea");
-		var $emojis = $container.children(".emojis");
+		var $emojis = $head.children(".emojis");
 		var $resizeHandles = $container.find(".ui-resizable-handle");
 		
 		var contentHtml = "";

@@ -37,32 +37,35 @@ public class UrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
 
 					@Override
 					public Set<NodeRenderingHandler<?>> getNodeRenderingHandlers() {
-				        HashSet<NodeRenderingHandler<?>> set = new HashSet<NodeRenderingHandler<?>>();
-				        set.add(new NodeRenderingHandler<Image>(Image.class, new CustomNodeRenderer<Image>() {
-				        	
-				            @Override
-				            public void render(Image image, NodeRendererContext context, HtmlWriter html) {
-				            	String url = image.getUrl().toString();
-				                ResolvedLink resolvedLink = context.resolveLink(LinkType.IMAGE, url, null);
-				                html.attr("src", resolveUrl(options.get(BASE_URL), url));
-				                html.attr("alt", image.getText());
-				                html.withAttr(resolvedLink);
-				                html.tagVoid("img");
-				            }
-				            
-				        }));
-				        set.add(new NodeRenderingHandler<Link>(Link.class, new CustomNodeRenderer<Link>() {
-				        	
-				            @Override
-				            public void render(Link link, NodeRendererContext context, HtmlWriter html) {
-				            	String url = link.getUrl().toString();
-				                ResolvedLink resolvedLink = context.resolveLink(LinkType.LINK, url, null);
-				                html.attr("href", resolveUrl(options.get(BASE_URL), url));
-				                html.withAttr(resolvedLink);
-				                html.tag("a").text(link.getText()).closeTag("a");
-				            }
-				            
-				        }));
+				        Set<NodeRenderingHandler<?>> set = new HashSet<NodeRenderingHandler<?>>();
+						String baseUrl = options.get(BASE_URL);
+						if (baseUrl != null) {
+					        set.add(new NodeRenderingHandler<Image>(Image.class, new CustomNodeRenderer<Image>() {
+					        	
+					            @Override
+					            public void render(Image image, NodeRendererContext context, HtmlWriter html) {
+					            	String url = image.getUrl().toString();
+					                ResolvedLink resolvedLink = context.resolveLink(LinkType.IMAGE, url, null);
+					                html.attr("src", resolveUrl(baseUrl, url));
+					                html.attr("alt", image.getText());
+					                html.withAttr(resolvedLink);
+					                html.tagVoid("img");
+					            }
+					            
+					        }));
+					        set.add(new NodeRenderingHandler<Link>(Link.class, new CustomNodeRenderer<Link>() {
+					        	
+					            @Override
+					            public void render(Link link, NodeRendererContext context, HtmlWriter html) {
+					            	String url = link.getUrl().toString();
+					                ResolvedLink resolvedLink = context.resolveLink(LinkType.LINK, url, null);
+					                html.attr("href", resolveUrl(baseUrl, url));
+					                html.withAttr(resolvedLink);
+					                html.tag("a").text(link.getText()).closeTag("a");
+					            }
+					            
+					        }));
+						}
 				        
 				        return set;
 					}

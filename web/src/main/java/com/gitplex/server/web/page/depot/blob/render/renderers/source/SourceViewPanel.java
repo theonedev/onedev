@@ -75,6 +75,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.CommentPos;
 import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.TextRange;
+import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
@@ -150,13 +151,19 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 		super(id, context);
 		
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
-		Preconditions.checkArgument(blob.getText() != null);
 		
 		String blobName = context.getBlobIdent().getName();
 		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
 		if (extractor != null) {
 			try {
-				symbols.addAll(extractor.extract(null, blob.getText().getContent()));
+				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+				List<Symbol> cachedSymbols = searchManager.getSymbols(context.getDepot(), blob.getBlobId(), 
+						blob.getIdent().path);
+				if (cachedSymbols != null)
+					symbols.addAll(cachedSymbols);
+				else {
+					symbols.addAll(extractor.extract(null, blob.getText().getContent()));
+				}
 			} catch (ExtractException e) {
 				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
 			}

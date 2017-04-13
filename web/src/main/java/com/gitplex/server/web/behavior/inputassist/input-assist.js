@@ -126,8 +126,6 @@ gitplex.server.inputassist = {
 				return false;
 			}
 		});
-		
-		callback("input", $input.val());		
 	},
 	
 	markErrors: function(inputId, errors) {

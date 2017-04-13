@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
 import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.resource.ITextResourceCompressor;
 import org.apache.wicket.resource.bundles.ConcatBundleResource;
-import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
 import org.apache.wicket.util.io.ByteArrayOutputStream;
 import org.apache.wicket.util.io.IOUtils;
 import org.apache.wicket.util.resource.IResourceStream;
@@ -15,7 +14,7 @@ import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
 
 @SuppressWarnings("serial")
 public class JavaScriptConcatResourceBundleReference 
-		extends ConcatResourceBundleReference<JavaScriptReferenceHeaderItem> {
+		extends CachedDependenciesConcatResourceBundleReference<JavaScriptReferenceHeaderItem> {
 	
 	public JavaScriptConcatResourceBundleReference(Class<?> scope, String name, List<JavaScriptReferenceHeaderItem> resources) {
 		super(scope, name, resources);
