@@ -10,7 +10,10 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.jsyntax.Token;
+import com.gitplex.jsyntax.TextToken;
+import com.gitplex.jsyntax.TokenTypes;
+import com.gitplex.jsyntax.TokenUtils;
+import com.gitplex.jsyntax.Tokenized;
 import com.gitplex.jsyntax.Tokenizer;
 import com.gitplex.jsyntax.TokenizerRegistry;
 import com.gitplex.server.util.StringUtils;
@@ -26,49 +29,54 @@ public class DiffUtils {
 	
 	private static final Pattern pattern = Pattern.compile("\\w+");
 	
-	private static List<String> splitByWord(String line) {
-		List<String> tokens = new ArrayList<>();
-		Matcher matcher = pattern.matcher(line);
+	private static List<Long> splitByWord(String line, long token) {
+		int beginPos = TokenUtils.getBeginPos(token);
+		int endPos = TokenUtils.getEndPos(token);
+		int typeId = TokenUtils.getTypeId(token);
+		String text = TokenUtils.getText(line, token);
+		List<Long> tokens = new ArrayList<>();
+		Matcher matcher = pattern.matcher(text);
 		int lastEnd = 0;
 		while (matcher.find()) {
 			int start = matcher.start();
 			if (start > lastEnd)
-				tokens.add(line.substring(lastEnd, start));
-            tokens.add(matcher.group());
+				tokens.add(TokenUtils.getToken(lastEnd+beginPos, start+beginPos, typeId));
+            tokens.add(TokenUtils.getToken(matcher.start()+beginPos, matcher.end()+beginPos, typeId));
             lastEnd = matcher.end();
         }
-		if (lastEnd < line.length())
-			tokens.add(line.substring(lastEnd));
+		if (lastEnd < text.length())
+			tokens.add(TokenUtils.getToken(lastEnd+beginPos, endPos, typeId));
 		return tokens;
 	}
 	
-	private static List<List<Token>> tokenize(List<String> lines, @Nullable String fileName) {
+	private static List<Tokenized> tokenize(List<String> lines, @Nullable String fileName) {
 		Tokenizer tokenizer = TokenizerRegistry.getTokenizer(fileName);
 		if (tokenizer != null) {
-			List<List<Token>> tokenizedLines = tokenizer.tokenize(lines);
-			List<List<Token>> refinedLines = new ArrayList<>();
-			for (List<Token> tokenizedLine: tokenizedLines) {
-				List<Token> refinedLine = new ArrayList<>();
-				for (Token token: tokenizedLine) {
-					if (token.getType().equals("") || token.isComment() || token.isString() 
-							|| token.isMeta() || token.isLink() || token.isAttribute() 
-							|| token.isProperty()) {
-						for (String each: splitByWord(token.getText()))
-							refinedLine.add(new Token(token.getType(), each));
+			List<Tokenized> tokenizedLines = tokenizer.tokenize(lines);
+			List<Tokenized> refinedTokens = new ArrayList<>();
+			int index = 0;
+			for (Tokenized tokenizedLine: tokenizedLines) {
+				List<Long> refinedLine = new ArrayList<>();
+				for (long token: tokenizedLine.getTokens()) {
+					int typeId = TokenUtils.getTypeId(token);
+					if (typeId == 0 || (typeId & TokenTypes.COMMENT) != 0 || (typeId & TokenTypes.STRING) != 0 
+							|| (typeId & TokenTypes.STRING2) != 0 || (typeId & TokenTypes.META) != 0
+							|| (typeId & TokenTypes.LINK) != 0 || (typeId & TokenTypes.ATTRIBUTE) != 0
+							|| (typeId & TokenTypes.PROPERTY) != 0) {
+						refinedLine.addAll(splitByWord(lines.get(index), token));
 					} else {
 						refinedLine.add(token);
 					}
 				}
-				refinedLines.add(refinedLine);
+				refinedTokens.add(new Tokenized(tokenizedLine.getText(), TokenUtils.toArray(refinedLine)));
+				index++;
 			}
-			return refinedLines;
+			return refinedTokens;
 		} else {
-			List<List<Token>> tokenizedLines = new ArrayList<>();
+			List<Tokenized> tokenizedLines = new ArrayList<>();
 			for (String line: lines) {
-				List<Token> tokenizedLine = new ArrayList<>();
-				for (String each: splitByWord(line)) 
-					tokenizedLine.add(new Token("", each));
-				tokenizedLines.add(tokenizedLine);
+				long token = TokenUtils.getToken(0, line.length(), 0);
+				tokenizedLines.add(new Tokenized(line, TokenUtils.toArray(splitByWord(line, token))));
 			}
 			return tokenizedLines;
 		}
@@ -77,7 +85,7 @@ public class DiffUtils {
 	/**
 	 * Diff two list of strings.
 	 */
-	public static List<DiffBlock<List<Token>>> diff(List<String> oldLines, @Nullable String oldFileName, 
+	public static List<DiffBlock<Tokenized>> diff(List<String> oldLines, @Nullable String oldFileName, 
 			List<String> newLines, @Nullable String newFileName, WhitespaceOption whitespaceOption) {
 		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_SIZE, 
 				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
@@ -92,36 +100,36 @@ public class DiffUtils {
 			processedNewLines.add(whitespaceOption.process(line));
 		}
 		
-		List<List<Token>> oldTokenizedLines = tokenize(oldLines, oldFileName);
-		List<List<Token>> newTokenizedLines = tokenize(newLines, newFileName);
+		List<Tokenized> oldTokenizedLines = tokenize(oldLines, oldFileName);
+		List<Tokenized> newTokenizedLines = tokenize(newLines, newFileName);
 
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		TokensToCharsResult<String> result1 = tokensToChars(processedOldLines, processedNewLines);
 		
 		List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result1.chars1, result1.chars2, false);
 
-		List<DiffBlock<List<Token>>> diffBlocks = new ArrayList<>();
+		List<DiffBlock<Tokenized>> diffBlocks = new ArrayList<>();
 		int oldLineNo = 0;
 		int newLineNo = 0;
 		for (Diff diff : diffs) {
-			List<List<Token>> lines = new ArrayList<>();
+			List<Tokenized> lines = new ArrayList<>();
 			if (diff.operation == Operation.EQUAL) {
 				for (int i = 0; i < diff.text.length(); i++) {
 					lines.add(newTokenizedLines.get(newLineNo));
 					oldLineNo++;
 					newLineNo++;
 				}
-				diffBlocks.add(new DiffBlock<List<Token>>(diff.operation, lines, 
+				diffBlocks.add(new DiffBlock<>(diff.operation, lines, 
 						oldLineNo-lines.size(), newLineNo-lines.size()));
 			} else if (diff.operation == Operation.INSERT) {
 				for (int i = 0; i < diff.text.length(); i++)
 					lines.add(newTokenizedLines.get(newLineNo++));
-				diffBlocks.add(new DiffBlock<List<Token>>(diff.operation, lines, 
+				diffBlocks.add(new DiffBlock<>(diff.operation, lines, 
 						oldLineNo, newLineNo-lines.size()));
 			} else {
 				for (int i = 0; i < diff.text.length(); i++)
 					lines.add(oldTokenizedLines.get(oldLineNo++));
-				diffBlocks.add(new DiffBlock<List<Token>>(diff.operation, lines, 
+				diffBlocks.add(new DiffBlock<>(diff.operation, lines, 
 						oldLineNo-lines.size(), newLineNo));
 			}
 		}
@@ -173,7 +181,7 @@ public class DiffUtils {
 	 * @return
 	 */
 	public static LinkedHashMap<Integer, LineDiff> align(
-			List<List<Token>> deleteLines, List<List<Token>> insertLines) {
+			List<Tokenized> deleteLines, List<Tokenized> insertLines) {
 		LinkedHashMap<Integer, LineDiff> lineDiffs = new LinkedHashMap<>();
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
@@ -181,17 +189,20 @@ public class DiffUtils {
 		long time = System.currentTimeMillis();
 		int nextInsert = 0;
 		for (int i=0; i<deleteLines.size(); i++) {
-			List<Token> deleteLine = deleteLines.get(i);
+			Tokenized deleteLine = deleteLines.get(i);
+			List<TextToken> deleteTokens = TokenUtils.getTextTokens(deleteLine);
 			for (int j=nextInsert; j<insertLines.size(); j++) {
-				List<Token> insertLine = insertLines.get(j);
-				TokensToCharsResult<Token> result = DiffUtils.tokensToChars(deleteLine, insertLine);						
+				Tokenized insertLine = insertLines.get(j);
+				List<TextToken> insertTokens = TokenUtils.getTextTokens(insertLine);
+				
+				TokensToCharsResult<TextToken> result = DiffUtils.tokensToChars(deleteTokens, insertTokens);						
 				List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result.chars1, result.chars2, false);
 				int equal = 0;
 				int total = 0;
 				for (DiffMatchPatch.Diff diff: diffs) {
 					for (int k=0; k<diff.text.length(); k++) {
 						int pos = diff.text.charAt(k);
-						Token token = result.tokenArray.get(pos);
+						TextToken token = result.tokenArray.get(pos);
 						if (StringUtils.isNotBlank(token.getText())) {
 							total += token.getText().length();
 							if (diff.operation == Operation.EQUAL)
@@ -200,26 +211,29 @@ public class DiffUtils {
 					}
 				}
 				if (equal*3 >= total) {
-					List<DiffBlock<Token>> diffBlocks = new ArrayList<>();
+					List<DiffBlock<TextToken>> diffBlocks = new ArrayList<>();
 					int oldLineNo = 0;
 					int newLineNo = 0;
 					for (Diff diff : diffs) {
-						List<Token> tokens = new ArrayList<>();
+						List<TextToken> tokens = new ArrayList<>();
 						if (diff.operation == Operation.EQUAL) {
 							for (int k = 0; k < diff.text.length(); k++) {
-								tokens.add(insertLine.get(newLineNo));
+								tokens.add(insertTokens.get(newLineNo));
 								oldLineNo++;
 								newLineNo++;
 							}
-							diffBlocks.add(new DiffBlock<Token>(diff.operation, tokens, oldLineNo-tokens.size(), newLineNo-tokens.size()));
+							diffBlocks.add(new DiffBlock<TextToken>(
+									diff.operation, tokens, oldLineNo-tokens.size(), newLineNo-tokens.size()));
 						} else if (diff.operation == Operation.INSERT) {
 							for (int k = 0; k < diff.text.length(); k++)
-								tokens.add(insertLine.get(newLineNo++));
-							diffBlocks.add(new DiffBlock<Token>(diff.operation, tokens, oldLineNo, newLineNo-tokens.size()));
+								tokens.add(insertTokens.get(newLineNo++));
+							diffBlocks.add(new DiffBlock<>(
+									diff.operation, tokens, oldLineNo, newLineNo-tokens.size()));
 						} else {
 							for (int k = 0; k < diff.text.length(); k++)
-								tokens.add(deleteLine.get(oldLineNo++));
-							diffBlocks.add(new DiffBlock<Token>(diff.operation, tokens, oldLineNo-tokens.size(), newLineNo));
+								tokens.add(deleteTokens.get(oldLineNo++));
+							diffBlocks.add(new DiffBlock<>(
+									diff.operation, tokens, oldLineNo-tokens.size(), newLineNo));
 						}
 					}
 

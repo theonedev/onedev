@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
-import com.gitplex.jsyntax.Token;
+import com.gitplex.jsyntax.Tokenized;
 import com.gitplex.server.util.diff.DiffBlock;
 import com.gitplex.server.util.diff.DiffUtils;
 import com.gitplex.server.util.diff.WhitespaceOption;
@@ -29,7 +29,7 @@ public abstract class BlobChange implements Serializable {
 	
 	protected final BlobIdent newBlobIdent;
 	
-	private transient List<DiffBlock<List<Token>>> diffBlocks;
+	private transient List<DiffBlock<Tokenized>> diffBlocks;
 	
 	public BlobChange(String oldRev, String newRev, DiffEntry diffEntry, 
 			WhitespaceOption whitespaceOption) {
@@ -82,7 +82,7 @@ public abstract class BlobChange implements Serializable {
 		return newBlobIdent.path != null? newBlobIdent.path: oldBlobIdent.path;
 	}
 	
-	public List<DiffBlock<List<Token>>> getDiffBlocks() {
+	public List<DiffBlock<Tokenized>> getDiffBlocks() {
 		if (diffBlocks == null) {
 			try {
 				if (type == ChangeType.ADD || type == ChangeType.COPY) {
@@ -140,7 +140,7 @@ public abstract class BlobChange implements Serializable {
 	
 	public int getAdditions() {
 		int additions = 0;
-		for (DiffBlock<List<Token>> diff: getDiffBlocks()) {
+		for (DiffBlock<Tokenized> diff: getDiffBlocks()) {
 			if (diff.getOperation() == Operation.INSERT)
 				additions += diff.getUnits().size();
 		}
@@ -149,7 +149,7 @@ public abstract class BlobChange implements Serializable {
 
 	public int getDeletions() {
 		int deletions = 0;
-		for (DiffBlock<List<Token>> diff: getDiffBlocks()) {
+		for (DiffBlock<Tokenized> diff: getDiffBlocks()) {
 			if (diff.getOperation() == Operation.DELETE)
 				deletions += diff.getUnits().size();
 		}

@@ -3,7 +3,7 @@ package com.gitplex.server.web.component.diff.blob.text;
 import java.io.Serializable;
 import java.util.List;
 
-import com.gitplex.jsyntax.Token;
+import com.gitplex.jsyntax.Tokenized;
 
 public class MarkAwareDiffBlock implements Serializable {
 
@@ -15,11 +15,11 @@ public class MarkAwareDiffBlock implements Serializable {
 
 	private final Type type;
 	
-	private final List<List<Token>> lines;
+	private final List<Tokenized> lines;
 	
 	private final int oldStart, newStart;
 	
-	public MarkAwareDiffBlock(Type type, List<List<Token>> lines, int oldStart, int newStart) {
+	public MarkAwareDiffBlock(Type type, List<Tokenized> lines, int oldStart, int newStart) {
 		this.type = type;
 		this.lines = lines;
 		this.oldStart = oldStart;
@@ -30,7 +30,7 @@ public class MarkAwareDiffBlock implements Serializable {
 		return type;
 	}
 
-	public List<List<Token>> getLines() {
+	public List<Tokenized> getLines() {
 		return lines;
 	}
 

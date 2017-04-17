@@ -3,7 +3,7 @@ package com.gitplex.server.util.diff;
 import java.io.Serializable;
 import java.util.List;
 
-import com.gitplex.jsyntax.Token;
+import com.gitplex.jsyntax.TextToken;
 
 public class LineDiff implements Serializable {
 
@@ -11,18 +11,18 @@ public class LineDiff implements Serializable {
 
 	private final int compareLine;
 	
-	private final List<DiffBlock<Token>> tokenDiffs;
+	private final List<DiffBlock<TextToken>> tokenDiffs;
 	
-	public LineDiff(int line, List<DiffBlock<Token>> diffs) {
-		this.compareLine = line;
-		this.tokenDiffs = diffs;
+	public LineDiff(int compareLine, List<DiffBlock<TextToken>> tokenDiffs) {
+		this.compareLine = compareLine;
+		this.tokenDiffs = tokenDiffs;
 	}
 
 	public int getCompareLine() {
 		return compareLine;
 	}
 
-	public List<DiffBlock<Token>> getTokenDiffs() {
+	public List<DiffBlock<TextToken>> getTokenDiffs() {
 		return tokenDiffs;
 	}
 	
