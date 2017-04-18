@@ -88,13 +88,13 @@ public class DepotCommitsPage extends DepotPage {
 	
 	private static final int COUNT = 50;
 	
-	private static final int MAX_STEPS = 50;
+	private static final int MAX_PAGES = 50;
 	
 	private static final String PARAM_COMPARE_WITH = "compareWith";
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private static final String PARAM_STEP = "step";
+	private static final String PARAM_PAGE = "page";
 	
 	private State state = new State();
 	
@@ -123,8 +123,8 @@ public class DepotCommitsPage extends DepotPage {
 				RevListCommand command = new RevListCommand(getDepot().getDirectory());
 				command.ignoreCase(true);
 				
-				if (state.page > MAX_STEPS)
-					throw new RuntimeException("Step should be no more than " + MAX_STEPS);
+				if (state.page > MAX_PAGES)
+					throw new RuntimeException("Page should be no more than " + MAX_PAGES);
 				
 				command.count(state.page*COUNT);
 
@@ -192,8 +192,8 @@ public class DepotCommitsPage extends DepotPage {
 			hasMore = commitHashes.size() == state.page*COUNT;
 			
 			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
-				int lastMaxCount = (state.page-1)*COUNT;
-
+				int lastMaxCount = Math.min((state.page-1)*COUNT, commitHashes.size());
+				
 				commits.last = new ArrayList<>();
 				
 				for (int i=0; i<lastMaxCount; i++) { 
@@ -226,9 +226,9 @@ public class DepotCommitsPage extends DepotPage {
 		
 		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();
 		state.query = params.get(PARAM_QUERY).toString();
-		Integer step = params.get(PARAM_STEP).toOptionalInteger();
-		if (step != null)
-			state.page = step.intValue();		
+		Integer page = params.get(PARAM_PAGE).toOptionalInteger();
+		if (page != null)
+			state.page = page.intValue();		
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -362,7 +362,7 @@ public class DepotCommitsPage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(hasMore && state.page < MAX_STEPS);
+				setVisible(hasMore && state.page < MAX_PAGES);
 			}
 			
 		});
@@ -371,7 +371,7 @@ public class DepotCommitsPage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(state.page == MAX_STEPS);
+				setVisible(state.page == MAX_PAGES);
 			}
 			
 		});
@@ -532,7 +532,7 @@ public class DepotCommitsPage extends DepotPage {
 		if (state.query != null)
 			params.set(PARAM_QUERY, state.query);
 		if (state.page != 1)
-			params.set(PARAM_STEP, state.page);
+			params.set(PARAM_PAGE, state.page);
 		return params;
 	}
 	
