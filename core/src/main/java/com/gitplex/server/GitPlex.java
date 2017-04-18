@@ -103,7 +103,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 				logger.warn("Please set up the server at " + guessServerUrl());
 				initStage = new InitStage("Server Setup", manualConfigs);
 				
-				initStage.waitFor();
+				initStage.waitForFinish();
 				
 				// clear session in order to pick up changes made in interactive setup 
 				dao.getSession().clear();
@@ -154,11 +154,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	 * 			cloned initStage, or <tt>null</tt> if system initialization is completed
 	 */
 	public @Nullable InitStage getInitStage() {
-		if (initStage != null) {
-			return initStage.clone();
-		} else {
-			return null;
-		}
+		return initStage;
 	}
 	
 	public boolean isReady() {

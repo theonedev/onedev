@@ -3,6 +3,7 @@ package com.gitplex.server.web.page.init;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -16,6 +17,7 @@ import com.gitplex.server.model.Account;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.init.InitStage;
 import com.gitplex.server.util.init.ManualConfig;
+import com.gitplex.server.util.init.Skippable;
 import com.gitplex.server.web.WebSession;
 import com.gitplex.server.web.component.wizard.ManualConfigStep;
 import com.gitplex.server.web.component.wizard.Wizard;
@@ -27,8 +29,52 @@ public class ServerInitPage extends BasePage {
 	private InitStage initStage;
 	
 	public ServerInitPage() {
-		initStage = GitPlex.getInstance().getInitStage();
-		if (initStage == null) {
+		InitStage initStage = GitPlex.getInstance().getInitStage();
+		if (initStage != null) {
+			if (!initStage.getManualConfigs().isEmpty()) {
+				List<ManualConfig> clonedConfigs = new ArrayList<ManualConfig>();
+				for (ManualConfig each: initStage.getManualConfigs())
+					clonedConfigs.add(SerializationUtils.clone(each));
+				
+				final ManualConfig lastConfig = clonedConfigs.remove(clonedConfigs.size()-1);
+				
+				clonedConfigs.add(new ManualConfig(lastConfig.getMessage(), lastConfig.getSetting()) {
+		
+					@Override
+					public Skippable getSkippable() {
+						final Skippable skippable = lastConfig.getSkippable();
+						if (skippable != null) {
+							return new Skippable() {
+
+								@Override
+								public void skip() {
+									skippable.skip();
+									InitStage initStage = GitPlex.getInstance().getInitStage();
+									if (initStage != null)
+										initStage.finished();
+								}
+								
+							};
+						} else {
+							return null;
+						}
+					}
+		
+					@Override
+					public void complete() {
+						lastConfig.complete();
+						InitStage initStage = GitPlex.getInstance().getInitStage();
+						if (initStage != null)
+							initStage.finished();
+					}
+					
+				});
+				
+				this.initStage = new InitStage(initStage.getMessage(), clonedConfigs);
+			} else {
+				this.initStage = new InitStage(initStage.getMessage());
+			}
+		} else {
 			continueToOriginalDestination();
 			
 			throw new RestartResponseException(getApplication().getHomePage());
