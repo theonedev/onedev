@@ -263,18 +263,31 @@ public class GitUtils {
 		return blobIdent;
     }
     
-    public static RevCommit getMergeBase(Repository repository, ObjectId commit1, ObjectId commit2) {
+    /**
+     * @return
+     * 			merge base of specified commits, or <tt>null</tt> if two commits do not have related history. In this 
+     * 			case, these two commits can not be merged
+     */
+    @Nullable
+    public static ObjectId getMergeBase(Repository repository, ObjectId commit1, ObjectId commit2) {
 		try (RevWalk revWalk = new RevWalk(repository)) {
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
 			
 			revWalk.markStart(revWalk.parseCommit(commit1));
 			revWalk.markStart(revWalk.parseCommit(commit2));
-			return Preconditions.checkNotNull(revWalk.next());
+			RevCommit mergeBase = revWalk.next();
+			return mergeBase!=null?mergeBase.copy():null;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} 			
     }
 
+    /**
+     * @return
+     * 			merge base of specified commits, or <tt>null</tt> if two commits do not have related history. In this 
+     * 			case, these two commits can not be merged
+     */
+    @Nullable
 	public static ObjectId getMergeBase(Repository repository1, ObjectId commit1, 
 			Repository repository2, ObjectId commit2, @Nullable String fetchRef) {
 		if (repository1.getDirectory()!=null && repository1.getDirectory().equals(repository2.getDirectory())) {

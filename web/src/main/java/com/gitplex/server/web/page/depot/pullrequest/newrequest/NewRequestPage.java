@@ -84,6 +84,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public class NewRequestPage extends DepotPage implements CommentSupport {
 
+	private static final String TABS_ID = "tabs";
+	
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
 	private DepotAndBranch target;
@@ -159,39 +161,39 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
 		
 		if (pullRequest == null) {
-			pullRequest = new PullRequest();
-			pullRequest.setTarget(target);
-			pullRequest.setSource(source);
-			pullRequest.setSubmitter(currentUser);
-			
-			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);
-			Preconditions.checkState(!strategies.isEmpty());
-			pullRequest.setIntegrationStrategy(strategies.get(0));
-			
-			ObjectPermission writePermission = ObjectPermission.ofDepotWrite(target.getDepot());
-			if (currentUser.asSubject().isPermitted(writePermission))
-				pullRequest.setAssignee(currentUser);
-
 			ObjectId baseCommitId = GitUtils.getMergeBase(
 					target.getDepot().getRepository(), target.getObjectId(), 
 					source.getDepot().getRepository(), source.getObjectId(), 
 					GitUtils.branch2ref(source.getBranch()));
-			
-			pullRequest.setBaseCommitHash(baseCommitId.name());
-			if (pullRequest.getBaseCommitHash().equals(source.getObjectName())) {
-				CloseInfo closeInfo = new CloseInfo();
-				closeInfo.setCloseDate(new Date());
-				closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-				pullRequest.setCloseInfo(closeInfo);
+			if (baseCommitId != null) {
+				pullRequest = new PullRequest();
+				pullRequest.setTarget(target);
+				pullRequest.setSource(source);
+				pullRequest.setSubmitter(currentUser);
+				
+				PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+				List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);
+				Preconditions.checkState(!strategies.isEmpty());
+				pullRequest.setIntegrationStrategy(strategies.get(0));
+				
+				ObjectPermission writePermission = ObjectPermission.ofDepotWrite(target.getDepot());
+				if (currentUser.asSubject().isPermitted(writePermission))
+					pullRequest.setAssignee(currentUser);
+	
+				pullRequest.setBaseCommitHash(baseCommitId.name());
+				if (pullRequest.getBaseCommitHash().equals(source.getObjectName())) {
+					CloseInfo closeInfo = new CloseInfo();
+					closeInfo.setCloseDate(new Date());
+					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+					pullRequest.setCloseInfo(closeInfo);
+				}
+	
+				PullRequestUpdate update = new PullRequestUpdate();
+				pullRequest.addUpdate(update);
+				update.setRequest(pullRequest);
+				update.setHeadCommitHash(source.getObjectName());
+				update.setMergeCommitHash(pullRequest.getBaseCommitHash());
 			}
-
-			PullRequestUpdate update = new PullRequestUpdate();
-			pullRequest.addUpdate(update);
-			update.setRequest(pullRequest);
-			update.setHeadCommitHash(source.getObjectName());
-			update.setMergeCommitHash(pullRequest.getBaseCommitHash());
-			
 			requestModel = Model.of(pullRequest);
 		} else {
 			Long requestId = pullRequest.getId();
@@ -271,15 +273,16 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 
 			@Override
 			public void onClick() {
-				PageParameters params = paramsOf(getPullRequest().getSourceDepot(), 
-						getPullRequest().getSource(), getPullRequest().getTarget()); 
+				PageParameters params = paramsOf(source.getDepot(), source, target); 
 				setResponsePage(NewRequestPage.class, params);
 			}
 			
 		});
 		
 		Fragment fragment;
-		if (getPullRequest().getId() != null) {
+		if (getPullRequest() == null) {
+			fragment = newUnrelatedHistoryFrag();
+		} else if (getPullRequest().getId() != null) {
 			fragment = newOpenedFrag();
 		} else if (getPullRequest().getSource().equals(getPullRequest().getTarget())) {
 			fragment = newSameBranchFrag();
@@ -292,42 +295,47 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 		}
 		add(fragment);
 
-		List<Tab> tabs = new ArrayList<>();
-		
-		tabs.add(new AjaxActionTab(Model.of("Commits")) {
+		if (getPullRequest() != null) {
+			List<Tab> tabs = new ArrayList<>();
 			
-			@Override
-			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component panel = newCommitsPanel();
-				getPage().replace(panel);
-				target.add(panel);
-			}
-			
-		});
-
-		tabs.add(new AjaxActionTab(Model.of("Files")) {
-			
-			@Override
-			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component panel = newRevDiffPanel();
-				getPage().replace(panel);
-				target.add(panel);
-			}
-			
-		});
-
-		add(new Tabbable("tabs", tabs) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
+			tabs.add(new AjaxActionTab(Model.of("Commits")) {
 				
-				setVisible(getPullRequest().getStatus() != INTEGRATED);
-			}
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					Component panel = newCommitsPanel();
+					getPage().replace(panel);
+					target.add(panel);
+				}
+				
+			});
+
+			tabs.add(new AjaxActionTab(Model.of("Files")) {
+				
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					Component panel = newRevDiffPanel();
+					getPage().replace(panel);
+					target.add(panel);
+				}
+				
+			});
+
+			add(new Tabbable(TABS_ID, tabs) {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					
+					setVisible(getPullRequest().getStatus() != INTEGRATED);
+				}
+				
+			});
 			
-		});
-		
-		add(newCommitsPanel());
+			add(newCommitsPanel());
+		} else {
+			add(new WebMarkupContainer(TABS_ID).setVisible(false));
+			add(new WebMarkupContainer(TAB_PANEL_ID).setVisible(false));
+		}
 	}
 	
 	private Component newCommitsPanel() {
@@ -466,6 +474,10 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 	
 	private Fragment newSameBranchFrag() {
 		return new Fragment("status", "sameBranchFrag", this);
+	}
+	
+	private Fragment newUnrelatedHistoryFrag() {
+		return new Fragment("status", "unrelatedHistoryFrag", this);
 	}
 	
 	private Fragment newIntegratedFrag() {

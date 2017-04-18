@@ -98,6 +98,8 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	
 	private static final String PARAM_TAB = "tab-panel";
 	
+	private static final String TABS_ID = "tabs";
+	
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
 	private IModel<List<RevCommit>> commitsModel;
@@ -218,7 +220,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			mergeBase = GitUtils.getMergeBase(
 					state.leftSide.getDepot().getRepository(), leftCommitId, 
 					state.rightSide.getDepot().getRepository(), rightCommitId, 
-					refName).copy();
+					refName);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -292,7 +294,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!mergeBase.equals(leftCommitId));
+				setVisible(mergeBase != null && !mergeBase.equals(leftCommitId));
 			}
 			
 		};
@@ -390,7 +392,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				if (isLoggedIn() && state.leftSide.getBranch()!=null && state.rightSide.getBranch()!=null) {
+				if (mergeBase != null && isLoggedIn() && state.leftSide.getBranch()!=null && state.rightSide.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();
 					setVisible(request == null && !mergeBase.equals(rightCommitId));
 				} else {
@@ -447,43 +449,58 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			
 		});
 		
-		List<Tab> tabs = new ArrayList<>();
+		add(new WebMarkupContainer("unrelatedHistory") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(mergeBase == null);
+			}
+			
+		});
 		
-		tabs.add(new AjaxActionTab(Model.of("Commits")) {
+		if (mergeBase != null) {
+			List<Tab> tabs = new ArrayList<>();
 			
-			@Override
-			public boolean isSelected() {
-				return state.tabPanel == null || state.tabPanel == TabPanel.COMMITS;
-			}
+			tabs.add(new AjaxActionTab(Model.of("Commits")) {
+				
+				@Override
+				public boolean isSelected() {
+					return state.tabPanel == null || state.tabPanel == TabPanel.COMMITS;
+				}
 
-			@Override
-			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				state.tabPanel = TabPanel.COMMITS;
-				newTabPanel(target);
-				pushState(target);
-			}
-			
-		});
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					state.tabPanel = TabPanel.COMMITS;
+					newTabPanel(target);
+					pushState(target);
+				}
+				
+			});
 
-		tabs.add(new AjaxActionTab(Model.of("Changes")) {
-			
-			@Override
-			public boolean isSelected() {
-				return state.tabPanel == TabPanel.CHANGES;
-			}
-			
-			@Override
-			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				state.tabPanel = TabPanel.CHANGES;
-				newTabPanel(target);
-				pushState(target);
-			}
-			
-		});
+			tabs.add(new AjaxActionTab(Model.of("Changes")) {
+				
+				@Override
+				public boolean isSelected() {
+					return state.tabPanel == TabPanel.CHANGES;
+				}
+				
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					state.tabPanel = TabPanel.CHANGES;
+					newTabPanel(target);
+					pushState(target);
+				}
+				
+			});
 
-		add(tabbable = new Tabbable("tabs", tabs));
+			add(tabbable = new Tabbable(TABS_ID, tabs));
 
-		newTabPanel(null);
+			newTabPanel(null);
+		} else {
+			add(new WebMarkupContainer(TABS_ID).setVisible(false));
+			add(new WebMarkupContainer(TAB_PANEL_ID).setVisible(false));
+		}
 	}
 	
 	@Override

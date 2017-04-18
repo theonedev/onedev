@@ -478,16 +478,18 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	private void checkUpdate(PullRequest request, boolean independent) {
 		if (!request.getHeadCommitHash().equals(request.getSource().getObjectName())) {
-			PullRequestUpdate update = new PullRequestUpdate();
-			update.setRequest(request);
-			update.setHeadCommitHash(request.getSource().getObjectName());
 			ObjectId mergeBase = GitUtils.getMergeBase(
 					request.getTargetDepot().getRepository(), request.getTarget().getObjectId(), 
 					request.getSourceDepot().getRepository(), request.getSource().getObjectId(), 
 					GitUtils.branch2ref(request.getSourceBranch()));
-			update.setMergeCommitHash(mergeBase.name());
-			request.addUpdate(update);
-			pullRequestUpdateManager.save(update, independent);
+			if (mergeBase != null) {
+				PullRequestUpdate update = new PullRequestUpdate();
+				update.setRequest(request);
+				update.setHeadCommitHash(request.getSource().getObjectName());
+				update.setMergeCommitHash(mergeBase.name());
+				request.addUpdate(update);
+				pullRequestUpdateManager.save(update, independent);
+			}
 		}
 	}
 
