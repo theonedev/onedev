@@ -1,7 +1,7 @@
 #! /bin/sh
 
 #
-# Copyright (c) 1999, 2016 Tanuki Software, Ltd.
+# Copyright (c) 1999, 2017 Tanuki Software, Ltd.
 # http://www.tanukisoftware.com
 # All rights reserved.
 #
@@ -16,7 +16,7 @@
 
 #-----------------------------------------------------------------------------
 # These settings can be modified to fit the needs of your application
-# Optimized for use with version 3.5.30-st of the Wrapper.
+# Optimized for use with version 3.5.32-st of the Wrapper.
 
 # IMPORTANT - Please always stop and uninstall an application before making
 #             any changes to this file.  Failure to do so could remove the
@@ -43,7 +43,7 @@ APP_NAME="@app.name@"
 APP_LONG_NAME="@app.long.name@"
 
 # If uncommented (and set to false), APP_NAME and APP_LONG_NAME will no longer 
-# be passed to the wrapper. See documentation for details.
+#  be passed to the wrapper. See documentation for details.
 #APP_NAME_PASS_TO_WRAPPER=false
 
 # Wrapper
@@ -69,8 +69,10 @@ PIDFILE_CHECK_PID=true
 @set_fixed_command@
 
 # PASS_THROUGH tells the script to pass all arguments through to the JVM
-#  as is.  If FIXED_COMMAND is specified then all arguments will be passed.
-#  If not set then all arguments starting with the second will be passed.
+#  as is.  If PASS_THROUGH is set to true and FIXED_COMMAND is specified
+#  then all arguments will be passed. If PASS_THROUGH is set to true but
+#  FIXED_COMMAND is not specified then all arguments starting with the
+#  second will be passed.
 @set_pass_through@
 
 # If uncommented, causes the Wrapper to be shutdown using an anchor file.
@@ -84,7 +86,6 @@ PIDFILE_CHECK_PID=true
 #  startup scripts.  Setting WAIT_AFTER_STARTUP to a positive number will
 #  cause the start command to delay for the indicated period of time 
 #  (in seconds).
-# 
 WAIT_AFTER_STARTUP=0
 
 # If set, wait for the wrapper to report that the daemon has started
@@ -100,6 +101,14 @@ WAIT_FOR_STARTED_TIMEOUT=120
 #  the Wrapper.  See the wrapper.pausable and wrapper.pausable.stop_jvm
 #  properties for more information.
 #PAUSABLE=true
+
+# Set the mode used to 'pause' or 'resume' the Wrapper. Possible values are
+#  'signals' which uses SIGUSR1 and SIGUSR2, and 'file' which uses the command
+#  file to to communicate these actions.  The default value is 'signals'.
+#  Be aware that depending on the mode, the properties wrapper.signal.mode.usr1,
+#  wrapper.signal.mode.usr2, or wrapper.commandfile of the configuration file may
+#  be overriden.
+#PAUSABLE_MODE=signals
 
 # If specified, the Wrapper will be run as the specified user.
 # IMPORTANT - Make sure that the user has the required privileges to write
@@ -119,7 +128,7 @@ WAIT_FOR_STARTED_TIMEOUT=120
 #  ignore the value of SU_BIN.
 SU_BIN=su
 
-# Set option for 'su'.
+# Set option(s) for 'su' or 'runuser'.
 # In case the user set in RUN_AS_USER has no bash set, the 'su' command will fail.
 # The workaround for GNU/Linux system is to specify which bash to use with 
 #  the '-s' option.
@@ -133,24 +142,21 @@ ID_BIN=id
 # By default we show a detailed usage block.  Uncomment to show brief usage.
 #BRIEF_USAGE=true
 
-# OS service management tool: flag for using Upstart when installing (rather than init.d rc.d).
-USE_UPSTART=
-
-# OS service management tool: flag for using systemd when installing.
-USE_SYSTEMD=
-
-# Flag for AIX to start/stop the Wrapper without using the System Resource 
-# Controller (SRC).This is useful when you want to start the Wrapper as a 
-# daemon without installation or when APP_NAME is longer than 14 chars. 
-SKIP_SRC=
+# Set which service management tool to use.
+# Possible values are: 
+#   for linux...: auto, systemd, upstart, initd
+#   for aix.....: auto, src, initd
+# When set to 'auto', this script file will try to detect in the order of the 
+# list for each platform which service management tool to use to install the Wrapper.
+SERVICE_MANAGEMENT_TOOL=auto
 
 # When installing on Mac OSX platforms, the following domain will be used to
 #  prefix the plist file name.
 PLIST_DOMAIN=org.tanukisoftware.wrapper
 
 # When installing on Mac OSX platforms, this parameter controls whether the daemon
-# is to be kept continuously running or to let demand and conditions control the 
-# invocation.
+#  is to be kept continuously running or to let demand and conditions control the 
+#  invocation.
 MACOSX_KEEP_RUNNING="false"
 
 # The following two lines are used by the chkconfig command. Change as is
@@ -393,7 +399,7 @@ then
     OS_VER=`sw_vers | grep 'ProductVersion:' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\|[0-9]*\.[0-9]*'`
     DIST_ARCH="universal"
     compareVersions "$OS_VER" "10.5.0"
-    if [[ $? < 1 ]]
+    if [ $? -lt 1 ]
     then
         DIST_BITS="32"
         KEY_KEEP_ALIVE="OnDemand"
@@ -410,6 +416,12 @@ then
     fi
     APP_PLIST_BASE=${PLIST_DOMAIN}.${APP_NAME}
     APP_PLIST=${APP_PLIST_BASE}.plist
+elif [ "$DIST_OS" = "zos" ] ; then
+    # Z/Os is not supported in the Delta Pack, therefore we only provide a binary
+    # file named "wrapper". However this script will still check for a file named
+    # "wrapper-zos-390-32" and "wrapper-zos-390-64" in case the user edited the name.
+    DIST_ARCH="390"
+    DIST_BITS="64"
 else
     if [ "$DIST_OS" = "linux" ]
     then
@@ -491,9 +503,13 @@ else
                 DIST_BITS="32"
             fi
             ;;
-        '2064' | '2066' | '2084' | '2086' | '2094' | '2096' | '2097' | '2098' | '2817')
+        s390* )
             DIST_ARCH="390"
-            DIST_BITS="64"
+            if [ `getconf LONG_BIT` -eq 64 ] ; then
+                DIST_BITS="64"
+            else
+                DIST_BITS="32"
+            fi
             ;;
         armv*)
             if [ -z "`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`" ] ; then 
@@ -547,63 +563,41 @@ outputFile() {
     fi
 }
 
+# Check if the first parameter is an existing executable file.
+detectWrapperBinary() {
+    if [ -f "$1" ] ; then
+        WRAPPER_TEST_CMD="$1"
+        if [ ! -x "$WRAPPER_TEST_CMD" ] ; then
+            chmod +x "$WRAPPER_TEST_CMD" 2>/dev/null
+        fi
+        if [ -x "$WRAPPER_TEST_CMD" ] ; then
+            WRAPPER_CMD="$WRAPPER_TEST_CMD"
+        else
+            outputFile "$WRAPPER_TEST_CMD"
+            WRAPPER_TEST_CMD=""
+        fi
+    fi
+}
+
 # Decide on the wrapper binary to use.
 # If the bits of the OS could be detected, we will try to look for the
 #  binary with the correct bits value.  If it doesn't exist, fall back
 #  and look for the 32-bit binary.  If that doesn't exist either then
 #  look for the default.
 WRAPPER_TEST_CMD=""
-if [ -f "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-$DIST_BITS" ]
-then
-    WRAPPER_TEST_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-$DIST_BITS"
-    if [ ! -x "$WRAPPER_TEST_CMD" ]
-    then
-        chmod +x "$WRAPPER_TEST_CMD" 2>/dev/null
-    fi
-    if [ -x "$WRAPPER_TEST_CMD" ]
-    then 
-        WRAPPER_CMD="$WRAPPER_TEST_CMD"
-    else
-        outputFile "$WRAPPER_TEST_CMD"
-        WRAPPER_TEST_CMD=""
-    fi
+detectWrapperBinary "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-$DIST_BITS"
+if [ -z "$WRAPPER_TEST_CMD" ] ; then
+    detectWrapperBinary "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
 fi
-if [ -f "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32" -a -z "$WRAPPER_TEST_CMD" ]
-then
-    WRAPPER_TEST_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
-    if [ ! -x "$WRAPPER_TEST_CMD" ]
-    then
-        chmod +x "$WRAPPER_TEST_CMD" 2>/dev/null
-    fi
-    if [ -x "$WRAPPER_TEST_CMD" ]
-    then 
-        WRAPPER_CMD="$WRAPPER_TEST_CMD"
-    else
-        outputFile "$WRAPPER_TEST_CMD"
-        WRAPPER_TEST_CMD=""
-    fi
+if [ -z "$WRAPPER_TEST_CMD" ] ; then
+    detectWrapperBinary "$WRAPPER_CMD"
 fi
-if [ -f "$WRAPPER_CMD" -a -z "$WRAPPER_TEST_CMD" ]
-then
-    WRAPPER_TEST_CMD="$WRAPPER_CMD"
-    if [ ! -x "$WRAPPER_TEST_CMD" ]
-    then
-        chmod +x "$WRAPPER_TEST_CMD" 2>/dev/null
-    fi
-    if [ -x "$WRAPPER_TEST_CMD" ]
-    then 
-        WRAPPER_CMD="$WRAPPER_TEST_CMD"
-    else
-        outputFile "$WRAPPER_TEST_CMD"
-        WRAPPER_TEST_CMD=""
-    fi
-fi
-if [ -z "$WRAPPER_TEST_CMD" ]
-then
+    
+
+if [ -z "$WRAPPER_TEST_CMD" ] ; then
     eval echo `gettext 'Unable to locate any of the following binaries:'`
     outputFile "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-$DIST_BITS"
-    if [ ! "$DIST_BITS" = "32" ]
-    then
+    if [ ! "$DIST_BITS" = "32" ] ; then
         outputFile "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
     fi
     outputFile "$WRAPPER_CMD"
@@ -641,7 +635,11 @@ fi
 # Build the command file clause.
 if [ -n "$PAUSABLE" ]
 then
-   COMMANDPROP="wrapper.commandfile=\"$COMMANDFILE\" wrapper.pausable=TRUE"
+    if [ "$PAUSABLE_MODE" = "file" ] ; then
+        COMMANDPROP="wrapper.commandfile=\"$COMMANDFILE\" wrapper.pausable=TRUE"
+    else
+        COMMANDPROP="wrapper.signal.mode.usr1=PAUSE wrapper.signal.mode.usr2=RESUME wrapper.pausable=TRUE"
+    fi
 else
    COMMANDPROP=
 fi
@@ -794,11 +792,10 @@ checkUser() {
             shift
         done
 
-        # Use "runuser" if this exists.
-        # runuser should be used on RedHat in preference to su.
-        if test -f "/sbin/runuser"
-        then
-            /sbin/runuser - $RUN_AS_USER -c "\"$REALPATH\" $ADDITIONAL_PARA"
+        # runuser doesn't transmit signals (such as ctrl+c) to the Wrapper. This causes problem when running as a console.
+        # When the Wrapper is launched as a service on RedHat, runuser should be used in preference to su.
+        if [ -f "/sbin/runuser" -a $COMMAND != "console" ] ; then
+            /sbin/runuser - $RUN_AS_USER -c "\"$REALPATH\" $ADDITIONAL_PARA" $SU_OPTS
         else
             $SU_BIN - $RUN_AS_USER -c "\"$REALPATH\" $ADDITIONAL_PARA" $SU_OPTS
         fi
@@ -838,9 +835,8 @@ checkUser() {
 # With this function, we want to make sure we are able to fork.
 checkForkCommand() {
     
-    if test -f "/sbin/runuser"
-    then
-        /sbin/runuser - $RUN_AS_USER -c "ls \"$REALPATH\"" > /dev/null 2>&1 &
+    if [ -f "/sbin/runuser" -a $COMMAND != "console" ] ; then
+        /sbin/runuser - $RUN_AS_USER -c "ls \"$REALPATH\"" $SU_OPTS > /dev/null 2>&1 &
     else
         $SU_BIN - $RUN_AS_USER -c "ls \"$REALPATH\"" $SU_OPTS > /dev/null 2>&1 &
     fi
@@ -1052,7 +1048,7 @@ launchinternal() {
         prepAdditionalParams "$@"
 
         # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.30 $ADDITIONAL_PARA"
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.32 $ADDITIONAL_PARA"
         eval $COMMAND_LINE
     else
         eval echo `gettext '$APP_LONG_NAME is already running.'`
@@ -1075,9 +1071,12 @@ console() {
         prepAdditionalParams "$@"
 
         # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" $APPNAMEPROP $ANCHORPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.30 $ADDITIONAL_PARA"
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" $APPNAMEPROP $ANCHORPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.32 $ADDITIONAL_PARA"
         eval $COMMAND_LINE
-        exit $?
+        COMMAND_EXIT_CODE=$?
+        if [ $COMMAND_EXIT_CODE -ne 0 ] ; then
+            exit $COMMAND_EXIT_CODE
+        fi
     else
         eval echo `gettext '$APP_LONG_NAME is already running.'`
         exit 1
@@ -1219,6 +1218,22 @@ macosxRestart() {
     startwait
 }
 
+# Detect if upstart is installed
+# Returns 0 if upstart is found, otherwise returns 1.
+upstartDetection() {
+    INITCTL_BIN="/sbin/initctl"
+    if [ ! -x "$INITCTL_BIN" ] ; then
+        return 1
+    fi
+    
+    result='initctl version | grep upstart'
+    # if the word "restart" is in the result, then we assume upstart is installed.
+    if [ $? -eq 0 ] ; then
+        return 0
+    fi
+    return 1
+}
+
 upstartstart() {
     # The daemon has been installed.
     eval echo `gettext 'Starting $APP_LONG_NAME.  Detected Linux and installed upstart.'`
@@ -1265,6 +1280,17 @@ upstartRestart() {
     startwait
 }
 
+# Method to check if systemd is running.
+# Returns 0 if systemd is found, otherwise returns 1.
+systemdDetection() {
+    PIDOF_BIN="/bin/pidof"
+    if [ ! -x "$PIDOF_BIN" ] ; then
+        return 1
+    fi
+    result=`/bin/pidof systemd`
+    return $?
+}
+
 systemdInstall() {
     eval echo `gettext ' Installing the $APP_LONG_NAME daemon using systemd...'`
     if [ -f "${REALDIR}/${APP_NAME}.service" ] ; then 
@@ -1293,14 +1319,6 @@ systemdInstall() {
 }
 
 systemdStart() {
-    # check if the service file is present
-    if [ -f "${SYSTEMD_SERVICE_FILE}" ] ; then 
-        eval echo `gettext 'Reading file ${SYSTEMD_SERVICE_FILE}'`
-    else
-        eval echo `gettext 'No service file detected. Did you install the service?'`
-        exit 1
-    fi
-
     systemctl start $APP_NAME
     if [ $? -ne 0 ] ; then
         eval echo `gettext 'Failed to start service $APP_NAME'`
@@ -1336,6 +1354,13 @@ systemdRemove() {
     systemctl daemon-reload
 }
 
+# Method to check if src is running.
+# Returns 0 if src is found, otherwise returns 1.
+srcDetection() {
+    result=`ps -A | grep srcmstr`
+    return $?
+}
+
 srcInstall() {
     if [ "X$RUN_AS_USER" = "X" ] ; then
         USERID="0"
@@ -1348,10 +1373,6 @@ srcInstall() {
     fi
     /usr/bin/mkssys -s "$APP_NAME" -p "$REALPATH" -a "launchdinternal" -u "$USERID" -f 9 -n 15 -S
     /usr/sbin/mkitab "$APP_NAME":2:once:"/usr/bin/startsrc -s \"${APP_NAME}\" >/dev/console 2>&1"
-    
-    if [ -n "$SKIP_SRC" ] ; then
-        eval echo `gettext 'Please do not set SKIP_SRC to be able to use SRC features.'`
-    fi
 }
 
 srcStart() {
@@ -1385,7 +1406,7 @@ start() {
         prepAdditionalParams "$@"
 
         # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.30 $ADDITIONAL_PARA"
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.32 $ADDITIONAL_PARA"
         eval $COMMAND_LINE
     else
         eval echo `gettext '$APP_LONG_NAME is already running.'`
@@ -1483,11 +1504,57 @@ stopit() {
 }
  
 pause() {
-    eval echo `gettext 'Pausing $APP_LONG_NAME.'`
+    getpid
+    if [ "X$pid" = "X" ] ; then
+        # The application is not running, print the status
+        status
+    else
+        if [ "$PAUSABLE_MODE" = "file" ] ; then
+            echo "PAUSE" >> $COMMANDFILE
+            if [ $? != 0 ] ; then
+                eval echo `gettext 'Failed to write in the command file to pause $APP_LONG_NAME.'`
+                exit 1
+            fi
+        else
+            # send a SIGUSR1 (use constants because numbers change depending on the platform)
+            kill -USR1 $pid 2>/dev/null
+            if [ $? != 0 ] ; then
+                kill -SIGUSR1 $pid
+                if [ $? != 0 ] ; then
+                    eval echo `gettext 'Failed to send a signal to pause $APP_LONG_NAME.'`
+                    exit 1
+                fi
+            fi
+        fi
+        eval echo `gettext 'Pausing $APP_LONG_NAME.'`
+    fi
 }
 
 resume() {
-    eval echo `gettext 'Resuming $APP_LONG_NAME.'`
+    getpid
+    if [ "X$pid" = "X" ] ; then
+        # The application is not running, print the status
+        status
+    else
+        if [ "$PAUSABLE_MODE" = "file" ] ; then
+            echo "RESUME" >> $COMMANDFILE
+            if [ $? != 0 ] ; then
+                eval echo `gettext 'Failed to write in the command file to resume $APP_LONG_NAME.'`
+                exit 1
+            fi
+        else
+            # send a SIGUSR2 (use constants because numbers change depending on the platform)
+            kill -USR2 $pid 2>/dev/null
+            if [ $? != 0 ] ; then
+                kill -SIGUSR2 $pid
+                if [ $? != 0 ] ; then
+                    eval echo `gettext 'Failed to send a signal to resume $APP_LONG_NAME.'`
+                    exit 1
+                fi
+            fi
+        fi
+        eval echo `gettext 'Resuming $APP_LONG_NAME.'`
+    fi
 }
 
 checkInstalled() {
@@ -1548,18 +1615,20 @@ checkInstalled() {
             installedStatus=0
         fi
     elif [ "$DIST_OS" = "aix" ] ; then
-        validateAppNameLength
         if [ -f "/etc/rc.d/init.d/$APP_NAME" -o -L "/etc/rc.d/init.d/$APP_NAME" ] ; then
             installedStatus=1
-            installedWith="rc.d"
-        elif [ -n "`/usr/sbin/lsitab $APP_NAME`" -a -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
-            installedStatus=4
-            installedWith="SRC"
-        elif [ -n "`/usr/sbin/lsitab $APP_NAME`" -o -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
-            installedStatus=5
-            installedWith="SRC"
+            installedWith="init.d"
         else
-            installedStatus=0
+            validateAppNameLength
+            if [ -n "`/usr/sbin/lsitab $APP_NAME`" -a -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+                installedStatus=4
+                installedWith="SRC"
+            elif [ -n "`/usr/sbin/lsitab $APP_NAME`" -o -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+                installedStatus=5
+                installedWith="SRC"
+            else
+                installedStatus=0
+            fi
         fi
     elif [ "$DIST_OS" = "freebsd" ] ; then
         if [ -f "/etc/rc.d/$APP_NAME" -o -L "/etc/rc.d/$APP_NAME" ] ; then
@@ -1740,19 +1809,29 @@ installdaemon() {
         fi
     elif [ "$DIST_OS" = "aix" ] ; then
         eval echo `gettext 'Detected AIX:'`
-        validateAppNameLength
+        
         if [ $installedStatus -eq 1 -o $installedStatus -eq 4 ] ; then
             eval echo `gettext ' The $APP_LONG_NAME daemon is already installed with $installedWith.'`
         else
             eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
             if [ -n "`/usr/sbin/lsitab install_assist`" ] ; then 
-                eval echo `gettext ' The task /usr/sbin/install_assist was found in the inittab, this might cause problems for all subsequent tasks to launch at this process is known to block the init task. Please make sure this task is not needed anymore and remove/deactivate it.'`
+                eval echo `gettext ' The task /usr/sbin/install_assist was found in the inittab, this might cause problems for all subsequent tasks to launch as this process is known to block the init task. Please make sure this task is not needed anymore and remove/deactivate it.'`
             fi
+            
             for i in `ls "/etc/rc.d/rc2.d/K"??"$APP_NAME_LOWER" "/etc/rc.d/rc2.d/S"??"$APP_NAME_LOWER" 2>/dev/null` ; do
                 eval echo `gettext ' Removing unexpected file before proceeding: $i'`
                 rm -f $i
             done
-            srcInstall
+            
+            if [ -n "$USE_SRC" ] ; then
+                validateAppNameLength
+                srcInstall
+            else
+                # install using initd
+                ln -s "$REALPATH" "/etc/rc.d/init.d/$APP_NAME"
+                ln -s "/etc/rc.d/init.d/$APP_NAME" "/etc/rc.d/rc2.d/K${APP_RUN_LEVEL_K}$APP_NAME_LOWER"
+                ln -s "/etc/rc.d/init.d/$APP_NAME" "/etc/rc.d/rc2.d/S${APP_RUN_LEVEL_S}$APP_NAME_LOWER"
+            fi
         fi
     elif [ "$DIST_OS" = "freebsd" ] ; then
         eval echo `gettext 'Detected FreeBSD:'`
@@ -1849,11 +1928,11 @@ installdaemon() {
 startdaemon() {
     if [ "$DIST_OS" = "macosx" -a -f "/Library/LaunchDaemons/${APP_PLIST}" ] ; then
         macosxStart
-    elif [ "$DIST_OS" = "linux" -a -f "/etc/init/${APP_NAME}.conf" ] ; then
+    elif [ "$DIST_OS" = "linux" -a -n "$USE_UPSTART" ] && [ -f "/etc/init/${APP_NAME}.conf" ] ; then
         upstartstart
-    elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] ; then
+    elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] && [ -f "${SYSTEMD_SERVICE_FILE}" ] ; then
         systemdStart
-    elif [ "$DIST_OS" = "aix" -a -z "$SKIP_SRC" ] && [ -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+    elif [ "$DIST_OS" = "aix" -a -n "$USE_SRC" ] && [ -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
         srcStart
     else
         if [ -n "$SYSD" ] ; then
@@ -1864,6 +1943,14 @@ startdaemon() {
         if [ ! -n "$FIXED_COMMAND" ] ; then
             shift
         fi
+        
+        # In case the user set SERVICE_MANAGEMENT_TOOL to something different than 'auto' or 'initd',
+        # then we show a warning saying that because he didn't run "install", it will not use 
+        # the service management tool to start the service.
+        if [ "$SERVICE_MANAGEMENT_TOOL" != "auto" -a "$SERVICE_MANAGEMENT_TOOL" != "initd" ] ; then
+            eval echo `gettext 'Script configured to use a service management tool $SERVICE_MANAGEMENT_TOOL, but the service was not installed.'`
+        fi
+        
         start "$@"
     fi
 }
@@ -1961,7 +2048,6 @@ removedaemon() {
         fi
     elif [ "$DIST_OS" = "aix" ] ; then
         eval echo `gettext 'Detected AIX:'`
-        validateAppNameLength
         if [ $installedStatus -gt 0 ] ; then
             stopit "0"
             eval echo `gettext ' Removing $APP_LONG_NAME daemon...'`
@@ -1970,6 +2056,7 @@ removedaemon() {
                     rm -f $i
                 done
             else
+                validateAppNameLength
                 /usr/sbin/rmitab $APP_NAME
                 /usr/bin/rmssys -s $APP_NAME
             fi
@@ -2100,23 +2187,28 @@ showUsage() {
         eval echo `gettext 'Unexpected command: $1'`
         echo "";
     fi
+    
+    if [ ! -n "$PASS_THROUGH" ]
+    then
+        PASS_THROUGH=false
+    fi
 
     eval MSG=`gettext 'Usage: '`
     if [ -n "$FIXED_COMMAND" ] ; then
-        if [ -n "$PASS_THROUGH" ] ; then
+        if [ $PASS_THROUGH = true ] ; then
             echo "${MSG} $0 {JavaAppArgs}"
         else
             echo "${MSG} $0"
         fi
     else
         if [ -n "$PAUSABLE" ] ; then
-            if [ -n "$PASS_THROUGH" ] ; then
+            if [ $PASS_THROUGH = true ] ; then
                 echo "${MSG} $0 [ console {JavaAppArgs} | start {JavaAppArgs} | stop | restart {JavaAppArgs} | condrestart {JavaAppArgs} | pause | resume | status | install | installstart | remove | dump ]"
             else
                 echo "${MSG} $0 [ console | start | stop | restart | condrestart | pause | resume | status | install | installstart | remove | dump ]"
             fi
         else
-            if [ -n "$PASS_THROUGH" ] ; then
+            if [ $PASS_THROUGH = true ] ; then
                 echo "${MSG} $0 [ console {JavaAppArgs} | start {JavaAppArgs} | stop | restart {JavaAppArgs} | condrestart {JavaAppArgs} | status | install | installstart | remove | dump ]"
             else
                 echo "${MSG} $0 [ console | start | stop | restart | condrestart | status | install | installstart | remove | dump ]"
@@ -2145,7 +2237,7 @@ showUsage() {
             echo "`gettext '  dump         Request a Java thread dump if running.'`"
             echo "";
         fi
-        if [ -n "$PASS_THROUGH" ] ; then
+        if [ $PASS_THROUGH = true ] ; then
             echo "`gettext 'JavaAppArgs: Zero or more arguments which will be passed to the Java application.'`"
             echo "";
         fi
@@ -2154,7 +2246,75 @@ showUsage() {
     exit 1
 }
 
+# Resolve the service management tool for 3 platforms: linux, solairs, aix.
+setServiceManagementTool() {
+    if [ ! -n "$SERVICE_MANAGEMENT_TOOL" ] ; then
+        # Set the default value to auto
+        SERVICE_MANAGEMENT_TOOL=auto
+    fi
+    if [ "$DIST_OS" = "linux" ] ; then
+        setServiceManagementToolLinux
+    elif [ "$DIST_OS" = "aix" ] ; then
+        setServiceManagementToolAix
+    else
+        return
+    fi
+    
+    if [ $? = 1 ] ; then
+        eval echo `gettext 'Service management tool value is invalid: $SERVICE_MANAGEMENT_TOOL.'`
+        exit 1
+    fi
+}
+
+setServiceManagementToolLinux() {
+    case "$SERVICE_MANAGEMENT_TOOL" in
+        'auto')
+            systemdDetection
+            if [ $? -eq 0 ] ; then
+                USE_SYSTEMD=1
+                return
+            fi
+            
+            upstartDetection
+            if [ $? -eq 0 ] ; then
+                USE_UPSTART=1
+                return
+            fi
+            ;;
+        'systemd')
+            USE_SYSTEMD=1
+            ;;
+        'upstart')
+            USE_UPSTART=1
+            ;;
+        'initd')
+            ;;
+        *)
+            return 1
+    esac
+}
+
+setServiceManagementToolAix() {
+    case "$SERVICE_MANAGEMENT_TOOL" in
+        'auto')
+            srcDetection
+            if [ $? -eq 0 ] ; then
+                USE_SRC=1
+            fi
+            ;;
+        'src')
+            USE_SRC=1
+            ;;
+        'initd')
+            ;;
+        *)
+            return 1
+    esac
+}
+
 docommand() {
+    setServiceManagementTool
+  
     case "$COMMAND" in
         'console')
             checkUser touchlock "$@"
@@ -2171,11 +2331,11 @@ docommand() {
         'stop')
             if [ "$DIST_OS" = "macosx" -a -f "/Library/LaunchDaemons/${APP_PLIST}" ] ; then
                 macosxStop
-            elif [ "$DIST_OS" = "linux" -a -f "/etc/init/${APP_NAME}.conf" ] ; then
+            elif [ "$DIST_OS" = "linux" -a -n "$USE_UPSTART" ] && [ -f "/etc/init/${APP_NAME}.conf" ] ; then
                 upstartStop
-            elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] ; then
+            elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] && [ -f "${SYSTEMD_SERVICE_FILE}" ] ; then
                 systemdStop
-            elif [ "$DIST_OS" = "aix" -a -z "$SKIP_SRC" ] && [ "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+            elif [ "$DIST_OS" = "aix" -a -n "$USE_SRC" ] && [ -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
                 srcStop
             else
                 checkUser "" "$COMMAND"
@@ -2186,11 +2346,11 @@ docommand() {
         'restart')
             if [ "$DIST_OS" = "macosx" -a -f "/Library/LaunchDaemons/${APP_PLIST}" ] ; then
                 macosxRestart
-            elif [ "$DIST_OS" = "linux" -a -f "/etc/init/${APP_NAME}.conf" ] ; then
+            elif [ "$DIST_OS" = "linux" -a -n "$USE_UPSTART" ] && [ -f "/etc/init/${APP_NAME}.conf" ] ; then
                 upstartRestart
-            elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] ; then
+            elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] && [ -f "${SYSTEMD_SERVICE_FILE}" ] ; then
                 systemdRestart
-            elif [ "$DIST_OS" = "aix" -a -z "$SKIP_SRC" ] && [ "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+            elif [ "$DIST_OS" = "aix" -a -n "$USE_SRC" ] && [ -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
                 srcRestart
             else
                 if [ -n "$SMF" ] ; then

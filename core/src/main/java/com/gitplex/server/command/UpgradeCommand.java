@@ -2,6 +2,7 @@ package com.gitplex.server.command;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -356,13 +357,39 @@ public class UpgradeCommand extends DefaultPersistManager {
 	
 	protected void copyProgramFilesTo(File upgradeDir) {
 		cleanAndCopy(new File(Bootstrap.installDir, "3rdparty-licenses"), new File(upgradeDir, "3rdparty-licenses"));
+		
+		File siteServerScriptFile = new File(upgradeDir, "bin/server.sh");
 		for (File file: Bootstrap.getBinDir().listFiles()) {
-			if (!file.getName().equals("server.sh")) { // server.sh may be customized by user
-				try {
-					FileUtils.copyFile(file, new File(upgradeDir, "bin/" + file.getName()));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+			try {
+				String serverScript = null;
+				if (file.getName().equals("server.sh")) {
+					String siteRunAsUserLine = null;
+					for (String line: (List<String>)FileUtils.readLines(siteServerScriptFile)) {
+						if (line.contains("RUN_AS_USER")) {
+							siteRunAsUserLine = line;
+							break;
+						}
+					}
+					if (siteRunAsUserLine != null) {
+						String newRunAsUserLine = null;
+						for (String line: (List<String>)FileUtils.readLines(file)) {
+							if (line.contains("RUN_AS_USER")) {
+								newRunAsUserLine = line;
+								break;
+							}
+						}
+						if (newRunAsUserLine != null) {
+							serverScript = FileUtils.readFileToString(file);
+							serverScript = StringUtils.replace(serverScript, newRunAsUserLine, siteRunAsUserLine);
+						}
+					}
 				}
+				if (serverScript != null)
+					FileUtils.writeStringToFile(siteServerScriptFile, serverScript);
+				else 
+					FileUtils.copyFile(file, new File(upgradeDir, "bin/" + file.getName()));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
