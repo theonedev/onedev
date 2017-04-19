@@ -101,6 +101,10 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	private String render(String markdown) {
 		if (StringUtils.isNotBlank(markdown)) {
 			MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
+			
+			// Normalize line breaks to make source position tracking information comparable 
+			// to textarea caret position when sync edit/preview scroll bar
+			markdown = StringUtils.replace(markdown, "\r\n", "\n");
 			return markdownManager.render(markdown, getBaseUrl(), true);
 		} else {
 			return "<div class='message'>Nothing to preview</div>";
