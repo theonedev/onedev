@@ -17,11 +17,11 @@ import org.apache.shiro.util.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.launcher.loader.AbstractPlugin;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.launcher.loader.ManagedSerializedForm;
-import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStarting;
 import com.gitplex.server.event.lifecycle.SystemStopped;
