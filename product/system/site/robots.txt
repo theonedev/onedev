@@ -8,3 +8,5 @@ Disallow: /*/*/tags
 Disallow: /*/*/pulls
 Disallow: /*/*/comments
 Disallow: /*/*/compare
+Disallow: /wicket/*
+Disallow: /*?*-*.*.*
