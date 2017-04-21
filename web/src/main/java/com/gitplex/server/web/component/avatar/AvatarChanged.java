@@ -3,9 +3,9 @@ package com.gitplex.server.web.component.avatar;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.gitplex.server.model.Account;
-import com.gitplex.server.web.util.AjaxEvent;
+import com.gitplex.server.web.util.AjaxPayload;
 
-public class AvatarChanged extends AjaxEvent {
+public class AvatarChanged extends AjaxPayload {
 
 	private final Account account;
 	

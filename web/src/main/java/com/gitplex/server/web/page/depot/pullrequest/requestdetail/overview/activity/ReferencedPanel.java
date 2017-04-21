@@ -5,12 +5,13 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestReference;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.component.pullrequest.requeststatus.RequestStatusPanel;
+import com.gitplex.server.web.component.requeststatus.RequestStatusPanel;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.util.DateUtils;
 
@@ -26,8 +27,10 @@ class ReferencedPanel extends GenericPanel<PullRequestReference> {
 		super.onInitialize();
 		
 		PullRequestReference reference = getModelObject();
-		add(new AvatarLink("avatar", reference.getUser(), null));
-		add(new AccountLink("name", reference.getUser()));
+		
+		Account userForDisplay = Account.getForDisplay(reference.getUser(), reference.getUserName());
+		add(new AvatarLink("avatar", userForDisplay));
+		add(new AccountLink("name", userForDisplay));
 		add(new Label("age", DateUtils.formatAge(reference.getDate())));
 		
 		ViewStateAwarePageLink<Void> link = new ViewStateAwarePageLink<Void>("link", 
@@ -43,7 +46,7 @@ class ReferencedPanel extends GenericPanel<PullRequestReference> {
 				return ReferencedPanel.this.getModelObject().getReferencedBy();
 			}
 			
-		}, false));
+		}));
 	}
 
 }

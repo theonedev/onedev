@@ -4,10 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.pullrequest.PullRequestChangeEvent;
+import com.gitplex.server.event.pullrequest.PullRequestEvent;
 import com.gitplex.server.web.util.WicketUtils;
-import com.gitplex.server.web.websocket.PageKey;
-import com.gitplex.server.web.websocket.WebSocketManager;
 
 @Singleton
 public class PullRequestChangeBroadcaster {
@@ -20,7 +18,7 @@ public class PullRequestChangeBroadcaster {
 	}
 
 	@Listen
-	public void on(PullRequestChangeEvent event) {
+	public void on(PullRequestEvent event) {
 		PullRequestChangedRegion region = new PullRequestChangedRegion(event.getRequest().getId());
 		PageKey sourcePageKey = WicketUtils.getPageKey();
 			

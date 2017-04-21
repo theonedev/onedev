@@ -15,7 +15,7 @@ public interface PullRequestUpdateManager extends EntityManager<PullRequestUpdat
 	 * 			update to be saved
 	 * @param independent
 	 * 			whether or not this update is an independent update. An independent update is 
-	 * 			not created as result of other actions such as open and integrate
+	 * 			not created as result of other actions such as open and merge
 	 */
 	void save(PullRequestUpdate update, boolean independent);
 	

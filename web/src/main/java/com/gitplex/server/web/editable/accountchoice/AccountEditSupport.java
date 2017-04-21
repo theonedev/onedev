@@ -56,7 +56,7 @@ public class AccountEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
-						return new AccountMultiChoiceEditor(componentId, this, model, accountChoice.organization());
+						return new AccountMultiChoiceEditor(componentId, this, model, accountChoice.type());
 					}
         			
         		};
@@ -81,7 +81,7 @@ public class AccountEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new AccountSingleChoiceEditor(componentId, this, model, accountChoice.organization());
+						return new AccountSingleChoiceEditor(componentId, this, model, accountChoice.type());
 					}
         			
         		};

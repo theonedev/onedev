@@ -19,6 +19,7 @@ import org.hibernate.StaleStateException;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestStatusChange;
@@ -196,8 +197,9 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 		if (iconClass != null)
 			icon.add(AttributeAppender.append("class", iconClass));
 		
-		container.add(new AvatarLink("userAvatar", statusChange.getUser(), null));
-		container.add(new AccountLink("userName", statusChange.getUser()));
+		Account userForDisplay = Account.getForDisplay(statusChange.getUser(), statusChange.getUserName());
+		container.add(new AvatarLink("userAvatar", userForDisplay));
+		container.add(new AccountLink("userName", userForDisplay));
 		container.add(new Label("eventName", statusChange.getType().getName()));
 		container.add(new Label("eventDate", DateUtils.formatAge(statusChange.getDate())));
 		container.add(new SinceChangesLink("changes", new LoadableDetachableModel<PullRequest>() {

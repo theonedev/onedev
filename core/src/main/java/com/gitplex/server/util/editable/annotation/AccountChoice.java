@@ -8,5 +8,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AccountChoice {
-	boolean organization() default false;
+	
+	public enum Type{ORGANIZATION, USER, DEPOT_READER, DEPOT_WRITER, DEPOT_ADMINISTRATOR} 
+	
+	Type type() default Type.USER;
 }

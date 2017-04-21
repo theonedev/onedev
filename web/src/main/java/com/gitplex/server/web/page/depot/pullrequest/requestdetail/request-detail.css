@@ -10,6 +10,9 @@
 #request-detail>.summary .md-editor {
 	margin-bottom: 20px;
 }
+#request-detail>.summary .merged-note, #request-detail>.summary .do-not-merge {
+	font-size: 16px;
+}
 
 #request-detail>.head {
 	font-size: 24px; 

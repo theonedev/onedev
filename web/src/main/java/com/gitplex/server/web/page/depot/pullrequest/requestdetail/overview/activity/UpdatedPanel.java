@@ -3,7 +3,6 @@ package com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.act
 import java.util.List;
 
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -15,50 +14,26 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
-import com.gitplex.server.web.websocket.PullRequestChanged;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
 class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 
 	public UpdatedPanel(String id, IModel<PullRequestUpdate> model) {
 		super(id, model);
-	}
-	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (event.getPayload() instanceof PullRequestChanged) {
-			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-			visitChildren(VerificationStatusPanel.class, new IVisitor<VerificationStatusPanel, Void>() {
-
-				@Override
-				public void component(VerificationStatusPanel object, IVisit<Void> visit) {
-					pullRequestChanged.getPartialPageRequestHandler().add(object);
-				}
-
-			});
-		}
 	}
 	
 	@Override
@@ -92,7 +67,7 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 			protected void populateItem(final ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
 				
-				item.add(new AvatarLink("author", commit.getAuthorIdent(), new TooltipConfig()));
+				item.add(new AvatarLink("author", commit.getAuthorIdent(), true));
 
 				IModel<Depot> depotModel = new AbstractReadOnlyModel<Depot>() {
 
@@ -104,16 +79,6 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				};
 				item.add(new ExpandableCommitMessagePanel("message", depotModel, item.getModel()));
 
-				IModel<PullRequest> requestModel = new AbstractReadOnlyModel<PullRequest>() {
-
-					@Override
-					public PullRequest getObject() {
-						return getUpdate().getRequest();
-					}
-					
-				};
-				item.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.name())));
-				
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();
 				PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), commitState);
@@ -129,8 +94,8 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				
 				if (getUpdate().getRequest().getTarget().getObjectId(false) != null) {
 					if (getUpdate().getRequest().getMergedCommits().contains(commit)) {
-						item.add(AttributeAppender.append("class", " integrated"));
-						item.add(AttributeAppender.append("title", "This commit has been integrated"));
+						item.add(AttributeAppender.append("class", " merged"));
+						item.add(AttributeAppender.append("title", "This commit has been merged"));
 					} else if (!getUpdate().getRequest().getPendingCommits().contains(commit)) {
 						item.add(AttributeAppender.append("class", " rebased"));
 						item.add(AttributeAppender.append("title", "This commit has been rebased"));

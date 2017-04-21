@@ -16,7 +16,7 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.util.editable.annotation.AccountChoice;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.FileChoice;
-import com.gitplex.server.util.match.WildcardUtils;
+import com.gitplex.server.util.stringmatch.WildcardUtils;
 
 @Editable
 public class CodeCommentFilter implements Serializable {

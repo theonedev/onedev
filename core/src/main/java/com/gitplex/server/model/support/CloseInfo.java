@@ -16,11 +16,14 @@ public class CloseInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Status {INTEGRATED, DISCARDED};
+	public enum Status {MERGED, DISCARDED};
 	
 	@OptimisticLock(excluded=true)
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Account closedBy;
+	
+	@OptimisticLock(excluded=true)
+	private String closedByName;
 
 	@OptimisticLock(excluded=true)
 	private Date closeDate;
@@ -34,6 +37,14 @@ public class CloseInfo implements Serializable {
 
 	public void setClosedBy(Account closedBy) {
 		this.closedBy = closedBy;
+	}
+
+	public String getClosedByName() {
+		return closedByName;
+	}
+
+	public void setClosedByName(String closedByName) {
+		this.closedByName = closedByName;
 	}
 
 	public Date getCloseDate() {

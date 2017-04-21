@@ -32,13 +32,14 @@ html body {
 
 /* FEEDBACK */
 #session-feedback {
-	position:absolute; 
-	max-width:75%;
+	position: fixed; 
+	max-width: 75%;
 	padding: 6px 12px; 
-	z-index:10000; 
-	border-radius:0 0 4px 4px; 
+	z-index: 10000; 
+	border-radius: 0 0 4px 4px; 
 	border: 1px solid;
 	border-top: none;
+	top: 0;
 	display: none;
 }
 #session-feedback.success {
@@ -143,13 +144,9 @@ form>.test-feedback {
 .editable table.list {
 	margin-bottom: 0;
 }
-.editable table.list>tbody>tr>td, .editable table.list>tfoot>tr>td {
-	border-top-style: dotted; 
-	border-top-width: 2px;
-}
 .editable table.list>tfoot>tr.add-element>td {
-	border-bottom: 2px dotted #DDD; 
-	padding: 0;
+	padding: 4px 0;
+	vertical-align: middle;
 }
 .editable table.list>tfoot>tr.add-element>td>a {
 	display: block; 
@@ -157,14 +154,11 @@ form>.test-feedback {
 	padding: 4px 8px;
 }
 
-.editable table.list>tbody>tr.no-elements>td {
-	font-style: italic;
-}
-.editable table.list>tbody>tr.no-elements>td:hover {
-	background: inherit;
-}
 .editable table.list>tfoot>tr.add-element>td:hover {
 	background-color: #F2F2F2;
+}
+.editable table.list>tbody>tr.no-elements>td {
+	font-style: italic;
 }
 
 .editable>.reflection>table {
@@ -219,17 +213,16 @@ form>.test-feedback {
 	display: none;
 }
 
-.editor>table.concrete.list>tbody>tr>td.actions {
-	width: 76px;
+.editor>table.list>tbody>tr>td.actions {
+	text-align: right;
 }
-.editor>table.concrete.list>tbody>tr>td.actions a {
-	margin-right: 8px;
+.editor>table.list>tbody>tr>td.actions .fa, .editor>table.list>tfoot>tr>td.add-element .fa {
+	vertical-align: center;
+	font-size: 20px;
+	color: #666;
 }
 .editor>table.list>tbody>tr>td.actions .handle {
-	color: #666; 
 	cursor: move; 
-	font-size: 22px; 
-	margin-top: 4px;
 }
 .editor>table.list .sort-helper {
 	border: 2px solid #DDD; 
@@ -311,20 +304,6 @@ form>.test-feedback {
     background: rgba(255,255,255,0.0); /* IE ignores this since it's not supported */
 }
     
-/* ICONS */
-span.add.icon {
-	padding: 12px; 
-	background: url("/assets/image/add.png") no-repeat 50% 50%;
-}
-span.delete.icon {
-	padding: 12px; 
-	background: url("/assets/image/delete.png") no-repeat 50% 50%;
-}
-span.move.icon {
-	padding: 12px;
-	background: url("/assets/image/move.png") no-repeat 50% 50%;
-}
-
 /* WEB SOCKET ERROR */
 #websocket-error {
 	display: none; 
@@ -338,9 +317,7 @@ span.move.icon {
 	margin-left: -120px;
 }	
 #websocket-error span {
-	width: 16px; 
-	height: 16px; 
-	background: url("/assets/image/error.png") 0 0 no-repeat;
+	color: #F54D4D;
 }
 
 /* FILE INPUT */

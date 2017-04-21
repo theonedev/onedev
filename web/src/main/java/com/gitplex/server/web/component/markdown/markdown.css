@@ -27,6 +27,7 @@ body.fullscreen {
 	margin: 4px;
 }
 .markdown-editor>.head {
+	background: white;
 	border: 1px solid #CCC;	
 	border-bottom: none;
 	border-radius: 4px 4px 0 0;
@@ -148,6 +149,7 @@ body.fullscreen {
 	width: 100%;
 	display: block;
 	resize: none;
+	padding: 8px;
 }
 .markdown-editor>.body>.preview>.markdown-rendered {
 	overflow: auto;

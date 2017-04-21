@@ -17,6 +17,7 @@ import org.hibernate.StaleStateException;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
@@ -179,8 +180,9 @@ class OpenedPanel extends GenericPanel<PullRequest> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AccountLink("user", getPullRequest().getSubmitter()));
-		add(new Label("age", DateUtils.formatAge(getPullRequest().getSubmitDate())));
+		PullRequest request = getPullRequest();
+		add(new AccountLink("user", Account.getForDisplay(request.getSubmitter(), request.getSubmitterName())));
+		add(new Label("age", DateUtils.formatAge(request.getSubmitDate())));
 		
 		add(newViewer());
 	}

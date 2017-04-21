@@ -54,7 +54,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 			avatarLink.setEnabled(false);
 		}
 		add(avatarLink);
-		avatarLink.add(new Avatar("avatar", accountModel.getObject(), null));
+		avatarLink.add(new Avatar("avatar", accountModel.getObject()));
 		
 		List<PageTab> tabs = new ArrayList<>();
 		

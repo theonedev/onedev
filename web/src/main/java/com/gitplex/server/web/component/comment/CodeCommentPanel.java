@@ -103,8 +103,9 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}));
 		
-		commentContainer.add(new AvatarLink("userAvatar", getComment().getUser()));
-		commentContainer.add(new AccountLink("userName", getComment().getUser()));
+		Account userForDisplay = Account.getForDisplay(getComment().getUser(), getComment().getUserName());
+		commentContainer.add(new AvatarLink("userAvatar", userForDisplay));
+		commentContainer.add(new AccountLink("userName", userForDisplay));
 		commentContainer.add(new Label("activityDescription", "commented"));
 		commentContainer.add(new Label("activityDate", DateUtils.formatAge(getComment().getDate())));
 		commentContainer.add(new Link<Void>("compareContext") {
@@ -319,8 +320,10 @@ public abstract class CodeCommentPanel extends Panel {
 		activityContainer.setMarkupId(activity.getAnchor());
 		activityContainer.add(AttributeAppender.append("name", activity.getAnchor()));
 		
-		activityContainer.add(new AvatarLink("userAvatar", activity.getUser()));
-		activityContainer.add(new AccountLink("userName", activity.getUser()));
+		Account userForDisplay = Account.getForDisplay(activity.getUser(), activity.getUserName());
+		activityContainer.add(new AvatarLink("userAvatar", userForDisplay));
+		activityContainer.add(new AccountLink("userName", userForDisplay));
+		
 		String activityDescription;
 		if (activity instanceof CodeCommentStatusChange) {
 			CodeCommentStatusChange statusChange = (CodeCommentStatusChange) activity;

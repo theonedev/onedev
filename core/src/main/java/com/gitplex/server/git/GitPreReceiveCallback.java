@@ -3,7 +3,6 @@ package com.gitplex.server.git;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -15,16 +14,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.launcher.loader.LoaderUtils;
-import com.gitplex.server.gatekeeper.GateKeeper;
-import com.gitplex.server.gatekeeper.checkresult.Failed;
-import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.model.support.BranchProtection;
+import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.util.StringUtils;
@@ -40,10 +42,13 @@ public class GitPreReceiveCallback extends HttpServlet {
 	
 	private final AccountManager userManager;
 	
+	private final ReviewManager reviewManager;
+	
 	@Inject
-	public GitPreReceiveCallback(DepotManager depotManager, AccountManager userManager) {
+	public GitPreReceiveCallback(DepotManager depotManager, AccountManager userManager, ReviewManager reviewManager) {
 		this.depotManager = depotManager;
 		this.userManager = userManager;
+		this.reviewManager = reviewManager;
 	}
 	
 	private void error(Output output, String refName, String... messages) {
@@ -106,29 +111,48 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    		Account user = userManager.getCurrent();
 	    		Preconditions.checkNotNull(user);
 
-	    		if (refName.startsWith(Depot.REFS_GITPLEX)) {
+	    		if (refName.startsWith(PullRequest.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
 	    			if (!user.asSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 	    				error(output, refName, "Only repository administrators can update gitplex refs.");
 	    				break;
 	    			}
-	    		} else {
-	    			GateKeeper gateKeeper = depot.getGateKeeper();
-	    			GateCheckResult checkResult = gateKeeper.checkPush(user, depot, refName, oldObjectId, newObjectId);
-	    			if (!checkResult.isPassedOrIgnored()) {
-	    				List<String> messages = new ArrayList<>();
-	    				for (String each: checkResult.getReasons())
-	    					messages.add(each);
-	    				if (GitUtils.ref2branch(refName) != null 
-	    						&& !oldObjectId.equals(ObjectId.zeroId()) 
-	    						&& !newObjectId.equals(ObjectId.zeroId()) 
-	    						&& !(checkResult instanceof Failed)) {
-	    					messages.add("");
-	    					messages.add("----------------------------------------------------");
-	    					messages.add("You may submit a pull request instead.");
-	    				}
-	    				error(output, refName, messages.toArray(new String[messages.size()]));
-	    				break;
+	    		} else if (refName.startsWith(Constants.R_HEADS)) {
+	    			String branchName = Preconditions.checkNotNull(GitUtils.branch2ref(refName));
+
+	    			if (!oldObjectId.equals(ObjectId.zeroId())) {
+		    			if (newObjectId.equals(ObjectId.zeroId())) {
+		    				BranchProtection protection = depot.getBranchProtection(branchName);
+		    				if (protection != null && protection.isNoDeletion())
+		    					error(output, refName, "Can not delete this branch according to branch protection setting");
+		    			} else if (!GitUtils.isMergedInto(depot.getRepository(), oldObjectId, newObjectId)) {
+		    				BranchProtection protection = depot.getBranchProtection(branchName);
+		    				if (protection != null && protection.isNoForcedPush())
+			    				error(output, refName, "Can not force-push to this branch according to branch protection setting");
+		    			} else {
+		    				if (!reviewManager.canPush(user, depot, refName, oldObjectId, newObjectId)) {
+		    					error(output, refName, 
+		    							"Your changes need to be reviewed. Please submit pull request instead");
+		    				}
+		    			}
 	    			}
+	    		} else if (refName.startsWith(Constants.R_TAGS)) {
+	    			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
+	    			String errorMessage = null;
+	    			TagProtection protection = depot.getTagProtection(tagName);
+	    			if (protection != null) {
+    					if (oldObjectId.equals(ObjectId.zeroId())) {
+    						errorMessage = protection.getTagCreator().getNotMatchMessage(depot, user);
+    						if (errorMessage != null)
+    							errorMessage = "Unable to create protected tag: " + errorMessage;
+    					} else if (newObjectId.equals(ObjectId.zeroId())) {
+    						if (protection.isNoDeletion())
+    							errorMessage = "Can not delete this tag according to tag protection setting";
+    					} else if (protection.isNoUpdate()) {
+							errorMessage = "Can not update this tag according to tag protection setting";
+    					}
+	    			}
+					if (errorMessage != null)
+						error(output, refName, errorMessage);
 	    		}
 	    		
 	        	field = field.substring(40);

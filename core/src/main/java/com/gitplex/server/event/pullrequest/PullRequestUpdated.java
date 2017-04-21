@@ -7,7 +7,7 @@ import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable(name="has new commits")
-public class PullRequestUpdated extends PullRequestChangeEvent {
+public class PullRequestUpdated extends PullRequestEvent {
 
 	private final PullRequestUpdate update;
 	

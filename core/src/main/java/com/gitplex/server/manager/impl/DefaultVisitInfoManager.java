@@ -202,15 +202,18 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	@Listen
 	public void on(CodeCommentActivityEvent event) {
 		CodeCommentActivity activity = event.getActivity();
-		visit(activity.getUser(), activity.getComment());
-		for (CodeCommentRelation relation: activity.getComment().getRelations()) {
-			visit(activity.getUser(), relation.getRequest());
+		if (activity.getUser() != null) {
+			visit(activity.getUser(), activity.getComment());
+			for (CodeCommentRelation relation: activity.getComment().getRelations()) {
+				visit(activity.getUser(), relation.getRequest());
+			}
 		}
 	}
 
 	@Listen
 	public void on(CodeCommentCreated event) {
-		visit(event.getComment().getUser(), event.getComment());
+		if (event.getComment().getUser() != null) 
+			visit(event.getComment().getUser(), event.getComment());
 	}
 
 	private byte[] longToBytes(long value) {
@@ -233,12 +236,14 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	
 	@Listen
 	public void on(PullRequestOpened event) {
-		visit(event.getRequest().getSubmitter(), event.getRequest());
+		if (event.getRequest().getSubmitter() != null)
+			visit(event.getRequest().getSubmitter(), event.getRequest());
 	}
 	
 	@Listen
 	public void on(PullRequestStatusChangeEvent event) {
-		visit(event.getUser(), event.getRequest());
+		if (event.getUser() != null)
+			visit(event.getUser(), event.getRequest());
 	}
 
 	@Transactional

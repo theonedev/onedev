@@ -57,7 +57,7 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 	private static final long serialVersionUID = 1L;
 
 	public static final Long ADMINISTRATOR_ID = 1L;
-
+	
     @Column(unique=true, nullable=false)
     private String name;
 
@@ -71,9 +71,6 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 	/* used by user account */
 	@Column(unique=true)
 	private String email;
-	
-	/* used by user account */
-	private int reviewEffort;
 	
 	/* used by organization account */
 	@Column(nullable=false)
@@ -89,7 +86,7 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
-	 * gatekeepers and integration policies upon account renaming/deletion
+	 * branch and tag protection settings upon account renaming/deletion
 	 */
 	@Version
 	private long version;
@@ -114,16 +111,10 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 	private Collection<Team> definedTeams = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReference> requestReferences = new ArrayList<>();
+	private Collection<Review> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
-	
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestVerification> verifications = new ArrayList<PullRequestVerification>();
-	
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReviewInvitation> reviewInvitations = new ArrayList<>();
+	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<BranchWatch> branchWatches = new ArrayList<>();
@@ -134,21 +125,6 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestTask> requestTasks = new ArrayList<>();
 
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestStatusChange> requestStatusChanges = new ArrayList<>();
-    
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestComment> requestComments = new ArrayList<>();
-    
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<CodeComment> codeComments = new ArrayList<>();
-    
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<CodeCommentStatusChange> codeCommentStatusChanges = new ArrayList<>();
-    
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<CodeCommentReply> codeCommentReplies = new ArrayList<>();
-    
     private transient Collection<TeamAuthorization> allTeamAuthorizationsInOrganization;
     
     private transient Collection<TeamMembership> allTeamMembershipsInOrganiation;
@@ -290,14 +266,6 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 		this.joinedTeams = joinedTeams;
 	}
 
-	public int getReviewEffort() {
-		return reviewEffort;
-	}
-
-	public void setReviewEffort(int reviewEffort) {
-		this.reviewEffort = reviewEffort;
-	}
-
 	public Collection<Depot> getDepots() {
 		return depots;
 	}
@@ -334,13 +302,13 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 			return false;
 		}
 	}
-	
-	public PullRequestReview.Result checkReviewSince(PullRequestUpdate update) {
-		for (PullRequestReview vote: update.listReviewsOnwards()) {
-			if (vote.getUser().equals(this))
-				return vote.getResult();
+
+	@Nullable
+	public Review getReviewAfter(PullRequestUpdate update) {
+		for (Review review: update.getRequest().getReviews()) {
+			if (review.getUser().equals(this) && review.getDate().after(update.getDate()))
+				return review;
 		}
-		
 		return null;
 	}
 	
@@ -453,4 +421,12 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 		return Sets.newHashSet("defaultPrivilege", "description");
 	}
 
+	public static Account getForDisplay(@Nullable Account account, @Nullable String accountName) {
+		if (account == null && accountName != null) {
+			account = new Account();
+			account.setName(accountName);
+		}
+		return account;
+	}
+	
 }

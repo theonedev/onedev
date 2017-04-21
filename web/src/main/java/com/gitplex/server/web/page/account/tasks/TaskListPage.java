@@ -9,7 +9,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -68,6 +67,7 @@ public class TaskListPage extends AccountLayoutPage {
 		selectionColumn = new SelectionColumn<PullRequestTask, String>();
 		if (getAccount().equals(getLoginUser()))
 			columns.add(selectionColumn);
+		
 		columns.add(new AbstractColumn<PullRequestTask, String>(Model.of("Pull Request"), "request") {
 
 			@Override
@@ -75,7 +75,7 @@ public class TaskListPage extends AccountLayoutPage {
 					Item<ICellPopulator<PullRequestTask>> cellItem,
 					String componentId, IModel<PullRequestTask> rowModel) {
 				PullRequestTask task = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "requestFrag", TaskListPage.this);
+				Fragment fragment = new Fragment(componentId, "linkFrag", TaskListPage.this);
 				fragment.add(new ViewStateAwarePageLink<Void>("link", RequestOverviewPage.class, 
 						RequestOverviewPage.paramsOf(task.getRequest())) {
 
@@ -89,26 +89,20 @@ public class TaskListPage extends AccountLayoutPage {
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestTask, String>(Model.of("To Branch")) {
+		columns.add(new AbstractColumn<PullRequestTask, String>(Model.of("Target Branch")) {
 
 			@Override
 			public void populateItem(
 					Item<ICellPopulator<PullRequestTask>> cellItem,
 					String componentId, IModel<PullRequestTask> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
-				cellItem.add(new BranchLink(componentId, request.getTarget()) {
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.setName("a");
-					}
-					
-				});
+				Fragment fragment = new Fragment(componentId, "linkFrag", TaskListPage.this);
+				fragment.add(new BranchLink("link", request.getTarget()));
+				cellItem.add(fragment);
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestTask, String>(Model.of("From Branch")) {
+		columns.add(new AbstractColumn<PullRequestTask, String>(Model.of("Source Branch")) {
 
 			@Override
 			public void populateItem(
@@ -116,22 +110,16 @@ public class TaskListPage extends AccountLayoutPage {
 					String componentId, IModel<PullRequestTask> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
 				if (request.getSource() != null) {
-					cellItem.add(new BranchLink(componentId, request.getSource()) {
-	
-						@Override
-						protected void onComponentTag(ComponentTag tag) {
-							super.onComponentTag(tag);
-							tag.setName("a");
-						}
-						
-					});
+					Fragment fragment = new Fragment(componentId, "linkFrag", TaskListPage.this);
+					fragment.add(new BranchLink("link", request.getSource()));
+					cellItem.add(fragment);
 				} else {
 					cellItem.add(new Label(componentId, request.getSource().getFQN()));
 				}
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestTask, String>(Model.of("Type"), "type") {
+		columns.add(new AbstractColumn<PullRequestTask, String>(Model.of("Task"), "type") {
 
 			@Override
 			public void populateItem(

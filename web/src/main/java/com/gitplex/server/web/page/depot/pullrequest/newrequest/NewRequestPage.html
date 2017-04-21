@@ -32,9 +32,9 @@
 			<div wicket:id="tabPanel" class="tab-panel"></div>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="openedFrag">
+	<wicket:fragment wicket:id="effectiveFrag">
 		<div class="alert alert-info">
-			<div>Pull request #<span wicket:id="no"></span> is already open for this comparison:</div> 
+			<div wicket:id="description"></div> 
 			<b><a wicket:id="link"><span wicket:id="label"></span></a></b>
 		</div>
 	</wicket:fragment>
@@ -42,11 +42,11 @@
 		<div class="alert alert-warning">
 			<div class="summary">
 				<span class="fa fa-lg fa-warning"></span>
-				<span>Please select different branches to integrate.</span>
+				<span>Please select different branches to merge.</span>
 			</div>
 		</div>		
 	</wicket:fragment>
-	<wicket:fragment wicket:id="integratedFrag">
+	<wicket:fragment wicket:id="mergedFrag">
 		<div class="alert alert-success">
 			<div class="summary">
 				<span class="fa fa-lg fa-check"></span>
@@ -76,7 +76,7 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="canSendFrag">
 		<div class="can-send">
-			<form wicket:id="form">
+			<form wicket:id="form" class="leave-confirm">
 				<table>
 					<tr class="title">
 						<td class="name">Title <span class="required"></span></td>
@@ -89,37 +89,24 @@
 						<td class="name">Description</td>
 						<td class="value"><div wicket:id="comment"></div></td>
 					</tr>
-					<tr class="assignee">
-						<td class="name">Assignee <span class="required"></span></td>
-						<td wicket:id="assignee" class="value">
-							<input wicket:id="assignee" type="hidden"></input>
-							<div wicket:id="feedback"></div>
-							<div class="help-block">
-								<i class="fa fa-info-circle"></i> Assignee is responsible for integration of the 
-								pull request after it passes gatekeeper check.
-							</div>
+					<tr class="merge-strategy">
+						<td class="name">Merge Strategy</td>
+						<td class="value">
+							<select wicket:id="mergeStrategy" class="form-control"></select>
+							<div wicket:id="mergeStrategyHelp" class="help-block"></div>							
 						</td>
 					</tr>
 					<tr class="reviewers">
 						<td class="name">Reviewers</td>
-						<td wicket:id="reviewers" class="value">
-							<ul class="clearfix list-unstyled">
-								<li wicket:id="reviewers" class="pull-left">
-									<a wicket:id="avatar"></a>
-								</li>
-								<wicket:enclosure child="addReviewer">
-								<li class="pull-left"><input wicket:id="addReviewer" type="hidden"></input></li>
-								</wicket:enclosure>
-							</ul>
-							<div wicket:id="prePopulateHint" class="help-block">
-								<i class="fa fa-info-circle"></i> GitPlex pre-populated some reviewers above as suggested 
-								by gatekeeper of the repository. You may adjust the list by removing existing (hovering mouse 
-								over reviewer avatar) or adding more.
-							</div>
-						</td>
+						<td class="value"><div wicket:id="reviewers"></div></td>
 					</tr>
 				</table>
-				<input wicket:id="send" type="submit" class="btn btn-primary" value="Send Pull Request"></input>
+				<div class="clearfix">
+					<input wicket:id="send" type="submit" class="btn btn-primary pull-left" value="Create Pull Request"></input>
+					<div wicket:id="immediateMergeNote" class="alert alert-warning pull-left immediate-merge">
+						<i class="fa fa-warning"></i> This pull request will be merged immediately after being created
+					</div>
+				</div>
 			</form>
 		</div>	
 	</wicket:fragment>

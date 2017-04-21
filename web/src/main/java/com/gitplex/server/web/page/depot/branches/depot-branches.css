@@ -56,26 +56,14 @@
 	background: #ccc;
 	border-radius: 0 2px 2px 0;
 }
-#repo-branches>.list>table .ahead .bar.request {
-	background: #F1D763;
-}
 #repo-branches>.list>table .behind .bar {
 	background: #ccc;
 	border-radius: 2px 0 0 2px;
 }
-#repo-branches>.list>table .behind .bar.request {
-	background: #F1D763;
-}
-#repo-branches>.list>.help-block .bar.request {
-	background: #F1D763; 
-	font-size: 6px;
-	border-radius: 2px;
-	vertical-align: middle;
-}
 
 #repo-branches>.list>table td.actions {
 	text-align: right;
-	width: 90px;
+	width: 300px;
 }
 
 #searching-branches {

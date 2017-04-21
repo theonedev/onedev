@@ -8,65 +8,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 import com.gitplex.codeassist.InputSuggestion;
 import com.gitplex.jsymbol.Range;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.CommitInfoManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.util.match.PatternApplied;
-import com.gitplex.server.util.match.WildcardUtils;
+import com.gitplex.server.model.Team;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.util.stringmatch.PatternApplied;
+import com.gitplex.server.util.stringmatch.WildcardUtils;
 import com.google.common.base.Preconditions;
 
 public class SuggestionUtils {
 	
-	public static List<InputSuggestion> suggestBranch(Depot depot, String matchWith,
-			int count, @Nullable String description, @Nullable String wildcardDescription) {
+	public static List<InputSuggestion> suggestBranch(Depot depot, String matchWith, int count) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		if (wildcardDescription != null) {
-			String wildcard = "*";
-			int index = wildcard.indexOf(lowerCaseMatchWith);
-			if (index != -1) {
-				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(wildcard, wildcardDescription, matchRange));
-			}
-		}
 		for (RefInfo ref: depot.getBranches()) {
 			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			int index = branch.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(branch, description, matchRange));
-			}
-		}
-		return suggestions;
-	}
-	
-	public static List<InputSuggestion> suggestAffinals(Depot depot, String matchWith, 
-			int count, @Nullable String description, @Nullable String wildcardDescription) {
-		String lowerCaseMatchWith = matchWith.toLowerCase();
-		int numSuggestions = 0;
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		if (wildcardDescription != null) {
-			String wildcard = "*/*";
-			int index = wildcard.indexOf(lowerCaseMatchWith);
-			if (index != -1) {
-				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(wildcard, wildcardDescription, matchRange));
-			}
-		}
-		for (Depot affinal: GitPlex.getInstance(Dao.class).findAll(Depot.class)) {
-			String FQN = affinal.getFQN();
-			int index = FQN.toLowerCase().indexOf(lowerCaseMatchWith);
-			if (index != -1 && numSuggestions++<count) {
-				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(FQN, description, matchRange));
+				suggestions.add(new InputSuggestion(branch, null, matchRange));
 			}
 		}
 		return suggestions;
@@ -81,7 +49,37 @@ public class SuggestionUtils {
 			int index = tag.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(tag, matchRange));
+				suggestions.add(new InputSuggestion(tag, null, matchRange));
+			}
+		}
+		return suggestions;
+	}
+	
+	public static List<InputSuggestion> suggestUser(Depot depot, DepotPrivilege privilege, String matchWith, int count) {
+		String lowerCaseMatchWith = matchWith.toLowerCase();
+		int numSuggestions = 0;
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (Account user: SecurityUtils.findUsersCan(depot, privilege)) {
+			String name = user.getName();
+			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
+			if (index != -1 && numSuggestions++<count) {
+				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(name, matchRange));
+			}
+		}
+		return suggestions;
+	}
+	
+	public static List<InputSuggestion> suggestTeam(Depot depot, String matchWith, int count) {
+		String lowerCaseMatchWith = matchWith.toLowerCase();
+		int numSuggestions = 0;
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (Team team: depot.getAccount().getDefinedTeams()) {
+			String name = team.getName();
+			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
+			if (index != -1 && numSuggestions++<count) {
+				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(name, matchRange));
 			}
 		}
 		return suggestions;

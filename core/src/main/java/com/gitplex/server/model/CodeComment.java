@@ -56,8 +56,10 @@ public class CodeComment extends AbstractEntity {
 	private Depot depot;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
+	@JoinColumn
 	private Account user;
+	
+	private String userName;
 
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -106,6 +108,15 @@ public class CodeComment extends AbstractEntity {
 
 	public void setUser(@Nullable Account user) {
 		this.user = user;
+	}
+
+	@Nullable
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	public long getVersion() {

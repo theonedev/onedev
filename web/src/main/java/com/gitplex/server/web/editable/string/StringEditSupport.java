@@ -7,9 +7,14 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import com.gitplex.server.util.editable.annotation.AccountChoice;
+import com.gitplex.server.util.editable.annotation.BranchPattern;
 import com.gitplex.server.util.editable.annotation.Markdown;
 import com.gitplex.server.util.editable.annotation.Multiline;
 import com.gitplex.server.util.editable.annotation.Password;
+import com.gitplex.server.util.editable.annotation.PathPattern;
+import com.gitplex.server.util.editable.annotation.TagPattern;
+import com.gitplex.server.util.editable.annotation.TeamChoice;
 import com.gitplex.server.web.component.MultilineLabel;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.editable.BeanContext;
@@ -33,7 +38,13 @@ public class StringEditSupport implements EditSupport {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 
 		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
-		if (propertyClass == String.class && propertyDescriptor.getPropertyGetter().getAnnotation(Password.class) == null) {
+		if (propertyClass == String.class 
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(Password.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(BranchPattern.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(TagPattern.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(TeamChoice.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(AccountChoice.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(PathPattern.class) == null) {
 			return new PropertyContext<String>(propertyDescriptor) {
 
 				@Override

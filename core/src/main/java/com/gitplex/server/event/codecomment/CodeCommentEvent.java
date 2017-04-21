@@ -2,6 +2,8 @@ package com.gitplex.server.event.codecomment;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
+
 import com.gitplex.server.event.MarkdownAware;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
@@ -25,6 +27,7 @@ public abstract class CodeCommentEvent implements MarkdownAware {
 		return comment;
 	}
 
+	@Nullable
 	public abstract Account getUser();
 	
 	public abstract Date getDate();

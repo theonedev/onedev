@@ -10,14 +10,17 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestComment;
-import com.gitplex.server.model.PullRequestReview;
 import com.gitplex.server.model.PullRequestStatusChange;
+import com.gitplex.server.model.Review;
+import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.CodeCommentActivity;
+import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.security.privilege.Privilege;
 
@@ -26,8 +29,9 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static Collection<Account> findUsersCan(Depot depot, DepotPrivilege operation) {
 		Set<Account> authorizedUsers = new HashSet<Account>();
 		for (Account account: GitPlex.getInstance(AccountManager.class).findAll()) {
-			if (!account.isOrganization() && account.asSubject().isPermitted(new ObjectPermission(depot, operation)))
+			if (!account.isOrganization() && account.asSubject().isPermitted(new ObjectPermission(depot, operation))) {
 				authorizedUsers.add(account);
+			}
 		}
 		return authorizedUsers;
 	}
@@ -38,8 +42,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return true;
 		} else {
 			Account currentUser = getAccount();
-			return currentUser != null && 
-					(currentUser.equals(request.getSubmitter()) || currentUser.equals(request.getAssignee()));
+			return currentUser != null && currentUser.equals(request.getSubmitter());
 		}
 	}
 
@@ -47,8 +50,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return GitPlex.getInstance(AccountManager.class).getCurrent();
 	}
 	
-	public static boolean canModify(PullRequestReview review) {
-		Depot depot = review.getUpdate().getRequest().getTargetDepot();
+	public static boolean canModify(Review review) {
+		Depot depot = review.getRequest().getTargetDepot();
 		if (canManage(depot)) {
 			return true;
 		} else {
@@ -92,15 +95,51 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 	
-	public static boolean canPushRef(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		Account currentUser = getAccount();
-		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotWrite(depot))	
-				&& depot.getGateKeeper().checkPush(currentUser, depot, refName, oldCommit, newCommit).isPassedOrIgnored();
+	public static boolean canDeleteBranch(Depot depot, String branchName) {
+		if (canWrite(depot)) {
+			BranchProtection protection = depot.getBranchProtection(branchName);
+			return protection == null || !protection.isNoDeletion();
+		} else {
+			return false;
+		}
 	}
-
-	public static boolean canModify(Depot depot, String branch, @Nullable String file) {
-		return canWrite(depot) && depot.getGateKeeper().checkFile(getAccount(), depot, branch, file).isPassedOrIgnored();
+	
+	public static boolean canUpdateTag(Depot depot, String tagName) {
+		if (canWrite(depot)) {
+			TagProtection protection = depot.getTagProtection(tagName);
+			return protection == null || !protection.isNoUpdate();
+		} else {
+			return false;
+		}
+	}
+	
+	public static boolean canDeleteTag(Depot depot, String tagName) {
+		if (canWrite(depot)) {
+			TagProtection protection = depot.getTagProtection(tagName);
+			return protection == null || !protection.isNoDeletion();
+		} else {
+			return false;
+		}
+	}
+	
+	@Nullable
+	public static boolean canCreateTag(Depot depot, String tagName) {
+		if (canWrite(depot)) {
+			TagProtection protection = depot.getTagProtection(tagName);
+			return protection == null || 
+					protection.getTagCreator().getNotMatchMessage(depot, SecurityUtils.getAccount()) == null;
+		} else {
+			return false;
+		}
+	}
+	
+	public static boolean canModify(Depot depot, String branch, String file) {
+		return canWrite(depot) && GitPlex.getInstance(ReviewManager.class).canModify(getAccount(), depot, branch, file); 
+	}
+	
+	public static boolean canPush(Depot depot, String branchName, ObjectId oldObjectId, ObjectId newObjectId) {
+		return canWrite(depot) && GitPlex.getInstance(ReviewManager.class).canPush(getAccount(), depot, branchName, 
+				oldObjectId, newObjectId); 
 	}
 	
 	public static boolean canManage(Account account) {

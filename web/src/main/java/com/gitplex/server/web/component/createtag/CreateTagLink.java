@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
@@ -29,9 +28,7 @@ public abstract class CreateTagLink extends ModalLink {
 	protected void onConfigure() {
 		super.onConfigure();
 		
-		ObjectId commit = depotModel.getObject().getRevCommit(revision);
-		setVisible(SecurityUtils.canPushRef(depotModel.getObject(), Constants.R_TAGS, 
-				ObjectId.zeroId(), commit));
+		setVisible(SecurityUtils.canCreateTag(depotModel.getObject(), Constants.R_TAGS));
 	}
 	
 	@Override

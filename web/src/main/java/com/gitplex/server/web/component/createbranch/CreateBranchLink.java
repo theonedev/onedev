@@ -3,8 +3,6 @@ package com.gitplex.server.web.component.createbranch;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.security.SecurityUtils;
@@ -25,12 +23,9 @@ public abstract class CreateBranchLink extends ModalLink {
 		this.revision = revision;
 	}
 	
-	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		
-		ObjectId commitId = depotModel.getObject().getRevCommit(revision);
-		setVisible(SecurityUtils.canPushRef(depotModel.getObject(), Constants.R_HEADS, ObjectId.zeroId(), commitId));
+		setVisible(SecurityUtils.canWrite(depotModel.getObject()));
 	}
 	
 	@Override

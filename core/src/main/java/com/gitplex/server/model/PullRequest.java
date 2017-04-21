@@ -9,7 +9,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,24 +40,20 @@ import org.hibernate.criterion.Restrictions;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
-import com.gitplex.server.gatekeeper.checkresult.Failed;
-import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
-import com.gitplex.server.gatekeeper.checkresult.Pending;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.git.exception.ObjectNotFoundException;
 import com.gitplex.server.manager.CodeCommentRelationManager;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.support.CloseInfo;
 import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.DepotAndBranch;
-import com.gitplex.server.model.support.IntegrationPreview;
 import com.gitplex.server.model.support.LastEvent;
-import com.gitplex.server.persistence.UnitOfWork;
-import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.security.ObjectPermission;
+import com.gitplex.server.model.support.MergePreview;
+import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.util.ReviewCheckStatus;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.jackson.ExternalView;
@@ -75,69 +71,16 @@ import com.google.common.base.Preconditions;
 				@Index(columnList="title"), @Index(columnList="uuid"), 
 				@Index(columnList="numberStr"), @Index(columnList="noSpaceTitle"), 
 				@Index(columnList="number"), @Index(columnList="g_targetDepot_id"), 
-				@Index(columnList="g_sourceDepot_id"), @Index(columnList="g_submitter_id"), 
-				@Index(columnList="g_assignee_id")},
+				@Index(columnList="g_sourceDepot_id"), @Index(columnList="g_submitter_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetDepot_id", "number"})})
 public class PullRequest extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String REFS_PREFIX = "refs/pulls/";
+	
 	public static final int MAX_CODE_COMMENTS = 1000;
 	 
-	public enum Status {
-		PENDING_APPROVAL("Pending Approval"), 
-		PENDING_UPDATE("Pending Update"), PENDING_INTEGRATE("Pending Integration"), 
-		INTEGRATED("Integrated"), DISCARDED("Discarded");
-
-		private final String displayName;
-		
-		Status(String displayName) {
-			this.displayName = displayName;
-		}
-		
-		@Override
-		public String toString() {
-			return displayName;
-		}
-		
-	}
-	
-	public enum IntegrationStrategy {
-		MERGE_ALWAYS("Merge always", 
-				"Always create merge commit when integrate into target branch"), 
-		MERGE_IF_NECESSARY("Merge if necessary", 
-				"Create merge commit only if target branch can not be fast-forwarded to the pull request"), 
-		MERGE_WITH_SQUASH("Merge with squash", 
-				"Squash all commits in the pull request and then merge with target branch"),
-		REBASE_SOURCE_ONTO_TARGET("Rebase source onto target", 
-				"Rebase source branch onto target branch and then fast-forward target branch to source branch"), 
-		REBASE_TARGET_ONTO_SOURCE("Rebase target onto source", 
-				"Rebase target branch onto source branch");
-
-		private final String displayName;
-		
-		private final String description;
-		
-		IntegrationStrategy(String displayName, String description) {
-			this.displayName = displayName;
-			this.description = description;
-		}
-		
-		public String getDisplayName() {
-			return displayName;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-
-		@Override
-		public String toString() {
-			return displayName;
-		}
-		
-	}
-	
 	@Embedded
 	private CloseInfo closeInfo;
 
@@ -149,8 +92,10 @@ public class PullRequest extends AbstractEntity {
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
+	@JoinColumn
 	private Account submitter;
+	
+	private String submitterName;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -168,9 +113,6 @@ public class PullRequest extends AbstractEntity {
 	@Column(nullable=false)
 	private String baseCommitHash;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-	private Account assignee;
-
 	@Embedded
 	private LastEvent lastEvent;
 	
@@ -190,13 +132,13 @@ public class PullRequest extends AbstractEntity {
 	
 	@OptimisticLock(excluded=true)
 	@Embedded
-	private IntegrationPreview lastIntegrationPreview;
+	private MergePreview lastMergePreview;
 	
 	@Column(nullable=false)
 	private Date submitDate = new Date();
 	
 	@Column(nullable=false)
-	private IntegrationStrategy integrationStrategy;
+	private MergeStrategy mergeStrategy;
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -210,7 +152,10 @@ public class PullRequest extends AbstractEntity {
 	private Collection<CodeCommentRelation> codeCommentRelations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReviewInvitation> reviewInvitations = new ArrayList<>();
+	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
+	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<Review> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="referenced", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> referencedBy = new ArrayList<>();
@@ -218,9 +163,6 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy="referencedBy",cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> referenced = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestVerification> verifications = new ArrayList<>();
-
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
@@ -233,23 +175,17 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
-	private transient GateCheckResult gateResult;
+	private transient ReviewCheckStatus reviewCheckStatus;
 	
-	private transient Boolean merged;
+	private transient Boolean mergedIntoTarget;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
-	
-	private transient List<PullRequestUpdate> effectiveUpdates;
-
-	private transient PullRequestUpdate referentialUpdate;
 	
 	private transient Collection<RevCommit> pendingCommits;
 	
 	private transient Collection<RevCommit> mergedCommits;
 	
-	private transient List<PullRequestReview> reviews;
-	
-	private transient IntegrationPreview integrationPreview;
+	private transient Optional<MergePreview> mergePreviewOpt;
 	
 	private transient List<CodeComment> codeComments;
 	
@@ -282,6 +218,7 @@ public class PullRequest extends AbstractEntity {
 	 * @return
 	 * 			the user submitting the pull request
 	 */
+	@Nullable
 	public Account getSubmitter() {
 		return submitter;
 	}
@@ -290,20 +227,13 @@ public class PullRequest extends AbstractEntity {
 		this.submitter = submitter;
 	}
 
-	/**
-	 * Get the user responsible for integration of the pull request.
-	 * 
-	 * @return
-	 * 			the user responsible for integration of this pull request, or <tt>null</tt> to have the 
-	 * 			system integrate the pull request automatically
-	 */
 	@Nullable
-	public Account getAssignee() {
-		return assignee;
+	public String getSubmitterName() {
+		return submitterName;
 	}
 
-	public void setAssignee(Account assignee) {
-		this.assignee = assignee;
+	public void setSubmitterName(String submitterName) {
+		this.submitterName = submitterName;
 	}
 
 	public Depot getTargetDepot() {
@@ -411,13 +341,11 @@ public class PullRequest extends AbstractEntity {
 	public void setUpdates(Collection<PullRequestUpdate> updates) {
 		this.updates = updates;
 		sortedUpdates = null;
-		effectiveUpdates = null;
 	}
 
 	public void addUpdate(PullRequestUpdate update) {
 		updates.add(update);
 		sortedUpdates = null;
-		effectiveUpdates = null;
 	}
 
 	public Collection<CodeCommentRelation> getCodeCommentRelations() {
@@ -428,20 +356,12 @@ public class PullRequest extends AbstractEntity {
 		this.codeCommentRelations = codeCommentRelations;
 	}
 
-	public Collection<PullRequestReviewInvitation> getReviewInvitations() {
+	public Collection<ReviewInvitation> getReviewInvitations() {
 		return reviewInvitations;
 	}
 
-	public void setReviewInvitations(Collection<PullRequestReviewInvitation> reviewInvitations) {
+	public void setReviewInvitations(Collection<ReviewInvitation> reviewInvitations) {
 		this.reviewInvitations = reviewInvitations;
-	}
-
-	public Collection<PullRequestVerification> getVerifications() {
-		return verifications;
-	}
-
-	public void setVerifications(Collection<PullRequestVerification> verifications) {
-		this.verifications = verifications;
 	}
 
 	public Collection<PullRequestReference> getReferencedBy() {
@@ -492,46 +412,14 @@ public class PullRequest extends AbstractEntity {
 		this.watches = watches;
 	}
 
-	public Status getStatus() {
-		if (closeInfo != null) {
-			if (closeInfo.getCloseStatus() == CloseInfo.Status.INTEGRATED) { 
-				return Status.INTEGRATED;
-			} else {
-				return Status.DISCARDED;
-			}
-		} else {
-			GateCheckResult result = checkGates(false);					
-			if (result instanceof Pending) { 
-				return Status.PENDING_APPROVAL;
-			} else if (result instanceof Failed) { 
-				return Status.PENDING_UPDATE;
-			} else {
-				return Status.PENDING_INTEGRATE;
-			}
-		}
+	public ReviewCheckStatus getReviewCheckStatus() {
+		if (reviewCheckStatus == null)
+			reviewCheckStatus = GitPlex.getInstance(ReviewManager.class).checkRequest(this);
+		return reviewCheckStatus;
 	}
 	
-	public GateCheckResult checkGates(boolean recheck) {
-		if (recheck || gateResult == null) {
-			Long requestId = getId();
-			try {
-				gateResult = getTargetDepot().getGateKeeper().checkRequest(this);
-			} catch (ObjectNotFoundException e) {
-				// in case target/source branch is deleted but the pull request is not closed
-				// for some reason, we call check again to make sure they will be closed
-				GitPlex.getInstance(UnitOfWork.class).doAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-						pullRequestManager.check(pullRequestManager.load(requestId));
-					}
-					
-				});
-				throw e;
-			}
-		}
-		return gateResult;
+	public void clearReviewCheckStatus() {
+		reviewCheckStatus = null;
 	}
 
 	@Nullable
@@ -547,50 +435,39 @@ public class PullRequest extends AbstractEntity {
 		return closeInfo == null;
 	}
 	
-	public PullRequestUpdate getReferentialUpdate() {
-		if (referentialUpdate != null) 
-			return referentialUpdate;
-		else 
-			return getEffectiveUpdates().get(0);
-	}
-
-	public void setReferentialUpdate(PullRequestUpdate referentiralUpdate) {
-		this.referentialUpdate = referentiralUpdate;
-	}
-
 	/**
-	 * Get last integration preview of this pull request. Note that this method may return an 
-	 * out dated integration preview. Refer to {@link this#getIntegrationPreview()}
-	 * if you'd like to get an update-to-date integration preview
+	 * Get last merge preview of this pull request. Note that this method may return an 
+	 * out dated merge preview. Refer to {@link this#getIntegrationPreview()}
+	 * if you'd like to get an update-to-date merge preview
 	 *  
 	 * @return
-	 * 			integration preview of this pull request, or <tt>null</tt> if integration 
+	 * 			merge preview of this pull request, or <tt>null</tt> if merge 
 	 * 			preview has not been calculated yet. 
 	 */
 	@Nullable
-	public IntegrationPreview getLastIntegrationPreview() {
-		return lastIntegrationPreview;
+	public MergePreview getLastMergePreview() {
+		return lastMergePreview;
 	}
 	
-	public void setLastIntegrationPreview(IntegrationPreview lastIntegrationPreview) {
-		this.lastIntegrationPreview = lastIntegrationPreview;
+	public void setLastMergePreview(MergePreview lastIntegrationPreview) {
+		this.lastMergePreview = lastIntegrationPreview;
 	}
 
 	/**
-	 * Get effective integration preview of this pull request.
+	 * Get effective merge preview of this pull request.
 	 * 
 	 * @return
-	 * 			update to date integration preview of this pull request, or <tt>null</tt> if 
-	 * 			the integration preview has not been calculated or out dated. In both cases, 
+	 * 			update to date merge preview of this pull request, or <tt>null</tt> if 
+	 * 			the merge preview has not been calculated or out dated. In both cases, 
 	 * 			it will trigger a re-calculation, and client should call this method later 
 	 * 			to get the calculated result 
 	 */
 	@JsonView(ExternalView.class)
 	@Nullable
-	public IntegrationPreview getIntegrationPreview() {
-		if (integrationPreview == null)
-			integrationPreview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(this);
-		return integrationPreview;
+	public MergePreview getMergePreview() {
+		if (mergePreviewOpt == null)
+			mergePreviewOpt = Optional.ofNullable(GitPlex.getInstance(PullRequestManager.class).previewMerge(this));
+		return mergePreviewOpt.orElse(null);
 	}
 	
 	/**
@@ -608,38 +485,12 @@ public class PullRequest extends AbstractEntity {
 		return sortedUpdates;
 	}
 
-	/**
-	 * Get list of effective updates reversely sorted by id. Update is considered effective if it is 
-	 * not ancestor of target branch head.
-	 * 
-	 * @return 
-	 * 			list of effective updates reversely sorted by id
-	 */
-	public List<PullRequestUpdate> getEffectiveUpdates() {
-		Preconditions.checkState(isOpen(), "Can only be called while request is open");
-		if (effectiveUpdates == null) {
-			effectiveUpdates = new ArrayList<PullRequestUpdate>();
-
-			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
-				PullRequestUpdate update = getSortedUpdates().get(i);
-				ObjectId headCommitId = ObjectId.fromString(update.getHeadCommitHash());
-				if (!GitUtils.isMergedInto(getTargetDepot().getRepository(), headCommitId, getTarget().getObjectId()))
-					effectiveUpdates.add(update);
-				else 
-					break;
-			}
-			
-			Preconditions.checkState(!effectiveUpdates.isEmpty());
-		}
-		return effectiveUpdates;
+	public MergeStrategy getMergeStrategy() {
+		return mergeStrategy;
 	}
 
-	public IntegrationStrategy getIntegrationStrategy() {
-		return integrationStrategy;
-	}
-
-	public void setIntegrationStrategy(IntegrationStrategy integrationStrategy) {
-		this.integrationStrategy = integrationStrategy;
+	public void setMergeStrategy(MergeStrategy mergeStrategy) {
+		this.mergeStrategy = mergeStrategy;
 	}
 
 	@JsonView(ExternalView.class)
@@ -650,99 +501,28 @@ public class PullRequest extends AbstractEntity {
 	@JsonView(ExternalView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
-		return Depot.REFS_GITPLEX + "pulls/" + getNumber() + "/base";
+		return REFS_PREFIX + getNumber() + "/base";
 	}
 
 	@JsonView(ExternalView.class)
-	public String getIntegrateRef() {
+	public String getMergeRef() {
 		Preconditions.checkNotNull(getId());
-		return Depot.REFS_GITPLEX + "pulls/" + getNumber() + "/integrate";
+		return REFS_PREFIX + getNumber() + "/merge";
 	}
 
+	@JsonView(ExternalView.class)
+	public String getHeadRef() {
+		Preconditions.checkNotNull(getId());
+		return REFS_PREFIX + getNumber() + "/head";
+	}
+	
 	/**
 	 * Delete refs of this pull request, without touching refs of its updates.
 	 */
 	public void deleteRefs() {
 		GitUtils.deleteRef(getTargetDepot().updateRef(getBaseRef()));
-		GitUtils.deleteRef(getTargetDepot().updateRef(getIntegrateRef()));
-	}
-	
-	/**
-	 * Invite specified number of users in candidates to review this request.
-	 * <p>
-	 * 
-	 * @param candidates 
-	 * 			a collection of users to invite users from
-	 * @param count 
-	 * 			number of users to invite
-	 */
-	public void pickReviewers(Collection<Account> candidates, int count) {
-		List<Account> pickList = new ArrayList<Account>(candidates);
-
-		/*
-		 * users already reviewed since base update should be excluded from
-		 * invitation list as their reviews are still valid
-		 */
-		for (PullRequestReview review: getReferentialUpdate().listReviewsOnwards()) {
-			pickList.remove(review.getUser());
-		}
-
-		Set<Account> firstChoices = new HashSet<>();
-		Set<Account> lastChoices = new HashSet<>();
-		
-		for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
-			if (invitation.getStatus() != PullRequestReviewInvitation.Status.EXCLUDED)
-				firstChoices.add(invitation.getUser());
-			else
-				lastChoices.add(invitation.getUser());
-		}
-		
-		lastChoices.add(getSubmitter());
-		
-		List<Account> firstPickList = new ArrayList<>();
-		List<Account> lastPickList = new ArrayList<>();
-		List<Account> otherPickList = new ArrayList<>();
-		for (Account user: pickList) {
-			if (firstChoices.contains(user))
-				firstPickList.add(user);
-			else if (lastChoices.contains(user))
-				lastPickList.add(user);
-			else
-				otherPickList.add(user);
-		}
-		firstPickList.sort(Comparator.comparing(Account::getReviewEffort));
-		lastPickList.sort(Comparator.comparing(Account::getReviewEffort));
-		otherPickList.sort(Comparator.comparing(Account::getReviewEffort));
-		pickList.clear();
-		pickList.addAll(firstPickList);
-		pickList.addAll(lastPickList);
-		pickList.addAll(otherPickList);
-
-		List<Account> picked;
-		if (count <= pickList.size())
-			picked = pickList.subList(0, count);
-		else
-			picked = pickList;
-
-		for (Account user: picked) {
-			boolean found = false;
-			for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
-				if (invitation.getUser().equals(user)) {
-					invitation.setDate(new Date());
-					invitation.setStatus(PullRequestReviewInvitation.Status.ADDED_BY_RULE);
-					found = true;
-				}
-			}
-			if (!found) {
-				PullRequestReviewInvitation invitation = new PullRequestReviewInvitation();
-				invitation.setDate(new Date());
-				invitation.setStatus(PullRequestReviewInvitation.Status.ADDED_BY_RULE);
-				invitation.setRequest(this);
-				invitation.setUser(user);
-				getReviewInvitations().add(invitation);
-			}
-		}
-
+		GitUtils.deleteRef(getTargetDepot().updateRef(getMergeRef()));
+		GitUtils.deleteRef(getTargetDepot().updateRef(getHeadRef()));
 	}
 	
 	public static class CriterionHelper {
@@ -789,10 +569,10 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	/**
-	 * Get commits pending integration.
+	 * Get commits pending merge.
 	 * 
 	 * @return
-	 * 			commits pending integration
+	 * 			commits pending merge
 	 */
 	public Collection<RevCommit> getPendingCommits() {
 		if (pendingCommits == null) {
@@ -830,60 +610,12 @@ public class PullRequest extends AbstractEntity {
 		return mergedCommits;
 	}
 	
-	public List<PullRequestReview> getReviews() {
-		if (reviews == null) { 
-			if (!isNew())
-				reviews = GitPlex.getInstance(PullRequestReviewManager.class).findAll(this);
-			else
-				reviews = new ArrayList<>();
-		}
+	public Collection<Review> getReviews() {
 		return reviews;
 	}
 	
-	/**
-	 * This method is here for performance consideration. Often we need to load reviews of 
-	 * different updates in a pull request. And we optimize it to load all reviews at once 
-	 * for all updates in a pull request to reduce SQL queries. 
-	 * 
-	 * @param update
-	 * @return
-	 */
-	public List<PullRequestReview> getReviews(PullRequestUpdate update) {
-		List<PullRequestReview> reviews = new ArrayList<>();
-		for (PullRequestReview review: getReviews()) {
-			if (review.getUpdate().equals(update))
-				reviews.add(review);
-		}
-		return reviews;
-	}
-	
-	public boolean isReviewEffective(Account user) {
-		for (PullRequestReview review: getReviews()) {
-			if (review.getUpdate().equals(getLatestUpdate()) && review.getUser().equals(user)) 
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Calculate list of users can be added as reviewers of this pull request.
-	 *  
-	 * @return
-	 * 			list of potential reviewers
-	 */
-	public List<Account> getPotentialReviewers() {
-		List<Account> reviewers = new ArrayList<>();
-		Set<Account> alreadyInvited = new HashSet<>();
-		for (PullRequestReviewInvitation invitation: getReviewInvitations()) {
-			if (invitation.getStatus() != PullRequestReviewInvitation.Status.EXCLUDED)
-				alreadyInvited.add(invitation.getUser());
-		}
-		ObjectPermission readPerm = ObjectPermission.ofDepotRead(getTargetDepot());
-		for (Account user: GitPlex.getInstance(Dao.class).findAll(Account.class)) {
-			if (user.asSubject().isPermitted(readPerm) && !alreadyInvited.contains(user))
-				reviewers.add(user);
-		}
-		return reviewers;
+	public void setReviews(Collection<Review> reviews) {
+		this.reviews = reviews;
 	}
 	
 	@Nullable
@@ -981,7 +713,7 @@ public class PullRequest extends AbstractEntity {
 		String commitMessage = getTitle() + "\n\n";
 		if (getDescription() != null)
 			commitMessage += getDescription() + "\n\n";
-		commitMessage += "This commit is created as result of integrating pull request #" + getNumber();
+		commitMessage += "This commit is created as result of accepting pull request #" + getNumber();
 		return commitMessage;
 	}
 	
@@ -1012,9 +744,19 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public boolean isMerged() {
-		if (merged == null) 
-			merged = GitUtils.isMergedInto(getTargetDepot().getRepository(), ObjectId.fromString(getHeadCommitHash()), getTarget().getObjectId());
-		return merged;
+		return closeInfo != null && closeInfo.getCloseStatus() == CloseInfo.Status.MERGED;
+	}
+	
+	public boolean isDiscarded() {
+		return closeInfo != null && closeInfo.getCloseStatus() == CloseInfo.Status.DISCARDED;
+	}
+	
+	public boolean isMergeIntoTarget() {
+		if (mergedIntoTarget == null) { 
+			mergedIntoTarget = GitUtils.isMergedInto(getTargetDepot().getRepository(), ObjectId.fromString(getHeadCommitHash()), 
+					getTarget().getObjectId());
+		}
+		return mergedIntoTarget;
 	}
 	
 	public void setLastEvent(PullRequestStatusChange statusChange) {
@@ -1041,6 +783,18 @@ public class PullRequest extends AbstractEntity {
 			return depotAndBranch.getObjectId(false);
 		else
 			return null;
+	}
+	
+	public List<Account> getRemainingReviewers() {
+		ReviewCheckStatus checkStatus = getReviewCheckStatus();
+		Collection<Account> users = SecurityUtils.findUsersCan(getTargetDepot(), DepotPrivilege.READ);
+		users.removeAll(checkStatus.getAwaitingReviewers());
+		for (Review review: checkStatus.getEffectiveReviews().values())
+			users.remove(review.getUser());
+		users.remove(SecurityUtils.getAccount());
+		List<Account> userList = new ArrayList<>(users);
+		userList.sort(Comparator.comparing(Account::getName));
+		return userList;
 	}
 	
 	public static class ComparingInfo implements Serializable {

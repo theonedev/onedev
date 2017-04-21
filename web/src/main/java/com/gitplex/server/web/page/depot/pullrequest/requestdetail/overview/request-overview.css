@@ -186,7 +186,7 @@
 #request-detail .activities tr.activity>.content>.update tr:hover td {
 	background: #F5F5F5;
 }
-#request-detail .activities tr.activity>.content>.update tr.integrated td.icon .fa {
+#request-detail .activities tr.activity>.content>.update tr.merged td.icon .fa {
 	color: #35A612;
 }
 #request-detail .activities tr.activity>.content>.update tr.rebased td a {
@@ -198,41 +198,39 @@
 #request-detail .activities tr.activity>.content>.update tr.rebased img.avatar {
 	opacity: 0.5;
 }
-#request-detail .activities tr.activity>.content>.update td.status .successful {
-	color: #35A612;
-}
-#request-detail .activities tr.activity>.content>.update td.status .failed {
-	color: #F93333;
-}
-#request-detail .activities tr.activity>.content>.update td.status .running {
-	color: #AFAD1F;
-}
 #request-detail .activities tr.activity.new>.avatar {
 	border-color: #4667EE;
 }
 
-#request-detail .activities tr.activity>.content>.assigned>.head>.icon {
-	padding-left: 8px;
-}
 #request-detail .activities tr.activity>.content>.discarded>.head>.icon {
 	background: #F93333;
 	padding-left: 7px;
 }
-#request-detail .activities tr.activity>.content>.integrated>.head>.icon {
+#request-detail .activities tr.activity>.content>.merged>.head>.icon {
 	background: #35A612; 
-}
-#request-detail .activities tr.activity>.content>.approved>.head>.icon,
-#request-detail .activities tr.activity>.content>.completed-verification-successful>.head>.icon {
-	background: #35A612; 
-}
-#request-detail .activities tr.activity>.content>.disapproved>.head>.icon,
-#request-detail .activities tr.activity>.content>.completed-verification-failed>.head>.icon {
-	background: #F93333; 
 }
 #request-detail .activities tr.activity>.content>.deleted-review>.head>.icon,
-#request-detail .activities tr.activity>.content>.deleted-verification>.head>.icon,
 #request-detail .activities tr.activity>.content>.deleted-source-branch>.head>.icon {
 	padding-top: 6px;
+	padding-left: 8px;
+}
+#request-detail .activities tr.activity>.content>.approved>.head>.icon {
+	background: #35A612;
+	padding-top: 6px;
+	padding-left: 8px;
+}
+#request-detail .activities tr.activity>.content>.disapproved>.head>.icon {
+	background: #F93333;
+	padding-top: 6px;
+	padding-left: 8px;
+}
+#request-detail .activities tr.activity>.content>.changed-merge-strategy>.head>.icon {
+	padding-top: 6px;
+	padding-left: 8px;
+}
+#request-detail .activities tr.activity>.content>.added-reviewer>.head>.icon,
+#request-detail .activities tr.activity>.content>.removed-reviewer>.head>.icon {
+	padding-top: 7px;
 	padding-left: 8px;
 }
 #request-detail .activities tr.activity>.content>.restored-source-branch>.head>.icon,
@@ -271,9 +269,13 @@
 	border-bottom: none; 
 	margin-bottom: 0; 
 }
-#request-detail .info>div>.assignee, #request-detail .info>div>.reviewers>div,
-#request-detail .info>div>.integration-strategy, #request-detail .info>div>.watch {
+#request-detail .info>div>.reviewers>div,
+#request-detail .info>div>.merge-strategy, 
+#request-detail .info>div>.watch {
 	padding-bottom: 20px; 
+}
+#request-detail .info>div>.reviewers .no-reviewers {
+	font-size: 14px;
 }
 
 #request-detail .info .help-block {
@@ -285,8 +287,8 @@
 	vertical-align: middle;
 }
 #request-detail .info label {
-	margin-right: 4px; 
-	font-weight: normal;
+	margin: 0 4px 8px 0; 
+	font-size: 16px;
 }
 #request-detail .info .select2-container {
 	width: 100%;
@@ -300,21 +302,6 @@
 	height: 20px;
 }
 
-#request-detail .info .reviewers ul {
-	margin-bottom: 0;
-}
-#request-detail .info .reviewers li {
-	margin-right: 16px; 
-	margin-bottom: 20px; 
-	position: relative;
-}
-#request-detail .info .reviewers li a:hover {
-	text-decoration: none;
-}
-
-#request-detail .info .reviewers .review-result {
-	top: -4px;
-}
 #request-detail .info .manage .help-block {
 	margin-bottom: 12px;
 }

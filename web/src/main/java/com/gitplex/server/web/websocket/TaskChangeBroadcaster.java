@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.TaskChangeEvent;
+import com.gitplex.server.event.TaskChanged;
 import com.gitplex.server.web.websocket.WebSocketManager;
 
 @Singleton
@@ -18,7 +18,7 @@ public class TaskChangeBroadcaster {
 	}
 
 	@Listen
-	public void on(TaskChangeEvent event) {
+	public void on(TaskChanged event) {
 		TaskChangedRegion region = new TaskChangedRegion(event.getUserId());
 		webSocketManager.render(region, null);
 	}

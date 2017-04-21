@@ -85,10 +85,12 @@ public class ReflectionBeanEditor extends BeanEditor<Serializable> {
 				nameLabel.setVisible(false);
 
 			String required;
-			if (propertyContext.isPropertyRequired() && propertyContext.getPropertyClass() != boolean.class)
+			if (propertyContext.isPropertyRequired() && propertyContext.getPropertyClass() != boolean.class 
+					&& propertyContext.getPropertyClass() != List.class) {
 				required = "*";
-			else
+			} else {
 				required = "&nbsp;";
+			}
 			
 			item.add(new Label("required", required).setEscapeModelStrings(false));
 			

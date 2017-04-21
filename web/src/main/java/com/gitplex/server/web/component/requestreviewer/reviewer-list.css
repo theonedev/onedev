@@ -1,0 +1,31 @@
+table.reviewers a {
+	color: #333;
+}
+table.reviewers>tbody>tr>td {
+	padding: 0 12px 12px 0;
+}
+table.reviewers>tbody>tr>td.result, table.reviewers>tbody>tr>td.actions {
+	font-size: 16px;
+}
+table.reviewers>tbody>tr>td.result span.awaiting {
+	color: #DCB412;
+}
+table.reviewers>tbody>tr>td.result span.approved {
+	color: #35A612;
+}
+table.reviewers>tbody>tr>td.result span.disapproved {
+	color: #F93333;
+}
+
+table.reviewers>tbody>tr:last-child>td {
+	padding-bottom: 0;
+}
+table.reviewers>tbody>tr>td.no-reviewers {
+	font-size: 16px;
+}
+table.reviewers .immediate-accept-notice .alert-warning {
+	margin-bottom: 0;
+}
+.review-note {
+	padding: 8px 8px 0 8px;
+}

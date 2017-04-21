@@ -31,13 +31,10 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
-import com.gitplex.server.model.Depot;
-import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
-import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
@@ -228,25 +225,6 @@ public class FolderViewPanel extends Panel {
 			
 		}));
 		
-		readmeContainer.add(new ViewStateAwareAjaxLink<Void>("edit") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				DepotBlobPage.State state = new DepotBlobPage.State(readmeModel.getObject());
-				state.mode = Mode.EDIT;
-				setResponsePage(DepotBlobPage.class, DepotBlobPage.paramsOf(context.getDepot(), state));
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				Depot depot = context.getDepot();
-				BlobIdent blobIdent = readmeModel.getObject();
-				setVisible(depot.getBranchRef(blobIdent.revision) != null 
-						&& SecurityUtils.canModify(depot, blobIdent.revision, blobIdent.path));
-			}
-			
-		});
 		readmeContainer.add(new MarkdownViewer("body", new LoadableDetachableModel<String>() {
 
 			@Override

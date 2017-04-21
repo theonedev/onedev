@@ -31,7 +31,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.subject.Subject;
@@ -69,8 +68,6 @@ import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
-import com.gitplex.server.gatekeeper.AndGateKeeper;
-import com.gitplex.server.gatekeeper.GateKeeper;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.BlobIdentFilter;
@@ -83,14 +80,16 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.CommitMessageTransformSetting;
-import com.gitplex.server.model.support.IntegrationPolicy;
+import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.protectedobject.AccountBelonging;
 import com.gitplex.server.security.protectedobject.ProtectedObject;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.LockUtils;
+import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.Markdown;
@@ -114,8 +113,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	public static final String FQN_SEPARATOR = "/";
 	
 	public static final String REF_FQN_SEPARATOR = ":";
-	
-	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
 	
@@ -147,18 +144,18 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
-	 * gatekeepers and integration policies upon depot renaming/deletion
+	 * branch and tag protection settings upon depot renaming/deletion
 	 */
 	@Version
 	private long version;
 	
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<GateKeeper> gateKeepers = new ArrayList<>();
+	private ArrayList<BranchProtection> branchProtections = new ArrayList<>();
 	
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<IntegrationPolicy> integrationPolicies = new ArrayList<>();
+	private ArrayList<TagProtection> tagProtections = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private Date createdAt = new Date();
@@ -250,23 +247,20 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		this.uuid = uuid;
 	}
 
-	@NotNull
-	@Valid
-	public List<GateKeeper> getGateKeepers() {
-		return gateKeepers;
+	public ArrayList<BranchProtection> getBranchProtections() {
+		return branchProtections;
 	}
 
-	public void setGateKeepers(ArrayList<GateKeeper> gateKeepers) {
-		this.gateKeepers = gateKeepers;
+	public void setBranchProtections(ArrayList<BranchProtection> branchProtections) {
+		this.branchProtections = branchProtections;
 	}
 
-	@Valid
-	public List<IntegrationPolicy> getIntegrationPolicies() {
-		return integrationPolicies;
+	public ArrayList<TagProtection> getTagProtections() {
+		return tagProtections;
 	}
 
-	public void setIntegrationPolicies(ArrayList<IntegrationPolicy> integrationPolicies) {
-		this.integrationPolicies = integrationPolicies;
+	public void setTagProtections(ArrayList<TagProtection> tagProtections) {
+		this.tagProtections = tagProtections;
 	}
 
 	public Date getCreatedAt() {
@@ -397,13 +391,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
         return true;
 	}
 	
-	public GateKeeper getGateKeeper() {
-		AndGateKeeper andGateKeeper = new AndGateKeeper();
-		for (GateKeeper each: getGateKeepers())
-			andGateKeeper.getGateKeepers().add(each);
-		return andGateKeeper;
-	}
-
 	/**
 	 * Find fork root of this repository. 
 	 * 
@@ -1034,4 +1021,23 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			return FileMode.TREE.getBits();
 		}
 	}
+
+	@Nullable
+	public TagProtection getTagProtection(String tagName) {
+		for (TagProtection protection: tagProtections) {
+			if (PathUtils.matchChildAware(protection.getTag(), tagName))
+				return protection;
+		}
+		return null;
+	}
+	
+	@Nullable
+	public BranchProtection getBranchProtection(String branchName) {
+		for (BranchProtection protection: branchProtections) {
+			if (PathUtils.matchChildAware(protection.getBranch(), branchName))
+				return protection;
+		}
+		return null;
+	}
+	
 }

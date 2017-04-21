@@ -17,23 +17,3 @@ img.avatar {
 	left: 22px;
 	top: 13px;
 }
-
-.removeable-avatar {
-	position: relative;
-	display: block;
-}
-.removeable-avatar img {
-	width: 32px !important;
-	height: 32px !important;
-}
-.removeable-avatar i {
-	display: none; 
-	color: red; 
-	font-size: 30px; 
-	position: absolute; 
-	left: 4px; 
-	top: 1px;
-}
-a.removeable-avatar:hover i {
-	display: inline;
-}

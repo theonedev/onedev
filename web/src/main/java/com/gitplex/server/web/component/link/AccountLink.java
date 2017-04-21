@@ -1,5 +1,7 @@
 package com.gitplex.server.web.component.link;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -19,17 +21,25 @@ public class AccountLink extends ViewStateAwarePageLink<Void> {
 	
 	private final String name;
 	
-	public AccountLink(String id, Account account) {
+	public AccountLink(String id, @Nullable Account account) {
 		super(id, AccountOverviewPage.class);
 
-		params = AccountPage.paramsOf(account);
-		name = account.getDisplayName();
+		if (account == null) {
+			params = new PageParameters();
+			name = GitPlex.NAME;
+		} else if (account.getId() == null) {
+			params = new PageParameters();
+			name = account.getDisplayName();
+		} else {
+			params = AccountPage.paramsOf(account);
+			name = account.getDisplayName();
+		}
 	}
 	
 	public AccountLink(String id, PersonIdent person) {
 		super(id, AccountOverviewPage.class);
-		name = person.getName();
 		Account account = GitPlex.getInstance(AccountManager.class).find(person);
+		name = person.getName();
 		if (account != null) { 
 			params = AccountPage.paramsOf(account);
 		} else {

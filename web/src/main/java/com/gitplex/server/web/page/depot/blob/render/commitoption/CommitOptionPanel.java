@@ -49,15 +49,17 @@ import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.Provider;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.revision.DiffViewMode;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
-import com.gitplex.server.web.page.depot.blob.RevisionResolveEvent;
+import com.gitplex.server.web.page.depot.blob.RevisionResolved;
 import com.gitplex.server.web.page.depot.blob.navigator.BlobNameChanging;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
@@ -315,6 +317,15 @@ public class CommitOptionPanel extends Panel {
 
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
+				
+				if (!GitPlex.getInstance(ReviewManager.class).canModify(SecurityUtils.getAccount(), context.getDepot(), 
+						context.getBlobIdent().revision, context.getNewPath())) {
+					CommitOptionPanel.this.error("Adding of file '" + context.getNewPath() + "' need to be reviewed. "
+							+ "Please submit pull request instead");
+					target.add(feedback);
+					return false;
+				}
+				
 				newBlobs.put(context.getNewPath(), new BlobContent() {
 
 					@Override
@@ -350,7 +361,7 @@ public class CommitOptionPanel extends Panel {
 				} catch (ObsoleteCommitException e) {
 					try (RevWalk revWalk = new RevWalk(repository)) {
 						RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
-						send(this, Broadcast.BUBBLE, new RevisionResolveEvent(target, e.getOldCommitId()));
+						send(this, Broadcast.BUBBLE, new RevisionResolved(target, e.getOldCommitId()));
 						RevCommit currentCommit = revWalk.parseCommit(e.getOldCommitId());
 						prevCommitId = e.getOldCommitId();
 

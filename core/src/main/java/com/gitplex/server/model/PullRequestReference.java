@@ -2,6 +2,7 @@ package com.gitplex.server.model;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -37,8 +38,10 @@ public class PullRequestReference extends AbstractEntity {
 	private Date date;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
+	@JoinColumn
 	private Account user;
+	
+	private String userName;
 
 	public PullRequest getReferenced() {
 		return referenced;
@@ -64,12 +67,22 @@ public class PullRequestReference extends AbstractEntity {
 		this.date = date;
 	}
 
+	@Nullable
 	public Account getUser() {
 		return user;
 	}
 
 	public void setUser(Account user) {
 		this.user = user;
+	}
+
+	@Nullable
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 	
 }

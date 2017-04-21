@@ -4,10 +4,14 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.jsymbol.Range;
+import com.gitplex.launcher.loader.LoaderUtils;
+import com.gitplex.server.util.stringmatch.ChildAwareMatcher;
+import com.gitplex.server.util.stringmatch.Matcher;
 
 public class PathUtils {
+
+	private static final Matcher CHILDAWARE_MATCHER = new ChildAwareMatcher();
 
     /**
      * Match specified path against a collection of base paths to find out the longest match.
@@ -52,4 +56,8 @@ public class PathUtils {
     	return null;
     }
     
+	public static boolean matchChildAware(String pattern, String value) {
+		return CHILDAWARE_MATCHER.matches(pattern, value);
+	}
+	
 }

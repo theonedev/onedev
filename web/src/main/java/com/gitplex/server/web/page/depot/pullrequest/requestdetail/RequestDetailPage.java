@@ -1,15 +1,13 @@
 package com.gitplex.server.web.page.depot.pullrequest.requestdetail;
 
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
+import static com.gitplex.server.model.support.MergeStrategy.ALWAYS_MERGE;
+import static com.gitplex.server.model.support.MergeStrategy.MERGE_IF_NECESSARY;
+import static com.gitplex.server.model.support.MergeStrategy.REBASE_MERGE;
+import static com.gitplex.server.model.support.MergeStrategy.SQUASH_MERGE;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.APPROVE;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.DELETE_SOURCE_BRANCH;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.DISAPPROVE;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.DISCARD;
-import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.INTEGRATE;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.REOPEN;
 import static com.gitplex.server.web.page.depot.pullrequest.requestdetail.PullRequestOperation.RESTORE_SOURCE_BRANCH;
 
@@ -42,8 +40,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -58,12 +54,12 @@ import org.apache.wicket.util.visit.IVisitor;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequest.Status;
-import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.support.DepotAndBranch;
-import com.gitplex.server.model.support.IntegrationPreview;
+import com.gitplex.server.model.support.MergePreview;
+import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.comment.CommentInput;
@@ -74,7 +70,6 @@ import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
-import com.gitplex.server.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
 import com.gitplex.server.web.component.tabbable.Tab;
@@ -84,7 +79,7 @@ import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
+import com.gitplex.server.web.page.depot.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.WicketUtils;
@@ -288,12 +283,20 @@ public abstract class RequestDetailPage extends DepotPage {
 		add(summaryContainer);
 
 		summaryContainer.add(newDiscardedNoteContainer());
-		summaryContainer.add(newPendingUpdateNoteContainer());
-		summaryContainer.add(newPendingApprovalNoteContainer());
-		summaryContainer.add(newIntegratedNoteContainer());
-		summaryContainer.add(newStatusReasonsContainer());
-		summaryContainer.add(newIntegrationPreviewContainer());
+		summaryContainer.add(newMergedNoteContainer());
+		summaryContainer.add(newMergePreviewContainer());
+		summaryContainer.add(new WebMarkupContainer("doNotMerge") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().getMergeStrategy() == MergeStrategy.DO_NOT_MERGE);
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		summaryContainer.add(newOperationsContainer());
+		
 		WicketUtils.markLastVisibleChild(summaryContainer);
 		
 		List<Tab> tabs = new ArrayList<>();
@@ -301,7 +304,7 @@ public abstract class RequestDetailPage extends DepotPage {
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("File Changes", RequestChangesPage.class));
 		tabs.add(new RequestTab("Code Comments", RequestCodeCommentsPage.class));
-		tabs.add(new RequestTab("Integration Preview", IntegrationPreviewPage.class));
+		tabs.add(new RequestTab("Merge Preview", MergePreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		
@@ -330,7 +333,11 @@ public abstract class RequestDetailPage extends DepotPage {
 
 			@Override
 			public String getObject() {
-				return getPullRequest().getStatus().toString();
+				PullRequest request = getPullRequest();
+				if (request.isOpen())
+					return "OPEN";
+				else
+					return request.getCloseInfo().getCloseStatus().toString();
 			}
 			
 		}) {
@@ -345,10 +352,10 @@ public abstract class RequestDetailPage extends DepotPage {
 
 					@Override
 					public String getObject() {
-						PullRequest.Status status = getPullRequest().getStatus();
-						if (status == Status.DISCARDED)
+						PullRequest request = getPullRequest();
+						if (request.isDiscarded())
 							return " label-danger";
-						else if (status == Status.INTEGRATED)
+						else if (request.isMerged())
 							return " label-success";
 						else
 							return " label-warning";
@@ -369,23 +376,9 @@ public abstract class RequestDetailPage extends DepotPage {
 			
 		});
 		
-		if (request.getStatus() == Status.INTEGRATED) {
-			if (request.getCloseInfo().getClosedBy() != null)
-				statusAndBranchesContainer.add(new AccountLink("user", request.getCloseInfo().getClosedBy())); 
-			else
-				statusAndBranchesContainer.add(new WebMarkupContainer("user").setVisible(false)); 
-			
-			int commitCount = 0;
-			for (PullRequestUpdate update: request.getUpdates())
-				commitCount += update.getCommits().size();
-			
-			statusAndBranchesContainer.add(new Label("action", "integrated " + commitCount + " commits"));
-			statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getCloseInfo().getCloseDate())));
-		} else {
-			statusAndBranchesContainer.add(new AccountLink("user", request.getSubmitter()));
-			statusAndBranchesContainer.add(new Label("action", "wants to integrate"));
-			statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
-		}
+		statusAndBranchesContainer.add(new AccountLink("user", 
+				Account.getForDisplay(request.getSubmitter(), request.getSubmitterName())));
+		statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 		
 		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget()));
 		if (request.getSourceDepot() != null) {
@@ -403,29 +396,31 @@ public abstract class RequestDetailPage extends DepotPage {
 		}
 		return statusAndBranchesContainer;
 	}
-	
-	private WebMarkupContainer newIntegrationPreviewContainer() {
-		WebMarkupContainer integrationPreviewContainer = new WebMarkupContainer("integrationPreview") {
+
+	private WebMarkupContainer newMergePreviewContainer() {
+		WebMarkupContainer mergePreviewContainer = new WebMarkupContainer("mergePreview") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().isOpen());
+				
+				PullRequest request = getPullRequest();
+				setVisible(request.isOpen() && request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE);
 			}
 			
 		};
-		integrationPreviewContainer.setOutputMarkupPlaceholderTag(true);
+		mergePreviewContainer.setOutputMarkupPlaceholderTag(true);
 		
-		integrationPreviewContainer.add(new WebMarkupContainer("calculating") {
+		mergePreviewContainer.add(new WebMarkupContainer("calculating") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getIntegrationPreview() == null);
+				setVisible(getPullRequest().getMergePreview() == null);
 			}
 			
 		});
-		integrationPreviewContainer.add(new WebMarkupContainer("conflict") {
+		mergePreviewContainer.add(new WebMarkupContainer("conflict") {
 			
 			@Override
 			protected void onInitialize() {
@@ -450,54 +445,40 @@ public abstract class RequestDetailPage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				IntegrationPreview preview = getPullRequest().getIntegrationPreview();
-				setVisible(preview != null && preview.getIntegrated() == null);
+				MergePreview preview = getPullRequest().getMergePreview();
+				setVisible(preview != null && preview.getMerged() == null);
 			}
 
 		});
-		integrationPreviewContainer.add(new WebMarkupContainer("noConflict") {
+		mergePreviewContainer.add(new WebMarkupContainer("noConflict") {
 			
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
 
-				Link<Void> link = new Link<Void>("preview") {
+				Link<Void> link = new Link<Void>("mergePreview") {
 					
 					@Override
 					public void onClick() {
 						PullRequest request = getPullRequest();
-						PageParameters params = IntegrationPreviewPage.paramsOf(request);
-						setResponsePage(IntegrationPreviewPage.class, params);
+						PageParameters params = MergePreviewPage.paramsOf(request);
+						setResponsePage(MergePreviewPage.class, params);
 					}
-					
+
 				};
 				add(link);
-
-				add(new VerificationStatusPanel("verification", requestModel, new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						PullRequest request = getPullRequest();
-						IntegrationPreview preview = request.getIntegrationPreview();
-						if (preview != null)
-							return preview.getIntegrated();
-						else
-							return null;
-					}
-					
-				}));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				IntegrationPreview preview = getPullRequest().getIntegrationPreview();
-				setVisible(preview != null && preview.getIntegrated() != null);
+				MergePreview preview = getPullRequest().getMergePreview();
+				setVisible(preview != null && preview.getMerged() != null);
 			}
 
 		});
 		
-		return integrationPreviewContainer;
+		return mergePreviewContainer;
 	}
 	
 	private WebMarkupContainer newOperationsContainer() {
@@ -558,23 +539,6 @@ public abstract class RequestDetailPage extends DepotPage {
 				setVisible(DISAPPROVE.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
 			}
 			
-		});
-		
-		operationsContainer.add(new AjaxLink<Void>("integrate") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				operationsContainer.replace(newOperationConfirm(confirmId, INTEGRATE, operationsContainer));
-				target.add(operationsContainer);
-				target.appendJavaScript("$(window).resize();");
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(INTEGRATE.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
-			}
-
 		});
 		
 		operationsContainer.add(new AjaxLink<Void>("discard") {
@@ -716,9 +680,7 @@ public abstract class RequestDetailPage extends DepotPage {
 
 			@Override
 			public String getObject() {
-				if (operation == INTEGRATE)
-					return "btn-success";
-				else if (operation == DISCARD)
+				if (operation == DISCARD)
 					return "btn-danger";
 				else 
 					return "btn-primary";
@@ -751,7 +713,7 @@ public abstract class RequestDetailPage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getStatus() == Status.DISCARDED);
+				setVisible(getPullRequest().isDiscarded());
 			}
 			
 		};
@@ -759,166 +721,90 @@ public abstract class RequestDetailPage extends DepotPage {
 		return discardedNoteContainer;
 	}
 	
-	private WebMarkupContainer newPendingUpdateNoteContainer() {
-		WebMarkupContainer pendingUpdateNoteContainer = new WebMarkupContainer("pendingUpdateNote") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getStatus() == Status.PENDING_UPDATE);
-			}
-			
-		};
-		pendingUpdateNoteContainer.setOutputMarkupPlaceholderTag(true);
-		return pendingUpdateNoteContainer;
-	}
-	
-	private WebMarkupContainer newPendingApprovalNoteContainer() {
-		WebMarkupContainer pendingApprovalNoteContainer = new WebMarkupContainer("pendingApprovalNote") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getStatus() == Status.PENDING_APPROVAL);
-			}
-			
-		};
-		pendingApprovalNoteContainer.setOutputMarkupPlaceholderTag(true);
-		return pendingApprovalNoteContainer;
-	}
-	
 	private String getOperationName(PullRequestOperation operation) {
 		return WordUtils.capitalizeFully(operation.name()).replace("_", " ").toLowerCase();		
 	}
 
-	private WebMarkupContainer newIntegratedNoteContainer() {
-		WebMarkupContainer integratedNoteContainer = new WebMarkupContainer("integratedNote") {
+	private WebMarkupContainer newMergedNoteContainer() {
+		WebMarkupContainer mergedNoteContainer = new WebMarkupContainer("mergedNote") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getStatus() == Status.INTEGRATED);
+				setVisible(getPullRequest().isMerged());
 			}
 			
 		};
-		integratedNoteContainer.setOutputMarkupPlaceholderTag(true);
+		mergedNoteContainer.setOutputMarkupPlaceholderTag(true);
 		
-		integratedNoteContainer.add(new WebMarkupContainer("fastForwarded") {
+		mergedNoteContainer.add(new WebMarkupContainer("fastForwarded") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getLastIntegrationPreview();
-				setVisible(preview != null && preview.getRequestHead().equals(preview.getIntegrated()));
+				MergePreview preview = request.getLastMergePreview();
+				setVisible(preview != null && preview.getRequestHead().equals(preview.getMerged()));
 			}
 			
 		});
-		integratedNoteContainer.add(new WebMarkupContainer("merged") {
+		mergedNoteContainer.add(new WebMarkupContainer("merged") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getLastIntegrationPreview();
+				MergePreview preview = request.getLastMergePreview();
 				setVisible(preview != null 
-						&& !preview.getRequestHead().equals(preview.getIntegrated())
-						&& (preview.getIntegrationStrategy() == MERGE_ALWAYS || preview.getIntegrationStrategy() == MERGE_IF_NECESSARY));
+						&& !preview.getRequestHead().equals(preview.getMerged())
+						&& (preview.getMergeStrategy() == ALWAYS_MERGE || preview.getMergeStrategy() == MERGE_IF_NECESSARY));
 			}
 			
 		});
-		integratedNoteContainer.add(new WebMarkupContainer("mergedOutside") {
+		mergedNoteContainer.add(new WebMarkupContainer("mergedOutside") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(getPullRequest().getLastIntegrationPreview() == null);
+				setVisible(getPullRequest().getLastMergePreview() == null);
 			}
 			
 		});
-		integratedNoteContainer.add(new WebMarkupContainer("squashed") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getLastIntegrationPreview();
-				setVisible(preview != null 
-						&& !preview.getRequestHead().equals(preview.getIntegrated())
-						&& preview.getIntegrationStrategy() == MERGE_WITH_SQUASH);
-			}
-			
-		});
-		
-		integratedNoteContainer.add(new WebMarkupContainer("sourceRebased") {
+		mergedNoteContainer.add(new WebMarkupContainer("squashed") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getLastIntegrationPreview();
+				MergePreview preview = request.getLastMergePreview();
 				setVisible(preview != null 
-						&& !preview.getRequestHead().equals(preview.getIntegrated())
-						&& preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET);
+						&& !preview.getRequestHead().equals(preview.getMerged())
+						&& preview.getMergeStrategy() == SQUASH_MERGE);
 			}
 			
 		});
-		
-		integratedNoteContainer.add(new WebMarkupContainer("targetRebased") {
+		mergedNoteContainer.add(new WebMarkupContainer("rebased") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getLastIntegrationPreview();
+				MergePreview preview = request.getMergePreview();
 				setVisible(preview != null 
-						&& !preview.getRequestHead().equals(preview.getIntegrated())
-						&& preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE);
+						&& !preview.getRequestHead().equals(preview.getMerged())
+						&& preview.getMergeStrategy() == REBASE_MERGE);
 			}
 			
 		});
 		
-		return integratedNoteContainer;
+		return mergedNoteContainer;
 	}
 
-	private WebMarkupContainer newStatusReasonsContainer() {
-		WebMarkupContainer statusReasonsContainer = new WebMarkupContainer("statusReasons") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				PullRequest.Status status = getPullRequest().getStatus();
-				setVisible(status == Status.PENDING_APPROVAL || status == Status.PENDING_UPDATE);
-			}
-			
-		};
-		statusReasonsContainer.setOutputMarkupPlaceholderTag(true);
-		
-		statusReasonsContainer.add(new ListView<String>("reasons", new AbstractReadOnlyModel<List<String>>() {
-
-			@Override
-			public List<String> getObject() {
-				return getPullRequest().checkGates(false).getReasons();					
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<String> item) {
-				item.add(new Label("reason", item.getModelObject()));
-			}
-
-		});
-		
-		return statusReasonsContainer;
-	}
-	
 	@Override
 	protected void onDetach() {
 		requestModel.detach();

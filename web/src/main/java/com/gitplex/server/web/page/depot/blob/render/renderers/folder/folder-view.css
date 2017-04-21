@@ -42,10 +42,6 @@
 	font-weight: bold;	
 	border-bottom: 1px solid #BBB;
 }
-.folder-view>.readme>.head a {
-	color: #333;
-	margin-left: 4px;
-}
 .folder-view>.readme>.body {
 	padding: 20px;
 	max-width: 900px;

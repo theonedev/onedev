@@ -41,6 +41,8 @@ import com.gitplex.server.util.serverconfig.ServerConfig;
 
 public class GitPlex extends AbstractPlugin implements Serializable {
 
+	public static final String NAME = "GitPlex";
+	
 	private static final Logger logger = LoggerFactory.getLogger(GitPlex.class);
 	
 	private static final Pattern DOCLINK_PATTERN = Pattern.compile("\\d+\\.\\d+");

@@ -25,10 +25,7 @@
 	padding-left: 40px;
 }
 .code-comment>.section>.detail>.head .user-name {
-	color: #999;
-}
-.code-comment>.section>.detail>.head .user-name:hover {
-	color: #333;
+	color: #666;
 }
 .code-comment>.section>.detail>.head .activity {
 	font-size: 12px;

@@ -29,6 +29,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -196,36 +197,6 @@ public class DepotBranchesPage extends DepotPage {
 		
 	};
 	
-	private final IModel<Map<String, PullRequest>> aheadOpenRequestsModel = 
-			new LoadableDetachableModel<Map<String, PullRequest>>() {
-
-		@Override
-		protected Map<String, PullRequest> load() {
-			Map<String, PullRequest> requests = new HashMap<>();
-			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), baseBranch);
-			for (PullRequest request: pullRequestManager.findAllOpenTo(depotAndBranch, getDepot())) 
-				requests.put(request.getSource().getBranch(), request);
-			return requests;
-		}
-		
-	};
-	
-	private final IModel<Map<String, PullRequest>> behindOpenRequestsModel = 
-			new LoadableDetachableModel<Map<String, PullRequest>>() {
-
-		@Override
-		protected Map<String, PullRequest> load() {
-			Map<String, PullRequest> requests = new HashMap<>();
-			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), baseBranch);
-			for (PullRequest request: pullRequestManager.findAllOpenFrom(depotAndBranch, getDepot())) 
-				requests.put(request.getTarget().getBranch(), request);
-			return requests;
-		}
-		
-	};
-
 	private final IModel<Map<String, BranchWatch>> branchWatchesModel = 
 			new LoadableDetachableModel<Map<String, BranchWatch>>() {
 
@@ -310,8 +281,7 @@ public class DepotBranchesPage extends DepotPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectId commit = getDepot().getObjectId(branchRevision);
-				setVisible(SecurityUtils.canPushRef(getDepot(), Constants.R_HEADS, ObjectId.zeroId(), commit));
+				setVisible(SecurityUtils.canWrite(getDepot()));
 			}
 
 			private RevisionPicker newRevisionPicker() {
@@ -486,39 +456,22 @@ public class DepotBranchesPage extends DepotPage {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						if (behindOpenRequestsModel.getObject().get(item.getModelObject()) != null) { 
-							tag.put("title", "" + ab.getBehind() + " commits behind of base branch, and there is an "
-									+ "open pull request fetching those commits");
-						} else {
-							tag.put("title", "" + ab.getBehind() + " commits ahead of base branch");
-						}
+						tag.put("title", "" + ab.getBehind() + " commits ahead of base branch");
 						if (ab.getBehind() == 0)
 							tag.setName("span");
 					}
 
 					@Override
 					public void onClick() {
-						PullRequest request = behindOpenRequestsModel.getObject().get(branch);
-						if (request != null) {
-							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
-						} else {
-							RevisionComparePage.State state = new RevisionComparePage.State();
-							state.leftSide = new DepotAndBranch(getDepot(), branch);
-							state.rightSide = new DepotAndBranch(getDepot(), baseBranch);
-							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state); 
-							setResponsePage(RevisionComparePage.class, params);
-						}
+						RevisionComparePage.State state = new RevisionComparePage.State();
+						state.leftSide = new DepotAndBranch(getDepot(), branch);
+						state.rightSide = new DepotAndBranch(getDepot(), baseBranch);
+						PageParameters params = RevisionComparePage.paramsOf(getDepot(), state); 
+						setResponsePage(RevisionComparePage.class, params);
 					}
 					
 				});
 				item.add(new Label("behindBar") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						if (behindOpenRequestsModel.getObject().get(branch) != null)
-							add(AttributeAppender.append("class", " request"));
-					}
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
@@ -547,39 +500,22 @@ public class DepotBranchesPage extends DepotPage {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						if (aheadOpenRequestsModel.getObject().get(branch) != null) { 
-							tag.put("title", "" + ab.getAhead() + " commits ahead of base branch, and there is an "
-									+ "open pull request sending these commits to base branch");
-						} else {
-							tag.put("title", "" + ab.getAhead() + " commits ahead of base branch");
-						}
+						tag.put("title", "" + ab.getAhead() + " commits ahead of base branch");
 						if (ab.getAhead() == 0)
 							tag.setName("span");
 					}
 
 					@Override
 					public void onClick() {
-						PullRequest request = aheadOpenRequestsModel.getObject().get(branch);
-						if (request != null) {
-							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
-						} else {
-							RevisionComparePage.State state = new RevisionComparePage.State();
-							state.leftSide = new DepotAndBranch(getDepot(), baseBranch);
-							state.rightSide = new DepotAndBranch(getDepot(), branch);
-							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
-							setResponsePage(RevisionComparePage.class, params);
-						}
+						RevisionComparePage.State state = new RevisionComparePage.State();
+						state.leftSide = new DepotAndBranch(getDepot(), baseBranch);
+						state.rightSide = new DepotAndBranch(getDepot(), branch);
+						PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
+						setResponsePage(RevisionComparePage.class, params);
 					}
 					
 				});
 				item.add(new Label("aheadBar") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						if (aheadOpenRequestsModel.getObject().get(branch) != null)
-							add(AttributeAppender.append("class", " request"));
-					}
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
@@ -592,6 +528,31 @@ public class DepotBranchesPage extends DepotPage {
 				
 				WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
 				item.add(actionsContainer.setOutputMarkupId(true));
+
+				PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+				PullRequest effectiveRequest = pullRequestManager.findEffective(
+						new DepotAndBranch(getDepot(), baseBranch), 
+						new DepotAndBranch(getDepot(), branch));
+				WebMarkupContainer requestLink;
+				if (effectiveRequest != null && ab.getAhead() != 0) {
+					requestLink = new BookmarkablePageLink<Void>("effectiveRequest", 
+							RequestOverviewPage.class, RequestOverviewPage.paramsOf(effectiveRequest)); 
+					if (effectiveRequest.isOpen()) {
+						requestLink.add(new Label("label", "Open"));
+						requestLink.add(AttributeAppender.append("title", "A pull request is open for this change"));
+						requestLink.add(AttributeAppender.append("class", "btn-warning"));
+					} else {
+						requestLink.add(new Label("label", "Merged"));
+						requestLink.add(AttributeAppender.append("title", 
+								"This change is squashed/rebased onto base branch via a pull request"));
+						requestLink.add(AttributeAppender.append("class", "btn-success"));
+					}
+				} else {
+					requestLink = new WebMarkupContainer("effectiveRequest");
+					requestLink.setVisible(false);
+					requestLink.add(new WebMarkupContainer("label"));
+				}
+				actionsContainer.add(requestLink);
 				
 				actionsContainer.add(new AjaxLink<Void>("unwatchRequests") {
 
@@ -681,9 +642,8 @@ public class DepotBranchesPage extends DepotPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						RefInfo ref = item.getModelObject();
 						if (!getDepot().getDefaultBranch().equals(branch) 
-								&& SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getRef().getObjectId(), ObjectId.zeroId())) {
+								&& SecurityUtils.canDeleteBranch(getDepot(), branch)) {
 							setVisible(true);
 						} else {
 							setVisible(false);
@@ -728,8 +688,6 @@ public class DepotBranchesPage extends DepotPage {
 	@Override
 	public void onDetach() {
 		branchesModel.detach();
-		aheadOpenRequestsModel.detach();
-		behindOpenRequestsModel.detach();
 		branchWatchesModel.detach();
 		aheadBehindsModel.detach();
 		aheadBehindWidthModel.detach();

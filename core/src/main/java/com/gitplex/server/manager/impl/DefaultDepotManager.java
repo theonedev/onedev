@@ -35,7 +35,6 @@ import com.gitplex.server.event.depot.DepotTransferred;
 import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStarting;
 import com.gitplex.server.event.lifecycle.SystemStopping;
-import com.gitplex.server.gatekeeper.GateKeeper;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.CloneCommand;
 import com.gitplex.server.manager.AccountManager;
@@ -49,7 +48,8 @@ import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.Team;
 import com.gitplex.server.model.TeamAuthorization;
-import com.gitplex.server.model.support.IntegrationPolicy;
+import com.gitplex.server.model.support.BranchProtection;
+import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
@@ -150,27 +150,15 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		Account oldAccount = userManager.load(oldAccountId);
     		listenerRegistry.post(new DepotTransferred(depot, oldAccount));
     		
-    		for (Depot each: findAll()) {
-    			for (IntegrationPolicy policy: each.getIntegrationPolicies()) {
-    				policy.onDepotTransfer(depot, oldAccount);
-    			}
-    			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-    				if (it.next().onDepotTransfer(each, depot, oldAccount))
-    					it.remove();
-    			}
-    		}
+       		for (BranchProtection protection: depot.getBranchProtections()) {
+				protection.onDepotTransferred(depot);
+			}
+       		for (TagProtection protection: depot.getTagProtections()) {
+				protection.onDepotTransferred(depot);
+			}
     	}
     	if (oldName != null && !depot.getName().equals(oldName)) {
     		listenerRegistry.post(new DepotRenamed(depot, oldName));
-    		
-    		for (Depot each: findAll()) {
-    			for (IntegrationPolicy integrationPolicy: each.getIntegrationPolicies()) {
-    				integrationPolicy.onDepotRename(depot.getAccount(), oldName, depot.getName());
-    			}
-    			for (GateKeeper gateKeeper: each.getGateKeepers()) {
-    				gateKeeper.onDepotRename(depot, oldName);
-    			}
-    		}
     	}
     	
         doAfterCommit(newAfterCommitRunnable(depot, isNew));
@@ -204,17 +192,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 
     	dao.remove(depot);
     	
-		for (Depot each: findAll()) {
-			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
-				if (it.next().onDepotDelete(depot))
-					it.remove();
-			}
-			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-				if (it.next().onDepotDelete(depot))
-					it.remove();
-			}
-		}
-
 		doAfterCommit(new Runnable() {
 
 			@Override
@@ -361,16 +338,18 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	@Listen
 	public void on(RefUpdated event) {
 		if (event.getNewObjectId().equals(ObjectId.zeroId())) {
+			Depot depot = event.getDepot();
 			String branch = GitUtils.ref2branch(event.getRefName());
-			for (Depot each: findAll()) {
-				if (branch != null) {
-					for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
-						if (it.next().onBranchDelete(each, event.getDepot(), branch))
-							it.remove();
-					}
+			if (branch != null) {
+				for (Iterator<BranchProtection> it = depot.getBranchProtections().iterator(); it.hasNext();) {
+					if (it.next().onBranchDelete(branch))	
+						it.remove();
 				}
-				for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-					if (it.next().onRefDelete(event.getRefName()))
+			}
+			String tag = GitUtils.ref2tag(event.getRefName());
+			if (tag != null) {
+				for (Iterator<TagProtection> it = depot.getTagProtections().iterator(); it.hasNext();) {
+					if (it.next().onTagDelete(tag))	
 						it.remove();
 				}
 			}

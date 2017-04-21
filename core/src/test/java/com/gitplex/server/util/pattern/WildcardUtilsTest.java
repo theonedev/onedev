@@ -1,6 +1,6 @@
 package com.gitplex.server.util.pattern;
 
-import static com.gitplex.server.util.match.WildcardUtils.*;
+import static com.gitplex.server.util.stringmatch.WildcardUtils.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;

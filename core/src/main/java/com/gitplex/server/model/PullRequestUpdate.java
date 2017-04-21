@@ -7,17 +7,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
@@ -41,6 +38,8 @@ public class PullRequestUpdate extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String REFS_PREFIX = "refs/updates/";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;
@@ -49,13 +48,10 @@ public class PullRequestUpdate extends AbstractEntity {
 	private String headCommitHash;
 	
 	@Column(nullable=false)
-	private String mergeCommitHash;
+	private String mergeBaseCommitHash;
 
 	@Column(nullable=false)
 	private Date date = new Date();
-	
-	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -80,12 +76,12 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.headCommitHash = headCommitHash;
 	}
 	
-	public String getMergeCommitHash() {
-		return mergeCommitHash;
+	public String getMergeBaseCommitHash() {
+		return mergeBaseCommitHash;
 	}
 
-	public void setMergeCommitHash(String mergeCommitHash) {
-		this.mergeCommitHash = mergeCommitHash;
+	public void setMergeBaseCommitHash(String mergeBaseCommitHash) {
+		this.mergeBaseCommitHash = mergeBaseCommitHash;
 	}
 
 	public Date getDate() {
@@ -96,41 +92,12 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.date = date;
 	}
 
-    public Collection<PullRequestReview> getReviews() {
-		return getRequest().getReviews(this);
-	}
-
 	@JsonProperty
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return Depot.REFS_GITPLEX + "updates/" + getId();
+		return REFS_PREFIX + getId();
 	}
 	
-	/**
-	 * List reviews against this update and all subsequent updates.
-	 * <p>
-	 * @return
-	 * 			list of found reviews, ordered by associated updates reversely
-	 */
-	public List<PullRequestReview> listReviewsOnwards() {
-		List<PullRequestReview> reviews = new ArrayList<PullRequestReview>();
-		Set<Account> excludedReviewers = new HashSet<>();
-		for (PullRequestReviewInvitation invitation: getRequest().getReviewInvitations()) {
-			if (invitation.getStatus() == PullRequestReviewInvitation.Status.EXCLUDED)
-				excludedReviewers.add(invitation.getUser());
-		}
-		for (PullRequestUpdate update: getRequest().getEffectiveUpdates()) {
-			for (PullRequestReview review: update.getReviews()) {
-				if (!excludedReviewers.contains(review.getUser()))
-					reviews.add(review);
-			}
-			if (update.equals(this))
-				break;
-		}
-		
-		return reviews;
-	}
-
 	public void deleteRefs() {
 		GitUtils.deleteRef(getRequest().getTargetDepot().updateRef(getHeadRef()));
 	}	
@@ -147,7 +114,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			Repository repository = getRequest().getWorkDepot().getRepository();
 			try (	RevWalk revWalk = new RevWalk(repository);
 					TreeWalk treeWalk = new TreeWalk(repository)) {
-				RevCommit mergeCommit = revWalk.parseCommit(ObjectId.fromString(getMergeCommitHash()));
+				RevCommit mergeCommit = revWalk.parseCommit(ObjectId.fromString(getMergeBaseCommitHash()));
 				RevCommit baseCommit = revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash()));
 				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash()));
 				revWalk.markStart(mergeCommit);
@@ -267,7 +234,7 @@ public class PullRequestUpdate extends AbstractEntity {
 				 * update
 				 * 2. commits of this update will remain unchanged even if tip of the target branch changes     
 				 */
-				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getMergeCommitHash())));
+				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getMergeBaseCommitHash())));
 				
 				revWalk.forEach(c->commits.add(c));
 			} catch (IOException e) {

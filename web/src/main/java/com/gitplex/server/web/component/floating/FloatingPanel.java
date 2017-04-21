@@ -76,7 +76,8 @@ public abstract class FloatingPanel extends Panel {
 			String script = String.format("gitplex.server.floating.close($('#%s'), false);", getMarkupId(true));
 			target.appendJavaScript(script);
 		} 
-		remove();
+		if (getParent() != null)
+			remove();
 		onClosed();
 	}
 	

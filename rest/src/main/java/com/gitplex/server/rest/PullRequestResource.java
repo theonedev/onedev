@@ -57,8 +57,7 @@ public class PullRequestResource {
     		@QueryParam("targetDepotId") Long targetDepotId, @QueryParam("targetBranch") String targetBranch,
     		@QueryParam("sourceDepotId") Long sourceDepotId, @QueryParam("sourceBranch") String sourceBranch, 
     		@QueryParam("submitterId") Long submitterId, @QueryParam("status") String status, 
-    		@QueryParam("assigneeId") Long assigneeId, @QueryParam("beginDate") Date beginDate, 
-    		@QueryParam("endDate") Date endDate) {
+    		@QueryParam("beginDate") Date beginDate, @QueryParam("endDate") Date endDate) {
     	
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 
@@ -79,8 +78,6 @@ public class PullRequestResource {
 		
 		if (submitterId != null)
 			criteria.add(Restrictions.eq("submitter.id", submitterId));
-		if (assigneeId != null)
-			criteria.add(Restrictions.eq("assignee.id", assigneeId));
 		if (beginDate != null)
 			criteria.add(Restrictions.ge("submitDate", beginDate));
 		if (endDate != null)

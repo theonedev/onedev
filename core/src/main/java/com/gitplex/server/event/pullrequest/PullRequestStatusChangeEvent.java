@@ -6,7 +6,7 @@ import com.gitplex.server.event.MarkdownAware;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.PullRequestStatusChange;
 
-public class PullRequestStatusChangeEvent extends PullRequestChangeEvent implements MarkdownAware {
+public class PullRequestStatusChangeEvent extends PullRequestEvent implements MarkdownAware {
 
 	private final PullRequestStatusChange statusChange;
 	

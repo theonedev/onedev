@@ -1,6 +1,5 @@
 package com.gitplex.server.manager.impl;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -17,14 +16,11 @@ import org.hibernate.criterion.Restrictions;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStarting;
-import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestStatusChange;
-import com.gitplex.server.model.support.IntegrationPolicy;
+import com.gitplex.server.model.support.BranchProtection;
+import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
@@ -36,8 +32,6 @@ import com.google.common.collect.HashBiMap;
 @Singleton
 public class DefaultAccountManager extends AbstractEntityManager<Account> implements AccountManager {
 
-    private final PullRequestManager pullRequestManager;
-    
     private final PasswordService passwordService;
     
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
@@ -47,10 +41,9 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultAccountManager(Dao dao, PullRequestManager pullRequestManager, PasswordService passwordService) {
+    public DefaultAccountManager(Dao dao, PasswordService passwordService) {
         super(dao);
         
-        this.pullRequestManager = pullRequestManager;
         this.passwordService = passwordService;
     }
 
@@ -65,10 +58,10 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 
     	if (oldName != null && !oldName.equals(account.getName())) {
     		for (Depot depot: dao.findAll(Depot.class)) {
-    			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
-    				integrationPolicy.onAccountRename(oldName, account.getName());
-    			}
-    			depot.getGateKeeper().onAccountRename(oldName, account.getName());
+    			for (BranchProtection protection: depot.getBranchProtections())
+    				protection.onAccountRename(depot, oldName, account.getName());
+    			for (TagProtection protection: depot.getTagProtections())
+    				protection.onAccountRename(oldName, account.getName());
     		}
     	}
     	
@@ -98,43 +91,67 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     @Transactional
     @Override
 	public void delete(Account account) {
-    	Query query = getSession().createQuery("update PullRequest set lastEvent.user=null where lastEvent.user=:lastEventUser");
-    	query.setParameter("lastEventUser", account);
-    	query.executeUpdate();
-
-    	query = getSession().createQuery("from PullRequest where assignee=:assignee");
-    	query.setParameter("assignee", account);
-
-    	for (Object each: query.list()) {
-    		PullRequest request = (PullRequest) each;
-    		request.setAssignee(request.getTargetDepot().getAccount());
-    		pullRequestManager.save(request);
-    	}
-    	
-    	query = getSession().createQuery("update PullRequest set closeInfo.closedBy=null where closeInfo.closedBy=:closedBy");
-    	query.setParameter("closedBy", account);
-    	query.executeUpdate();
-    	
-    	query = getSession().createQuery("from PullRequest where submitter=:submitter");
+    	Query query = getSession().createQuery("update PullRequest set submitter=null, submitterName=:submitterName "
+    			+ "where submitter=:submitter");
     	query.setParameter("submitter", account);
-
-    	for (Object each: query.list()) {
-    		PullRequest request = (PullRequest) each;
-    		pullRequestManager.delete(request);
-    	}
+    	query.setParameter("submitterName", account.getDisplayName());
+    	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeComment set lastEvent.user=null where lastEvent.user=:user");
+    	query = getSession().createQuery("update PullRequest set closeInfo.closedBy=null, "
+    			+ "closeInfo.closedByName=:closedByName where closeInfo.closedBy=:closedBy");
+    	query.setParameter("closedBy", account);
+    	query.setParameter("closedByName", account.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update PullRequest set lastEvent.user=null, "
+    			+ "lastEvent.userName=:lastEventUserName where lastEvent.user=:lastEventUser");
+    	query.setParameter("lastEventUser", account);
+    	query.setParameter("lastEventUserName", account.getDisplayName());
+    	query.executeUpdate();
+
+    	query = getSession().createQuery("update PullRequestStatusChange set user=null, userName=:userName where user=:user");
     	query.setParameter("user", account);
+    	query.setParameter("userName", account.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update PullRequestComment set user=null, userName=:userName where user=:user");
+    	query.setParameter("user", account);
+    	query.setParameter("userName", account.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update PullRequestReference set user=null, userName=:userName where user=:user");
+    	query.setParameter("user", account);
+    	query.setParameter("userName", account.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update CodeComment set user=null, userName=:userName where user=:user");
+    	query.setParameter("user", account);
+    	query.setParameter("userName", account.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update CodeComment set lastEvent.user=null, "
+    			+ "lastEvent.userName=:lastEventUserName where lastEvent.user=:lastEventUser");
+    	query.setParameter("lastEventUser", account);
+    	query.setParameter("lastEventUserName", account.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update CodeCommentReply set user=null, userName=:userName where user=:user");
+    	query.setParameter("user", account);
+    	query.setParameter("userName", account.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update CodeCommentStatusChange set user=null, userName=:userName where user=:user");
+    	query.setParameter("user", account);
+    	query.setParameter("userName", account.getDisplayName());
     	query.executeUpdate();
     	
 		dao.remove(account);
 		
 		for (Depot depot: dao.findAll(Depot.class)) {
-			for (Iterator<IntegrationPolicy> it = depot.getIntegrationPolicies().iterator(); it.hasNext();) {
-				if (it.next().onAccountDelete(account.getName()))
-					it.remove();
-			}
-			depot.getGateKeeper().onAccountDelete(account.getName());
+			for (BranchProtection protection: depot.getBranchProtections())
+				protection.onAccountDelete(depot, account.getName());
+			for (TagProtection protection: depot.getTagProtections())
+				protection.onAccountDelete(account.getName());
 		}
 		
 		doAfterCommit(new Runnable() {
@@ -233,17 +250,6 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
 		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
 		criteria.add(Restrictions.eq("organization", true));
 		return findRange(criteria, 0, 0);
-	}
-
-	@Transactional
-	@Listen
-	public void on(PullRequestStatusChangeEvent event) {
-		if (event.getStatusChange().getType() == PullRequestStatusChange.Type.APPROVED
-				|| event.getStatusChange().getType() == PullRequestStatusChange.Type.DISAPPROVED) {
-			Account user = event.getStatusChange().getUser();
-			user.setReviewEffort(user.getReviewEffort()+1);
-			save(user);
-		}
 	}
 
 	@Listen

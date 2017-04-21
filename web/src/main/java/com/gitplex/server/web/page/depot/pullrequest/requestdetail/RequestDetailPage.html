@@ -13,7 +13,7 @@
 		<div wicket:id="statusAndBranches" class="status-and-branches clearfix">
 			<div wicket:id="status" class="label pull-left status"></div>
 			<div class="pull-left branches">
-				<a wicket:id="user"></a> <span wicket:id="action"></span> into <a wicket:id="target" class="branch"></a>
+				<a wicket:id="user"></a> wants to merge into <a wicket:id="target" class="branch"></a>
 				from <a wicket:id="source" class="branch"></a> <span wicket:id="date"></span>
 			</div>
 		</div>
@@ -21,74 +21,49 @@
 			<div wicket:id="discardedNote">
 				<i class="fa fa-info-circle"></i> This pull request has been discarded.
 			</div>
-			<div wicket:id="pendingUpdateNote" class="note with-status-reasons">
-				<i class="fa fa-info-circle"></i> This pull request does not pass gatekeeper 
-				checks below, and needs to be updated with new commits.
-			</div>
-			<div wicket:id="pendingApprovalNote" class="note with-status-reasons">
-				<i class="fa fa-info-circle"></i> This pull request needs to be approved/verified as below, before it can be integrated
-			</div>
-			<div wicket:id="integratedNote" class="integrated-note">
+			<div wicket:id="mergedNote" class="merged-note">
 				<div wicket:id="fastForwarded">
-					<i class="fa fa-info-circle"></i> Target branch was fast-forwarded to source branch.
+					<i class="fa fa-info-circle"></i> Target branch was fast-forwarded to source branch
 				</div>
 				<div wicket:id="merged">
-					<i class="fa fa-info-circle"></i> Target branch was merged with source branch.
+					<i class="fa fa-info-circle"></i> Commits were merged into target branch
 				</div>
 				<div wicket:id="mergedOutside">
-					<i class="fa fa-info-circle"></i> Target branch was merged with source branch by someone outside of this pull request.
+					<i class="fa fa-info-circle"></i> Commits were merged into target branch by someone outside of this pull request
 				</div>
 				<div wicket:id="squashed">
-					<p><i class="fa fa-info-circle"></i> Per integration strategy, pending commits in source branch was squashed 
-					before merging into target branch. Run this command if you want to sync local 
-					branch with the source branch: 
-					<kbd>git fetch origin && git rebase</kbd> 
-					</p>
+					<i class="fa fa-info-circle"></i> Commits were squashed into a single commit in target branch
 				</div>
-				<div wicket:id="sourceRebased">
-					<p><i class="fa fa-info-circle"></i> Per integration strategy, pending commits in source branch was rebased 
-					before merging into target branch. Run this command if you want to sync local 
-					branch with the source branch:
-					<kbd>git fetch origin && git rebase</kbd>
-					</p>
-				</div>
-				<div wicket:id="targetRebased">
-					<p><i class="fa fa-info-circle"></i> Per integration strategy, target branch was rebased on top of source branch.
-					Run this command if you want to sync local branch with the target branch:
-					<kbd>git fetch origin && git rebase</kbd>
-					</p>
+				<div wicket:id="rebased">
+					<i class="fa fa-info-circle"></i> Commits were rebased onto target branch
 				</div>
 			</div>
-			<div wicket:id="statusReasons" class="status-reasons">
-				<ul><li wicket:id="reasons" class="reason"><span wicket:id="reason"></span></li></ul>
-			</div>
-			<div wicket:id="integrationPreview" class="integration-preview">
+			<div wicket:id="mergePreview" class="merge-preview">
 				<div wicket:id="calculating">
 					<wicket:link>
-					<img src="ajax-indicator.gif"></img> Calculating integration preview...
+					<img src="ajax-indicator.gif"></img> Calculating merge preview...
 					</wicket:link>
 				</div>
 				<div wicket:id="noConflict" class="no-conflict">
-					<label><i class="fa fa-check-circle"></i> Able to integrate without conflicts</label> 
-					<wicket:enclosure child="preview">
-						<span class="middot"></span> <span><a wicket:id="preview">Preview</a> the integration result</span>
-					</wicket:enclosure>
-					<wicket:enclosure child="verification">
-						<span class="middot"></span> <span>Integration build verification <span wicket:id="verification"></span></span>
+					<label><i class="fa fa-check-circle"></i> Able to merge without conflicts</label> 
+					<wicket:enclosure child="mergePreview">
+						<span class="middot"></span> Target branch will be updated to the <a wicket:id="mergePreview">merge result</a> upon approvals of all reviewers
 					</wicket:enclosure>
 				</div>
 				<div wicket:id="conflict" class="conflict">
-					<span><i class="fa fa-warning"></i> There are integration conflicts.</span>
+					<span><i class="fa fa-warning"></i> There are merge conflicts.</span>
 					<wicket:enclosure child="resolveInstructionsTrigger">
 						Please follow <a wicket:id="resolveInstructionsTrigger" href="javascript:void(0);">this instruction</a> to resolve the conflicts.
 					</wicket:enclosure>
 				</div>
 			</div>
+			<div wicket:id="doNotMerge" class="do-not-merge">
+				This pull request is for review only and does not need to be merged
+			</div>
 			<div wicket:id="operations" class="operations">
 				<div class="buttons">
 					<a wicket:id="approve" class="btn btn-primary">Approve</a>
 					<a wicket:id="disapprove" class="btn btn-primary">Disapprove</a>
-					<a wicket:id="integrate" class="btn btn-success">Integrate</a>
 					<a wicket:id="discard" class="btn btn-danger">Discard</a>
 					<a wicket:id="reopen" class="btn btn-primary">Reopen</a>
 					<a wicket:id="deleteSourceBranch" class="btn btn-primary">Delete source branch</a>

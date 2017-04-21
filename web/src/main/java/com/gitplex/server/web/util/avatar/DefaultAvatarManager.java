@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.locks.Lock;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,6 +16,7 @@ import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.persistence.annotation.Transactional;
@@ -41,19 +43,22 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Transactional
 	@Override
-	public String getAvatarUrl(Account account) {
-		if (account == null) 
+	public String getAvatarUrl(@Nullable Account account) {
+		if (account == null) {
+			return AVATARS_BASE_URL + "gitplex.png";
+		} else if (account.getId() == null) {
 			return AVATARS_BASE_URL + "default.png";
-		
-		File avatarFile = getUploaded(account);
-		if (avatarFile.exists()) { 
-			return AVATARS_BASE_URL + "uploaded/" + account.getId() + "?version=" + avatarFile.lastModified();
+		} else {
+			File avatarFile = getUploaded(account);
+			if (avatarFile.exists()) { 
+				return AVATARS_BASE_URL + "uploaded/" + account.getId() + "?version=" + avatarFile.lastModified();
+			}
+			
+			if (configManager.getSystemSetting().isGravatarEnabled() && !account.isOrganization())
+				return Gravatar.getURL(account.getEmail(), GRAVATAR_SIZE);
+			else 
+				return generateAvatar(account.getDisplayName(), account.getEmail());
 		}
-		
-		if (configManager.getSystemSetting().isGravatarEnabled() && !account.isOrganization())
-			return Gravatar.getURL(account.getEmail(), GRAVATAR_SIZE);
-		else 
-			return generateAvatar(account.getDisplayName(), account.getEmail());
 	}
 	
 	private String generateAvatar(String primaryName, String secondaryName) {
@@ -85,7 +90,9 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public String getAvatarUrl(PersonIdent person) {
-		if (configManager.getSystemSetting().isGravatarEnabled())
+		if (person.getEmailAddress().length() == 0 && person.getName().equals(GitPlex.NAME))
+			return AVATARS_BASE_URL + "gitplex.png";
+		else if (configManager.getSystemSetting().isGravatarEnabled())
 			return Gravatar.getURL(person.getEmailAddress(), GRAVATAR_SIZE);
 		else 
 			return generateAvatar(person.getName(), person.getEmailAddress());

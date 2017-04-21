@@ -7,16 +7,12 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.model.Account;
-import com.gitplex.server.web.behavior.TooltipBehavior;
 import com.gitplex.server.web.util.avatar.AvatarManager;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
 public class Avatar extends WebComponent {
@@ -25,35 +21,21 @@ public class Avatar extends WebComponent {
 	
 	private String url;
 	
-	private final String name;
-	
-	private final TooltipConfig tooltipConfig;
-	
 	public Avatar(String id, @Nullable Account account) {
-		this(id, account, null);
-	}
-	
-	public Avatar(String id, @Nullable Account account, @Nullable TooltipConfig tooltipConfig) {
 		super(id);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		if (account != null) {
-			accountId = account.getId();
-			url = avatarManager.getAvatarUrl(account);
-			name = account.getDisplayName();
-		} else {
+		if (account == null) {
 			accountId = null;
-			url = avatarManager.getAvatarUrl(account);
-			name = "Unknown";
+		} else if (account.getId() == null) {
+			accountId = null;
+		} else {
+			accountId = account.getId();
 		}
-		this.tooltipConfig = tooltipConfig;
+		url = avatarManager.getAvatarUrl(account);
 	}
 	
 	public Avatar(String id, PersonIdent person) {
-		this(id, person, null);
-	}
-	
-	public Avatar(String id, PersonIdent person, @Nullable TooltipConfig tooltipConfig) {
 		super(id);
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
@@ -62,13 +44,10 @@ public class Avatar extends WebComponent {
 		if (account != null) { 
 			accountId = account.getId();
 			url = avatarManager.getAvatarUrl(account);
-			name = account.getDisplayName();
 		} else {
 			accountId = null;
 			url = avatarManager.getAvatarUrl(person);
-			name = person.getName();
 		}
-		this.tooltipConfig = tooltipConfig;
 	}
 	
 	@Override
@@ -88,10 +67,6 @@ public class Avatar extends WebComponent {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		if (tooltipConfig != null)
-			add(new TooltipBehavior(Model.of(name), tooltipConfig));
-		
 		setOutputMarkupId(true);
 	}
 

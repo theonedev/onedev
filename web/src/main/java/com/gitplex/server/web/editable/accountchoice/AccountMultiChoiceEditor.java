@@ -12,6 +12,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.model.Account;
+import com.gitplex.server.util.editable.annotation.AccountChoice;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceProvider;
 import com.gitplex.server.web.component.accountchoice.AccountMultiChoice;
 import com.gitplex.server.web.editable.ErrorContext;
@@ -24,12 +25,12 @@ public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private AccountMultiChoice input;
 	
-	private final boolean organization;
+	private final AccountChoice.Type type;
 	
 	public AccountMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
-			IModel<List<String>> propertyModel, boolean organization) {
+			IModel<List<String>> propertyModel, AccountChoice.Type type) {
 		super(id, propertyDescriptor, propertyModel);
-		this.organization = organization;
+		this.type = type;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -47,7 +48,7 @@ public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 		} 
 		
-		input = new AccountMultiChoice("input", new Model((Serializable)accounts), new AccountChoiceProvider(organization));
+		input = new AccountMultiChoice("input", new Model((Serializable)accounts), new AccountChoiceProvider(type));
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);

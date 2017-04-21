@@ -334,9 +334,7 @@ gitplex.server = {
 	showSessionFeedback: function() {
 		if ($("#session-feedback li").length != 0) {
 			var feedback = $("#session-feedback");
-	        var x = ($(window).width() - feedback.outerWidth()) / 2;
-	        feedback.css("left", x+$(window).scrollLeft());
-			feedback.css("top", $(window).scrollTop());
+	        feedback.css("left", ($(window).width()-feedback.outerWidth()) / 2);
 			feedback.slideDown("slow");
 			
 			var body = $("body");

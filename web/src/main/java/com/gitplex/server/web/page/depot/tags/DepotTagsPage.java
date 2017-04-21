@@ -28,7 +28,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
@@ -103,8 +102,7 @@ public class DepotTagsPage extends DepotPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectId commit = getDepot().getObjectId(tagRevision);
-				setVisible(SecurityUtils.canPushRef(getDepot(), Constants.R_TAGS, ObjectId.zeroId(), commit));
+				setVisible(SecurityUtils.canCreateTag(getDepot(), Constants.R_TAGS));
 			}
 
 			private RevisionPicker newRevisionPicker() {
@@ -324,8 +322,7 @@ public class DepotTagsPage extends DepotPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						RefInfo ref = item.getModelObject();
-						setVisible(SecurityUtils.canPushRef(getDepot(), ref.getRef().getName(), ref.getPeeledObj(), ObjectId.zeroId()));
+						setVisible(SecurityUtils.canDeleteTag(getDepot(), tagName));
 					}
 					
 				});

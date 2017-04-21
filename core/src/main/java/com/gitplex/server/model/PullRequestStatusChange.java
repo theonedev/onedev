@@ -24,16 +24,15 @@ public class PullRequestStatusChange extends AbstractEntity {
 	public enum Type {
 		APPROVED("approved", "fa fa-thumbs-o-up"),
 		DISAPPROVED("disapproved", "fa fa-thumbs-o-down"),
-		ASSIGNED("assigned", "fa fa-user"),
 		DISCARDED("discarded", "fa fa-ban"),
-		INTEGRATED("integrated", "fa fa-check"),
+		MERGED("merged", "fa fa-check"),
 		REOPENED("reopened", "fa fa-repeat"),
-		REVIEW_DELETED("deleted review", "fa fa-times"),
-		VERIFICATION_DELETED("deleted verification", "fa fa-times"),
-		VERIFICATION_FAILED("completed verification (failed)", "fa fa-thumbs-o-down"),
-		VERIFICATION_SUCCEEDED("completed verification (successful)", "fa fa-thumbs-o-up"),
-		SOURCE_BRANCH_DELETED("deleted source branch", "fa fa-times"),
-		SOURCE_BRANCH_RESTORED("restored source branch", "fa fa-repeat"),
+		WITHDRAWED_REVIEW("withdrawed review", "fa fa-undo"),
+		ADDED_REVIEWER("added reviewer", "fa fa-plus"),
+		REMOVED_REVIEWER("removed reviewer", "fa fa-trash"),
+		CHANGED_MERGE_STRATEGY("changed merge strategy", "fa fa-pencil"),
+		DELETED_SOURCE_BRANCH("deleted source branch", "fa fa-trash"),
+		RESTORED_SOURCE_BRANCH("restored source branch", "fa fa-repeat"),
 		;
 
 		private final String name;
@@ -66,8 +65,10 @@ public class PullRequestStatusChange extends AbstractEntity {
 	private Type type;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
+	@JoinColumn
 	private Account user;
+	
+	private String userName;
 	
 	@Column(nullable=false)
 	private Date date;
@@ -105,6 +106,15 @@ public class PullRequestStatusChange extends AbstractEntity {
 
 	public void setUser(Account user) {
 		this.user = user;
+	}
+
+	@Nullable
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	public Date getDate() {

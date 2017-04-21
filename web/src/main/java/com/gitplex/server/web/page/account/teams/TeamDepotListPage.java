@@ -46,7 +46,7 @@ import com.gitplex.server.web.component.privilegeselection.PrivilegeSelectionPan
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
 import com.gitplex.server.web.component.select2.SelectToAddChoice;
-import com.gitplex.server.web.page.depot.setting.authorization.DepotTeamListPage;
+import com.gitplex.server.web.page.depot.setting.authorization.DepotTeamAuthorizationPage;
 import com.gitplex.server.web.util.depotaccess.DepotAccess;
 import com.google.common.base.Preconditions;
 
@@ -272,8 +272,8 @@ public class TeamDepotListPage extends TeamPage {
 			protected void populateItem(ListItem<TeamAuthorization> item) {
 				TeamAuthorization authorization = item.getModelObject();
 
-				Link<Void> link = new ViewStateAwarePageLink<Void>("link", DepotTeamListPage.class, 
-						DepotTeamListPage.paramsOf(authorization.getDepot()));
+				Link<Void> link = new ViewStateAwarePageLink<Void>("link", DepotTeamAuthorizationPage.class, 
+						DepotTeamAuthorizationPage.paramsOf(authorization.getDepot()));
 				link.add(new Label("name", authorization.getDepot().getName()));
 				item.add(link);
 				

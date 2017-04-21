@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import com.gitplex.server.model.support.CommentPos;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
+import com.gitplex.server.web.page.depot.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -25,7 +25,7 @@ public class RequestCompareInfo implements Serializable {
 	
 	public RequestChangesPage.State compareState;
 	
-	public IntegrationPreviewPage.State previewState;
+	public MergePreviewPage.State previewState;
 	
 	@Override
 	public String toString() {
@@ -104,7 +104,7 @@ public class RequestCompareInfo implements Serializable {
 				compareInfo.compareState.mark = CommentPos.fromString(decode(fields.get(8)));
 				compareInfo.compareState.whitespaceOption = WhitespaceOption.ofNullableName(decode(fields.get(9)));
 			} else {
-				compareInfo.previewState = new IntegrationPreviewPage.State();
+				compareInfo.previewState = new MergePreviewPage.State();
 				compareInfo.previewState.pathFilter = decode(fields.get(2));
 				compareInfo.previewState.whitespaceOption = WhitespaceOption.ofNullableName(decode(fields.get(3)));
 				compareInfo.previewState.blameFile = decode(fields.get(4));

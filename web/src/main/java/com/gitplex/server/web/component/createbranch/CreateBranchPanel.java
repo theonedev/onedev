@@ -8,16 +8,10 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
-import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.security.SecurityUtils;
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -83,19 +77,8 @@ abstract class CreateBranchPanel extends Panel {
 					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					Depot depot = depotModel.getObject();
-					ObjectId commitId = depot.getRevCommit(revision);
-					Account user = Preconditions.checkNotNull(SecurityUtils.getAccount());
-					GateCheckResult checkResult = depot.getGateKeeper().checkPush(user, 
-							depot, Constants.R_HEADS + branchName, ObjectId.zeroId(), commitId);
-					if (!checkResult.isPassedOrIgnored()) {
-						form.error(Joiner.on(", ").join(checkResult.getReasons()));
-						target.focusComponent(nameInput);
-						target.add(form);
-					} else {
-						depot.createBranch(branchName, revision);
-						onCreate(target, branchName);
-					}
+					depotModel.getObject().createBranch(branchName, revision);
+					onCreate(target, branchName);
 				}
 			}
 

@@ -7,6 +7,7 @@ import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.OrganizationMembership;
+import com.gitplex.server.util.editable.annotation.AccountChoice;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceProvider;
 import com.gitplex.server.web.component.select2.Response;
@@ -18,7 +19,7 @@ public class MemberChoiceProvider extends AccountChoiceProvider {
 	private final IModel<Account> organizationModel;
 	
 	public MemberChoiceProvider(IModel<Account> organizationModel) {
-		super(false);
+		super(AccountChoice.Type.USER);
 		this.organizationModel = organizationModel;
 	}
 	

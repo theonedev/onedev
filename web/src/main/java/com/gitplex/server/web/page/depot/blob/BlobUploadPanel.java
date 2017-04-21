@@ -27,7 +27,9 @@ import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.dropzonefield.DropzoneField;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.google.common.base.Preconditions;
@@ -83,11 +85,20 @@ abstract class BlobUploadPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
+				ReviewManager reviewManager = GitPlex.getInstance(ReviewManager.class);
 				Map<String, BlobContent> newBlobs = new HashMap<>();
 				for (FileUpload upload: uploads) {
 					String blobPath = upload.getClientFileName();
 					if (context.getBlobIdent().path != null)
 						blobPath = context.getBlobIdent().path + "/" + blobPath;
+					
+					if (!reviewManager.canModify(SecurityUtils.getAccount(), context.getDepot(), 
+							context.getBlobIdent().revision, blobPath)) {
+						form.error("Adding of file '" + blobPath + "' need to be reviewed. "
+								+ "Please submit pull request instead");
+						target.add(feedback);
+						return;
+					}
 					BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
 					newBlobs.put(blobPath, blobContent);
 				}

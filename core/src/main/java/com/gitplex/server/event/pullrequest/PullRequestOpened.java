@@ -8,7 +8,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable(name="opened")
-public class PullRequestOpened extends PullRequestChangeEvent implements MarkdownAware {
+public class PullRequestOpened extends PullRequestEvent implements MarkdownAware {
 
 	public PullRequestOpened(PullRequest request) {
 		super(request);
@@ -21,7 +21,7 @@ public class PullRequestOpened extends PullRequestChangeEvent implements Markdow
 
 	@Override
 	public Account getUser() {
-		return getRequest().getSubmitter();
+		return Account.getForDisplay(getRequest().getSubmitter(), getRequest().getSubmitterName());
 	}
 
 	@Override

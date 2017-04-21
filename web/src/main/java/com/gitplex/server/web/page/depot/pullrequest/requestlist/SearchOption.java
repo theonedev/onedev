@@ -29,8 +29,6 @@ public class SearchOption implements Serializable {
 	
 	private static final String PARAM_STATUS = "status";
 	
-	private static final String PARAM_ASSIGNEE = "assignee";
-	
 	private static final String PARAM_SUBMITTER = "submitter";
 	
 	private static final String PARAM_BRANCH = "branch";
@@ -49,8 +47,6 @@ public class SearchOption implements Serializable {
 	
 	private Status status = Status.OPEN;
 
-	private String assigneeName;
-	
 	private String submitterName;
 	
 	private String branch;
@@ -79,16 +75,6 @@ public class SearchOption implements Serializable {
 
 	public void setStatus(Status status) {
 		this.status = status;
-	}
-
-	@Editable(order=200, name="Assigned To")
-	@AccountChoice
-	public String getAssigneeName() {
-		return assigneeName;
-	}
-
-	public void setAssigneeName(String assigneeName) {
-		this.assigneeName = assigneeName;
 	}
 
 	@Editable(order=300, name="Submitted By")
@@ -150,8 +136,6 @@ public class SearchOption implements Serializable {
 		if (value != null)
 			status = Status.valueOf(value);
 		
-		assigneeName = params.get(PARAM_ASSIGNEE).toString();
-		
 		submitterName = params.get(PARAM_SUBMITTER).toString();
 		
 		branch = params.get(PARAM_BRANCH).toString();
@@ -194,9 +178,6 @@ public class SearchOption implements Serializable {
 		if (submitterName != null) {
 			criteria.createCriteria("submitter").add(Restrictions.eq("name", submitterName));
 		}
-		if (assigneeName != null) {
-			criteria.createCriteria("assignee").add(Restrictions.eq("name", assigneeName));
-		}
 		if (title != null)
 			criteria.add(Restrictions.ilike("title", "%" + title + "%"));
 		if (beginDate != null)
@@ -209,8 +190,6 @@ public class SearchOption implements Serializable {
 	public void fillPageParams(PageParameters params) {
 		params.set(PARAM_DIRECTION, direction.name());
 		params.set(PARAM_STATUS, status.name());
-		if (assigneeName != null)
-			params.set(PARAM_ASSIGNEE, assigneeName);
 		if (submitterName != null)
 			params.set(PARAM_SUBMITTER, submitterName);
 		if (branch != null)

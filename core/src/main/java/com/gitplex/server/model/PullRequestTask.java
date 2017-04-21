@@ -21,9 +21,9 @@ public class PullRequestTask extends AbstractEntity {
 	private static final long serialVersionUID = 1L;
 
 	public enum Type {
-		REVIEW("Please review this pull request."), 
-		UPDATE("Please update this pull request."), 
-		INTEGRATE("Please integrate this pull request.");
+		REVIEW("There are new changes to review"), 
+		UPDATE("Someone disapproved current changes"), 
+		RESOLVE_CONFLICT("There are merge conflicts");
 
 		private final String displayName;
 		

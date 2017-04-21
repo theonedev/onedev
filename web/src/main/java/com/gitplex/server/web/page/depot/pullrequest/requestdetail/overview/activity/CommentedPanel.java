@@ -18,6 +18,7 @@ import org.hibernate.StaleStateException;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestCommentManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestComment;
@@ -46,7 +47,7 @@ class CommentedPanel extends GenericPanel<PullRequestComment> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new AccountLink("user", getComment().getUser()));
+		add(new AccountLink("user", Account.getForDisplay(getComment().getUser(), getComment().getUserName())));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 		
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {

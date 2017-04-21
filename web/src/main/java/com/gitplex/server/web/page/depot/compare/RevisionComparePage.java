@@ -207,9 +207,13 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 
 			@Override
 			protected PullRequest load() {
-				DepotAndBranch left = new DepotAndBranch(state.leftSide.toString());
-				DepotAndBranch right = new DepotAndBranch(state.rightSide.toString());
-				return GitPlex.getInstance(PullRequestManager.class).findOpen(left, right);
+				if (state.leftSide.getBranch() != null && state.rightSide.getBranch() != null) {
+					DepotAndBranch left = new DepotAndBranch(state.leftSide.toString());
+					DepotAndBranch right = new DepotAndBranch(state.rightSide.toString());
+					return GitPlex.getInstance(PullRequestManager.class).findEffective(left, right);
+				} else {
+					return null;
+				}
 			}
 			
 		};
@@ -402,27 +406,32 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			
 		});
 		
-		add(new WebMarkupContainer("openedRequest") {
+		add(new WebMarkupContainer("effectiveRequest") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(requestModel.getObject() != null);
+				PullRequest request = requestModel.getObject();
+				setVisible(request != null && (request.isOpen() || !request.isMergeIntoTarget()));
 			}
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				
-				add(new Label("no", new AbstractReadOnlyModel<String>() {
+
+				add(new Label("description", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						return String.valueOf(requestModel.getObject().getNumber());
+						if (requestModel.getObject().isOpen())
+							return "This change is already opened for merge by a pull request";
+						else 
+							return "This change is squashed/rebased onto base branch via a pull request";
 					}
 					
 				}));
+				
 				add(new Link<Void>("link") {
 
 					@Override
@@ -432,7 +441,8 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 
 							@Override
 							public String getObject() {
-								return requestModel.getObject().getTitle();
+								PullRequest request = requestModel.getObject();
+								return "#" + request.getNumber() + " " + request.getTitle();
 							}
 						}));
 					}

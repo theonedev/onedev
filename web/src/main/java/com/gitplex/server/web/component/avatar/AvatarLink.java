@@ -29,32 +29,44 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 	
 	private final PageParameters params;
 	
+	private final String tooltip;
+	
 	private String url;
 	
-	private final String name;
-	
-	private final TooltipConfig tooltipConfig;
-	
-	public AvatarLink(String id, Account user) {
-		this(id, user, null);
+	public AvatarLink(String id, @Nullable Account account) {
+		this(id, account, false);
 	}
 	
-	public AvatarLink(String id, Account account, @Nullable TooltipConfig tooltipConfig) {
+	public AvatarLink(String id, @Nullable Account account, boolean showTooltip) {
 		super(id, AccountOverviewPage.class);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		accountId = account.getId();
-		params = AccountPage.paramsOf(account);
-		name = account.getDisplayName();
+		if (account == null) {
+			accountId = null;
+			params = new PageParameters();
+		} else if (account.getId() == null) {
+			accountId = null;
+			params = new PageParameters();
+		} else {
+			accountId = account.getId();
+			params = AccountPage.paramsOf(account);
+		}
+		if (showTooltip) {
+			if (account != null)
+				tooltip = account.getDisplayName();
+			else
+				tooltip = GitPlex.NAME;
+		} else {
+			tooltip = null;
+		}
 		url = avatarManager.getAvatarUrl(account);
-		this.tooltipConfig = tooltipConfig;
 	}
 	
 	public AvatarLink(String id, PersonIdent person) {
-		this(id, person, null);
+		this(id, person, false);
 	}
 	
-	public AvatarLink(String id, PersonIdent person, @Nullable TooltipConfig tooltipConfig) {
+	public AvatarLink(String id, PersonIdent person, boolean showTooltip) {
 		super(id, AccountOverviewPage.class);
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
@@ -64,14 +76,16 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 			accountId = account.getId();
 			params = AccountPage.paramsOf(account);
 			url = avatarManager.getAvatarUrl(account);
-			name = account.getDisplayName();
 		} else {
 			accountId = null;
 			params = new PageParameters();
 			url = avatarManager.getAvatarUrl(person);
-			name = person.getName();
 		}
-		this.tooltipConfig = tooltipConfig;
+		
+		if (showTooltip)
+			tooltip = person.getName();
+		else
+			tooltip = null;
 	}
 	
 	@Override
@@ -119,8 +133,8 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 		setEnabled(!params.isEmpty());
 		setEscapeModelStrings(false);
 		
-		if (tooltipConfig != null)
-			add(new TooltipBehavior(Model.of(name), tooltipConfig));
+		if (tooltip != null)
+			add(new TooltipBehavior(Model.of(tooltip), new TooltipConfig()));
 		
 		setOutputMarkupId(true);
 	}

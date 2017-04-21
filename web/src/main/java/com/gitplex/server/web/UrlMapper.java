@@ -47,16 +47,16 @@ import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
 import com.gitplex.server.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
+import com.gitplex.server.web.page.depot.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
-import com.gitplex.server.web.page.depot.setting.authorization.DepotTeamListPage;
+import com.gitplex.server.web.page.depot.setting.authorization.DepotTeamAuthorizationPage;
+import com.gitplex.server.web.page.depot.setting.branchprotection.BranchProtectionPage;
 import com.gitplex.server.web.page.depot.setting.commitmessagetransform.CommitMessageTransformPage;
-import com.gitplex.server.web.page.depot.setting.gatekeeper.GateKeeperPage;
 import com.gitplex.server.web.page.depot.setting.general.GeneralSettingPage;
-import com.gitplex.server.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
+import com.gitplex.server.web.page.depot.setting.tagprotection.TagProtectionPage;
 import com.gitplex.server.web.page.depot.tags.DepotTagsPage;
 import com.gitplex.server.web.page.init.ServerInitPage;
 import com.gitplex.server.web.page.init.WelcomePage;
@@ -206,16 +206,16 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new DepotMapper(
 				"${account}/${depot}/pulls/${request}/changes", RequestChangesPage.class));
 		add(new DepotMapper(
-				"${account}/${depot}/pulls/${request}/integration-preview", IntegrationPreviewPage.class));
+				"${account}/${depot}/pulls/${request}/merge-preview", MergePreviewPage.class));
 		add(new DepotMapper("${account}/${depot}/comments", DepotCommentsPage.class));
 		add(new DepotMapper("${account}/${depot}/comments/${comment}", CodeCommentPage.class));
 
 		add(new DepotMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
-		add(new DepotMapper("${account}/${depot}/settings/teams", DepotTeamListPage.class));
+		add(new DepotMapper("${account}/${depot}/settings/team-authorization", DepotTeamAuthorizationPage.class));
 		add(new DepotMapper("${account}/${depot}/settings/collaborators", DepotCollaboratorListPage.class));
 		add(new DepotMapper("${account}/${depot}/settings/effective-privilege", DepotEffectivePrivilegePage.class));
-		add(new DepotMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
-		add(new DepotMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));
+		add(new DepotMapper("${account}/${depot}/settings/branch-protection", BranchProtectionPage.class));
+		add(new DepotMapper("${account}/${depot}/settings/tag-protection", TagProtectionPage.class));
 		add(new DepotMapper("${account}/${depot}/settings/commit-message-transform", CommitMessageTransformPage.class));
 		
 		add(new DepotMapper("${account}/${depot}/no-branches", NoBranchesPage.class));

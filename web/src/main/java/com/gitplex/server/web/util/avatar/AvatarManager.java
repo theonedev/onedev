@@ -17,8 +17,7 @@ public interface AvatarManager {
 	 * @param user
 	 * 			user to get avatar for
 	 * @return
-	 * 			url of avatar image. This url will be relative to context root if gravatar is disabled, or 
-	 * 			a default avatar is returned when user is null 
+	 * 			url of avatar image. This url will be relative to context root if gravatar is disabled
 	 */
 	String getAvatarUrl(@Nullable Account user);
 	

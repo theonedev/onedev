@@ -2,6 +2,7 @@ package com.gitplex.server.model.support;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.FetchType;
@@ -25,8 +26,10 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 	private CodeComment comment;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
+	@JoinColumn
 	private Account user;
+	
+	private String userName;
 
 	@Column(nullable=false)
 	private Date date;
@@ -45,12 +48,22 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 		this.comment = comment;
 	}
 
+	@Nullable
 	public Account getUser() {
 		return user;
 	}
 
 	public void setUser(Account user) {
 		this.user = user;
+	}
+
+	@Nullable
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	public Date getDate() {

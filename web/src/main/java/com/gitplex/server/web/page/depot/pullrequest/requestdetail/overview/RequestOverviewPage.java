@@ -9,7 +9,6 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -24,8 +23,6 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -41,27 +38,19 @@ import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequest.IntegrationStrategy;
 import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.model.PullRequestReference;
-import com.gitplex.server.model.PullRequestReview;
-import com.gitplex.server.model.PullRequestReviewInvitation;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.PullRequestWatch;
+import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.behavior.TooltipBehavior;
-import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
-import com.gitplex.server.web.component.pullrequest.requestassignee.AssigneeChoice;
-import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerAvatar;
-import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerChoice;
-import com.gitplex.server.web.component.pullrequest.reviewresult.ReviewResultIcon;
+import com.gitplex.server.web.component.requestreviewer.ReviewerListPanel;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.activity.CommentedActivity;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.activity.OpenedActivity;
@@ -71,23 +60,14 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.acti
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.activity.UpdatedActivity;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
-import com.gitplex.server.web.util.model.EntityModel;
-import com.gitplex.server.web.util.model.ReviewersModel;
 import com.gitplex.server.web.websocket.PullRequestChanged;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public class RequestOverviewPage extends RequestDetailPage {
 	
-	private static final String ASSIGNEE_HELP = "Assignee has write permission to the "
-			+ "repository and is resonsible for integrating the pull request into "
-			+ "target branch after it passes gatekeeper check.";
-
 	private enum WatchStatus {
 		WATCHING("Watching"), 
 		NOT_WATCHING("Not Watching"), 
@@ -140,10 +120,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 		
 		if (activity instanceof OpenedActivity) {
 			row.add(AttributeAppender.append("class", " discussion"));
-			avatarColumn.add(new AvatarLink("avatar", ((OpenedActivity)activity).getRequest().getSubmitter(), null));
+			PullRequest request = ((OpenedActivity)activity).getRequest();
+			avatarColumn.add(new AvatarLink("avatar", 
+					Account.getForDisplay(request.getSubmitter(), request.getSubmitterName())));
 		} else if (activity instanceof CommentedActivity) {
 			row.add(AttributeAppender.append("class", " discussion"));
-			avatarColumn.add(new AvatarLink("avatar", ((CommentedActivity)activity).getComment().getUser(), null));
+			PullRequestComment comment = ((CommentedActivity)activity).getComment();
+			avatarColumn.add(new AvatarLink("avatar", Account.getForDisplay(comment.getUser(), comment.getUserName())));
 		} else {
 			row.add(AttributeAppender.append("class", " non-discussion"));
 			avatarColumn.add(new WebMarkupContainer("avatar"));
@@ -386,9 +369,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 		});
 		
-		add(newIntegrationStrategyContainer());
-		add(newAssigneeContainer());
-		add(newReviewersContainer());
+		add(newMergeStrategyContainer());
+		add(new ReviewerListPanel("reviewers", requestModel));
 		add(newWatchContainer());
 		add(newManageContainer());
 	}
@@ -400,7 +382,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 			@Override
 			public void onClick() {
-				GitPlex.getInstance(PullRequestManager.class).check(getPullRequest());
+				GitPlex.getInstance(PullRequestManager.class).checkStatus(getPullRequest());
 				Session.get().success("Pull request is synchronized");
 			}
 			
@@ -419,52 +401,50 @@ public class RequestOverviewPage extends RequestDetailPage {
 		return container;
 	}
 
-	private WebMarkupContainer newIntegrationStrategyContainer() {
-		WebMarkupContainer integrationStrategyContainer = new WebMarkupContainer("integrationStrategy") {
+	private WebMarkupContainer newMergeStrategyContainer() {
+		WebMarkupContainer mergeStrategyContainer = new WebMarkupContainer("mergeStrategy") {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isOpen());
-			}
-			
-		};
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
 
-		PullRequest request = getPullRequest();
-		
-		final List<IntegrationStrategy> strategies = 
-				GitPlex.getInstance(PullRequestManager.class).getApplicableIntegrationStrategies(request);
-		if (!strategies.contains(request.getIntegrationStrategy())) {
-			request.setIntegrationStrategy(strategies.get(0));
-			GitPlex.getInstance(Dao.class).persist(request);
-		}
-		IModel<IntegrationStrategy> strategyModel = new IModel<IntegrationStrategy>() {
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
+					partialPageRequestHandler.add(this);
+				}
+				
+			}
+		};
+		mergeStrategyContainer.setOutputMarkupId(true);
+
+		IModel<MergeStrategy> mergeStrategyModel = new IModel<MergeStrategy>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public IntegrationStrategy getObject() {
-				return getPullRequest().getIntegrationStrategy();
+			public MergeStrategy getObject() {
+				return getPullRequest().getMergeStrategy();
 			}
 
 			@Override
-			public void setObject(IntegrationStrategy object) {
-				getPullRequest().setIntegrationStrategy(object);
+			public void setObject(MergeStrategy object) {
+				getPullRequest().setMergeStrategy(object);
 			}
 			
 		};
 		
-		DropDownChoice<IntegrationStrategy> editor = 
-				new DropDownChoice<IntegrationStrategy>("editor", strategyModel, strategies) {
+		List<MergeStrategy> mergeStrategies = Arrays.asList(MergeStrategy.values());
+		DropDownChoice<MergeStrategy> editor = 
+				new DropDownChoice<MergeStrategy>("editor", mergeStrategyModel, mergeStrategies) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofDepotWrite(getDepot());
-				setVisible(SecurityUtils.getSubject().isPermitted(writePermission) && strategies.size() > 1);						
+				setVisible(SecurityUtils.canModify(getPullRequest()));						
 			}
 			
 		};
@@ -472,46 +452,41 @@ public class RequestOverviewPage extends RequestDetailPage {
 					
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				GitPlex.getInstance(Dao.class).persist(getPullRequest());
+				GitPlex.getInstance(PullRequestManager.class).saveMergeStrategy(getPullRequest());
 				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
 			}
 			
 		});
-		integrationStrategyContainer.add(editor);
+		mergeStrategyContainer.add(editor);
 		
-		integrationStrategyContainer.add(new Label("viewer", request.getIntegrationStrategy()) {
+		mergeStrategyContainer.add(new Label("viewer", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPullRequest().getMergeStrategy().getDisplayName();
+			}
+			
+		}) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofDepotWrite(getDepot());
-				setVisible(!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1);						
+				setVisible(!SecurityUtils.canModify(getPullRequest()));						
 			}
 			
 		});
 
-		ObjectPermission writePermission = ObjectPermission.ofDepotWrite(getDepot());
+		mergeStrategyContainer.add(new Label("help", new AbstractReadOnlyModel<String>() {
 
-		if (!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1) {
-			integrationStrategyContainer.add(new WebMarkupContainer("help").add(
-					new TooltipBehavior(Model.of(getPullRequest().getIntegrationStrategy().getDescription()))));
-		} else {
-			StringBuilder strategyHelp = new StringBuilder("<dl class='integration-strategy-help'>");
-			
-			for (IntegrationStrategy strategy: strategies) {
-				strategyHelp.append("<dt>").append(strategy.toString()).append("</dt>");
-				strategyHelp.append("<dd>").append(strategy.getDescription()).append("</dd>");
+			@Override
+			public String getObject() {
+				return getPullRequest().getMergeStrategy().getDescription();
 			}
-
-			strategyHelp.append("</dl>");
 			
-			integrationStrategyContainer.add(new WebMarkupContainer("help")
-						.add(AttributeAppender.append("data-html", "true"))
-						.add(new TooltipBehavior(Model.of(strategyHelp.toString()), new TooltipConfig().withPlacement(Placement.left))));
-		}
+		}));
 		
-		return integrationStrategyContainer;
+		return mergeStrategyContainer;
 	}
 	
 	private WebMarkupContainer newWatchContainer() {
@@ -627,130 +602,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 		}));
 		
 		return watchContainer;
-	}
-
-	private Component newAssigneeContainer() {
-		PullRequest request = getPullRequest();
-		
-		Fragment assigneeContainer;
-		Account assignee = request.getAssignee();
-		boolean canChangeAssignee = request.isOpen() && SecurityUtils.canModify(request);
-		if (assignee != null) {
-			if (canChangeAssignee) {
-				assigneeContainer = new Fragment("assignee", "assigneeEditFrag", this);			
-				assigneeContainer.add(new WebMarkupContainer("help").add(new TooltipBehavior(Model.of(ASSIGNEE_HELP))));
-				
-				AssigneeChoice choice = new AssigneeChoice("assignee", new AbstractReadOnlyModel<Depot>() {
-
-					@Override
-					public Depot getObject() {
-						return getPullRequest().getTargetDepot();
-					}
-					
-				}, new IModel<Account>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@Override
-					public Account getObject() {
-						return getPullRequest().getAssignee();
-					}
-
-					@Override
-					public void setObject(Account object) {
-						getPullRequest().setAssignee(object);
-					}
-					
-				});
-				choice.setRequired(true);
-				assigneeContainer.add(choice);
-				choice.add(new AjaxFormComponentUpdatingBehavior("change") {
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						Preconditions.checkNotNull(getPullRequest().getAssignee());
-						GitPlex.getInstance(PullRequestManager.class).changeAssignee(getPullRequest());
-					}
-					
-				});
-			} else {
-				assigneeContainer = new Fragment("assignee", "assigneeViewFrag", this);
-				assigneeContainer.add(new WebMarkupContainer("help").add(new TooltipBehavior(Model.of(ASSIGNEE_HELP))));
-				assigneeContainer.add(new Avatar("assignee", assignee, new TooltipConfig()));
-			}
-		} else {
-			assigneeContainer = new Fragment("assignee", "noAssigneeFrag", this);
-		}
-		
-		return assigneeContainer;
-	}
-	
-	private WebMarkupContainer newReviewersContainer() {
-		WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				PullRequest request = getPullRequest();
-				if (request.getReviewInvitations().isEmpty()) {
-					setVisible(request.isOpen() 
-							&& !request.getPotentialReviewers().isEmpty()
-							&& SecurityUtils.canModify(request));
-				} else {
-					setVisible(true);
-				}
-			}
-			
-		};
-		reviewersContainer.setOutputMarkupId(true);
-		reviewersContainer.add(new ListView<PullRequestReviewInvitation>("reviewers", new ReviewersModel(requestModel)) {
-
-			@Override
-			protected void populateItem(ListItem<PullRequestReviewInvitation> item) {
-				PullRequestReviewInvitation invitation = item.getModelObject();
-				item.add(new ReviewerAvatar("avatar", invitation) {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						super.onClick(target);
-						
-						target.add(reviewersContainer);
-						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
-					}
-					
-				});
-
-				List<PullRequestReview> userReviews = new ArrayList<>();
-				for (PullRequestReview review: getPullRequest().getReviews()) {
-					if (review.getUser().equals(invitation.getUser()))
-						userReviews.add(review);
-				}
-				if (!userReviews.isEmpty()) {
-					PullRequestReview review = userReviews.get(userReviews.size()-1); 
-					item.add(new ReviewResultIcon("result", new EntityModel<PullRequestReview>(review)));
-				} else {
-					item.add(new WebMarkupContainer("result").setVisible(false));
-				}
-			}
-			
-		});
-		
-		reviewersContainer.add(new ReviewerChoice("addReviewer", requestModel) {
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, Account user) {
-				super.onSelect(target, user);
-				
-				target.add(reviewersContainer);
-				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
-			}
-			
-		});
-		
-		return reviewersContainer;
 	}
 
 	@Override

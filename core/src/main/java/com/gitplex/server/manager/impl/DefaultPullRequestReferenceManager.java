@@ -9,7 +9,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.MarkdownAware;
-import com.gitplex.server.event.pullrequest.PullRequestChangeEvent;
+import com.gitplex.server.event.pullrequest.PullRequestEvent;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestReferenceManager;
@@ -39,7 +39,7 @@ public class DefaultPullRequestReferenceManager extends AbstractEntityManager<Pu
 
 	@Transactional
 	@Listen
-	public void on(PullRequestChangeEvent event) {
+	public void on(PullRequestEvent event) {
 		if (event instanceof MarkdownAware) {
 			String markdown = ((MarkdownAware)event).getMarkdown();
 			if (markdown != null) {

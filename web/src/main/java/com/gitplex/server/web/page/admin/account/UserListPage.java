@@ -109,7 +109,7 @@ public class UserListPage extends AdministrationPage {
 			protected void populateItem(ListItem<Account> item) {
 				Account account = item.getModelObject();
 
-				item.add(new AvatarLink("avatarLink", item.getModelObject(), null));
+				item.add(new AvatarLink("avatarLink", item.getModelObject()));
 				item.add(new AccountLink("nameLink", item.getModelObject()));
 				item.add(new Label("email", account.getEmail()));
 				

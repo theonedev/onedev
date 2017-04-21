@@ -21,41 +21,28 @@
 			</td>
 			<td class="info">
 				<div class="well">
-					<div wicket:id="assignee" class="assignee"></div>
-					<div wicket:id="reviewers" class="reviewers">
+					<div class="reviewers">
 						<label>Reviewers:</label>
-						<ul class="clearfix list-unstyled">
-							<li wicket:id="reviewers" class="pull-left">
-								<a wicket:id="avatar"></a>
-								<span wicket:id="result"></span>
-							</li>
-						</ul>
-						<wicket:enclosure child="addReviewer">
-						<div>
-							<input wicket:id="addReviewer" type="hidden"></input>
-						</div>
-						</wicket:enclosure>
+						<div wicket:id="reviewers"></div>
 					</div>
-					<div wicket:id="integrationStrategy" class="integration-strategy">
-						<label>
-							Integration Strategy: 						
-							<span wicket:id="help" class="fa fa-question-circle pointer small"></span>
-						</label>
+					<div wicket:id="mergeStrategy" class="merge-strategy">
 						<div>
+							<label>Merge Strategy:</label> 						
 							<select wicket:id="editor"></select> 
 							<span wicket:id="viewer"></span>
 						</div>
+						<div wicket:id="help" class="help-block"></div>
 					</div>
 					<div wicket:id="watch" class="watch">
 						<div>
 							<label>Watch Status:</label>
 							<select wicket:id="option"></select>
 						</div>
-						<div class="help-block"><i class="fa fa-info-circle small"></i> <span wicket:id="help"></span></div>
+						<div wicket:id="help" class="help-block"></div>
 					</div>
 					<div wicket:id="manage" class="manage">
 						<a wicket:id="synchronize" class="check btn btn-default">Synchronize</a>
-						<p class="help-block"><i class="fa fa-info-circle"></i> In case the pull request status is out of sync with underlying 
+						<p class="help-block">In case the pull request status is out of sync with underlying 
 						repository, you may synchronize them manually here</p>
 						<a wicket:id="delete" class="delete btn btn-danger">Delete</a>
 					</div>
@@ -63,19 +50,6 @@
 			</td>
 		</tr>
 	</table>
-	<wicket:fragment wicket:id="assigneeEditFrag">
-		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer small"></span></label>
-		<div>
-			<input wicket:id="assignee" type="hidden"></input>
-		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="assigneeViewFrag">
-		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer small"></span></label> 
-		<span wicket:id="assignee" class="avatar"></span> 
-	</wicket:fragment>
-	<wicket:fragment wicket:id="noAssigneeFrag">
-		This pull request will be integrated automatically as long as it passes gatekeeper check. 
-	</wicket:fragment>
 	<wicket:fragment wicket:id="sinceChangesRowContentFrag">
 		<div>
 			<span class="icon fa fa-ext fa-file-diff"></span> <a wicket:id="sinceChanges">Changes since last visit</a>

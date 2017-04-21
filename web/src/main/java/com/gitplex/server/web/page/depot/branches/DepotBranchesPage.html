@@ -50,21 +50,17 @@
 						</div>
 					</td>
 					<td wicket:id="actions" class="actions">
+						<a wicket:id="effectiveRequest" class="btn"><i class="fa fa-ext fa-branch-compare"></i> <span wicket:id="label"></span></a>
 						<span class="btn-group">
-							<a wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye"></i></a>
-							<a wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i></a>
-							<a wicket:id="delete" class="btn btn-default" title="Delete this branch"><i class="fa fa-trash"></i></a>
+							<a wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye"></i> Unwatch</a>
+							<a wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> Watch</a>
+							<a wicket:id="delete" class="btn btn-default" title="Delete this branch"><i class="fa fa-trash"></i> Delete</a>
 						</span>
 					</td>
 				</tr>
 			</table>		
 			<div class="center"><ul wicket:id="branchesPageNav"></ul></div>
 			<div wicket:id="noBranches" class="alert alert-warning">No branches found</div>
-			<div class="help-block">
-				<i class="fa fa-info-circle"></i> Yellow bars 
-				<span class="bar request">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> 
-				represent ahead/behind commits with a pull request opening.
-			</div>
 			<div id="searching-branches" class="ajax-indicator">
 				<wicket:link>
 				<img src="ajax-indicator.gif"></img>

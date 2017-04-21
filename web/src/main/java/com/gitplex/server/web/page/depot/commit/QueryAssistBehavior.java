@@ -19,8 +19,8 @@ import com.gitplex.server.git.NameAndEmail;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.util.match.PatternApplied;
-import com.gitplex.server.util.match.WildcardUtils;
+import com.gitplex.server.util.stringmatch.PatternApplied;
+import com.gitplex.server.util.stringmatch.WildcardUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import com.gitplex.server.web.util.SuggestionUtils;
@@ -65,7 +65,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						Depot depot = depotModel.getObject();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count, null, null));
+							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count));
 							break;
 						case CommitQueryParser.TAG:
 							suggestions.addAll(SuggestionUtils.suggestTag(depot, unfencedMatchWith, count));
@@ -82,7 +82,8 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 								else
 									content = contributor.getName();
 								content = content.trim();
-								PatternApplied applied = WildcardUtils.applyPattern(unfencedLowerCaseMatchWith, content, false);
+								PatternApplied applied = WildcardUtils.applyPattern(unfencedLowerCaseMatchWith, content, 
+										false);
 								if (applied != null) {
 									suggestedInputs.put(applied.getText(), applied.getMatchRange());
 									if (suggestedInputs.size() == count)

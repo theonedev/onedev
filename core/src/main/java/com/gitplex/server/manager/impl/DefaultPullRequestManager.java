@@ -6,28 +6,24 @@ import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSourceDepot
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSubmitter;
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTarget;
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTargetDepot;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
-import static com.gitplex.server.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
+import static com.gitplex.server.model.support.MergeStrategy.ALWAYS_MERGE;
+import static com.gitplex.server.model.support.MergeStrategy.MERGE_IF_NECESSARY;
+import static com.gitplex.server.model.support.MergeStrategy.SQUASH_MERGE;
+import static com.gitplex.server.model.support.MergeStrategy.REBASE_MERGE;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
@@ -35,7 +31,6 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.transport.RefSpec;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -44,42 +39,34 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ListenerRegistry;
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.event.depot.DepotDeleted;
-import com.gitplex.server.event.pullrequest.IntegrationPreviewCalculated;
+import com.gitplex.server.event.pullrequest.MergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
-import com.gitplex.server.event.pullrequest.PullRequestPendingApproval;
-import com.gitplex.server.event.pullrequest.PullRequestPendingIntegration;
-import com.gitplex.server.event.pullrequest.PullRequestPendingUpdate;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
-import com.gitplex.server.gatekeeper.checkresult.Failed;
-import com.gitplex.server.gatekeeper.checkresult.GateCheckResult;
-import com.gitplex.server.gatekeeper.checkresult.Pending;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.PullRequestReviewInvitationManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
+import com.gitplex.server.manager.ReviewInvitationManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestReviewInvitation;
 import com.gitplex.server.model.PullRequestStatusChange;
-import com.gitplex.server.model.PullRequestUpdate;
-import com.gitplex.server.model.PullRequest.IntegrationStrategy;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
+import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.model.Review;
+import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.model.support.CloseInfo;
 import com.gitplex.server.model.support.DepotAndBranch;
-import com.gitplex.server.model.support.IntegrationPolicy;
-import com.gitplex.server.model.support.IntegrationPreview;
+import com.gitplex.server.model.support.MergePreview;
+import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
@@ -88,11 +75,10 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.BatchWorker;
+import com.gitplex.server.util.ReviewCheckStatus;
 import com.gitplex.server.util.concurrent.Prioritized;
-import com.gitplex.server.util.fullbranchmatch.FullBranchMatchUtils;
-import com.gitplex.server.util.includeexclude.IncludeExcludeUtils;
-import com.gitplex.server.util.match.ChildAwareMatcher;
-import com.gitplex.server.util.match.PatternMatcher;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest> implements PullRequestManager {
@@ -103,8 +89,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private static final int BACKEND_PREVIEW_PRIORITY = 50;
 	
-	private static final PatternMatcher BRANCH_MATCHER = new ChildAwareMatcher();
-	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
 	private final AccountManager accountManager;
@@ -113,7 +97,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final PullRequestReviewInvitationManager reviewInvitationManager;
+	private final ReviewInvitationManager reviewInvitationManager;
 	
 	private final BatchWorkManager batchWorkManager;
 	
@@ -123,7 +107,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
-			PullRequestReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
+			ReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
 			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
 			ListenerRegistry listenerRegistry, UnitOfWork unitOfWork, 
 			PullRequestStatusChangeManager pullRequestStatusChangeManager) {
@@ -171,7 +155,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			statusChange.setDate(new Date());
 			statusChange.setNote(note);
 			statusChange.setRequest(request);
-			statusChange.setType(Type.SOURCE_BRANCH_RESTORED);
+			statusChange.setType(Type.RESTORED_SOURCE_BRANCH);
 			statusChange.setUser(accountManager.getCurrent());
 			pullRequestStatusChangeManager.save(statusChange);
 			
@@ -192,7 +176,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			statusChange.setDate(new Date());
 			statusChange.setNote(note);
 			statusChange.setRequest(request);
-			statusChange.setType(Type.SOURCE_BRANCH_DELETED);
+			statusChange.setType(Type.DELETED_SOURCE_BRANCH);
 			statusChange.setUser(accountManager.getCurrent());
 			pullRequestStatusChangeManager.save(statusChange);
 			
@@ -217,7 +201,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		request.setLastEvent(statusChange);
 		save(request);
-		checkAsync(request);
+		checkStatusAsync(request);
 	}
 
 	@Transactional
@@ -244,105 +228,63 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		save(request);
 	}
 	
-	@Transactional
-	@Override
-	public void integrate(PullRequest request, String note) {
-		IntegrationPreview preview = request.getIntegrationPreview();
+	private void merge(PullRequest request) {
+		MergePreview preview = request.getMergePreview();
 		if (preview == null)
-			throw new IllegalStateException("Integration preview has not been calculated yet.");
+			throw new IllegalStateException("Merge preview has not been calculated yet.");
 
-		String integrated = preview.getIntegrated();
-		if (integrated == null)
-			throw new IllegalStateException("There are integration conflicts.");
+		String merged = preview.getMerged();
+		if (merged == null)
+			throw new IllegalStateException("There are merge conflicts.");
 		
-		Account user = accountManager.getCurrent();
-
-		ObjectId integratedId = ObjectId.fromString(integrated);
-		RevCommit integratedCommit = request.getTargetDepot().getRevCommit(integratedId);
+		ObjectId mergedId = ObjectId.fromString(merged);
+		RevCommit mergedCommit = request.getTargetDepot().getRevCommit(mergedId);
 		
+        PersonIdent committer = new PersonIdent(GitPlex.NAME, "");
+        
 		Depot targetDepot = request.getTargetDepot();
-		IntegrationStrategy strategy = request.getIntegrationStrategy();
-		if ((strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY || strategy == MERGE_WITH_SQUASH) 
-				&& !preview.getIntegrated().equals(preview.getRequestHead()) 
-				&& !integratedCommit.getFullMessage().equals(request.getCommitMessage())) {
+		MergeStrategy strategy = request.getMergeStrategy();
+		if ((strategy == ALWAYS_MERGE || strategy == MERGE_IF_NECESSARY || strategy == SQUASH_MERGE) 
+				&& !preview.getMerged().equals(preview.getRequestHead()) 
+				&& !mergedCommit.getFullMessage().equals(request.getCommitMessage())) {
 			try (	RevWalk revWalk = new RevWalk(targetDepot.getRepository());
 					ObjectInserter inserter = targetDepot.getRepository().newObjectInserter()) {
 		        CommitBuilder newCommit = new CommitBuilder();
-		        newCommit.setAuthor(integratedCommit.getAuthorIdent());
-		        newCommit.setCommitter(user.asPerson());
+		        newCommit.setAuthor(mergedCommit.getAuthorIdent());
+		        newCommit.setCommitter(committer);
 		        newCommit.setMessage(request.getCommitMessage());
-		        newCommit.setTreeId(integratedCommit.getTree());
-		        newCommit.setParentIds(integratedCommit.getParents());
-		        integratedId = inserter.insert(newCommit);
-		        integrated = integratedId.name();
+		        newCommit.setTreeId(mergedCommit.getTree());
+		        newCommit.setParentIds(mergedCommit.getParents());
+		        mergedId = inserter.insert(newCommit);
+		        merged = mergedId.name();
 		        inserter.flush();
 			} catch (Exception e) {
 				Throwables.propagate(e);
 			}
-	        preview = new IntegrationPreview(preview.getTargetHead(), preview.getRequestHead(), 
-	        		preview.getIntegrationStrategy(), integrated);
-	        request.setLastIntegrationPreview(preview);
-			RefUpdate refUpdate = targetDepot.updateRef(request.getIntegrateRef());
-			refUpdate.setNewObjectId(integratedId);
+	        preview = new MergePreview(preview.getTargetHead(), preview.getRequestHead(), 
+	        		preview.getMergeStrategy(), merged);
+	        request.setLastMergePreview(preview);
+			RefUpdate refUpdate = targetDepot.updateRef(request.getMergeRef());
+			refUpdate.setNewObjectId(mergedId);
 			GitUtils.updateRef(refUpdate);
 		}
 		
-		closeAsIntegrated(request, false, note);
-
-		if (strategy == REBASE_SOURCE_ONTO_TARGET || strategy == MERGE_WITH_SQUASH) {
-			Depot sourceDepot = request.getSourceDepot();
-			if (!sourceDepot.equals(targetDepot)) {
-				try {
-					sourceDepot.git().fetch()
-						.setRemote(targetDepot.getDirectory().getAbsolutePath())
-						.setRefSpecs(new RefSpec(request.getIntegrateRef()))
-						.call();
-				} catch (GitAPIException e) {
-					throw new RuntimeException(e);
-				}
-			} 
-			RefUpdate refUpdate = sourceDepot.updateRef(request.getSourceRef());
-			refUpdate.setNewObjectId(integratedId);
-			ObjectId requestHeadId = ObjectId.fromString(preview.getRequestHead());
-			refUpdate.setExpectedOldObjectId(requestHeadId);
-			refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
-			GitUtils.updateRef(refUpdate);
-
-			checkUpdate(request, false);
-
-			Long requestId = request.getId();
-			ObjectId newSourceHeadId = integratedId;
-			Subject subject = SecurityUtils.getSubject();
-			doUnitOfWorkAsyncAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					ThreadContext.bind(subject);
-					try {
-						PullRequest request = load(requestId);
-						request.getSourceDepot().cacheObjectId(request.getSourceRef(), newSourceHeadId);
-						listenerRegistry.post(new RefUpdated(
-								request.getSourceDepot(), request.getSourceRef(), requestHeadId, newSourceHeadId));
-					} finally {
-						ThreadContext.unbindSubject();
-					}
-				}
-				
-			});
-		}
+		closeAsMerged(request, false, null);
 		
 		String targetRef = request.getTargetRef();
 		ObjectId targetHeadId = ObjectId.fromString(preview.getTargetHead());
 		RefUpdate refUpdate = targetDepot.updateRef(targetRef);
-		refUpdate.setRefLogIdent(user.asPerson());
+		refUpdate.setRefLogIdent(committer);
 		refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
 		refUpdate.setExpectedOldObjectId(targetHeadId);
-		refUpdate.setNewObjectId(integratedId);
+		refUpdate.setNewObjectId(mergedId);
 		GitUtils.updateRef(refUpdate);
+		
+		request.getTargetDepot().cacheObjectId(request.getTargetRef(), mergedId);
 		
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
-		ObjectId newTargetHeadId = integratedId;
+		ObjectId newTargetHeadId = mergedId;
 		doUnitOfWorkAsyncAfterCommit(new Runnable() {
 
 			@Override
@@ -402,63 +344,31 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		refUpdate.setNewObjectId(ObjectId.fromString(request.getBaseCommitHash()));
 		GitUtils.updateRef(refUpdate);
 		
+		refUpdate = request.getTargetDepot().updateRef(request.getHeadRef());
+		refUpdate.setNewObjectId(ObjectId.fromString(request.getHeadCommitHash()));
+		GitUtils.updateRef(refUpdate);
+		
 		for (PullRequestUpdate update: request.getUpdates()) {
 			pullRequestUpdateManager.save(update, false);
 		}
 		
-		for (PullRequestReviewInvitation invitation: request.getReviewInvitations())
+		for (ReviewInvitation invitation: request.getReviewInvitations())
 			reviewInvitationManager.save(invitation);
 
-		checkAsync(request);
+		checkStatusAsync(request);
 		
 		listenerRegistry.post(new PullRequestOpened(request));
 	}
 
-	@Override
-	public List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request) {
-		List<IntegrationStrategy> strategies = null;
-		for (IntegrationPolicy policy: request.getTargetDepot().getIntegrationPolicies()) {
-			if (IncludeExcludeUtils.getIncludeExclude(policy.getTargetBranchMatch()).matches(BRANCH_MATCHER, request.getTargetBranch()) 
-					&& FullBranchMatchUtils.matches(policy.getSourceBranchMatch(), request.getTargetDepot(), request.getSource())) {
-				strategies = policy.getIntegrationStrategies();
-				break;
-			}
-		}
-		if (strategies == null) 
-			strategies = Lists.newArrayList(IntegrationStrategy.MERGE_ALWAYS);
-		return strategies;
-	}
-
-	@Transactional
-	@Override
-	public void changeAssignee(PullRequest request) {
-		if (request.isOpen()) {
-			String note = request.getAssignee().getDisplayName() + " is expected to integrate the pull request";
-
-			PullRequestStatusChange statusChange = new PullRequestStatusChange();
-			statusChange.setDate(new Date());
-			statusChange.setNote(note);
-			statusChange.setRequest(request);
-			statusChange.setType(Type.ASSIGNED);
-			statusChange.setUser(accountManager.getCurrent());
-			pullRequestStatusChangeManager.save(statusChange);
-
-			request.setLastEvent(statusChange);
-		}
-		save(request);
-	}
-
-	private void closeAsIntegrated(PullRequest request, boolean dueToMerged, String note) {
-		Account user = accountManager.getCurrent();
+	private void closeAsMerged(PullRequest request, boolean dueToMerged, String note) {
 		Date date = new Date();
 		
 		if (dueToMerged)
-			request.setLastIntegrationPreview(null);
+			request.setLastMergePreview(null);
 		
 		CloseInfo closeInfo = new CloseInfo();
 		closeInfo.setCloseDate(date);
-		closeInfo.setClosedBy(user);
-		closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+		closeInfo.setCloseStatus(CloseInfo.Status.MERGED);
 		request.setCloseInfo(closeInfo);
 		
 		if (dueToMerged)
@@ -468,15 +378,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		statusChange.setDate(date);
 		statusChange.setNote(note);
 		statusChange.setRequest(request);
-		statusChange.setType(Type.INTEGRATED);
-		statusChange.setUser(user);
+		statusChange.setType(Type.MERGED);
 		pullRequestStatusChangeManager.save(statusChange);
 		request.setLastEvent(statusChange);
 		
 		save(request);
 	}
 
-	private void checkUpdate(PullRequest request, boolean independent) {
+	private void checkUpdate(PullRequest request) {
 		if (!request.getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			ObjectId mergeBase = GitUtils.getMergeBase(
 					request.getTargetDepot().getRepository(), request.getTarget().getObjectId(), 
@@ -486,16 +395,20 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				PullRequestUpdate update = new PullRequestUpdate();
 				update.setRequest(request);
 				update.setHeadCommitHash(request.getSource().getObjectName());
-				update.setMergeCommitHash(mergeBase.name());
+				update.setMergeBaseCommitHash(mergeBase.name());
 				request.addUpdate(update);
-				pullRequestUpdateManager.save(update, independent);
+				pullRequestUpdateManager.save(update, true);
+				
+				RefUpdate refUpdate = request.getTargetDepot().updateRef(request.getHeadRef());
+				refUpdate.setNewObjectId(ObjectId.fromString(request.getHeadCommitHash()));
+				GitUtils.updateRef(refUpdate);
 			}
 		}
 	}
 
 	@Transactional
 	@Override
-	public void check(PullRequest request) {
+	public void checkStatus(PullRequest request) {
 		if (request.isOpen()) {
 			if (request.getSourceDepot() == null) {
 				discard(request, "Source repository no longer exists");
@@ -504,27 +417,28 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			} else if (request.getTarget().getObjectId(false) == null) {
 				discard(request, "Target branch no longer exists");
 			} else {
-				checkUpdate(request, true);
-				if (request.isMerged()) {
-					closeAsIntegrated(request, true, null);
+				checkUpdate(request);
+				if (request.isMergeIntoTarget()) {
+					closeAsMerged(request, true, null);
 				} else {
-					IntegrationPreview integrationPreview = request.getIntegrationPreview();
-					Date timeBeforeCheck = new Date();
-					GateCheckResult result = request.checkGates(false);					
-					if (result instanceof Pending) { 
-						for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) { 
-							if (invitation.getDate().getTime()>=timeBeforeCheck.getTime())
-								reviewInvitationManager.save(invitation);
+					MergePreview mergePreview = request.getMergePreview();
+					ReviewCheckStatus checkStatus = request.getReviewCheckStatus();					
+					
+					for (ReviewInvitation invitation: request.getReviewInvitations()) {
+						if (checkStatus.getAwaitingReviewers().contains(invitation.getUser()))
+							reviewInvitationManager.save(invitation);
+					}
+					
+					boolean hasDisapprovals = false;
+					for (Review review: checkStatus.getEffectiveReviews().values()) {
+						if (!review.isApproved()) {
+							hasDisapprovals = true;
+							break;
 						}
-						listenerRegistry.post(new PullRequestPendingApproval(request));
-					} else if (result instanceof Failed) { 
-						listenerRegistry.post(new PullRequestPendingUpdate(request));
-					} else if (integrationPreview != null 
-								&& integrationPreview.getIntegrated() != null 
-								&& request.getAssignee() == null) {
-						integrate(request, "Integrated automatically by GitPlex");
-					} else {
-						listenerRegistry.post(new PullRequestPendingIntegration(request));
+					}
+					if (!hasDisapprovals && checkStatus.getAwaitingReviewers().isEmpty() 
+							&& mergePreview != null && mergePreview.getMerged() != null) {
+						merge(request);
 					}
 				}
 			}
@@ -532,31 +446,35 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 
 	@Override
-	public IntegrationPreview previewIntegration(PullRequest request) {
-		IntegrationPreview preview = request.getLastIntegrationPreview();
-		if (request.isOpen() && !request.isMerged() && (preview == null || preview.isObsolete(request))) {
-			int priority = RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY;			
-			if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-				doAfterCommit(new Runnable() {
-
-					@Override
-					public void run() {
-						batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(priority));
-					}
-					
-				});
+	public MergePreview previewMerge(PullRequest request) {
+		if (request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE) {
+			MergePreview lastPreview = request.getLastMergePreview();
+			if (request.isOpen() && !request.isMergeIntoTarget() && (lastPreview == null || lastPreview.isObsolete(request))) {
+				int priority = RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY;			
+				if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
+					doAfterCommit(new Runnable() {
+	
+						@Override
+						public void run() {
+							batchWorkManager.submit(getMergePreviewer(request), new Prioritized(priority));
+						}
+						
+					});
+				} else {
+					batchWorkManager.submit(getMergePreviewer(request), new Prioritized(priority));
+				}
+				return null;
 			} else {
-				batchWorkManager.submit(getIntegrationPreviewer(request), new Prioritized(priority));
+				return lastPreview;
 			}
-			return null;
 		} else {
-			return preview;
+			return null;
 		}
 	}
 	
-	private BatchWorker getIntegrationPreviewer(PullRequest request) {
+	private BatchWorker getMergePreviewer(PullRequest request) {
 		Long requestId = request.getId();
-		return new BatchWorker("request-" + requestId + "-previewIntegration", 1) {
+		return new BatchWorker("request-" + requestId + "-previewMerge", 1) {
 
 			@Override
 			public void doWork(Collection<Prioritized> works) {
@@ -567,57 +485,56 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					public Void call() throws Exception {
 						PullRequest request = load(requestId);
 						try {
-							IntegrationPreview preview = request.getLastIntegrationPreview();
-							if (request.isOpen() && !request.isMerged() && (preview == null || preview.isObsolete(request))) {
-								logger.info("Calculating integration preview of pull request #{} in repository '{}'...", 
+							MergePreview preview = request.getLastMergePreview();
+							if (request.isOpen() && !request.isMergeIntoTarget() && (preview == null || preview.isObsolete(request))) {
+								logger.info("Calculating merge preview of pull request #{} in repository '{}'...", 
 										request.getNumber(), request.getTargetDepot());
 								String requestHead = request.getHeadCommitHash();
 								String targetHead = request.getTarget().getObjectName();
 								Depot targetDepot = request.getTargetDepot();
-								preview = new IntegrationPreview(targetHead, requestHead, request.getIntegrationStrategy(), null);
-								request.setLastIntegrationPreview(preview);
-								String integrateRef = request.getIntegrateRef();
+								preview = new MergePreview(targetHead, requestHead, request.getMergeStrategy(), null);
+								request.setLastMergePreview(preview);
+								String mergeRef = request.getMergeRef();
 								ObjectId requestHeadId = ObjectId.fromString(requestHead);
 								ObjectId targetHeadId = ObjectId.fromString(targetHead);
-								if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY 
+								if ((preview.getMergeStrategy() == MERGE_IF_NECESSARY) 
 										&& GitUtils.isMergedInto(targetDepot.getRepository(), targetHeadId, requestHeadId)) {
-									preview.setIntegrated(requestHead);
-									RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
+									preview.setMerged(requestHead);
+									RefUpdate refUpdate = targetDepot.updateRef(mergeRef);
 									refUpdate.setNewObjectId(ObjectId.fromString(requestHead));
 									GitUtils.updateRef(refUpdate);
 								} else {
-									PersonIdent user = accountManager.getRoot().asPerson();
-									ObjectId integrated;
-									if (preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE) {
-										integrated = GitUtils.rebase(targetDepot.getRepository(), targetHeadId, requestHeadId, user);
-									} else if (preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET) {
-										integrated = GitUtils.rebase(targetDepot.getRepository(), requestHeadId, targetHeadId, user);
-									} else if (preview.getIntegrationStrategy() == MERGE_WITH_SQUASH) {
-										integrated = GitUtils.merge(targetDepot.getRepository(), 
+									PersonIdent user = new PersonIdent(GitPlex.NAME, "");
+									ObjectId merged;
+									if (preview.getMergeStrategy() == REBASE_MERGE) {
+										merged = GitUtils.rebase(targetDepot.getRepository(), requestHeadId, targetHeadId, user);
+									} else if (preview.getMergeStrategy() == SQUASH_MERGE) {
+										merged = GitUtils.merge(targetDepot.getRepository(), 
 												requestHeadId, targetHeadId, true, user, request.getCommitMessage());
 									} else {
-										integrated = GitUtils.merge(targetDepot.getRepository(), 
+										merged = GitUtils.merge(targetDepot.getRepository(), 
 												requestHeadId, targetHeadId, false, user, request.getCommitMessage());
 									} 
 									
-									if (integrated != null) {
-										preview.setIntegrated(integrated.name());
-										RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
-										refUpdate.setNewObjectId(integrated);
+									if (merged != null) {
+										preview.setMerged(merged.name());
+										RefUpdate refUpdate = targetDepot.updateRef(mergeRef);
+										refUpdate.setNewObjectId(merged);
 										GitUtils.updateRef(refUpdate);
 									} else {
-										RefUpdate refUpdate = targetDepot.updateRef(integrateRef);
+										RefUpdate refUpdate = targetDepot.updateRef(mergeRef);
 										GitUtils.deleteRef(refUpdate);
 									}
 								}
+								preview.setDate(new Date());
 								dao.persist(request);
 
-								listenerRegistry.post(new IntegrationPreviewCalculated(request));
-								logger.info("Integration preview of pull request #{} in repository '{}' is calculated.", 
+								listenerRegistry.post(new MergePreviewCalculated(request));
+								logger.info("Merge preview of pull request #{} in repository '{}' is calculated.", 
 										request.getNumber(), request.getTargetDepot());						
 							}
 						} catch (Exception e) {
-							logger.error("Error calculating pull request integration preview", e);
+							logger.error("Error calculating pull request merge preview", e);
 						}
 						return null;
 					}
@@ -652,16 +569,22 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					ofOpen(), 
 					Restrictions.or(ofSource(depotAndBranch), ofTarget(depotAndBranch)));
 			for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
-				check(request);
+				checkStatus(request);
 			}
 		}
 	}
 
 	@Sessional
 	@Override
-	public PullRequest findOpen(DepotAndBranch target, DepotAndBranch source) {
-		return find(EntityCriteria.of(PullRequest.class)
-				.add(ofTarget(target)).add(ofSource(source)).add(ofOpen()));
+	public PullRequest findEffective(DepotAndBranch target, DepotAndBranch source) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		Criterion merged = Restrictions.and(
+				Restrictions.eq("closeInfo.closeStatus", CloseInfo.Status.MERGED), 
+				Restrictions.eq("lastMergePreview.requestHead", source.getObjectName()));
+		
+		criteria.add(ofTarget(target)).add(ofSource(source)).add(Restrictions.or(ofOpen(), merged));
+		
+		return find(criteria);
 	}
 	
 	@Sessional
@@ -677,24 +600,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public Collection<PullRequest> findAllOpenTo(DepotAndBranch target, @Nullable Depot sourceDepot) {
+	public Collection<PullRequest> findAllOpenTo(DepotAndBranch target) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofTarget(target));
-
-		if (sourceDepot != null)
-			criteria.add(Restrictions.eq("sourceDepot", sourceDepot));
-		criteria.add(ofOpen());
-		return findAll(criteria);
-	}
-
-	@Sessional
-	@Override
-	public Collection<PullRequest> findAllOpenFrom(DepotAndBranch source, @Nullable Depot targetDepot) {
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(ofSource(source));
-		
-		if (targetDepot != null)
-			criteria.add(Restrictions.eq("targetDepot", targetDepot));
 		criteria.add(ofOpen());
 		return findAll(criteria);
 	}
@@ -737,28 +645,27 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Listen
 	public void on(PullRequestStatusChangeEvent event) {
 		Type type =  event.getStatusChange().getType();
-		if (type == Type.APPROVED || type == Type.DISAPPROVED || type == Type.REVIEW_DELETED
-				|| type == Type.VERIFICATION_DELETED || type == Type.VERIFICATION_SUCCEEDED
-				|| type == Type.VERIFICATION_FAILED) {
-			checkAsync(event.getRequest());
+		if (type == Type.APPROVED || type == Type.DISAPPROVED || type == Type.WITHDRAWED_REVIEW 
+				|| type == Type.REMOVED_REVIEWER || type == Type.ADDED_REVIEWER) {
+			checkStatusAsync(event.getRequest());
 		}
 	}
 	
 	@Listen
-	public void on(IntegrationPreviewCalculated event) {
-		checkAsync(event.getRequest());
+	public void on(MergePreviewCalculated event) {
+		checkStatusAsync(event.getRequest());
 	}
 	
-	private Runnable newCheckRunnable(Long requestId, Subject subject) {
+	private Runnable newCheckStatusRunnable(Long requestId, Subject subject) {
 		return new Runnable() {
 			
 			@Override
 			public void run() {
 				try {
 			        ThreadContext.bind(subject);
-					check(load(requestId));
+					checkStatus(load(requestId));
 				} catch (Exception e) {
-					logger.error("Error checking pull request", e);
+					logger.error("Error checking pull request status", e);
 				} finally {
 					ThreadContext.unbindSubject();
 				}
@@ -768,14 +675,30 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 	
 	@Sessional
-	protected void checkAsync(PullRequest request) {
+	protected void checkStatusAsync(PullRequest request) {
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
 		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-			doUnitOfWorkAsyncAfterCommit(newCheckRunnable(requestId, subject));
+			doUnitOfWorkAsyncAfterCommit(newCheckStatusRunnable(requestId, subject));
 		} else {
-			unitOfWork.doAsync(newCheckRunnable(requestId, subject));
+			unitOfWork.doAsync(newCheckStatusRunnable(requestId, subject));
 		}
+	}
+
+	@Transactional
+	@Override
+	public void saveMergeStrategy(PullRequest request) {
+		PullRequestStatusChange statusChange = new PullRequestStatusChange();
+		statusChange.setDate(new Date());
+		statusChange.setRequest(request);
+		statusChange.setType(Type.CHANGED_MERGE_STRATEGY);
+		statusChange.setUser(accountManager.getCurrent());
+		
+		pullRequestStatusChangeManager.save(statusChange);
+		
+		request.setLastEvent(statusChange);
+		
+		save(request);
 	}
 
 }

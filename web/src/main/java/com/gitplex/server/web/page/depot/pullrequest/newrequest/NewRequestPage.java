@@ -1,34 +1,34 @@
 package com.gitplex.server.web.page.depot.pullrequest.newrequest;
 
-import static com.gitplex.server.model.PullRequest.Status.INTEGRATED;
-import static com.gitplex.server.model.PullRequest.Status.PENDING_UPDATE;
-
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -42,15 +42,14 @@ import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequest.IntegrationStrategy;
-import com.gitplex.server.model.PullRequest.Status;
-import com.gitplex.server.model.PullRequestReviewInvitation;
 import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.model.support.CloseInfo;
 import com.gitplex.server.model.support.CommentPos;
 import com.gitplex.server.model.support.DepotAndBranch;
+import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.security.ObjectPermission;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.component.branchpicker.AffinalBranchPicker;
 import com.gitplex.server.web.component.comment.CommentInput;
@@ -61,9 +60,7 @@ import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
-import com.gitplex.server.web.component.pullrequest.requestassignee.AssigneeChoice;
-import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerAvatar;
-import com.gitplex.server.web.component.pullrequest.requestreviewer.ReviewerChoice;
+import com.gitplex.server.web.component.requestreviewer.ReviewerListPanel;
 import com.gitplex.server.web.component.tabbable.AjaxActionTab;
 import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
@@ -76,7 +73,7 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetail
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.page.security.LoginPage;
-import com.gitplex.server.web.util.model.ReviewersModel;
+import com.gitplex.server.web.websocket.PullRequestChanged;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -154,49 +151,54 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			}
 		}
 
-		PullRequest pullRequest;
+		AtomicReference<PullRequest> pullRequestRef = new AtomicReference<>(null);
 		if (prevRequest != null && source.equals(prevRequest.getSource()) && target.equals(prevRequest.getTarget()) && prevRequest.isOpen())
-			pullRequest = prevRequest;
+			pullRequestRef.set(prevRequest);
 		else
-			pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
+			pullRequestRef.set(GitPlex.getInstance(PullRequestManager.class).findEffective(target, source));
 		
-		if (pullRequest == null) {
+		if (pullRequestRef.get() == null) {
 			ObjectId baseCommitId = GitUtils.getMergeBase(
 					target.getDepot().getRepository(), target.getObjectId(), 
 					source.getDepot().getRepository(), source.getObjectId(), 
 					GitUtils.branch2ref(source.getBranch()));
 			if (baseCommitId != null) {
-				pullRequest = new PullRequest();
-				pullRequest.setTarget(target);
-				pullRequest.setSource(source);
-				pullRequest.setSubmitter(currentUser);
+				pullRequestRef.set(new PullRequest());
+				pullRequestRef.get().setTarget(target);
+				pullRequestRef.get().setSource(source);
+				pullRequestRef.get().setSubmitter(currentUser);
 				
-				PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-				List<IntegrationStrategy> strategies = pullRequestManager.getApplicableIntegrationStrategies(pullRequest);
-				Preconditions.checkState(!strategies.isEmpty());
-				pullRequest.setIntegrationStrategy(strategies.get(0));
+				pullRequestRef.get().setMergeStrategy(MergeStrategy.ALWAYS_MERGE);
 				
-				ObjectPermission writePermission = ObjectPermission.ofDepotWrite(target.getDepot());
-				if (currentUser.asSubject().isPermitted(writePermission))
-					pullRequest.setAssignee(currentUser);
-	
-				pullRequest.setBaseCommitHash(baseCommitId.name());
-				if (pullRequest.getBaseCommitHash().equals(source.getObjectName())) {
+				pullRequestRef.get().setBaseCommitHash(baseCommitId.name());
+				if (pullRequestRef.get().getBaseCommitHash().equals(source.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setCloseDate(new Date());
-					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
-					pullRequest.setCloseInfo(closeInfo);
+					closeInfo.setCloseStatus(CloseInfo.Status.MERGED);
+					pullRequestRef.get().setCloseInfo(closeInfo);
 				}
 	
 				PullRequestUpdate update = new PullRequestUpdate();
-				pullRequest.addUpdate(update);
-				update.setRequest(pullRequest);
+				pullRequestRef.get().addUpdate(update);
+				update.setRequest(pullRequestRef.get());
 				update.setHeadCommitHash(source.getObjectName());
-				update.setMergeCommitHash(pullRequest.getBaseCommitHash());
+				update.setMergeBaseCommitHash(pullRequestRef.get().getBaseCommitHash());
 			}
-			requestModel = Model.of(pullRequest);
+			requestModel = new LoadableDetachableModel<PullRequest>() {
+
+				@Override
+				protected PullRequest load() {
+					if (pullRequestRef.get() != null) {
+						pullRequestRef.get().setTarget(target);
+						pullRequestRef.get().setSource(source);
+						pullRequestRef.get().setSubmitter(SecurityUtils.getAccount());
+					}
+					return pullRequestRef.get();
+				}
+				
+			};
 		} else {
-			Long requestId = pullRequest.getId();
+			Long requestId = pullRequestRef.get().getId();
 			requestModel = new LoadableDetachableModel<PullRequest>() {
 
 				@Override
@@ -205,8 +207,8 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 				}
 				
 			};
-			requestModel.setObject(pullRequest);
 		}
+		requestModel.setObject(pullRequestRef.get());
 		
 		commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
@@ -280,19 +282,18 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 		});
 		
 		Fragment fragment;
-		if (getPullRequest() == null) {
+		PullRequest request = getPullRequest();
+		if (request == null) {
 			fragment = newUnrelatedHistoryFrag();
-		} else if (getPullRequest().getId() != null) {
-			fragment = newOpenedFrag();
-		} else if (getPullRequest().getSource().equals(getPullRequest().getTarget())) {
+		} else if (request.getId() != null && (request.isOpen() || !request.isMergeIntoTarget())) {
+			fragment = newEffectiveFrag();
+		} else if (request.getSource().equals(request.getTarget())) {
 			fragment = newSameBranchFrag();
-		} else if (getPullRequest().getStatus() == INTEGRATED) {
-			fragment = newIntegratedFrag();
-		} else if (getPullRequest().getStatus() == PENDING_UPDATE) {
-			fragment = newRejectedFrag();
-		} else {
+		} else if (request.isMerged()) {
+			fragment = newAcceptedFrag();
+		} else { 
 			fragment = newCanSendFrag();
-		}
+		} 
 		add(fragment);
 
 		if (getPullRequest() != null) {
@@ -325,8 +326,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					
-					setVisible(getPullRequest().getStatus() != INTEGRATED);
+					setVisible(!getPullRequest().isMerged());
 				}
 				
 			});
@@ -344,7 +344,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getStatus() != INTEGRATED);
+				setVisible(!getPullRequest().isMerged());
 			}
 			
 		}.setOutputMarkupId(true);
@@ -430,7 +430,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getStatus() != INTEGRATED);
+				setVisible(!getPullRequest().isMerged());
 			}
 			
 		};
@@ -438,15 +438,21 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 		return diffPanel;
 	}
 
-	private Fragment newOpenedFrag() {
-		Fragment fragment = new Fragment("status", "openedFrag", this);
-		fragment.add(new Label("no", new AbstractReadOnlyModel<String>() {
+	private Fragment newEffectiveFrag() {
+		Fragment fragment = new Fragment("status", "effectiveFrag", this);
+
+		fragment.add(new Label("description", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getPullRequest().getId().toString();
+				if (requestModel.getObject().isOpen())
+					return "This change is already opened for merge by a pull request";
+				else 
+					return "This change is squashed/rebased onto base branch via a pull request";
 			}
+			
 		}));
+		
 		fragment.add(new Link<Void>("link") {
 
 			@Override
@@ -456,8 +462,10 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 
 					@Override
 					public String getObject() {
-						return getPullRequest().getTitle();
+						PullRequest request = getPullRequest();
+						return "#" + request.getNumber() + " " + request.getTitle();
 					}
+					
 				}));
 			}
 
@@ -480,8 +488,8 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 		return new Fragment("status", "unrelatedHistoryFrag", this);
 	}
 	
-	private Fragment newIntegratedFrag() {
-		Fragment fragment = new Fragment("status", "integratedFrag", this);
+	private Fragment newAcceptedFrag() {
+		Fragment fragment = new Fragment("status", "mergedFrag", this);
 		fragment.add(new BranchLink("sourceBranch", getPullRequest().getSource()));
 		fragment.add(new BranchLink("targetBranch", getPullRequest().getTarget()));
 		fragment.add(new Link<Void>("swapBranches") {
@@ -497,27 +505,6 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 		return fragment;
 	}
 	
-	private Fragment newRejectedFrag() {
-		Fragment fragment = new Fragment("status", "rejectedFrag", this);
-		fragment.add(new ListView<String>("reasons", new LoadableDetachableModel<List<String>>() {
-
-			@Override
-			protected List<String> load() {
-				return getPullRequest().checkGates(false).getReasons();					
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<String> item) {
-				item.add(new Label("reason", item.getModelObject()));
-			}
-
-		});
-		
-		return fragment;
-	}
-
 	private Fragment newCanSendFrag() {
 		Fragment fragment = new Fragment("status", "canSendFrag", this);
 		Form<?> form = new Form<Void>("form");
@@ -541,10 +528,8 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 				} else {
 					getPullRequest().setSource(source);
 					getPullRequest().setTarget(target);
-					for (PullRequestReviewInvitation invitation: getPullRequest().getReviewInvitations())
+					for (ReviewInvitation invitation: getPullRequest().getReviewInvitations())
 						invitation.setUser(dao.load(Account.class, invitation.getUser().getId()));
-					
-					getPullRequest().setAssignee(dao.load(Account.class, getPullRequest().getAssignee().getId()));
 					
 					GitPlex.getInstance(PullRequestManager.class).open(getPullRequest());
 					
@@ -554,8 +539,31 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 				}			
 				
 			}
-			
 		});
+		
+		form.add(new WebMarkupContainer("immediateMergeNote") {
+			
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged payload = (PullRequestChanged) event.getPayload();
+					payload.getPartialPageRequestHandler().add(this);
+				}
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				PullRequest request = getPullRequest();
+				
+				setVisible(request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE 
+						&& request.getReviewCheckStatus().getAwaitingReviewers().isEmpty());
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		WebMarkupContainer titleContainer = new WebMarkupContainer("title");
 		form.add(titleContainer);
@@ -567,15 +575,18 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 
 			@Override
 			public String getObject() {
-				if (getPullRequest().getTitle() == null) {
+				PullRequest request = getPullRequest();
+				if (request.getTitle() == null) {
 					List<RevCommit> commits = commitsModel.getObject();
 					Preconditions.checkState(!commits.isEmpty());
-					if (commits.size() == 1)
-						getPullRequest().setTitle(commits.get(0).getShortMessage());
-					else
-						getPullRequest().setTitle(getPullRequest().getSource().getBranch());
+					if (commits.size() == 1) {
+						request.setTitle(commits.get(0).getShortMessage());
+					} else if (!request.getSourceBranch().equals("master") 
+							&& !request.getSourceBranch().equals(request.getTargetBranch())) {
+						request.setTitle(request.getSourceBranch());
+					}
 				}
-				return getPullRequest().getTitle();
+				return request.getTitle();
 			}
 
 			@Override
@@ -633,81 +644,49 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			
 		});
 
-		WebMarkupContainer assigneeContainer = new WebMarkupContainer("assignee");
-		form.add(assigneeContainer);
-		IModel<Account> assigneeModel = new PropertyModel<>(getPullRequest(), "assignee");
-		AssigneeChoice assigneeChoice = new AssigneeChoice("assignee", new AbstractReadOnlyModel<Depot>() {
+		IModel<MergeStrategy> mergeStrategyModel = new IModel<MergeStrategy>() {
 
 			@Override
-			public Depot getObject() {
-				return target.getDepot();
+			public void detach() {
+			}
+
+			@Override
+			public MergeStrategy getObject() {
+				return getPullRequest().getMergeStrategy();
+			}
+
+			@Override
+			public void setObject(MergeStrategy object) {
+				getPullRequest().setMergeStrategy(object);
 			}
 			
-		}, assigneeModel);
-		assigneeChoice.setRequired(true);
-		assigneeContainer.add(assigneeChoice);
+		};
 		
-		assigneeContainer.add(new NotificationPanel("feedback", assigneeChoice));
+		List<MergeStrategy> mergeStrategies = Arrays.asList(MergeStrategy.values());
+		DropDownChoice<MergeStrategy> mergeStrategyDropdown = 
+				new DropDownChoice<MergeStrategy>("mergeStrategy", mergeStrategyModel, mergeStrategies);
+
+		mergeStrategyDropdown.add(new OnChangeAjaxBehavior() {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
+			}
+			
+		});
 		
-		assigneeContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		form.add(mergeStrategyDropdown);
+		
+		form.add(new Label("mergeStrategyHelp", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return !assigneeChoice.isValid()?" has-error":"";
+				return getPullRequest().getMergeStrategy().getDescription();
 			}
 			
 		}));
 		
-		WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers") {
-
-			@Override
-			protected void onBeforeRender() {
-				super.onBeforeRender();
-			}
-			
-		};
-		reviewersContainer.setOutputMarkupId(true);
-		form.add(reviewersContainer);
-		reviewersContainer.add(new ListView<PullRequestReviewInvitation>("reviewers", new ReviewersModel(requestModel)) {
-
-			@Override
-			protected void populateItem(ListItem<PullRequestReviewInvitation> item) {
-				PullRequestReviewInvitation invitation = item.getModelObject();
-				
-				item.add(new ReviewerAvatar("avatar", invitation) {
-					
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						super.onClick(target);
-						
-						target.add(reviewersContainer);
-					}
-					
-				});
-			}
-			
-		});
-		
-		reviewersContainer.add(new ReviewerChoice("addReviewer", requestModel) {
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, Account user) {
-				super.onSelect(target, user);
-				
-				target.add(reviewersContainer);
-			}
-			
-		});
-		
-		reviewersContainer.add(new WebMarkupContainer("prePopulateHint") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getStatus() == Status.PENDING_APPROVAL);
-			}
-			
-		});
+		form.add(new ReviewerListPanel("reviewers", requestModel));
 		
 		return fragment;
 	}

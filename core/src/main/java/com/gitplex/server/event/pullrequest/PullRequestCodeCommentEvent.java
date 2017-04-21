@@ -4,7 +4,7 @@ import com.gitplex.server.event.MarkdownAware;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.PullRequest;
 
-public abstract class PullRequestCodeCommentEvent extends PullRequestChangeEvent implements MarkdownAware {
+public abstract class PullRequestCodeCommentEvent extends PullRequestEvent implements MarkdownAware {
 
 	private final CodeComment comment;
 	

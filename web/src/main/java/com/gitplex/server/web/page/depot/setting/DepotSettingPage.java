@@ -14,11 +14,11 @@ import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.gitplex.server.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
-import com.gitplex.server.web.page.depot.setting.authorization.DepotTeamListPage;
+import com.gitplex.server.web.page.depot.setting.authorization.DepotTeamAuthorizationPage;
+import com.gitplex.server.web.page.depot.setting.branchprotection.BranchProtectionPage;
 import com.gitplex.server.web.page.depot.setting.commitmessagetransform.CommitMessageTransformPage;
-import com.gitplex.server.web.page.depot.setting.gatekeeper.GateKeeperPage;
 import com.gitplex.server.web.page.depot.setting.general.GeneralSettingPage;
-import com.gitplex.server.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
+import com.gitplex.server.web.page.depot.setting.tagprotection.TagProtectionPage;
 
 @SuppressWarnings("serial")
 public abstract class DepotSettingPage extends DepotPage {
@@ -39,7 +39,7 @@ public abstract class DepotSettingPage extends DepotPage {
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new DepotSettingTab("General Setting", "fa fa-fw fa-sliders", GeneralSettingPage.class));
 		if (getAccount().isOrganization()) {
-			tabs.add(new DepotSettingTab("Teams", "fa fa-fw fa-group", DepotTeamListPage.class));
+			tabs.add(new DepotSettingTab("Team Authorizations", "fa fa-fw fa-group", DepotTeamAuthorizationPage.class));
 			tabs.add(new DepotSettingTab("Collaborators", "fa fa-fw fa-user", DepotCollaboratorListPage.class));
 			tabs.add(new DepotSettingTab("Effective Privileges", "fa fa-fw fa-key", DepotEffectivePrivilegePage.class));
 		} else {
@@ -54,8 +54,8 @@ public abstract class DepotSettingPage extends DepotPage {
 			tabs.add(new DepotSettingTab("Collaborators", "fa fa-fw fa-user", DepotCollaboratorListPage.class));
 		}
 		tabs.add(new DepotSettingTab("Commit Message Transform", "fa fa-fw fa-exchange", CommitMessageTransformPage.class));
-		tabs.add(new DepotSettingTab("Gatekeepers", "fa fa-fw fa-eye", GateKeeperPage.class));
-		tabs.add(new DepotSettingTab("Integration Policies", "fa fa-fw fa-puzzle-piece", IntegrationPolicyPage.class));
+		tabs.add(new DepotSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
+		tabs.add(new DepotSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
 		
 		add(new Tabbable("depotSettingTabs", tabs));
 	}

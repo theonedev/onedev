@@ -71,7 +71,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.diff.DiffUtils;
 import com.gitplex.server.util.diff.WhitespaceOption;
-import com.gitplex.server.util.match.WildcardUtils;
+import com.gitplex.server.util.stringmatch.WildcardUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
 import com.gitplex.server.web.component.comment.CodeCommentPanel;
@@ -562,7 +562,7 @@ public class RevisionDiffPanel extends Panel {
 			
 			@Override
 			protected List<String> getHints(InputStatus inputStatus) {
-				return Lists.newArrayList("Use * to match any string in the path");
+				return Lists.newArrayList("Use * to match any part of the path");
 			}
 
 			@Override

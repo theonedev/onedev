@@ -32,8 +32,6 @@ import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 import com.google.common.base.Preconditions;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-
 @SuppressWarnings("serial")
 public class TeamListPage extends AccountLayoutPage {
 
@@ -130,7 +128,7 @@ public class TeamListPage extends AccountLayoutPage {
 				for (TeamMembership teamMembership: teamMembershipsModel.getObject()) {
 					if (teamMembership.getTeam().equals(team) && count++<MAX_DISPLAY_MEMBERS) {
 						WebMarkupContainer child = new WebMarkupContainer(membersView.newChildId());
-						child.add(new AvatarLink("member", teamMembership.getUser(), new TooltipConfig()));
+						child.add(new AvatarLink("member", teamMembership.getUser(), true));
 						membersView.add(child);
 					}
 				}

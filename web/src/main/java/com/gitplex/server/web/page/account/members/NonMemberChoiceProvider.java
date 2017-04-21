@@ -16,6 +16,7 @@ import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.OrganizationMembership;
 import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.util.editable.annotation.AccountChoice;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.accountchoice.AccountChoiceProvider;
 import com.gitplex.server.web.component.select2.Response;
@@ -28,7 +29,7 @@ public class NonMemberChoiceProvider extends AccountChoiceProvider {
 	private final IModel<Account> organizationModel;
 	
 	public NonMemberChoiceProvider(IModel<Account> organizationModel) {
-		super(false);
+		super(AccountChoice.Type.USER);
 		this.organizationModel = organizationModel;
 	}
 	

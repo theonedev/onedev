@@ -45,7 +45,7 @@ import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
-import com.gitplex.server.web.component.pullrequest.requeststatus.RequestStatusPanel;
+import com.gitplex.server.web.component.requeststatus.RequestStatusPanel;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.pullrequest.newrequest.NewRequestPage;
@@ -92,30 +92,6 @@ public class RequestListPage extends DepotPage {
 				Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 				if (currentUser != null) {
 					String userName = currentUser.getName();
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "Open requests assigned to me";
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new Link<Void>(id) {
-
-								@Override
-								public void onClick() {
-									searchOption = new SearchOption();
-									searchOption.setStatus(Status.OPEN);
-									searchOption.setAssigneeName(userName);
-									
-									setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
-								}
-								
-							};
-						}
-						
-					});
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -303,8 +279,9 @@ public class RequestListPage extends DepotPage {
 					
 				});
 				
-				fragment.add(new RequestStatusPanel("status", rowModel, false));
-				fragment.add(new AccountLink("submitter", rowModel.getObject().getSubmitter()));
+				fragment.add(new RequestStatusPanel("status", rowModel));
+				fragment.add(new AccountLink("submitter", Account.getForDisplay(request.getSubmitter(), 
+						request.getSubmitterName())));
 				fragment.add(new BranchLink("target", request.getTarget()));
 				if (request.getSource() != null) 
 					fragment.add(new BranchLink("source", request.getSource()));
@@ -315,10 +292,9 @@ public class RequestListPage extends DepotPage {
 				
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (request.getLastEvent() != null) {
-					if (request.getLastEvent().getUser() != null)
-						lastEventContainer.add(new AccountLink("user", request.getLastEvent().getUser()));
-					else
-						lastEventContainer.add(new WebMarkupContainer("user").setVisible(false));
+					Account userForDisplay = Account.getForDisplay(request.getLastEvent().getUser(), 
+							request.getLastEvent().getUserName());
+					lastEventContainer.add(new AccountLink("user", userForDisplay));
 					String description = request.getLastEvent().getType();
 					lastEventContainer.add(new Label("description", description));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getLastEvent().getDate())));

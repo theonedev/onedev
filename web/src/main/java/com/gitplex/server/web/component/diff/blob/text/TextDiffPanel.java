@@ -77,7 +77,7 @@ import com.gitplex.server.web.page.depot.blob.RequestCompareInfo;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
+import com.gitplex.server.web.page.depot.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.google.common.base.Preconditions;
 
@@ -211,7 +211,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					&& request.getSource() != null 
 					&& request.getSource().getObjectName(false) != null
 					&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), change.getPath())
-					&& (getPage() instanceof RequestChangesPage || getPage() instanceof IntegrationPreviewPage)) { 
+					&& (getPage() instanceof RequestChangesPage || getPage() instanceof MergePreviewPage)) { 
 				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 
@@ -227,7 +227,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 							RequestChangesPage page = (RequestChangesPage) getPage();
 							editState.requestCompareInfo.compareState = page.getState();
 						} else {
-							IntegrationPreviewPage page = (IntegrationPreviewPage) getPage();
+							MergePreviewPage page = (MergePreviewPage) getPage();
 							editState.requestCompareInfo.previewState = page.getState();
 						}
 						PageParameters params = DepotBlobPage.paramsOf(request.getSourceDepot(), editState);

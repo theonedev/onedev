@@ -138,7 +138,7 @@ public abstract class LayoutPage extends BasePage {
 		}
 		
 		if (signedIn) {
-			head.add(new AvatarLink("user", user, null));
+			head.add(new AvatarLink("user", user));
 			head.add(new DropdownLink("userMenuTrigger", new AlignPlacement(50, 100, 50, 0, 8)) {
 
 				@Override

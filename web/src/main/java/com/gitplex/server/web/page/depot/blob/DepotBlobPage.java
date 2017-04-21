@@ -88,7 +88,7 @@ import com.gitplex.server.web.page.depot.blob.search.quick.QuickSearchPanel;
 import com.gitplex.server.web.page.depot.blob.search.result.SearchResultPanel;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
+import com.gitplex.server.web.page.depot.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.util.resource.RawBlobResourceReference;
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
@@ -404,9 +404,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible((state.mode == Mode.VIEW || state.mode == Mode.BLAME) 
-						&& isOnBranch() 
-						&& state.blobIdent.isTree()
-						&& SecurityUtils.canModify(getDepot(), state.blobIdent.revision, state.blobIdent.path));
+						&& isOnBranch() && state.blobIdent.isTree() && SecurityUtils.canWrite(getDepot()));
 			}
 			
 		});
@@ -643,7 +641,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 							.load(state.requestCompareInfo.requestId);
 					for (PullRequestUpdate update: request.getUpdates()) {
 						if (update.getHeadCommitHash().equals(newCommitId.name())) {
-							setResponsePage(RequestChangesPage.class, IntegrationPreviewPage.paramsOf(request));
+							setResponsePage(RequestChangesPage.class, MergePreviewPage.paramsOf(request));
 							break;
 						}
 					}
@@ -999,9 +997,9 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 						state.requestCompareInfo.compareState);
 				setResponsePage(RequestChangesPage.class, params);
 			} else {
-				PageParameters params = IntegrationPreviewPage.paramsOf(request, 
+				PageParameters params = MergePreviewPage.paramsOf(request, 
 						state.requestCompareInfo.previewState);
-				setResponsePage(IntegrationPreviewPage.class, params);
+				setResponsePage(MergePreviewPage.class, params);
 			}
 		} else {
 			/*
@@ -1101,8 +1099,8 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
-		if (event.getPayload() instanceof RevisionResolveEvent) {
-			RevisionResolveEvent revisionResolveEvent = (RevisionResolveEvent) event.getPayload();
+		if (event.getPayload() instanceof RevisionResolved) {
+			RevisionResolved revisionResolveEvent = (RevisionResolved) event.getPayload();
 			
 			resolvedRevision = revisionResolveEvent.getResolvedRevision();
 		}

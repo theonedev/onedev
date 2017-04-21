@@ -111,7 +111,7 @@ public class SelectionColumn<T, S> implements IStyledColumn<T, S> {
 				protected void respond(AjaxRequestTarget target) {
 					final boolean checked = RequestCycle.get()
 							.getRequest()
-							.getQueryParameters()
+							.getPostParameters()
 							.getParameterValue("checked")
 							.toBoolean();
 					findParent(DataTable.class).visitChildren(
@@ -187,7 +187,7 @@ public class SelectionColumn<T, S> implements IStyledColumn<T, S> {
 				protected void respond(final AjaxRequestTarget target) {
 					boolean checked = RequestCycle.get()
 							.getRequest()
-							.getQueryParameters()
+							.getPostParameters()
 							.getParameterValue("checked")
 							.toBoolean();
 					if (checked)
@@ -214,11 +214,13 @@ public class SelectionColumn<T, S> implements IStyledColumn<T, S> {
 					super.renderHead(component, response);
 					response.render(JavaScriptHeaderItem.forReference(WicketAjaxJQueryResourceReference.get()));
 
-					CallbackParameter param = CallbackParameter.resolved("checked", "this.checked");
-					CharSequence callbackFunc = getCallbackFunction(param);
-					String template = "$('#%s').change(%s)";
-					String checkboxMarkupId = RowSelector.this.get("checkbox").getMarkupId();
-					String script = String.format(template, checkboxMarkupId, callbackFunc);
+					CallbackParameter param = CallbackParameter.explicit("checked");
+					String script = String.format(""
+							+ "$('#%s').change(function() {\n"
+							+ "  var checked = this.checked;\n"
+							+ "  %s;\n"
+							+ "});\n", 
+							RowSelector.this.get("checkbox").getMarkupId(), getCallbackFunctionBody(param));
 					response.render(OnDomReadyHeaderItem.forScript(script));
 				}
 

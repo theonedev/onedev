@@ -33,6 +33,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CodeCommentManager;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
@@ -166,7 +167,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				titleLink.add(new Label("label", StringUtils.abbreviate(comment.getContent(), TITLE_LEN)));
 				fragment.add(titleLink);
 				fragment.add(new WebMarkupContainer("resolved").setVisible(comment.isResolved()));
-				fragment.add(new AccountLink("user", comment.getUser()));
+				fragment.add(new AccountLink("user", Account.getForDisplay(comment.getUser(), comment.getUserName())));
 				
 				Link<Void> fileLink = new Link<Void>("file") {
 
@@ -185,10 +186,10 @@ public abstract class CodeCommentListPanel extends Panel {
 				if (comment.getLastEvent() != null) {
 					String description = comment.getLastEvent().getType();
 					lastEventContainer.add(new Label("description", description));
-					if (comment.getLastEvent().getUser() != null)
-						lastEventContainer.add(new AccountLink("user", comment.getLastEvent().getUser()));
-					else
-						lastEventContainer.add(new WebMarkupContainer("user").setVisible(false));
+					
+					Account userForDisplay = Account.getForDisplay(comment.getLastEvent().getUser(), 
+							comment.getLastEvent().getUserName());
+					lastEventContainer.add(new AccountLink("user", userForDisplay));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(comment.getLastEvent().getDate())));
 				} else {
 					lastEventContainer.add(new WebMarkupContainer("description"));

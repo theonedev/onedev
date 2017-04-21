@@ -1,60 +1,23 @@
 package com.gitplex.server.web.page.depot.pullrequest.requestdetail;
 
-import static com.gitplex.server.model.PullRequest.Status.PENDING_INTEGRATE;
-
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestReview;
-import com.gitplex.server.model.PullRequestReviewInvitation;
-import com.gitplex.server.model.PullRequest.Status;
-import com.gitplex.server.model.support.IntegrationPreview;
+import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 public enum PullRequestOperation {
-	INTEGRATE {
-
-		@Override
-		public boolean canOperate(PullRequest request) {
-			if (!SecurityUtils.canWrite(request.getTargetDepot()) || request.getStatus() != PENDING_INTEGRATE) {
-				return false;
-			} else {
-				IntegrationPreview integrationPreview = request.getIntegrationPreview();
-				return integrationPreview != null && integrationPreview.getIntegrated() != null;
-			}
-		}
-
-		@Override
-		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(PullRequestManager.class).integrate(request, comment);
-		}
-
-		@Override
-		public Component newHinter(String id, PullRequest request) {
-			Long requestId = request.getId();
-			return new IntegrationHintPanel(id, new LoadableDetachableModel<PullRequest>() {
-
-				@Override
-				protected PullRequest load() {
-					return GitPlex.getInstance(PullRequestManager.class).load(requestId);
-				}
-				
-			});
-		}
-
-	},
 	DISCARD {
 
 		@Override
@@ -80,7 +43,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(PullRequestReviewManager.class).review(request, PullRequestReview.Result.APPROVE, comment);
+			GitPlex.getInstance(ReviewManager.class).review(request, true, comment);
 		}
 
 		@Override
@@ -106,7 +69,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(PullRequestReviewManager.class).review(request, PullRequestReview.Result.DISAPPROVE, comment);
+			GitPlex.getInstance(ReviewManager.class).review(request, false, comment);
 		}
 
 	},
@@ -115,18 +78,14 @@ public enum PullRequestOperation {
 		@Override
 		public boolean canOperate(PullRequest request) {
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			if (request.isOpen() 
-					|| !SecurityUtils.canModify(request)
-					|| request.getTarget().getObjectName(false) == null
-					|| request.getSourceDepot() == null 
-					|| request.getSource().getObjectName(false) == null
-					|| pullRequestManager.findOpen(request.getTarget(), request.getSource()) != null) {
-				return false;
-			}
-			
-			// now check if source branch is integrated into target branch
-			return !GitUtils.isMergedInto(request.getTargetDepot().getRepository(), 
-					request.getSource().getObjectId(), request.getTarget().getObjectId());
+			return (!request.isOpen() 
+					&& SecurityUtils.canModify(request)
+					&& request.getTarget().getObjectName(false) != null
+					&& request.getSourceDepot() != null 
+					&& request.getSource().getObjectName(false) != null
+					&& pullRequestManager.findEffective(request.getTarget(), request.getSource()) == null
+					&& !GitUtils.isMergedInto(request.getTargetDepot().getRepository(), 
+							request.getSource().getObjectId(), request.getTarget().getObjectId()));
 		}
 
 		@Override
@@ -144,18 +103,18 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			IntegrationPreview preview = request.getLastIntegrationPreview();
+			MergePreview preview = request.getLastMergePreview();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			return request.getStatus() == Status.INTEGRATED 
+			return request.isMerged()
 					&& request.getSourceDepot() != null		
 					&& request.getSource().getObjectName(false) != null
 					&& !request.getSource().isDefault()
 					&& preview != null
 					&& (request.getSource().getObjectName().equals(preview.getRequestHead()) 
-							|| request.getSource().getObjectName().equals(preview.getIntegrated()))
+							|| request.getSource().getObjectName().equals(preview.getMerged()))
 					&& SecurityUtils.canModify(request)
-					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), request.getSource().getObjectId(), ObjectId.zeroId())
-					&& pullRequestManager.findAllOpenTo(request.getSource(), null).isEmpty();
+					&& SecurityUtils.canDeleteBranch(request.getSourceDepot(), request.getSourceBranch())
+					&& pullRequestManager.findAllOpenTo(request.getSource()).isEmpty();
 		}
 
 	}, 
@@ -171,7 +130,7 @@ public enum PullRequestOperation {
 			return request.getSourceDepot() != null 
 					&& request.getSource().getObjectName(false) == null 
 					&& SecurityUtils.canModify(request) 
-					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), ObjectId.zeroId(), ObjectId.fromString(request.getHeadCommitHash()));
+					&& SecurityUtils.canWrite(request.getSourceDepot());
 		}
 
 	};
@@ -179,20 +138,7 @@ public enum PullRequestOperation {
 	private static boolean canReview(PullRequest request) {
 		Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 		
-		// call request.getStatus() in order to trigger generation of review
-		// integrations which will be used in else condition 
-		if (user == null  
-				|| request.getStatus() == PullRequest.Status.INTEGRATED 
-				|| request.getStatus() == PullRequest.Status.DISCARDED
-				|| request.isReviewEffective(user)) { 
-			return false;
-		} else {
-			for (PullRequestReviewInvitation invitation: request.getReviewInvitations()) {
-				if (invitation.getStatus() != PullRequestReviewInvitation.Status.EXCLUDED && invitation.getUser().equals(user))
-					return true;
-			}
-			return false;
-		}
+		return request.getReviewCheckStatus().getAwaitingReviewers().contains(user);
 	}
 
 	public abstract void operate(PullRequest request, @Nullable String comment);

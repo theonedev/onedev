@@ -12,19 +12,17 @@ import javax.inject.Singleton;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.google.common.collect.Sets;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.MarkdownAware;
-import com.gitplex.server.event.pullrequest.IntegrationPreviewCalculated;
-import com.gitplex.server.event.pullrequest.PullRequestChangeEvent;
+import com.gitplex.server.event.ReviewInvitationChanged;
+import com.gitplex.server.event.pullrequest.MergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
+import com.gitplex.server.event.pullrequest.PullRequestEvent;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
-import com.gitplex.server.event.pullrequest.PullRequestReviewInvitationChanged;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.event.pullrequest.PullRequestUpdated;
-import com.gitplex.server.event.pullrequest.PullRequestVerificationRunning;
 import com.gitplex.server.git.NameAndEmail;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.BranchWatchManager;
@@ -36,10 +34,10 @@ import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.BranchWatch;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestReviewInvitation;
+import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.PullRequestWatch;
-import com.gitplex.server.model.PullRequestStatusChange.Type;
+import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
@@ -77,8 +75,8 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 	
 	@Transactional
 	@Listen
-	public void on(PullRequestChangeEvent event) {
-		if (event instanceof IntegrationPreviewCalculated || event instanceof PullRequestVerificationRunning) {
+	public void on(PullRequestEvent event) {
+		if (event instanceof MergePreviewCalculated) {
 			return;
 		}
 		String eventType;
@@ -86,7 +84,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 		if (event instanceof PullRequestStatusChangeEvent) {
 			statusChangeType = ((PullRequestStatusChangeEvent) event).getStatusChange().getType();
 			eventType = statusChangeType.getName();
-			if (statusChangeType == Type.SOURCE_BRANCH_DELETED || statusChangeType == Type.SOURCE_BRANCH_RESTORED) {
+			if (statusChangeType == Type.DELETED_SOURCE_BRANCH || statusChangeType == Type.RESTORED_SOURCE_BRANCH) {
 				return;
 			}
 		} else {
@@ -96,24 +94,16 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 		PullRequest request = event.getRequest();
 		Account user = event.getUser();
 		
-		/*
-		 * verification is often performed automatically by robots (such as CI system), and it does not make
-		 * sense to make them watching the pull request
-		 */
-		if (user != null && statusChangeType != Type.VERIFICATION_SUCCEEDED && statusChangeType != Type.VERIFICATION_FAILED) {
+		if (user != null && user.getEmail() != null) {
 			watch(request, user, 
 					"You've set to watch this pull request as you've " + eventType);
 		}
 		if (event instanceof PullRequestOpened) {
-			if (request.getAssignee() != null)
-				watch(request, request.getAssignee(), "You are set to watch this pull request as you are assigned to integrate it.");
 			for (BranchWatch branchWatch: branchWatchManager.find(request.getTargetDepot(), request.getTargetBranch())) {
 				watch(request, branchWatch.getUser(), 
 						"You are set to watch this pull request as you are watching the target branch.");
 			}
 			makeContributorsWatching(request.getLatestUpdate());
-		} else if (statusChangeType == Type.ASSIGNED) {
-			watch(request, request.getAssignee(), "You are set to watch this pull request as you are assigned to integrate it.");
 		} else if (event instanceof PullRequestUpdated) {
 			PullRequestUpdated updated = (PullRequestUpdated) event;
 			makeContributorsWatching(updated.getUpdate());
@@ -175,19 +165,6 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 		}
 
 		watchUsers.removeAll(mentionUsers);
-
-		if ((event instanceof PullRequestOpened || statusChangeType == Type.ASSIGNED) 
-				&& request.getAssignee() != null
-				&& !request.getAssignee().equals(event.getUser())) {
-			watchUsers.remove(request.getAssignee());
-			String subject = String.format("You are assigned with pull request #%d (%s)", 
-					request.getNumber(), request.getTitle());
-			String url = urlManager.urlFor(request);
-			String body = String.format("You are assigned with pull request #%d (%s).<br>"
-					+ "Please visit <a href='%s'>%s</a> for details.",
-					request.getNumber(), request.getTitle(), url, url);
-			mailManager.sendMailAsync(Sets.newHashSet(request.getAssignee().getEmail()), subject, decorateBody(body));
-		}
 		
 		if (!watchUsers.isEmpty()) {
 			String subject, body;
@@ -244,9 +221,9 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 
 	@Transactional
 	@Listen
-	public void on(PullRequestReviewInvitationChanged event) {
-		PullRequestReviewInvitation invitation = event.getInvitation();
-		if (invitation.getStatus() != PullRequestReviewInvitation.Status.EXCLUDED) {
+	public void on(ReviewInvitationChanged event) {
+		ReviewInvitation invitation = event.getInvitation();
+		if (invitation.getType() != ReviewInvitation.Type.EXCLUDE) {
 			watch(invitation.getRequest(), invitation.getUser(), 
 					"You are set to watch this pull request as you are invited to review it.");
 		}
