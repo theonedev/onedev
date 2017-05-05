@@ -2,10 +2,6 @@ package com.gitplex.server.web.page.depot.pullrequest.requestdetail;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.model.LoadableDetachableModel;
-
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.AccountManager;
@@ -16,16 +12,12 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.security.SecurityUtils;
 
-@SuppressWarnings("serial")
 public enum PullRequestOperation {
 	DISCARD {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			if (!SecurityUtils.canModify(request))
-				return false;
-			else 
-				return request.isOpen();
+			return request.isOpen() && SecurityUtils.canModify(request);
 		}
 
 		@Override
@@ -46,19 +38,6 @@ public enum PullRequestOperation {
 			GitPlex.getInstance(ReviewManager.class).review(request, true, comment);
 		}
 
-		@Override
-		public Component newHinter(String id, PullRequest request) {
-			Long requestId = request.getId();
-			return new ApprovalHintPanel(id, new LoadableDetachableModel<PullRequest>() {
-
-				@Override
-				protected PullRequest load() {
-					return GitPlex.getInstance(PullRequestManager.class).load(requestId);
-				}
-				
-			});
-		}
-		
 	},
 	DISAPPROVE {
 
@@ -78,14 +57,14 @@ public enum PullRequestOperation {
 		@Override
 		public boolean canOperate(PullRequest request) {
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			return (!request.isOpen() 
+			return !request.isOpen() 
 					&& SecurityUtils.canModify(request)
 					&& request.getTarget().getObjectName(false) != null
 					&& request.getSourceDepot() != null 
 					&& request.getSource().getObjectName(false) != null
 					&& pullRequestManager.findEffective(request.getTarget(), request.getSource()) == null
 					&& !GitUtils.isMergedInto(request.getTargetDepot().getRepository(), 
-							request.getSource().getObjectId(), request.getTarget().getObjectId()));
+							request.getSource().getObjectId(), request.getTarget().getObjectId());
 		}
 
 		@Override
@@ -144,9 +123,5 @@ public enum PullRequestOperation {
 	public abstract void operate(PullRequest request, @Nullable String comment);
 	
 	public abstract boolean canOperate(PullRequest request);	
-	
-	public Component newHinter(String id, PullRequest request) {
-		return new WebMarkupContainer(id).setVisible(false);
-	}
 	
 }

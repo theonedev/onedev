@@ -53,10 +53,12 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.manager.PullRequestUpdateManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
@@ -99,9 +101,13 @@ public abstract class RequestDetailPage extends DepotPage {
 
 	public static final String PARAM_REQUEST = "request";
 	
+	private static final String HINT_ID = "hint";
+	
 	protected IModel<PullRequest> requestModel;
 	
 	private boolean editingTitle;
+	
+	private Long reviewUpdateId;
 	
 	public RequestDetailPage(PageParameters params) {
 		super(params);
@@ -122,6 +128,7 @@ public abstract class RequestDetailPage extends DepotPage {
 
 		};
 
+		reviewUpdateId = requestModel.getObject().getLatestUpdate().getId();
 	}
 
 	@Override
@@ -511,6 +518,7 @@ public abstract class RequestDetailPage extends DepotPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				reviewUpdateId = getPullRequest().getLatestUpdate().getId();
 				operationsContainer.replace(newOperationConfirm(confirmId, APPROVE, operationsContainer));
 				target.add(operationsContainer);
 				target.appendJavaScript("$(window).resize();");
@@ -528,6 +536,7 @@ public abstract class RequestDetailPage extends DepotPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				reviewUpdateId = getPullRequest().getLatestUpdate().getId();
 				operationsContainer.replace(newOperationConfirm(confirmId, DISAPPROVE, operationsContainer));
 				target.add(operationsContainer);
 				target.appendJavaScript("$(window).resize();");
@@ -648,8 +657,19 @@ public abstract class RequestDetailPage extends DepotPage {
 			}
 			
 		});
-		form.add(operation.newHinter("hint", request));
-		form.add(new NotificationPanel("feedback", form));
+		
+		WebMarkupContainer hint;
+		if (operation == APPROVE)
+			hint = new UnresolvedCodeCommentsPanel(HINT_ID, requestModel);
+		else
+			hint = new WebMarkupContainer(HINT_ID);
+		hint.setOutputMarkupPlaceholderTag(true);
+		fragment.add(hint);
+		
+		NotificationPanel feedback = new NotificationPanel("feedback", form);
+		feedback.setOutputMarkupPlaceholderTag(true);
+		fragment.add(feedback);
+		
 		form.add(new AjaxButton("submit") {
 
 			@Override
@@ -657,9 +677,29 @@ public abstract class RequestDetailPage extends DepotPage {
 				super.onSubmit(target, form);
 				
 				PullRequest request = getPullRequest();
-				if (!operation.canOperate(request)) {
+				if ((operation == APPROVE || operation == DISAPPROVE) && 
+						!getPullRequest().getLatestUpdate().getId().equals(reviewUpdateId)) {
+					Long prevReviewUpdateId = reviewUpdateId;
+					WebMarkupContainer hint = new UnreviewedChangesPanel(HINT_ID, 
+							new LoadableDetachableModel<PullRequestUpdate>() {
+
+						@Override
+						protected PullRequestUpdate load() {
+							return GitPlex.getInstance(PullRequestUpdateManager.class).load(prevReviewUpdateId);
+						}
+						
+					});
+					hint.setOutputMarkupPlaceholderTag(true);
+					fragment.replace(hint);
+					
+					target.add(feedback);
+					target.add(hint);
+					target.appendJavaScript("$(window).resize();");
+					reviewUpdateId = getPullRequest().getLatestUpdate().getId();
+				} else if (!operation.canOperate(request)) {
 					error("Not allowed to " + getOperationName(operation) + " at this point");
-					target.add(form);
+					target.add(feedback);
+					target.add(hint);
 					target.appendJavaScript("$(window).resize();");
 				} else {
 					operation.operate(request, noteInput.getModelObject());

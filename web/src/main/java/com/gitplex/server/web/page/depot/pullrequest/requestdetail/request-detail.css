@@ -93,11 +93,11 @@
 	margin-right: 4px;
 }
 
-#request-detail>.summary>.operations>.confirm>form>.hint {
+#request-detail>.summary>.operations>.confirm>.hint {
 	margin-bottom: 12px;
 	font-size: 16px;
 } 
-#request-detail>.summary>.operations>.confirm>form>.hint .warning {
+#request-detail>.summary>.operations>.confirm>.hint .warning {
 	color: #EC5544;
 } 
 #request-detail>.summary>.operations>.buttons>a, 
