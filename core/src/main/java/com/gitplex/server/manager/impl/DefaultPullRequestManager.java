@@ -61,7 +61,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
-import com.gitplex.server.model.Review;
+import com.gitplex.server.model.PullRequestReview;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.model.support.CloseInfo;
 import com.gitplex.server.model.support.DepotAndBranch;
@@ -75,7 +75,7 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.BatchWorker;
-import com.gitplex.server.util.ReviewCheckStatus;
+import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.concurrent.Prioritized;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -229,13 +229,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 	
 	private void merge(PullRequest request) {
-		MergePreview preview = request.getMergePreview();
-		if (preview == null)
-			throw new IllegalStateException("Merge preview has not been calculated yet.");
-
-		String merged = preview.getMerged();
-		if (merged == null)
-			throw new IllegalStateException("There are merge conflicts.");
+		MergePreview preview = Preconditions.checkNotNull(request.getMergePreview());
+		String merged = Preconditions.checkNotNull(preview.getMerged());
 		
 		ObjectId mergedId = ObjectId.fromString(merged);
 		RevCommit mergedCommit = request.getTargetDepot().getRevCommit(mergedId);
@@ -422,7 +417,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					closeAsMerged(request, true, null);
 				} else {
 					MergePreview mergePreview = request.getMergePreview();
-					ReviewCheckStatus checkStatus = request.getReviewCheckStatus();					
+					ReviewStatus checkStatus = request.getReviewStatus();					
 					
 					for (ReviewInvitation invitation: request.getReviewInvitations()) {
 						if (checkStatus.getAwaitingReviewers().contains(invitation.getUser()))
@@ -430,7 +425,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					}
 					
 					boolean hasDisapprovals = false;
-					for (Review review: checkStatus.getEffectiveReviews().values()) {
+					for (PullRequestReview review: checkStatus.getEffectiveReviews().values()) {
 						if (!review.isApproved()) {
 							hasDisapprovals = true;
 							break;
@@ -449,7 +444,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public MergePreview previewMerge(PullRequest request) {
 		if (request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE) {
 			MergePreview lastPreview = request.getLastMergePreview();
-			if (request.isOpen() && !request.isMergeIntoTarget() && (lastPreview == null || lastPreview.isObsolete(request))) {
+			if (request.isOpen() && !request.isMergeIntoTarget() 
+					&& (lastPreview == null || lastPreview.isObsolete(request))) {
 				int priority = RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY;			
 				if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
 					doAfterCommit(new Runnable() {
@@ -526,7 +522,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 										GitUtils.deleteRef(refUpdate);
 									}
 								}
-								preview.setDate(new Date());
 								dao.persist(request);
 
 								listenerRegistry.post(new MergePreviewCalculated(request));

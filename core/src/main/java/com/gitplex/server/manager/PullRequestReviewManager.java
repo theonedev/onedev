@@ -2,23 +2,19 @@ package com.gitplex.server.manager;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestUpdate;
-import com.gitplex.server.model.Review;
+import com.gitplex.server.model.PullRequestReview;
 import com.gitplex.server.persistence.dao.EntityManager;
-import com.gitplex.server.util.ReviewCheckStatus;
+import com.gitplex.server.util.ReviewStatus;
 
-public interface ReviewManager extends EntityManager<Review> {
+public interface PullRequestReviewManager extends EntityManager<PullRequestReview> {
 
-	Review find(Account user, PullRequestUpdate update);
-
-	void review(PullRequest request, boolean approved, @Nullable String note);
+	@Override
+	void save(PullRequestReview review);
 	
 	/**
 	 * Find list of reviews ordered by review date for specified pull request.
@@ -28,11 +24,11 @@ public interface ReviewManager extends EntityManager<Review> {
 	 * @return
 	 * 			list of reviews ordered by review date
 	 */
-	List<Review> findAll(PullRequest request);
+	List<PullRequestReview> findAll(PullRequest request);
 	
 	void delete(Account user, PullRequest request);
 	
-	ReviewCheckStatus checkRequest(PullRequest request);
+	ReviewStatus checkRequest(PullRequest request);
 	
 	/**
 	 * Check if specified user can modify specified file in specified branch.

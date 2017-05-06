@@ -1,5 +1,7 @@
 package com.gitplex.server.web.component.requestreviewer;
 
+import java.util.Date;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -65,8 +67,9 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 			request.getReviewInvitations().add(invitation);
 		}
 		invitation.setType(ReviewInvitation.Type.MANUAL);
+		invitation.setDate(new Date());
 
-		request.clearReviewCheckStatus();
+		request.clearReviewStatus();
 		
 		if (!request.isNew())
 			GitPlex.getInstance(ReviewInvitationManager.class).invite(invitation);

@@ -6,9 +6,10 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.ReviewManager;
+import com.gitplex.server.manager.PullRequestReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReview;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.security.SecurityUtils;
 
@@ -35,7 +36,15 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(ReviewManager.class).review(request, true, comment);
+			PullRequestReview review = new PullRequestReview();
+			review.setApproved(true);
+			review.setAutoCheck(false);
+			review.setCheckMerged(false);
+			review.setCommit(request.getHeadCommitHash());
+			review.setNote(comment);
+			review.setRequest(request);
+			review.setUser(SecurityUtils.getAccount());
+			GitPlex.getInstance(PullRequestReviewManager.class).save(review);
 		}
 
 	},
@@ -48,7 +57,15 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			GitPlex.getInstance(ReviewManager.class).review(request, false, comment);
+			PullRequestReview review = new PullRequestReview();
+			review.setApproved(false);
+			review.setAutoCheck(false);
+			review.setCheckMerged(false);
+			review.setCommit(request.getHeadCommitHash());
+			review.setNote(comment);
+			review.setRequest(request);
+			review.setUser(SecurityUtils.getAccount());
+			GitPlex.getInstance(PullRequestReviewManager.class).save(review);
 		}
 
 	},
@@ -117,7 +134,7 @@ public enum PullRequestOperation {
 	private static boolean canReview(PullRequest request) {
 		Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 		
-		return request.getReviewCheckStatus().getAwaitingReviewers().contains(user);
+		return request.getReviewStatus().getAwaitingReviewers().contains(user);
 	}
 
 	public abstract void operate(PullRequest request, @Nullable String comment);

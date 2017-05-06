@@ -56,8 +56,8 @@ public class DefaultReviewInvitationManager extends AbstractEntityManager<Review
 		save(invitation);
 		
 		Account reviewer = invitation.getUser();
-		if (request.getReviewCheckStatus().getAwaitingReviewers().contains(reviewer) 
-				|| request.getReviewCheckStatus().getEffectiveReviews().containsKey(reviewer)) {
+		if (request.getReviewStatus().getAwaitingReviewers().contains(reviewer) 
+				|| request.getReviewStatus().getEffectiveReviews().containsKey(reviewer)) {
 			return false;
 		} else {
 			PullRequestStatusChange statusChange = new PullRequestStatusChange();

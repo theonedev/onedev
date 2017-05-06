@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Review;
+import com.gitplex.server.model.PullRequestReview;
 
-public interface ReviewCheckStatus {
+public interface ReviewStatus {
 
 	List<Account> getAwaitingReviewers();
 
-	Map<Account, Review> getEffectiveReviews();
+	Map<Account, PullRequestReview> getEffectiveReviews();
 	
 }

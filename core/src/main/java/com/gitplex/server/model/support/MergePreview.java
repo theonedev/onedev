@@ -1,7 +1,6 @@
 package com.gitplex.server.model.support;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -26,8 +25,6 @@ public class MergePreview implements Serializable {
 	
 	@Column(name="PREVIEW_MERGED")
 	private String merged;
-	
-	private Date date = new Date();
 	
 	@SuppressWarnings("unused")
 	private MergePreview() {
@@ -62,14 +59,6 @@ public class MergePreview implements Serializable {
 
 	public void setIntegrationStrategy(MergeStrategy mergeStrategy) {
 		this.mergeStrategy = mergeStrategy;
-	}
-
-	public Date getDate() {
-		return date;
-	}
-
-	public void setDate(Date date) {
-		this.date = date;
 	}
 
 	/**

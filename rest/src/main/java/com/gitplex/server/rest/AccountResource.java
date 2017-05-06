@@ -20,16 +20,16 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;
 
-@Path("/users")
+@Path("/accounts")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class UserResource {
+public class AccountResource {
 
 	private final Dao dao;
 	
 	@Inject
-	public UserResource(Dao dao) {
+	public AccountResource(Dao dao) {
 		this.dao = dao;
 	}
 	

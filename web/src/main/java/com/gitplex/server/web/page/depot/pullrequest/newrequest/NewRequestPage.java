@@ -560,7 +560,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 				PullRequest request = getPullRequest();
 				
 				setVisible(request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE 
-						&& request.getReviewCheckStatus().getAwaitingReviewers().isEmpty());
+						&& request.getReviewStatus().getAwaitingReviewers().isEmpty());
 			}
 			
 		}.setOutputMarkupPlaceholderTag(true));

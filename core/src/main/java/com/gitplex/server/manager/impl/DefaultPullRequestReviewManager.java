@@ -3,6 +3,7 @@ package com.gitplex.server.manager.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,18 +22,20 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.manager.PullRequestReviewManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
-import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.PullRequestReview;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
-import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.model.Team;
 import com.gitplex.server.model.support.BranchProtection;
@@ -45,13 +48,16 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.ObjectPermission;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
-import com.gitplex.server.util.ReviewCheckStatus;
+import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 import com.google.common.base.Preconditions;
 
 @Singleton
-public class DefaultReviewManager extends AbstractEntityManager<Review> implements ReviewManager {
+public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullRequestReview> 
+		implements PullRequestReviewManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestReviewManager.class);
+	
 	private final AccountManager accountManager;
 
 	private final PullRequestManager pullRequestManager;
@@ -59,7 +65,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 	private final PullRequestStatusChangeManager pullRequestStatusChangeManager;
 	
 	@Inject
-	public DefaultReviewManager(Dao dao, AccountManager accountManager, PullRequestManager pullRequestManager, 
+	public DefaultPullRequestReviewManager(Dao dao, AccountManager accountManager, PullRequestManager pullRequestManager, 
 			PullRequestStatusChangeManager pullRequestStatusChangeManager) {
 		super(dao);
 		
@@ -70,52 +76,35 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 
 	@Transactional
 	@Override
-	public ReviewCheckStatus checkRequest(PullRequest request) {
-		return new ReviewCheckStatusImpl(request);
-	}
-
-	@Sessional
-	@Override
-	public Review find(Account user, PullRequestUpdate update) {
-		return find(EntityCriteria.of(Review.class)
-				.add(Restrictions.eq("user", user)) 
-				.add(Restrictions.eq("update", update)));
+	public ReviewStatus checkRequest(PullRequest request) {
+		return new ReviewStatusImpl(request);
 	}
 
 	@Transactional
 	@Override
-	public void review(PullRequest request, boolean approved, String note) {
-		Account user = accountManager.getCurrent();
-		Date date = new Date();
-		
-		Review review = new Review();
-		review.setRequest(request);
-		review.setApproved(approved);
-		review.setNote(note);
-		review.setUser(user);
-		review.setDate(date);
-		save(review);	
+	public void save(PullRequestReview review) {
+		super.save(review);	
 
 		PullRequestStatusChange statusChange = new PullRequestStatusChange();
-		statusChange.setDate(date);
-		statusChange.setNote(note);
-		statusChange.setRequest(request);
-		if (approved) {
+		statusChange.setDate(new Date());
+		statusChange.setNote(review.getNote());
+		statusChange.setRequest(review.getRequest());
+		if (review.isApproved()) {
 			statusChange.setType(Type.APPROVED);
 		} else {
 			statusChange.setType(Type.DISAPPROVED);
 		}
-		statusChange.setUser(user);
+		statusChange.setUser(review.getUser());
 		pullRequestStatusChangeManager.save(statusChange);
 		
-		request.setLastEvent(statusChange);
-		pullRequestManager.save(request);
+		review.getRequest().setLastEvent(statusChange);
+		pullRequestManager.save(review.getRequest());
 	}
 
 	@Sessional
 	@Override
-	public List<Review> findAll(PullRequest request) {
-		EntityCriteria<Review> criteria = EntityCriteria.of(Review.class);
+	public List<PullRequestReview> findAll(PullRequest request) {
+		EntityCriteria<PullRequestReview> criteria = EntityCriteria.of(PullRequestReview.class);
 		criteria.createCriteria("update").add(Restrictions.eq("request", request));
 		criteria.addOrder(Order.asc("date"));
 		return findAll(criteria);
@@ -124,8 +113,8 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 	@Transactional
 	@Override
 	public void delete(Account user, PullRequest request) {
-		for (Iterator<Review> it = request.getReviews().iterator(); it.hasNext();) {
-			Review review = it.next();
+		for (Iterator<PullRequestReview> it = request.getReviews().iterator(); it.hasNext();) {
+			PullRequestReview review = it.next();
 			if (review.getUser().equals(user)) {
 				delete(review);
 				it.remove();
@@ -195,13 +184,13 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 		return true;
 	}
 
-	private static class ReviewCheckStatusImpl implements ReviewCheckStatus {
+	private static class ReviewStatusImpl implements ReviewStatus {
 
 		private final PullRequest request;
 		
 		private final List<Account> awaitingReviewers = new ArrayList<>();
 		
-		private final Map<Account, Review> effectiveReviews = new HashMap<>();
+		private final Map<Account, PullRequestReview> effectiveReviews = new HashMap<>();
 		
 		@Override
 		public List<Account> getAwaitingReviewers() {
@@ -209,7 +198,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 		}
 
 		@Override
-		public Map<Account, Review> getEffectiveReviews() {
+		public Map<Account, PullRequestReview> getEffectiveReviews() {
 			return effectiveReviews;
 		}
 
@@ -222,13 +211,13 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 			return null;
 		}
 		
-		public ReviewCheckStatusImpl(PullRequest request) {
+		public ReviewStatusImpl(PullRequest request) {
 			this.request = request;
 			
 			for (ReviewInvitation invitation: request.getReviewInvitations()) {
 				if (!invitation.getUser().equals(request.getSubmitter()) 
 						&& invitation.getType() == ReviewInvitation.Type.MANUAL) {
-					Review effectiveReview = invitation.getUser().getReviewAfter(request.getLatestUpdate());
+					PullRequestReview effectiveReview = invitation.getUser().getReviewAfter(request.getLatestUpdate());
 					if (effectiveReview == null) 
 						awaitingReviewers.add(invitation.getUser());
 					else
@@ -259,15 +248,16 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 			
 			ObjectPermission writePermission = ObjectPermission.ofDepotWrite(request.getTargetDepot());
 			if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writePermission)) {
-				checkReviews(SecurityUtils.findUsersCan(request.getTargetDepot(), DepotPrivilege.WRITE), 1, 
-						request.getLatestUpdate());
+				Collection<Account> writers = SecurityUtils.findUsersCan(request.getTargetDepot(), 
+						DepotPrivilege.WRITE);
+				checkReviews(writers, 1, request.getLatestUpdate(), true);
 			}
 			
-			for (Iterator<Map.Entry<Account, Review>> it = effectiveReviews.entrySet().iterator(); it.hasNext();) {
-				Review review = it.next().getValue();
+			for (Iterator<Map.Entry<Account, PullRequestReview>> it = effectiveReviews.entrySet().iterator(); it.hasNext();) {
+				PullRequestReview review = it.next().getValue();
 				if (review.isCheckMerged()) {
 					if (request.getMergePreview() == null 
-							|| request.getMergePreview().getDate().after(review.getDate())) {
+							|| !review.getCommit().equals(request.getMergePreview().getMerged())) {
 						if (!awaitingReviewers.contains(review.getUser()))
 							awaitingReviewers.add(review.getUser());
 						it.remove();
@@ -280,7 +270,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 		private void checkReviews(ReviewAppointment appointment, PullRequestUpdate update) {
 			for (Account user: appointment.getUsers()) {
 				if (!user.equals(request.getSubmitter()) && !awaitingReviewers.contains(user)) {
-					Review effectiveReview = user.getReviewAfter(update);
+					PullRequestReview effectiveReview = user.getReviewAfter(update);
 					if (effectiveReview == null) {
 						awaitingReviewers.add(user);
 						recordReviewer(user);
@@ -293,12 +283,13 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 			for (Map.Entry<Team, Integer> entry: appointment.getTeams().entrySet()) {
 				Team team = entry.getKey();
 				int requiredCount = entry.getValue();
-				checkReviews(team.getMembers(), requiredCount, update);
+				checkReviews(team.getMembers(), requiredCount, update, false);
 			}
 		}
 		
-		private void checkReviews(Collection<Account> users, int requiredCount, PullRequestUpdate update) {
-			if (requiredCount == 0 || requiredCount > users.size())
+		private void checkReviews(Collection<Account> users, int requiredCount, PullRequestUpdate update, 
+				boolean excludeAutoReviews) {
+			if (requiredCount == 0)
 				requiredCount = users.size();
 			
 			int effectiveCount = 0;
@@ -309,9 +300,14 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 				} else if (awaitingReviewers.contains(user)) {
 					requiredCount--;
 				} else {
-					Review effectiveReview = user.getReviewAfter(update);
+					PullRequestReview effectiveReview = user.getReviewAfter(update);
 					if (effectiveReview != null) {
-						effectiveCount++;
+						if (!excludeAutoReviews || !effectiveReview.isAutoCheck()) {						
+							effectiveCount++;
+						} else {
+							logger.warn("Auto review made by {} is ignored while checking reviews of pull request #{}", 
+									user.getDisplayName(), update.getRequest().getNumber());
+						}
 					} else {
 						potentialReviewers.add(user);
 					}
@@ -339,13 +335,25 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 				}
 			}
 			if (candidateReviewers.size() < missingCount) {
+				List<ReviewInvitation> excludedInvitations = new ArrayList<>();
 				for (Account user: potentialReviewers) {
-					if (!candidateReviewers.contains(user)) {
-						candidateReviewers.add(user);
-						if (candidateReviewers.size() == missingCount)
-							break;
-					}
+					ReviewInvitation invitation = getInvitation(user);
+					if (invitation != null && invitation.getType() == ReviewInvitation.Type.EXCLUDE)
+						excludedInvitations.add(invitation);
 				}
+				excludedInvitations.sort(Comparator.comparing(ReviewInvitation::getDate));
+				
+				for (ReviewInvitation invitation: excludedInvitations) {
+					candidateReviewers.add(invitation.getUser());
+					if (candidateReviewers.size() == missingCount)
+						break;
+				}
+			}
+			if (candidateReviewers.size() < missingCount) {
+				String errorMessage = String.format("Impossible to provide required number of reviewers "
+						+ "(candidates: %s, required number of reviewers: %d, pull request: #%d)", 
+						candidateReviewers, missingCount, update.getRequest().getNumber());
+				throw new RuntimeException(errorMessage);
 			}
 
 			Set<Account> selectedReviewers = selectReviewers(candidateReviewers, missingCount);

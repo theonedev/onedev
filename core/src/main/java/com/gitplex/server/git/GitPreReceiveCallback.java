@@ -20,7 +20,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.DepotManager;
-import com.gitplex.server.manager.ReviewManager;
+import com.gitplex.server.manager.PullRequestReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
@@ -42,10 +42,10 @@ public class GitPreReceiveCallback extends HttpServlet {
 	
 	private final AccountManager userManager;
 	
-	private final ReviewManager reviewManager;
+	private final PullRequestReviewManager reviewManager;
 	
 	@Inject
-	public GitPreReceiveCallback(DepotManager depotManager, AccountManager userManager, ReviewManager reviewManager) {
+	public GitPreReceiveCallback(DepotManager depotManager, AccountManager userManager, PullRequestReviewManager reviewManager) {
 		this.depotManager = depotManager;
 		this.userManager = userManager;
 		this.reviewManager = reviewManager;

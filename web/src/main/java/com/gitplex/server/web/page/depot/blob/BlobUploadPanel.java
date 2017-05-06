@@ -27,7 +27,7 @@ import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.manager.ReviewManager;
+import com.gitplex.server.manager.PullRequestReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.dropzonefield.DropzoneField;
@@ -85,7 +85,7 @@ abstract class BlobUploadPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				ReviewManager reviewManager = GitPlex.getInstance(ReviewManager.class);
+				PullRequestReviewManager reviewManager = GitPlex.getInstance(PullRequestReviewManager.class);
 				Map<String, BlobContent> newBlobs = new HashMap<>();
 				for (FileUpload upload: uploads) {
 					String blobPath = upload.getClientFileName();

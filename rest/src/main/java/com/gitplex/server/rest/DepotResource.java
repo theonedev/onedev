@@ -30,14 +30,14 @@ import com.gitplex.server.security.ObjectPermission;
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class RepositoryResource {
+public class DepotResource {
 
 	private final Dao dao;
 	
 	private final DepotManager depotManager;
 	
 	@Inject
-	public RepositoryResource(Dao dao, DepotManager depotManager) {
+	public DepotResource(Dao dao, DepotManager depotManager) {
 		this.dao = dao;
 		this.depotManager = depotManager;
 	}

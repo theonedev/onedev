@@ -1,5 +1,7 @@
 package com.gitplex.server.model;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -29,6 +31,8 @@ public class ReviewInvitation extends AbstractEntity {
 	
 	private Type type;
 	
+	private Date date = new Date();
+	
 	public Account getUser() {
 		return user;
 	}
@@ -51,6 +55,14 @@ public class ReviewInvitation extends AbstractEntity {
 
 	public void setType(Type type) {
 		this.type = type;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 }

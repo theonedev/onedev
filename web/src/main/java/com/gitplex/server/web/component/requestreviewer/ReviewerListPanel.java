@@ -1,7 +1,8 @@
 package com.gitplex.server.web.component.requestreviewer;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -23,14 +24,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.MarkdownManager;
+import com.gitplex.server.manager.PullRequestReviewManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
-import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.Review;
+import com.gitplex.server.model.PullRequestReview;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.ReviewCheckStatus;
+import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.web.behavior.dropdown.DropdownHover;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.AccountLink;
@@ -69,13 +70,13 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				PullRequest request = getPullRequest();
 				List<Account> reviewers = new ArrayList<>();
 				
-				List<Review> reviews = new ArrayList<>(request.getReviewCheckStatus().getEffectiveReviews().values());
-				reviews.sort(Comparator.comparing(Review::getDate));
+				List<PullRequestReview> reviews = new ArrayList<>(request.getReviewStatus().getEffectiveReviews().values());
+				Collections.sort(reviews);
 				
-				for (Review review: reviews)
+				for (PullRequestReview review: reviews)
 					reviewers.add(review.getUser());
 				
-				for (Account awaitingReviewer: request.getReviewCheckStatus().getAwaitingReviewers())
+				for (Account awaitingReviewer: request.getReviewStatus().getAwaitingReviewers())
 					reviewers.add(awaitingReviewer);
 				
 				return reviewers;
@@ -90,7 +91,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				item.add(new AccountLink("name", item.getModelObject()));
 				
 				PullRequest request = getPullRequest();
-				Review review = request.getReviewCheckStatus().getEffectiveReviews().get(item.getModelObject());
+				PullRequestReview review = request.getReviewStatus().getEffectiveReviews().get(item.getModelObject());
 				
 				WebMarkupContainer result = new WebMarkupContainer("result");
 				if (review != null) {
@@ -151,17 +152,18 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						}
 						
 						if (invitation != null) {
-							request.clearReviewCheckStatus();
+							request.clearReviewStatus();
+							invitation.setDate(new Date());
 							boolean removed;
 							if (request.isNew()) {
 								invitation.setType(ReviewInvitation.Type.EXCLUDE);
-								removed = !request.getReviewCheckStatus().getAwaitingReviewers().contains(reviewer);								
+								removed = !request.getReviewStatus().getAwaitingReviewers().contains(reviewer);								
 							} else {
 								removed = GitPlex.getInstance(ReviewInvitationManager.class).exclude(invitation);
 							}
 							if (!removed) {
 								getSession().warn("Reviewer '" + reviewer.getDisplayName() 
-										+ "' is required by branch protection setting and can not be removed");
+										+ "' is required and can not be removed");
 							}
 							reviewersModel.detach();
 							
@@ -175,9 +177,8 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						
 						PullRequest request = getPullRequest();
 						Account currentUser = SecurityUtils.getAccount();
-						setVisible(request.isOpen() && 
-								(currentUser != null && currentUser.equals(request.getSubmitter())
-										|| SecurityUtils.canManage(request.getTargetDepot())));
+						setVisible(currentUser != null && currentUser.equals(request.getSubmitter())
+										|| SecurityUtils.canManage(request.getTargetDepot()));
 					}
 					
 				});
@@ -196,8 +197,8 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						
 						PullRequest request = getPullRequest();
 						Account reviewer = item.getModelObject();
-						Review review = request.getReviewCheckStatus().getEffectiveReviews().get(reviewer);
-						setVisible(request.isOpen() && review != null 
+						PullRequestReview review = request.getReviewStatus().getEffectiveReviews().get(reviewer);
+						setVisible(review != null 
 								&& (reviewer.equals(SecurityUtils.getAccount()) 
 										|| SecurityUtils.canManage(request.getTargetDepot())));
 					}
@@ -206,8 +207,8 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						Account reviewer = item.getModelObject();
-						request.clearReviewCheckStatus();
-						GitPlex.getInstance(ReviewManager.class).delete(reviewer, request);
+						request.clearReviewStatus();
+						GitPlex.getInstance(PullRequestReviewManager.class).delete(reviewer, request);
 						reviewersModel.detach();
 						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
 					}
@@ -222,7 +223,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				ReviewCheckStatus reviewCheckStatus = getPullRequest().getReviewCheckStatus();
+				ReviewStatus reviewCheckStatus = getPullRequest().getReviewStatus();
 				setVisible(reviewCheckStatus.getAwaitingReviewers().isEmpty() 
 						&& reviewCheckStatus.getEffectiveReviews().isEmpty());
 			}
@@ -236,7 +237,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				super.onConfigure();
 
 				PullRequest request = getPullRequest();
-				setVisible(request.isOpen() && SecurityUtils.canModify(request));
+				setVisible(SecurityUtils.canModify(request));
 			}
 		                                                                                                                              
 			@Override

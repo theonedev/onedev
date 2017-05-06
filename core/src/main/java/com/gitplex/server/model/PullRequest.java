@@ -43,7 +43,7 @@ import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.CodeCommentRelationManager;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.ReviewManager;
+import com.gitplex.server.manager.PullRequestReviewManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.support.CloseInfo;
 import com.gitplex.server.model.support.CompareContext;
@@ -53,7 +53,7 @@ import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
-import com.gitplex.server.util.ReviewCheckStatus;
+import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.jackson.ExternalView;
@@ -155,7 +155,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<Review> reviews = new ArrayList<>();
+	private Collection<PullRequestReview> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="referenced", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> referencedBy = new ArrayList<>();
@@ -175,7 +175,7 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
-	private transient ReviewCheckStatus reviewCheckStatus;
+	private transient ReviewStatus reviewStatus;
 	
 	private transient Boolean mergedIntoTarget;
 
@@ -412,14 +412,14 @@ public class PullRequest extends AbstractEntity {
 		this.watches = watches;
 	}
 
-	public ReviewCheckStatus getReviewCheckStatus() {
-		if (reviewCheckStatus == null)
-			reviewCheckStatus = GitPlex.getInstance(ReviewManager.class).checkRequest(this);
-		return reviewCheckStatus;
+	public ReviewStatus getReviewStatus() {
+		if (reviewStatus == null)
+			reviewStatus = GitPlex.getInstance(PullRequestReviewManager.class).checkRequest(this);
+		return reviewStatus;
 	}
 	
-	public void clearReviewCheckStatus() {
-		reviewCheckStatus = null;
+	public void clearReviewStatus() {
+		reviewStatus = null;
 	}
 
 	@Nullable
@@ -610,11 +610,11 @@ public class PullRequest extends AbstractEntity {
 		return mergedCommits;
 	}
 	
-	public Collection<Review> getReviews() {
+	public Collection<PullRequestReview> getReviews() {
 		return reviews;
 	}
 	
-	public void setReviews(Collection<Review> reviews) {
+	public void setReviews(Collection<PullRequestReview> reviews) {
 		this.reviews = reviews;
 	}
 	
@@ -786,10 +786,10 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public List<Account> getRemainingReviewers() {
-		ReviewCheckStatus checkStatus = getReviewCheckStatus();
+		ReviewStatus checkStatus = getReviewStatus();
 		Collection<Account> users = SecurityUtils.findUsersCan(getTargetDepot(), DepotPrivilege.READ);
 		users.removeAll(checkStatus.getAwaitingReviewers());
-		for (Review review: checkStatus.getEffectiveReviews().values())
+		for (PullRequestReview review: checkStatus.getEffectiveReviews().values())
 			users.remove(review.getUser());
 		users.remove(SecurityUtils.getAccount());
 		List<Account> userList = new ArrayList<>(users);
