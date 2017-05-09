@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -136,6 +137,11 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     	return repository;
     }
     
+    @Override
+    public void save(Depot depot) {
+    	save(depot, null, null);
+    }
+    
     @Transactional
     @Override
     public void save(Depot depot, Long oldAccountId, String oldName) {
@@ -177,6 +183,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 				}
 				if (isNew) {
 		    		checkGit(depot);
+			        commitInfoManager.requestToCollect(depot);
 				}
 			}
         	
@@ -250,15 +257,13 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     @Transactional
 	@Override
 	public void fork(Depot from, Depot to) {
-    	boolean isNew = to.isNew();
     	save(to);
         FileUtils.cleanDir(to.getDirectory());
         new CloneCommand(to.getDirectory()).mirror(true).from(from.getDirectory().getAbsolutePath()).call();
-        doAfterCommit(newAfterCommitRunnable(to, isNew));
+        doAfterCommit(newAfterCommitRunnable(to, true));
 	}
 
 	private void checkGit(Depot depot) {
-		logger.info("Checking sanity of repository '{}'...", depot);
 		File gitDir = depot.getDirectory();
 		if (depot.getDirectory().exists() && !GitUtils.isValid(gitDir)) {
         	logger.warn("Directory '" + gitDir + "' is not a valid git repository, removing...");
@@ -299,11 +304,17 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	@Listen
 	public void on(SystemStarted event) {
 		for (Depot depot: findAll()) {
+			logger.info("Checking repository {}...", depot.getFQN());
 			checkGit(depot);
 			checkInfo(depot);
-	        commitInfoManager.collect(depot);
+	        try {
+				commitInfoManager.requestToCollect(depot).get();
+			} catch (InterruptedException | ExecutionException e) {
+				throw new RuntimeException(e);
+			}
 	        pullRequestInfoManager.collect(depot);
 	        codeCommentInfoManager.collect(depot);
+			logger.info("Repository checking finished for {}", depot.getFQN());
 		}
 	}
 	

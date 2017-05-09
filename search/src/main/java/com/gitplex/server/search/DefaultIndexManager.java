@@ -317,7 +317,7 @@ public class DefaultIndexManager implements IndexManager {
 					public Void call() throws Exception {
 						Depot depot = depotManager.load(depotId);
 						IndexWork indexWork = (IndexWork) works.iterator().next();
-						index(depot, indexWork.getCommitId());
+						doIndex(depot, indexWork.getCommitId());
 						return null;
 					}
 					
@@ -327,8 +327,7 @@ public class DefaultIndexManager implements IndexManager {
 		};
 	}
 	
-	@Override
-	public IndexResult index(Depot depot, ObjectId commit) {
+	private IndexResult doIndex(Depot depot, ObjectId commit) {
 		IndexResult indexResult;
 		File indexDir = storageManager.getIndexDir(depot);
 		try (Directory directory = FSDirectory.open(indexDir)) {

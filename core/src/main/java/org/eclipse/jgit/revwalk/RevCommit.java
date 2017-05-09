@@ -244,7 +244,7 @@ public class RevCommit extends RevObject {
 					if ((p.flags & carry) == carry)
 						continue;
 					p.flags |= carry;
-					FIFORevQueue q = carryFlags1(c, carry, depth + 1);
+					FIFORevQueue q = carryFlags1(p, carry, depth + 1);
 					if (q != null)
 						return defer(q, carry, pList, i + 1);
 				}
@@ -565,7 +565,7 @@ public class RevCommit extends RevObject {
 			ptr--;
 
 		final int msgB = RawParseUtils.commitMessage(raw, 0);
-		final ArrayList<FooterLine> r = new ArrayList<FooterLine>(4);
+		final ArrayList<FooterLine> r = new ArrayList<>(4);
 		final Charset enc = guessEncoding();
 		for (;;) {
 			ptr = RawParseUtils.prevLF(raw, ptr);
@@ -628,7 +628,7 @@ public class RevCommit extends RevObject {
 		final List<FooterLine> src = getFooterLines();
 		if (src.isEmpty())
 			return Collections.emptyList();
-		final ArrayList<String> r = new ArrayList<String>(src.size());
+		final ArrayList<String> r = new ArrayList<>(src.size());
 		for (final FooterLine f : src) {
 			if (f.matches(keyName))
 				r.add(f.getValue());

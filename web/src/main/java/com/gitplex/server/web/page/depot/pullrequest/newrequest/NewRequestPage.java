@@ -29,6 +29,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -247,7 +248,15 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String branch) {
 				PageParameters params = paramsOf(depot, new DepotAndBranch(depot, branch), source); 
-				setResponsePage(NewRequestPage.class, params);
+				
+				/*
+				 * Use below code instead of calling setResponsePage() to make sure the dropdown is 
+				 * closed while creating the new page as otherwise clicking other places in original page 
+				 * while new page is loading will result in ComponentNotFound issue for the dropdown 
+				 * component
+				 */
+				String url = RequestCycle.get().urlFor(NewRequestPage.class, params).toString();
+				target.appendJavaScript(String.format("window.location.href='%s';", url));
 			}
 			
 		});
@@ -262,7 +271,10 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String branch) {
 				PageParameters params = paramsOf(getDepot(), NewRequestPage.this.target,
 						new DepotAndBranch(depot, branch)); 
-				setResponsePage(NewRequestPage.class, params);
+				
+				// Refer to comments in target branch picker for not using setResponsePage 
+				String url = RequestCycle.get().urlFor(NewRequestPage.class, params).toString();
+				target.appendJavaScript(String.format("window.location.href='%s';", url));
 			}
 			
 		});

@@ -35,6 +35,7 @@ import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.persistence.UnitOfWork;
+import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityPersisted;
@@ -166,7 +167,8 @@ public class DefaultPullRequestInfoManager implements PullRequestInfoManager {
 		else
 			return null;
 	}
-	
+
+	@Sessional
 	@Override
 	public void collect(Depot depot) {
 		logger.debug("Collecting pull request info (repository: {})...", depot);

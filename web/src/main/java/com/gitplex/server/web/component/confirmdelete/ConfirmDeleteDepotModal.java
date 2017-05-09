@@ -28,7 +28,7 @@ public abstract class ConfirmDeleteDepotModal extends ConfirmDeleteModal {
 	@Override
 	protected String getWarningMessage() {
 		return "Everything inside this repository will be deleted and can not be recovered, "
-				+ "please input repository name below to confirm deletion.";
+				+ "please input repository name \"" + getDepot().getName() + "\" below to confirm deletion.";
 	}
 
 	@Override

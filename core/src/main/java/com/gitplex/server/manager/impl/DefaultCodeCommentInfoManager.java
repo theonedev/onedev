@@ -36,6 +36,7 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.persistence.UnitOfWork;
+import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.BatchWorker;
@@ -85,9 +86,8 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager {
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultCodeCommentInfoManager(Dao dao, DepotManager depotManager, 
-			StorageManager storageManager, CodeCommentManager codeCommentManager, 
-			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork) {
+	public DefaultCodeCommentInfoManager(Dao dao, DepotManager depotManager, StorageManager storageManager, 
+			CodeCommentManager codeCommentManager, BatchWorkManager batchWorkManager, UnitOfWork unitOfWork) {
 		this.dao = dao;
 		this.depotManager = depotManager;
 		this.storageManager = storageManager;
@@ -172,9 +172,10 @@ public class DefaultCodeCommentInfoManager implements CodeCommentInfoManager {
 			return null;
 	}
 	
+	@Sessional
 	@Override
 	public void collect(Depot depot) {
-		logger.debug("Collecting code comment info (depot: {})", depot);
+		logger.debug("Collecting code comment info (depot: {})...", depot);
 		Environment env = getEnv(depot);
 		Store store = getStore(env, DEFAULT_STORE);
 

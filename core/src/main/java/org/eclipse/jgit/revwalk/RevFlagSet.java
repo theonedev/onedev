@@ -61,7 +61,7 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 
 	/** Create an empty set of flags. */
 	public RevFlagSet() {
-		active = new ArrayList<RevFlag>();
+		active = new ArrayList<>();
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 	 */
 	public RevFlagSet(final RevFlagSet s) {
 		mask = s.mask;
-		active = new ArrayList<RevFlag>(s.active);
+		active = new ArrayList<>(s.active);
 	}
 
 	/**
@@ -132,14 +132,17 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 		return new Iterator<RevFlag>() {
 			private RevFlag current;
 
+			@Override
 			public boolean hasNext() {
 				return i.hasNext();
 			}
 
+			@Override
 			public RevFlag next() {
 				return current = i.next();
 			}
 
+			@Override
 			public void remove() {
 				mask &= ~current.mask;
 				i.remove();

@@ -3,6 +3,7 @@ package com.gitplex.server.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -30,6 +32,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +46,16 @@ import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.StorageManager;
+import com.gitplex.server.manager.WorkExecutor;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.concurrent.Prioritized;
+import com.gitplex.server.util.concurrent.PrioritizedRunnable;
+import com.google.common.base.Charsets;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -72,6 +79,8 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	
 	private static final String COMMITS_STORE = "commits";
 	
+	private static final String CONTRIBUTIONS_STORE = "contributions";
+	
 	private static final ByteIterable LAST_COMMIT_KEY = new StringByteIterable("lastCommit");
 	
 	private static final ByteIterable AUTHORS_KEY = new StringByteIterable("authors");
@@ -85,6 +94,8 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	private static final int PRIORITY = 100;
 	
 	private final StorageManager storageManager;
+	
+	private final WorkExecutor workExecutor;
 	
 	private final BatchWorkManager batchWorkManager;
 	
@@ -104,11 +115,12 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	
 	@Inject
 	public DefaultCommitInfoManager(DepotManager depotManager, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork) {
+			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, WorkExecutor workExecutor) {
 		this.depotManager = depotManager;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
+		this.workExecutor = workExecutor;
 	}
 	
 	private void doCollect(Depot depot, List<RevCommit> commits) {
@@ -117,6 +129,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 		Environment env = getEnv(depot);
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store commitsStore = getStore(env, COMMITS_STORE);
+		Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE); 
 
 		commits.sort(Comparator.comparing(RevCommit::getCommitTime));
 		
@@ -164,19 +177,14 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 					prevFiles = new HashSet<>();
 				Set<String> files = new HashSet<>(prevFiles);
 				
-				RevCommit latestCommit = commits.get(commits.size()-1);
-				try (	RevWalk revWalk = new RevWalk(depot.getRepository());
-						TreeWalk treeWalk = new TreeWalk(depot.getRepository());) {
+				try (	RevWalk revWalk = new RevWalk(depot.getRepository());) {
 					revWalk.markStart(commits);
 					if (lastCommitId != null) {
 						RevCommit lastCommit = GitUtils.parseCommit(revWalk, lastCommitId);
 						if (lastCommit != null) {
 							revWalk.markUninteresting(lastCommit);
-							treeWalk.addTree(lastCommit.getTree());
 						}
 					}
-					treeWalk.addTree(latestCommit.getTree());
-					treeWalk.setRecursive(true);
 						
 					RevCommit commit = revWalk.next();
 					while (commit != null) {
@@ -228,12 +236,29 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 									|| StringUtils.isNotBlank(commit.getCommitterIdent().getEmailAddress())) {
 								committers.add(new NameAndEmail(commit.getCommitterIdent()));
 							}
+							
+							String authorEmail = commit.getAuthorIdent().getEmailAddress();
+							if (StringUtils.isNotBlank(authorEmail) && commit.getParentCount() == 1) {
+								try (TreeWalk treeWalk = new TreeWalk(depot.getRepository())) {
+									treeWalk.setFilter(TreeFilter.ANY_DIFF);
+									treeWalk.addTree(commit.getTree());
+									treeWalk.addTree(commit.getParent(0).getTree());
+									treeWalk.setRecursive(true);
+									while (treeWalk.next()) {
+										String path = treeWalk.getPathString();
+										files.add(path);
+										
+										updateContribution(txn, contributionsStore, authorEmail, path);
+										while (path.contains("/")) {
+											path = StringUtils.substringBeforeLast(path, "/");
+											updateContribution(txn, contributionsStore, authorEmail, path);
+										}
+										updateContribution(txn, contributionsStore, authorEmail, "");
+									}
+								}
+							}
 						}		
 						commit = revWalk.next();
-					}
-					
-					while (treeWalk.next()) {
-						files.add(treeWalk.getPathString());
 					}
 					
 				} catch (IOException e) {
@@ -265,12 +290,28 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 				}
 				
 				bytes = new byte[20];
-				latestCommit.copyRawTo(bytes, 0);
+				commits.get(commits.size()-1).copyRawTo(bytes, 0);
 				defaultStore.put(txn, LAST_COMMIT_KEY, new ArrayByteIterable(bytes));
 			}
 			
 		});
-		logger.debug("Commits info collected (repository: {}, commits: {})...", depot, commits.size());
+		logger.debug("Commits info collected (repository: {}, commits: {})", depot, commits.size());
+	}
+	
+	private void updateContribution(Transaction txn, Store contributionsStore, String email, String path) {
+		ArrayByteIterable contributionKey = 
+				new ArrayByteIterable(getContributionKey(email, path));
+		byte[] contributionBytes = 
+				getBytes(contributionsStore.get(txn, contributionKey));
+		int contributions;
+		if (contributionBytes != null)
+			contributions = ByteBuffer.wrap(contributionBytes).getInt() + 1;
+		else
+			contributions = 1;
+		ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+		byteBuffer.putInt(contributions);
+		contributionsStore.put(txn, contributionKey, 
+				new ArrayByteIterable(byteBuffer.array()));
 	}
 	
 	private Environment getEnv(final Depot depot) {
@@ -385,6 +426,32 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 			filesCache.put(depot.getId(), files);
 		}
 		return files;
+	}
+	
+	private byte[] getContributionKey(String email, String file) {
+		return (email + " " + file).getBytes(Charsets.UTF_8);
+	}
+	
+	@Override
+	public int getContributions(Depot depot, Account account, String path) {
+		if (account.getEmail() != null) {
+			Environment env = getEnv(depot);
+			Store store = getStore(env, CONTRIBUTIONS_STORE);
+			return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
+
+				@Override
+				public Integer compute(Transaction tx) {
+					byte[] contributionKey = getContributionKey(account.getEmail(), path);
+					byte[] bytes = getBytes(store.get(tx, new ArrayByteIterable(contributionKey)));
+					if (bytes != null)
+						return ByteBuffer.wrap(bytes).getInt();
+					else
+						return 0;
+				}
+			});
+		} else {
+			return 0;
+		}
 	}
 	
 	@Override
@@ -523,42 +590,49 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 	
 	@Override
-	public void collect(Depot depot) {
-		List<RevCommit> commits = new ArrayList<>();
-		try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
-			Collection<Ref> refs = new ArrayList<>();
-			refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
-			refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
+	public Future<?> requestToCollect(Depot depot) {
+		return workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
+			
+			@Override
+			public void run() {
+				List<RevCommit> commits = new ArrayList<>();
+				try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
+					Collection<Ref> refs = new ArrayList<>();
+					refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
+					refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
 
-			for (Ref ref: refs) {
-				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
-				if (revObj instanceof RevCommit) {
-					RevCommit commit = (RevCommit) revObj;
-					Environment env = getEnv(depot);
-					Store commitsStore = getStore(env, COMMITS_STORE);
-					boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
-						
-						@Override
-						public Boolean compute(Transaction txn) {
-							byte[] keyBytes = new byte[20];
-							commit.copyRawTo(keyBytes, 0);
-							ByteIterable key = new ArrayByteIterable(keyBytes);
-							byte[] valueBytes = getBytes(commitsStore.get(txn, key));
-							return valueBytes != null && valueBytes.length%2 != 0;
+					for (Ref ref: refs) {
+						RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
+						if (revObj instanceof RevCommit) {
+							RevCommit commit = (RevCommit) revObj;
+							Environment env = getEnv(depot);
+							Store commitsStore = getStore(env, COMMITS_STORE);
+							boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
+								
+								@Override
+								public Boolean compute(Transaction txn) {
+									byte[] keyBytes = new byte[20];
+									commit.copyRawTo(keyBytes, 0);
+									ByteIterable key = new ArrayByteIterable(keyBytes);
+									byte[] valueBytes = getBytes(commitsStore.get(txn, key));
+									return valueBytes != null && valueBytes.length%2 != 0;
+								}
+								
+							});
+							if (!collected) 
+								commits.add(commit);
 						}
-						
-					});
-					if (!collected) 
-						commits.add(commit);
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				
+				if (!commits.isEmpty()) {
+					doCollect(depot, commits);
 				}
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		
-		if (!commits.isEmpty()) {
-			doCollect(depot, commits);
-		}
+			
+		});
 	}
 
 	@Listen

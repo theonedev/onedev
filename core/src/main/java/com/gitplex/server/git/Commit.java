@@ -2,93 +2,98 @@ package com.gitplex.server.git;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.Serializable;
+import java.util.Date;
 
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
-public class Commit extends BriefCommit {
+import com.google.common.base.Objects;
+
+public class Commit implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String body;
+	private final String hash;
     
-    private final String note;
+    private final String subject;
     
-    private final List<String> parentHashes;
+    private final PersonIdent committer;
     
-    private final List<String> changedFiles;
+    private final PersonIdent author;
+    
+    public Commit(String hash, PersonIdent committer, PersonIdent author, String subject) {
+    	this.hash = checkNotNull(hash, "hash");
+    	this.committer = checkNotNull(committer, "committer");
+    	this.author = checkNotNull(author, "author");
+    	this.subject = checkNotNull(subject, "subject");
+    }
 
-    public Commit(String hash, PersonIdent committer, PersonIdent author, String subject, 
-    		@Nullable String body, List<String> parentHashes, @Nullable String note, 
-    		@Nullable List<String> changedFiles) {
-    	super(hash, committer, author, subject);
-    	
-    	this.body = body;
-    	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
-    	this.note = note;
-    	this.changedFiles = changedFiles;
+    public Commit(Commit commit) {
+    	this(commit.getHash(), commit.getCommitter(), commit.getAuthor(), commit.getSubject());
     }
-    
-    public Commit(BriefCommit briefCommit, @Nullable String body, 
-    		List<String> parentHashes, @Nullable String note, 
-    		@Nullable List<String> changedFiles) {
-    	super(briefCommit);
-    	
-    	this.body = body;
-    	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
-    	this.note = note;
-    	this.changedFiles = changedFiles;
-    }
-    
-	public String getMessage() {
-		if (body != null)
-			return getSubject() + "\n\n" + body;
-		else
-			return getSubject();
+
+    public String getHash() {
+		return hash;
 	}
 
-	@Nullable
-	public String getNote() {
-		return note;
+	public PersonIdent getCommitter() {
+		return committer;
 	}
 
-	public List<String> getParentHashes() {
-		return Collections.unmodifiableList(parentHashes);
+	public PersonIdent getAuthor() {
+		return author;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(hash);
 	}
 	
-	@Nullable
-	public String getBody() {
-		return body;
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) return true;
+		if (!(other instanceof Commit)) return false;
+		
+		Commit rhs = (Commit) other;
+		return Objects.equal(hash, rhs.hash);
+	}
+	
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("hash", hash)
+				.add("committer", committer.getName())
+				.add("date", committer.getWhen())
+				.add("messageSummary", subject)
+				.toString();
 	}
 
-	@Nullable
-    public List<String> getChangedFiles() {
-		return changedFiles;
-	}
-
-	public static class Builder extends BriefCommit.Builder {
+    public static class Builder {
     	
-    	public String body;
+		public String hash;
 		
-    	public List<String> parentHashes = new ArrayList<>();
+        public String committerName;
+        
+        public String committerEmail;
 		
-    	public String note;
+        public Date committerDate;
     	
-    	public List<String> changedFiles;
+        public String authorName;
+        
+        public Date authorDate;
+        
+        public String authorEmail;
+        
+        public String subject;
 		
 		public Commit build() {
-			return new Commit(super.build(), StringUtils.isNotBlank(body)?body.trim():null, 
-					parentHashes, note, changedFiles);
+			PersonIdent committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
+			PersonIdent author = GitUtils.newPersonIdent(authorName, authorEmail, authorDate);
+			return new Commit(hash, committer, author, subject.trim());
 		}
-	}
-	
-    public static Builder builder() {
-    	return new Builder();
     }
-
 }

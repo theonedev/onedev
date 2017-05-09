@@ -3,7 +3,6 @@ package com.gitplex.server.git;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -155,7 +154,8 @@ public class BlobEdits implements Serializable {
 			}
 			if (!entries.isEmpty()) {
 				TreeFormatter formatter = new TreeFormatter();
-				Collections.sort(entries);
+				// Do not sort entries as otherwise it may distort original tree 
+//				Collections.sort(entries);
 				for (TreeFormatterEntry entry: entries)
 					formatter.append(entry.name, entry.mode, entry.id);
 				return inserter.insert(formatter);

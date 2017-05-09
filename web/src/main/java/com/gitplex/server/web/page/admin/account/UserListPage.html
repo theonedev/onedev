@@ -9,32 +9,19 @@
 			</div>
 		</div>
 		<div class="body">
-			<table wicket:id="accounts" class="accounts table table-hover">
-				<thead>
-					<tr>
-						<th class="name">Name</th>
-						<th class="email">Email</th>
-						<th class="actions"></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr wicket:id="accounts">
-						<td class="name">
-							<a wicket:id="avatarLink"></a>
-							<a wicket:id="nameLink"></a>
-						</td>
-						<td class="email">
-							<span wicket:id="email"></span>
-						</td>
-						<td class="actions">
-							<a wicket:id="setting" class="fa fa-cog" title="User settings"></a>
-							<a wicket:id="delete" class="fa fa-trash" title="Delete this user"></a>
-						</td>
-					</tr>
-				</tbody>
-			</table>	
+			<table wicket:id="accounts" class="accounts table table-hover"></table>
 			<div class="center"><ul wicket:id="accountsPageNav"></ul></div>
 			<div wicket:id="noAccounts" class="alert alert-warning">No users found</div>
 		</div>
 	</section>
+	<wicket:fragment wicket:id="nameFrag">
+		<a wicket:id="avatarLink"></a>
+		<a wicket:id="nameLink"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="actionFrag">
+		<div class="btn-group">
+			<a wicket:id="setting" class="btn btn-default"><i class="fa fa-cog"></i> Profile</a>
+			<a wicket:id="delete" class="btn btn-default"><i class="fa fa-trash"></i> Delete</a>
+		</div>
+	</wicket:fragment>
 </wicket:extend>

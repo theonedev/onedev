@@ -8,16 +8,16 @@ import com.gitplex.jsymbol.Range;
 
 public class Blame {
 	
-	private final BriefCommit commit;
+	private final Commit commit;
 
 	private final List<Range> ranges;
 	
-	public Blame(BriefCommit commit, List<Range> ranges) {
+	public Blame(Commit commit, List<Range> ranges) {
 		this.commit = commit;
 		this.ranges = ranges;
 	}
 
-	public BriefCommit getCommit() {
+	public Commit getCommit() {
 		return commit;
 	}
 	

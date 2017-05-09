@@ -1,23 +1,34 @@
 package com.gitplex.server.web.page.admin.account;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.model.Account;
+import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
@@ -34,15 +45,23 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class UserListPage extends AdministrationPage {
 
-	private PageableListView<Account> accountsView;
+	private DataTable<Account, Void> accountsTable;
 	
 	private BootstrapPagingNavigator pagingNavigator;
-	
-	private WebMarkupContainer accountsContainer; 
 	
 	private WebMarkupContainer noAccountsContainer;
 	
 	private String searchInput;
+	
+	private EntityCriteria<Account> getCriteria() {
+		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
+		if (searchInput != null) {
+			criteria.add(Restrictions.or(
+					Restrictions.ilike("name", searchInput, MatchMode.ANYWHERE), 
+					Restrictions.ilike("fullName", searchInput, MatchMode.ANYWHERE)));
+		}
+		return criteria;
+	}
 	
 	@Override
 	protected void onInitialize() {
@@ -55,7 +74,7 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
 				searchInput = searchField.getInput();
-				target.add(accountsContainer);
+				target.add(accountsTable);
 				target.add(pagingNavigator);
 				target.add(noAccountsContainer);
 			}
@@ -77,54 +96,49 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		
-		accountsContainer = new WebMarkupContainer("accounts") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!accountsView.getModelObject().isEmpty());
-			}
-			
-		};
-		accountsContainer.setOutputMarkupPlaceholderTag(true);
-		add(accountsContainer);
+		List<IColumn<Account, Void>> columns = new ArrayList<>();
 		
-		accountsContainer.add(accountsView = new PageableListView<Account>("accounts", new LoadableDetachableModel<List<Account>>() {
+		columns.add(new AbstractColumn<Account, Void>(Model.of("Name")) {
 
 			@Override
-			protected List<Account> load() {
-				List<Account> accounts = new ArrayList<>();
-				for (Account account: GitPlex.getInstance(AccountManager.class).findAll()) {
-					if (account.matches(searchInput) && !account.isOrganization()) {
-						accounts.add(account);
-					}
-				}
-				accounts.sort((account1, account2) -> account1.getDisplayName().compareTo(account2.getDisplayName()));
-				return accounts;
+			public void populateItem(Item<ICellPopulator<Account>> cellItem, String componentId,
+					IModel<Account> rowModel) {
+				Account account = rowModel.getObject();
+				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
+				fragment.add(new AvatarLink("avatarLink", account));
+				fragment.add(new AccountLink("nameLink", account));
+				cellItem.add(fragment);
 			}
-			
-		}, WebConstants.DEFAULT_PAGE_SIZE) {
+		});
+		
+		columns.add(new AbstractColumn<Account, Void>(Model.of("Email")) {
 
 			@Override
-			protected void populateItem(ListItem<Account> item) {
-				Account account = item.getModelObject();
+			public void populateItem(Item<ICellPopulator<Account>> cellItem, String componentId,
+					IModel<Account> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getEmail()));
+			}
+		});
+		
+		columns.add(new AbstractColumn<Account, Void>(Model.of("")) {
 
-				item.add(new AvatarLink("avatarLink", item.getModelObject()));
-				item.add(new AccountLink("nameLink", item.getModelObject()));
-				item.add(new Label("email", account.getEmail()));
-				
-				item.add(new Link<Void>("setting") {
+			@Override
+			public void populateItem(Item<ICellPopulator<Account>> cellItem, String componentId,
+					IModel<Account> rowModel) {
+				Account account = rowModel.getObject();
+				Fragment fragment = new Fragment(componentId, "actionFrag", UserListPage.this);
+				fragment.add(new Link<Void>("setting") {
 
 					@Override
 					public void onClick() {
-						PageParameters params = AccountPage.paramsOf(item.getModelObject());
+						PageParameters params = AccountPage.paramsOf(rowModel.getObject());
 						setResponsePage(ProfileEditPage.class, params);
 					}
 
 				});
 				
 				Long accountId = account.getId();
-				item.add(new AjaxLink<Void>("delete") {
+				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -136,7 +150,7 @@ public class UserListPage extends AdministrationPage {
 								
 								@Override
 								protected void onDeleted(AjaxRequestTarget target) {
-									target.add(accountsContainer);
+									target.add(accountsTable);
 									target.add(pagingNavigator);
 									target.add(noAccountsContainer);
 								}
@@ -149,25 +163,57 @@ public class UserListPage extends AdministrationPage {
 						}
 					}
 
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						Account account = item.getModelObject();
-						setVisible(SecurityUtils.canManage(account) && !account.equals(getLoginUser()));
-					}
-
 				});
+				cellItem.add(fragment);
 			}
-			
 		});
+		
+		SortableDataProvider<Account, Void> dataProvider = new SortableDataProvider<Account, Void>() {
 
-		add(pagingNavigator = new BootstrapAjaxPagingNavigator("accountsPageNav", accountsView) {
+			@Override
+			public Iterator<? extends Account> iterator(long first, long count) {
+				EntityCriteria<Account> criteria = getCriteria();
+				criteria.addOrder(Order.asc("name"));
+				return GitPlex.getInstance(AccountManager.class).findRange(criteria, (int)first, (int)count).iterator();
+			}
+
+			@Override
+			public long size() {
+				return GitPlex.getInstance(AccountManager.class).count(getCriteria());
+			}
+
+			@Override
+			public IModel<Account> model(Account object) {
+				Long id = object.getId();
+				return new LoadableDetachableModel<Account>() {
+
+					@Override
+					protected Account load() {
+						return GitPlex.getInstance(AccountManager.class).load(id);
+					}
+					
+				};
+			}
+		};
+		
+		add(accountsTable = new DataTable<Account, Void>("accounts", columns, dataProvider, 
+				WebConstants.DEFAULT_PAGE_SIZE) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(accountsView.getPageCount() > 1);
+				setVisible(getItemCount() != 0);
+			}
+						
+		});
+		accountsTable.setOutputMarkupPlaceholderTag(true);
+		
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("accountsPageNav", accountsTable) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(accountsTable.getPageCount() > 1);
 			}
 			
 		});
@@ -178,7 +224,7 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(accountsView.getModelObject().isEmpty());
+				setVisible(accountsTable.getItemCount() == 0);
 			}
 			
 		});

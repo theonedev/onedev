@@ -288,7 +288,15 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				newState.tabPanel = state.tabPanel;
 
 				PageParameters params = paramsOf(depot, newState);
-				setResponsePage(RevisionComparePage.class, params);
+				
+				/*
+				 * Use below code instead of calling setResponsePage() to make sure the dropdown is 
+				 * closed while creating the new page as otherwise clicking other places in original page 
+				 * while new page is loading will result in ComponentNotFound issue for the dropdown 
+				 * component
+				 */
+				String url = RequestCycle.get().urlFor(RevisionComparePage.class, params).toString();
+				target.appendJavaScript(String.format("window.location.href='%s';", url));
 			}
 			
 		});
@@ -316,7 +324,10 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				newState.tabPanel = state.tabPanel;
 				
 				PageParameters params = RevisionComparePage.paramsOf(depotModel.getObject(), newState);
-				setResponsePage(RevisionComparePage.class, params);
+				
+				// Refer to comments in left revision picker for not using setResponsePage 
+				String url = RequestCycle.get().urlFor(RevisionComparePage.class, params).toString();
+				target.appendJavaScript(String.format("window.location.href='%s';", url));
 			}
 			
 		});

@@ -121,7 +121,7 @@ public final class RevWalkUtils {
 		if (end != null)
 			walk.markUninteresting(end);
 
-		List<RevCommit> commits = new ArrayList<RevCommit>();
+		List<RevCommit> commits = new ArrayList<>();
 		for (RevCommit c : walk)
 			commits.add(c);
 		return commits;
@@ -155,7 +155,7 @@ public final class RevWalkUtils {
 		// Make sure commit is from the same RevWalk
 		commit = revWalk.parseCommit(commit.getId());
 		revWalk.reset();
-		List<Ref> result = new ArrayList<Ref>();
+		List<Ref> result = new ArrayList<>();
 
 		final int SKEW = 24*3600; // one day clock skew
 

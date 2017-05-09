@@ -43,6 +43,8 @@
 
 package org.eclipse.jgit.revwalk;
 
+import java.util.Locale;
+
 import org.eclipse.jgit.lib.Constants;
 
 /** Case insensitive key for a {@link FooterLine}. */
@@ -68,7 +70,7 @@ public final class FooterKey {
 	 */
 	public FooterKey(final String keyName) {
 		name = keyName;
-		raw = Constants.encode(keyName.toLowerCase());
+		raw = Constants.encode(keyName.toLowerCase(Locale.ROOT));
 	}
 
 	/** @return name of this footer line. */

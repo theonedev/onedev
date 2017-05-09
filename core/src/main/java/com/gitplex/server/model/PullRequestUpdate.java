@@ -114,21 +114,21 @@ public class PullRequestUpdate extends AbstractEntity {
 			Repository repository = getRequest().getWorkDepot().getRepository();
 			try (	RevWalk revWalk = new RevWalk(repository);
 					TreeWalk treeWalk = new TreeWalk(repository)) {
-				RevCommit mergeCommit = revWalk.parseCommit(ObjectId.fromString(getMergeBaseCommitHash()));
+				RevCommit mergeBaseCommit = revWalk.parseCommit(ObjectId.fromString(getMergeBaseCommitHash()));
 				RevCommit baseCommit = revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash()));
 				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash()));
-				revWalk.markStart(mergeCommit);
+				revWalk.markStart(mergeBaseCommit);
 				revWalk.markStart(baseCommit);
 				revWalk.setRevFilter(RevFilter.MERGE_BASE);
-				RevCommit mergeBase = Preconditions.checkNotNull(revWalk.next());
+				RevCommit nextMergeBase = Preconditions.checkNotNull(revWalk.next());
 				treeWalk.setRecursive(true);
-				if (mergeBase.equals(baseCommit)) {
-					treeWalk.addTree(mergeCommit.getTree());
+				if (nextMergeBase.equals(baseCommit)) {
+					treeWalk.addTree(mergeBaseCommit.getTree());
 					treeWalk.addTree(headCommit.getTree());
 					treeWalk.setFilter(TreeFilter.ANY_DIFF);
 					while (treeWalk.next())
 						changedFiles.add(treeWalk.getPathString());
-				} else if (mergeBase.equals(mergeCommit)) {
+				} else if (nextMergeBase.equals(mergeBaseCommit)) {
 					treeWalk.addTree(baseCommit.getTree());
 					treeWalk.addTree(headCommit.getTree());
 					treeWalk.setFilter(TreeFilter.ANY_DIFF);
@@ -137,7 +137,7 @@ public class PullRequestUpdate extends AbstractEntity {
 				} else {
 					treeWalk.addTree(headCommit.getTree());
 					treeWalk.addTree(baseCommit.getTree());
-					treeWalk.addTree(mergeCommit.getTree());
+					treeWalk.addTree(mergeBaseCommit.getTree());
 					treeWalk.setFilter(new TreeFilter() {
 
 						@Override

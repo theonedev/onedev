@@ -382,7 +382,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 			@Override
 			public void onClick() {
-				GitPlex.getInstance(PullRequestManager.class).checkStatus(getPullRequest());
+				GitPlex.getInstance(PullRequestManager.class).check(getPullRequest());
 				Session.get().success("Pull request is synchronized");
 			}
 			

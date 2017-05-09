@@ -201,7 +201,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		request.setLastEvent(statusChange);
 		save(request);
-		checkStatusAsync(request);
+		checkAsync(request);
 	}
 
 	@Transactional
@@ -350,7 +350,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		for (ReviewInvitation invitation: request.getReviewInvitations())
 			reviewInvitationManager.save(invitation);
 
-		checkStatusAsync(request);
+		checkAsync(request);
 		
 		listenerRegistry.post(new PullRequestOpened(request));
 	}
@@ -403,7 +403,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Transactional
 	@Override
-	public void checkStatus(PullRequest request) {
+	public void check(PullRequest request) {
 		if (request.isOpen()) {
 			if (request.getSourceDepot() == null) {
 				discard(request, "Source repository no longer exists");
@@ -564,7 +564,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					ofOpen(), 
 					Restrictions.or(ofSource(depotAndBranch), ofTarget(depotAndBranch)));
 			for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
-				checkStatus(request);
+				check(request);
 			}
 		}
 	}
@@ -642,13 +642,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Type type =  event.getStatusChange().getType();
 		if (type == Type.APPROVED || type == Type.DISAPPROVED || type == Type.WITHDRAWED_REVIEW 
 				|| type == Type.REMOVED_REVIEWER || type == Type.ADDED_REVIEWER) {
-			checkStatusAsync(event.getRequest());
+			checkAsync(event.getRequest());
 		}
 	}
 	
 	@Listen
 	public void on(MergePreviewCalculated event) {
-		checkStatusAsync(event.getRequest());
+		checkAsync(event.getRequest());
 	}
 	
 	private Runnable newCheckStatusRunnable(Long requestId, Subject subject) {
@@ -658,7 +658,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			public void run() {
 				try {
 			        ThreadContext.bind(subject);
-					checkStatus(load(requestId));
+					check(load(requestId));
 				} catch (Exception e) {
 					logger.error("Error checking pull request status", e);
 				} finally {
@@ -670,7 +670,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 	
 	@Sessional
-	protected void checkStatusAsync(PullRequest request) {
+	protected void checkAsync(PullRequest request) {
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
 		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {

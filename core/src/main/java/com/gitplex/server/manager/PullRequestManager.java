@@ -33,7 +33,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     void reopen(PullRequest request, @Nullable String note);
 
-    void checkStatus(PullRequest request);
+    void check(PullRequest request);
     
 	/**
      * Preview merge of this pull request.

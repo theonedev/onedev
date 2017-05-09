@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -25,7 +26,9 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestReviewManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
@@ -50,13 +53,14 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
-import com.google.common.base.Preconditions;
 
 @Singleton
 public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullRequestReview> 
 		implements PullRequestReviewManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestReviewManager.class);
+	
+	private static final int MAX_CONTRIBUTION_FILES = 100;
 	
 	private final AccountManager accountManager;
 
@@ -65,8 +69,8 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 	private final PullRequestStatusChangeManager pullRequestStatusChangeManager;
 	
 	@Inject
-	public DefaultPullRequestReviewManager(Dao dao, AccountManager accountManager, PullRequestManager pullRequestManager, 
-			PullRequestStatusChangeManager pullRequestStatusChangeManager) {
+	public DefaultPullRequestReviewManager(Dao dao, AccountManager accountManager, 
+			PullRequestManager pullRequestManager, PullRequestStatusChangeManager pullRequestStatusChangeManager) {
 		super(dao);
 		
 		this.accountManager = accountManager;
@@ -273,7 +277,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 					PullRequestReview effectiveReview = user.getReviewAfter(update);
 					if (effectiveReview == null) {
 						awaitingReviewers.add(user);
-						recordReviewer(user);
+						inviteReviewer(user);
 					} else {
 						effectiveReviews.put(effectiveReview.getUser(), effectiveReview);
 					}
@@ -317,24 +321,37 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 			}
 
 			int missingCount = requiredCount - effectiveCount;
+			Set<Account> reviewers = new HashSet<>();
 			
-			Set<Account> candidateReviewers = new HashSet<>();
+			List<Account> candidateReviewers = new ArrayList<>();
 			for (Account user: potentialReviewers) {
 				ReviewInvitation invitation = getInvitation(user);
 				if (invitation != null && invitation.getType() != ReviewInvitation.Type.EXCLUDE)
 					candidateReviewers.add(user);
 			}
-			if (candidateReviewers.size() < missingCount) {
+			
+			sortByContributions(candidateReviewers, update);
+			for (Account user: candidateReviewers) {
+				reviewers.add(user);
+				if (reviewers.size() == missingCount)
+					break;
+			}
+			
+			if (reviewers.size() < missingCount) {
+				candidateReviewers = new ArrayList<>();
 				for (Account user: potentialReviewers) {
 					ReviewInvitation invitation = getInvitation(user);
-					if (invitation == null) {
+					if (invitation == null) 
 						candidateReviewers.add(user);
-						if (candidateReviewers.size() == missingCount)
-							break;
-					}
+				}
+				sortByContributions(candidateReviewers, update);
+				for (Account user: candidateReviewers) {
+					reviewers.add(user);
+					if (reviewers.size() == missingCount)
+						break;
 				}
 			}
-			if (candidateReviewers.size() < missingCount) {
+			if (reviewers.size() < missingCount) {
 				List<ReviewInvitation> excludedInvitations = new ArrayList<>();
 				for (Account user: potentialReviewers) {
 					ReviewInvitation invitation = getInvitation(user);
@@ -344,39 +361,63 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 				excludedInvitations.sort(Comparator.comparing(ReviewInvitation::getDate));
 				
 				for (ReviewInvitation invitation: excludedInvitations) {
-					candidateReviewers.add(invitation.getUser());
-					if (candidateReviewers.size() == missingCount)
+					reviewers.add(invitation.getUser());
+					if (reviewers.size() == missingCount)
 						break;
 				}
 			}
-			if (candidateReviewers.size() < missingCount) {
+			if (reviewers.size() < missingCount) {
 				String errorMessage = String.format("Impossible to provide required number of reviewers "
 						+ "(candidates: %s, required number of reviewers: %d, pull request: #%d)", 
-						candidateReviewers, missingCount, update.getRequest().getNumber());
+						reviewers, missingCount, update.getRequest().getNumber());
 				throw new RuntimeException(errorMessage);
 			}
 
-			Set<Account> selectedReviewers = selectReviewers(candidateReviewers, missingCount);
-			for (Account user: selectedReviewers) {
+			for (Account user: reviewers) {
 				awaitingReviewers.add(user);
-				recordReviewer(user);
+				inviteReviewer(user);
 			}
 		}
 		
-		private Set<Account> selectReviewers(Set<Account> candidateReviewers, int count) {
-			Preconditions.checkArgument(candidateReviewers.size() >= count);
-			Set<Account> selectedReviewers = new HashSet<>();
-			if (count > 0) {
-				for (Account user: candidateReviewers) {
-					selectedReviewers.add(user);
-					if (selectedReviewers.size() == count)
+		private void sortByContributions(List<Account> users, PullRequestUpdate update) {
+			CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
+			Map<Account, Integer> contributions = new HashMap<>();
+			for (Account user: users)
+				contributions.put(user, 0);
+
+			int count = 0;
+			for (String file: update.getChangedFiles()) {
+				int addedContributions = addContributions(contributions, commitInfoManager, file, update);
+				while (addedContributions == 0) {
+					if (file.contains("/")) {
+						file = StringUtils.substringBeforeLast(file, "/");
+						addedContributions = addContributions(contributions, commitInfoManager, file, update);
+					} else {
+						addContributions(contributions, commitInfoManager, "", update);
 						break;
+					}
 				}
+				if (++count >= MAX_CONTRIBUTION_FILES)
+					break;
 			}
-			return selectedReviewers;
+
+			users.sort((user1, user2)-> contributions.get(user2) - contributions.get(user1));
 		}
 		
-		private void recordReviewer(Account user) {
+		private int addContributions(Map<Account, Integer> contributions, CommitInfoManager commitInfoManager, 
+				String file, PullRequestUpdate update) {
+			int addedContributions = 0;
+			for (Map.Entry<Account, Integer> entry: contributions.entrySet()) {
+				Account user = entry.getKey();
+				int fileContribution = commitInfoManager.getContributions(update.getRequest().getTargetDepot(), user, 
+						file);
+				entry.setValue(entry.getValue() + fileContribution);
+				addedContributions += fileContribution;
+			}
+			return addedContributions;
+		}
+		
+		private void inviteReviewer(Account user) {
 			ReviewInvitation invitation = getInvitation(user);
 			if (invitation != null) {
 				invitation.setType(ReviewInvitation.Type.RULE);

@@ -82,6 +82,11 @@ public class DefaultAccountManager extends AbstractEntityManager<Account> implem
     	});
     }
     
+    @Override
+    public void save(Account account) {
+    	save(account, null);
+    }
+    
     @Sessional
     @Override
     public Account getRoot() {

@@ -2,17 +2,21 @@ package com.gitplex.server.manager;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.git.NameAndEmail;
+import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 
 public interface CommitInfoManager {
 	
-	void collect(Depot depot);
+	Future<?> requestToCollect(Depot depot);
 	
 	List<String> getFiles(Depot depot);
+	
+	int getContributions(Depot depot, Account user, String path);
 	
 	int getCommitCount(Depot depot);
 	

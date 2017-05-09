@@ -28,8 +28,7 @@ public abstract class ConfirmDeleteAccountModal extends ConfirmDeleteModal {
 
 	@Override
 	protected String getWarningMessage() {
-		return "All pull requests submitted by and comments belonging to account \"" + getAccount().getName() + "\" will also be deleted, "
-				+ "please input account name below to confirm deletion.";
+		return "please input account name \"" + getAccount().getName() + "\" below to confirm deletion.";
 	}
 
 	protected abstract void onDeleted(AjaxRequestTarget target);

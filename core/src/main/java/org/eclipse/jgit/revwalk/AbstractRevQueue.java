@@ -107,6 +107,7 @@ abstract class AbstractRevQueue extends Generator {
 	 *
 	 * @return the first commit of this queue.
 	 */
+	@Override
 	public abstract RevCommit next();
 
 	/** Remove all entries from this queue. */

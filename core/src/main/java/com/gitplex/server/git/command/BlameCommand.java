@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.jsymbol.Range;
 import com.gitplex.server.git.Blame;
-import com.gitplex.server.git.BriefCommit;
+import com.gitplex.server.git.Commit;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.util.execution.Commandline;
 import com.gitplex.server.util.execution.ExecuteResult;
@@ -71,9 +71,9 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 		Commandline cmd = buildCmd();
 		
 		final Map<String, Blame> blames = new HashMap<>();
-		final Map<String, BriefCommit> commitMap = new HashMap<>();
+		final Map<String, Commit> commitMap = new HashMap<>();
 		
-		final AtomicReference<BriefCommit> commitRef = new AtomicReference<>(null);
+		final AtomicReference<Commit> commitRef = new AtomicReference<>(null);
 		final BriefCommitBuilder commitBuilder = new BriefCommitBuilder();
 		
 		final AtomicBoolean endOfFile = new AtomicBoolean(false);
@@ -93,7 +93,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 					commitBuilder.hash = null;
 				} else if (commitBuilder.hash == null) {
 					commitBuilder.hash = StringUtils.substringBefore(line, " ");
-					BriefCommit commit = commitRef.get();
+					Commit commit = commitRef.get();
 					if (commit != null && !commitBuilder.hash.equals(commit.getHash())) {
 						Blame blame = blames.get(commit.getHash());
 						if (blame == null) {
@@ -142,7 +142,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 			result.checkReturnCode();
 		
 		if (endLine.get() > beginLine.get()) {
-			BriefCommit commit = commitRef.get();
+			Commit commit = commitRef.get();
 			Blame blame = blames.get(commit.getHash());
 			if (blame == null) {
 				blame = new Blame(commit, new ArrayList<Range>());
@@ -175,8 +175,8 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
         
         private String summary;
         
-    	private BriefCommit build() {
-    		return new BriefCommit(
+    	private Commit build() {
+    		return new Commit(
     				hash, 
     				GitUtils.newPersonIdent(committer, committerEmail, committerDate), 
     				GitUtils.newPersonIdent(author, authorEmail, authorDate), 

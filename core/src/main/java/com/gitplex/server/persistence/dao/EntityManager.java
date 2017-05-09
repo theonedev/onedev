@@ -91,6 +91,6 @@ public interface EntityManager<T extends AbstractEntity> {
 	 * @return
 	 * 			number of entities matching specified {@link DetachedCriteria}
 	 */
-	int count(EntityCriteria<T> detachedCriteria);
+	int count(EntityCriteria<T> entityCriteria);
 
 }

@@ -99,6 +99,7 @@ public class RevFlag {
 		return walker;
 	}
 
+	@Override
 	public String toString() {
 		return name;
 	}

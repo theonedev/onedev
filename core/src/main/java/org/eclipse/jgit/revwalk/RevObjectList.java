@@ -78,6 +78,7 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		// Initialized above.
 	}
 
+	@Override
 	public void add(final int index, final E element) {
 		if (index != size)
 			throw new UnsupportedOperationException(MessageFormat.format(
@@ -87,6 +88,7 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		size++;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public E set(int index, E element) {
 		Block s = contents;
@@ -107,6 +109,7 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		return (E) old;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public E get(int index) {
 		Block s = contents;
@@ -120,6 +123,7 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		return s != null ? (E) s.contents[index] : null;
 	}
 
+	@Override
 	public int size() {
 		return size;
 	}
