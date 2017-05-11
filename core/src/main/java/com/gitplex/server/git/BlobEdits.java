@@ -154,8 +154,6 @@ public class BlobEdits implements Serializable {
 			}
 			if (!entries.isEmpty()) {
 				TreeFormatter formatter = new TreeFormatter();
-				// Do not sort entries as otherwise it may distort original tree 
-//				Collections.sort(entries);
 				for (TreeFormatterEntry entry: entries)
 					formatter.append(entry.name, entry.mode, entry.id);
 				return inserter.insert(formatter);
@@ -226,13 +224,14 @@ public class BlobEdits implements Serializable {
 	        ru.setNewObjectId(commitId);
 	        ru.setExpectedOldObjectId(expectedOldCommitId);
 	        GitUtils.updateRef(ru);
+	        
 	        return commitId;
 		} catch (RevisionSyntaxException | IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public static class TreeFormatterEntry implements Comparable<TreeFormatterEntry> {
+	public static class TreeFormatterEntry {
 
 		String name;
 		
@@ -244,11 +243,6 @@ public class BlobEdits implements Serializable {
 			this.name = name;
 			this.mode = mode;
 			this.id = id;
-		}
-
-		@Override
-		public int compareTo(TreeFormatterEntry entry) {
-			return name.compareTo(entry.name);
 		}
 
 	}

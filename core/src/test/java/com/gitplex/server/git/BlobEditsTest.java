@@ -3,9 +3,12 @@ package com.gitplex.server.git;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -200,6 +203,41 @@ public class BlobEditsTest extends AbstractGitTest {
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/b.java", revTree));
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "common/common.java", revTree));
 		}
+	}
+	
+	@Test
+	public void testModifyFile() throws IOException {
+		createDir("a");
+		addFileAndCommit("a/file.java", "", "add a/file.java");
+		
+		createDir("a.b");
+		addFileAndCommit("a.b/file.java", "", "add a.b/file.java");
+		
+		String refName = "refs/heads/master";
+		ObjectId oldCommitId = git.getRepository().resolve(refName);
+
+		List<String> oldPaths = new ArrayList<>();
+		try (	RevWalk revWalk = new RevWalk(git.getRepository());
+				TreeWalk treeWalk = new TreeWalk(git.getRepository());) {
+			treeWalk.addTree(revWalk.parseCommit(oldCommitId).getTree());
+			while (treeWalk.next())
+				oldPaths.add(treeWalk.getPathString());
+		}
+		
+		Map<String, BlobContent> newBlobs = new HashMap<>();
+		newBlobs.put("a.b/file.java", new BlobContent.Immutable("hello".getBytes(), FileMode.REGULAR_FILE));
+		BlobEdits edits = new BlobEdits(Sets.newHashSet("a.b/file.java"), newBlobs);
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test modify");
+
+		List<String> newPaths = new ArrayList<>();
+		try (	RevWalk revWalk = new RevWalk(git.getRepository());
+				TreeWalk treeWalk = new TreeWalk(git.getRepository());) {
+			treeWalk.addTree(revWalk.parseCommit(newCommitId).getTree());
+			while (treeWalk.next())
+				newPaths.add(treeWalk.getPathString());
+		}
+		
+		assertEquals(oldPaths, newPaths);
 	}
 	
 	@Test
