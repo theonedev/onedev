@@ -98,6 +98,7 @@ import com.gitplex.server.manager.impl.DefaultDataManager;
 import com.gitplex.server.manager.impl.DefaultDepotManager;
 import com.gitplex.server.manager.impl.DefaultMailManager;
 import com.gitplex.server.manager.impl.DefaultMarkdownManager;
+import com.gitplex.server.manager.impl.DefaultNotificationManager;
 import com.gitplex.server.manager.impl.DefaultOrganizationMembershipManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestCommentManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestInfoManager;
@@ -116,6 +117,7 @@ import com.gitplex.server.manager.impl.DefaultTeamMembershipManager;
 import com.gitplex.server.manager.impl.DefaultUserAuthorizationManager;
 import com.gitplex.server.manager.impl.DefaultVisitInfoManager;
 import com.gitplex.server.manager.impl.DefaultWorkExecutor;
+import com.gitplex.server.manager.impl.NotificationManager;
 import com.gitplex.server.migration.JpaConverter;
 import com.gitplex.server.migration.PersistentBagConverter;
 import com.gitplex.server.persistence.DefaultIdManager;
@@ -274,6 +276,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentStatusChangeManager.class).to(DefaultCodeCommentStatusChangeManager.class);
 		bind(PullRequestReferenceManager.class).to(DefaultPullRequestReferenceManager.class);
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
+		bind(NotificationManager.class).to(DefaultNotificationManager.class);
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);

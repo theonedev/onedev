@@ -49,11 +49,13 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 	
 	private final ListenerRegistry listenerRegistry;
 	
+	private final NotificationManager notificationManager;
+	
 	@Inject
 	public DefaultCodeCommentRelationManager(Dao dao, PullRequestInfoManager pullRequestInfoManager,
 			CodeCommentInfoManager codeCommentInfoManager, CodeCommentManager codeCommentManager, 
 			PullRequestManager pullRequestManager, VisitInfoManager visitInfoManager, 
-			ListenerRegistry listenerRegistry) {
+			ListenerRegistry listenerRegistry, NotificationManager notificationManager) {
 		super(dao);
 		this.pullRequestInfoManager = pullRequestInfoManager;
 		this.codeCommentInfoManager = codeCommentInfoManager;
@@ -61,6 +63,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 		this.pullRequestManager = pullRequestManager;
 		this.visitInfoManager = visitInfoManager;
 		this.listenerRegistry = listenerRegistry;
+		this.notificationManager = notificationManager;
 	}
 
 	/*
@@ -169,7 +172,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 		}
 		
 		if (!found) {
-			codeCommentManager.sendNotifications(event);
+			notificationManager.sendNotifications(event);
 		}
 		
 	}

@@ -5,8 +5,6 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.gitplex.launcher.loader.ListenerRegistry;
-import com.gitplex.server.event.ReviewInvitationChanged;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
@@ -23,28 +21,17 @@ import com.gitplex.server.security.SecurityUtils;
 public class DefaultReviewInvitationManager extends AbstractEntityManager<ReviewInvitation> 
 		implements ReviewInvitationManager {
 
-	private final ListenerRegistry listenerRegistry;
-	
 	private final PullRequestManager pullRequestManager;
 	
 	private final PullRequestStatusChangeManager pullRequestStatusChangeManager;
 	
 	@Inject
-	public DefaultReviewInvitationManager(Dao dao, ListenerRegistry listenerRegistry, 
-			PullRequestManager pullRequestManager, PullRequestStatusChangeManager pullRequestStatusChangeManger) {
+	public DefaultReviewInvitationManager(Dao dao, PullRequestManager pullRequestManager, 
+			PullRequestStatusChangeManager pullRequestStatusChangeManger) {
 		super(dao);
 		
-		this.listenerRegistry = listenerRegistry;
 		this.pullRequestManager = pullRequestManager;
 		this.pullRequestStatusChangeManager = pullRequestStatusChangeManger;
-	}
-
-	@Transactional
-	@Override
-	public void save(ReviewInvitation invitation) {
-		dao.persist(invitation);
-		
-		listenerRegistry.post(new ReviewInvitationChanged(invitation));
 	}
 
 	@Transactional

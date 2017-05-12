@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.event.codecomment.CodeCommentEvent;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.CodeCommentStatusChange;
 import com.gitplex.server.model.Depot;
@@ -27,7 +26,5 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	List<CodeComment> findAllAfter(Depot depot, @Nullable String commentUUID);
 	
 	void save(CodeComment comment);
-	
-	void sendNotifications(CodeCommentEvent event);
 	
 }

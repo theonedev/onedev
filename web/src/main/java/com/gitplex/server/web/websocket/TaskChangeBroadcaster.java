@@ -4,7 +4,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.TaskChanged;
+import com.gitplex.server.model.PullRequestTask;
+import com.gitplex.server.persistence.dao.EntityPersisted;
+import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.web.websocket.WebSocketManager;
 
 @Singleton
@@ -18,9 +20,21 @@ public class TaskChangeBroadcaster {
 	}
 
 	@Listen
-	public void on(TaskChanged event) {
-		TaskChangedRegion region = new TaskChangedRegion(event.getUserId());
-		webSocketManager.render(region, null);
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof PullRequestTask) {
+			PullRequestTask task = (PullRequestTask) event.getEntity();
+			TaskChangedRegion region = new TaskChangedRegion(task.getUser().getId());
+			webSocketManager.render(region, null);
+		}
 	}
 
+	@Listen
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof PullRequestTask) {
+			PullRequestTask task = (PullRequestTask) event.getEntity();
+			TaskChangedRegion region = new TaskChangedRegion(task.getUser().getId());
+			webSocketManager.render(region, null);
+		}
+	}
+	
 }
