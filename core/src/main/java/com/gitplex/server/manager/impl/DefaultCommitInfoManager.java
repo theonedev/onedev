@@ -627,9 +627,8 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 					throw new RuntimeException(e);
 				}
 				
-				if (!commits.isEmpty()) {
+				if (!commits.isEmpty())
 					doCollect(depot, commits);
-				}
 			}
 			
 		});
@@ -680,7 +679,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 
 	static class StringByteIterable extends ArrayByteIterable {
 		StringByteIterable(String value) {
-			super(value.getBytes());
+			super(value.getBytes(Charsets.UTF_8));
 		}
 	}
 

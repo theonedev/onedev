@@ -48,9 +48,9 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	private final NotificationManager notificationManager;
 	
 	@Inject
-	public DefaultCodeCommentManager(Dao dao, ListenerRegistry listenerRegistry, 
-			CodeCommentStatusChangeManager codeCommentStatusChangeManager,  
-			PullRequestManager pullRequestManager, NotificationManager notificationManager) {
+	public DefaultCodeCommentManager(Dao dao, ListenerRegistry listenerRegistry,
+			CodeCommentStatusChangeManager codeCommentStatusChangeManager, PullRequestManager pullRequestManager, 
+			NotificationManager notificationManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
 		this.codeCommentStatusChangeManager = codeCommentStatusChangeManager;

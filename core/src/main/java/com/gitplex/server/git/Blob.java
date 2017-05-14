@@ -1,5 +1,7 @@
 package com.gitplex.server.git;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,12 +10,15 @@ import javax.annotation.Nullable;
 
 import org.apache.tika.mime.MediaType;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 
 import com.gitplex.server.util.ContentDetector;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 
 public class Blob {
+	
+	public static final int MAX_BLOB_SIZE = 5*1024*1024;
 	
 	private final BlobIdent ident;
 	
@@ -26,6 +31,25 @@ public class Blob {
 	private transient MediaType mediaType;
 	
 	private transient Optional<Text> optionalText;
+
+	public Blob(BlobIdent ident, ObjectLoader objectLoader, ObjectId blobId) {
+		this.ident = ident;
+		this.blobId = blobId;
+		long blobSize = objectLoader.getSize();
+		if (blobSize > MAX_BLOB_SIZE) {
+			try (InputStream is = objectLoader.openStream()) {
+				byte[] bytes = new byte[Blob.MAX_BLOB_SIZE];
+				is.read(bytes);
+				size = blobSize;
+				this.bytes = bytes;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			bytes = objectLoader.getCachedBytes();
+			size = bytes.length;
+		}
+	}
 	
 	public Blob(BlobIdent ident, ObjectId blobId, byte[] bytes) {
 		this(ident, blobId, bytes, bytes.length);

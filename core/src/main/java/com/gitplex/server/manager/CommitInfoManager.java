@@ -25,8 +25,8 @@ public interface CommitInfoManager {
 	List<NameAndEmail> getCommitters(Depot depot);
 	
 	/**
-	 * Given an ancestor commit, get all its descendant commits. The result might be incomplete 
-	 * if some commits have not be cached yet
+	 * Given an ancestor commit, get all its descendant commits including the ancestor commit itself. 
+	 * The result might be incomplete if some commits have not be cached yet
 	 *  
 	 * @param depot
 	 * 			repository to get descendant commits

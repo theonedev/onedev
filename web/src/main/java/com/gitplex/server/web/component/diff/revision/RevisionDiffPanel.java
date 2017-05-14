@@ -50,6 +50,7 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -61,6 +62,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobChange;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
@@ -129,7 +131,9 @@ public class RevisionDiffPanel extends Panel {
 
 		@Override
 		protected List<DiffEntry> load() {
-			return depotModel.getObject().getDiffs(oldRev, newRev);
+			AnyObjectId oldRevId = depotModel.getObject().getObjectId(oldRev);
+			AnyObjectId newRevId = depotModel.getObject().getObjectId(newRev);
+			return GitUtils.diff(depotModel.getObject().getRepository(), oldRevId, newRevId);
 		}
 		
 	};

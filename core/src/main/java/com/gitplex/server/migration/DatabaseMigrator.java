@@ -6,9 +6,9 @@ import java.util.Stack;
 
 import javax.inject.Singleton;
 
-import org.apache.commons.io.FileUtils;
 import org.dom4j.Element;
 
+import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
 import com.google.common.base.Charsets;
 
@@ -134,6 +134,83 @@ public class DatabaseMigrator {
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
+			}
+		}	
+	}
+	
+	private void migrateIntegrationStrategy(Element integrationStrategyElement) {
+		if (integrationStrategyElement != null) {
+			integrationStrategyElement.setName("mergeStrategy");
+			switch (integrationStrategyElement.getText()) {
+			case "MERGE_ALWAYS":
+				integrationStrategyElement.setText("ALWAYS_MERGE");
+				break;
+			case "MERGE_WITH_SQUASH":
+				integrationStrategyElement.setText("SQUASH_MERGE");
+				break;
+			case "REBASE_SOURCE_ONTO_TARGET":
+				integrationStrategyElement.setText("REBASE_MERGE");
+				break;
+			case "REBASE_TARGET_ONTO_SOURCE":
+				integrationStrategyElement.setText("MERGE_IF_NECESSARY");
+				break;
+			}
+		}
+	}
+	
+	private void migrate8(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Accounts.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("reviewEffort").detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Depots.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("gateKeepers").detach();
+					element.element("integrationPolicies").detach();
+					element.addElement("branchProtections");
+					element.addElement("tagProtections");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element assigneeElement = element.element("assignee");
+					if (assigneeElement != null)
+						assigneeElement.detach();
+					migrateIntegrationStrategy(element.element("integrationStrategy"));
+					Element lastIntegrationPreviewElement = element.element("lastIntegrationPreview");
+					if (lastIntegrationPreviewElement != null) {
+						lastIntegrationPreviewElement.setName("lastMergePreview");
+						Element integratedElement = lastIntegrationPreviewElement.element("integrated");
+						if (integratedElement != null)
+							integratedElement.setName("merged");
+						migrateIntegrationStrategy(lastIntegrationPreviewElement.element("integrationStrategy"));
+					}
+					Element closeInfoElement = element.element("closeInfo");
+					if (closeInfoElement != null) {
+						Element closeStatusElement = closeInfoElement.element("closeStatus");
+						if (closeStatusElement.getText().equals("INTEGRATED"))
+							closeStatusElement.setText("MERGED");
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestReviews.xml") 
+					|| file.getName().startsWith("PullRequestReviewInvitations.xml")
+					|| file.getName().startsWith("PullRequestStatusChanges.xml")
+					|| file.getName().startsWith("PullRequestTasks.xml")
+					|| file.getName().startsWith("PullRequestVerifications.xml")) {
+				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element mergeCommitHashElement = element.element("mergeCommitHash");
+					mergeCommitHashElement.setName("mergeBaseCommitHash");
+				}				
+				dom.writeToFile(file, false);
 			}
 		}	
 	}

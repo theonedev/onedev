@@ -14,7 +14,6 @@ gitplex.server.codemirror = {
 				{line: mark.beginLine, ch: mark.beginChar}, 
 				{line: mark.endLine, ch: mark.endChar},
 				{className: "CodeMirror-mark"});
-		cm.setCursor({line: mark.beginLine, ch: mark.beginChar});
 	},
 	scrollTo: function(cm, mark) {
 		var top = cm.charCoords({line: mark.beginLine, ch: 0}, "local").top;

@@ -39,9 +39,6 @@ import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
@@ -57,7 +54,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.util.io.NullOutputStream;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -94,7 +90,6 @@ import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.Markdown;
 import com.gitplex.server.util.validation.annotation.DepotName;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -115,8 +110,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	public static final String REF_FQN_SEPARATOR = ":";
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
-	
-	private static final int MAX_READ_BLOB_SIZE = 5*1024*1024;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -485,21 +478,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		defaultBranch = null;
 	}
 	
-	private Blob readBlob(ObjectLoader objectLoader, BlobIdent ident, ObjectId id) {
-		long blobSize = objectLoader.getSize();
-		if (blobSize > MAX_READ_BLOB_SIZE) {
-			try (InputStream is = objectLoader.openStream()) {
-				byte[] bytes = new byte[MAX_READ_BLOB_SIZE];
-				is.read(bytes);
-				return new Blob(ident, id, bytes, blobSize);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			return new Blob(ident, id, objectLoader.getCachedBytes());
-		}
-	}
-	
 	private Map<BlobIdent, Blob> getBlobCache() {
 		if (blobCache == null) {
 			synchronized(this) {
@@ -548,7 +526,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
 						ObjectLoader objectLoader = treeWalk.getObjectReader().open(blobId);
-						blob = readBlob(objectLoader, blobIdent, blobId);
+						blob = new Blob(blobIdent, objectLoader, blobId);
 					}
 					getBlobCache().put(blobIdent, blob);
 				} else {
@@ -613,29 +591,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			objectIdCache = new HashMap<>();
 		
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
-	}
-	
-	public List<DiffEntry> getDiffs(String oldRev, String newRev) {
-		List<DiffEntry> diffs = new ArrayList<>();
-		try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
-	    	diffFormatter.setRepository(getRepository());
-	    	diffFormatter.setDetectRenames(true);
-	    	diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-			AnyObjectId oldRevId = getObjectId(oldRev);
-			AnyObjectId newRevId = getObjectId(newRev);
-	    	for (DiffEntry entry: diffFormatter.scan(oldRevId, newRevId)) {
-	    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
-	    				|| !Objects.equal(entry.getOldMode(), entry.getNewMode())
-	    				|| entry.getOldId()==null || !entry.getOldId().isComplete()
-	    				|| entry.getNewId()== null || !entry.getNewId().isComplete()
-	    				|| !entry.getOldId().equals(entry.getNewId())) {
-	    			diffs.add(entry);
-	    		}
-	    	}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}			
-		return diffs;
 	}
 	
 	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {

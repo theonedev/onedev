@@ -13,10 +13,13 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
@@ -34,6 +37,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.util.SystemReader;
+import org.eclipse.jgit.util.io.NullOutputStream;
 
 import com.gitplex.launcher.bootstrap.BootstrapUtils;
 import com.gitplex.server.git.command.CalcMergeBaseCommand;
@@ -71,6 +75,27 @@ public class GitUtils {
 
 	public static String abbreviateSHA(String sha) {
 		return abbreviateSHA(sha, SHORT_SHA_LENGTH);
+	}
+	
+	public static List<DiffEntry> diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId) {
+		List<DiffEntry> diffs = new ArrayList<>();
+		try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
+	    	diffFormatter.setRepository(repository);
+	    	diffFormatter.setDetectRenames(true);
+	    	diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+	    	for (DiffEntry entry: diffFormatter.scan(oldRevId, newRevId)) {
+	    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
+	    				|| !Objects.equal(entry.getOldMode(), entry.getNewMode())
+	    				|| entry.getOldId()==null || !entry.getOldId().isComplete()
+	    				|| entry.getNewId()== null || !entry.getNewId().isComplete()
+	    				|| !entry.getOldId().equals(entry.getNewId())) {
+	    			diffs.add(entry);
+	    		}
+	    	}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}			
+		return diffs;
 	}
 	
 	@Nullable

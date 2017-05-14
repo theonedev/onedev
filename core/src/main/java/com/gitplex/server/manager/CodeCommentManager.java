@@ -25,6 +25,7 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
 	List<CodeComment> findAllAfter(Depot depot, @Nullable String commentUUID);
 	
+	@Override
 	void save(CodeComment comment);
 	
 }

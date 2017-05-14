@@ -489,6 +489,7 @@ gitplex.server.sourceView = {
 			$(".source-view").data("mark", mark);
 			gitplex.server.codemirror.mark(cm, mark);
 			gitplex.server.codemirror.scrollTo(cm, mark);
+			cm.setCursor({line: mark.beginLine, ch: 0});
 		} else {
 			$(".source-view").removeData("mark");
 			gitplex.server.codemirror.clearMark(cm);			
