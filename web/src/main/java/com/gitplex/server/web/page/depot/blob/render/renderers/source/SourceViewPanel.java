@@ -259,8 +259,11 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 			
 			@Override
 			protected void onRender(WebSocketRequestHandler handler) {
-				if (commentContainer.isVisible())
-					handler.add(commentContainer.get("head").get("toggleResolve"));
+				if (commentContainer.isVisible()) {
+					Component toggleResolve = commentContainer.get("head").get("toggleResolve");					
+					if (toggleResolve.isVisible())
+						handler.add(toggleResolve);
+				}
 			}
 			
 		});
