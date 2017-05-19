@@ -66,8 +66,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		codeAssist = new CodeAssist(lexerClass, grammarFiles, tokenFile) {
 
 			@Override
-			protected List<InputSuggestion> suggest(ParentedElement element, String matchWith, int count) {
-				return ANTLRAssistBehavior.this.suggest(element, matchWith, count);
+			protected List<InputSuggestion> suggest(ParentedElement element, String matchWith) {
+				return ANTLRAssistBehavior.this.suggest(element, matchWith);
 			}
 
 			@Override
@@ -94,8 +94,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	}
 	
 	@Override
-	protected List<InputCompletion> getSuggestions(InputStatus inputStatus, int count) {
-		return codeAssist.suggest(inputStatus, ruleName, count);
+	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
+		return codeAssist.suggest(inputStatus, ruleName);
 	}
 	
 	protected int getEndOfMatch(ElementSpec spec, String content) {
@@ -217,7 +217,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		}
 	}
 
-	protected abstract List<InputSuggestion> suggest(ParentedElement element, String matchWith, int count);
+	protected abstract List<InputSuggestion> suggest(ParentedElement element, String matchWith);
 	
 	@Override
 	protected final List<String> getHints(InputStatus inputStatus) {

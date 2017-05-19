@@ -21,18 +21,19 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.util.stringmatch.PatternApplied;
 import com.gitplex.server.util.stringmatch.WildcardUtils;
+import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
 import com.google.common.base.Preconditions;
 
 public class SuggestionUtils {
 	
-	public static List<InputSuggestion> suggestBranch(Depot depot, String matchWith, int count) {
+	public static List<InputSuggestion> suggestBranch(Depot depot, String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (RefInfo ref: depot.getBranches()) {
 			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			int index = branch.toLowerCase().indexOf(lowerCaseMatchWith);
-			if (index != -1 && numSuggestions++<count) {
+			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
 				suggestions.add(new InputSuggestion(branch, null, matchRange));
 			}
@@ -40,14 +41,14 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestTag(Depot depot, String matchWith, int count) {
+	public static List<InputSuggestion> suggestTag(Depot depot, String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (RefInfo ref: depot.getTags()) {
 			String tag = GitUtils.ref2tag(ref.getRef().getName());
 			int index = tag.toLowerCase().indexOf(lowerCaseMatchWith);
-			if (index != -1 && numSuggestions++<count) {
+			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
 				suggestions.add(new InputSuggestion(tag, null, matchRange));
 			}
@@ -55,14 +56,14 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestUser(Depot depot, DepotPrivilege privilege, String matchWith, int count) {
+	public static List<InputSuggestion> suggestUser(Depot depot, DepotPrivilege privilege, String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Account user: SecurityUtils.findUsersCan(depot, privilege)) {
 			String name = user.getName();
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
-			if (index != -1 && numSuggestions++<count) {
+			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
 				suggestions.add(new InputSuggestion(name, matchRange));
 			}
@@ -70,14 +71,13 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestTeam(Depot depot, String matchWith, int count) {
+	public static List<InputSuggestion> suggestTeam(Depot depot, String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
-		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Team team: depot.getAccount().getDefinedTeams()) {
 			String name = team.getName();
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
-			if (index != -1 && numSuggestions++<count) {
+			if (index != -1) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
 				suggestions.add(new InputSuggestion(name, matchRange));
 			}
@@ -85,9 +85,9 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestPath(Depot depot, String matchWith, int count) {
+	public static List<InputSuggestion> suggestPath(Depot depot, String matchWith) {
 		CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
-		return suggestPath(commitInfoManager.getFiles(depot), matchWith, count);
+		return suggestPath(commitInfoManager.getFiles(depot), matchWith);
 	}
 	
 	private static Set<String> getChildren(List<PatternApplied> allApplied, String path) {
@@ -105,7 +105,7 @@ public class SuggestionUtils {
 		return children;
 	}
 	
-	public static List<InputSuggestion> suggestPath(List<String> files, String matchWith, int count) {
+	public static List<InputSuggestion> suggestPath(List<String> files, String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
@@ -146,7 +146,7 @@ public class SuggestionUtils {
 				suggestedInput += suffix;
 			}
 			suggestedInputs.put(suggestedInput, matchRange);
-			if (suggestedInputs.size() == count)
+			if (suggestedInputs.size() == InputAssistBehavior.MAX_SUGGESTIONS)
 				break;
 		}
 		

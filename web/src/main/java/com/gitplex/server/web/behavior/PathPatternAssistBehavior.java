@@ -31,10 +31,10 @@ public class PathPatternAssistBehavior extends InputAssistBehavior {
 	}
 
 	@Override
-	protected List<InputCompletion> getSuggestions(InputStatus inputStatus, int count) {
+	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 		List<InputCompletion> completions = new ArrayList<>();
 		for (InputSuggestion suggestion: SuggestionUtils.suggestPath(depotModel.getObject(), 
-				inputStatus.getContentBeforeCaret().trim(), count)) {
+				inputStatus.getContentBeforeCaret().trim())) {
 			int caret = suggestion.getCaret();
 			if (caret == -1)
 				caret = suggestion.getContent().length();

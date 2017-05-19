@@ -3,6 +3,7 @@ package com.gitplex.server.web.behavior.inputassist;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -34,7 +35,7 @@ import com.google.common.base.Splitter;
 @SuppressWarnings("serial")
 public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
-	static final int PAGE_SIZE = 25;
+	public static final int MAX_SUGGESTIONS = 1000;
 	
 	private FloatingPanel dropdown;
 	
@@ -128,8 +129,20 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			target.appendJavaScript(script);
 			
 			if (inputCaret != null) {
-				final InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
-				final List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret), PAGE_SIZE);
+				InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
+				List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
+				for (Iterator<InputCompletion> it = suggestions.iterator(); it.hasNext();) {
+					InputCompletion suggestion = it.next();
+					if (inputStatus.getContentBeforeCaret().equals(suggestion.getReplaceContent())) {
+						it.remove();
+					}
+				}
+				int count = 0;
+				for (Iterator<InputCompletion> it = suggestions.iterator(); it.hasNext();) {
+					it.next();
+					if (++count > MAX_SUGGESTIONS)
+						it.remove();
+				}
 				if (!suggestions.isEmpty()) {
 					int anchor = getAnchor(inputContent.substring(0, inputCaret));
 					if (dropdown == null) {
@@ -137,8 +150,8 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 							@Override
 							protected Component newContent(String id) {
-								return new AssistPanel(id, InputAssistBehavior.this, inputStatus, 
-										suggestions, getHints(inputStatus));
+								return new AssistPanel(id, getComponent(), inputStatus, suggestions, 
+										getHints(inputStatus));
 							}
 
 							@Override
@@ -153,8 +166,8 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 						target.appendJavaScript(script);
 					} else {
 						Component content = dropdown.getContent();
-						Component newContent = new AssistPanel(content.getId(), InputAssistBehavior.this, 
-								inputStatus, suggestions, getHints(inputStatus));
+						Component newContent = new AssistPanel(content.getId(), getComponent(), inputStatus, 
+								suggestions, getHints(inputStatus));
 						content.replaceWith(newContent);
 						target.add(newContent);
 
@@ -180,10 +193,6 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			dropdown.close();
 	}
 	
-	Component getInputField() {
-		return super.getComponent();
-	}
-
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
@@ -197,7 +206,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract List<InputCompletion> getSuggestions(InputStatus inputStatus, int count);
+	protected abstract List<InputCompletion> getSuggestions(InputStatus inputStatus);
 
 	protected List<String> getHints(InputStatus inputStatus) {
 		return new ArrayList<>();

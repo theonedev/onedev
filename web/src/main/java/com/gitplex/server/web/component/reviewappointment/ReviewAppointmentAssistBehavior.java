@@ -40,19 +40,19 @@ public class ReviewAppointmentAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, int count) {
+	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith) {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value")) {
 				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith, int count) {
+					protected List<InputSuggestion> match(String unfencedMatchWith) {
 						if (expectedElement.findParentByRule("userCriteria") != null) {
 							return SuggestionUtils.suggestUser(depotModel.getObject(), DepotPrivilege.READ, 
-									unfencedMatchWith, count);
+									unfencedMatchWith);
 						} else {
-							return SuggestionUtils.suggestTeam(depotModel.getObject(), unfencedMatchWith, count);
+							return SuggestionUtils.suggestTeam(depotModel.getObject(), unfencedMatchWith);
 						}
 					}
 
@@ -61,7 +61,7 @@ public class ReviewAppointmentAssistBehavior extends ANTLRAssistBehavior {
 						return "value needs to be enclosed in brackets";
 					}
 					
-				}.suggest(expectedElement.getSpec(), matchWith, count);
+				}.suggest(expectedElement.getSpec(), matchWith);
 			} else if (spec.getRuleName().equals("DIGIT")) {
 				List<InputSuggestion> suggestions = new ArrayList<>();
 				suggestions.add(new InputSuggestion("1", "require one review from the team", null));

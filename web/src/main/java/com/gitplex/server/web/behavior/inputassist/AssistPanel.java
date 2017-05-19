@@ -19,18 +19,20 @@ import com.gitplex.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {
 
-	private final InputAssistBehavior assistBehavior;
+	private static final int PAGE_SIZE = 25;
+	
+	private final Component input;
 	
 	private final InputStatus inputStatus;
 	
-	private final List<InputCompletion> suggestions;
-	
 	private final List<String> hints;
 
-	public AssistPanel(String id, InputAssistBehavior assistBehavior, InputStatus inputStatus, 
-			List<InputCompletion> suggestions, List<String> hints) {
+	private final List<InputCompletion> suggestions;
+	
+	public AssistPanel(String id, Component input, InputStatus inputStatus, List<InputCompletion> suggestions, 
+			List<String> hints) {
 		super(id);
-		this.assistBehavior = assistBehavior;
+		this.input = input;
 		this.inputStatus = inputStatus;
 		this.hints = hints;
 		this.suggestions = suggestions;
@@ -44,18 +46,19 @@ class AssistPanel extends Panel {
 		add(suggestionsContainer);
 		RepeatingView suggestionsView = new RepeatingView("suggestions");
 		suggestionsContainer.add(suggestionsView);
-		for (InputCompletion suggestion: suggestions) 
-			suggestionsView.add(newSuggestionItem(suggestionsView.newChildId(), suggestion));
+		int count = 0;
+		for (InputCompletion suggestion: suggestions) {
+			if (++count <= PAGE_SIZE)
+				suggestionsView.add(newSuggestionItem(suggestionsView.newChildId(), suggestion));
+		}
 		
-		suggestionsContainer.add(new InfiniteScrollBehavior(InputAssistBehavior.PAGE_SIZE) {
+		suggestionsContainer.add(new InfiniteScrollBehavior(PAGE_SIZE) {
 
 			@Override
 			protected void appendPage(AjaxRequestTarget target, int page) {
-				List<InputCompletion> suggestions = assistBehavior.getSuggestions(inputStatus, page*InputAssistBehavior.PAGE_SIZE);
-				int prevSize = (page-1)*InputAssistBehavior.PAGE_SIZE;
-				if (suggestions.size() > prevSize) {
-					List<InputCompletion> newSuggestions = suggestions.subList(prevSize, suggestions.size());
-					for (InputCompletion suggestion: newSuggestions) {
+				for (int i=(page-1)*PAGE_SIZE; i<page*PAGE_SIZE; i++) {
+					if (i < suggestions.size()) {
+						InputCompletion suggestion = suggestions.get(i);
 						Component suggestionItem = newSuggestionItem(suggestionsView.newChildId(), suggestion);
 						suggestionsView.add(suggestionItem);
 						String script = String.format("$('#%s .suggestions>table>tbody').append('<tr id=\"%s\"></tr>');", 
@@ -63,8 +66,10 @@ class AssistPanel extends Panel {
 						target.prependJavaScript(script);
 						target.add(suggestionItem);
 						script = String.format("$('#%s').click(function() {$('#%s').data('update')($(this));});", 
-								suggestionItem.getMarkupId(), assistBehavior.getInputField().getMarkupId());
+								suggestionItem.getMarkupId(), input.getMarkupId());
 						target.appendJavaScript(script);
+					} else {
+						break;
 					}
 				}
 			}
