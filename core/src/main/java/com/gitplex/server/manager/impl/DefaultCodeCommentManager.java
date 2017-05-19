@@ -9,26 +9,18 @@ import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ListenerRegistry;
-import com.gitplex.server.event.codecomment.CodeCommentActivityEvent;
-import com.gitplex.server.event.codecomment.CodeCommentCreated;
-import com.gitplex.server.event.codecomment.CodeCommentEvent;
-import com.gitplex.server.event.codecomment.CodeCommentResolved;
-import com.gitplex.server.event.codecomment.CodeCommentUnresolved;
-import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentResolved;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentUnresolved;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentStatusChangeManager;
-import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.CodeCommentRelation;
 import com.gitplex.server.model.CodeCommentStatusChange;
-import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
@@ -43,26 +35,19 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	
 	private final CodeCommentStatusChangeManager codeCommentStatusChangeManager;
 	
-	private final PullRequestManager pullRequestManager;
-	
-	private final NotificationManager notificationManager;
-	
 	@Inject
 	public DefaultCodeCommentManager(Dao dao, ListenerRegistry listenerRegistry,
-			CodeCommentStatusChangeManager codeCommentStatusChangeManager, PullRequestManager pullRequestManager, 
-			NotificationManager notificationManager) {
+			CodeCommentStatusChangeManager codeCommentStatusChangeManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
 		this.codeCommentStatusChangeManager = codeCommentStatusChangeManager;
-		this.pullRequestManager = pullRequestManager;
-		this.notificationManager = notificationManager;
 	}
 
 	@Sessional
 	@Override
-	public Collection<CodeComment> findAll(Depot depot, ObjectId commitId, String path) {
+	public Collection<CodeComment> findAll(PullRequest request, ObjectId commitId, String path) {
 		EntityCriteria<CodeComment> criteria = newCriteria();
-		criteria.add(Restrictions.eq("depot", depot));
+		criteria.add(Restrictions.eq("request", request));
 		criteria.add(Restrictions.eq("commentPos.commit", commitId.name()));
 		if (path != null)
 			criteria.add(Restrictions.eq("commentPos.path", path));
@@ -71,11 +56,11 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 	@Sessional
 	@Override
-	public Collection<CodeComment> findAll(Depot depot, ObjectId... commitIds) {
+	public Collection<CodeComment> findAll(PullRequest request, ObjectId... commitIds) {
 		Preconditions.checkArgument(commitIds.length > 0);
 		
 		EntityCriteria<CodeComment> criteria = newCriteria();
-		criteria.add(Restrictions.eq("depot", depot));
+		criteria.add(Restrictions.eq("request", request));
 		List<Criterion> criterions = new ArrayList<>();
 		for (ObjectId commitId: commitIds) {
 			criterions.add(Restrictions.eq("commentPos.commit", commitId.name()));
@@ -87,45 +72,14 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Transactional
 	@Override
 	public void save(CodeComment comment) {
-		CodeCommentCreated event;
+		PullRequestCodeCommentCreated event;
 		if (comment.isNew()) {
-			event = new CodeCommentCreated(comment);
-		} else {
-			event = null;
-		}
-		dao.persist(comment);
-		if (event != null) {
+			event = new PullRequestCodeCommentCreated(comment);
+			dao.persist(comment);
 			listenerRegistry.post(event);
+		} else {
+			dao.persist(comment);
 		}
-	}
-
-	@Transactional
-	@Override
-	public void delete(CodeComment comment) {
-		dao.remove(comment);
-	}
-
-	@Sessional
-	@Override
-	public CodeComment find(String uuid) {
-		EntityCriteria<CodeComment> criteria = newCriteria();
-		criteria.add(Restrictions.eq("uuid", uuid));
-		return find(criteria);
-	}
-	
-	@Sessional
-	@Override
-	public List<CodeComment> findAllAfter(Depot depot, String commentUUID) {
-		EntityCriteria<CodeComment> criteria = newCriteria();
-		criteria.add(Restrictions.eq("depot", depot));
-		criteria.addOrder(Order.asc("id"));
-		if (commentUUID != null) {
-			CodeComment comment = find(commentUUID);
-			if (comment != null) {
-				criteria.add(Restrictions.gt("id", comment.getId()));
-			}
-		}
-		return findAll(criteria);
 	}
 
 	@Transactional
@@ -135,33 +89,15 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		
 		codeCommentStatusChangeManager.save(statusChange);
 		
-		CodeCommentEvent event;
+		PullRequestCodeCommentEvent event;
 		if (statusChange.isResolved()) {
-			event = new CodeCommentResolved(statusChange);
+			event = new PullRequestCodeCommentResolved(statusChange);
 		} else {
-			event = new CodeCommentUnresolved(statusChange);
+			event = new PullRequestCodeCommentUnresolved(statusChange);
 		}
 		listenerRegistry.post(event);
 		statusChange.getComment().setLastEvent(event);
 		save(statusChange.getComment());
-	}
-
-	@Transactional
-	@Listen
-	public void on(CodeCommentActivityEvent event) {
-		CodeCommentActivity activity = event.getActivity();
-		
-		for (CodeCommentRelation relation: activity.getComment().getRelations()) {
-			PullRequest request = relation.getRequest();
-			PullRequestCodeCommentActivityEvent pullRequestCodeCommentActivityEvent = event.getPullRequestCodeCommentActivityEvent(request);
-			listenerRegistry.post(pullRequestCodeCommentActivityEvent);
-			request.setLastEvent(pullRequestCodeCommentActivityEvent);
-			
-			pullRequestManager.save(request);
-		}
-		
-		if (activity.getComment().getRelations().isEmpty())
-			notificationManager.sendNotifications(event);
 	}
 
 }

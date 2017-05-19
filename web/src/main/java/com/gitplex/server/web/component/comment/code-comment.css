@@ -1,3 +1,13 @@
+.code-comment>.outdated-context {
+	color: #8a6d3b;
+	display: block;
+	font-weight: bold;
+	margin: 0 0 12px 8px;
+	padding: 8px;
+	border-radius: 4px;
+	background: #fcf8e3;
+	border: 1px solid #faebcc;
+}
 .code-comment>.section {
 	position: relative;
 	margin-left: -12px;

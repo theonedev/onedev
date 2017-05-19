@@ -547,9 +547,4 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		return objectIdCache;
 	}
 
-	@Override
-	public String getAnchor() {
-		return null;
-	}
-
 }

@@ -1,10 +1,11 @@
 package com.gitplex.server.model;
 
-import java.io.Serializable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -21,17 +22,25 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.event.codecomment.CodeCommentEvent;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
+import com.gitplex.server.git.Blob;
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.model.support.CommentPos;
-import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.LastEvent;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.diff.DiffUtils;
+import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.util.editable.EditableUtils;
+import com.google.common.base.Preconditions;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -40,9 +49,8 @@ import com.gitplex.server.util.editable.EditableUtils;
  */
 @Entity
 @Table(indexes={
-		@Index(columnList="g_depot_id"), @Index(columnList="g_user_id"),
-		@Index(columnList="uuid"), @Index(columnList="commit"), 
-		@Index(columnList="path"), @Index(columnList="compareCommit")})
+		@Index(columnList="g_request_id"), @Index(columnList="g_user_id"),
+		@Index(columnList="commit"), @Index(columnList="path")})
 @DynamicUpdate 
 public class CodeComment extends AbstractEntity {
 	
@@ -53,7 +61,7 @@ public class CodeComment extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Depot depot;
+	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
@@ -74,16 +82,10 @@ public class CodeComment extends AbstractEntity {
 	@Embedded
 	private CommentPos commentPos;
 	
-	@Embedded
-	private CompareContext compareContext;
-	
 	private boolean resolved;
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
-	
-	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentRelation> relations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentStatusChange> statusChanges= new ArrayList<>();
@@ -93,14 +95,16 @@ public class CodeComment extends AbstractEntity {
 	
 	private transient List<CodeCommentActivity> activities;
 	
-	public Depot getDepot() {
-		return depot;
+	private transient Boolean codeChanged;
+	
+	public PullRequest getRequest() {
+		return request;
 	}
 	
-	public void setDepot(Depot depot) {
-		this.depot = depot;
+	public void setRequest(PullRequest request) {
+		this.request = request;
 	}
-
+	
 	@Nullable
 	public Account getUser() {
 		return user;
@@ -147,28 +151,12 @@ public class CodeComment extends AbstractEntity {
 		this.commentPos = commentPos;
 	}
 
-	public CompareContext getCompareContext() {
-		return compareContext;
-	}
-
-	public void setCompareContext(CompareContext compareContext) {
-		this.compareContext = compareContext;
-	}
-
 	public Collection<CodeCommentReply> getReplies() {
 		return replies;
 	}
 
 	public void setReplies(Collection<CodeCommentReply> replies) {
 		this.replies = replies;
-	}
-
-	public Collection<CodeCommentRelation> getRelations() {
-		return relations;
-	}
-
-	public void setRelations(Collection<CodeCommentRelation> relations) {
-		this.relations = relations;
 	}
 
 	public Collection<CodeCommentStatusChange> getStatusChanges() {
@@ -203,7 +191,7 @@ public class CodeComment extends AbstractEntity {
 		this.lastEvent = lastEvent;
 	}
 	
-	public void setLastEvent(CodeCommentEvent event) {
+	public void setLastEvent(PullRequestCodeCommentEvent event) {
 		LastEvent lastEvent = new LastEvent();
 		lastEvent.setDate(event.getDate());
 		lastEvent.setType(EditableUtils.getName(event.getClass()));
@@ -221,10 +209,6 @@ public class CodeComment extends AbstractEntity {
 		}
 	}
 
-	public ComparingInfo getComparingInfo() {
-		return new ComparingInfo(commentPos.getCommit(), compareContext);
-	}
-	
 	public List<CodeCommentActivity> getActivities() {
 		if (activities == null) {
 			activities= new ArrayList<>();
@@ -234,37 +218,62 @@ public class CodeComment extends AbstractEntity {
 		}
 		return activities;
 	}
-	
-	public CompareContext getLastCompareContext() {
-		if (!getActivities().isEmpty()) {
-			CodeCommentActivity lastActivity = activities.get(activities.size()-1);
-			return lastActivity.getCompareContext();
-		} else {
-			return getCompareContext();
+
+	public boolean isCodeChanged() {
+		if (codeChanged == null) {
+			if (request.getHeadCommitHash().equals(commentPos.getCommit())) {
+				codeChanged = false;
+			} else {
+				Depot depot = request.getTargetDepot();
+				try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
+					TreeWalk treeWalk = TreeWalk.forPath(depot.getRepository(), commentPos.getPath(), 
+							request.getHeadCommit().getTree());
+					if (treeWalk != null) {
+						ObjectId blobId = treeWalk.getObjectId(0);
+						if (treeWalk.getRawMode(0) == FileMode.REGULAR_FILE.getBits()) {
+							BlobIdent blobIdent = new BlobIdent(request.getHeadCommitHash(), commentPos.getPath(), 
+									treeWalk.getRawMode(0));
+							Blob newBlob = new Blob(blobIdent, blobId, treeWalk.getObjectReader()); 
+							Blob oldBlob = depot.getBlob(new BlobIdent(commentPos.getCommit(), 
+									commentPos.getPath(), FileMode.REGULAR_FILE.getBits()));
+							Preconditions.checkState(oldBlob != null && oldBlob.getText() != null);
+							
+							List<String> oldLines = new ArrayList<>();
+							for (String line: oldBlob.getText().getLines())
+								oldLines.add(WhitespaceOption.DEFAULT.process(line));
+							
+							List<String> newLines = new ArrayList<>();
+							for (String line: newBlob.getText().getLines())
+								newLines.add(WhitespaceOption.DEFAULT.process(line));
+							
+							Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
+							int oldBeginLine = commentPos.getRange().getBeginLine();
+							int oldEndLine = commentPos.getRange().getEndLine();
+							Integer newBeginLine = lineMapping.get(oldBeginLine);
+							if (newBeginLine != null) {
+								for (int oldLine=oldBeginLine; oldLine<=oldEndLine; oldLine++) {
+									Integer newLine = lineMapping.get(oldLine);
+									if (newLine == null || newLine.intValue() != oldLine-oldBeginLine+newBeginLine) {
+										codeChanged = true;
+										break;
+									}
+								}
+								if (codeChanged == null)
+									codeChanged = false;
+							} else {
+								codeChanged = true;
+							}
+						} else  {
+							codeChanged = true;
+						}
+					} else {
+						codeChanged = true;
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
+		return codeChanged;
 	}
-	
-	public static class ComparingInfo implements Serializable {
-
-		private static final long serialVersionUID = 1L;
-
-		private final String commit;
-		
-		private final CompareContext compareContext;
-		
-		public ComparingInfo(String commit, CompareContext compareContext) {
-			this.commit = commit;
-			this.compareContext = compareContext;
-		}
-		
-		public String getCommit() {
-			return commit;
-		}
-
-		public CompareContext getCompareContext() {
-			return compareContext;
-		}
-		
-	}
-	
 }

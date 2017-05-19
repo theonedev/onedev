@@ -7,14 +7,14 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.Review;
 import com.gitplex.server.persistence.dao.EntityManager;
 import com.gitplex.server.util.ReviewStatus;
 
-public interface PullRequestReviewManager extends EntityManager<PullRequestReview> {
+public interface ReviewManager extends EntityManager<Review> {
 
 	@Override
-	void save(PullRequestReview review);
+	void save(Review review);
 	
 	/**
 	 * Find list of reviews ordered by review date for specified pull request.
@@ -24,7 +24,7 @@ public interface PullRequestReviewManager extends EntityManager<PullRequestRevie
 	 * @return
 	 * 			list of reviews ordered by review date
 	 */
-	List<PullRequestReview> findAll(PullRequest request);
+	List<Review> findAll(PullRequest request);
 	
 	void delete(Account user, PullRequest request);
 	

@@ -39,10 +39,8 @@ import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.CloneCommand;
 import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.manager.CodeCommentInfoManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.DepotManager;
-import com.gitplex.server.manager.PullRequestInfoManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.TeamAuthorizationManager;
 import com.gitplex.server.model.Account;
@@ -69,7 +67,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultDepotManager.class);
 	
-	private static final int INFO_VERSION = 2;
+	private static final int INFO_VERSION = 3;
 	
 	private final ListenerRegistry listenerRegistry;
 	
@@ -77,10 +75,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     
     private final CommitInfoManager commitInfoManager;
     
-    private final PullRequestInfoManager pullRequestInfoManager;
-    
-    private final CodeCommentInfoManager codeCommentInfoManager;
-   
     private final TeamAuthorizationManager teamAuthorizationManager;
     
     private final StorageManager storageManager;
@@ -94,16 +88,13 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
 	
     @Inject
-    public DefaultDepotManager(Dao dao, AccountManager userManager, CodeCommentInfoManager codeCommentInfoManager,
-    		TeamAuthorizationManager teamAuthorizationManager, PullRequestInfoManager pullRequestInfoManager,
+    public DefaultDepotManager(Dao dao, AccountManager userManager, TeamAuthorizationManager teamAuthorizationManager, 
     		CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry, StorageManager storageManager) {
     	super(dao);
     	
         this.userManager = userManager;
-        this.pullRequestInfoManager = pullRequestInfoManager;
         this.teamAuthorizationManager = teamAuthorizationManager;
         this.commitInfoManager = commitInfoManager;
-        this.codeCommentInfoManager = codeCommentInfoManager;
         this.listenerRegistry = listenerRegistry;
         this.storageManager = storageManager;
         
@@ -312,8 +303,6 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 			} catch (InterruptedException | ExecutionException e) {
 				throw new RuntimeException(e);
 			}
-	        pullRequestInfoManager.collect(depot);
-	        codeCommentInfoManager.collect(depot);
 			logger.info("Repository checking finished for {}", depot.getFQN());
 		}
 	}

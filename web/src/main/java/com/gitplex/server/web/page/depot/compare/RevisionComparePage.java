@@ -38,7 +38,6 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.CommentPos;
-import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.model.support.DepotAndRevision;
 import com.gitplex.server.util.diff.WhitespaceOption;
@@ -90,8 +89,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	
 	private static final String PARAM_MARK = "mark";
 	
-	private static final String PARAM_ANCHOR = "anchor";
-	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
 	private static final String PARAM_BLAME_FILE = "blame-file";
@@ -116,26 +113,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	
 	private Tabbable tabbable;
 	
-	public static PageParameters paramsOf(Depot depot, CodeComment comment, @Nullable String anchor) {
-		RevisionComparePage.State state = new RevisionComparePage.State();
-		state.commentId = comment.getId();
-		state.mark = comment.getCommentPos();
-		state.anchor = anchor;
-		state.compareWithMergeBase = false;
-		CompareContext compareContext = comment.getLastCompareContext();
-		if (compareContext.isLeftSide()) {
-			state.leftSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
-			state.rightSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
-		} else {
-			state.leftSide = new DepotAndRevision(depot, comment.getCommentPos().getCommit());
-			state.rightSide = new DepotAndRevision(depot, compareContext.getCompareCommit());
-		}
-		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-		state.whitespaceOption = compareContext.getWhitespaceOption();
-		state.pathFilter = compareContext.getPathFilter();
-		return paramsOf(depot, state);
-	}
-	
 	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
 		params.set(PARAM_LEFT, state.leftSide.toString());
@@ -151,8 +128,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
-		if (state.anchor != null)
-			params.set(PARAM_ANCHOR, state.anchor);
 		if (state.tabPanel != null)
 			params.set(PARAM_TAB, state.tabPanel.name());
 		return params;
@@ -199,7 +174,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
-		state.anchor = params.get(PARAM_ANCHOR).toString();
 		
 		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
 		
@@ -681,9 +655,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		@Nullable
 		public CommentPos mark;
 		
-		@Nullable
-		public String anchor;
-		
 		public State() {
 		}
 		
@@ -696,7 +667,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			blameFile = state.blameFile;
 			commentId = state.commentId;
 			mark = state.mark;
-			anchor = state.anchor;
 			tabPanel = state.tabPanel;
 		}
 		
@@ -707,11 +677,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		return state.mark;
 	}
 	
-	@Override
-	public String getAnchor() {
-		return state.anchor;
-	}
-
 	@Override
 	public String getMarkUrl(CommentPos mark) {
 		State markState = new State();

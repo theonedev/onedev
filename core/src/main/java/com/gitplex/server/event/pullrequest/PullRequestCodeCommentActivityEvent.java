@@ -3,15 +3,14 @@ package com.gitplex.server.event.pullrequest;
 import java.util.Date;
 
 import com.gitplex.server.model.Account;
-import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.CodeCommentActivity;
 
 public abstract class PullRequestCodeCommentActivityEvent extends PullRequestCodeCommentEvent {
 
 	private final CodeCommentActivity activity;
 	
-	public PullRequestCodeCommentActivityEvent(PullRequest request, CodeCommentActivity activity) {
-		super(request, activity.getComment());
+	public PullRequestCodeCommentActivityEvent(CodeCommentActivity activity) {
+		super(activity.getComment());
 		this.activity = activity;
 	}
 

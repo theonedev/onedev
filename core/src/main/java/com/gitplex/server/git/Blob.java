@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.apache.tika.mime.MediaType;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.ObjectReader;
 
 import com.gitplex.server.util.ContentDetector;
 import com.google.common.base.Charsets;
@@ -32,9 +33,15 @@ public class Blob {
 	
 	private transient Optional<Text> optionalText;
 
-	public Blob(BlobIdent ident, ObjectLoader objectLoader, ObjectId blobId) {
+	public Blob(BlobIdent ident, ObjectId blobId, ObjectReader objectReader) {
 		this.ident = ident;
 		this.blobId = blobId;
+		ObjectLoader objectLoader;
+		try {
+			objectLoader = objectReader.open(blobId);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		long blobSize = objectLoader.getSize();
 		if (blobSize > MAX_BLOB_SIZE) {
 			try (InputStream is = objectLoader.openStream()) {

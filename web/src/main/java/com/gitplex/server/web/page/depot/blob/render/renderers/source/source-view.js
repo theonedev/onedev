@@ -1,7 +1,7 @@
 gitplex.server.sourceView = {
 	onDomReady: function(filePath, fileContent, openComment, mark, symbolTooltipId, 
 			revision, blameInfos, comments, callback, blameMessageCallback, 
-			loggedIn, anchor, tabSize, lineWrapMode) {
+			tabSize, lineWrapMode) {
 		
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
@@ -326,14 +326,14 @@ gitplex.server.sourceView = {
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
 	},
-	openSelectionPopover: function(mark, markUrl, loggedIn) {
+	openSelectionPopover: function(mark, markUrl, hasPullRequest, loggedIn) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
 		var ch = (mark.beginChar + mark.endChar)/2;
 		var position = cm.charCoords({line:mark.beginLine, ch:ch});
 		
 		var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
 		$content.children("a.permanent").attr("href", markUrl);
-		if (loggedIn) {
+		if (hasPullRequest && loggedIn) {
 			$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
 			$content.children("a.comment").click(function() {
 				if ($(".source-view").find("form.dirty").length != 0 
@@ -343,7 +343,7 @@ gitplex.server.sourceView = {
 				var callback = $(".source-view").data("callback");
 				callback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 			});
-		} else {
+		} else if (!loggedIn) {
 			$content.append("<span class='comment'><i class='fa fa-warning'></i> Log in to comment on selection</span>");
 		}			
 		

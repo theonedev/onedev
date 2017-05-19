@@ -19,7 +19,7 @@ import com.gitplex.server.model.support.MergePreview;
 		indexes={@Index(columnList="g_user_id"), @Index(columnList="g_request_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_user_id", "g_request_id", "commit"})}
 )
-public class PullRequestReview extends AbstractEntity {
+public class Review extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	

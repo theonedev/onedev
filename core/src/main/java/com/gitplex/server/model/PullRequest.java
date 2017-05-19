@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -41,12 +40,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.manager.CodeCommentRelationManager;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.support.CloseInfo;
-import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.model.support.LastEvent;
 import com.gitplex.server.model.support.MergePreview;
@@ -149,13 +146,13 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentRelation> codeCommentRelations = new ArrayList<>();
-	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReview> reviews = new ArrayList<>();
+	private Collection<Review> reviews = new ArrayList<>();
+	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
 	@OneToMany(mappedBy="referenced", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> referencedBy = new ArrayList<>();
@@ -186,8 +183,6 @@ public class PullRequest extends AbstractEntity {
 	private transient Collection<RevCommit> mergedCommits;
 	
 	private transient Optional<MergePreview> mergePreviewOpt;
-	
-	private transient List<CodeComment> codeComments;
 	
 	/**
 	 * Get title of this merge request.
@@ -348,14 +343,6 @@ public class PullRequest extends AbstractEntity {
 		sortedUpdates = null;
 	}
 
-	public Collection<CodeCommentRelation> getCodeCommentRelations() {
-		return codeCommentRelations;
-	}
-
-	public void setCodeCommentRelations(Collection<CodeCommentRelation> codeCommentRelations) {
-		this.codeCommentRelations = codeCommentRelations;
-	}
-
 	public Collection<ReviewInvitation> getReviewInvitations() {
 		return reviewInvitations;
 	}
@@ -388,6 +375,14 @@ public class PullRequest extends AbstractEntity {
 		this.comments = comments;
 	}
 
+	public Collection<CodeComment> getCodeComments() {
+		return codeComments;
+	}
+
+	public void setCodeComments(Collection<CodeComment> codeComments) {
+		this.codeComments = codeComments;
+	}
+
 	public Collection<PullRequestStatusChange> getStatusChanges() {
 		return statusChanges;
 	}
@@ -414,7 +409,7 @@ public class PullRequest extends AbstractEntity {
 
 	public ReviewStatus getReviewStatus() {
 		if (reviewStatus == null)
-			reviewStatus = GitPlex.getInstance(PullRequestReviewManager.class).checkRequest(this);
+			reviewStatus = GitPlex.getInstance(ReviewManager.class).checkRequest(this);
 		return reviewStatus;
 	}
 	
@@ -610,11 +605,11 @@ public class PullRequest extends AbstractEntity {
 		return mergedCommits;
 	}
 	
-	public Collection<PullRequestReview> getReviews() {
+	public Collection<Review> getReviews() {
 		return reviews;
 	}
 	
-	public void setReviews(Collection<PullRequestReview> reviews) {
+	public void setReviews(Collection<Review> reviews) {
 		this.reviews = reviews;
 	}
 	
@@ -656,53 +651,6 @@ public class PullRequest extends AbstractEntity {
 		numberStr = String.valueOf(number);
 	}
 
-	public List<CodeComment> getCodeComments() {
-		if (codeComments == null) {
-			codeComments = GitPlex.getInstance(CodeCommentRelationManager.class).findCodeComments(this);
-		}
-		return codeComments;
-	}
-	
-	@Nullable
-	public ComparingInfo getRequestComparingInfo(CodeComment.ComparingInfo commentComparingInfo) {
-		List<String> commits = new ArrayList<>();
-		commits.add(getBaseCommitHash());
-		for (PullRequestUpdate update: getSortedUpdates()) {
-			commits.addAll(update.getCommits().stream().map(RevCommit::getName).collect(Collectors.toList()));
-		}
-		String commit = commentComparingInfo.getCommit();
-		CompareContext compareContext = commentComparingInfo.getCompareContext();
-		if (commit.equals(compareContext.getCompareCommit())) {
-			int index = commits.indexOf(commit);
-			if (index == 0) {
-				return null;
-			} else {
-				return new ComparingInfo(commits.get(index-1), commit, 
-						compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-			}
-		} else {
-			int commitIndex = commits.indexOf(commit);
-			int compareCommitIndex = commits.indexOf(compareContext.getCompareCommit());
-			if (commitIndex == -1 || compareCommitIndex == -1) {
-				return null;
-			} else if (compareContext.isLeftSide()) {
-				if (compareCommitIndex < commitIndex) {
-					return new ComparingInfo(compareContext.getCompareCommit(), commit, 
-							compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-				} else {
-					return null;
-				}
-			} else {
-				if (commitIndex < compareCommitIndex) {
-					return new ComparingInfo(commit, compareContext.getCompareCommit(), 
-							compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-				} else {
-					return null;
-				}
-			}
-		} 
-	}
-	
 	public List<RevCommit> getCommits() {
 		List<RevCommit> commits = new ArrayList<>();
 		getSortedUpdates().forEach(update->commits.addAll(update.getCommits()));
@@ -789,7 +737,7 @@ public class PullRequest extends AbstractEntity {
 		ReviewStatus checkStatus = getReviewStatus();
 		Collection<Account> users = SecurityUtils.findUsersCan(getTargetDepot(), DepotPrivilege.READ);
 		users.removeAll(checkStatus.getAwaitingReviewers());
-		for (PullRequestReview review: checkStatus.getEffectiveReviews().values())
+		for (Review review: checkStatus.getEffectiveReviews().values())
 			users.remove(review.getUser());
 		users.remove(SecurityUtils.getAccount());
 		List<Account> userList = new ArrayList<>(users);

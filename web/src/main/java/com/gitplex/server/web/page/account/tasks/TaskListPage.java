@@ -97,7 +97,7 @@ public class TaskListPage extends AccountLayoutPage {
 					String componentId, IModel<PullRequestTask> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
 				Fragment fragment = new Fragment(componentId, "linkFrag", TaskListPage.this);
-				fragment.add(new BranchLink("link", request.getTarget()));
+				fragment.add(new BranchLink("link", request.getTarget(), null));
 				cellItem.add(fragment);
 			}
 			
@@ -111,7 +111,7 @@ public class TaskListPage extends AccountLayoutPage {
 				PullRequest request = rowModel.getObject().getRequest();
 				if (request.getSource() != null) {
 					Fragment fragment = new Fragment(componentId, "linkFrag", TaskListPage.this);
-					fragment.add(new BranchLink("link", request.getSource()));
+					fragment.add(new BranchLink("link", request.getSource(), request));
 					cellItem.add(fragment);
 				} else {
 					cellItem.add(new Label(componentId, request.getSource().getFQN()));

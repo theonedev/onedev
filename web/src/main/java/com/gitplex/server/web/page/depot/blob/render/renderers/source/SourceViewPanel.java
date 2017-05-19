@@ -71,9 +71,7 @@ import com.gitplex.server.git.command.BlameCommand;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.CommentPos;
-import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
@@ -83,9 +81,7 @@ import com.gitplex.server.web.behavior.blamemessage.BlameMessageBehavior;
 import com.gitplex.server.web.component.comment.CodeCommentPanel;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
-import com.gitplex.server.web.component.comment.comparecontext.CompareContextPanel;
 import com.gitplex.server.web.component.floating.FloatingPanel;
-import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.modal.ModalLink;
@@ -93,7 +89,6 @@ import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.sourceformat.OptionChangeCallback;
 import com.gitplex.server.web.component.sourceformat.SourceFormatPanel;
 import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
-import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.page.depot.blob.render.view.BlobViewPanel;
@@ -129,8 +124,12 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 
 		@Override
 		protected Collection<CodeComment> load() {
-			return GitPlex.getInstance(CodeCommentManager.class).findAll(
-					context.getDepot(), context.getCommit(), context.getBlobIdent().path);
+			if (context.getPullRequest() != null) {
+				return GitPlex.getInstance(CodeCommentManager.class).findAll(
+						context.getPullRequest(), context.getCommit(), context.getBlobIdent().path);
+			} else {
+				return new ArrayList<>();
+			}
 		}
 		
 	};
@@ -255,45 +254,10 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 
 		};
 		
-		commentContainer.add(new WebSocketRenderBehavior() {
-			
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				if (commentContainer.isVisible()) {
-					Component toggleResolve = commentContainer.get("head").get("toggleResolve");					
-					if (toggleResolve.isVisible())
-						handler.add(toggleResolve);
-				}
-			}
-			
-		});
-		
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
-		head.add(new DropdownLink("context") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(context.getOpenComment() != null);
-			}
-
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				CompareContext compareContext = context.getOpenComment().getCompareContext();
-				return new CompareContextPanel(id, Model.of((PullRequest)null), new AbstractReadOnlyModel<CodeComment>() {
-
-					@Override
-					public CodeComment getObject() {
-						return context.getOpenComment();
-					}
-					
-				}, Model.of(compareContext.getWhitespaceOption()));
-			}
-			
-		});
 		head.add(new AjaxLink<Void>("locate") {
 
 			@Override
@@ -317,35 +281,6 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 			}
 			
 		});
-		
-		// use this instead of bookmarkable link as we want to get the link 
-		// updated whenever we re-render the comment container
-		AttributeAppender appender = AttributeAppender.append("href", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				if (context.getOpenComment() != null) {
-					BlobIdent blobIdent = new BlobIdent(context.getBlobIdent());
-					blobIdent.revision = context.getCommit().name();
-					DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
-					state.commentId = context.getOpenComment().getId();
-					state.mark = context.getOpenComment().getCommentPos().getRange();
-					return urlFor(DepotBlobPage.class, DepotBlobPage.paramsOf(context.getDepot(), state)).toString();
-				} else {
-					return "";
-				}
-			}
-			
-		});
-		head.add(new WebMarkupContainer("permanent") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(context.getOpenComment() != null);
-			}
-			
-		}.add(appender));
 		
 		head.add(new AjaxLink<Void>("close") {
 
@@ -404,10 +339,12 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 				}
 			}
 			
-		}.setOutputMarkupId(true));
+		});
 		
 		commentContainer.setOutputMarkupPlaceholderTag(true);
-		if (context.getOpenComment() != null && context.getOpenComment().getCommentPos().getCommit().equals(context.getCommit().name())) {
+		
+		if (context.getOpenComment() != null 
+				&& context.getOpenComment().getCommentPos().getCommit().equals(context.getCommit().name())) {
 			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, context.getOpenComment().getId()) {
 
 				@Override
@@ -416,26 +353,27 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 				}
 
 				@Override
-				protected CompareContext getCompareContext(CodeComment comment) {
-					return SourceViewPanel.this.getCompareContext();
-				}
-
-				@Override
 				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 					target.add(commentContainer.get("head"));
 				}
 
-				@Override
-				protected PullRequest getPullRequest() {
-					return null;
-				}
-				
 			};
 			commentContainer.add(commentPanel);
 		} else {
 			commentContainer.add(new WebMarkupContainer(BODY_ID));
 			commentContainer.setVisible(false);
 		}
+		
+		commentContainer.add(new WebSocketRenderBehavior() {
+			
+			@Override
+			protected void onRender(WebSocketRequestHandler handler) {
+				if (commentContainer.isVisible())
+					handler.add(head);					
+			}
+			
+		});
+		
 		add(commentContainer);
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
@@ -446,8 +384,8 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 				switch(params.getParameterValue("action").toString()) {
 				case "openSelectionPopover": 
 					TextRange mark = getMark(params, "param1", "param2", "param3", "param4");
-					String script = String.format("gitplex.server.sourceView.openSelectionPopover(%s, '%s', %s);", 
-							getJson(mark), context.getMarkUrl(mark), 
+					String script = String.format("gitplex.server.sourceView.openSelectionPopover(%s, '%s', %s, %s);", 
+							getJson(mark), context.getMarkUrl(mark), context.getPullRequest()!=null,
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
 					break;
@@ -527,10 +465,9 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 							comment.getCommentPos().setCommit(context.getCommit().name());
 							comment.getCommentPos().setPath(context.getBlobIdent().path);
 							comment.setContent(contentInput.getModelObject());
-							comment.setDepot(context.getDepot());
+							comment.setRequest(context.getPullRequest());
 							comment.setUser(SecurityUtils.getAccount());
 							comment.getCommentPos().setRange(mark);
-							comment.setCompareContext(getCompareContext());
 							
 							GitPlex.getInstance(CodeCommentManager.class).save(comment);
 							
@@ -542,20 +479,10 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 								}
 
 								@Override
-								protected CompareContext getCompareContext(CodeComment comment) {
-									return SourceViewPanel.this.getCompareContext();
-								}
-
-								@Override
 								protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 									target.add(commentContainer.get("head"));
 								}
 
-								@Override
-								protected PullRequest getPullRequest() {
-									return null;
-								}
-								
 							};
 							commentContainer.replace(commentPanel);
 							target.add(commentContainer);
@@ -588,20 +515,10 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 						}
 
 						@Override
-						protected CompareContext getCompareContext(CodeComment comment) {
-							return SourceViewPanel.this.getCompareContext();
-						}
-
-						@Override
 						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 							target.add(commentContainer.get("head"));
 						}
 
-						@Override
-						protected PullRequest getPullRequest() {
-							return null;
-						}
-						
 					};
 					commentContainer.replace(commentPanel);
 					commentContainer.setVisible(true);
@@ -858,13 +775,6 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 		return jsonOfBlameInfos;
 	}
 	
-	private CompareContext getCompareContext() {
-		CompareContext compareContext = new CompareContext();
-		compareContext.setCompareCommit(context.getCommit().name());
-		compareContext.setPathFilter(context.getBlobIdent().path);
-		return compareContext;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -906,7 +816,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"));
 		String script = String.format("gitplex.server.sourceView.onDomReady('%s', '%s', %s, %s, '%s', '%s', "
-				+ "%s, %s, %s, %s, %s, '%s', %s, '%s');", 
+				+ "%s, %s, %s, %s, %s, '%s');", 
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				context.getOpenComment()!=null?getJsonOfComment(context.getOpenComment()):"undefined",
@@ -917,8 +827,6 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 				jsonOfCommentInfos,
 				callback, 
 				blameMessageBehavior.getCallback(),
-				SecurityUtils.getAccount()!=null, 
-				context.getAnchor()!=null?"'"+context.getAnchor()+"'":"undefined", 
 				sourceFormat.getTabSize(),
 				sourceFormat.getLineWrapMode());
 		response.render(OnDomReadyHeaderItem.forScript(script));

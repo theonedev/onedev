@@ -202,7 +202,11 @@ public class DatabaseMigrator {
 					|| file.getName().startsWith("PullRequestReviewInvitations.xml")
 					|| file.getName().startsWith("PullRequestStatusChanges.xml")
 					|| file.getName().startsWith("PullRequestTasks.xml")
-					|| file.getName().startsWith("PullRequestVerifications.xml")) {
+					|| file.getName().startsWith("PullRequestVerifications.xml")
+					|| file.getName().startsWith("CodeComments.xml")
+					|| file.getName().startsWith("CodeCommentRelations.xml")
+					|| file.getName().startsWith("CodeCommentReplys.xml") 
+					|| file.getName().startsWith("CodeCommentStatusChanges.xml")) {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);

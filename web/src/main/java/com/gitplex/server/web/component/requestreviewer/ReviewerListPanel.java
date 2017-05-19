@@ -24,11 +24,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.MarkdownManager;
-import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ReviewStatus;
@@ -70,10 +70,10 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				PullRequest request = getPullRequest();
 				List<Account> reviewers = new ArrayList<>();
 				
-				List<PullRequestReview> reviews = new ArrayList<>(request.getReviewStatus().getEffectiveReviews().values());
+				List<Review> reviews = new ArrayList<>(request.getReviewStatus().getEffectiveReviews().values());
 				Collections.sort(reviews);
 				
-				for (PullRequestReview review: reviews)
+				for (Review review: reviews)
 					reviewers.add(review.getUser());
 				
 				for (Account awaitingReviewer: request.getReviewStatus().getAwaitingReviewers())
@@ -91,7 +91,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				item.add(new AccountLink("name", item.getModelObject()));
 				
 				PullRequest request = getPullRequest();
-				PullRequestReview review = request.getReviewStatus().getEffectiveReviews().get(item.getModelObject());
+				Review review = request.getReviewStatus().getEffectiveReviews().get(item.getModelObject());
 				
 				WebMarkupContainer result = new WebMarkupContainer("result");
 				if (review != null) {
@@ -197,7 +197,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						
 						PullRequest request = getPullRequest();
 						Account reviewer = item.getModelObject();
-						PullRequestReview review = request.getReviewStatus().getEffectiveReviews().get(reviewer);
+						Review review = request.getReviewStatus().getEffectiveReviews().get(reviewer);
 						setVisible(review != null 
 								&& (reviewer.equals(SecurityUtils.getAccount()) 
 										|| SecurityUtils.canManage(request.getTargetDepot())));
@@ -208,7 +208,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						PullRequest request = getPullRequest();
 						Account reviewer = item.getModelObject();
 						request.clearReviewStatus();
-						GitPlex.getInstance(PullRequestReviewManager.class).delete(reviewer, request);
+						GitPlex.getInstance(ReviewManager.class).delete(reviewer, request);
 						reviewersModel.detach();
 						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
 					}

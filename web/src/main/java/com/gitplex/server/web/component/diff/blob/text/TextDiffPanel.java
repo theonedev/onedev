@@ -73,7 +73,6 @@ import com.gitplex.server.web.component.diff.revision.DiffViewMode;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
-import com.gitplex.server.web.page.depot.blob.RequestCompareInfo;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
@@ -193,16 +192,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		
 		Depot depot = depotModel.getObject();
 		PullRequest request = requestModel.getObject();
-		CodeComment comment;
-		if (markSupport != null && markSupport.getOpenComment() != null) {
-			comment = markSupport.getOpenComment();
-		} else {
-			comment = null;
-		}
 		DepotBlobPage.State viewState = new DepotBlobPage.State(change.getBlobIdent());
-		if (comment != null)
-			viewState.commentId = comment.getId();
-		
+	
+		viewState.requestId = PullRequest.idOf(request);
 		PageParameters params = DepotBlobPage.paramsOf(depot, viewState);
 		actions.add(new ViewStateAwarePageLink<Void>("viewFile", DepotBlobPage.class, params));
 		
@@ -220,16 +212,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 						BlobIdent blobIdent = new BlobIdent(request.getSourceBranch(), change.getPath(), 
 								FileMode.REGULAR_FILE.getBits());
 						DepotBlobPage.State editState = new DepotBlobPage.State(blobIdent);
+						editState.requestId = request.getId();
 						editState.mode = Mode.EDIT;
-						editState.requestCompareInfo = new RequestCompareInfo();
-						editState.requestCompareInfo.requestId = request.getId();
-						if (getPage() instanceof RequestChangesPage) {
-							RequestChangesPage page = (RequestChangesPage) getPage();
-							editState.requestCompareInfo.compareState = page.getState();
-						} else {
-							MergePreviewPage page = (MergePreviewPage) getPage();
-							editState.requestCompareInfo.previewState = page.getState();
-						}
 						PageParameters params = DepotBlobPage.paramsOf(request.getSourceDepot(), editState);
 						setResponsePage(DepotBlobPage.class, params);
 					}
@@ -314,9 +298,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 							params.getParameterValue("param1").toInt(), 
 							params.getParameterValue("param2").toInt());
 					CommentPos mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
-					script = String.format("gitplex.server.textDiff.openSelectionPopover('%s', %s, %s, '%s', %s);", 
+					script = String.format("gitplex.server.textDiff.openSelectionPopover('%s', %s, %s, '%s', %s, %s);", 
 							getMarkupId(), jsonOfPosition, getJson(mark), markSupport.getMarkUrl(mark), 
-							SecurityUtils.getAccount()!=null);
+							requestModel.getObject()!=null, SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "addComment":

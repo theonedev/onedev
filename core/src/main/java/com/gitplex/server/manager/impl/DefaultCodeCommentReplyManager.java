@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.ListenerRegistry;
-import com.gitplex.server.event.codecomment.CodeCommentReplied;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentReplied;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentReplyManager;
 import com.gitplex.server.model.CodeCommentReply;
@@ -33,7 +33,7 @@ public class DefaultCodeCommentReplyManager extends AbstractEntityManager<CodeCo
 		boolean isNew = reply.isNew();
 		dao.persist(reply);
 		if (isNew && callListeners) {
-			CodeCommentReplied event = new CodeCommentReplied(reply); 
+			PullRequestCodeCommentReplied event = new PullRequestCodeCommentReplied(reply); 
 			listenerRegistry.post(event);
 			reply.getComment().setLastEvent(event);
 			codeCommentManager.save(reply.getComment());

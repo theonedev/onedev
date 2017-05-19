@@ -49,7 +49,7 @@ import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
@@ -318,7 +318,7 @@ public class CommitOptionPanel extends Panel {
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
 				
-				if (!GitPlex.getInstance(PullRequestReviewManager.class).canModify(SecurityUtils.getAccount(), context.getDepot(), 
+				if (!GitPlex.getInstance(ReviewManager.class).canModify(SecurityUtils.getAccount(), context.getDepot(), 
 						context.getBlobIdent().revision, context.getNewPath())) {
 					CommitOptionPanel.this.error("Adding of file '" + context.getNewPath() + "' need to be reviewed. "
 							+ "Please submit pull request instead");

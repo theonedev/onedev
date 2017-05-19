@@ -1,5 +1,7 @@
 package com.gitplex.server.web.page.depot.blob;
 
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,7 +19,6 @@ import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
@@ -56,7 +57,6 @@ import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.search.IndexManager;
@@ -87,8 +87,6 @@ import com.gitplex.server.web.page.depot.blob.search.advanced.AdvancedSearchPane
 import com.gitplex.server.web.page.depot.blob.search.quick.QuickSearchPanel;
 import com.gitplex.server.web.page.depot.blob.search.result.SearchResultPanel;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.util.resource.RawBlobResourceReference;
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
@@ -106,7 +104,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	
 	private static final String PARAM_PATH = "path";
 	
-	private static final String PARAM_REQUEST_COMPARE_INFO = "request_compare_info";
+	private static final String PARAM_REQUEST = "request";
 	
 	private static final String PARAM_COMMENT = "comment";
 	
@@ -115,8 +113,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	private static final String PARAM_QUERY = "query";
 	
 	private static final String PARAM_MARK = "mark";
-	
-	private static final String PARAM_ANCHOR = "anchor";
 	
 	private static final String REVISION_PICKER_ID = "revisionPicker";
 	
@@ -164,11 +160,10 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		resolvedRevision = getDepot().getObjectId(state.blobIdent.revision);
 		
 		state.mark = TextRange.of(params.get(PARAM_MARK).toString());
-		state.anchor = params.get(PARAM_ANCHOR).toString();
+		
+		state.requestId = params.get(PARAM_REQUEST).toOptionalLong();
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		
-		state.requestCompareInfo = RequestCompareInfo.fromString(params.get(PARAM_REQUEST_COMPARE_INFO).toString());
 		
 		state.query = params.get(PARAM_QUERY).toString();
 		
@@ -313,6 +308,14 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	public CodeComment getOpenComment() {
 		if (state.commentId != null)
 			return GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
+		else
+			return null;
+	}
+	
+	@Override
+	public PullRequest getPullRequest() {
+		if (state.requestId != null)
+			return GitPlex.getInstance(PullRequestManager.class).load(state.requestId);
 		else
 			return null;
 	}
@@ -606,51 +609,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		}
 	}
 	
-	private void showRequestChanges(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId) {
-		if (state.requestCompareInfo.compareState != null) {
-			RequestChangesPage.State changeState = SerializationUtils.clone(this.state.requestCompareInfo.compareState);
-			changeState.newCommit = newCommitId.name();
-			changeState.pathFilter = null;
-			if (changeState.commentId != null) {
-				CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(changeState.commentId);
-				changeState.oldCommit = comment.getCommentPos().getCommit();
-			} else {
-				changeState.oldCommit = oldCommitId.name();
-			}
-			get(BLOB_CONTENT_ID).add(new WebSocketRenderBehavior() {
-				
-				@Override
-				protected void onRender(WebSocketRequestHandler handler) {
-					PullRequest request = GitPlex.getInstance(PullRequestManager.class)
-							.load(DepotBlobPage.this.state.requestCompareInfo.requestId);
-					for (PullRequestUpdate update: request.getUpdates()) {
-						if (update.getHeadCommitHash().equals(newCommitId.name())) {
-							setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, changeState));
-							break;
-						}
-					}
-				}
-				
-			});
-		} else {
-			get(BLOB_CONTENT_ID).add(new WebSocketRenderBehavior() {
-				
-				@Override
-				protected void onRender(WebSocketRequestHandler handler) {
-					PullRequest request = GitPlex.getInstance(PullRequestManager.class)
-							.load(state.requestCompareInfo.requestId);
-					for (PullRequestUpdate update: request.getUpdates()) {
-						if (update.getHeadCommitHash().equals(newCommitId.name())) {
-							setResponsePage(RequestChangesPage.class, MergePreviewPage.paramsOf(request));
-							break;
-						}
-					}
-				}
-				
-			});
-		}
-	}
-	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getDepot(), state);
 		CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, params);
@@ -740,14 +698,14 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		response.render(OnLoadHeaderItem.forScript("gitplex.server.depotBlob.onWindowLoad();"));
 	}
 
-	public static PageParameters paramsOf(Depot depot, CodeComment comment, @Nullable String anchor) {
+	public static PageParameters paramsOf(CodeComment comment) {
 		BlobIdent blobIdent = new BlobIdent(comment.getCommentPos().getCommit(), comment.getCommentPos().getPath(), 
 				FileMode.REGULAR_FILE.getBits());
 		DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
+		state.requestId = comment.getRequest().getId();
 		state.commentId = comment.getId();
 		state.mark = comment.getCommentPos().getRange();
-		state.anchor = anchor;
-		return paramsOf(depot, state);
+		return paramsOf(comment.getRequest().getTargetDepot(), state);
 	}
 	
 	public static PageParameters paramsOf(Depot depot, BlobIdent blobIdent) {
@@ -763,10 +721,8 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			params.set(PARAM_PATH, state.blobIdent.path);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
-		if (state.anchor != null)
-			params.set(PARAM_ANCHOR, state.anchor);
-		if (state.requestCompareInfo != null)
-			params.set(PARAM_REQUEST_COMPARE_INFO, state.requestCompareInfo.toString());
+		if (state.requestId != null)
+			params.set(PARAM_REQUEST, state.requestId);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mode != Mode.VIEW)
@@ -846,11 +802,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	}
 
 	@Override
-	public String getAnchor() {
-		return state.anchor;
-	}
-	
-	@Override
 	public void onMark(AjaxRequestTarget target, TextRange mark) {
 		state.mark = mark;
 		pushState(target);
@@ -860,7 +811,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	public String getMarkUrl(TextRange mark) {
 		State markState = SerializationUtils.clone(state);
 		markState.blobIdent.revision = resolvedRevision.name();
-		markState.requestCompareInfo = null;
 		markState.commentId = null;
 		markState.mark = mark;
 		PageParameters params = paramsOf(getDepot(), markState);		
@@ -879,6 +829,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			state.blobIdent = blobIdent;
 			state.mode = Mode.VIEW;
 			state.commentId = null;
+			state.requestId = null;
 			newSearchResult(target, null);
 			onResolvedRevisionChange(target);
 		} else {
@@ -948,14 +899,11 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
 		regions.add(new CommitIndexedRegion(getDepot().getId(), getDepot().getRevCommit(resolvedRevision)));
+		if (state.requestId != null)
+			regions.add(new PullRequestChangedRegion(state.requestId));
 		if (state.commentId != null)
 			regions.add(new CodeCommentChangedRegion(state.commentId));
 		
-		/*
-		 * add below so that we can jump to request changes page after editing a file 
-		 */
-		if (state.requestCompareInfo != null)
-			regions.add(new PullRequestChangedRegion(state.requestCompareInfo.requestId));
 		return regions;
 	}
 
@@ -965,15 +913,13 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 
 		public BlobIdent blobIdent;
 		
+		public Long requestId;
+		
 		public Long commentId;
 		
 		public TextRange mark;
 		
-		public String anchor;
-		
 		public Mode mode = Mode.VIEW;
-		
-		public RequestCompareInfo requestCompareInfo;
 		
 		public String query;
 
@@ -989,34 +935,20 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 
 	@Override
 	public void onModeChange(AjaxRequestTarget target, Mode mode) {
-		if (state.mode == Mode.EDIT && mode == Mode.VIEW && state.requestCompareInfo != null) {
-			PullRequest request = GitPlex.getInstance(PullRequestManager.class)
-					.load(state.requestCompareInfo.requestId);
-			if (state.requestCompareInfo.compareState != null) {
-				PageParameters params = RequestChangesPage.paramsOf(request, 
-						state.requestCompareInfo.compareState);
-				setResponsePage(RequestChangesPage.class, params);
-			} else {
-				PageParameters params = MergePreviewPage.paramsOf(request, 
-						state.requestCompareInfo.previewState);
-				setResponsePage(MergePreviewPage.class, params);
+		/*
+		 * User might be changing blob name when adding a file, and onModeChange will be called. 
+		 * In this case, we only need to re-create blob content
+		 */
+		if (mode != Mode.ADD || state.mode != Mode.ADD) {
+			state.mode = mode;
+			pushState(target);
+			if (state.mode == Mode.VIEW || state.mode == Mode.EDIT || state.mode == Mode.ADD) {
+				newBlobNavigator(target);
+				newBlobOperations(target);
 			}
-		} else {
-			/*
-			 * User might be changing blob name when adding a file, and onModeChange will be called. 
-			 * In this case, we only need to re-create blob content
-			 */
-			if (mode != Mode.ADD || state.mode != Mode.ADD) {
-				state.mode = mode;
-				pushState(target);
-				if (state.mode == Mode.VIEW || state.mode == Mode.EDIT || state.mode == Mode.ADD) {
-					newBlobNavigator(target);
-					newBlobOperations(target);
-				}
-			}			
-			newBlobContent(target);
-			resizeWindow(target);
-		}
+		}			
+		newBlobContent(target);
+		resizeWindow(target);
 	}
 
 	@Override
@@ -1072,9 +1004,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			
 		});
 		
-		if (state.requestCompareInfo != null) {
-			showRequestChanges(target, oldCommit, newCommit);
-		} else if (newBlobIdent != null) {
+		if (newBlobIdent != null) {
 			state.blobIdent = newBlobIdent;
 			state.mark = null;
 			state.commentId = null;

@@ -502,8 +502,8 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 	
 	private Fragment newAcceptedFrag() {
 		Fragment fragment = new Fragment("status", "mergedFrag", this);
-		fragment.add(new BranchLink("sourceBranch", getPullRequest().getSource()));
-		fragment.add(new BranchLink("targetBranch", getPullRequest().getTarget()));
+		fragment.add(new BranchLink("sourceBranch", getPullRequest().getSource(), null));
+		fragment.add(new BranchLink("targetBranch", getPullRequest().getTarget(), null));
 		fragment.add(new Link<Void>("swapBranches") {
 
 			@Override
@@ -781,11 +781,6 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
 		this.commentId = null;
 		this.mark = mark;
-	}
-
-	@Override
-	public String getAnchor() {
-		return null;
 	}
 
 }

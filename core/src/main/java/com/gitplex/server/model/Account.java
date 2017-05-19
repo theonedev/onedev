@@ -111,7 +111,7 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 	private Collection<Team> definedTeams = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReview> reviews = new ArrayList<>();
+	private Collection<Review> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
@@ -304,8 +304,8 @@ public class Account extends AbstractEntity implements AuthenticationInfo, Prote
 	}
 
 	@Nullable
-	public PullRequestReview getReviewAfter(PullRequestUpdate update) {
-		for (PullRequestReview review: update.getRequest().getReviews()) {
+	public Review getReviewAfter(PullRequestUpdate update) {
+		for (Review review: update.getRequest().getReviews()) {
 			if (review.getUser().equals(this) && review.getUpdate() != null 
 					&& review.getUpdate().getId()>=update.getId()) {
 				return review;

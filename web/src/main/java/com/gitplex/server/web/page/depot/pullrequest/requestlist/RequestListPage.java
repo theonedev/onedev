@@ -282,9 +282,9 @@ public class RequestListPage extends DepotPage {
 				fragment.add(new RequestStatusPanel("status", rowModel));
 				fragment.add(new AccountLink("submitter", Account.getForDisplay(request.getSubmitter(), 
 						request.getSubmitterName())));
-				fragment.add(new BranchLink("target", request.getTarget()));
+				fragment.add(new BranchLink("target", request.getTarget(), null));
 				if (request.getSource() != null) 
-					fragment.add(new BranchLink("source", request.getSource()));
+					fragment.add(new BranchLink("source", request.getSource(), request));
 				else
 					fragment.add(new Label("source").setVisible(false));
 					

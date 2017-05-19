@@ -387,9 +387,9 @@ public abstract class RequestDetailPage extends DepotPage {
 				Account.getForDisplay(request.getSubmitter(), request.getSubmitterName())));
 		statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 		
-		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget()));
+		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget(), null));
 		if (request.getSourceDepot() != null) {
-			statusAndBranchesContainer.add(new BranchLink("source", request.getSource()));
+			statusAndBranchesContainer.add(new BranchLink("source", request.getSource(), getPullRequest()));
 		} else {
 			statusAndBranchesContainer.add(new Label("source", "unknown") {
 

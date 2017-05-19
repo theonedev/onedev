@@ -58,7 +58,7 @@ import com.gitplex.server.manager.ReviewInvitationManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.Review;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
@@ -425,7 +425,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					}
 					
 					boolean hasDisapprovals = false;
-					for (PullRequestReview review: checkStatus.getEffectiveReviews().values()) {
+					for (Review review: checkStatus.getEffectiveReviews().values()) {
 						if (!review.isApproved()) {
 							hasDisapprovals = true;
 							break;

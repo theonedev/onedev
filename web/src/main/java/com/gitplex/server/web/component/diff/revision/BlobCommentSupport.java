@@ -17,8 +17,6 @@ public interface BlobCommentSupport extends Serializable {
 	
 	@Nullable CommentPos getMark();
 	
-	@Nullable String getAnchor();
-	
 	String getMarkUrl(CommentPos mark);
 	
 	@Nullable CodeComment getOpenComment();

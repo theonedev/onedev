@@ -43,7 +43,6 @@ import com.gitplex.server.web.page.account.AccountPage;
 import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;
-import com.gitplex.server.web.page.depot.comments.DepotCommentsPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
@@ -144,8 +143,6 @@ public abstract class DepotPage extends AccountPage {
 		tabs.add(new DepotTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
 				0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class));
 		
-		tabs.add(new DepotTab(Model.of("Code Comments"), "fa fa-fw fa-commenting", 
-				0, DepotCommentsPage.class, DepotCommentsPage.class));
 		tabs.add(new DepotTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
 		
 		if (SecurityUtils.canManage(getDepot()))

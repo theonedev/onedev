@@ -168,9 +168,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	@OneToMany(mappedBy="depot", cascade=CascadeType.REMOVE)
 	private Collection<UserAuthorization> authorizedUsers = new ArrayList<>();
 	
-	@OneToMany(mappedBy="depot", cascade=CascadeType.REMOVE)
-	private Collection<CodeComment> comments = new ArrayList<>();
-	
 	private transient Repository repository;
 	
     private transient Map<BlobIdent, Blob> blobCache;
@@ -525,8 +522,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 					} else if (blobIdent.isTree()) {
 						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
-						ObjectLoader objectLoader = treeWalk.getObjectReader().open(blobId);
-						blob = new Blob(blobIdent, objectLoader, blobId);
+						blob = new Blob(blobIdent, blobId, treeWalk.getObjectReader());
 					}
 					getBlobCache().put(blobIdent, blob);
 				} else {

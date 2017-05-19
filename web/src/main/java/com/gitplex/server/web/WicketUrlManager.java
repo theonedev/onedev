@@ -34,25 +34,19 @@ public class WicketUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(CodeComment comment, PullRequest request) {
-		String url = urlFor(comment.getDepot()) + "/comments/" + comment.getId();
-		if (request != null)
-			url += "?request=" + request.getId();
-		return url;
+	public String urlFor(CodeComment comment) {
+		return urlFor(comment.getRequest()) + "/codecomments/" + comment.getId();
 	}
 
 	@Override
-	public String urlFor(CodeCommentActivity activity, PullRequest request) {
-		String url = urlFor(activity.getComment(), request);
-		if (request != null)
-			return url + "&anchor=" + activity.getAnchor();
-		else
-			return url + "?anchor=" + activity.getAnchor();
+	public String urlFor(CodeCommentActivity activity) {
+		String url = urlFor(activity.getComment());
+		return url + "#" + activity.getAnchor();
 	}
 
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlFor(request.getTarget().getDepot()) + "/pulls/" + request.getNumber() + "/overview";
+		return urlFor(request.getTarget().getDepot()) + "/pulls/" + request.getNumber();
 	}
 
 	@Override

@@ -12,10 +12,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.codecomment.CodeCommentActivityEvent;
-import com.gitplex.server.event.codecomment.CodeCommentCreated;
 import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
@@ -23,7 +23,6 @@ import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.CodeCommentRelation;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.CodeCommentActivity;
@@ -132,7 +131,7 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 
 	@Override
 	public void visit(Account user, CodeComment comment) {
-		Environment env = getEnv(comment.getDepot());
+		Environment env = getEnv(comment.getRequest().getTargetDepot());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
@@ -183,7 +182,7 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 
 	@Override
 	public Date getVisitDate(Account user, CodeComment comment) {
-		Environment env = getEnv(comment.getDepot());
+		Environment env = getEnv(comment.getRequest().getTargetDepot());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Date>() {
 			
@@ -200,18 +199,15 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 
 	@Listen
-	public void on(CodeCommentActivityEvent event) {
+	public void on(PullRequestCodeCommentActivityEvent event) {
 		CodeCommentActivity activity = event.getActivity();
 		if (activity.getUser() != null) {
 			visit(activity.getUser(), activity.getComment());
-			for (CodeCommentRelation relation: activity.getComment().getRelations()) {
-				visit(activity.getUser(), relation.getRequest());
-			}
 		}
 	}
 
 	@Listen
-	public void on(CodeCommentCreated event) {
+	public void on(PullRequestCodeCommentCreated event) {
 		if (event.getComment().getUser() != null) 
 			visit(event.getComment().getUser(), event.getComment());
 	}

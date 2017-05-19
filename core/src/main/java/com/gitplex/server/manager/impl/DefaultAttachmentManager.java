@@ -136,7 +136,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 					@Override
 					public void run() {
-						makeAttachmentPermanent(comment.getDepot(), comment.getUUID());
+						makeAttachmentPermanent(comment.getRequest().getTargetDepot(), comment.getUUID());
 					}
 					
 				});
@@ -152,7 +152,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			FileUtils.deleteDir(storageManager.getAttachmentDir(depot));
 		} else if (event.getEntity() instanceof CodeComment) {
 			CodeComment comment = (CodeComment) event.getEntity();
-			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getDepot(), comment.getUUID());
+			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getRequest().getTargetDepot(), comment.getUUID());
 			if (permanentAttachmentDir.exists())
 				FileUtils.deleteDir(permanentAttachmentDir);
 		}

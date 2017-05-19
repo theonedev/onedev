@@ -20,6 +20,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -42,10 +43,7 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.CodeCommentReply;
 import com.gitplex.server.model.CodeCommentStatusChange;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.CodeCommentActivity;
-import com.gitplex.server.model.support.CompareContext;
-import com.gitplex.server.model.support.DepotAndRevision;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ClassUtils;
@@ -54,7 +52,7 @@ import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.markdown.ContentVersionSupport;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
-import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
+import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -108,56 +106,6 @@ public abstract class CodeCommentPanel extends Panel {
 		commentContainer.add(new AccountLink("userName", userForDisplay));
 		commentContainer.add(new Label("activityDescription", "commented"));
 		commentContainer.add(new Label("activityDate", DateUtils.formatAge(getComment().getDate())));
-		commentContainer.add(new Link<Void>("compareContext") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getCompareContext(getComment()).equals(getComment().getCompareContext()) 
-						&& !getComment().getCommentPos().getCommit().equals(getComment().getCompareContext().getCompareCommit()));
-			}
-
-			@Override
-			public void onClick() {
-				CodeComment comment = getComment();
-				CompareContext compareContext = comment.getCompareContext();
-				PullRequest request = getPullRequest();
-				if (request != null) {
-					RequestChangesPage.State state = new RequestChangesPage.State();
-					state.commentId = comment.getId();
-					if (compareContext.isLeftSide()) {
-						state.oldCommit = compareContext.getCompareCommit();
-						state.newCommit = comment.getCommentPos().getCommit();
-					} else {
-						state.oldCommit = comment.getCommentPos().getCommit();
-						state.newCommit = compareContext.getCompareCommit();
-					}
-					state.mark = comment.getCommentPos();
-					state.pathFilter = compareContext.getPathFilter();
-					state.whitespaceOption = compareContext.getWhitespaceOption();
-					PageParameters params  = RequestChangesPage.paramsOf(request, state);
-					setResponsePage(RequestChangesPage.class, params);
-				} else {
-					RevisionComparePage.State state = new RevisionComparePage.State();
-					state.commentId = comment.getId();
-					state.compareWithMergeBase = false;
-					if (compareContext.isLeftSide()) {
-						state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
-						state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
-					} else {
-						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
-						state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
-					}
-					state.mark = comment.getCommentPos();
-					state.pathFilter = compareContext.getPathFilter();
-					state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-					state.whitespaceOption = compareContext.getWhitespaceOption();
-					PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
-					setResponsePage(RevisionComparePage.class, params);
-				}
-			}
-			
-		}.add(AttributeAppender.append("title", "This comment is added in a different compare context, click to show")));
 
 		ContentVersionSupport contentVersionSupport;
 		if (SecurityUtils.canModify(getComment())) {
@@ -208,12 +156,12 @@ public abstract class CodeCommentPanel extends Panel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getUUID());
+						return new DepotAttachmentSupport(getComment().getRequest().getTargetDepot(), getComment().getUUID());
 					}
 
 					@Override
 					protected Depot getDepot() {
-						return getComment().getDepot();
+						return getComment().getRequest().getTargetDepot();
 					}
 					
 					@Override
@@ -336,57 +284,6 @@ public abstract class CodeCommentPanel extends Panel {
 		}
 		activityContainer.add(new Label("activityDescription", activityDescription));
 		activityContainer.add(new Label("activityDate", DateUtils.formatAge(activity.getDate())));
-		activityContainer.add(new Link<Void>("compareContext") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getCompareContext(getComment()).equals(identity.getActivity().getCompareContext())
-						&& !getComment().getCommentPos().getCommit().equals(identity.getActivity().getCompareContext().getCompareCommit()));
-			}
-
-			@Override
-			public void onClick() {
-				CodeCommentActivity activity = identity.getActivity();
-				CompareContext compareContext = activity.getCompareContext();
-				PullRequest request = getPullRequest();
-				if (request != null) {
-					RequestChangesPage.State state = new RequestChangesPage.State();
-					state.commentId = activity.getComment().getId();
-					if (compareContext.isLeftSide()) {
-						state.oldCommit = compareContext.getCompareCommit();
-						state.newCommit = activity.getComment().getCommentPos().getCommit();
-					} else {
-						state.oldCommit = activity.getComment().getCommentPos().getCommit();
-						state.newCommit = compareContext.getCompareCommit();
-					}
-					state.mark = activity.getComment().getCommentPos();
-					state.pathFilter = compareContext.getPathFilter();
-					state.whitespaceOption = compareContext.getWhitespaceOption();
-					PageParameters params  = RequestChangesPage.paramsOf(request, state);
-					setResponsePage(RequestChangesPage.class, params);
-				} else {
-					RevisionComparePage.State state = new RevisionComparePage.State();
-					CodeComment comment = activity.getComment();
-					state.commentId = comment.getId();
-					state.compareWithMergeBase = false;
-					if (compareContext.isLeftSide()) {
-						state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
-						state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
-					} else {
-						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommentPos().getCommit());
-						state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
-					}
-					state.mark = comment.getCommentPos();
-					state.pathFilter = compareContext.getPathFilter();
-					state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-					state.whitespaceOption = compareContext.getWhitespaceOption();
-					PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
-					setResponsePage(RevisionComparePage.class, params);
-				}
-			}
-			
-		}.add(AttributeAppender.append("title", "This reply is added in a different compare context, click to show")));		
 
 		if (StringUtils.isNotBlank(activity.getNote())) {
 			ContentVersionSupport contentVersionSupport;
@@ -406,8 +303,6 @@ public abstract class CodeCommentPanel extends Panel {
 
 				@Override
 				public void detach() {
-					// TODO Auto-generated method stub
-					
 				}
 
 				@Override
@@ -450,12 +345,12 @@ public abstract class CodeCommentPanel extends Panel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getUUID());
+						return new DepotAttachmentSupport(getComment().getRequest().getTargetDepot(), getComment().getUUID());
 					}
 
 					@Override
 					protected Depot getDepot() {
-						return getComment().getDepot();
+						return getComment().getRequest().getTargetDepot();
 					}
 
 					@Override
@@ -581,22 +476,51 @@ public abstract class CodeCommentPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		PageParameters params = RequestChangesPage.paramsOf(getComment());
+		Link<Void> outdatedContextLink = new BookmarkablePageLink<Void>("outdatedContext", RequestChangesPage.class, 
+				params) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				CodeComment comment = getComment();
+				if (getPage() instanceof DepotBlobPage) {
+					setVisible(comment.isCodeChanged());
+				} else if (getPage() instanceof RequestChangesPage) {
+					RequestChangesPage page = (RequestChangesPage) getPage();
+					if (page.getState().newCommit.equals(comment.getCommentPos().getCommit())) {
+						setVisible(comment.isCodeChanged());
+					} else {
+						setVisible(!comment.getRequest().getHeadCommitHash().equals(page.getState().newCommit));
+					}
+				}
+			}
+			
+		};
+		outdatedContextLink.setOutputMarkupPlaceholderTag(true);
+		outdatedContextLink.add(new WebSocketRenderBehavior() {
+					
+			@Override
+			protected void onRender(WebSocketRequestHandler handler) {
+				handler.add(outdatedContextLink);
+			}
+			
+		});
+
+		add(outdatedContextLink);
 		
 		add(newCommentContainer());
 		
 		activitiesView = new RepeatingView("activities");
-		PullRequest request = getPullRequest();
 		
 		List<CodeCommentActivity> activities = new ArrayList<>();
 		for (CodeCommentReply reply: getComment().getReplies()) {
-			if (request == null || request.getRequestComparingInfo(reply.getComparingInfo()) != null) {
-				activities.add(reply);
-			}
+			activities.add(reply);
 		}
 		for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
-			if (request == null || request.getRequestComparingInfo(statusChange.getComparingInfo()) != null) {
-				activities.add(statusChange);
-			}
+			activities.add(statusChange);
 		}
 
 		activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
@@ -630,17 +554,14 @@ public abstract class CodeCommentPanel extends Panel {
 					prevActivityMarkupId = get("comment").getMarkupId();
 				}
 				
-				PullRequest request = getPullRequest();
 				List<CodeCommentActivity> activities = new ArrayList<>();
 				for (CodeCommentReply reply: getComment().getReplies()) {
-					if (reply.getDate().getTime()>lastActivityDate.getTime() 
-							&& (request == null || request.getRequestComparingInfo(reply.getComparingInfo()) != null)) {
+					if (reply.getDate().getTime()>lastActivityDate.getTime()) {
 						activities.add(reply);
 					}
 				}
 				for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
-					if (statusChange.getDate().getTime()>lastActivityDate.getTime() 
-							&& (request == null || request.getRequestComparingInfo(statusChange.getComparingInfo()) != null)) {
+					if (statusChange.getDate().getTime()>lastActivityDate.getTime()) {
 						activities.add(statusChange);
 					}
 				}
@@ -685,12 +606,12 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new DepotAttachmentSupport(getComment().getDepot(), getComment().getUUID());
+				return new DepotAttachmentSupport(getComment().getRequest().getTargetDepot(), getComment().getUUID());
 			}
 
 			@Override
 			protected Depot getDepot() {
-				return getComment().getDepot();
+				return getComment().getRequest().getTargetDepot();
 			}
 
 			@Override
@@ -746,12 +667,10 @@ public abstract class CodeCommentPanel extends Panel {
 				Account user = SecurityUtils.getAccount();
 				CodeComment comment = getComment();
 				Date date = new Date();
-				CompareContext compareContext = getCompareContext(comment);
 				if (changeStatus) {
 					CodeCommentStatusChange statusChange = new CodeCommentStatusChange();
 					statusChange.setComment(getComment());
 					statusChange.setUser(user);
-					statusChange.setCompareContext(compareContext);
 					statusChange.setResolved(!comment.isResolved());
 					statusChange.setDate(date);
 					statusChange.setNote(contentInput.getModelObject());
@@ -765,7 +684,6 @@ public abstract class CodeCommentPanel extends Panel {
 					reply.setDate(date);
 					reply.setUser(user);
 					reply.setContent(contentInput.getModelObject());
-					reply.setCompareContext(compareContext);
 					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply, true);
 					onReplyAdded(target, fragment, reply);
 				}
@@ -824,10 +742,6 @@ public abstract class CodeCommentPanel extends Panel {
 	protected abstract void onDeleteComment(AjaxRequestTarget target, CodeComment comment);
 	
 	protected abstract void onSaveComment(AjaxRequestTarget target, CodeComment comment);
-	
-	protected abstract CompareContext getCompareContext(CodeComment comment);
-	
-	protected abstract PullRequest getPullRequest();
 	
 	private static class ActivityIdentity implements Serializable {
 

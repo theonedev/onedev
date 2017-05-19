@@ -1,5 +1,8 @@
 <wicket:panel>
 	<div class="code-comment">
+		<a wicket:id="outdatedContext" class="outdated-context">
+			<i class="fa fa-warning"></i> comment context out dated, click to update
+		</a>
 		<div wicket:id="comment" class="comment section"></div>
 		<div wicket:id="activities" class="reply section"></div>
 		<div wicket:id="addReply" class="add-reply"></div>
@@ -13,7 +16,6 @@
 					<span wicket:id="activityDescription" class="description"></span>
 					<span wicket:id="activityDate" class="date"></span>
 				</span>
-				<a wicket:id="compareContext" class="compare-context pull-right"><i class="fa fa-chain-broken"></i></a>
 			</div>
 			<div class="body">
 				<div wicket:id="content"></div>

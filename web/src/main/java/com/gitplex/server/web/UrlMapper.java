@@ -39,8 +39,6 @@ import com.gitplex.server.web.page.admin.account.UserListPage;
 import com.gitplex.server.web.page.depot.NoBranchesPage;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;
-import com.gitplex.server.web.page.depot.comments.CodeCommentPage;
-import com.gitplex.server.web.page.depot.comments.DepotCommentsPage;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.page.depot.compare.RevisionComparePage;
@@ -207,8 +205,6 @@ public class UrlMapper extends CompoundRequestMapper {
 				"${account}/${depot}/pulls/${request}/changes", RequestChangesPage.class));
 		add(new DepotMapper(
 				"${account}/${depot}/pulls/${request}/merge-preview", MergePreviewPage.class));
-		add(new DepotMapper("${account}/${depot}/comments", DepotCommentsPage.class));
-		add(new DepotMapper("${account}/${depot}/comments/${comment}", CodeCommentPage.class));
 
 		add(new DepotMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
 		add(new DepotMapper("${account}/${depot}/settings/team-authorization", DepotTeamAuthorizationPage.class));

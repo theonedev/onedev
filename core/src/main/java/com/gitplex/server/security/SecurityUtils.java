@@ -10,14 +10,14 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.model.PullRequestStatusChange;
-import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.Review;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.model.support.TagProtection;
@@ -50,7 +50,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return GitPlex.getInstance(AccountManager.class).getCurrent();
 	}
 	
-	public static boolean canModify(PullRequestReview review) {
+	public static boolean canModify(Review review) {
 		Depot depot = review.getRequest().getTargetDepot();
 		if (canManage(depot)) {
 			return true;
@@ -64,7 +64,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (currentUser == null) {
 			return false;
 		} else {
-			return currentUser.equals(comment.getUser()) || canManage(comment.getDepot());
+			return currentUser.equals(comment.getUser()) || canManage(comment.getRequest().getTargetDepot());
 		}
 	}
 
@@ -73,7 +73,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (currentUser == null) {
 			return false;
 		} else {
-			return currentUser.equals(activity.getUser()) || canManage(activity.getComment().getDepot());
+			return currentUser.equals(activity.getUser()) || canManage(activity.getComment().getRequest().getTargetDepot());
 		}
 	}
 	
@@ -134,11 +134,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canModify(Depot depot, String branch, String file) {
-		return canWrite(depot) && GitPlex.getInstance(PullRequestReviewManager.class).canModify(getAccount(), depot, branch, file); 
+		return canWrite(depot) && GitPlex.getInstance(ReviewManager.class).canModify(getAccount(), depot, branch, file); 
 	}
 	
 	public static boolean canPush(Depot depot, String branchName, ObjectId oldObjectId, ObjectId newObjectId) {
-		return canWrite(depot) && GitPlex.getInstance(PullRequestReviewManager.class).canPush(getAccount(), depot, branchName, 
+		return canWrite(depot) && GitPlex.getInstance(ReviewManager.class).canPush(getAccount(), depot, branchName, 
 				oldObjectId, newObjectId); 
 	}
 	

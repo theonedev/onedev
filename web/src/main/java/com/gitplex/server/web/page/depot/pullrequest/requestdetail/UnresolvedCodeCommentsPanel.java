@@ -8,10 +8,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.web.component.comment.CodeCommentFilter;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 
@@ -28,25 +26,23 @@ class UnresolvedCodeCommentsPanel extends GenericPanel<PullRequest> {
 		
 		PullRequest request = getModelObject();
 		
-		PageParameters params = RequestCodeCommentsPage.paramsOf(request);
-		getFilter().fillPageParams(params);
+		PageParameters params = RequestCodeCommentsPage.paramsOf(request, getState());
 		add(new ViewStateAwarePageLink<Void>("link", RequestCodeCommentsPage.class, params));
 	}
 	
-	private CodeCommentFilter getFilter() {
-		Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
-		CodeCommentFilter filter = new CodeCommentFilter();
-		filter.setUnresolved(true);
-		filter.setUserName(user.getName());
-		return filter;
+	private RequestCodeCommentsPage.State getState() {
+		RequestCodeCommentsPage.State state = new RequestCodeCommentsPage.State();
+		state.setUnresolved(true);
+		state.setUserName(GitPlex.getInstance(AccountManager.class).getCurrent().getName());
+		return state;
 	}
-
+	
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
 		
 		Collection<CodeComment> comments = getModelObject().getCodeComments();
-		getFilter().filter(comments);
+		getState().filter(comments);
 		setVisible(!comments.isEmpty());
 	}
 

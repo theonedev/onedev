@@ -13,16 +13,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.util.StringUtils;
 import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.MarkdownAware;
-import com.gitplex.server.event.codecomment.CodeCommentActivityEvent;
-import com.gitplex.server.event.codecomment.CodeCommentCreated;
-import com.gitplex.server.event.codecomment.CodeCommentEvent;
 import com.gitplex.server.event.pullrequest.MergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
@@ -31,7 +26,6 @@ import com.gitplex.server.event.pullrequest.PullRequestEvent;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.event.pullrequest.PullRequestUpdated;
-import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.BranchWatchManager;
 import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.manager.MarkdownManager;
@@ -41,11 +35,9 @@ import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.BranchWatch;
-import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
-import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.model.PullRequestTask;
 import com.gitplex.server.model.PullRequestWatch;
 import com.gitplex.server.model.ReviewInvitation;
@@ -73,13 +65,10 @@ public class DefaultNotificationManager implements NotificationManager {
 	
 	private final PullRequestWatchManager pullRequestWatchManager;
 	
-	private final AccountManager accountManager;
-	
 	@Inject
 	public DefaultNotificationManager(MarkdownManager markdownManager, BranchWatchManager branchWatchManager, 
 			MailManager mailManager, UrlManager urlManager, VisitInfoManager visitInfoManager, 
-			PullRequestWatchManager pullRequestWatchManager, PullRequestTaskManager pullRequestTaskManager, 
-			AccountManager accountManager) {
+			PullRequestWatchManager pullRequestWatchManager, PullRequestTaskManager pullRequestTaskManager) {
 		this.branchWatchManager = branchWatchManager;
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
@@ -87,7 +76,6 @@ public class DefaultNotificationManager implements NotificationManager {
 		this.markdownManager = markdownManager;
 		this.pullRequestTaskManager = pullRequestTaskManager;
 		this.pullRequestWatchManager = pullRequestWatchManager;
-		this.accountManager = accountManager;
 	}
 	
 	@Transactional
@@ -211,9 +199,9 @@ public class DefaultNotificationManager implements NotificationManager {
 					else if (event instanceof PullRequestStatusChangeEvent) 
 						url = urlManager.urlFor(((PullRequestStatusChangeEvent)event).getStatusChange());
 					else if (event instanceof PullRequestCodeCommentCreated)
-						url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment(), event.getRequest());
+						url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment());
 					else if (event instanceof PullRequestCodeCommentActivityEvent)
-						url = urlManager.urlFor(((PullRequestCodeCommentActivityEvent)event).getActivity(), event.getRequest());
+						url = urlManager.urlFor(((PullRequestCodeCommentActivityEvent)event).getActivity());
 					else 
 						url = urlManager.urlFor(event.getRequest());
 					
@@ -402,48 +390,4 @@ public class DefaultNotificationManager implements NotificationManager {
 		}
 	}
 
-	@Override
-	public void sendNotifications(CodeCommentEvent event) {
-		if (event.getMarkdown() != null) {
-			CodeComment comment = event.getComment();
-			Collection<Account> mentionedUsers = new HashSet<>();
-			for (Account user: new MentionParser().parseMentions(markdownManager.render(event.getMarkdown(), null, false))) {
-				mentionedUsers.add(user);
-			}
-			String subject = "You are mentioned in a code comment on file " + comment.getCommentPos().getPath();
-			String url;
-			if (event instanceof CodeCommentCreated)
-				url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
-			else 
-				url = urlManager.urlFor(((CodeCommentActivityEvent)event).getActivity(), null);
-				
-			String content = String.format(""
-					+ "<p style='margin: 16px 0;'>"
-					+ "<div style='padding-left: 16px; border-left: 4px solid #CCC;'>%s</div>"
-					+ "<p style='margin: 16px 0;'>"
-					+ "Visit <a href='%s'>%s</a> for details."
-					+ "<p style='margin: 16px 0;'>"
-					+ "-- Sent by GitPlex", 
-					markdownManager.escape(event.getMarkdown()), url, url);
-			
-			mailManager.sendMailAsync(mentionedUsers.stream().map(Account::getEmail).collect(Collectors.toList()), 
-					subject, subject + "." + content);
-			
-			Collection<Account> involvedUsers = new HashSet<>();
-			RevCommit commit = comment.getDepot().getRevCommit(ObjectId.fromString(comment.getCommentPos().getCommit()));
-			
-			Account author = accountManager.find(commit.getAuthorIdent());
-			if (author != null) 
-				involvedUsers.add(author);
-			involvedUsers.add(comment.getUser());
-			involvedUsers.addAll(comment.getActivities().stream().map(CodeCommentActivity::getUser).collect(Collectors.toList()));
-			involvedUsers.removeAll(mentionedUsers);
-			involvedUsers.remove(event.getUser());
-			
-			subject = "You are involved in a code comment on file " + comment.getCommentPos().getPath();
-			mailManager.sendMailAsync(involvedUsers.stream().map(Account::getEmail).collect(Collectors.toList()), 
-					subject, subject + "." + content);
-		}
-	}
-	
 }

@@ -4,7 +4,6 @@ import java.util.Date;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -14,7 +13,6 @@ import javax.persistence.Version;
 import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.CodeComment.ComparingInfo;
 
 @MappedSuperclass
 public abstract class CodeCommentActivity extends AbstractEntity {
@@ -34,9 +32,6 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date;
 	
-	@Embedded
-	private CompareContext compareContext;
-
 	@Version
 	private long version;
 	
@@ -74,14 +69,6 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 		this.date = date;
 	}
 
-	public CompareContext getCompareContext() {
-		return compareContext;
-	}
-
-	public void setCompareContext(CompareContext compareContext) {
-		this.compareContext = compareContext;
-	}
-
 	public long getVersion() {
 		return version;
 	}
@@ -90,10 +77,6 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 		this.version = version;
 	}
 	
-	public ComparingInfo getComparingInfo() {
-		return new ComparingInfo(getComment().getCommentPos().getCommit(), getCompareContext());
-	}
-
 	public String getAnchor() {
 		return getClass().getSimpleName() + "-" + getId();
 	}

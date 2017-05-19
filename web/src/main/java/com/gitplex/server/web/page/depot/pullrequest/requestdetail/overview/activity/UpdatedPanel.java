@@ -89,6 +89,7 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 
 				BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
 				DepotBlobPage.State browseState = new DepotBlobPage.State(blobIdent);
+				browseState.requestId = getUpdate().getRequest().getId();
 				params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
 				item.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
 				

@@ -32,7 +32,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.google.common.base.Preconditions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.CodeCommentManager;
@@ -40,7 +39,6 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
-import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.model.support.CommentPos;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
@@ -72,8 +70,6 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	
 	private static final String PARAM_MARK = "mark";
 	
-	private static final String PARAM_ANCHOR = "anchor";
-	
 	private State state = new State();
 	
 	private WebMarkupContainer head;
@@ -94,18 +90,42 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	public RequestChangesPage(PageParameters params) {
 		super(params);
 
+		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
+		state.mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
+		
 		state.oldCommit = params.get(PARAM_OLD_COMMIT).toString();
-		if (state.oldCommit == null)
-			state.oldCommit = getPullRequest().getBaseCommitHash();
 		state.newCommit = params.get(PARAM_NEW_COMMIT).toString();
-		if (state.newCommit == null)
-			state.newCommit = getPullRequest().getHeadCommitHash();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
-		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
-		state.anchor = params.get(PARAM_ANCHOR).toString();
+		
+		PullRequest request = getPullRequest();
+		if (state.commentId != null) {
+			CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
+			if (state.oldCommit == null && state.newCommit == null) {
+				String commentCommit = comment.getCommentPos().getCommit();
+				if (commentCommit.equals(request.getBaseCommitHash())) {
+					state.oldCommit = request.getBaseCommitHash();
+					state.newCommit = request.getHeadCommitHash();
+				} else if (comment.isCodeChanged()) {
+					state.oldCommit = commentCommit;
+					state.newCommit = request.getHeadCommitHash();
+				} else {
+					state.oldCommit = request.getBaseCommitHash();
+					state.newCommit = commentCommit;
+				}
+			} else {
+				if (state.oldCommit == null) 
+					state.oldCommit = request.getBaseCommitHash();
+				if (state.newCommit == null)
+					state.newCommit = request.getHeadCommitHash();
+			}
+		} else {
+			if (state.oldCommit == null) 
+				state.oldCommit = request.getBaseCommitHash();
+			if (state.newCommit == null)
+				state.newCommit = request.getHeadCommitHash();
+		}
 	}
 	
 	private int getCommitIndex(String commitHash) {
@@ -337,26 +357,12 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		return paramsOf(request, state);
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, CodeComment comment, @Nullable String anchor) {
-		PullRequest.ComparingInfo comparingInfo = null;
-		for (int i=comment.getActivities().size()-1; i>=0; i--) {
-			CodeCommentActivity activity = comment.getActivities().get(i);
-			comparingInfo = request.getRequestComparingInfo(activity.getComparingInfo());
-			if (comparingInfo != null)
-				break;
-		}
-		if (comparingInfo == null) {
-			comparingInfo = Preconditions.checkNotNull(request.getRequestComparingInfo(comment.getComparingInfo()));
-		}
+	public static PageParameters paramsOf(CodeComment comment) {
 		RequestChangesPage.State state = new RequestChangesPage.State();
 		state.commentId = comment.getId();
 		state.mark = comment.getCommentPos();
-		state.oldCommit = comparingInfo.getOldCommit();
-		state.newCommit = comparingInfo.getNewCommit();
-		state.pathFilter = comparingInfo.getPathFilter();
-		state.whitespaceOption = comparingInfo.getWhitespaceOption();
-		state.anchor = anchor;
-		return paramsOf(request, state);
+		state.pathFilter = comment.getCommentPos().getPath();
+		return paramsOf(comment.getRequest(), state);
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, State state) {
@@ -376,8 +382,6 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
-		if (state.anchor != null)
-			params.set(PARAM_ANCHOR, state.anchor);
 		return params;
 	}
 	
@@ -482,11 +486,6 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 
 	@Override
-	public String getAnchor() {
-		return state.anchor;
-	}
-
-	@Override
 	public String getMarkUrl(CommentPos mark) {
 		State markState = new State();
 		markState.mark = mark;
@@ -578,9 +577,6 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		@Nullable
 		public CommentPos mark;
 		
-		@Nullable
-		public String anchor;
-
 	}
 
 }

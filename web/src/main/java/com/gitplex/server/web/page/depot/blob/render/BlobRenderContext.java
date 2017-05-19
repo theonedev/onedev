@@ -13,6 +13,7 @@ import com.gitplex.jsymbol.TokenPosition;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.hit.QueryHit;
 
@@ -21,14 +22,14 @@ public interface BlobRenderContext extends Serializable {
 	public enum Mode {VIEW, BLAME, ADD, EDIT, DELETE}
 	
 	Depot getDepot();
+	
+	@Nullable
+	PullRequest getPullRequest();
 
 	BlobIdent getBlobIdent();
 	
 	@Nullable
 	TextRange getMark();
-	
-	@Nullable
-	String getAnchor();
 	
 	void onMark(AjaxRequestTarget target, TextRange mark);
 	

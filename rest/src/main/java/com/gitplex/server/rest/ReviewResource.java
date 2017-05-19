@@ -16,31 +16,31 @@ import javax.ws.rs.core.MediaType;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.Account;
-import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.Review;
 import com.gitplex.server.security.SecurityUtils;
 
-@Path("/pullrequest_reviews")
+@Path("/reviews")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class PullRequestReviewResource {
+public class ReviewResource {
 
-	private final PullRequestReviewManager reviewManager;
+	private final ReviewManager reviewManager;
 	
 	private final AccountManager accountManager;
 	
 	@Inject
-	public PullRequestReviewResource(PullRequestReviewManager reviewManager, AccountManager accountManager) {
+	public ReviewResource(ReviewManager reviewManager, AccountManager accountManager) {
 		this.reviewManager = reviewManager;
 		this.accountManager = accountManager;
 	}
 	
     @GET
     @Path("/{id}")
-    public PullRequestReview get(@PathParam("id") Long id) {
-    	PullRequestReview review = reviewManager.load(id);
+    public Review get(@PathParam("id") Long id) {
+    	Review review = reviewManager.load(id);
     	if (!SecurityUtils.canRead(review.getRequest().getTargetDepot()))
     		throw new UnauthorizedException();
     	return review;
@@ -49,7 +49,7 @@ public class PullRequestReviewResource {
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
-    	PullRequestReview review = reviewManager.load(id);
+    	Review review = reviewManager.load(id);
     	Account currentUser = accountManager.getCurrent();
     	if (review.getUser().equals(currentUser) || SecurityUtils.canManage(review.getRequest().getTargetDepot())) 
     		reviewManager.delete(review);
@@ -58,7 +58,7 @@ public class PullRequestReviewResource {
     }
 
     @POST
-    public Long save(@NotNull @Valid PullRequestReview review) {
+    public Long save(@NotNull @Valid Review review) {
     	if (!SecurityUtils.canWrite(review.getRequest().getTargetDepot()))
     		throw new UnauthorizedException();
     	

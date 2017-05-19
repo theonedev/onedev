@@ -30,12 +30,12 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.PullRequestReviewManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.PullRequestReview;
+import com.gitplex.server.model.Review;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
@@ -55,10 +55,10 @@ import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 
 @Singleton
-public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullRequestReview> 
-		implements PullRequestReviewManager {
+public class DefaultReviewManager extends AbstractEntityManager<Review> 
+		implements ReviewManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestReviewManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultReviewManager.class);
 	
 	private static final int MAX_CONTRIBUTION_FILES = 100;
 	
@@ -69,7 +69,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 	private final PullRequestStatusChangeManager pullRequestStatusChangeManager;
 	
 	@Inject
-	public DefaultPullRequestReviewManager(Dao dao, AccountManager accountManager, 
+	public DefaultReviewManager(Dao dao, AccountManager accountManager, 
 			PullRequestManager pullRequestManager, PullRequestStatusChangeManager pullRequestStatusChangeManager) {
 		super(dao);
 		
@@ -86,7 +86,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 
 	@Transactional
 	@Override
-	public void save(PullRequestReview review) {
+	public void save(Review review) {
 		super.save(review);	
 
 		PullRequestStatusChange statusChange = new PullRequestStatusChange();
@@ -107,8 +107,8 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 
 	@Sessional
 	@Override
-	public List<PullRequestReview> findAll(PullRequest request) {
-		EntityCriteria<PullRequestReview> criteria = EntityCriteria.of(PullRequestReview.class);
+	public List<Review> findAll(PullRequest request) {
+		EntityCriteria<Review> criteria = EntityCriteria.of(Review.class);
 		criteria.createCriteria("update").add(Restrictions.eq("request", request));
 		criteria.addOrder(Order.asc("date"));
 		return findAll(criteria);
@@ -117,8 +117,8 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 	@Transactional
 	@Override
 	public void delete(Account user, PullRequest request) {
-		for (Iterator<PullRequestReview> it = request.getReviews().iterator(); it.hasNext();) {
-			PullRequestReview review = it.next();
+		for (Iterator<Review> it = request.getReviews().iterator(); it.hasNext();) {
+			Review review = it.next();
 			if (review.getUser().equals(user)) {
 				delete(review);
 				it.remove();
@@ -194,7 +194,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		
 		private final List<Account> awaitingReviewers = new ArrayList<>();
 		
-		private final Map<Account, PullRequestReview> effectiveReviews = new HashMap<>();
+		private final Map<Account, Review> effectiveReviews = new HashMap<>();
 		
 		@Override
 		public List<Account> getAwaitingReviewers() {
@@ -202,7 +202,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		}
 
 		@Override
-		public Map<Account, PullRequestReview> getEffectiveReviews() {
+		public Map<Account, Review> getEffectiveReviews() {
 			return effectiveReviews;
 		}
 
@@ -221,7 +221,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 			for (ReviewInvitation invitation: request.getReviewInvitations()) {
 				if (!invitation.getUser().equals(request.getSubmitter()) 
 						&& invitation.getType() == ReviewInvitation.Type.MANUAL) {
-					PullRequestReview effectiveReview = invitation.getUser().getReviewAfter(request.getLatestUpdate());
+					Review effectiveReview = invitation.getUser().getReviewAfter(request.getLatestUpdate());
 					if (effectiveReview == null) 
 						awaitingReviewers.add(invitation.getUser());
 					else
@@ -257,8 +257,8 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 				checkReviews(writers, 1, request.getLatestUpdate(), true);
 			}
 			
-			for (Iterator<Map.Entry<Account, PullRequestReview>> it = effectiveReviews.entrySet().iterator(); it.hasNext();) {
-				PullRequestReview review = it.next().getValue();
+			for (Iterator<Map.Entry<Account, Review>> it = effectiveReviews.entrySet().iterator(); it.hasNext();) {
+				Review review = it.next().getValue();
 				if (review.isCheckMerged()) {
 					if (request.getMergePreview() == null 
 							|| !review.getCommit().equals(request.getMergePreview().getMerged())) {
@@ -274,7 +274,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		private void checkReviews(ReviewAppointment appointment, PullRequestUpdate update) {
 			for (Account user: appointment.getUsers()) {
 				if (!user.equals(request.getSubmitter()) && !awaitingReviewers.contains(user)) {
-					PullRequestReview effectiveReview = user.getReviewAfter(update);
+					Review effectiveReview = user.getReviewAfter(update);
 					if (effectiveReview == null) {
 						awaitingReviewers.add(user);
 						inviteReviewer(user);
@@ -304,7 +304,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 				} else if (awaitingReviewers.contains(user)) {
 					requiredCount--;
 				} else {
-					PullRequestReview effectiveReview = user.getReviewAfter(update);
+					Review effectiveReview = user.getReviewAfter(update);
 					if (effectiveReview != null) {
 						if (!excludeAutoReviews || !effectiveReview.isAutoCheck()) {						
 							effectiveCount++;
