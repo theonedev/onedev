@@ -191,35 +191,50 @@ public class RevisionDiffPanel extends Panel {
 				markedPaths.add(mark.getPath());
 			}
 			
-			List<BlobChange> filterChanges = new ArrayList<>();
-	    	for (BlobChange change: allChanges) {
-	    		if (StringUtils.isNotBlank(pathFilterModel.getObject())) {
-		    		String matchWith = pathFilterModel.getObject().toLowerCase().trim();
-	    			matchWith = StringUtils.stripStart(matchWith, "/");
-	    			matchWith = StringUtils.stripEnd(matchWith, "/");
-	    			String oldPath = change.getOldBlobIdent().path;
-	    			if (oldPath == null)
-	    				oldPath = "";
-	    			else
-	    				oldPath = oldPath.toLowerCase();
-	    			String newPath = change.getNewBlobIdent().path;
-	    			if (newPath == null)
-	    				newPath = "";
-	    			else
-	    				newPath = newPath.toLowerCase();
-	    			if (matchWith.equals(oldPath) || matchWith.equals(newPath)) {
-	    				filterChanges.add(change);
-	    			} else if (oldPath.startsWith(matchWith + "/") || newPath.startsWith(matchWith + "/")) {
-	    				filterChanges.add(change);
-	    			} else if (WildcardUtils.matchString(matchWith, oldPath) 
-	    					|| WildcardUtils.matchString(matchWith, newPath)){
-	    				filterChanges.add(change);
-	    			}
-	    		} else {
-	    			filterChanges.add(change);
-	    		}
-	    	}
-	    	
+			List<BlobChange> filterChanges;
+    		String matchWith = pathFilterModel.getObject();
+    		if (StringUtils.isNotBlank(matchWith)) {
+        		matchWith = matchWith.toLowerCase().trim();
+        		boolean exclude = false;
+        		if (matchWith.startsWith("-")) {
+        			matchWith = matchWith.substring(1).trim();
+        			exclude = true;
+        		}
+    			matchWith = StringUtils.stripStart(matchWith, "/");
+    			matchWith = StringUtils.stripEnd(matchWith, "/");
+
+    			List<BlobChange> matchChanges = new ArrayList<>();
+    	    	for (BlobChange change: allChanges) {
+        			String oldPath = change.getOldBlobIdent().path;
+        			if (oldPath == null)
+        				oldPath = "";
+        			else
+        				oldPath = oldPath.toLowerCase();
+        			String newPath = change.getNewBlobIdent().path;
+        			if (newPath == null)
+        				newPath = "";
+        			else
+        				newPath = newPath.toLowerCase();
+        			if (matchWith.equals(oldPath) || matchWith.equals(newPath)) {
+        				matchChanges.add(change);
+        			} else if (oldPath.startsWith(matchWith + "/") || newPath.startsWith(matchWith + "/")) {
+        				matchChanges.add(change);
+        			} else if (WildcardUtils.matchString(matchWith, oldPath) 
+        					|| WildcardUtils.matchString(matchWith, newPath)){
+        				matchChanges.add(change);
+        			}
+    	    	}
+    	    	
+    			if (exclude) {
+    				filterChanges = new ArrayList<>(allChanges);
+    				filterChanges.removeAll(matchChanges);
+    			} else {
+    				filterChanges = matchChanges;
+    			}
+    		} else {
+    			filterChanges = new ArrayList<>(allChanges);
+    		}
+			
 	    	// for some unknown reason, some paths in the diff entries is DELETE/ADD 
 	    	// pair instead MODIFICATION, here we normalize those as a single 
 	    	// MODIFICATION entry
@@ -544,14 +559,25 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 				List<InputCompletion> completions = new ArrayList<>();
-				for (InputSuggestion suggestion: SuggestionUtils.suggestPath(listOfInvolvedPaths, 
-						inputStatus.getContentBeforeCaret().trim())) {
+				String matchWith = inputStatus.getContentBeforeCaret().trim();
+				boolean exclude = false;
+				if (matchWith.startsWith("-")) {
+					matchWith = matchWith.substring(1).trim();
+					exclude = true;
+				}
+				
+				for (InputSuggestion suggestion: SuggestionUtils.suggestPath(listOfInvolvedPaths, matchWith)) {
 					int caret = suggestion.getCaret();
 					if (caret == -1)
 						caret = suggestion.getContent().length();
-					InputCompletion completion = new InputCompletion(0, inputStatus.getContent().length(), 
-							suggestion.getContent(), caret, suggestion.getLabel(), 
-							null, suggestion.getMatchRange());
+					InputCompletion completion;
+					if (exclude) {
+						completion = new InputCompletion(0, inputStatus.getContent().length(), 
+								"-"+suggestion.getContent(), caret+1, null, null, suggestion.getMatchRange());
+					} else {
+						completion = new InputCompletion(0, inputStatus.getContent().length(), suggestion.getContent(), 
+								caret, null, null, suggestion.getMatchRange());
+					}
 					completions.add(completion);
 				}
 				return completions;
@@ -559,7 +585,7 @@ public class RevisionDiffPanel extends Panel {
 			
 			@Override
 			protected List<String> getHints(InputStatus inputStatus) {
-				return Lists.newArrayList("Use * to match any part of the path");
+				return Lists.newArrayList("Use '*' to match any part of the path", "Prefix path with '-' to exclude");
 			}
 
 			@Override

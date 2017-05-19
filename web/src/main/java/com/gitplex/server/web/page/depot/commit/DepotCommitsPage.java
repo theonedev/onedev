@@ -278,7 +278,7 @@ public class DepotCommitsPage extends DepotPage {
 
 		};
 		
-		queryForm.add(queryInput.add(new QueryAssistBehavior(depotModel)));
+		queryForm.add(queryInput.add(new CommitQueryBehavior(depotModel)));
 		
 		queryForm.add(new AjaxButton("submit") {});
 		queryForm.setOutputMarkupId(true);

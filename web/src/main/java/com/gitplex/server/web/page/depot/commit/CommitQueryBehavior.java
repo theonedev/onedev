@@ -26,7 +26,7 @@ import com.gitplex.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import com.gitplex.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class QueryAssistBehavior extends ANTLRAssistBehavior {
+public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Depot> depotModel;
 	
@@ -39,7 +39,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 			"yesterday midnight", "3 days ago", "last week", "last Monday", 
 			"4 weeks ago", "1 month 2 days ago", "1 year ago"}; 
 	
-	public QueryAssistBehavior(IModel<Depot> depotModel) {
+	public CommitQueryBehavior(IModel<Depot> depotModel) {
 		super(CommitQueryParser.class, "query");
 		this.depotModel = depotModel;
 	}
@@ -104,8 +104,10 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), 
 											matchRange));
 								}
-								suggestions.add(new InputSuggestion(WebConstants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
-								suggestions.add(new InputSuggestion(WebConstants.DATE_FORMATTER.print(System.currentTimeMillis())));
+								suggestions.add(new InputSuggestion(
+										WebConstants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
+								suggestions.add(new InputSuggestion(
+										WebConstants.DATE_FORMATTER.print(System.currentTimeMillis())));
 								for (String dateExample: DATE_EXAMPLES) { 
 									suggestions.add(new InputSuggestion(dateExample));
 								}
