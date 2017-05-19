@@ -2,6 +2,7 @@ package com.gitplex.server.web.page.depot.commit;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,8 @@ import com.gitplex.server.web.page.depot.DepotPage;
 import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.depot.branches.DepotBranchesPage;
 import com.gitplex.server.web.page.depot.tags.DepotTagsPage;
+import com.gitplex.server.web.websocket.CommitIndexedRegion;
+import com.gitplex.server.web.websocket.WebSocketRegion;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 
@@ -530,21 +533,21 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		pushState(target);
 	}
 	
-	/*
-	 * In case we are on a branch, this operation makes sure that the branch resolves
-	 * to a certain commit during the life cycle of our page, unless the page is 
-	 * refreshed. This can avoid the issue that displayed file content and subsequent 
-	 * operations encounters different commit if someone commits to the branch while 
-	 * we are staying on the page. 
-	 */
 	@Override
 	protected Map<String, ObjectId> getObjectIdCache() {
 		Map<String, ObjectId> objectIdCache = new HashMap<>();
-		if (resolvedRevision != null)
-			objectIdCache.put(state.revision, resolvedRevision);
-		if (resolvedCompareWith != null)
+		objectIdCache.put(state.revision, resolvedRevision);
+		if (state.compareWith != null)
 			objectIdCache.put(state.compareWith, resolvedCompareWith);
 		return objectIdCache;
+	}
+
+	@Override
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+		regions.add(new CommitIndexedRegion(getDepot().getId(), resolvedRevision));
+		regions.add(new CommitIndexedRegion(getDepot().getId(), getCompareWith()));
+		return regions;
 	}
 
 }

@@ -57,6 +57,7 @@ import com.gitplex.server.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
+import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
 
@@ -744,6 +745,9 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+		regions.add(new CommitIndexedRegion(getDepot().getId(), state.leftSide.getCommit()));
+		regions.add(new CommitIndexedRegion(getDepot().getId(), state.rightSide.getCommit()));
+		
 		if (state.commentId != null)
 			regions.add(new CodeCommentChangedRegion(state.commentId));
 		return regions;

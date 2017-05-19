@@ -47,6 +47,7 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
+import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -59,6 +60,7 @@ import com.gitplex.codeassist.InputCompletion;
 import com.gitplex.codeassist.InputStatus;
 import com.gitplex.codeassist.InputSuggestion;
 import com.gitplex.jsymbol.Range;
+import com.gitplex.jsymbol.util.NoAntiCacheImage;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobChange;
@@ -69,6 +71,7 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.search.IndexManager;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.diff.DiffUtils;
@@ -432,6 +435,50 @@ public class RevisionDiffPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		add(new WebMarkupContainer("revisionsIndexing") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new NoAntiCacheImage("icon", 
+						new PackageResourceReference(RevisionDiffPanel.class, "indexing.gif")));
+
+				add(new WebSocketRenderBehavior() {
+					
+					@Override
+					protected void onRender(WebSocketRequestHandler handler) {
+						handler.add(getComponent());
+						handler.appendJavaScript("$(window).resize();");
+					}
+					
+				});
+				
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				Depot depot = depotModel.getObject();
+				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
+				RevCommit oldCommit = getOldCommit();
+				RevCommit newCommit = getNewCommit();
+				boolean oldCommitIndexed = indexManager.isIndexed(depot, oldCommit);
+				boolean newCommitIndexed = indexManager.isIndexed(depot, newCommit);
+				if (oldCommitIndexed && newCommitIndexed) {
+					setVisible(false);
+				} else {
+					if (!oldCommitIndexed)
+						indexManager.indexAsync(depot, oldCommit);
+					if (!newCommitIndexed)
+						indexManager.indexAsync(depot, newCommit);
+					setVisible(true);
+				}
+			}
+			
+		});
 
 		WebMarkupContainer body = new WebMarkupContainer(BODY_ID) {
 

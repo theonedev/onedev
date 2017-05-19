@@ -30,6 +30,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.gitplex.server.GitPlex;
@@ -49,6 +50,7 @@ import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
+import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.PullRequestChanged;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
@@ -140,6 +142,10 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		return index;
 	}
 	
+	private void onRegionChange() {
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -189,6 +195,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 						state.oldCommit = commitsModel.getObject().get(index).name();
 					}
 					newRevisionDiff(target);
+					onRegionChange();
 				}
 				target.add(head);
 				pushState(target);
@@ -235,6 +242,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 					index++;
 					state.newCommit = commitsModel.getObject().get(index).name();
 					newRevisionDiff(target);
+					onRegionChange();
 				} 
 				target.add(head);
 				pushState(target);
@@ -255,6 +263,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 						state.newCommit = params.getParameterValue("newCommit").toString();
 						target.add(head);
 						newRevisionDiff(target);
+						onRegionChange();
 						pushState(target);
 						dropdown.close();
 					}
@@ -329,6 +338,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 				state.newCommit = getPullRequest().getHeadCommitHash();
 				target.add(head);
 				newRevisionDiff(target);
+				onRegionChange();
 				pushState(target);
 			}
 
@@ -390,9 +400,8 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		super.onPopState(target, data);
 
 		state = (State) data;
-		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
-		
 		newRevisionDiff(target);
+		onRegionChange();
 	}
 	
 	@Override
@@ -525,7 +534,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 			state.commentId = null;
 			state.mark = null;
 		}
-		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+		onRegionChange();
 		pushState(target);
 	}
 
@@ -544,12 +553,14 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
-		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+		onRegionChange();
 	}
 
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+		regions.add(new CommitIndexedRegion(getDepot().getId(), ObjectId.fromString(state.oldCommit)));
+		regions.add(new CommitIndexedRegion(getDepot().getId(), ObjectId.fromString(state.newCommit)));
 		if (state.commentId != null)
 			regions.add(new CodeCommentChangedRegion(state.commentId));
 		return regions;

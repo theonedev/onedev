@@ -1,3 +1,12 @@
+.revision-diff>.revisions-indexing {
+	padding: 8px 8px 9px 8px;
+	background: #fcf8e3;
+	border: 1px solid #faebcc;
+	border-radius: 4px;
+	color: #8a6d3b;
+	font-size: 13px;
+	margin-bottom: 20px;
+}
 .revision-diff>.head {
 	margin-bottom: 16px;
 }
