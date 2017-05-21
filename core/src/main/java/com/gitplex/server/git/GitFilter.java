@@ -32,6 +32,7 @@ import com.gitplex.server.git.command.AdvertiseUploadRefsCommand;
 import com.gitplex.server.git.command.ReceiveCommand;
 import com.gitplex.server.git.command.UploadCommand;
 import com.gitplex.server.git.exception.GitException;
+import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.WorkExecutor;
@@ -60,14 +61,17 @@ public class GitFilter implements Filter {
 	
 	private final ServerConfig serverConfig;
 	
+	private final ConfigManager configManager;
+	
 	@Inject
 	public GitFilter(GitPlex gitPlex, StorageManager storageManager, DepotManager repositoryManager, 
-			WorkExecutor workManager, ServerConfig serverConfig) {
+			WorkExecutor workManager, ServerConfig serverConfig, ConfigManager configManager) {
 		this.gitPlex = gitPlex;
 		this.storageManager = storageManager;
 		this.repositoryManager = repositoryManager;
 		this.workExecutor = workManager;
 		this.serverConfig = serverConfig;
+		this.configManager = configManager;
 	}
 	
 	private String getPathInfo(HttpServletRequest request) {
@@ -124,10 +128,11 @@ public class GitFilter implements Filter {
         else 
             serverUrl = "https://localhost:" + serverConfig.getSslConfig().getPort();
 
+        environments.put("GITPLEX_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
 		environments.put("GITPLEX_URL", serverUrl);
 		environments.put("GITPLEX_USER_ID", Account.getCurrentId().toString());
 		environments.put("GITPLEX_REPOSITORY_ID", depot.getId().toString());
-		final File gitDir = storageManager.getGitDir(depot);
+		File gitDir = storageManager.getGitDir(depot);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(depot))) {

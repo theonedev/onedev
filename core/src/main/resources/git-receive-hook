@@ -1,6 +1,6 @@
 #!/bin/bash
 IFS=$'\r\n'; 
-lines=($(curl -k -s -S -f -X POST -d @- ${GITPLEX_URL}/%s/${GITPLEX_REPOSITORY_ID}/${GITPLEX_USER_ID} 2>&1))
+lines=($(${GITPLEX_CURL} -k -s -S -f -X POST -d @- ${GITPLEX_URL}/%s/${GITPLEX_REPOSITORY_ID}/${GITPLEX_USER_ID} 2>&1))
 
 returnCode=0;
 

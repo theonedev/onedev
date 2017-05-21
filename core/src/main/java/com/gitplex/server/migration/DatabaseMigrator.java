@@ -160,7 +160,17 @@ public class DatabaseMigrator {
 	
 	private void migrate8(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Accounts.xml")) {
+			if (file.getName().startsWith("Configs.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("SYSTEM")) {
+						Element settingElement = element.element("setting");
+						settingElement.addElement("curlConfig")
+								.addAttribute("class", "com.gitplex.server.git.config.SystemCurl");
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Accounts.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					element.element("reviewEffort").detach();

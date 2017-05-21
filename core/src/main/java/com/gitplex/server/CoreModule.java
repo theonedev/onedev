@@ -5,8 +5,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Singleton;
@@ -36,7 +34,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.launcher.loader.AbstractPlugin;
 import com.gitplex.launcher.loader.AbstractPluginModule;
-import com.gitplex.launcher.loader.ImplementationProvider;
 import com.gitplex.server.command.ApplyDBConstraintsCommand;
 import com.gitplex.server.command.BackupDBCommand;
 import com.gitplex.server.command.CheckDataVersionCommand;
@@ -47,8 +44,6 @@ import com.gitplex.server.command.ResetAdminPasswordCommand;
 import com.gitplex.server.command.RestoreDBCommand;
 import com.gitplex.server.command.UpgradeCommand;
 import com.gitplex.server.git.config.GitConfig;
-import com.gitplex.server.git.config.SpecifiedGit;
-import com.gitplex.server.git.config.SystemGit;
 import com.gitplex.server.git.jackson.GitObjectMapperConfigurator;
 import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.AttachmentManager;
@@ -67,12 +62,12 @@ import com.gitplex.server.manager.OrganizationMembershipManager;
 import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestReferenceManager;
-import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
 import com.gitplex.server.manager.PullRequestTaskManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
 import com.gitplex.server.manager.PullRequestWatchManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.TeamAuthorizationManager;
 import com.gitplex.server.manager.TeamManager;
@@ -98,12 +93,12 @@ import com.gitplex.server.manager.impl.DefaultOrganizationMembershipManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestCommentManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestReferenceManager;
-import com.gitplex.server.manager.impl.DefaultReviewManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestStatusChangeManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestTaskManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestUpdateManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestWatchManager;
 import com.gitplex.server.manager.impl.DefaultReviewInvitationManager;
+import com.gitplex.server.manager.impl.DefaultReviewManager;
 import com.gitplex.server.manager.impl.DefaultStorageManager;
 import com.gitplex.server.manager.impl.DefaultTeamAuthorizationManager;
 import com.gitplex.server.manager.impl.DefaultTeamManager;
@@ -213,22 +208,6 @@ public class CoreModule extends AbstractPluginModule {
 			@Override
 			public Set<String> getReserved() {
 				return Sets.newHashSet();
-			}
-		});
-		
-		contribute(ImplementationProvider.class, new ImplementationProvider() {
-			
-			@Override
-			public Collection<Class<?>> getImplementations() {
-				Collection<Class<?>> implementations = new HashSet<Class<?>>();
-				implementations.add(SystemGit.class);
-				implementations.add(SpecifiedGit.class);
-				return implementations;
-			}
-			
-			@Override
-			public Class<?> getAbstractClass() {
-				return GitConfig.class;
 			}
 		});
 		

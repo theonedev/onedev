@@ -9,7 +9,9 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.gitplex.server.git.config.CurlConfig;
 import com.gitplex.server.git.config.GitConfig;
+import com.gitplex.server.git.config.SystemCurl;
 import com.gitplex.server.git.config.SystemGit;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.validation.Validatable;
@@ -27,6 +29,8 @@ public class SystemSetting implements Serializable, Validatable {
 	private String storagePath;
 	
 	private GitConfig gitConfig = new SystemGit();
+	
+	private CurlConfig curlConfig = new SystemCurl();
 	
 	private boolean gravatarEnabled = true;
 	
@@ -62,6 +66,17 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setGitConfig(GitConfig gitConfig) {
 		this.gitConfig = gitConfig;
+	}
+
+	@Editable(order=250, description="GitPlex configures git hooks to communicate with itself via curl")
+	@Valid
+	@NotNull
+	public CurlConfig getCurlConfig() {
+		return curlConfig;
+	}
+
+	public void setCurlConfig(CurlConfig curlConfig) {
+		this.curlConfig = curlConfig;
 	}
 
 	@Editable(order=300, description="Whether or not to enable user gravatar.")

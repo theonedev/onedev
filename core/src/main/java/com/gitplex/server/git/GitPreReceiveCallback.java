@@ -117,7 +117,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    				break;
 	    			}
 	    		} else if (refName.startsWith(Constants.R_HEADS)) {
-	    			String branchName = Preconditions.checkNotNull(GitUtils.branch2ref(refName));
+	    			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(refName));
 
 	    			if (!oldObjectId.equals(ObjectId.zeroId())) {
 		    			if (newObjectId.equals(ObjectId.zeroId())) {
@@ -129,7 +129,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 		    				if (protection != null && protection.isNoForcedPush())
 			    				error(output, refName, "Can not force-push to this branch according to branch protection setting");
 		    			} else {
-		    				if (!reviewManager.canPush(user, depot, refName, oldObjectId, newObjectId)) {
+		    				if (!reviewManager.canPush(user, depot, branchName, oldObjectId, newObjectId)) {
 		    					error(output, refName, 
 		    							"Your changes need to be reviewed. Please submit pull request instead");
 		    				}
