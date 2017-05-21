@@ -6,6 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
+import com.gitplex.server.web.assets.js.clipboard.ClipboardResourceReference;
 import com.gitplex.server.web.assets.js.codemirror.CodeMirrorResourceReference;
 import com.gitplex.server.web.assets.js.cookies.CookiesResourceReference;
 import com.gitplex.server.web.assets.js.doneevents.DoneEventsResourceReference;
@@ -36,6 +37,7 @@ public class SourceViewResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(SourceViewResourceReference.class, "source-view.css")));
 		return dependencies;

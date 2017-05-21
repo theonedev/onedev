@@ -33,6 +33,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -267,6 +268,46 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		
 		add(callbackBehavior = new AbstractPostAjaxBehavior() {
 			
+			private String getMarkedText(CommentPos mark) {
+				List<String> lines;
+				if (mark.getCommit().equals(getOldCommit().name()))
+					lines = change.getOldText().getLines();
+				else 
+					lines = change.getNewText().getLines();
+				StringBuilder builder = new StringBuilder();
+				if (mark.getRange().getBeginLine() != mark.getRange().getEndLine()) {
+					String line = lines.get(mark.getRange().getBeginLine());
+					int beginChar = mark.getRange().getBeginChar();
+					if (beginChar < line.length())
+						builder.append(line.substring(beginChar));
+					for (int i=mark.getRange().getBeginLine()+1; i<mark.getRange().getEndLine(); i++) {
+						if (builder.length() != 0)
+							builder.append("\n");
+						builder.append(lines.get(i));
+					}
+					line = lines.get(mark.getRange().getEndLine());
+					int endChar = mark.getRange().getEndChar();
+					if (endChar > 0) {
+						if (endChar > line.length())
+							endChar = line.length();
+						if (builder.length() != 0)
+							builder.append("\n");
+						builder.append(line.substring(0, endChar));
+					}
+				} else {
+					String line = lines.get(mark.getRange().getBeginLine());
+					int beginChar = mark.getRange().getBeginChar();
+					int endChar = mark.getRange().getEndChar();
+					if (beginChar < line.length() && endChar > 0) {
+						if (endChar > line.length())
+							endChar = line.length();
+						builder.append(line.substring(beginChar, endChar));
+					}
+				}
+				
+				return builder.toString();
+			}
+			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
@@ -298,8 +339,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 							params.getParameterValue("param1").toInt(), 
 							params.getParameterValue("param2").toInt());
 					CommentPos mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
-					script = String.format("gitplex.server.textDiff.openSelectionPopover('%s', %s, %s, '%s', %s, %s);", 
+					script = String.format("gitplex.server.textDiff.openSelectionPopover('%s', %s, %s, '%s', '%s', %s, %s);", 
 							getMarkupId(), jsonOfPosition, getJson(mark), markSupport.getMarkUrl(mark), 
+							JavaScriptEscape.escapeJavaScript(getMarkedText(mark)),
 							requestModel.getObject()!=null, SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
 					break;

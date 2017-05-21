@@ -333,6 +333,16 @@ gitplex.server.sourceView = {
 		
 		var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
 		$content.children("a.permanent").attr("href", markUrl);
+		$content.append("<a class='copy-marked'><i class='fa fa-clipboard'></i> Copy selected text to clipboard</a>");
+		var clipboard = new Clipboard(".copy-marked", {
+		    text: function(trigger) {
+		        return cm.getSelection("\n");
+		    }
+		});		
+		clipboard.on("success", function(e) {
+			gitplex.server.codemirror.clearSelection(cm);
+			clipboard.destroy();
+		});
 		if (hasPullRequest && loggedIn) {
 			$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
 			$content.children("a.comment").click(function() {
@@ -344,7 +354,7 @@ gitplex.server.sourceView = {
 				callback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 			});
 		} else if (!loggedIn) {
-			$content.append("<span class='comment'><i class='fa fa-warning'></i> Log in to comment on selection</span>");
+			$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
 		}			
 		
 		$(".source-view>.code").selectionPopover("open", {

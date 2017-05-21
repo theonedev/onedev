@@ -7,6 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.gitplex.server.web.assets.js.clipboard.ClipboardResourceReference;
 import com.gitplex.server.web.assets.js.hover.HoverResourceReference;
 import com.gitplex.server.web.assets.js.selectionpopover.SelectionPopoverResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
@@ -26,6 +27,7 @@ public class TextDiffResourceReference extends BaseDependentResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
 		return dependencies;
