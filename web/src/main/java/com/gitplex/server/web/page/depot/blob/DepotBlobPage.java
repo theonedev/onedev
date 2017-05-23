@@ -80,7 +80,7 @@ import com.gitplex.server.web.page.depot.NoBranchesPage;
 import com.gitplex.server.web.page.depot.blob.navigator.BlobNavigator;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRendererContribution;
-import com.gitplex.server.web.page.depot.blob.render.view.MarkSupport;
+import com.gitplex.server.web.page.depot.blob.render.view.Markable;
 import com.gitplex.server.web.page.depot.blob.search.SearchMenuContributor;
 import com.gitplex.server.web.page.depot.blob.search.advanced.AdvancedSearchPanel;
 import com.gitplex.server.web.page.depot.blob.search.quick.QuickSearchPanel;
@@ -823,7 +823,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			onResolvedRevisionChange(target);
 		} else {
 			if (!Objects.equal(state.blobIdent.path, blobIdent.path) 
-					|| state.mark != null && !(get(BLOB_CONTENT_ID) instanceof MarkSupport)) {
+					|| state.mark != null && !(get(BLOB_CONTENT_ID) instanceof Markable)) {
 				state.blobIdent.path = blobIdent.path;
 				state.blobIdent.mode = blobIdent.mode;
 				state.mode = Mode.VIEW;
@@ -836,7 +836,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 			} else if (state.mark != null) {
 				// This logic is added for performance reason, we do not want to 
 				// reload the file if go to different mark positions in same file
-				((MarkSupport)get(BLOB_CONTENT_ID)).mark(target, state.mark);
+				((Markable)get(BLOB_CONTENT_ID)).mark(target, state.mark);
 			}
 		}
 		pushState(target);

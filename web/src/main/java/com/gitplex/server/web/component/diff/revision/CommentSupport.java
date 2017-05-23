@@ -1,21 +1,15 @@
 package com.gitplex.server.web.component.diff.revision;
 
-import java.io.Serializable;
-
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.MarkPos;
 
-public interface CommentSupport extends Serializable {
+public interface CommentSupport extends MarkSupport {
 	
-	@Nullable CommentPos getMark();
-	
-	void onMark(AjaxRequestTarget target, CommentPos mark);
-	
-	String getMarkUrl(CommentPos mark);
+	void onMark(AjaxRequestTarget target, MarkPos mark);
 	
 	String getCommentUrl(CodeComment comment);
 	
@@ -23,6 +17,6 @@ public interface CommentSupport extends Serializable {
 
 	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 	
-	void onAddComment(AjaxRequestTarget target, CommentPos commentPos);
+	void onAddComment(AjaxRequestTarget target, MarkPos markPos);
 
 }

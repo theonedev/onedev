@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.MarkPos;
 
 public interface SourceAware {
 	
@@ -15,7 +15,7 @@ public interface SourceAware {
 
 	void onCommentAdded(AjaxRequestTarget target, CodeComment comment);
 	
-	void mark(AjaxRequestTarget target, @Nullable CommentPos mark);
+	void mark(AjaxRequestTarget target, @Nullable MarkPos mark);
 
 	void onUnblame(AjaxRequestTarget target);
 }

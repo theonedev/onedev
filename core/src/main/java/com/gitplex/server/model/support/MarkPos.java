@@ -12,7 +12,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.OptimisticLock;
 
 @Embeddable
-public class CommentPos implements Serializable {
+public class MarkPos implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -52,10 +52,10 @@ public class CommentPos implements Serializable {
 		this.range = range;
 	}
 
-	public CommentPos() {
+	public MarkPos() {
 	}
 	
-	public CommentPos(String commit, @Nullable String path, @Nullable TextRange mark) {
+	public MarkPos(String commit, @Nullable String path, @Nullable TextRange mark) {
 		this.commit = commit;
 		this.path = path;
 		this.range = mark;
@@ -71,7 +71,7 @@ public class CommentPos implements Serializable {
 			return commit;
 	}
 	
-	public static CommentPos fromString(@Nullable String str) {
+	public static MarkPos fromString(@Nullable String str) {
 		if (str != null) {
 			String commit = StringUtils.substringBefore(str, ":");
 			String path = null;
@@ -83,7 +83,7 @@ public class CommentPos implements Serializable {
 				if (markStr.length() != 0)
 					mark = new TextRange(markStr);
 			}
-			return new CommentPos(commit, path, mark);
+			return new MarkPos(commit, path, mark);
 		} else {
 			return null;
 		}
@@ -91,11 +91,11 @@ public class CommentPos implements Serializable {
 	
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof CommentPos))
+		if (!(other instanceof MarkPos))
 			return false;
 		if (this == other)
 			return true;
-		CommentPos otherPos = (CommentPos) other;
+		MarkPos otherPos = (MarkPos) other;
 		return new EqualsBuilder()
 				.append(commit, otherPos.commit)
 				.append(path, otherPos.path)

@@ -40,7 +40,7 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
-import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.component.diff.revision.CommentSupport;
@@ -93,7 +93,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		super(params);
 
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
+		state.mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
 		
 		state.oldCommit = params.get(PARAM_OLD_COMMIT).toString();
 		state.newCommit = params.get(PARAM_NEW_COMMIT).toString();
@@ -490,12 +490,12 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 
 	@Override
-	public CommentPos getMark() {
+	public MarkPos getMark() {
 		return state.mark;
 	}
 
 	@Override
-	public String getMarkUrl(CommentPos mark) {
+	public String getMarkUrl(MarkPos mark) {
 		State markState = new State();
 		markState.mark = mark;
 		markState.oldCommit = state.oldCommit;
@@ -539,7 +539,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, CommentPos mark) {
+	public void onMark(AjaxRequestTarget target, MarkPos mark) {
 		state.mark = mark;
 		pushState(target);
 	}
@@ -549,7 +549,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
+	public void onAddComment(AjaxRequestTarget target, MarkPos mark) {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
@@ -586,7 +586,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		public Long commentId;
 		
 		@Nullable
-		public CommentPos mark;
+		public MarkPos mark;
 		
 	}
 

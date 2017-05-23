@@ -22,10 +22,10 @@ import com.gitplex.server.web.component.sourceformat.SourceFormatPanel;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.page.depot.blob.render.edit.BlobEditPanel;
-import com.gitplex.server.web.page.depot.blob.render.view.MarkSupport;
+import com.gitplex.server.web.page.depot.blob.render.view.Markable;
 
 @SuppressWarnings("serial")
-public class SourceEditPanel extends BlobEditPanel implements MarkSupport {
+public class SourceEditPanel extends BlobEditPanel implements Markable {
 
 	private SourceFormComponent sourceFormComponent;
 	

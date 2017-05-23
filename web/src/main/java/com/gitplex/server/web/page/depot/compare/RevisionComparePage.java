@@ -33,16 +33,15 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.model.support.DepotAndRevision;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.behavior.TooltipBehavior;
 import com.gitplex.server.web.component.commitlist.CommitListPanel;
-import com.gitplex.server.web.component.diff.revision.CommentSupport;
+import com.gitplex.server.web.component.diff.revision.MarkSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.revisionpicker.AffinalRevisionPicker;
@@ -60,7 +59,7 @@ import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
-public class RevisionComparePage extends DepotPage implements CommentSupport {
+public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 	public enum TabPanel {
 		COMMITS, 
@@ -167,7 +166,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
-		state.mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
+		state.mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
 		
 		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
 		
@@ -640,7 +639,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		public String blameFile;
 		
 		@Nullable
-		public CommentPos mark;
+		public MarkPos mark;
 		
 		public State() {
 		}
@@ -659,12 +658,12 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	}
 
 	@Override
-	public CommentPos getMark() {
+	public MarkPos getMark() {
 		return state.mark;
 	}
 	
 	@Override
-	public String getMarkUrl(CommentPos mark) {
+	public String getMarkUrl(MarkPos mark) {
 		State markState = new State();
 		markState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
 				state.compareWithMergeBase?mergeBase.name():leftCommitId.name());
@@ -678,12 +677,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, CommentPos mark) {
-		state.mark = mark;
-		pushState(target);
-	}
-
-	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
 		if (state.compareWithMergeBase) 
@@ -692,26 +685,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			regions.add(new CommitIndexedRegion(getDepot().getId(), state.leftSide.getCommit()));
 		regions.add(new CommitIndexedRegion(getDepot().getId(), state.rightSide.getCommit()));
 		return regions;
-	}
-
-	@Override
-	public String getCommentUrl(CodeComment comment) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public CodeComment getOpenComment() {
-		return null;
-	}
-
-	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void onAddComment(AjaxRequestTarget target, CommentPos commentPos) {
-		throw new UnsupportedOperationException();
 	}
 
 }

@@ -34,7 +34,7 @@ import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.support.CodeCommentActivity;
-import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.LastEvent;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.diff.DiffUtils;
@@ -80,7 +80,7 @@ public class CodeComment extends AbstractEntity {
 	private LastEvent lastEvent;
 
 	@Embedded
-	private CommentPos commentPos;
+	private MarkPos markPos;
 	
 	private boolean resolved;
 	
@@ -143,12 +143,12 @@ public class CodeComment extends AbstractEntity {
 		this.date = date;
 	}
 
-	public CommentPos getCommentPos() {
-		return commentPos;
+	public MarkPos getCommentPos() {
+		return markPos;
 	}
 
-	public void setCommentPos(CommentPos commentPos) {
-		this.commentPos = commentPos;
+	public void setCommentPos(MarkPos markPos) {
+		this.markPos = markPos;
 	}
 
 	public Collection<CodeCommentReply> getReplies() {
@@ -221,21 +221,21 @@ public class CodeComment extends AbstractEntity {
 
 	public boolean isCodeChanged() {
 		if (codeChanged == null) {
-			if (request.getHeadCommitHash().equals(commentPos.getCommit())) {
+			if (request.getHeadCommitHash().equals(markPos.getCommit())) {
 				codeChanged = false;
 			} else {
 				Depot depot = request.getTargetDepot();
 				try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
-					TreeWalk treeWalk = TreeWalk.forPath(depot.getRepository(), commentPos.getPath(), 
+					TreeWalk treeWalk = TreeWalk.forPath(depot.getRepository(), markPos.getPath(), 
 							request.getHeadCommit().getTree());
 					if (treeWalk != null) {
 						ObjectId blobId = treeWalk.getObjectId(0);
 						if (treeWalk.getRawMode(0) == FileMode.REGULAR_FILE.getBits()) {
-							BlobIdent blobIdent = new BlobIdent(request.getHeadCommitHash(), commentPos.getPath(), 
+							BlobIdent blobIdent = new BlobIdent(request.getHeadCommitHash(), markPos.getPath(), 
 									treeWalk.getRawMode(0));
 							Blob newBlob = new Blob(blobIdent, blobId, treeWalk.getObjectReader()); 
-							Blob oldBlob = depot.getBlob(new BlobIdent(commentPos.getCommit(), 
-									commentPos.getPath(), FileMode.REGULAR_FILE.getBits()));
+							Blob oldBlob = depot.getBlob(new BlobIdent(markPos.getCommit(), 
+									markPos.getPath(), FileMode.REGULAR_FILE.getBits()));
 							Preconditions.checkState(oldBlob != null && oldBlob.getText() != null);
 							
 							List<String> oldLines = new ArrayList<>();
@@ -247,8 +247,8 @@ public class CodeComment extends AbstractEntity {
 								newLines.add(WhitespaceOption.DEFAULT.process(line));
 							
 							Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
-							int oldBeginLine = commentPos.getRange().getBeginLine();
-							int oldEndLine = commentPos.getRange().getEndLine();
+							int oldBeginLine = markPos.getRange().getBeginLine();
+							int oldEndLine = markPos.getRange().getEndLine();
 							Integer newBeginLine = lineMapping.get(oldBeginLine);
 							if (newBeginLine != null) {
 								for (int oldLine=oldBeginLine; oldLine<=oldEndLine; oldLine++) {

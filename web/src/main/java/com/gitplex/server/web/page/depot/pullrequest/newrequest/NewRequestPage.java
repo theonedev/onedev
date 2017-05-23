@@ -40,13 +40,12 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.Account;
-import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.model.support.CloseInfo;
-import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.DepotAndBranch;
 import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.persistence.dao.Dao;
@@ -56,7 +55,7 @@ import com.gitplex.server.web.component.branchpicker.AffinalBranchPicker;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
 import com.gitplex.server.web.component.commitlist.CommitListPanel;
-import com.gitplex.server.web.component.diff.revision.CommentSupport;
+import com.gitplex.server.web.component.diff.revision.MarkSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -82,7 +81,7 @@ import com.google.common.base.Preconditions;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends DepotPage implements CommentSupport {
+public class NewRequestPage extends DepotPage implements MarkSupport {
 
 	private static final String TABS_ID = "tabs";
 	
@@ -96,7 +95,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 	
 	private IModel<PullRequest> requestModel;
 	
-	private CommentPos mark;
+	private MarkPos mark;
 	
 	private String pathFilter;
 	
@@ -735,12 +734,12 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 	}
 
 	@Override
-	public CommentPos getMark() {
+	public MarkPos getMark() {
 		return mark;
 	}
 
 	@Override
-	public String getMarkUrl(CommentPos mark) {
+	public String getMarkUrl(MarkPos mark) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.mark = mark;
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
@@ -750,31 +749,6 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 		state.whitespaceOption = whitespaceOption;
 		state.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
-	}
-
-	@Override
-	public CodeComment getOpenComment() {
-		return null;
-	}
-
-	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String getCommentUrl(CodeComment comment) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void onMark(AjaxRequestTarget target, CommentPos mark) {
-		this.mark = mark;
-	}
-
-	@Override
-	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

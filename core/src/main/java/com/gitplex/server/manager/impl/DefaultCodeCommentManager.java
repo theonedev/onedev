@@ -48,9 +48,9 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	public Collection<CodeComment> findAll(PullRequest request, ObjectId commitId, String path) {
 		EntityCriteria<CodeComment> criteria = newCriteria();
 		criteria.add(Restrictions.eq("request", request));
-		criteria.add(Restrictions.eq("commentPos.commit", commitId.name()));
+		criteria.add(Restrictions.eq("markPos.commit", commitId.name()));
 		if (path != null)
-			criteria.add(Restrictions.eq("commentPos.path", path));
+			criteria.add(Restrictions.eq("markPos.path", path));
 		return findAll(criteria);
 	}
 
@@ -63,7 +63,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		criteria.add(Restrictions.eq("request", request));
 		List<Criterion> criterions = new ArrayList<>();
 		for (ObjectId commitId: commitIds) {
-			criterions.add(Restrictions.eq("commentPos.commit", commitId.name()));
+			criterions.add(Restrictions.eq("markPos.commit", commitId.name()));
 		}
 		criteria.add(Restrictions.or(criterions.toArray(new Criterion[criterions.size()])));
 		return findAll(criteria);

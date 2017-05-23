@@ -43,7 +43,7 @@ import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.ContributorAvatars;
@@ -444,7 +444,7 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 		public String blameFile;
 		
 		@Nullable
-		public CommentPos mark;
+		public MarkPos mark;
 		
 		public State() {
 		}
@@ -466,18 +466,18 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 			pathFilter = params.get(PARAM_PATH_FILTER).toString();
 			blameFile = params.get(PARAM_BLAME_FILE).toString();
 			commentId = params.get(PARAM_COMMENT).toOptionalLong();
-			mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
+			mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
 		}
 		
 	}
 
 	@Override
-	public CommentPos getMark() {
+	public MarkPos getMark() {
 		return state.mark;
 	}
 
 	@Override
-	public String getMarkUrl(CommentPos mark) {
+	public String getMarkUrl(MarkPos mark) {
 		State markState = new State();
 		markState.mark = mark;
 		markState.whitespaceOption = state.whitespaceOption;
@@ -521,13 +521,13 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 	}
 	
 	@Override
-	public void onMark(AjaxRequestTarget target, CommentPos mark) {
+	public void onMark(AjaxRequestTarget target, MarkPos mark) {
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
+	public void onAddComment(AjaxRequestTarget target, MarkPos mark) {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);

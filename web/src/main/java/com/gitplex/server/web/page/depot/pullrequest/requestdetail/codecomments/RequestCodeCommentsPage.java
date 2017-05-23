@@ -387,7 +387,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 				String pathQuery = path.replace('*', '%');
 				if (pathQuery.endsWith("/"))
 					pathQuery += "%";
-				criteria.add(Restrictions.ilike("commentPos.path", pathQuery));
+				criteria.add(Restrictions.ilike("markPos.path", pathQuery));
 			}
 				
 			if (before != null)

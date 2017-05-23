@@ -6,6 +6,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.gitplex.server.model.support.TextRange;
 
-public interface MarkSupport {
+public interface Markable {
 	void mark(AjaxRequestTarget target, @Nullable TextRange mark);
 }

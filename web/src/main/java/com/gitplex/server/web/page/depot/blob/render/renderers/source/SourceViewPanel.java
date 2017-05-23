@@ -71,7 +71,7 @@ import com.gitplex.server.git.command.BlameCommand;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.support.CommentPos;
+import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
@@ -92,7 +92,7 @@ import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.page.depot.blob.render.view.BlobViewPanel;
-import com.gitplex.server.web.page.depot.blob.render.view.MarkSupport;
+import com.gitplex.server.web.page.depot.blob.render.view.Markable;
 import com.gitplex.server.web.page.depot.blob.search.SearchMenuContributor;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.util.DateUtils;
@@ -109,7 +109,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
  *
  */
 @SuppressWarnings("serial")
-public class SourceViewPanel extends BlobViewPanel implements MarkSupport, SearchMenuContributor {
+public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMenuContributor {
 
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
 	
@@ -462,7 +462,7 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 							
 							CodeComment comment = new CodeComment();
 							comment.setUUID(uuid);
-							comment.setCommentPos(new CommentPos());
+							comment.setCommentPos(new MarkPos());
 							comment.getCommentPos().setCommit(context.getCommit().name());
 							comment.getCommentPos().setPath(context.getBlobIdent().path);
 							comment.setContent(contentInput.getModelObject());
