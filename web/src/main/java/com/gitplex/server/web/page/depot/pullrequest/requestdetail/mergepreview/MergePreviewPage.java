@@ -1,6 +1,7 @@
 package com.gitplex.server.web.page.depot.pullrequest.requestdetail.mergepreview;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
@@ -15,6 +16,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.model.Depot;
 import com.gitplex.server.model.PullRequest;
@@ -23,7 +25,9 @@ import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
-import com.gitplex.server.web.websocket.PullRequestChanged;
+import com.gitplex.server.web.websocket.CommitIndexedRegion;
+import com.gitplex.server.web.websocket.PageDataChanged;
+import com.gitplex.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public class MergePreviewPage extends RequestDetailPage {
@@ -84,9 +88,9 @@ public class MergePreviewPage extends RequestDetailPage {
 				public void onEvent(IEvent<?> event) {
 					super.onEvent(event);
 
-					if (event.getPayload() instanceof PullRequestChanged) {
-						PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-						pullRequestChanged.getPartialPageRequestHandler().add(this);
+					if (event.getPayload() instanceof PageDataChanged) {
+						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+						pageDataChanged.getHandler().add(this);
 					}
 				}
 				
@@ -175,9 +179,9 @@ public class MergePreviewPage extends RequestDetailPage {
 				public void onEvent(IEvent<?> event) {
 					super.onEvent(event);
 
-					if (event.getPayload() instanceof PullRequestChanged) {
-						PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-						newContent(pullRequestChanged.getPartialPageRequestHandler());
+					if (event.getPayload() instanceof PageDataChanged) {
+						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+						newContent(pageDataChanged.getHandler());
 					}
 				}
 				
@@ -202,6 +206,17 @@ public class MergePreviewPage extends RequestDetailPage {
 		setResponsePage(RequestListPage.class, paramsOf(depot));
 	}
 
+	@Override
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+		MergePreview preview = getPullRequest().getMergePreview();
+		if (getPullRequest().isOpen() && preview != null && preview.getMerged() != null) {
+			regions.add(new CommitIndexedRegion(getDepot().getId(), ObjectId.fromString(preview.getTargetHead())));
+			regions.add(new CommitIndexedRegion(getDepot().getId(), ObjectId.fromString(preview.getMerged())));
+		}		
+		return regions;
+	}
+	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
 		PageParameters params = paramsOf(getPullRequest(), state);
 		CharSequence url = RequestCycle.get().urlFor(MergePreviewPage.class, params);

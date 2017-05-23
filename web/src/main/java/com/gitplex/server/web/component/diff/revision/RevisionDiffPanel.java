@@ -26,6 +26,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -43,7 +44,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
@@ -90,7 +90,7 @@ import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.util.SuggestionUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
+import com.gitplex.server.web.websocket.PageDataChanged;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
@@ -388,7 +388,7 @@ public class RevisionDiffPanel extends Panel {
 	
 	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			String oldRev, String newRev, IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel, 
-			@Nullable IModel<String> blameModel, @Nullable CommentSupport markSupport) {
+			@Nullable IModel<String> blameModel, @Nullable CommentSupport commentSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -422,7 +422,7 @@ public class RevisionDiffPanel extends Panel {
 			
 		};
 		this.whitespaceOptionModel = whitespaceOptionModel;
-		this.commentSupport = markSupport;
+		this.commentSupport = commentSupport;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_VIEW_MODE);
@@ -443,18 +443,18 @@ public class RevisionDiffPanel extends Panel {
 				super.onInitialize();
 				add(new NoAntiCacheImage("icon", 
 						new PackageResourceReference(RevisionDiffPanel.class, "indexing.gif")));
-
-				add(new WebSocketRenderBehavior() {
-					
-					@Override
-					protected void onRender(WebSocketRequestHandler handler) {
-						handler.add(getComponent());
-						handler.appendJavaScript("$(window).resize();");
-					}
-					
-				});
 				
 				setOutputMarkupPlaceholderTag(true);
+			}
+			
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+					pageDataChanged.getHandler().add(this);
+					pageDataChanged.getHandler().appendJavaScript("$(window).resize();");
+				}
 			}
 
 			@Override
@@ -1042,7 +1042,18 @@ public class RevisionDiffPanel extends Panel {
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
-		WebMarkupContainer head = new WebMarkupContainer("head");
+		WebMarkupContainer head = new WebMarkupContainer("head") {
+			
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (commentContainer.isVisible() && event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+					pageDataChanged.getHandler().add(this);
+				}
+			}
+
+		};
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
@@ -1182,16 +1193,6 @@ public class RevisionDiffPanel extends Panel {
 			commentContainer.add(new WebMarkupContainer(BODY_ID));
 			commentContainer.setVisible(false);
 		}
-		
-		commentContainer.add(new WebSocketRenderBehavior() {
-			
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				if (commentContainer.isVisible())
-					handler.add(head);					
-			}
-			
-		});
 		
 		return commentContainer;
 	}

@@ -36,7 +36,7 @@ import com.gitplex.server.web.behavior.dropdown.DropdownHover;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.AccountLink;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
-import com.gitplex.server.web.websocket.PullRequestChanged;
+import com.gitplex.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public class ReviewerListPanel extends GenericPanel<PullRequest> {
@@ -53,9 +53,9 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 
-		if (event.getPayload() instanceof PullRequestChanged) {
-			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-			pullRequestChanged.getPartialPageRequestHandler().add(this);
+		if (event.getPayload() instanceof PageDataChanged) {
+			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+			pageDataChanged.getHandler().add(this);
 		}
 	}
 	
@@ -167,7 +167,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 							}
 							reviewersModel.detach();
 							
-							send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
+							send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 						}
 					}
 					
@@ -210,7 +210,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						request.clearReviewStatus();
 						GitPlex.getInstance(ReviewManager.class).delete(reviewer, request);
 						reviewersModel.detach();
-						send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
+						send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 					}
 						
 				});
@@ -243,7 +243,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Account user) {
 				super.onSelect(target, user);
-				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
+				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 			
 		});

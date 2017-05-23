@@ -13,8 +13,8 @@ public class TaskChangedRegion implements WebSocketRegion {
 	@Override
 	public boolean contains(WebSocketRegion region) {
 		if (region instanceof TaskChangedRegion) {
-			TaskChangedRegion pullRequestChangedRegion = (TaskChangedRegion) region;
-			return userId.equals(pullRequestChangedRegion.userId);
+			TaskChangedRegion pageDataChangedRegion = (TaskChangedRegion) region;
+			return userId.equals(pageDataChangedRegion.userId);
 		} else {
 			return false;
 		}

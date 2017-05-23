@@ -120,7 +120,7 @@ public class MailSettingPage extends AdministrationPage {
 
 				if (event.getPayload() instanceof EditorChanged) {
 					EditorChanged editorChanged = (EditorChanged) event.getPayload();
-					editorChanged.getPartialPageRequestHandler().add(testButton);
+					editorChanged.getHandler().add(testButton);
 				}
 				
 			}

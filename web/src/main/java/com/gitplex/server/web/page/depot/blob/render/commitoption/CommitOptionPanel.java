@@ -456,7 +456,7 @@ public class CommitOptionPanel extends Panel {
 		super.onEvent(event);
 		if (event.getPayload() instanceof BlobNameChanging) {
 			BlobNameChanging payload = (BlobNameChanging) event.getPayload();
-			onBlobChange(payload.getPartialPageRequestHandler());
+			onBlobChange(payload.getHandler());
 		}
 	}
 

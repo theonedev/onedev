@@ -362,11 +362,28 @@ gitplex.server = {
 	},	
 	
 	setupWebsocketCallback: function() {
+		var ajaxCalls = 0;
+		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
+			ajaxCalls++;
+		});
+		Wicket.Event.subscribe('/ajax/call/done', function() {
+			ajaxCalls--;
+		});
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
-			if (message == "RenderCallback")
-				Wicket.WebSocket.send(message);
-			else if (message == "ErrorMessage")
+			if (message == "RenderCallback") { 
+				function requestToRender() {
+					if (ajaxCalls != 0) {
+						setTimeout(function() {
+							requestToRender();
+						}, 10);
+					} else {
+						Wicket.WebSocket.send(message);
+					}
+				}
+				requestToRender();
+			} else if (message == "ErrorMessage") {
 				$("#websocket-error").show();
+			}
 		});
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
 			Wicket.WebSocket.send("ConnectCallback");

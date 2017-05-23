@@ -12,7 +12,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.websocket.PullRequestChanged;
+import com.gitplex.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
@@ -56,9 +56,9 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 
-		if (event.getPayload() instanceof PullRequestChanged) {
-			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
+		if (event.getPayload() instanceof PageDataChanged) {
+			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+			IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
 			partialPageRequestHandler.add(this);
 		}
 	}

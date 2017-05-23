@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -19,7 +20,6 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.launcher.loader.AppLoader;
@@ -45,9 +45,9 @@ import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
+import com.gitplex.server.web.websocket.PageDataChanged;
 import com.gitplex.server.web.websocket.TaskChangedRegion;
 import com.gitplex.server.web.websocket.WebSocketRegion;
-import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
@@ -110,29 +110,21 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new ViewStateAwarePageLink<Void>("tasks", TaskListPage.class, TaskListPage.paramsOf(user)) {
 	
 				@Override
-				protected void onInitialize() {
-					super.onInitialize();
-					
-					add(new WebSocketRenderBehavior() {
-						
-						@Override
-						protected void onRender(WebSocketRequestHandler handler) {
-							handler.add(getComponent());
-						}
-						
-					});
-					
-					setOutputMarkupPlaceholderTag(true);
+				public void onEvent(IEvent<?> event) {
+					super.onEvent(event);
+					if (event.getPayload() instanceof PageDataChanged) {
+						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+						pageDataChanged.getHandler().add(this);
+					}
 				}
-
+				
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
 					setVisible(!getLoginUser().getRequestTasks().isEmpty());
 				}
 				
-			});
-			
+			}.setOutputMarkupPlaceholderTag(true));
 		} else {
 			head.add(new WebMarkupContainer("tasks").setVisible(false));
 		}

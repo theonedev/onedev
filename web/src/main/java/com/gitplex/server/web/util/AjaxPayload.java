@@ -4,14 +4,14 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
 public class AjaxPayload {
 	
-	private final IPartialPageRequestHandler partialPageRequestHandler;
+	private final IPartialPageRequestHandler handler;
 	
-	public AjaxPayload(IPartialPageRequestHandler partialPageRequestHandler) {
-		this.partialPageRequestHandler = partialPageRequestHandler;
+	public AjaxPayload(IPartialPageRequestHandler handler) {
+		this.handler = handler;
 	}
 
-	public IPartialPageRequestHandler getPartialPageRequestHandler() {
-		return partialPageRequestHandler;
+	public IPartialPageRequestHandler getHandler() {
+		return handler;
 	}
 	
 }

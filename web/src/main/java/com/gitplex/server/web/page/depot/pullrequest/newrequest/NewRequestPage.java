@@ -3,6 +3,7 @@ package com.gitplex.server.web.page.depot.pullrequest.newrequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,7 +38,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.Account;
 import com.gitplex.server.model.CodeComment;
@@ -74,7 +74,9 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetail
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.page.security.LoginPage;
-import com.gitplex.server.web.websocket.PullRequestChanged;
+import com.gitplex.server.web.websocket.CommitIndexedRegion;
+import com.gitplex.server.web.websocket.PageDataChanged;
+import com.gitplex.server.web.websocket.WebSocketRegion;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -93,8 +95,6 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 	private IModel<List<RevCommit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
-	
-	private Long commentId;
 	
 	private CommentPos mark;
 	
@@ -559,9 +559,9 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 
-				if (event.getPayload() instanceof PullRequestChanged) {
-					PullRequestChanged payload = (PullRequestChanged) event.getPayload();
-					payload.getPartialPageRequestHandler().add(this);
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged payload = (PageDataChanged) event.getPayload();
+					payload.getHandler().add(this);
 				}
 			}
 
@@ -682,7 +682,7 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
+				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 			
 		});
@@ -696,7 +696,19 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 				return getPullRequest().getMergeStrategy().getDescription();
 			}
 			
-		}));
+		}) {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged payload = (PageDataChanged) event.getPayload();
+					payload.getHandler().add(this);
+				}
+			}
+			
+		}.setOutputMarkupId(true));
 		
 		form.add(new ReviewerListPanel("reviewers", requestModel));
 		
@@ -742,34 +754,17 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 
 	@Override
 	public CodeComment getOpenComment() {
-		if (commentId != null)
-			return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-		else
-			return null;
+		return null;
 	}
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		if (comment != null) {
-			commentId = comment.getId();
-			mark = comment.getCommentPos();
-		} else {
-			commentId = null;
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String getCommentUrl(CodeComment comment) {
-		RevisionComparePage.State state = new RevisionComparePage.State();
-		mark = comment.getCommentPos();
-		state.commentId = comment.getId();
-		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
-		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getHeadCommitHash());
-		state.pathFilter = pathFilter;
-		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
-		state.whitespaceOption = whitespaceOption;
-		state.compareWithMergeBase = false;
-		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -779,8 +774,15 @@ public class NewRequestPage extends DepotPage implements CommentSupport {
 
 	@Override
 	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
-		this.commentId = null;
-		this.mark = mark;
+		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+		regions.add(new CommitIndexedRegion(getDepot().getId(), getPullRequest().getBaseCommit()));
+		regions.add(new CommitIndexedRegion(getDepot().getId(), getPullRequest().getHeadCommit()));
+		return regions;
+	}
+	
 }

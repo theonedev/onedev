@@ -29,7 +29,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -45,7 +44,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
@@ -87,10 +88,9 @@ import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.WicketUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.model.EntityModel;
-import com.gitplex.server.web.websocket.PullRequestChanged;
+import com.gitplex.server.web.websocket.PageDataChanged;
 import com.gitplex.server.web.websocket.PullRequestChangedRegion;
 import com.gitplex.server.web.websocket.WebSocketRegion;
-import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -254,8 +254,8 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 
-				if (event.getPayload() instanceof PullRequestChanged) {
-					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
 					for (Component child: this) {
 						if (child instanceof MarkupContainer) {
 							MarkupContainer container = (MarkupContainer) child;
@@ -268,14 +268,14 @@ public abstract class RequestDetailPage extends DepotPage {
 								
 							});
 							if (form == null) {
-								pullRequestChanged.getPartialPageRequestHandler().add(child);
+								pageDataChanged.getHandler().add(child);
 							}
 						} else if (!(child instanceof Form)) {
-							pullRequestChanged.getPartialPageRequestHandler().add(child);
+							pageDataChanged.getHandler().add(child);
 						}
 					}
 					WicketUtils.markLastVisibleChild(this);
-					pullRequestChanged.getPartialPageRequestHandler().appendJavaScript("$(window).resize();");
+					pageDataChanged.getHandler().appendJavaScript("$(window).resize();");
 				}
 			}
 
@@ -314,21 +314,60 @@ public abstract class RequestDetailPage extends DepotPage {
 		tabs.add(new RequestTab("Merge Preview", MergePreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
-		
-		add(new WebSocketRenderBehavior() {
-			
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(handler));				
+	}
+	
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		if (event.getPayload() instanceof PageDataChanged) {
+			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+			if (pageDataChanged.isOnConnect()) {
+				RequestCycle.get().getListeners().add(new IRequestCycleListener() {
+					
+					@Override
+					public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
+					}
+					
+					@Override
+					public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
+					}
+					
+					@Override
+					public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+						return null;
+					}
+					
+					@Override
+					public void onEndRequest(RequestCycle cycle) {
+						if (SecurityUtils.getAccount() != null) { 
+							GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), 
+									getPullRequest());
+						}
+					}
+					
+					@Override
+					public void onDetach(RequestCycle cycle) {
+					}
+					
+					@Override
+					public void onBeginRequest(RequestCycle cycle) {
+					}
+					
+				});
 			}
-
-			@Override
-			protected void onEndInitialRequest(RequestCycle cycle) {
-				if (SecurityUtils.getAccount() != null) 
-					GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), getPullRequest());
-			}
-
-		});
+		}
 	}
 	
 	private WebMarkupContainer newStatusAndBranchesContainer() {
@@ -375,9 +414,9 @@ public abstract class RequestDetailPage extends DepotPage {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 
-				if (event.getPayload() instanceof PullRequestChanged) {
-					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					pullRequestChanged.getPartialPageRequestHandler().add(this);
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+					pageDataChanged.getHandler().add(this);
 				}
 			}
 			
@@ -890,8 +929,8 @@ public abstract class RequestDetailPage extends DepotPage {
 					@Override
 					public void onEvent(IEvent<?> event) {
 						super.onEvent(event);
-						if (event.getPayload() instanceof PullRequestChanged) {
-							((PullRequestChanged)event.getPayload()).getPartialPageRequestHandler().add(this);
+						if (event.getPayload() instanceof PageDataChanged) {
+							((PageDataChanged)event.getPayload()).getHandler().add(this);
 						}
 					}
 					

@@ -60,7 +60,7 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.acti
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.activity.UpdatedActivity;
 import com.gitplex.server.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
-import com.gitplex.server.web.websocket.PullRequestChanged;
+import com.gitplex.server.web.websocket.PageDataChanged;
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -102,7 +102,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				if (event.getPayload() instanceof RequestCommentDeleted) {
 					RequestCommentDeleted commentRemoved = (RequestCommentDeleted) event.getPayload();
 					remove();
-					commentRemoved.getPartialPageRequestHandler().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
+					commentRemoved.getHandler().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
 				} 
 			}
 			
@@ -179,9 +179,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 
-		if (event.getPayload() instanceof PullRequestChanged) {
-			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
+		if (event.getPayload() instanceof PageDataChanged) {
+			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+			IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
 
 			@SuppressWarnings("deprecation")
 			Component prevActivityRow = activitiesView.get(activitiesView.size()-1);
@@ -408,9 +408,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 
-				if (event.getPayload() instanceof PullRequestChanged) {
-					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+					IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
 					partialPageRequestHandler.add(this);
 				}
 				
@@ -453,7 +453,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				GitPlex.getInstance(PullRequestManager.class).saveMergeStrategy(getPullRequest());
-				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target));								
+				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 			
 		});

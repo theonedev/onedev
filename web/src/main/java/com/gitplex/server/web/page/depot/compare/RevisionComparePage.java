@@ -32,7 +32,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Depot;
@@ -56,7 +55,6 @@ import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
-import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
@@ -85,8 +83,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compare-with-merge-base";
 	
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
-	
-	private static final String PARAM_COMMENT = "comment";
 	
 	private static final String PARAM_MARK = "mark";
 	
@@ -125,8 +121,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
 		if (state.blameFile != null)
 			params.set(PARAM_BLAME_FILE, state.blameFile);
-		if (state.commentId != null)
-			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
 		if (state.tabPanel != null)
@@ -173,7 +167,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
-		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = CommentPos.fromString(params.get(PARAM_MARK).toString());
 		
 		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
@@ -244,7 +237,7 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
+		
 		setOutputMarkupId(true);
 		
 		add(new AffinalRevisionPicker("leftRevSelector", state.leftSide.getDepotId(), state.leftSide.getRevision()) { 
@@ -259,7 +252,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.mark = state.mark;
-				newState.commentId = state.commentId;
 				newState.tabPanel = state.tabPanel;
 
 				PageParameters params = paramsOf(depot, newState);
@@ -294,7 +286,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				newState.rightSide = state.rightSide;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = !state.compareWithMergeBase;
-				newState.commentId = state.commentId;
 				newState.mark = state.mark;
 				newState.tabPanel = state.tabPanel;
 				
@@ -340,7 +331,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
-				newState.commentId = state.commentId;
 				newState.mark = state.mark;
 				newState.tabPanel = state.tabPanel;
 				
@@ -362,7 +352,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.mark = state.mark;
-				newState.commentId = state.commentId;
 				
 				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), newState));
 			}
@@ -651,9 +640,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 		public String blameFile;
 		
 		@Nullable
-		public Long commentId;
-
-		@Nullable
 		public CommentPos mark;
 		
 		public State() {
@@ -666,7 +652,6 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 			whitespaceOption = state.whitespaceOption;
 			pathFilter = state.pathFilter;
 			blameFile = state.blameFile;
-			commentId = state.commentId;
 			mark = state.mark;
 			tabPanel = state.tabPanel;
 		}
@@ -693,64 +678,40 @@ public class RevisionComparePage extends DepotPage implements CommentSupport {
 	}
 
 	@Override
-	public String getCommentUrl(CodeComment comment) {
-		State commentState = new State();
-		commentState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
-				state.compareWithMergeBase?mergeBase.name():leftCommitId.name());
-		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
-		commentState.mark = comment.getCommentPos();
-		commentState.commentId = comment.getId();
-		commentState.tabPanel = TabPanel.CHANGES;
-		commentState.pathFilter = state.pathFilter;
-		commentState.whitespaceOption = state.whitespaceOption;
-		commentState.compareWithMergeBase = false;
-		return urlFor(RevisionComparePage.class, paramsOf(commentState.rightSide.getDepot(), commentState)).toString();
-	}
-	
-	@Override
-	public CodeComment getOpenComment() {
-		if (state.commentId != null)
-			return GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
-		else
-			return null;
-	}
-
-	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		if (comment != null) {
-			state.mark = comment.getCommentPos();
-			state.commentId = comment.getId();
-		} else {
-			state.commentId = null;
-			state.mark = null;
-		}
-		pushState(target);
-		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
-	}
-
-	@Override
 	public void onMark(AjaxRequestTarget target, CommentPos mark) {
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, CommentPos mark) {
-		state.commentId = null;
-		state.mark = mark;
-		pushState(target);
-		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+	public Collection<WebSocketRegion> getWebSocketRegions() {
+		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+		if (state.compareWithMergeBase) 
+			regions.add(new CommitIndexedRegion(getDepot().getId(), mergeBase));
+		else
+			regions.add(new CommitIndexedRegion(getDepot().getId(), state.leftSide.getCommit()));
+		regions.add(new CommitIndexedRegion(getDepot().getId(), state.rightSide.getCommit()));
+		return regions;
 	}
 
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(getDepot().getId(), state.leftSide.getCommit()));
-		regions.add(new CommitIndexedRegion(getDepot().getId(), state.rightSide.getCommit()));
-		
-		if (state.commentId != null)
-			regions.add(new CodeCommentChangedRegion(state.commentId));
-		return regions;
+	public String getCommentUrl(CodeComment comment) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public CodeComment getOpenComment() {
+		return null;
+	}
+
+	@Override
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void onAddComment(AjaxRequestTarget target, CommentPos commentPos) {
+		throw new UnsupportedOperationException();
 	}
 
 }

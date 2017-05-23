@@ -28,7 +28,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
@@ -90,10 +89,10 @@ import com.gitplex.server.web.page.depot.commit.DepotCommitsPage;
 import com.gitplex.server.web.util.resource.RawBlobResourceReference;
 import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
+import com.gitplex.server.web.websocket.PageDataChanged;
 import com.gitplex.server.web.websocket.PullRequestChangedRegion;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
-import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -274,16 +273,6 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 				default:
 					throw new IllegalStateException("Unexpected action: " + action);
 				}
-			}
-			
-		});
-		
-		add(new WebSocketRenderBehavior() {
-			
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				handler.add(revisionIndexing);
-				resizeWindow(handler);
 			}
 			
 		});
@@ -1031,8 +1020,11 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 		super.onEvent(event);
 		if (event.getPayload() instanceof RevisionResolved) {
 			RevisionResolved revisionResolveEvent = (RevisionResolved) event.getPayload();
-			
 			resolvedRevision = revisionResolveEvent.getResolvedRevision();
+		} else if (event.getPayload() instanceof PageDataChanged) {
+			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+			pageDataChanged.getHandler().add(revisionIndexing);
+			resizeWindow(pageDataChanged.getHandler());
 		}
 	}
 

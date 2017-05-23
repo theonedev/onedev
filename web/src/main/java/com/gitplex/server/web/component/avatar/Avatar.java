@@ -59,7 +59,7 @@ public class Avatar extends WebComponent {
 			if (avatarChanged.getAccount().getId().equals(accountId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 				url = avatarManager.getAvatarUrl(avatarChanged.getAccount());
-				avatarChanged.getPartialPageRequestHandler().add(this);
+				avatarChanged.getHandler().add(this);
 			}
 		}
 	}

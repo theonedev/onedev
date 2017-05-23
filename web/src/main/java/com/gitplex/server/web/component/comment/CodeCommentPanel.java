@@ -15,20 +15,23 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.StaleStateException;
@@ -57,7 +60,7 @@ import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.Reque
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
-import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
+import com.gitplex.server.web.websocket.PageDataChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import jersey.repackaged.com.google.common.collect.Lists;
@@ -478,9 +481,18 @@ public abstract class CodeCommentPanel extends Panel {
 		super.onInitialize();
 
 		PageParameters params = RequestChangesPage.paramsOf(getComment());
-		Link<Void> outdatedContextLink = new BookmarkablePageLink<Void>("outdatedContext", RequestChangesPage.class, 
-				params) {
+		add(new BookmarkablePageLink<Void>("outdatedContext", RequestChangesPage.class, params) {
 
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+					pageDataChanged.getHandler().add(this);
+				}
+			}
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -498,18 +510,7 @@ public abstract class CodeCommentPanel extends Panel {
 				}
 			}
 			
-		};
-		outdatedContextLink.setOutputMarkupPlaceholderTag(true);
-		outdatedContextLink.add(new WebSocketRenderBehavior() {
-					
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				handler.add(outdatedContextLink);
-			}
-			
-		});
-
-		add(outdatedContextLink);
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		add(newCommentContainer());
 		
@@ -535,61 +536,103 @@ public abstract class CodeCommentPanel extends Panel {
 		add(newAddReplyContainer());
 		
 		setOutputMarkupId(true);
-		
-		add(new WebSocketRenderBehavior() {
-
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				Date lastActivityDate;
-				String prevActivityMarkupId;
-				if (activitiesView.size() != 0) {
-					@SuppressWarnings("deprecation")
-					Component lastActivityContainer = activitiesView.get(activitiesView.size()-1);
-					
-					CodeCommentActivity lastActivity = ((ActivityIdentity) lastActivityContainer.getDefaultModelObject()).getActivity();
-					lastActivityDate = lastActivity.getDate();
-					prevActivityMarkupId = lastActivityContainer.getMarkupId();
-				} else {
-					lastActivityDate = getComment().getDate();
-					prevActivityMarkupId = get("comment").getMarkupId();
-				}
-				
-				List<CodeCommentActivity> activities = new ArrayList<>();
-				for (CodeCommentReply reply: getComment().getReplies()) {
-					if (reply.getDate().getTime()>lastActivityDate.getTime()) {
-						activities.add(reply);
-					}
-				}
-				for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
-					if (statusChange.getDate().getTime()>lastActivityDate.getTime()) {
-						activities.add(statusChange);
-					}
-				}
-				activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
-				
-				for (CodeCommentActivity activity: activities) {
-					Component newActivityContainer = newActivityContainer(activitiesView.newChildId(), activity); 
-					newActivityContainer.add(AttributeAppender.append("class", "new"));
-					activitiesView.add(newActivityContainer);
-					
-					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							newActivityContainer.getMarkupId(), prevActivityMarkupId);
-					handler.prependJavaScript(script);
-					handler.add(newActivityContainer);
-					prevActivityMarkupId = newActivityContainer.getMarkupId();
-				}
-			}
-
-			@Override
-			protected void onEndInitialRequest(RequestCycle cycle) {
-				if (SecurityUtils.getAccount() != null) {
-					GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), getComment());
-				}
-			}
-			
-		});
 	}
 
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (event.getPayload() instanceof PageDataChanged) {
+			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+			IPartialPageRequestHandler handler = pageDataChanged.getHandler();
+			
+			Date lastActivityDate;
+			String prevActivityMarkupId;
+			if (activitiesView.size() != 0) {
+				@SuppressWarnings("deprecation")
+				Component lastActivityContainer = activitiesView.get(activitiesView.size()-1);
+				
+				CodeCommentActivity lastActivity = ((ActivityIdentity) lastActivityContainer.getDefaultModelObject()).getActivity();
+				lastActivityDate = lastActivity.getDate();
+				prevActivityMarkupId = lastActivityContainer.getMarkupId();
+			} else {
+				lastActivityDate = getComment().getDate();
+				prevActivityMarkupId = get("comment").getMarkupId();
+			}
+			
+			List<CodeCommentActivity> activities = new ArrayList<>();
+			for (CodeCommentReply reply: getComment().getReplies()) {
+				if (reply.getDate().getTime()>lastActivityDate.getTime()) {
+					activities.add(reply);
+				}
+			}
+			for (CodeCommentStatusChange statusChange: getComment().getStatusChanges()) {
+				if (statusChange.getDate().getTime()>lastActivityDate.getTime()) {
+					activities.add(statusChange);
+				}
+			}
+			activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
+			
+			for (CodeCommentActivity activity: activities) {
+				Component newActivityContainer = newActivityContainer(activitiesView.newChildId(), activity); 
+				newActivityContainer.add(AttributeAppender.append("class", "new"));
+				activitiesView.add(newActivityContainer);
+				
+				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+						newActivityContainer.getMarkupId(), prevActivityMarkupId);
+				handler.prependJavaScript(script);
+				handler.add(newActivityContainer);
+				prevActivityMarkupId = newActivityContainer.getMarkupId();
+			}
+			
+			if (pageDataChanged.isOnConnect()) {
+				RequestCycle.get().getListeners().add(new IRequestCycleListener() {
+					
+					@Override
+					public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
+					}
+					
+					@Override
+					public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
+					}
+					
+					@Override
+					public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+						return null;
+					}
+					
+					@Override
+					public void onEndRequest(RequestCycle cycle) {
+						if (SecurityUtils.getAccount() != null) {
+							GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), getComment());
+						}
+					}
+					
+					@Override
+					public void onDetach(RequestCycle cycle) {
+					}
+					
+					@Override
+					public void onBeginRequest(RequestCycle cycle) {
+					}
+				});
+				
+			}
+		}
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

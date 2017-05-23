@@ -13,8 +13,8 @@ public class PullRequestChangedRegion implements WebSocketRegion {
 	@Override
 	public boolean contains(WebSocketRegion region) {
 		if (region instanceof PullRequestChangedRegion) {
-			PullRequestChangedRegion pullRequestChangedRegion = (PullRequestChangedRegion) region;
-			return requestId.equals(pullRequestChangedRegion.requestId);
+			PullRequestChangedRegion pageDataChangedRegion = (PullRequestChangedRegion) region;
+			return requestId.equals(pageDataChangedRegion.requestId);
 		} else {
 			return false;
 		}

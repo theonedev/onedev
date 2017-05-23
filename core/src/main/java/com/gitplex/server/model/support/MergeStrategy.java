@@ -1,13 +1,13 @@
 package com.gitplex.server.model.support;
 
 public enum MergeStrategy {
-	ALWAYS_MERGE("Always Merge", 
+	ALWAYS_MERGE("Create Merge Commit", 
 			"Add all commits from source branch to target branch with a merge commit."), 
-	MERGE_IF_NECESSARY("Merge If Necessary", 
+	MERGE_IF_NECESSARY("Create Merge Commit If Necessary", 
 			"Only create merge commit if target branch can not be fast-forwarded to source branch"),
-	SQUASH_MERGE("Squash Merge", 
+	SQUASH_MERGE("Squash Source Branch Commits", 
 			"Squash all commits from source branch into a single commit in target branch"),
-	REBASE_MERGE("Rebase Merge", 
+	REBASE_MERGE("Rebase Source Branch Commits", 
 			"Rebase all commits from source branch onto target branch"), 
 	DO_NOT_MERGE("Do Not Merge", 
 			"Do not merge now, only for review"); 

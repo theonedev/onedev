@@ -18,6 +18,7 @@ import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -28,6 +29,9 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
+import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
+import org.apache.wicket.protocol.ws.api.message.TextMessage;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -46,6 +50,7 @@ import com.gitplex.server.web.page.init.ServerInitPage;
 import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
+import com.gitplex.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
@@ -189,6 +194,33 @@ public abstract class BasePage extends WebPage {
 				.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
 		
 		add(rootComponents = new RepeatingView("rootComponents"));
+		
+		add(new WebSocketBehavior() {
+
+			@Override
+			protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
+				super.onMessage(handler, message);
+				
+				if (message.getText().equals(WebSocketManager.RENDER_CALLBACK)) {
+					send(getPage(), Broadcast.BREADTH, new PageDataChanged(handler, false));
+				} else if (message.getText().equals(WebSocketManager.CONNECT_CALLBACK)) {
+					/* 
+					 * re-render interesting parts upon websocket connecting after a page is opened, 
+					 * this is necessary in case some web socket render request is sent between the 
+					 * gap of opening a page and a websocket connection is established. For instance
+					 * when someone creates a pull request, the server will re-render integration 
+					 * preview section of the page after preview is calculated and this may happen 
+					 * before the web socket connection is established. Requiring the page to 
+					 * re-render the integration preview section after connecting will make it 
+					 * displaying correctly    
+					 */
+					send(getPage(), Broadcast.BREADTH, new PageDataChanged(handler, true));
+				} 
+		 
+			}
+			
+		});
+					
 	}
 	
 	public FeedbackPanel getSessionFeedback() {

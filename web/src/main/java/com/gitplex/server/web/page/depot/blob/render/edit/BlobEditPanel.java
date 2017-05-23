@@ -134,7 +134,7 @@ public abstract class BlobEditPanel extends Panel {
 			BlobNameChanging payload = (BlobNameChanging) event.getPayload();
 			String script = String.format("gitplex.server.blobEdit.checkClean('%s', %s);", 
 					getMarkupId(), recreateBehavior.getCallbackFunction());
-			payload.getPartialPageRequestHandler().appendJavaScript(script);
+			payload.getHandler().appendJavaScript(script);
 		}
 	}
 

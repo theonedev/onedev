@@ -25,6 +25,7 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -42,7 +43,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -97,7 +97,7 @@ import com.gitplex.server.web.page.depot.blob.search.SearchMenuContributor;
 import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import com.gitplex.server.web.websocket.WebSocketRenderBehavior;
+import com.gitplex.server.web.websocket.PageDataChanged;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -254,7 +254,18 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 
 		};
 		
-		WebMarkupContainer head = new WebMarkupContainer("head");
+		WebMarkupContainer head = new WebMarkupContainer("head") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (commentContainer.isVisible() && event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+					pageDataChanged.getHandler().add(this);
+				}
+			}
+			
+		};
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
@@ -363,16 +374,6 @@ public class SourceViewPanel extends BlobViewPanel implements MarkSupport, Searc
 			commentContainer.add(new WebMarkupContainer(BODY_ID));
 			commentContainer.setVisible(false);
 		}
-		
-		commentContainer.add(new WebSocketRenderBehavior() {
-			
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				if (commentContainer.isVisible())
-					handler.add(head);					
-			}
-			
-		});
 		
 		add(commentContainer);
 		
