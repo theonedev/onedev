@@ -3,6 +3,7 @@ package com.gitplex.server.web;
 import org.apache.wicket.core.request.handler.BookmarkablePageRequestHandler;
 import org.apache.wicket.core.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
+import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
@@ -33,6 +34,8 @@ import com.gitplex.server.web.page.account.teams.TeamMemberListPage;
 import com.gitplex.server.web.page.admin.DatabaseBackupPage;
 import com.gitplex.server.web.page.admin.MailSettingPage;
 import com.gitplex.server.web.page.admin.SecuritySettingPage;
+import com.gitplex.server.web.page.admin.ServerInformationPage;
+import com.gitplex.server.web.page.admin.ServerLogPage;
 import com.gitplex.server.web.page.admin.SystemSettingPage;
 import com.gitplex.server.web.page.admin.account.NewUserPage;
 import com.gitplex.server.web.page.admin.account.UserListPage;
@@ -71,6 +74,7 @@ import com.gitplex.server.web.util.mapper.WebPageMapper;
 import com.gitplex.server.web.util.resource.ArchiveResourceReference;
 import com.gitplex.server.web.util.resource.AttachmentResourceReference;
 import com.gitplex.server.web.util.resource.RawBlobResourceReference;
+import com.gitplex.server.web.util.resource.ServerLogResourceReference;
 
 public class UrlMapper extends CompoundRequestMapper {
 
@@ -89,6 +93,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addResources() {
+		add(new ResourceMapper("resource/server-log", new ServerLogResourceReference()));
 		add(new DepotResourceMapper("${account}/${depot}/archive/${revision}", new ArchiveResourceReference()));
 		add(new DepotResourceMapper("${account}/${depot}/raw/${revision}/${path}", new RawBlobResourceReference()));
 		add(new DepotResourceMapper("${account}/${depot}/attachment/${uuid}/${attachment}", 
@@ -109,6 +114,8 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new WebPageMapper("administration/settings/mail", MailSettingPage.class));
 		add(new WebPageMapper("administration/settings/backup", DatabaseBackupPage.class));
 		add(new WebPageMapper("administration/settings/security", SecuritySettingPage.class));
+		add(new WebPageMapper("administration/server-log", ServerLogPage.class));
+		add(new WebPageMapper("administration/server-information", ServerInformationPage.class));
 	}
 	
 	private void addAccountPages() {

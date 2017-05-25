@@ -17,3 +17,12 @@
 	font-weight: bold;
 	font-size: 12px;
 }
+
+.server-log>.head {
+	margin-bottom: 20px;
+}
+.server-log>.body>pre {
+	background: black;
+	border: 1px solid black;
+	color: white;
+}
