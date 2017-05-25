@@ -39,8 +39,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.launcher.loader.Listen;
 import com.gitplex.jsymbol.Symbol;
+import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.manager.StorageManager;
@@ -98,7 +98,7 @@ public class DefaultSearchManager implements SearchManager {
 	@Override
 	public List<QueryHit> search(Depot depot, ObjectId commit, final BlobQuery query) 
 			throws InterruptedException {
-		final List<QueryHit> hits = new ArrayList<>();
+		List<QueryHit> hits = new ArrayList<>();
 
 		SearcherManager searcherManager = getSearcherManager(depot);
 		if (searcherManager != null) {
