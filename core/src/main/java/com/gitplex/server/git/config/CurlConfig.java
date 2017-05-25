@@ -22,9 +22,10 @@ import com.gitplex.server.util.validation.annotation.ClassValidating;
  */
 @Editable
 @ClassValidating
-@SuppressWarnings("serial")
 public abstract class CurlConfig implements Serializable, Validatable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private static final Logger logger = LoggerFactory.getLogger(CurlConfig.class);
 	
 	public abstract String getExecutable();

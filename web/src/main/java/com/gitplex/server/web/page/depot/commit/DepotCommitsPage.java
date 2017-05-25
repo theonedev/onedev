@@ -120,7 +120,7 @@ public class DepotCommitsPage extends DepotPage {
 			
 			List<String> commitHashes;
 			try {
-				RevListCommand command = new RevListCommand(getDepot().getDirectory());
+				RevListCommand command = new RevListCommand(getDepot().getGitDir());
 				command.ignoreCase(true);
 				
 				if (state.page > MAX_PAGES)

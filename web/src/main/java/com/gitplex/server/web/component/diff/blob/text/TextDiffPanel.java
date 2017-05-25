@@ -136,7 +136,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private BlameInfo getBlameInfo() {
 		blameInfo = new BlameInfo();
-		BlameCommand cmd = new BlameCommand(depotModel.getObject().getDirectory());
+		BlameCommand cmd = new BlameCommand(depotModel.getObject().getGitDir());
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
 			cmd.commitHash(getOldCommit().name()).file(oldPath);

@@ -77,7 +77,7 @@
             <dependency> 
                 <groupId>org.jetbrains.xodus</groupId>  
                 <artifactId>xodus-entity-store</artifactId>  
-                <version>1.0.4</version> 
+                <version>1.0.5</version> 
             </dependency>  
             <dependency> 
                 <groupId>org.apache.tika</groupId>  

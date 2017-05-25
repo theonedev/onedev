@@ -177,7 +177,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 					prevFiles = new HashSet<>();
 				Set<String> files = new HashSet<>(prevFiles);
 				
-				try (	RevWalk revWalk = new RevWalk(depot.getRepository());) {
+				try (RevWalk revWalk = new RevWalk(depot.getRepository());) {
 					revWalk.markStart(commits);
 					if (lastCommitId != null) {
 						RevCommit lastCommit = GitUtils.parseCommit(revWalk, lastCommitId);
@@ -319,8 +319,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 			Environment env = envs.get(depot.getId());
 			if (env == null) {
 				EnvironmentConfig config = new EnvironmentConfig();
-				config.setLogCacheShared(false);
-				config.setMemoryUsage(1024*1024*64);
+				config.setEnvCloseForcedly(true);
 				config.setLogFileSize(64*1024);
 				env = Environments.newInstance(getInfoDir(depot), config);
 				envs.put(depot.getId(), env);
@@ -551,7 +550,6 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 		filesCache.remove(depot.getId());
 		commitCountCache.remove(depot.getId());
 		authorsCache.remove(depot.getId());
-		FileUtils.deleteDir(getInfoDir(depot));
 	}
 	
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {

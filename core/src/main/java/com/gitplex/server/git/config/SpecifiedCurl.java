@@ -5,9 +5,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable(name="Use Specified curl", order=200)
-@SuppressWarnings("serial")
 public class SpecifiedCurl extends CurlConfig {
 
+	private static final long serialVersionUID = 1L;
+	
 	private String curlPath;
 	
 	@Editable(description="Specify path to curl executable, for instance: <tt>/usr/bin/curl</tt>")

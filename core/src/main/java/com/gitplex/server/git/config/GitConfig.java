@@ -17,8 +17,10 @@ import com.gitplex.server.util.validation.annotation.ClassValidating;
  */
 @Editable
 @ClassValidating
-@SuppressWarnings("serial")
 public abstract class GitConfig implements Serializable, Validatable {
+
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Get git executable, for instance <tt>/usr/bin/git</tt>.
 	 * 

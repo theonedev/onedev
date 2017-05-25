@@ -63,7 +63,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 		if (!request.getTargetDepot().equals(request.getSourceDepot())) {
 			try {
 				request.getTargetDepot().git().fetch()
-						.setRemote(request.getSourceDepot().getDirectory().getAbsolutePath())
+						.setRemote(request.getSourceDepot().getGitDir().getAbsolutePath())
 						.setRefSpecs(new RefSpec(GitUtils.branch2ref(request.getSourceBranch()) + ":" + update.getHeadRef()))
 						.call();
 				if (!request.getTargetDepot().getObjectId(update.getHeadRef()).equals(updateHeadId)) {

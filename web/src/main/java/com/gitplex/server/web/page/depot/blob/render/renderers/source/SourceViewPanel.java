@@ -749,7 +749,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			
 			String commitHash = context.getCommit().name();
 			
-			BlameCommand cmd = new BlameCommand(context.getDepot().getDirectory());
+			BlameCommand cmd = new BlameCommand(context.getDepot().getGitDir());
 			cmd.commitHash(commitHash).file(context.getBlobIdent().path);
 			for (Blame blame: cmd.call().values()) {
 				BlameInfo blameInfo = new BlameInfo();

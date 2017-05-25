@@ -115,7 +115,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     			repository = repositoryCache.get(depot.getId());
     			if (repository == null) {
     				try {
-						repository = new FileRepository(depot.getDirectory());
+						repository = new FileRepository(depot.getGitDir());
 						repository.getConfig().setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, 
 								ConfigConstants.CONFIG_KEY_ALGORITHM, SupportedAlgorithm.HISTOGRAM);
 					} catch (IOException e) {
@@ -173,7 +173,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 					idLock.writeLock().unlock();
 				}
 				if (isNew) {
-		    		checkGit(depot);
+		    		checkDirectory(depot);
 			        commitInfoManager.requestToCollect(depot);
 				}
 			}
@@ -249,14 +249,32 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 	@Override
 	public void fork(Depot from, Depot to) {
     	save(to);
-        FileUtils.cleanDir(to.getDirectory());
-        new CloneCommand(to.getDirectory()).mirror(true).from(from.getDirectory().getAbsolutePath()).call();
-        doAfterCommit(newAfterCommitRunnable(to, true));
+        FileUtils.cleanDir(to.getGitDir());
+        new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
 	}
 
-	private void checkGit(Depot depot) {
-		File gitDir = depot.getDirectory();
-		if (depot.getDirectory().exists() && !GitUtils.isValid(gitDir)) {
+	private boolean isGitHookValid(Depot depot, String hookName) {
+        File hookFile = new File(depot.getGitDir(), "hooks/" + hookName);
+        if (!hookFile.exists()) 
+        	return false;
+        
+        try {
+			String content = FileUtils.readFileToString(hookFile);
+			if (!content.contains("GITPLEX_USER_ID"))
+				return false;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+        if (!hookFile.canExecute())
+        	return false;
+        
+        return true;
+	}
+	
+	private void checkDirectory(Depot depot) {
+		File gitDir = depot.getGitDir();
+		if (depot.getGitDir().exists() && !GitUtils.isValid(gitDir)) {
         	logger.warn("Directory '" + gitDir + "' is not a valid git repository, removing...");
         	FileUtils.deleteDir(gitDir);
         }
@@ -271,7 +289,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 			}
         }
         
-        if (!depot.isValid()) {
+        if (!isGitHookValid(depot, "pre-receive") || !isGitHookValid(depot, "post-receive")) {
             File hooksDir = new File(gitDir, "hooks");
 
             File gitPreReceiveHookFile = new File(hooksDir, "pre-receive");
@@ -282,32 +300,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
             FileUtils.writeFile(gitPostReceiveHookFile, String.format(gitReceiveHook, "git-postreceive-callback"));
             gitPostReceiveHookFile.setExecutable(true);
         }
-	}
-	
-	@Sessional
-	@Listen
-	public void on(SystemStarting event) {
-        for (Depot depot: findAll()) 
-        	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getAccount().getId(), depot.getName()));
-	}
-	
-	@Transactional
-	@Listen
-	public void on(SystemStarted event) {
-		for (Depot depot: findAll()) {
-			logger.info("Checking repository {}...", depot.getFQN());
-			checkGit(depot);
-			checkInfo(depot);
-	        try {
-				commitInfoManager.requestToCollect(depot).get();
-			} catch (InterruptedException | ExecutionException e) {
-				throw new RuntimeException(e);
-			}
-			logger.info("Repository checking finished for {}", depot.getFQN());
-		}
-	}
-	
-	private void checkInfo(Depot depot) {
+        
 		File infoVersionFile = new File(storageManager.getInfoDir(depot), "version.txt");
 		int infoVersion;
 		if (infoVersionFile.exists()) {
@@ -324,7 +317,29 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 			FileUtils.writeFile(infoVersionFile, String.valueOf(INFO_VERSION));
 		}
 	}
-
+	
+	@Sessional
+	@Listen
+	public void on(SystemStarting event) {
+        for (Depot depot: findAll()) 
+        	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getAccount().getId(), depot.getName()));
+	}
+	
+	@Transactional
+	@Listen
+	public void on(SystemStarted event) {
+		for (Depot depot: findAll()) {
+			logger.info("Checking repository {}...", depot.getFQN());
+			checkDirectory(depot);
+	        try {
+				commitInfoManager.requestToCollect(depot).get();
+			} catch (InterruptedException | ExecutionException e) {
+				throw new RuntimeException(e);
+			}
+			logger.info("Repository checking finished for {}", depot.getFQN());
+		}
+	}
+	
 	@Listen
 	public void on(SystemStopping event) {
 		synchronized(repositoryCache) {

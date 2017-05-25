@@ -347,38 +347,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		return Git.wrap(getRepository()); 
 	}
 	
-	public File getDirectory() {
+	public File getGitDir() {
 		return AppLoader.getInstance(StorageManager.class).getGitDir(this);
-	}
-	
-	/**
-	 * Whether or not specified git represents a valid repository git. This can be used to tell 
-	 * apart a GitPlex repository git from some other Git repositories.
-	 * 
-	 * @return
-	 * 			<tt>true</tt> if valid; <tt>false</tt> otherwise
-	 */
-	public boolean isValid() {
-		return isGitHookValid("pre-receive") && isGitHookValid("post-receive");
-	}
-	
-	public boolean isGitHookValid(String hookName) {
-        File hookFile = new File(getDirectory(), "hooks/" + hookName);
-        if (!hookFile.exists()) 
-        	return false;
-        
-        try {
-			String content = FileUtils.readFileToString(hookFile);
-			if (!content.contains("GITPLEX_USER_ID"))
-				return false;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		
-        if (!hookFile.canExecute())
-        	return false;
-        
-        return true;
 	}
 	
 	/**

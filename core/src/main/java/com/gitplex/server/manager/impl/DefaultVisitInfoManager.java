@@ -68,8 +68,7 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 		Environment env = envs.get(depot.getId());
 		if (env == null) {
 			EnvironmentConfig config = new EnvironmentConfig();
-			config.setLogCacheShared(false);
-			config.setMemoryUsage(1024*1024*16);
+			config.setEnvCloseForcedly(true);
 			env = Environments.newInstance(getInfoDir(depot), config);
 			envs.put(depot.getId(), env);
 		}
