@@ -24,7 +24,7 @@ public class AffinalDepotsModel extends LoadableDetachableModel<Collection<Depot
 	@Override
 	protected Collection<Depot> load() {
 		Depot depot = GitPlex.getInstance(Dao.class).load(Depot.class, repoId);;
-		List<Depot> affinals = new ArrayList<>(depot.findAffinals());
+		List<Depot> affinals = new ArrayList<>(depot.getForkDescendants());
 		affinals.remove(depot);
 		if (depot.getForkedFrom() != null)
 			affinals.remove(depot.getForkedFrom());

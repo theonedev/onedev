@@ -754,8 +754,8 @@ public class NewRequestPage extends DepotPage implements MarkSupport {
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(getDepot().getId(), getPullRequest().getBaseCommit()));
-		regions.add(new CommitIndexedRegion(getDepot().getId(), getPullRequest().getHeadCommit()));
+		regions.add(new CommitIndexedRegion(getPullRequest().getBaseCommit()));
+		regions.add(new CommitIndexedRegion(getPullRequest().getHeadCommit()));
 		return regions;
 	}
 	

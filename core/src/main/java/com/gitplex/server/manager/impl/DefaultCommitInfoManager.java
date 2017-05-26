@@ -59,6 +59,8 @@ import com.google.common.base.Charsets;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.backup.BackupStrategy;
+import jetbrains.exodus.backup.BackupStrategy.FileDescriptor;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.EnvironmentConfig;
 import jetbrains.exodus.env.Environments;
@@ -694,6 +696,23 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 			return commitId;
 		}
 		
+	}
+
+	@Override
+	public void cloneInfo(Depot from, Depot to) {
+		BackupStrategy backupStrategy = getEnv(from).getBackupStrategy();
+		try {
+			backupStrategy.beforeBackup();
+			try {
+				for (FileDescriptor descriptor: backupStrategy.listFiles()) {
+					FileUtils.copyFileToDirectory(descriptor.getFile(), getInfoDir(to));
+				}
+			} finally {
+				backupStrategy.afterBackup();
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

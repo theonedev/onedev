@@ -158,11 +158,7 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     		listenerRegistry.post(new DepotRenamed(depot, oldName));
     	}
     	
-        doAfterCommit(newAfterCommitRunnable(depot, isNew));
-    }
-    
-    private Runnable newAfterCommitRunnable(Depot depot, boolean isNew) {
-    	return new Runnable() {
+        doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -172,15 +168,13 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
 				} finally {
 					idLock.writeLock().unlock();
 				}
-				if (isNew) {
+				if (isNew)
 		    		checkDirectory(depot);
-			        commitInfoManager.requestToCollect(depot);
-				}
 			}
         	
-        };    	
+        });
     }
-
+    
     @Transactional
     @Override
     public void delete(Depot depot) {
@@ -251,6 +245,15 @@ public class DefaultDepotManager extends AbstractEntityManager<Depot> implements
     	save(to);
         FileUtils.cleanDir(to.getGitDir());
         new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
+        
+        doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+		        commitInfoManager.cloneInfo(from, to);
+			}
+        	
+        });
 	}
 
 	private boolean isGitHookValid(Depot depot, String hookName) {

@@ -39,13 +39,10 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
-import com.gitplex.launcher.bootstrap.BootstrapUtils;
 import com.gitplex.server.git.command.CalcMergeBaseCommand;
-import com.gitplex.server.git.command.CloneCommand;
 import com.gitplex.server.git.command.FetchCommand;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.git.exception.RefUpdateException;
-import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.LockUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -318,36 +315,44 @@ public class GitUtils {
 		if (repository1.getDirectory()!=null && repository1.getDirectory().equals(repository2.getDirectory())) {
 			return GitUtils.getMergeBase(repository1, commit1, commit2);
 		} else {
-			File tempDir = BootstrapUtils.createTempDir();
-			try {
-				new CloneCommand(tempDir).from(repository1.getDirectory().getAbsolutePath()).bare(true).shared(true).call();
-				if (fetchRef != null) {
-					new FetchCommand(tempDir).from(repository2.getDirectory().getAbsolutePath()).refspec(fetchRef).call();
-				} else {
-					LockUtils.call("repository-fetch:" + repository2.getDirectory(), new Callable<Void>() {
-
-						@Override
-						public Void call() throws Exception {
-							try {
-								RefUpdate refUpdate = repository2.updateRef("refs/temp/fetch");
-								refUpdate.setNewObjectId(commit2);
-								updateRef(refUpdate);
-								new FetchCommand(tempDir).from(repository2.getDirectory().getAbsolutePath()).refspec(refUpdate.getName()).call();
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-							return null;
-						}
-						
-					});
-				}
-				return ObjectId.fromString(new CalcMergeBaseCommand(tempDir).rev1(commit1.name()).rev2(commit2.name()).call());
-			} finally {
-				FileUtils.deleteDir(tempDir);
-			}
+			fetch(repository2, commit2, repository1, fetchRef);
+			return ObjectId.fromString(new CalcMergeBaseCommand(repository1.getDirectory())
+					.rev1(commit1.name())
+					.rev2(commit2.name())
+					.call());
 		}
 	}
 	
+	public static void fetch(Repository fromRepository, ObjectId fromCommit, Repository toRepository, 
+			@Nullable String fetchRef) {
+		if (fetchRef != null) {
+			new FetchCommand(toRepository.getDirectory())
+					.from(fromRepository.getDirectory().getAbsolutePath())
+					.refspec(fetchRef)
+					.call();
+		} else {
+			LockUtils.call("repository-fetch:" + fromRepository.getDirectory(), new Callable<Void>() {
+
+				@Override
+				public Void call() throws Exception {
+					try {
+						RefUpdate refUpdate = fromRepository.updateRef("refs/temp/fetch");
+						refUpdate.setNewObjectId(fromCommit);
+						updateRef(refUpdate);
+						new FetchCommand(toRepository.getDirectory())
+								.from(fromRepository.getDirectory().getAbsolutePath())
+								.refspec(refUpdate.getName())
+								.call();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					return null;
+				}
+				
+			});
+		}
+	}
+    
     public static boolean isMergedInto(Repository repository, ObjectId base, ObjectId tip) {
 		try (RevWalk revWalk = new RevWalk(repository)) {
 			RevCommit baseCommit;

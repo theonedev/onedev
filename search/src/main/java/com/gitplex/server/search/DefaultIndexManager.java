@@ -63,13 +63,14 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.launcher.loader.Listen;
-import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.jsymbol.ExtractException;
 import com.gitplex.jsymbol.Symbol;
 import com.gitplex.jsymbol.SymbolExtractor;
 import com.gitplex.jsymbol.SymbolExtractorRegistry;
+import com.gitplex.launcher.loader.Listen;
+import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.event.RefUpdated;
+import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.DepotManager;
 import com.gitplex.server.manager.StorageManager;
@@ -306,7 +307,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private BatchWorker getBatchWorker(Depot depot) {
 		Long depotId = depot.getId();
-		return new BatchWorker("depot-" + depotId + "-indexBlob", 1) {
+		return new BatchWorker("depot-" + depot.getForkRoot().getId() + "-indexBlob", 1) {
 
 			@Override
 			public void doWork(Collection<Prioritized> works) {
@@ -317,7 +318,14 @@ public class DefaultIndexManager implements IndexManager {
 					public Void call() throws Exception {
 						Depot depot = depotManager.load(depotId);
 						IndexWork indexWork = (IndexWork) works.iterator().next();
-						doIndex(depot, indexWork.getCommitId());
+
+						Depot forkRoot = depot.getForkRoot();
+						if (!forkRoot.equals(depot) && !forkRoot.getRepository().hasObject(indexWork.getCommitId())) {
+							GitUtils.fetch(depot.getRepository(), indexWork.getCommitId(), forkRoot.getRepository(), 
+									null);
+						}
+						
+						doIndex(forkRoot, indexWork.getCommitId());
 						return null;
 					}
 					
@@ -386,7 +394,7 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Override
 	public boolean isIndexed(Depot depot, ObjectId commit) {
-		File indexDir = storageManager.getIndexDir(depot);
+		File indexDir = storageManager.getIndexDir(depot.getForkRoot());
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
@@ -410,7 +418,7 @@ public class DefaultIndexManager implements IndexManager {
 			batchWorkManager.submit(getBatchWorker(event.getDepot()), work);
 		}
 	}
-
+	
 	@Override
 	public void indexAsync(Depot depot, ObjectId commit) {
 		int priority;

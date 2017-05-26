@@ -355,57 +355,30 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	 * Find fork root of this repository. 
 	 * 
 	 * @return
-	 * 			fork root of this repository, or <tt>null</tt> if the repository is not 
-	 * 			forked from any other repository  
+	 * 			fork root of this repository
 	 */
-	public @Nullable Depot findForkRoot() {
-		if (forkedFrom != null) {
-			Depot forkedRoot = forkedFrom.findForkRoot();
-			if (forkedRoot != null)
-				return forkedRoot;
-			else
-				return forkedFrom;
-		} else {
-			return null;
-		}
+	public Depot getForkRoot() {
+		if (forkedFrom != null) 
+			return forkedFrom.getForkRoot();
+		else 
+			return this;
 	}
 	
 	/**
-	 * Find all descendant repositories forking from current repository.
+	 * Get all descendant repositories forking from current repository.
 	 * 
 	 * @return
 	 * 			all descendant repositories forking from current repository
 	 */
-	public List<Depot> findForkDescendants() {
+	public List<Depot> getForkDescendants() {
 		List<Depot> descendants = new ArrayList<>();
+		if (getDefaultBranch() != null)
+			descendants.add(this);
 		for (Depot fork: getForks()) { 
-			if (fork.getDefaultBranch() != null)
-				descendants.add(fork);
-			descendants.addAll(fork.findForkDescendants());
+			descendants.addAll(fork.getForkDescendants());
 		}
 		
 		return descendants;
-	}
-	
-	/**
-	 * Find all comparable repositories of current repository. Comparable repositories can 
-	 * be connected via forks, and can be compared/pulled. 
-	 * 
-	 * @return
-	 * 			comparable repositories of current repository, with current repository also 
-	 * 			included in the collection
-	 */
-	public Collection<Depot> findAffinals() {
-		Collection<Depot> affinals = new ArrayList<Depot>();
-		Depot forkRoot = findForkRoot();
-		if (forkRoot != null) {
-			affinals.add(forkRoot);
-			affinals.addAll(forkRoot.findForkDescendants());
-		} else {
-			affinals.add(this);
-			affinals.addAll(findForkDescendants());
-		}
-		return affinals;
 	}
 	
 	public Repository getRepository() {

@@ -545,8 +545,8 @@ public class CommitDetailPage extends DepotPage implements CommentSupport {
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(getDepot().getId(), resolvedRevision));
-		regions.add(new CommitIndexedRegion(getDepot().getId(), getCompareWith()));
+		regions.add(new CommitIndexedRegion(resolvedRevision));
+		regions.add(new CommitIndexedRegion(getCompareWith()));
 		return regions;
 	}
 

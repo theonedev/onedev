@@ -6,12 +6,9 @@ import com.gitplex.server.web.websocket.WebSocketRegion;
 
 public class CommitIndexedRegion implements WebSocketRegion {
 
-	private final Long depotId;
-	
 	private final ObjectId commitId;
 
-	public CommitIndexedRegion(Long depotId, ObjectId commitId) {
-		this.depotId = depotId;
+	public CommitIndexedRegion(ObjectId commitId) {
 		this.commitId = commitId;
 	}
 	
@@ -19,7 +16,7 @@ public class CommitIndexedRegion implements WebSocketRegion {
 	public boolean contains(WebSocketRegion region) {
 		if (region instanceof CommitIndexedRegion) {
 			CommitIndexedRegion commitIndexedRegion = (CommitIndexedRegion) region;  
-		    return depotId.equals(commitIndexedRegion.depotId) && commitId.equals(commitIndexedRegion.commitId);
+		    return commitId.equals(commitIndexedRegion.commitId);
 		} else {
 			return false;
 		}

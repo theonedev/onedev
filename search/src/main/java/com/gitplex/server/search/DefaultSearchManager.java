@@ -100,7 +100,7 @@ public class DefaultSearchManager implements SearchManager {
 			throws InterruptedException {
 		List<QueryHit> hits = new ArrayList<>();
 
-		SearcherManager searcherManager = getSearcherManager(depot);
+		SearcherManager searcherManager = getSearcherManager(depot.getForkRoot());
 		if (searcherManager != null) {
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
@@ -161,7 +161,7 @@ public class DefaultSearchManager implements SearchManager {
 	@Override
 	public List<Symbol> getSymbols(Depot depot, ObjectId blobId, String blobPath) {
 		try {
-			SearcherManager searcherManager = getSearcherManager(depot);
+			SearcherManager searcherManager = getSearcherManager(depot.getForkRoot());
 			if (searcherManager != null) {
 				try {
 					IndexSearcher searcher = searcherManager.acquire();

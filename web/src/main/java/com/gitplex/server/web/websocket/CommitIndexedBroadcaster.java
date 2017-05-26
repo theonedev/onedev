@@ -19,7 +19,7 @@ public class CommitIndexedBroadcaster {
 	
 	@Listen
 	public void on(CommitIndexed event) {
-		CommitIndexedRegion region = new CommitIndexedRegion(event.getDepot().getId(), event.getCommitId());
+		CommitIndexedRegion region = new CommitIndexedRegion(event.getCommitId());
 		webSocketManager.render(region, null);
 	}
 

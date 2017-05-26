@@ -49,5 +49,7 @@ public interface CommitInfoManager {
 	 * 			child commits
 	 */
 	Set<ObjectId> getChildren(Depot depot, ObjectId parent);
+
+	void cloneInfo(Depot from, Depot to);
 	
 }

@@ -887,7 +887,7 @@ public class DepotBlobPage extends DepotPage implements BlobRenderContext {
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(getDepot().getId(), getDepot().getRevCommit(resolvedRevision)));
+		regions.add(new CommitIndexedRegion(getDepot().getRevCommit(resolvedRevision)));
 		if (state.requestId != null)
 			regions.add(new PullRequestChangedRegion(state.requestId));
 		if (state.commentId != null)

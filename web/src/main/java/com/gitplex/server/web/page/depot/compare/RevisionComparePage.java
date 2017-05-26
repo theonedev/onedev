@@ -680,10 +680,10 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
 		if (state.compareWithMergeBase) 
-			regions.add(new CommitIndexedRegion(getDepot().getId(), mergeBase));
+			regions.add(new CommitIndexedRegion(mergeBase));
 		else
-			regions.add(new CommitIndexedRegion(getDepot().getId(), state.leftSide.getCommit()));
-		regions.add(new CommitIndexedRegion(getDepot().getId(), state.rightSide.getCommit()));
+			regions.add(new CommitIndexedRegion(state.leftSide.getCommit()));
+		regions.add(new CommitIndexedRegion(state.rightSide.getCommit()));
 		return regions;
 	}
 

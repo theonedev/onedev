@@ -211,8 +211,8 @@ public class MergePreviewPage extends RequestDetailPage {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
 		MergePreview preview = getPullRequest().getMergePreview();
 		if (getPullRequest().isOpen() && preview != null && preview.getMerged() != null) {
-			regions.add(new CommitIndexedRegion(getDepot().getId(), ObjectId.fromString(preview.getTargetHead())));
-			regions.add(new CommitIndexedRegion(getDepot().getId(), ObjectId.fromString(preview.getMerged())));
+			regions.add(new CommitIndexedRegion(ObjectId.fromString(preview.getTargetHead())));
+			regions.add(new CommitIndexedRegion(ObjectId.fromString(preview.getMerged())));
 		}		
 		return regions;
 	}

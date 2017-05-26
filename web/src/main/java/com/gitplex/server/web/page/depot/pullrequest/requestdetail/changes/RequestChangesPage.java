@@ -559,8 +559,8 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(getDepot().getId(), ObjectId.fromString(state.oldCommit)));
-		regions.add(new CommitIndexedRegion(getDepot().getId(), ObjectId.fromString(state.newCommit)));
+		regions.add(new CommitIndexedRegion(ObjectId.fromString(state.oldCommit)));
+		regions.add(new CommitIndexedRegion(ObjectId.fromString(state.newCommit)));
 		if (state.commentId != null)
 			regions.add(new CodeCommentChangedRegion(state.commentId));
 		return regions;
