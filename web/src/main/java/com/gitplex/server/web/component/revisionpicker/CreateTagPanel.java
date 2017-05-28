@@ -9,14 +9,14 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 
 @SuppressWarnings("serial")
 abstract class CreateTagPanel extends Panel {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final String tagName;
 	
@@ -24,9 +24,9 @@ abstract class CreateTagPanel extends Panel {
 	
 	private String message;
 	
-	public CreateTagPanel(String id, IModel<Depot> depotModel, String tagName, String revision) {
+	public CreateTagPanel(String id, IModel<Project> projectModel, String tagName, String revision) {
 		super(id);
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.tagName = tagName;
 		this.revision = revision;
 	}
@@ -59,8 +59,8 @@ abstract class CreateTagPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
-				depotModel.getObject().tag(tagName, revision, user.asPerson(), message);
+				User user = GitPlex.getInstance(UserManager.class).getCurrent();
+				projectModel.getObject().tag(tagName, revision, user.asPerson(), message);
 				onCreate(target, tagName);
 			}
 			
@@ -82,7 +82,7 @@ abstract class CreateTagPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		super.onDetach();
 	}
 

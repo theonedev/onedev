@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStarting;
+import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.FileUtils;
@@ -42,65 +42,65 @@ public class DefaultStorageManager implements StorageManager {
     	return storageDir;
     }
     
-    private File getDepotsDir() {
-    	File depotsDir = new File(getStorageDir(), "repositories");
-    	FileUtils.createDir(depotsDir);
-    	return depotsDir;
+    private File getProjectsDir() {
+    	File projectsDir = new File(getStorageDir(), "projects");
+    	FileUtils.createDir(projectsDir);
+    	return projectsDir;
     }
     
-    private File getDepotDir(Depot depot) {
-        File depotDir = new File(getDepotsDir(), String.valueOf(depot.getId()));
-        FileUtils.createDir(depotDir);
-        return depotDir;
+    private File getProjectDir(Project project) {
+        File projectDir = new File(getProjectsDir(), String.valueOf(project.getId()));
+        FileUtils.createDir(projectDir);
+        return projectDir;
     }
     
     @Override
-    public File getGitDir(Depot depot) {
-        File gitDir = new File(getDepotDir(depot), "git");
+    public File getGitDir(Project project) {
+        File gitDir = new File(getProjectDir(project), "git");
         FileUtils.createDir(gitDir);
         return gitDir;
     }
 
 	@Override
-	public File getInfoDir(Depot depot) {
-        File cacheDir = new File(getDepotDir(depot), "info");
+	public File getInfoDir(Project project) {
+        File cacheDir = new File(getProjectDir(project), "info");
         FileUtils.createDir(cacheDir);
         return cacheDir;
 	}
 
 	@Override
-	public File getIndexDir(Depot depot) {
-        File indexDir = new File(getDepotDir(depot), "index");
+	public File getIndexDir(Project project) {
+        File indexDir = new File(getProjectDir(project), "index");
         FileUtils.createDir(indexDir);
         return indexDir;
 	}
 
 	@Override
-	public File getAttachmentDir(Depot depot) {
-        File attachmentDir = new File(getDepotDir(depot), "attachment");
+	public File getAttachmentDir(Project project) {
+        File attachmentDir = new File(getProjectDir(project), "attachment");
         FileUtils.createDir(attachmentDir);
         return attachmentDir;
 	}
 
 	@Listen
 	public void on(SystemStarting event) {
-        for (File depotDir: getDepotsDir().listFiles()) {
-        	if (new File(depotDir, DELETE_MARK).exists()) { 
-        		logger.info("Deleting directory marked for deletion: " + depotDir);
-        		FileUtils.deleteDir(depotDir);
+        for (File projectDir: getProjectsDir().listFiles()) {
+        	if (new File(projectDir, DELETE_MARK).exists()) { 
+        		logger.info("Deleting directory marked for deletion: " + projectDir);
+        		FileUtils.deleteDir(projectDir);
         	}
         }
 	}
 
 	@Transactional
 	@Listen
-	public void on(DepotDeleted event) {
+	public void on(ProjectDeleted event) {
 		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					new File(getDepotDir(event.getDepot()), DELETE_MARK).createNewFile();
+					new File(getProjectDir(event.getProject()), DELETE_MARK).createNewFile();
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

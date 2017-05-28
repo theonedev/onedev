@@ -25,9 +25,6 @@ public class MigrationHelper {
 	private static final Pattern migrateMethodPattern = 
 		Pattern.compile("^migrate(\\d+)$");
 	
-	// caches the analysis result to speed up migration process (there might be many 
-	// bean data need to be migrated, such as various repository/builder/step 
-	// definitions, etc).
 	private static Map<String, MigratorAnalyzeResult> migratorAnalyzeResults = 
 		new ConcurrentHashMap<String, MigratorAnalyzeResult>();
 

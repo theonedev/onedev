@@ -26,7 +26,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
@@ -34,7 +34,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.web.behavior.dropdown.DropdownHover;
 import com.gitplex.server.web.component.avatar.AvatarLink;
-import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 import com.gitplex.server.web.websocket.PageDataChanged;
 
@@ -63,12 +63,12 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		IModel<List<Account>> reviewersModel = new LoadableDetachableModel<List<Account>>() {
+		IModel<List<User>> reviewersModel = new LoadableDetachableModel<List<User>>() {
 
 			@Override
-			protected List<Account> load() {
+			protected List<User> load() {
 				PullRequest request = getPullRequest();
-				List<Account> reviewers = new ArrayList<>();
+				List<User> reviewers = new ArrayList<>();
 				
 				List<Review> reviews = new ArrayList<>(request.getReviewStatus().getEffectiveReviews().values());
 				Collections.sort(reviews);
@@ -76,19 +76,19 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				for (Review review: reviews)
 					reviewers.add(review.getUser());
 				
-				for (Account awaitingReviewer: request.getReviewStatus().getAwaitingReviewers())
+				for (User awaitingReviewer: request.getReviewStatus().getAwaitingReviewers())
 					reviewers.add(awaitingReviewer);
 				
 				return reviewers;
 			}
 			
 		};
-		add(new ListView<Account>("reviewers", reviewersModel) {
+		add(new ListView<User>("reviewers", reviewersModel) {
 
 			@Override
-			protected void populateItem(ListItem<Account> item) {
+			protected void populateItem(ListItem<User> item) {
 				item.add(new AvatarLink("avatar", item.getModelObject()));
-				item.add(new AccountLink("name", item.getModelObject()));
+				item.add(new UserLink("name", item.getModelObject()));
 				
 				PullRequest request = getPullRequest();
 				Review review = request.getReviewStatus().getEffectiveReviews().get(item.getModelObject());
@@ -142,7 +142,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						
-						Account reviewer = item.getModelObject();
+						User reviewer = item.getModelObject();
 						ReviewInvitation invitation = null;
 						for (ReviewInvitation each: request.getReviewInvitations()) {
 							if (each.getUser().equals(reviewer)) {
@@ -176,9 +176,9 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						super.onConfigure();
 						
 						PullRequest request = getPullRequest();
-						Account currentUser = SecurityUtils.getAccount();
+						User currentUser = SecurityUtils.getUser();
 						setVisible(currentUser != null && currentUser.equals(request.getSubmitter())
-										|| SecurityUtils.canManage(request.getTargetDepot()));
+										|| SecurityUtils.canManage(request.getTargetProject()));
 					}
 					
 				});
@@ -196,17 +196,17 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						super.onConfigure();
 						
 						PullRequest request = getPullRequest();
-						Account reviewer = item.getModelObject();
+						User reviewer = item.getModelObject();
 						Review review = request.getReviewStatus().getEffectiveReviews().get(reviewer);
 						setVisible(review != null 
-								&& (reviewer.equals(SecurityUtils.getAccount()) 
-										|| SecurityUtils.canManage(request.getTargetDepot())));
+								&& (reviewer.equals(SecurityUtils.getUser()) 
+										|| SecurityUtils.canManage(request.getTargetProject())));
 					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
-						Account reviewer = item.getModelObject();
+						User reviewer = item.getModelObject();
 						request.clearReviewStatus();
 						GitPlex.getInstance(ReviewManager.class).delete(reviewer, request);
 						reviewersModel.detach();
@@ -241,7 +241,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 			}
 		                                                                                                                              
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Account user) {
+			protected void onSelect(AjaxRequestTarget target, User user) {
 				super.onSelect(target, user);
 				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}

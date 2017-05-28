@@ -1,0 +1,52 @@
+#project-head .pull-left {
+	margin-right: 4px;
+}
+#project-head .more-info {
+	background: #444;
+	padding: 0 8px;
+	border-radius: 4px;
+	font-size: 14px;
+	margin-top: 6px;
+	margin-left: 8px;
+}
+#project-head .more-info:hover, #project-head .more-info.dropdown-open {
+	background: #777;
+}
+
+#project>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
+	display: block;
+	margin-top: -20px;
+	text-align: right;
+	font-size: 20px;
+	padding-right: 20px;
+	border-bottom: 1px solid #BBB;
+	text-decoration: none;
+	color: #666;
+	height: 31px;
+}
+#project>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
+	color: #333;
+}
+#project>.sidebar>table>tbody>tr>td.nav>.mini-toggle>span:before {
+	font-family: "FontAwesome";
+	content: "\f100";
+}
+#project>.sidebar>table>tbody>tr>td.mini.nav>.mini-toggle>span:before {
+	content: "\f101";
+}
+#project>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
+	background: #EEE;
+}
+#project>.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
+	width: 220px;
+}
+#project>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
+	width: auto;
+}
+#project>.sidebar>table>tbody>tr>td.mini.nav {
+	width: 40px;
+}
+#project>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text,
+#project>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.badge {
+	display: none;
+}

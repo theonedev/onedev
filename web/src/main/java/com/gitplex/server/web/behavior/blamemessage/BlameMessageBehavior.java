@@ -10,7 +10,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.util.DateUtils;
 
@@ -24,7 +24,7 @@ public abstract class BlameMessageBehavior extends AbstractPostAjaxBehavior {
 		
 		String tooltipId = params.getParameterValue("tooltip").toString();
 		String commitHash = params.getParameterValue("commit").toString();
-		RevCommit commit = getDepot().getRevCommit(commitHash);
+		RevCommit commit = getProject().getRevCommit(commitHash);
 		String authoring;
 		if (commit.getAuthorIdent() != null) {
 			authoring = commit.getAuthorIdent().getName();
@@ -45,7 +45,7 @@ public abstract class BlameMessageBehavior extends AbstractPostAjaxBehavior {
 		response.render(JavaScriptHeaderItem.forReference(new BlameMessageResourceReference()));
 	}
 
-	protected abstract Depot getDepot();
+	protected abstract Project getProject();
 	
 	public String getCallback() {
 		return getCallbackFunction(explicit("tooltip"), explicit("commit")).toString();

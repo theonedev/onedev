@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.DefaultPersistManager;
 import com.gitplex.server.persistence.HibernateProperties;
 import com.gitplex.server.persistence.IdManager;
@@ -24,16 +24,16 @@ public class ResetAdminPasswordCommand extends DefaultPersistManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(ResetAdminPasswordCommand.class);
 	
-	private final AccountManager accountManager;
+	private final UserManager userManager;
 	
 	private final PasswordService passwordService;
 	
 	@Inject
 	public ResetAdminPasswordCommand(PhysicalNamingStrategy physicalNamingStrategy, HibernateProperties properties, 
 			Interceptor interceptor, IdManager idManager, Dao dao, 
-			EntityValidator validator, AccountManager accountManager, PasswordService passwordService) {
+			EntityValidator validator, UserManager userManager, PasswordService passwordService) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
-		this.accountManager = accountManager;
+		this.userManager = userManager;
 		this.passwordService = passwordService;
 	}
 
@@ -53,14 +53,14 @@ public class ResetAdminPasswordCommand extends DefaultPersistManager {
 		Metadata metadata = buildMetadata();
 		sessionFactory = metadata.getSessionFactoryBuilder().applyInterceptor(interceptor).build();
 		
-		Account root = accountManager.get(Account.ADMINISTRATOR_ID);
+		User root = userManager.get(User.ROOT_ID);
 		if (root == null) {
 			logger.error("Server not set up yet");
 			System.exit(1);
 		}
 		String password = Bootstrap.command.getArgs()[0];
 		root.setPassword(passwordService.encryptPassword(password));
-		accountManager.save(root);
+		userManager.save(root);
 		
 		// wait for a short period to have embedded db flushing data
 		try {

@@ -38,17 +38,17 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.RefUpdated;
-import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
+import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.NameAndEmail;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.CommitInfoManager;
-import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.WorkExecutor;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.FileUtils;
@@ -101,7 +101,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	
 	private final BatchWorkManager batchWorkManager;
 	
-	private final DepotManager depotManager;
+	private final ProjectManager projectManager;
 	
 	private final UnitOfWork unitOfWork;
 	
@@ -116,19 +116,19 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	private final Map<Long, List<NameAndEmail>> committersCache = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultCommitInfoManager(DepotManager depotManager, StorageManager storageManager, 
+	public DefaultCommitInfoManager(ProjectManager projectManager, StorageManager storageManager, 
 			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, WorkExecutor workExecutor) {
-		this.depotManager = depotManager;
+		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
 		this.workExecutor = workExecutor;
 	}
 	
-	private void doCollect(Depot depot, List<RevCommit> commits) {
-		logger.debug("Collecting commits info (repository: {}, commits: {})...", depot, commits.size());
+	private void doCollect(Project project, List<RevCommit> commits) {
+		logger.debug("Collecting commits info (project: {}, commits: {})...", project, commits.size());
 		
-		Environment env = getEnv(depot);
+		Environment env = getEnv(project);
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store commitsStore = getStore(env, COMMITS_STORE);
 		Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE); 
@@ -179,7 +179,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 					prevFiles = new HashSet<>();
 				Set<String> files = new HashSet<>(prevFiles);
 				
-				try (RevWalk revWalk = new RevWalk(depot.getRepository());) {
+				try (RevWalk revWalk = new RevWalk(project.getRepository());) {
 					revWalk.markStart(commits);
 					if (lastCommitId != null) {
 						RevCommit lastCommit = GitUtils.parseCommit(revWalk, lastCommitId);
@@ -241,7 +241,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 							
 							String authorEmail = commit.getAuthorIdent().getEmailAddress();
 							if (StringUtils.isNotBlank(authorEmail) && commit.getParentCount() == 1) {
-								try (TreeWalk treeWalk = new TreeWalk(depot.getRepository())) {
+								try (TreeWalk treeWalk = new TreeWalk(project.getRepository())) {
 									treeWalk.setFilter(TreeFilter.ANY_DIFF);
 									treeWalk.addTree(commit.getTree());
 									treeWalk.addTree(commit.getParent(0).getTree());
@@ -270,25 +270,25 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 				if (newCommitCount != prevCommitCount) {
 					bytes = SerializationUtils.serialize(newCommitCount);
 					defaultStore.put(txn, COMMIT_COUNT_KEY, new ArrayByteIterable(bytes));
-					commitCountCache.put(depot.getId(), newCommitCount);
+					commitCountCache.put(project.getId(), newCommitCount);
 				}
 				
 				if (!authors.equals(prevAuthors)) {
 					bytes = SerializationUtils.serialize((Serializable) authors);
 					defaultStore.put(txn, AUTHORS_KEY, new ArrayByteIterable(bytes));
-					authorsCache.remove(depot.getId());
+					authorsCache.remove(project.getId());
 				} 
 				
 				if (!committers.equals(prevCommitters)) {
 					bytes = SerializationUtils.serialize((Serializable) committers);
 					defaultStore.put(txn, COMMITTERS_KEY, new ArrayByteIterable(bytes));
-					committersCache.remove(depot.getId());
+					committersCache.remove(project.getId());
 				}
 				
 				if (!files.equals(prevFiles)) {
 					bytes = SerializationUtils.serialize((Serializable) files);
 					defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
-					filesCache.remove(depot.getId());
+					filesCache.remove(project.getId());
 				}
 				
 				bytes = new byte[20];
@@ -297,7 +297,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 			}
 			
 		});
-		logger.debug("Commits info collected (repository: {}, commits: {})", depot, commits.size());
+		logger.debug("Commits info collected (project: {}, commits: {})", project, commits.size());
 	}
 	
 	private void updateContribution(Transaction txn, Store contributionsStore, String email, String path) {
@@ -316,22 +316,22 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 				new ArrayByteIterable(byteBuffer.array()));
 	}
 	
-	private Environment getEnv(final Depot depot) {
+	private Environment getEnv(final Project project) {
 		synchronized (envs) {
-			Environment env = envs.get(depot.getId());
+			Environment env = envs.get(project.getId());
 			if (env == null) {
 				EnvironmentConfig config = new EnvironmentConfig();
 				config.setEnvCloseForcedly(true);
 				config.setLogFileSize(64*1024);
-				env = Environments.newInstance(getInfoDir(depot), config);
-				envs.put(depot.getId(), env);
+				env = Environments.newInstance(getInfoDir(project), config);
+				envs.put(project.getId(), env);
 			}
 			return env;
 		}
 	}
 	
-	private File getInfoDir(Depot depot) {
-		File infoDir = new File(storageManager.getInfoDir(depot), INFO_DIR);
+	private File getInfoDir(Project project) {
+		File infoDir = new File(storageManager.getInfoDir(project), INFO_DIR);
 		if (!infoDir.exists()) 
 			FileUtils.createDir(infoDir);
 		return infoDir;
@@ -347,10 +347,10 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 
 	@Override
-	public List<NameAndEmail> getAuthors(Depot depot) {
-		List<NameAndEmail> authors = authorsCache.get(depot.getId());
+	public List<NameAndEmail> getAuthors(Project project) {
+		List<NameAndEmail> authors = authorsCache.get(project.getId());
 		if (authors == null) {
-			Environment env = getEnv(depot);
+			Environment env = getEnv(project);
 			Store store = getStore(env, DEFAULT_STORE);
 
 			authors = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
@@ -369,16 +369,16 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 					}
 				}
 			});
-			authorsCache.put(depot.getId(), authors);
+			authorsCache.put(project.getId(), authors);
 		}
 		return authors;	
 	}
 
 	@Override
-	public List<NameAndEmail> getCommitters(Depot depot) {
-		List<NameAndEmail> committers = committersCache.get(depot.getId());
+	public List<NameAndEmail> getCommitters(Project project) {
+		List<NameAndEmail> committers = committersCache.get(project.getId());
 		if (committers == null) {
-			Environment env = getEnv(depot);
+			Environment env = getEnv(project);
 			Store store = getStore(env, DEFAULT_STORE);
 
 			committers = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
@@ -397,16 +397,16 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 					}
 				}
 			});
-			committersCache.put(depot.getId(), committers);
+			committersCache.put(project.getId(), committers);
 		}
 		return committers;	
 	}
 	
 	@Override
-	public List<String> getFiles(Depot depot) {
-		List<String> files = filesCache.get(depot.getId());
+	public List<String> getFiles(Project project) {
+		List<String> files = filesCache.get(project.getId());
 		if (files == null) {
-			Environment env = getEnv(depot);
+			Environment env = getEnv(project);
 			final Store store = getStore(env, DEFAULT_STORE);
 
 			files = env.computeInReadonlyTransaction(new TransactionalComputable<List<String>>() {
@@ -424,7 +424,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 					}
 				}
 			});
-			filesCache.put(depot.getId(), files);
+			filesCache.put(project.getId(), files);
 		}
 		return files;
 	}
@@ -434,15 +434,15 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 	
 	@Override
-	public int getContributions(Depot depot, Account account, String path) {
-		if (account.getEmail() != null) {
-			Environment env = getEnv(depot);
+	public int getContributions(Project project, User user, String path) {
+		if (user.getEmail() != null) {
+			Environment env = getEnv(project);
 			Store store = getStore(env, CONTRIBUTIONS_STORE);
 			return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
 
 				@Override
 				public Integer compute(Transaction tx) {
-					byte[] contributionKey = getContributionKey(account.getEmail(), path);
+					byte[] contributionKey = getContributionKey(user.getEmail(), path);
 					byte[] bytes = getBytes(store.get(tx, new ArrayByteIterable(contributionKey)));
 					if (bytes != null)
 						return ByteBuffer.wrap(bytes).getInt();
@@ -456,8 +456,8 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 	
 	@Override
-	public Set<ObjectId> getDescendants(Depot depot, final ObjectId ancestor) {
-		Environment env = getEnv(depot);
+	public Set<ObjectId> getDescendants(Project project, final ObjectId ancestor) {
+		Environment env = getEnv(project);
 		final Store store = getStore(env, COMMITS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
@@ -507,8 +507,8 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 
 	@Override
-	public Set<ObjectId> getChildren(Depot depot, final ObjectId parent) {
-		Environment env = getEnv(depot);
+	public Set<ObjectId> getChildren(Project project, final ObjectId parent) {
+		Environment env = getEnv(project);
 		final Store store = getStore(env, COMMITS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
@@ -542,16 +542,16 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 
 	@Listen
-	public void on(DepotDeleted event) {
-		Depot depot = event.getDepot();
+	public void on(ProjectDeleted event) {
+		Project project = event.getProject();
 		synchronized (envs) {
-			Environment env = envs.remove(depot.getId());
+			Environment env = envs.remove(project.getId());
 			if (env != null)
 				env.close();
 		}
-		filesCache.remove(depot.getId());
-		commitCountCache.remove(depot.getId());
-		authorsCache.remove(depot.getId());
+		filesCache.remove(project.getId());
+		commitCountCache.remove(project.getId());
+		authorsCache.remove(project.getId());
 	}
 	
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
@@ -561,9 +561,9 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 			return null;
 	}
 	
-	private BatchWorker getBatchWorker(Depot depot) {
-		Long depotId = depot.getId();
-		return new BatchWorker("repository-" + depotId + "-collectCommitInfo") {
+	private BatchWorker getBatchWorker(Project project) {
+		Long projectId = project.getId();
+		return new BatchWorker("project-" + projectId + "-collectCommitInfo") {
 
 			@Override
 			public void doWork(Collection<Prioritized> works) {
@@ -571,15 +571,15 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 
 					@Override
 					public Void call() throws Exception {
-						Depot depot = depotManager.load(depotId);
+						Project project = projectManager.load(projectId);
 						List<RevCommit> commits = new ArrayList<>();
-						try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
+						try (RevWalk revWalk = new RevWalk(project.getRepository())) {
 							for (Prioritized work: works) {
 								CollectingWork collectingWork = (CollectingWork) work;
 								commits.add(revWalk.parseCommit(collectingWork.getCommitId()));
 							}
 						}
-						doCollect(depot, commits);
+						doCollect(project, commits);
 						return null;
 					}
 					
@@ -590,22 +590,22 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 	
 	@Override
-	public Future<?> requestToCollect(Depot depot) {
+	public Future<?> requestToCollect(Project project) {
 		return workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 			
 			@Override
 			public void run() {
 				List<RevCommit> commits = new ArrayList<>();
-				try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
+				try (RevWalk revWalk = new RevWalk(project.getRepository())) {
 					Collection<Ref> refs = new ArrayList<>();
-					refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
-					refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
+					refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
+					refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
 
 					for (Ref ref: refs) {
 						RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
 						if (revObj instanceof RevCommit) {
 							RevCommit commit = (RevCommit) revObj;
-							Environment env = getEnv(depot);
+							Environment env = getEnv(project);
 							Store commitsStore = getStore(env, COMMITS_STORE);
 							boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
 								
@@ -628,7 +628,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 				}
 				
 				if (!commits.isEmpty())
-					doCollect(depot, commits);
+					doCollect(project, commits);
 			}
 			
 		});
@@ -645,19 +645,19 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	@Listen
 	public void on(RefUpdated event) {
 		if (!event.getNewObjectId().equals(ObjectId.zeroId())) {
-			RevCommit commit = event.getDepot().getRevCommit(event.getNewObjectId(), false);
+			RevCommit commit = event.getProject().getRevCommit(event.getNewObjectId(), false);
 			if (commit != null) {
 				CollectingWork refUpdate = new CollectingWork(PRIORITY, commit.getId());
-				batchWorkManager.submit(getBatchWorker(event.getDepot()), refUpdate);
+				batchWorkManager.submit(getBatchWorker(event.getProject()), refUpdate);
 			}
 		}
 	}
 
 	@Override
-	public int getCommitCount(Depot depot) {
-		Integer commitCount = commitCountCache.get(depot.getId());
+	public int getCommitCount(Project project) {
+		Integer commitCount = commitCountCache.get(project.getId());
 		if (commitCount == null) {
-			Environment env = getEnv(depot);
+			Environment env = getEnv(project);
 			Store store = getStore(env, DEFAULT_STORE);
 
 			commitCount = env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
@@ -672,7 +672,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 					}
 				}
 			});
-			commitCountCache.put(depot.getId(), commitCount);
+			commitCountCache.put(project.getId(), commitCount);
 		}
 		return commitCount;
 	}
@@ -699,7 +699,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 
 	@Override
-	public void cloneInfo(Depot from, Depot to) {
+	public void cloneInfo(Project from, Project to) {
 		BackupStrategy backupStrategy = getEnv(from).getBackupStrategy();
 		try {
 			backupStrategy.beforeBackup();

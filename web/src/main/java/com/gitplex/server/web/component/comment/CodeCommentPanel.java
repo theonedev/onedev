@@ -41,22 +41,22 @@ import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentReplyManager;
 import com.gitplex.server.manager.CodeCommentStatusChangeManager;
 import com.gitplex.server.manager.VisitInfoManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.CodeCommentReply;
 import com.gitplex.server.model.CodeCommentStatusChange;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ClassUtils;
 import com.gitplex.server.web.component.avatar.AvatarLink;
-import com.gitplex.server.web.component.link.AccountLink;
+import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.markdown.ContentVersionSupport;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
-import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
@@ -104,9 +104,9 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}));
 		
-		Account userForDisplay = Account.getForDisplay(getComment().getUser(), getComment().getUserName());
+		User userForDisplay = User.getForDisplay(getComment().getUser(), getComment().getUserName());
 		commentContainer.add(new AvatarLink("userAvatar", userForDisplay));
-		commentContainer.add(new AccountLink("userName", userForDisplay));
+		commentContainer.add(new UserLink("userName", userForDisplay));
 		commentContainer.add(new Label("activityDescription", "commented"));
 		commentContainer.add(new Label("activityDate", DateUtils.formatAge(getComment().getDate())));
 
@@ -159,12 +159,12 @@ public abstract class CodeCommentPanel extends Panel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getRequest().getTargetDepot(), getComment().getUUID());
+						return new ProjectAttachmentSupport(getComment().getRequest().getTargetProject(), getComment().getUUID());
 					}
 
 					@Override
-					protected Depot getDepot() {
-						return getComment().getRequest().getTargetDepot();
+					protected Project getProject() {
+						return getComment().getRequest().getTargetProject();
 					}
 					
 					@Override
@@ -271,9 +271,9 @@ public abstract class CodeCommentPanel extends Panel {
 		activityContainer.setMarkupId(activity.getAnchor());
 		activityContainer.add(AttributeAppender.append("name", activity.getAnchor()));
 		
-		Account userForDisplay = Account.getForDisplay(activity.getUser(), activity.getUserName());
+		User userForDisplay = User.getForDisplay(activity.getUser(), activity.getUserName());
 		activityContainer.add(new AvatarLink("userAvatar", userForDisplay));
-		activityContainer.add(new AccountLink("userName", userForDisplay));
+		activityContainer.add(new UserLink("userName", userForDisplay));
 		
 		String activityDescription;
 		if (activity instanceof CodeCommentStatusChange) {
@@ -348,12 +348,12 @@ public abstract class CodeCommentPanel extends Panel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getRequest().getTargetDepot(), getComment().getUUID());
+						return new ProjectAttachmentSupport(getComment().getRequest().getTargetProject(), getComment().getUUID());
 					}
 
 					@Override
-					protected Depot getDepot() {
-						return getComment().getRequest().getTargetDepot();
+					protected Project getProject() {
+						return getComment().getRequest().getTargetProject();
 					}
 
 					@Override
@@ -460,7 +460,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAccount() != null);
+				setVisible(SecurityUtils.getUser() != null);
 			}
 			
 		};
@@ -498,7 +498,7 @@ public abstract class CodeCommentPanel extends Panel {
 				super.onConfigure();
 				
 				CodeComment comment = getComment();
-				if (getPage() instanceof DepotBlobPage) {
+				if (getPage() instanceof ProjectBlobPage) {
 					setVisible(comment.isCodeChanged());
 				} else if (getPage() instanceof RequestChangesPage) {
 					RequestChangesPage page = (RequestChangesPage) getPage();
@@ -615,8 +615,8 @@ public abstract class CodeCommentPanel extends Panel {
 					
 					@Override
 					public void onEndRequest(RequestCycle cycle) {
-						if (SecurityUtils.getAccount() != null) {
-							GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getAccount(), getComment());
+						if (SecurityUtils.getUser() != null) {
+							GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getUser(), getComment());
 						}
 					}
 					
@@ -649,12 +649,12 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new DepotAttachmentSupport(getComment().getRequest().getTargetDepot(), getComment().getUUID());
+				return new ProjectAttachmentSupport(getComment().getRequest().getTargetProject(), getComment().getUUID());
 			}
 
 			@Override
-			protected Depot getDepot() {
-				return getComment().getRequest().getTargetDepot();
+			protected Project getProject() {
+				return getComment().getRequest().getTargetProject();
 			}
 
 			@Override
@@ -707,7 +707,7 @@ public abstract class CodeCommentPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				Account user = SecurityUtils.getAccount();
+				User user = SecurityUtils.getUser();
 				CodeComment comment = getComment();
 				Date date = new Date();
 				if (changeStatus) {

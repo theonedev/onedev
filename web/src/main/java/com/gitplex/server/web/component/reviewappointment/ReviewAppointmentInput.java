@@ -10,25 +10,25 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 
 @SuppressWarnings("serial")
 public class ReviewAppointmentInput extends TextField<String> {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
-	public ReviewAppointmentInput(String id, IModel<Depot> depotModel, IModel<String> exprModel) {
+	public ReviewAppointmentInput(String id, IModel<Project> projectModel, IModel<String> exprModel) {
 		super(id, exprModel);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ReviewAppointmentAssistBehavior(depotModel));
+		add(new ReviewAppointmentAssistBehavior(projectModel));
 		add(new IValidator<String>() {
 
 			@Override
@@ -55,7 +55,7 @@ public class ReviewAppointmentInput extends TextField<String> {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		super.onDetach();
 	}
 

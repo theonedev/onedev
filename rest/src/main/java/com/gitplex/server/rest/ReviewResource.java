@@ -15,9 +15,9 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ReviewManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.Review;
 import com.gitplex.server.security.SecurityUtils;
 
@@ -29,19 +29,19 @@ public class ReviewResource {
 
 	private final ReviewManager reviewManager;
 	
-	private final AccountManager accountManager;
+	private final UserManager userManager;
 	
 	@Inject
-	public ReviewResource(ReviewManager reviewManager, AccountManager accountManager) {
+	public ReviewResource(ReviewManager reviewManager, UserManager userManager) {
 		this.reviewManager = reviewManager;
-		this.accountManager = accountManager;
+		this.userManager = userManager;
 	}
 	
     @GET
     @Path("/{id}")
     public Review get(@PathParam("id") Long id) {
     	Review review = reviewManager.load(id);
-    	if (!SecurityUtils.canRead(review.getRequest().getTargetDepot()))
+    	if (!SecurityUtils.canRead(review.getRequest().getTargetProject()))
     		throw new UnauthorizedException();
     	return review;
     }
@@ -50,8 +50,8 @@ public class ReviewResource {
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
     	Review review = reviewManager.load(id);
-    	Account currentUser = accountManager.getCurrent();
-    	if (review.getUser().equals(currentUser) || SecurityUtils.canManage(review.getRequest().getTargetDepot())) 
+    	User currentUser = userManager.getCurrent();
+    	if (review.getUser().equals(currentUser) || SecurityUtils.canManage(review.getRequest().getTargetProject())) 
     		reviewManager.delete(review);
     	else
     		throw new UnauthorizedException();
@@ -59,10 +59,10 @@ public class ReviewResource {
 
     @POST
     public Long save(@NotNull @Valid Review review) {
-    	if (!SecurityUtils.canWrite(review.getRequest().getTargetDepot()))
+    	if (!SecurityUtils.canWrite(review.getRequest().getTargetProject()))
     		throw new UnauthorizedException();
     	
-    	review.setUser(accountManager.getCurrent());
+    	review.setUser(userManager.getCurrent());
     	
     	reviewManager.save(review);
     	

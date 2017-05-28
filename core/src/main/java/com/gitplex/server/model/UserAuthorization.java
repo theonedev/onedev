@@ -9,12 +9,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.security.ProjectPrivilege;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_user_id"), @Index(columnList="g_depot_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_user_id", "g_depot_id"})
+		indexes={@Index(columnList="g_user_id"), @Index(columnList="g_project_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_user_id", "g_project_id"})
 })
 public class UserAuthorization extends AbstractEntity {
 
@@ -22,36 +22,36 @@ public class UserAuthorization extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Depot depot;
+	private Project project;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Account user;
+	private User user;
 	
 	@Column(nullable=false)
-	private DepotPrivilege privilege = DepotPrivilege.READ;
+	private ProjectPrivilege privilege = ProjectPrivilege.READ;
 	
-	public Depot getDepot() {
-		return depot;
+	public Project getProject() {
+		return project;
 	}
 
-	public void setDepot(Depot depot) {
-		this.depot = depot;
+	public void setProject(Project project) {
+		this.project = project;
 	}
 
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(Account user) {
+	public void setUser(User user) {
 		this.user = user;
 	}
 
-	public DepotPrivilege getPrivilege() {
+	public ProjectPrivilege getPrivilege() {
 		return privilege;
 	}
 
-	public void setPrivilege(DepotPrivilege privilege) {
+	public void setPrivilege(ProjectPrivilege privilege) {
 		this.privilege = privilege;
 	}
 

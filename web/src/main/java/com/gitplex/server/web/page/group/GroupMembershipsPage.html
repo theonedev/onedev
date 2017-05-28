@@ -1,0 +1,20 @@
+<wicket:extend>
+	<div class="user list">
+		<div class="head clearfix">
+			<div class="pull-left">
+				<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by user name"></input>
+			</div>
+			<div class="pull-left">
+				<input wicket:id="addNew" type="hidden" class="form-control"></input>
+			</div>
+			<div class="pull-left">
+				<a wicket:id="deleteSelected" class="btn btn-default"><i class="fa fa-trash"></i> Delete Selected</a>
+			</div>
+		</div>
+		<table wicket:id="memberships" class="memberships table table-hover table-condensed"></table>
+	</div>
+	<wicket:fragment wicket:id="nameFrag">
+		<a wicket:id="avatarLink"></a>
+		<a wicket:id="nameLink"></a>
+	</wicket:fragment>
+</wicket:extend>

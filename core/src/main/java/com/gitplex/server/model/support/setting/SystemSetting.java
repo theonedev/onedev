@@ -45,7 +45,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.serverUrl = serverUrl;
 	}
 
-	@Editable(name="Storage Directory", order=100, description="Specify directory to store GitPlex data such as Git repositories.")
+	@Editable(name="Storage Directory", order=100, description="Specify directory to store GitPlex data such as Git projects.")
 	@Directory(absolute=true, outsideOfInstallDir=true, writeable=true)
 	@NotEmpty
 	public String getStoragePath() {
@@ -56,7 +56,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.storagePath = storagePath;
 	}
 
-	@Editable(order=200, description="GitPlex relies on git command line to manage repositories. The minimum "
+	@Editable(order=200, description="GitPlex relies on git command line to manage projects. The minimum "
 			+ "required version is 1.8.0.")
 	@Valid
 	@NotNull

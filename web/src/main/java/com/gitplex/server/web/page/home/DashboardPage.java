@@ -10,6 +10,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
@@ -17,13 +18,15 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.DepotManager;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.manager.ProjectManager;
+import com.gitplex.server.model.Project;
+import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.layout.LayoutPage;
+import com.gitplex.server.web.page.layout.NewProjectPage;
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -31,13 +34,13 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class DashboardPage extends LayoutPage {
 
-	private PageableListView<Depot> depotsView;
+	private PageableListView<Project> projectsView;
 	
-	private BootstrapPagingNavigator depotsPageNav;
+	private BootstrapPagingNavigator projectsPageNav;
 	
-	private WebMarkupContainer depotsContainer; 
+	private WebMarkupContainer projectsContainer; 
 	
-	private WebMarkupContainer noDepotsContainer;
+	private WebMarkupContainer noProjectsContainer;
 	
 	private String searchInput;
 	
@@ -46,81 +49,90 @@ public class DashboardPage extends LayoutPage {
 		super.onInitialize();
 		
 		TextField<String> searchField;
-		add(searchField = new TextField<String>("search", Model.of("")));
+		add(searchField = new TextField<String>("filterProjects", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
 				searchInput = searchField.getInput();
-				target.add(depotsContainer);
-				target.add(depotsPageNav);
-				target.add(noDepotsContainer);
+				target.add(projectsContainer);
+				target.add(projectsPageNav);
+				target.add(noProjectsContainer);
 			}
 
 		});
-		
-		depotsContainer = new WebMarkupContainer("depots") {
+		add(new BookmarkablePageLink<Void>("createProject", NewProjectPage.class) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!depotsView.getModelObject().isEmpty());
+				setVisible(SecurityUtils.canCreateProjects());
+			}
+			
+		});
+		
+		projectsContainer = new WebMarkupContainer("projects") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!projectsView.getModelObject().isEmpty());
 			}
 			
 		};
-		depotsContainer.setOutputMarkupPlaceholderTag(true);
-		add(depotsContainer);
+		projectsContainer.setOutputMarkupPlaceholderTag(true);
+		add(projectsContainer);
 		
-		depotsContainer.add(depotsView = new PageableListView<Depot>("depots", 
-				new LoadableDetachableModel<List<Depot>>() {
+		projectsContainer.add(projectsView = new PageableListView<Project>("projects", 
+				new LoadableDetachableModel<List<Project>>() {
 
 			@Override
-			protected List<Depot> load() {
-				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
-				List<Depot> depots = new ArrayList<>();
-				for (Depot depot: depotManager.findAllAccessible(null, getLoginUser())) {
-					if (depot.matchesFQN(searchInput)) {
-						depots.add(depot);
+			protected List<Project> load() {
+				ProjectManager projectManager = GitPlex.getInstance(ProjectManager.class);
+				List<Project> projects = new ArrayList<>();
+				for (Project project: projectManager.findAllAccessible(getLoginUser())) {
+					if (project.matches(searchInput)) {
+						projects.add(project);
 					}
 				}
-				depots.sort(Depot::compareLastVisit);
-				return depots;
+				projects.sort(Project::compareLastVisit);
+				return projects;
 			}
 			
-		}, WebConstants.DEFAULT_PAGE_SIZE) {
+		}, WebConstants.PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(ListItem<Depot> item) {
-				Depot depot = item.getModelObject();
+			protected void populateItem(ListItem<Project> item) {
+				Project project = item.getModelObject();
 				Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
-						DepotBlobPage.class, DepotBlobPage.paramsOf(depot)); 
-				link.add(new Label("name", depot.getFQN()));
+						ProjectBlobPage.class, ProjectBlobPage.paramsOf(project)); 
+				link.add(new Label("name", project.getName()));
 				item.add(link);
 			}
 			
 		});
 
-		add(depotsPageNav = new BootstrapAjaxPagingNavigator("depotsPageNav", depotsView) {
+		add(projectsPageNav = new BootstrapAjaxPagingNavigator("projectsPageNav", projectsView) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(depotsView.getPageCount() > 1);
+				setVisible(projectsView.getPageCount() > 1);
 			}
 			
 		});
-		depotsPageNav.setOutputMarkupPlaceholderTag(true);
+		projectsPageNav.setOutputMarkupPlaceholderTag(true);
 		
-		add(noDepotsContainer = new WebMarkupContainer("noDepots") {
+		add(noProjectsContainer = new WebMarkupContainer("noProjects") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(depotsView.getModelObject().isEmpty());
+				setVisible(projectsView.getModelObject().isEmpty());
 			}
 			
 		});
-		noDepotsContainer.setOutputMarkupPlaceholderTag(true);		
+		noProjectsContainer.setOutputMarkupPlaceholderTag(true);		
 	}
 
 	@Override
@@ -131,7 +143,7 @@ public class DashboardPage extends LayoutPage {
 
 	@Override
 	protected Component newContextHead(String componentId) {
-		return new Label(componentId, "Accessible Repositories");
+		return new Label(componentId, "Projects");
 	}
 
 }

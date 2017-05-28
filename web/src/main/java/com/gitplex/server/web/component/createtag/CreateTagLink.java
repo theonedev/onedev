@@ -5,7 +5,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
@@ -13,14 +13,14 @@ import com.gitplex.server.web.component.modal.ModalPanel;
 @SuppressWarnings("serial")
 public abstract class CreateTagLink extends ModalLink {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final String revision;
 	
-	public CreateTagLink(String id, IModel<Depot> depotModel, String revision) {
+	public CreateTagLink(String id, IModel<Project> projectModel, String revision) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.revision = revision;
 	}
 	
@@ -28,12 +28,12 @@ public abstract class CreateTagLink extends ModalLink {
 	protected void onConfigure() {
 		super.onConfigure();
 		
-		setVisible(SecurityUtils.canCreateTag(depotModel.getObject(), Constants.R_TAGS));
+		setVisible(SecurityUtils.canCreateTag(projectModel.getObject(), Constants.R_TAGS));
 	}
 	
 	@Override
 	protected Component newContent(String id, ModalPanel modal) {
-		return new CreateTagPanel(id, depotModel, revision) {
+		return new CreateTagPanel(id, projectModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String tag) {
@@ -51,7 +51,7 @@ public abstract class CreateTagLink extends ModalLink {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		
 		super.onDetach();
 	}

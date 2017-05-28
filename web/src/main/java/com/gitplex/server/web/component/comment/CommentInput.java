@@ -10,13 +10,13 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.markdown.MarkdownEditor;
 import com.gitplex.server.web.component.markdown.PullRequestReferenceSupport;
@@ -34,9 +34,9 @@ public abstract class CommentInput extends MarkdownEditor {
 		return new UserMentionSupport() {
 
 			@Override
-			public List<Account> findUsers(String query, int count) {
-				List<Account> users = new ArrayList<>();
-				for (Account user: SecurityUtils.findUsersCan(getDepot(), DepotPrivilege.READ)) {
+			public List<User> findUsers(String query, int count) {
+				List<User> users = new ArrayList<>();
+				for (User user: SecurityUtils.findUsersCan(getProject(), ProjectPrivilege.READ)) {
 					if (users.size() < count) {
 						if (StringUtils.deleteWhitespace(user.getName()).toLowerCase().contains(query) 
 								|| user.getFullName() != null && StringUtils.deleteWhitespace(user.getFullName()).toLowerCase().contains(query)) {
@@ -46,7 +46,7 @@ public abstract class CommentInput extends MarkdownEditor {
 						break;
 					}
 				}
-				users.sort(Comparator.comparing(Account::getName));
+				users.sort(Comparator.comparing(User::getName));
 				return users;
 			}
 			
@@ -60,7 +60,7 @@ public abstract class CommentInput extends MarkdownEditor {
 			@Override
 			public List<PullRequest> findRequests(String query, int count) {
 				EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-				criteria.add(Restrictions.eq("targetDepot", getDepot()));
+				criteria.add(Restrictions.eq("targetProject", getProject()));
 				if (StringUtils.isNotBlank(query)) {
 					query = StringUtils.deleteWhitespace(query);
 					criteria.add(Restrictions.or(
@@ -74,6 +74,6 @@ public abstract class CommentInput extends MarkdownEditor {
 		};
 	}
 
-	protected abstract Depot getDepot();
+	protected abstract Project getProject();
 	
 }

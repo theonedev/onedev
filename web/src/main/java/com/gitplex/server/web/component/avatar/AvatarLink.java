@@ -12,12 +12,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.User;
 import com.gitplex.server.web.behavior.TooltipBehavior;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.account.AccountPage;
-import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
+import com.gitplex.server.web.page.user.UserPage;
+import com.gitplex.server.web.page.user.UserProfilePage;
 import com.gitplex.server.web.util.avatar.AvatarManager;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -25,7 +25,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class AvatarLink extends ViewStateAwarePageLink<Void> {
 
-	private final Long accountId;
+	private final Long userId;
 	
 	private final PageParameters params;
 	
@@ -33,33 +33,33 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 	
 	private String url;
 	
-	public AvatarLink(String id, @Nullable Account account) {
-		this(id, account, false);
+	public AvatarLink(String id, @Nullable User user) {
+		this(id, user, false);
 	}
 	
-	public AvatarLink(String id, @Nullable Account account, boolean showTooltip) {
-		super(id, AccountOverviewPage.class);
+	public AvatarLink(String id, @Nullable User user, boolean showTooltip) {
+		super(id, UserProfilePage.class);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		if (account == null) {
-			accountId = null;
+		if (user == null) {
+			userId = null;
 			params = new PageParameters();
-		} else if (account.getId() == null) {
-			accountId = null;
+		} else if (user.getId() == null) {
+			userId = null;
 			params = new PageParameters();
 		} else {
-			accountId = account.getId();
-			params = AccountPage.paramsOf(account);
+			userId = user.getId();
+			params = UserPage.paramsOf(user);
 		}
 		if (showTooltip) {
-			if (account != null)
-				tooltip = account.getDisplayName();
+			if (user != null)
+				tooltip = user.getDisplayName();
 			else
 				tooltip = GitPlex.NAME;
 		} else {
 			tooltip = null;
 		}
-		url = avatarManager.getAvatarUrl(account);
+		url = avatarManager.getAvatarUrl(user);
 	}
 	
 	public AvatarLink(String id, PersonIdent person) {
@@ -67,17 +67,17 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 	}
 	
 	public AvatarLink(String id, PersonIdent person, boolean showTooltip) {
-		super(id, AccountOverviewPage.class);
+		super(id, UserProfilePage.class);
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 		
-		Account account = GitPlex.getInstance(AccountManager.class).find(person);
-		if (account != null) { 
-			accountId = account.getId();
-			params = AccountPage.paramsOf(account);
-			url = avatarManager.getAvatarUrl(account);
+		User user = GitPlex.getInstance(UserManager.class).find(person);
+		if (user != null) { 
+			userId = user.getId();
+			params = UserPage.paramsOf(user);
+			url = avatarManager.getAvatarUrl(user);
 		} else {
-			accountId = null;
+			userId = null;
 			params = new PageParameters();
 			url = avatarManager.getAvatarUrl(person);
 		}
@@ -104,9 +104,9 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 		
 		if (event.getPayload() instanceof AvatarChanged) {
 			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
-			if (avatarChanged.getAccount().getId().equals(accountId)) {
+			if (avatarChanged.getUser().getId().equals(userId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getAccount());
+				url = avatarManager.getAvatarUrl(avatarChanged.getUser());
 				avatarChanged.getHandler().add(this);
 			}
 		}

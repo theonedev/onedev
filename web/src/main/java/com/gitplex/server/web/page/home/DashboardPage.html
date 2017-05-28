@@ -1,14 +1,21 @@
 <wicket:extend>
 	<div id="dashboard">
-		<div class="search">
-			<input wicket:id="search" class="form-control autofocus" placeholder="Search..."></input>
+		<div class="head clearfix">
+			<div class="pull-left">
+				<input wicket:id="filterProjects" class="form-control search" placeholder="Filter projects"></input>
+			</div>
+			<div class="pull-left">
+				<a wicket:id="createProject" class="btn btn-default"><i class="fa fa-plus"></i> Create Project</a>
+			</div>
 		</div>
-		<ul wicket:id="depots" class="list-unstyled">
-			<li wicket:id="depots">
-				<a wicket:id="link"><i class="fa fa-ext fa-repo"></i> <span wicket:id="name"></span></a> 
-			</li>
-		</ul>	
-		<div class="center"><ul wicket:id="depotsPageNav"></ul></div>
-		<div wicket:id="noDepots" class="alert alert-warning">No repositories found</div>
+		<div class="body">
+			<ul wicket:id="projects" class="list-unstyled">
+				<li wicket:id="projects">
+					<a wicket:id="link"><i class="fa fa-ext fa-repo"></i> <span wicket:id="name"></span></a> 
+				</li>
+			</ul>	
+			<div class="center"><ul wicket:id="projectsPageNav"></ul></div>
+			<div wicket:id="noProjects" class="alert alert-warning">No projects found</div>
+		</div>		
 	</div>
 </wicket:extend>

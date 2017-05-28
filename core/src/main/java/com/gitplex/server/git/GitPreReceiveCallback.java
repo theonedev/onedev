@@ -18,17 +18,18 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.launcher.loader.LoaderUtils;
-import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.ReviewManager;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.persistence.annotation.Transactional;
-import com.gitplex.server.security.ObjectPermission;
+import com.gitplex.server.security.ProjectPrivilege;
+import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.util.StringUtils;
 import com.google.common.base.Preconditions;
 
@@ -38,15 +39,15 @@ public class GitPreReceiveCallback extends HttpServlet {
 
 	public static final String PATH = "/git-prereceive-callback";
 
-	private final DepotManager depotManager;
+	private final ProjectManager projectManager;
 	
-	private final AccountManager userManager;
+	private final UserManager userManager;
 	
 	private final ReviewManager reviewManager;
 	
 	@Inject
-	public GitPreReceiveCallback(DepotManager depotManager, AccountManager userManager, ReviewManager reviewManager) {
-		this.depotManager = depotManager;
+	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager, ReviewManager reviewManager) {
+		this.projectManager = projectManager;
 		this.userManager = userManager;
 		this.reviewManager = reviewManager;
 	}
@@ -80,9 +81,9 @@ public class GitPreReceiveCallback extends HttpServlet {
         List<String> fields = LoaderUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        SecurityUtils.getSubject().runAs(Account.asPrincipal(Long.valueOf(fields.get(1))));
+        SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         try {
-            Depot depot = depotManager.load(Long.valueOf(fields.get(0)));
+            Project project = projectManager.load(Long.valueOf(fields.get(0)));
             
 	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	        IOUtils.copy(request.getInputStream(), baos);
@@ -108,12 +109,12 @@ public class GitPreReceiveCallback extends HttpServlet {
 	        	String field = fields.get(pos);
 	        	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
 	        	
-	    		Account user = userManager.getCurrent();
+	    		User user = userManager.getCurrent();
 	    		Preconditions.checkNotNull(user);
 
 	    		if (refName.startsWith(PullRequest.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
-	    			if (!user.asSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
-	    				error(output, refName, "Only repository administrators can update gitplex refs.");
+	    			if (!user.asSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.ADMIN))) {
+	    				error(output, refName, "Only project administrators can update gitplex refs.");
 	    				break;
 	    			}
 	    		} else if (refName.startsWith(Constants.R_HEADS)) {
@@ -121,15 +122,15 @@ public class GitPreReceiveCallback extends HttpServlet {
 
 	    			if (!oldObjectId.equals(ObjectId.zeroId())) {
 		    			if (newObjectId.equals(ObjectId.zeroId())) {
-		    				BranchProtection protection = depot.getBranchProtection(branchName);
+		    				BranchProtection protection = project.getBranchProtection(branchName);
 		    				if (protection != null && protection.isNoDeletion())
 		    					error(output, refName, "Can not delete this branch according to branch protection setting");
-		    			} else if (!GitUtils.isMergedInto(depot.getRepository(), oldObjectId, newObjectId)) {
-		    				BranchProtection protection = depot.getBranchProtection(branchName);
+		    			} else if (!GitUtils.isMergedInto(project.getRepository(), oldObjectId, newObjectId)) {
+		    				BranchProtection protection = project.getBranchProtection(branchName);
 		    				if (protection != null && protection.isNoForcedPush())
 			    				error(output, refName, "Can not force-push to this branch according to branch protection setting");
 		    			} else {
-		    				if (!reviewManager.canPush(user, depot, branchName, oldObjectId, newObjectId)) {
+		    				if (!reviewManager.canPush(user, project, branchName, oldObjectId, newObjectId)) {
 		    					error(output, refName, 
 		    							"Your changes need to be reviewed. Please submit pull request instead");
 		    				}
@@ -138,10 +139,10 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    		} else if (refName.startsWith(Constants.R_TAGS)) {
 	    			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
 	    			String errorMessage = null;
-	    			TagProtection protection = depot.getTagProtection(tagName);
+	    			TagProtection protection = project.getTagProtection(tagName);
 	    			if (protection != null) {
     					if (oldObjectId.equals(ObjectId.zeroId())) {
-    						errorMessage = protection.getTagCreator().getNotMatchMessage(depot, user);
+    						errorMessage = protection.getTagCreator().getNotMatchMessage(project, user);
     						if (errorMessage != null)
     							errorMessage = "Unable to create protected tag: " + errorMessage;
     					} else if (newObjectId.equals(ObjectId.zeroId())) {

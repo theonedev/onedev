@@ -8,8 +8,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.support.DepotAndRevision;
+import com.gitplex.server.model.Project;
+import com.gitplex.server.model.support.ProjectAndRevision;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
@@ -17,27 +17,27 @@ import com.gitplex.server.web.component.modal.ModalPanel;
 @SuppressWarnings("serial")
 public abstract class RevisionPicker extends DropdownLink {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private String revision;
 	
 	private final boolean canCreateRef;
 	
-	public RevisionPicker(String id, IModel<Depot> depotModel, String revision, boolean canCreateRef) {
+	public RevisionPicker(String id, IModel<Project> projectModel, String revision, boolean canCreateRef) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.revision = revision;
 		this.canCreateRef = canCreateRef;
 	}
 	
-	public RevisionPicker(String id, IModel<Depot> depotModel, String revision) {
-		this(id, depotModel, revision, false);
+	public RevisionPicker(String id, IModel<Project> projectModel, String revision) {
+		this(id, projectModel, revision, false);
 	}
 
 	@Override
 	protected Component newContent(String id, FloatingPanel dropdown) {
-		return new RevisionSelector(id, depotModel, revision, canCreateRef) {
+		return new RevisionSelector(id, projectModel, revision, canCreateRef) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
@@ -72,7 +72,7 @@ public abstract class RevisionPicker extends DropdownLink {
 	@Override
 	public IModel<?> getBody() {
 		String iconClass;
-		DepotAndRevision repoAndRevision = new DepotAndRevision(depotModel.getObject(), revision);
+		ProjectAndRevision repoAndRevision = new ProjectAndRevision(projectModel.getObject(), revision);
 		String label = repoAndRevision.getBranch();
 		if (label != null) {
 			iconClass = "fa fa-code-fork";
@@ -93,7 +93,7 @@ public abstract class RevisionPicker extends DropdownLink {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		super.onDetach();
 	}
 

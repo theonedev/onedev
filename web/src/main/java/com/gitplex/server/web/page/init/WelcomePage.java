@@ -2,11 +2,11 @@ package com.gitplex.server.web.page.init;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 
-import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.account.overview.NewDepotPage;
-import com.gitplex.server.web.page.account.overview.NewOrganizationPage;
+import com.gitplex.server.web.page.admin.user.NewUserPage;
 import com.gitplex.server.web.page.layout.LayoutPage;
+import com.gitplex.server.web.page.layout.NewProjectPage;
 
 @SuppressWarnings("serial")
 public class WelcomePage extends LayoutPage {
@@ -15,11 +15,8 @@ public class WelcomePage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		add(new ViewStateAwarePageLink<Void>("addOrganization", NewOrganizationPage.class, 
-				NewOrganizationPage.paramsOf(getLoginUser())));
-		
-		add(new ViewStateAwarePageLink<Void>("addDepot", NewDepotPage.class, 
-				NewDepotPage.paramsOf(getLoginUser())));
+		add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class));
+		add(new BookmarkablePageLink<Void>("addUser", NewUserPage.class));
 	}
 
 	@Override

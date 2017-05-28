@@ -4,7 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
@@ -12,25 +12,25 @@ import com.gitplex.server.web.component.modal.ModalPanel;
 @SuppressWarnings("serial")
 public abstract class CreateBranchLink extends ModalLink {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final String revision;
 	
-	public CreateBranchLink(String id, IModel<Depot> depotModel, String revision) {
+	public CreateBranchLink(String id, IModel<Project> projectModel, String revision) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.revision = revision;
 	}
 	
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canWrite(depotModel.getObject()));
+		setVisible(SecurityUtils.canWrite(projectModel.getObject()));
 	}
 	
 	@Override
 	protected Component newContent(String id, ModalPanel modal) {
-		return new CreateBranchPanel(id, depotModel, revision) {
+		return new CreateBranchPanel(id, projectModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
@@ -48,7 +48,7 @@ public abstract class CreateBranchLink extends ModalLink {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		
 		super.onDetach();
 	}

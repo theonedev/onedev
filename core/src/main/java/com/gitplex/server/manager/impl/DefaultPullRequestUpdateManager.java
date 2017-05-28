@@ -18,7 +18,7 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.support.LastEvent;
@@ -60,14 +60,14 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 		dao.persist(update);
 		
 		ObjectId updateHeadId = ObjectId.fromString(update.getHeadCommitHash());
-		if (!request.getTargetDepot().equals(request.getSourceDepot())) {
+		if (!request.getTargetProject().equals(request.getSourceProject())) {
 			try {
-				request.getTargetDepot().git().fetch()
-						.setRemote(request.getSourceDepot().getGitDir().getAbsolutePath())
+				request.getTargetProject().git().fetch()
+						.setRemote(request.getSourceProject().getGitDir().getAbsolutePath())
 						.setRefSpecs(new RefSpec(GitUtils.branch2ref(request.getSourceBranch()) + ":" + update.getHeadRef()))
 						.call();
-				if (!request.getTargetDepot().getObjectId(update.getHeadRef()).equals(updateHeadId)) {
-					RefUpdate refUpdate = request.getTargetDepot().updateRef(update.getHeadRef());
+				if (!request.getTargetProject().getObjectId(update.getHeadRef()).equals(updateHeadId)) {
+					RefUpdate refUpdate = request.getTargetProject().updateRef(update.getHeadRef());
 					refUpdate.setNewObjectId(updateHeadId);
 					GitUtils.updateRef(refUpdate);
 				}
@@ -75,7 +75,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 				Throwables.propagate(e);
 			}
 		} else {
-			RefUpdate refUpdate = request.getTargetDepot().updateRef(update.getHeadRef());
+			RefUpdate refUpdate = request.getTargetProject().updateRef(update.getHeadRef());
 			refUpdate.setNewObjectId(updateHeadId);
 			GitUtils.updateRef(refUpdate);
 		}
@@ -102,9 +102,9 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 
 	@Sessional
 	@Override
-	public List<PullRequestUpdate> findAllAfter(Depot depot, String updateUUID) {
+	public List<PullRequestUpdate> findAllAfter(Project project, String updateUUID) {
 		EntityCriteria<PullRequestUpdate> criteria = newCriteria();
-		criteria.createCriteria("request").add(Restrictions.eq("targetDepot", depot));
+		criteria.createCriteria("request").add(Restrictions.eq("targetProject", project));
 		criteria.addOrder(Order.asc("id"));
 		if (updateUUID != null) {
 			PullRequestUpdate update = find(updateUUID);

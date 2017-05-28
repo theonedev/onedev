@@ -1,0 +1,24 @@
+<wicket:extend>
+	<div id="project">
+		<div class="sidebar">
+			<table>
+				<tr>
+					<td wicket:id="sidebar" class="nav">
+						<a class="mini-toggle"><span></span></a>
+						<ul wicket:id="projectTabs" class="tabs list-unstyled"></ul>
+					</td>
+					<td class="content">
+						<wicket:child></wicket:child>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="contextHeadFrag">
+		<div id="project-head" class="clearfix">
+			<span class="pull-left">Project - </span>
+			<span wicket:id="projectName" class="pull-left"></span>
+			<a wicket:id="projectMoreInfo" class="pull-left more-info"><i class="fa fa-ellipsis-h"></i></a>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

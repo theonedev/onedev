@@ -4,14 +4,14 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.component.branchchoice.BranchChoiceProvider;
 import com.gitplex.server.web.component.branchchoice.BranchSingleChoice;
 import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.PropertyEditor;
-import com.gitplex.server.web.page.depot.DepotPage;
+import com.gitplex.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public class BranchSingleChoiceEditor extends PropertyEditor<String> {
@@ -26,12 +26,12 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Depot>() {
+    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Project>() {
 
 			@Override
-			protected Depot load() {
-				DepotPage page = (DepotPage) getPage();
-				return page.getDepot();
+			protected Project load() {
+				ProjectPage page = (ProjectPage) getPage();
+				return page.getProject();
 			}
     		
     	});

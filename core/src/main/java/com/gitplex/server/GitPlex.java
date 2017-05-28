@@ -26,7 +26,7 @@ import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStarting;
 import com.gitplex.server.event.lifecycle.SystemStopped;
 import com.gitplex.server.event.lifecycle.SystemStopping;
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
 import com.gitplex.server.persistence.PersistManager;
@@ -61,7 +61,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private final DataManager dataManager;
 	
-	private final AccountManager accountManager;
+	private final UserManager userManager;
 	
 	private final ServerConfig serverConfig;
 	
@@ -72,7 +72,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Inject
 	public GitPlex(JettyRunner jettyRunner, TaskScheduler taskScheduler, PersistManager persistManager, 
 			Dao dao, UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, 
-			ConfigManager configManager, AccountManager accountManager, ListenerRegistry listenerRegistry) {
+			ConfigManager configManager, UserManager userManager, ListenerRegistry listenerRegistry) {
 		this.jettyRunner = jettyRunner;
 		this.taskScheduler = taskScheduler;
 		this.persistManager = persistManager;
@@ -81,7 +81,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		this.configManager = configManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
-		this.accountManager = accountManager;
+		this.userManager = userManager;
 		this.listenerRegistry = listenerRegistry;
 		
 		initStage = new InitStage("Server is Starting...");
@@ -111,7 +111,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 				dao.getSession().clear();
 			}
 
-			ThreadContext.bind(accountManager.getRoot().asSubject());
+			ThreadContext.bind(userManager.getRoot().asSubject());
 			
 			listenerRegistry.post(new SystemStarting());
 		} finally {
@@ -178,7 +178,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void preStop() {
-		ThreadContext.bind(accountManager.getRoot().asSubject());
+		ThreadContext.bind(userManager.getRoot().asSubject());
 		listenerRegistry.post(new SystemStopping());
 	}
 

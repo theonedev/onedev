@@ -32,7 +32,7 @@ public class DatabaseMigrator {
 
 	private void migrate2(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Depots.xml")) {
+			if (file.getName().startsWith("depots.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					Element gateKeeperElement = element.element("gateKeeper");
@@ -73,7 +73,7 @@ public class DatabaseMigrator {
 	
 	private void migrate4(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Accounts.xml")) {
+			if (file.getName().startsWith("Users.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					Element avatarUploadDateElement = element.element("avatarUploadDate");
@@ -170,13 +170,13 @@ public class DatabaseMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
-			} else if (file.getName().startsWith("Accounts.xml")) {
+			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					element.element("reviewEffort").detach();
 				}
 				dom.writeToFile(file, false);
-			} else if (file.getName().startsWith("Depots.xml")) {
+			} else if (file.getName().startsWith("depots.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					element.element("gateKeepers").detach();

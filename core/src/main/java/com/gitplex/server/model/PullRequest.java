@@ -44,12 +44,12 @@ import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.support.CloseInfo;
-import com.gitplex.server.model.support.DepotAndBranch;
+import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.model.support.LastEvent;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
+import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.util.editable.EditableUtils;
@@ -67,9 +67,9 @@ import com.google.common.base.Preconditions;
 		indexes={
 				@Index(columnList="title"), @Index(columnList="uuid"), 
 				@Index(columnList="numberStr"), @Index(columnList="noSpaceTitle"), 
-				@Index(columnList="number"), @Index(columnList="g_targetDepot_id"), 
-				@Index(columnList="g_sourceDepot_id"), @Index(columnList="g_submitter_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetDepot_id", "number"})})
+				@Index(columnList="number"), @Index(columnList="g_targetProject_id"), 
+				@Index(columnList="g_sourceProject_id"), @Index(columnList="g_submitter_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetProject_id", "number"})})
 public class PullRequest extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -90,19 +90,19 @@ public class PullRequest extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
-	private Account submitter;
+	private User submitter;
 	
 	private String submitterName;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Depot targetDepot;
+	private Project targetProject;
 	
 	@Column(nullable=false)
 	private String targetBranch;
 
 	@ManyToOne(fetch=FetchType.LAZY)
-	private Depot sourceDepot;
+	private Project sourceProject;
 	
 	@Column(nullable=false)
 	private String sourceBranch;
@@ -214,11 +214,11 @@ public class PullRequest extends AbstractEntity {
 	 * 			the user submitting the pull request
 	 */
 	@Nullable
-	public Account getSubmitter() {
+	public User getSubmitter() {
 		return submitter;
 	}
 
-	public void setSubmitter(Account submitter) {
+	public void setSubmitter(User submitter) {
 		this.submitter = submitter;
 	}
 
@@ -231,26 +231,26 @@ public class PullRequest extends AbstractEntity {
 		this.submitterName = submitterName;
 	}
 
-	public Depot getTargetDepot() {
-		return targetDepot;
+	public Project getTargetProject() {
+		return targetProject;
 	}
 	
-	public DepotAndBranch getTarget() {
-		return new DepotAndBranch(getTargetDepot(), getTargetBranch());
+	public ProjectAndBranch getTarget() {
+		return new ProjectAndBranch(getTargetProject(), getTargetBranch());
 	}
 	
-	public void setTarget(DepotAndBranch target) {
-		setTargetDepot(target.getDepot());
+	public void setTarget(ProjectAndBranch target) {
+		setTargetProject(target.getProject());
 		setTargetBranch(target.getBranch());
 	}
 	
-	public void setSource(DepotAndBranch source) {
-		setSourceDepot(source.getDepot());
+	public void setSource(ProjectAndBranch source) {
+		setSourceProject(source.getProject());
 		setSourceBranch(source.getBranch());
 	}
 	
-	public void setTargetDepot(Depot targetDepot) {
-		this.targetDepot = targetDepot;
+	public void setTargetProject(Project targetProject) {
+		this.targetProject = targetProject;
 	}
 
 	public String getTargetBranch() {
@@ -262,12 +262,12 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	@Nullable
-	public Depot getSourceDepot() {
-		return sourceDepot;
+	public Project getSourceProject() {
+		return sourceProject;
 	}
 
-	public void setSourceDepot(Depot sourceDepot) {
-		this.sourceDepot = sourceDepot;
+	public void setSourceProject(Project sourceProject) {
+		this.sourceProject = sourceProject;
 	}
 
 	public String getSourceBranch() {
@@ -279,10 +279,10 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	@Nullable
-	public DepotAndBranch getSource() {
-		Depot sourceDepot = getSourceDepot();
-		if (sourceDepot != null)
-			return new DepotAndBranch(sourceDepot, getSourceBranch());
+	public ProjectAndBranch getSource() {
+		Project sourceProject = getSourceProject();
+		if (sourceProject != null)
+			return new ProjectAndBranch(sourceProject, getSourceBranch());
 		else
 			return null;
 	}
@@ -295,11 +295,11 @@ public class PullRequest extends AbstractEntity {
 		return GitUtils.branch2ref(getSourceBranch());
 	}
 	
-	public Depot getWorkDepot() {
+	public Project getWorkProject() {
 		if (isNew()) 
-			return getSourceDepot();
+			return getSourceProject();
 		else
-			return getTargetDepot();
+			return getTargetProject();
 	}
 	
 	public String getBaseCommitHash() {
@@ -315,11 +315,11 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public RevCommit getBaseCommit() {
-		return getTargetDepot().getRevCommit(ObjectId.fromString(getBaseCommitHash()));
+		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()));
 	}
 	
 	public RevCommit getHeadCommit() {
-		return getTargetDepot().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
+		return getTargetProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
 	}
 	
 	/**
@@ -515,9 +515,9 @@ public class PullRequest extends AbstractEntity {
 	 * Delete refs of this pull request, without touching refs of its updates.
 	 */
 	public void deleteRefs() {
-		GitUtils.deleteRef(getTargetDepot().updateRef(getBaseRef()));
-		GitUtils.deleteRef(getTargetDepot().updateRef(getMergeRef()));
-		GitUtils.deleteRef(getTargetDepot().updateRef(getHeadRef()));
+		GitUtils.deleteRef(getTargetProject().updateRef(getBaseRef()));
+		GitUtils.deleteRef(getTargetProject().updateRef(getMergeRef()));
+		GitUtils.deleteRef(getTargetProject().updateRef(getHeadRef()));
 	}
 	
 	public static class CriterionHelper {
@@ -529,27 +529,27 @@ public class PullRequest extends AbstractEntity {
 			return Restrictions.isNotNull("closeInfo");
 		}
 		
-		public static Criterion ofTarget(DepotAndBranch target) {
+		public static Criterion ofTarget(ProjectAndBranch target) {
 			return Restrictions.and(
-					Restrictions.eq("targetDepot", target.getDepot()),
+					Restrictions.eq("targetProject", target.getProject()),
 					Restrictions.eq("targetBranch", target.getBranch()));
 		}
 
-		public static Criterion ofTargetDepot(Depot target) {
-			return Restrictions.eq("targetDepot", target);
+		public static Criterion ofTargetProject(Project target) {
+			return Restrictions.eq("targetProject", target);
 		}
 		
-		public static Criterion ofSource(DepotAndBranch source) {
+		public static Criterion ofSource(ProjectAndBranch source) {
 			return Restrictions.and(
-					Restrictions.eq("sourceDepot", source.getDepot()),
+					Restrictions.eq("sourceProject", source.getProject()),
 					Restrictions.eq("sourceBranch", source.getBranch()));
 		}
 		
-		public static Criterion ofSourceDepot(Depot source) {
-			return Restrictions.eq("sourceDepot", source);
+		public static Criterion ofSourceProject(Project source) {
+			return Restrictions.eq("sourceProject", source);
 		}
 		
-		public static Criterion ofSubmitter(Account submitter) {
+		public static Criterion ofSubmitter(User submitter) {
 			return Restrictions.eq("submitter", submitter);
 		}
 		
@@ -572,8 +572,8 @@ public class PullRequest extends AbstractEntity {
 	public Collection<RevCommit> getPendingCommits() {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
-			Depot depot = getTargetDepot();
-			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
+			Project project = getTargetProject();
+			try (RevWalk revWalk = new RevWalk(project.getRepository())) {
 				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
 				revWalk.markUninteresting(revWalk.parseCommit(getTarget().getObjectId()));
 				revWalk.forEach(c->pendingCommits.add(c));
@@ -593,8 +593,8 @@ public class PullRequest extends AbstractEntity {
 	public Collection<RevCommit> getMergedCommits() {
 		if (mergedCommits == null) {
 			mergedCommits = new HashSet<>();
-			Depot depot = getTargetDepot();
-			try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
+			Project project = getTargetProject();
+			try (RevWalk revWalk = new RevWalk(project.getRepository())) {
 				revWalk.markStart(revWalk.parseCommit(getTarget().getObjectId(false)));
 				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
 				revWalk.forEach(c->mergedCommits.add(c));
@@ -614,7 +614,7 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	@Nullable
-	public PullRequestWatch getWatch(Account user) {
+	public PullRequestWatch getWatch(User user) {
 		for (PullRequestWatch watch: getWatches()) {
 			if (watch.getUser().equals(user))
 				return watch;
@@ -682,7 +682,7 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public boolean isVisitedAfter(Date date) {
-		Account user = SecurityUtils.getAccount();
+		User user = SecurityUtils.getUser();
 		if (user != null) {
 			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
@@ -701,7 +701,7 @@ public class PullRequest extends AbstractEntity {
 	
 	public boolean isMergeIntoTarget() {
 		if (mergedIntoTarget == null) { 
-			mergedIntoTarget = GitUtils.isMergedInto(getTargetDepot().getRepository(), ObjectId.fromString(getHeadCommitHash()), 
+			mergedIntoTarget = GitUtils.isMergedInto(getTargetProject().getRepository(), ObjectId.fromString(getHeadCommitHash()), 
 					getTarget().getObjectId());
 		}
 		return mergedIntoTarget;
@@ -726,22 +726,22 @@ public class PullRequest extends AbstractEntity {
 
 	@Nullable
 	public ObjectId getSourceHead() {
-		DepotAndBranch depotAndBranch = getSource();
-		if (depotAndBranch != null)
-			return depotAndBranch.getObjectId(false);
+		ProjectAndBranch projectAndBranch = getSource();
+		if (projectAndBranch != null)
+			return projectAndBranch.getObjectId(false);
 		else
 			return null;
 	}
 	
-	public List<Account> getRemainingReviewers() {
+	public List<User> getRemainingReviewers() {
 		ReviewStatus checkStatus = getReviewStatus();
-		Collection<Account> users = SecurityUtils.findUsersCan(getTargetDepot(), DepotPrivilege.READ);
+		Collection<User> users = SecurityUtils.findUsersCan(getTargetProject(), ProjectPrivilege.READ);
 		users.removeAll(checkStatus.getAwaitingReviewers());
 		for (Review review: checkStatus.getEffectiveReviews().values())
 			users.remove(review.getUser());
-		users.remove(SecurityUtils.getAccount());
-		List<Account> userList = new ArrayList<>(users);
-		userList.sort(Comparator.comparing(Account::getName));
+		users.remove(SecurityUtils.getUser());
+		List<User> userList = new ArrayList<>(users);
+		userList.sort(Comparator.comparing(User::getName));
 		return userList;
 	}
 	

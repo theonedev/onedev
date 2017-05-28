@@ -29,7 +29,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.git.BlobIdent;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.BlobIcon;
 import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
@@ -37,16 +37,16 @@ import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
 @SuppressWarnings("serial")
 public abstract class PathSelector extends Panel {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final String revision;
 	
 	private final Set<Integer> pathTypes;
 	
-	public PathSelector(String id, IModel<Depot> depotModel, String revision, int... pathTypes) {
+	public PathSelector(String id, IModel<Project> projectModel, String revision, int... pathTypes) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.revision = revision;
 		this.pathTypes = new HashSet<>();
 		for (int i=0; i<pathTypes.length; i++)
@@ -65,10 +65,10 @@ public abstract class PathSelector extends Panel {
 
 			@Override
 			public Iterator<? extends BlobIdent> getRoots() {
-				Repository repository = depotModel.getObject().getRepository();				
+				Repository repository = projectModel.getObject().getRepository();				
 				try (	RevWalk revWalk = new RevWalk(repository);
 						TreeWalk treeWalk = new TreeWalk(repository)) {
-					RevCommit commit = revWalk.parseCommit(depotModel.getObject().getObjectId(revision));
+					RevCommit commit = revWalk.parseCommit(projectModel.getObject().getObjectId(revision));
 					treeWalk.addTree(commit.getTree());
 					
 					List<BlobIdent> roots = new ArrayList<>();
@@ -92,9 +92,9 @@ public abstract class PathSelector extends Panel {
 
 			@Override
 			public Iterator<? extends BlobIdent> getChildren(BlobIdent node) {
-				Repository repository = depotModel.getObject().getRepository();				
+				Repository repository = projectModel.getObject().getRepository();				
 				try (RevWalk revWalk = new RevWalk(repository)) {
-					RevCommit commit = revWalk.parseCommit(depotModel.getObject().getObjectId(revision));
+					RevCommit commit = revWalk.parseCommit(projectModel.getObject().getObjectId(revision));
 					TreeWalk treeWalk = TreeWalk.forPath(repository, node.path, commit.getTree());
 					treeWalk.enterSubtree();
 					List<BlobIdent> children = new ArrayList<>();
@@ -165,7 +165,7 @@ public abstract class PathSelector extends Panel {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		
 		super.onDetach();
 	}

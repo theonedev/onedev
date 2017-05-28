@@ -39,7 +39,7 @@ import org.unbescape.html.HtmlEscape;
 
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;
@@ -58,7 +58,7 @@ public abstract class RevisionSelector extends Panel {
 
 	private static final int PAGE_SIZE = 25;
 	
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private static final String COMMIT_FLAG = "*";
 	
@@ -86,10 +86,10 @@ public abstract class RevisionSelector extends Panel {
 		List<String> names = new ArrayList<>();
 		
 		if (branchesActive) {
-			for (RefInfo ref: depotModel.getObject().getBranches())
+			for (RefInfo ref: projectModel.getObject().getBranches())
 				names.add(GitUtils.ref2branch(ref.getRef().getName()));
 		} else {
-			for (RefInfo ref: depotModel.getObject().getTags())
+			for (RefInfo ref: projectModel.getObject().getTags())
 				names.add(GitUtils.ref2tag(ref.getRef().getName()));
 		}
 		return names;
@@ -106,23 +106,23 @@ public abstract class RevisionSelector extends Panel {
 		target.focusComponent(revField);
 	}
 
-	public RevisionSelector(String id, IModel<Depot> depotModel, @Nullable String revision, boolean canCreateRef) {
+	public RevisionSelector(String id, IModel<Project> projectModel, @Nullable String revision, boolean canCreateRef) {
 		super(id);
 		
 		Preconditions.checkArgument(revision!=null || !canCreateRef);
 	
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.revision = revision;		
 		if (canCreateRef) {
-			Depot depot = depotModel.getObject();
-			canCreateBranch = SecurityUtils.canWrite(depot);						
-			canCreateTag = SecurityUtils.canCreateTag(depot, Constants.R_TAGS);						
+			Project project = projectModel.getObject();
+			canCreateBranch = SecurityUtils.canWrite(project);						
+			canCreateTag = SecurityUtils.canCreateTag(project, Constants.R_TAGS);						
 		} else {
 			canCreateBranch = false;
 			canCreateTag = false;
 		}
 		if (revision != null) {
-			Ref ref = depotModel.getObject().getRef(revision);
+			Ref ref = projectModel.getObject().getRef(revision);
 			branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
 		} else {
 			branchesActive = true;
@@ -131,12 +131,12 @@ public abstract class RevisionSelector extends Panel {
 		refs = findRefs();
 	}
 	
-	public RevisionSelector(String id, IModel<Depot> depotModel, @Nullable String revision) {
-		this(id, depotModel, revision, false);
+	public RevisionSelector(String id, IModel<Project> projectModel, @Nullable String revision) {
+		this(id, projectModel, revision, false);
 	}
 
-	public RevisionSelector(String id, IModel<Depot> depotModel) {
-		this(id, depotModel, null, false);
+	public RevisionSelector(String id, IModel<Project> projectModel) {
+		this(id, projectModel, null, false);
 	}
 	
 	@Override
@@ -270,18 +270,18 @@ public abstract class RevisionSelector extends Panel {
 					itemValues.add(ref);
 			}
 			if (itemValues.size() < count && !found) {
-				Depot depot = depotModel.getObject();
+				Project project = projectModel.getObject();
 				try {
-					if (depot.getRepository().resolve(revInput) != null) {
+					if (project.getRepository().resolve(revInput) != null) {
 						itemValues.add(COMMIT_FLAG + revInput);
 					} else if (branchesActive) {
 						if (canCreateBranch) {
-							if (SecurityUtils.canWrite(depot))
+							if (SecurityUtils.canWrite(project))
 								itemValues.add(ADD_FLAG + revInput);
 						}
 					} else {
 						if (canCreateTag) {
-							if (SecurityUtils.canCreateTag(depot, revInput)) { 
+							if (SecurityUtils.canCreateTag(project, revInput)) { 
 								itemValues.add(ADD_FLAG + revInput);
 							}
 						}
@@ -302,14 +302,14 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void onCreateRef(AjaxRequestTarget target, final String refName) {
 		if (branchesActive) {
-			depotModel.getObject().createBranch(refName, revision);
+			projectModel.getObject().createBranch(refName, revision);
 			selectRevision(target, refName);
 		} else {
 			ModalPanel modal = new ModalPanel(target) {
 
 				@Override
 				protected Component newContent(String id) {
-					return new CreateTagPanel(id, depotModel, refName, revision) {
+					return new CreateTagPanel(id, projectModel, refName, revision) {
 
 						@Override
 						protected void onCreate(AjaxRequestTarget target, String tagName) {
@@ -440,7 +440,7 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void selectRevision(AjaxRequestTarget target, String revision) {
 		try {
-			if (depotModel.getObject().getRevCommit(revision, false) != null) {
+			if (projectModel.getObject().getRevCommit(revision, false) != null) {
 				onSelect(target, revision);
 			} else {
 				feedbackMessage = "Can not find commit of revision " + revision + "";
@@ -468,7 +468,7 @@ public abstract class RevisionSelector extends Panel {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		
 		super.onDetach();
 	}

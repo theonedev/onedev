@@ -45,7 +45,7 @@ public class PullRequestResource {
     public PullRequest get(@PathParam("id") Long id) {
     	PullRequest request = dao.load(PullRequest.class, id);
     	
-    	if (!SecurityUtils.canRead(request.getTargetDepot()))
+    	if (!SecurityUtils.canRead(request.getTargetProject()))
     		throw new UnauthorizedException();
     	
     	return request;
@@ -54,20 +54,20 @@ public class PullRequestResource {
     @ValidQueryParams
     @GET
     public Collection<PullRequest> query(
-    		@QueryParam("targetDepotId") Long targetDepotId, @QueryParam("targetBranch") String targetBranch,
-    		@QueryParam("sourceDepotId") Long sourceDepotId, @QueryParam("sourceBranch") String sourceBranch, 
+    		@QueryParam("targetProjectId") Long targetProjectId, @QueryParam("targetBranch") String targetBranch,
+    		@QueryParam("sourceProjectId") Long sourceProjectId, @QueryParam("sourceBranch") String sourceBranch, 
     		@QueryParam("submitterId") Long submitterId, @QueryParam("status") String status, 
     		@QueryParam("beginDate") Date beginDate, @QueryParam("endDate") Date endDate) {
     	
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 
-    	if (targetDepotId != null)
-    		criteria.add(Restrictions.eq("targetDepot.id", targetDepotId));
+    	if (targetProjectId != null)
+    		criteria.add(Restrictions.eq("targetProject.id", targetProjectId));
     	if (targetBranch != null)
     		criteria.add(Restrictions.eq("targetBranch", targetBranch));
     		
-    	if (sourceDepotId != null)
-    		criteria.add(Restrictions.eq("sourceDepot.id", targetDepotId));
+    	if (sourceProjectId != null)
+    		criteria.add(Restrictions.eq("sourceProject.id", targetProjectId));
     	if (sourceBranch != null)
     		criteria.add(Restrictions.eq("sourceBranch", sourceBranch));
 		
@@ -86,7 +86,7 @@ public class PullRequestResource {
 		List<PullRequest> requests = dao.findAll(criteria);
 		
 		for (PullRequest request: requests) {
-	    	if (!SecurityUtils.canRead(request.getTarget().getDepot()))
+	    	if (!SecurityUtils.canRead(request.getTarget().getProject()))
 	    		throw new UnauthorizedException("Unauthorized access to pull request " + request.getTarget() + "/" + request.getId());
 		}
 		return requests;

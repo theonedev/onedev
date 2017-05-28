@@ -33,7 +33,7 @@ import com.gitplex.server.manager.PullRequestTaskManager;
 import com.gitplex.server.manager.PullRequestWatchManager;
 import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.manager.VisitInfoManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.BranchWatch;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestStatusChange;
@@ -83,7 +83,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	public void on(PullRequestEvent event) {
 		PullRequest request = event.getRequest();
 
-		Set<Account> notifiedUsers = new HashSet<>();
+		Set<User> notifiedUsers = new HashSet<>();
 
 		// Update pull request tasks
 		if (event instanceof PullRequestOpened) {
@@ -185,7 +185,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		}
 		
 		// handle mentions
-		Set<Account> mentionUsers = new HashSet<>();
+		Set<User> mentionUsers = new HashSet<>();
 		if (event instanceof MarkdownAware) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
@@ -219,7 +219,7 @@ public class DefaultNotificationManager implements NotificationManager {
 							+ "-- Sent by GitPlex", 
 							subject, markdownManager.escape(markdown), url, url);
 					
-					mailManager.sendMailAsync(mentionUsers.stream().map(Account::getEmail).collect(Collectors.toList()), 
+					mailManager.sendMailAsync(mentionUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
 							subject, body);
 				}
 			}
@@ -243,13 +243,13 @@ public class DefaultNotificationManager implements NotificationManager {
 		
 		if (event instanceof PullRequestOpened) {
 			for (BranchWatch branchWatch: 
-					branchWatchManager.find(request.getTargetDepot(), request.getTargetBranch())) {
+					branchWatchManager.find(request.getTargetProject(), request.getTargetBranch())) {
 				watch(request, branchWatch.getUser(), 
 						"You are set to watch this pull request as you are watching the target branch.");
 			}
 		} 
 		
-		for (Account mention: mentionUsers) {
+		for (User mention: mentionUsers) {
 			watch(request, mention, 
 					"You are set to watch this pull request as you are mentioned in code comment.");
 		}
@@ -267,7 +267,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		}
 		
 		if (notifyWatchers) {
-			Collection<Account> usersToNotify = new HashSet<>();
+			Collection<User> usersToNotify = new HashSet<>();
 			
 			for (PullRequestWatch watch: request.getWatches()) {
 				if (!watch.isIgnore() && !watch.getUser().equals(event.getUser()) 
@@ -321,7 +321,7 @@ public class DefaultNotificationManager implements NotificationManager {
 							+ "You receive this email as you are watching the pull request.",
 							activity, request.getNumber(), request.getTitle(), url, url);
 				}
-				mailManager.sendMailAsync(usersToNotify.stream().map(Account::getEmail).collect(Collectors.toList()), subject, body);
+				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), subject, body);
 			}
 		}
 	}
@@ -350,7 +350,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		mailManager.sendMailAsync(Sets.newHashSet(task.getUser().getEmail()), subject, body);
 	}
 	
-	private void watch(PullRequest request, Account user, String reason) {
+	private void watch(PullRequest request, User user, String reason) {
 		PullRequestWatch watch = request.getWatch(user);
 		if (watch == null) {
 			watch = new PullRequestWatch();
@@ -369,7 +369,7 @@ public class DefaultNotificationManager implements NotificationManager {
 			ReviewInvitation invitation = (ReviewInvitation) event.getEntity();
 			if (!event.isNew()) {
 				PullRequest request = invitation.getRequest();
-				Account user = invitation.getUser();
+				User user = invitation.getUser();
 				if (invitation.getType() == ReviewInvitation.Type.EXCLUDE) {
 					EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
 					criteria.add(Restrictions.eq("request", request)).add(Restrictions.eq("user", user)).add(Restrictions.eq("type", REVIEW));

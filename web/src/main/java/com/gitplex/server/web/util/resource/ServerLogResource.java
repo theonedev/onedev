@@ -23,7 +23,7 @@ public class ServerLogResource extends AbstractResource {
 
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
-		if (!SecurityUtils.canManageSystem()) 
+		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 
 		ResourceResponse response = new ResourceResponse();

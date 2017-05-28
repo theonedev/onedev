@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.eclipse.jgit.http.server.ServletUtils;
@@ -33,12 +32,12 @@ import com.gitplex.server.git.command.ReceiveCommand;
 import com.gitplex.server.git.command.UploadCommand;
 import com.gitplex.server.git.exception.GitException;
 import com.gitplex.server.manager.ConfigManager;
-import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.WorkExecutor;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
-import com.gitplex.server.security.ObjectPermission;
+import com.gitplex.server.model.User;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.util.concurrent.PrioritizedRunnable;
 import com.gitplex.server.util.serverconfig.ServerConfig;
 
@@ -55,7 +54,7 @@ public class GitFilter implements Filter {
 	
 	private final StorageManager storageManager;
 	
-	private final DepotManager repositoryManager;
+	private final ProjectManager projectManager;
 	
 	private final WorkExecutor workExecutor;
 	
@@ -64,11 +63,11 @@ public class GitFilter implements Filter {
 	private final ConfigManager configManager;
 	
 	@Inject
-	public GitFilter(GitPlex gitPlex, StorageManager storageManager, DepotManager repositoryManager, 
+	public GitFilter(GitPlex gitPlex, StorageManager storageManager, ProjectManager projectManager, 
 			WorkExecutor workManager, ServerConfig serverConfig, ConfigManager configManager) {
 		this.gitPlex = gitPlex;
 		this.storageManager = storageManager;
-		this.repositoryManager = repositoryManager;
+		this.projectManager = projectManager;
 		this.workExecutor = workManager;
 		this.serverConfig = serverConfig;
 		this.configManager = configManager;
@@ -79,28 +78,27 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Depot getDepot(HttpServletRequest request, HttpServletResponse response, String depotInfo) 
+	private Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
 			throws IOException {
-		depotInfo = StringUtils.stripStart(StringUtils.stripEnd(depotInfo, "/"), "/");
-		
-		String accountName = StringUtils.substringBefore(depotInfo, "/");
-		String repositoryName = StringUtils.substringAfter(depotInfo, "/");
+		projectInfo = StringUtils.stripStart(StringUtils.stripEnd(projectInfo, "/"), "/");
 
-		if (StringUtils.isBlank(accountName) || StringUtils.isBlank(repositoryName)) {
+		if (StringUtils.isBlank(projectInfo) || !projectInfo.startsWith("projects/")) {
 			String url = request.getRequestURL().toString();
 			String urlRoot = url.substring(0, url.length()-getPathInfo(request).length());
-			throw new GitException(String.format("Expecting url of format %s<account name>/<repository name>", urlRoot));
+			throw new GitException(String.format("Expecting url of format %sprojects/<project name>", urlRoot));
 		} 
 		
-		if (repositoryName.endsWith(".git"))
-			repositoryName = repositoryName.substring(0, repositoryName.length()-".git".length());
+		String projectName = StringUtils.substringAfter(projectInfo, "/");
 		
-		Depot depot = repositoryManager.find(accountName, repositoryName);
-		if (depot == null) {
-			throw new GitException(String.format("Unable to find repository %s under account %s.", repositoryName, accountName));
+		if (projectName.endsWith(".git"))
+			projectName = projectName.substring(0, projectName.length()-".git".length());
+		
+		Project project = projectManager.find(projectName);
+		if (project == null) {
+			throw new GitException(String.format("Unable to find project %s", projectName));
 		}
 		
-		return depot;
+		return project;
 	}
 	
 	private void doNotCache(HttpServletResponse response) {
@@ -115,8 +113,8 @@ public class GitFilter implements Filter {
 		
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
-		String depotInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Depot depot = getDepot(request, response, depotInfo);
+		String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
+		Project project = getProject(request, response, projectInfo);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
@@ -130,13 +128,13 @@ public class GitFilter implements Filter {
 
         environments.put("GITPLEX_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
 		environments.put("GITPLEX_URL", serverUrl);
-		environments.put("GITPLEX_USER_ID", Account.getCurrentId().toString());
-		environments.put("GITPLEX_REPOSITORY_ID", depot.getId().toString());
-		File gitDir = storageManager.getGitDir(depot);
+		environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
+		environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
+		File gitDir = storageManager.getGitDir(project);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(depot))) {
-				throw new UnauthorizedException("You do not have permission to pull from this repository.");
+			if (!SecurityUtils.canRead(project)) {
+				throw new UnauthorizedException("You do not have permission to pull from this project.");
 			}
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
@@ -154,8 +152,8 @@ public class GitFilter implements Filter {
 				
 			}).get();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(depot))) {
-				throw new UnauthorizedException("You do not have permission to push to this repository.");
+			if (!SecurityUtils.canWrite(project)) {
+				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
@@ -189,21 +187,21 @@ public class GitFilter implements Filter {
 		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
-		String depotInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Depot depot = getDepot(request, response, depotInfo);
+		String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
+		Project project = getProject(request, response, projectInfo);
 		String service = request.getParameter("service");
 		
-		File gitDir = storageManager.getGitDir(depot);
+		File gitDir = storageManager.getGitDir(project);
 
 		if (service.contains("upload")) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(depot))) {
-				throw new UnauthorizedException("You do not have permission to pull from this repository.");
+			if (!SecurityUtils.canRead(project)) {
+				throw new UnauthorizedException("You do not have permission to pull from this project.");
 			}
 			writeInitial(response, service);
 			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(depot))) {
-				throw new UnauthorizedException("You do not have permission to push to this repository.");
+			if (!SecurityUtils.canWrite(project)) {
+				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			writeInitial(response, service);
 			new AdvertiseReceiveRefsCommand(gitDir).output(response.getOutputStream()).call();

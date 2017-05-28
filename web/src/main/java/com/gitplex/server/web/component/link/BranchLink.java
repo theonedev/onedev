@@ -10,31 +10,31 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.support.DepotAndBranch;
-import com.gitplex.server.web.page.depot.DepotPage;
-import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
+import com.gitplex.server.model.support.ProjectAndBranch;
+import com.gitplex.server.web.page.project.ProjectPage;
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 
 @SuppressWarnings("serial")
 public class BranchLink extends ViewStateAwarePageLink<Void> {
 
-	private final DepotAndBranch depotAndBranch;
+	private final ProjectAndBranch projectAndBranch;
 	
-	public BranchLink(String id, DepotAndBranch depotAndBranch, @Nullable PullRequest request) {
-		super(id, DepotBlobPage.class, paramsOf(depotAndBranch, request));
-		this.depotAndBranch = depotAndBranch;
+	public BranchLink(String id, ProjectAndBranch projectAndBranch, @Nullable PullRequest request) {
+		super(id, ProjectBlobPage.class, paramsOf(projectAndBranch, request));
+		this.projectAndBranch = projectAndBranch;
 	}
 	
-	private static PageParameters paramsOf(DepotAndBranch depotAndBranch, PullRequest request) {
-		BlobIdent blobIdent = new BlobIdent(depotAndBranch.getBranch(), null, FileMode.TREE.getBits());
-		DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
+	private static PageParameters paramsOf(ProjectAndBranch projectAndBranch, PullRequest request) {
+		BlobIdent blobIdent = new BlobIdent(projectAndBranch.getBranch(), null, FileMode.TREE.getBits());
+		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		state.requestId = PullRequest.idOf(request);
-		return DepotBlobPage.paramsOf(depotAndBranch.getDepot(), state);
+		return ProjectBlobPage.paramsOf(projectAndBranch.getProject(), state);
 	}
 
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setEnabled(depotAndBranch.getObjectName(false) != null);
+		setEnabled(projectAndBranch.getObjectName(false) != null);
 	}
 
 	@Override
@@ -49,14 +49,14 @@ public class BranchLink extends ViewStateAwarePageLink<Void> {
 	@Override
 	public IModel<?> getBody() {
 		String label;
-		if (getPage() instanceof DepotPage) {
-			DepotPage page = (DepotPage) getPage();
-			if (page.getDepot().equals(depotAndBranch.getDepot())) 
-				label = depotAndBranch.getBranch();
+		if (getPage() instanceof ProjectPage) {
+			ProjectPage page = (ProjectPage) getPage();
+			if (page.getProject().equals(projectAndBranch.getProject())) 
+				label = projectAndBranch.getBranch();
 			else 
-				label = depotAndBranch.getFQN();
+				label = projectAndBranch.getFQN();
 		} else {
-			label = depotAndBranch.getFQN();
+			label = projectAndBranch.getFQN();
 		}
 		return Model.of(label);
 	}

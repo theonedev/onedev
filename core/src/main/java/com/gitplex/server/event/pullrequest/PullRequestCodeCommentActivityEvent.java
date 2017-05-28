@@ -2,7 +2,7 @@ package com.gitplex.server.event.pullrequest;
 
 import java.util.Date;
 
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.CodeCommentActivity;
 
 public abstract class PullRequestCodeCommentActivityEvent extends PullRequestCodeCommentEvent {
@@ -24,7 +24,7 @@ public abstract class PullRequestCodeCommentActivityEvent extends PullRequestCod
 	}
 
 	@Override
-	public Account getUser() {
+	public User getUser() {
 		return activity.getUser();
 	}
 

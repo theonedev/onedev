@@ -43,7 +43,7 @@ public class PullRequestTask extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Account user;
+	private User user;
 	
 	@Column(nullable=false)
 	private Type type;
@@ -59,11 +59,11 @@ public class PullRequestTask extends AbstractEntity {
 		this.request = request;
 	}
 
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(Account user) {
+	public void setUser(User user) {
 		this.user = user;
 	}
 

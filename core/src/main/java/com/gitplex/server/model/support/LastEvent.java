@@ -10,7 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 
 @Embeddable
 public class LastEvent implements Serializable {
@@ -19,7 +19,7 @@ public class LastEvent implements Serializable {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="LAST_EVENT_USER")
-	private Account user;
+	private User user;
 	
 	@Column(name="LAST_EVENT_USER_NAME")
 	private String userName;
@@ -47,11 +47,11 @@ public class LastEvent implements Serializable {
 	}
 
 	@Nullable
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(Account user) {
+	public void setUser(User user) {
 		this.user = user;
 	}
 

@@ -7,13 +7,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.behavior.TagPatternAssistBehavior;
 import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.PropertyEditor;
-import com.gitplex.server.web.page.depot.DepotPage;
+import com.gitplex.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public class TagPatternEditor extends PropertyEditor<String> {
@@ -30,11 +30,11 @@ public class TagPatternEditor extends PropertyEditor<String> {
     	
     	input = new TextField<String>("input", getModel());
     	
-    	input.add(new TagPatternAssistBehavior(new AbstractReadOnlyModel<Depot>() {
+    	input.add(new TagPatternAssistBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
-			public Depot getObject() {
-				return ((DepotPage) getPage()).getDepot();
+			public Project getObject() {
+				return ((ProjectPage) getPage()).getProject();
 			}
     		
     	}));

@@ -26,7 +26,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -34,7 +34,7 @@ import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 @SuppressWarnings("serial")
 public abstract class BranchSelector extends Panel {
 	
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final String branch;
 	
@@ -50,13 +50,13 @@ public abstract class BranchSelector extends Panel {
 	
 	private final List<String> filteredBranches = new ArrayList<>();
 	
-	public BranchSelector(String id, IModel<Depot> depotModel, String branch) {
+	public BranchSelector(String id, IModel<Project> projectModel, String branch) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.branch = branch;		
 		
-		for (RefInfo ref: depotModel.getObject().getBranches())
+		for (RefInfo ref: projectModel.getObject().getBranches())
 			branches.add(GitUtils.ref2branch(ref.getRef().getName()));
 		
 		filteredBranches.addAll(branches);
@@ -169,7 +169,7 @@ public abstract class BranchSelector extends Panel {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		
 		super.onDetach();
 	}

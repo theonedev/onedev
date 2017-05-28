@@ -26,3 +26,11 @@
 	border: 1px solid black;
 	color: white;
 }
+
+#user-add .actions .btn {
+	margin-right: 20px;
+}
+
+.group.list .actions a, .user.list .actions a {
+	color: #666;
+}

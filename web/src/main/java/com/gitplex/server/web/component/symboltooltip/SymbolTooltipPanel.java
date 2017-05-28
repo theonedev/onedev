@@ -33,7 +33,7 @@ import com.gitplex.jsymbol.Symbol;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.SearchManager;
@@ -46,15 +46,15 @@ import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.RunTaskBehavior;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
-import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
-import com.gitplex.server.web.page.depot.blob.search.result.SearchResultPanel;
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+import com.gitplex.server.web.page.project.blob.search.result.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
 
 	private static final int QUERY_ENTRIES = 20;
 	
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private String revision = "";
 	
@@ -62,10 +62,10 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
-	public SymbolTooltipPanel(String id, IModel<Depot> depotModel) {
+	public SymbolTooltipPanel(String id, IModel<Project> projectModel) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 				};
 
-				CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, getQueryHitParams(hit));
+				CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, getQueryHitParams(hit));
 				link.add(AttributeAppender.replace("href", url.toString()));
 				link.add(hit.render("label"));
 				link.add(new Label("scope", hit.getNamespace()).setVisible(hit.getNamespace()!=null));
@@ -154,8 +154,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 									.build();
 							try {
 								SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-								ObjectId commit = depotModel.getObject().getRevCommit(revision);
-								hits = searchManager.search(depotModel.getObject(), commit, query);
+								ObjectId commit = projectModel.getObject().getRevCommit(revision);
+								hits = searchManager.search(projectModel.getObject(), commit, query);
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);
 							}								
@@ -173,7 +173,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 				super.onComponentTag(tag);
 
 				// set href in onComponentTag in order to keep it up to date with symbol value
-				CharSequence url = RequestCycle.get().urlFor(DepotBlobPage.class, getFindOccurrencesParams());
+				CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, getFindOccurrencesParams());
 				tag.put("href", url.toString());
 			}
 
@@ -208,11 +208,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 				// do this check to avoid TooGeneralQueryException
 				if (symbolName.length() != 0 && symbolName.indexOf('?') == -1 && symbolName.indexOf('*') == -1) {
 					BlobIdent blobIdent = new BlobIdent(revision, getBlobPath(), FileMode.TYPE_FILE);
-					Blob blob = depotModel.getObject().getBlob(blobIdent);
+					Blob blob = projectModel.getObject().getBlob(blobIdent);
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						// first find in current file for matched symbols
-						List<Symbol> symbols = GitPlex.getInstance(SearchManager.class).getSymbols(depotModel.getObject(), 
+						List<Symbol> symbols = GitPlex.getInstance(SearchManager.class).getSymbols(projectModel.getObject(), 
 								blob.getBlobId(), getBlobPath());
 						if (symbols != null) {
 							for (Symbol symbol: symbols) {
@@ -238,7 +238,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 						// then find in other files for public symbols
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-							ObjectId commit = depotModel.getObject().getRevCommit(revision);
+							ObjectId commit = projectModel.getObject().getRevCommit(revision);
 							BlobQuery query;
 							if (symbolHits.size() < QUERY_ENTRIES) {
 								query = new SymbolQuery.Builder().term(symbolName)
@@ -248,7 +248,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.caseSensitive(true)
 										.count(QUERY_ENTRIES)
 										.build();
-								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+								symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
 							}							
 							if (symbolHits.size() < QUERY_ENTRIES) {
 								query = new SymbolQuery.Builder().term(symbolName)
@@ -258,11 +258,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.caseSensitive(true)
 										.count(QUERY_ENTRIES - symbolHits.size())
 										.build();
-								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+								symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
 							}
 							if (canBePath && symbolHits.size() < QUERY_ENTRIES) {
 								query = new PathQuery(null, symbolName, QUERY_ENTRIES - symbolHits.size());
-								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+								symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
 							}
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
@@ -297,16 +297,16 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
 		BlobIdent blobIdent = new BlobIdent(revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
-		DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
+		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		state.mark = TextRange.of(hit.getTokenPos());
-		return DepotBlobPage.paramsOf(depotModel.getObject(), state);
+		return ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
 		BlobIdent blobIdent = new BlobIdent(revision, getBlobPath(), FileMode.REGULAR_FILE.getBits());
-		DepotBlobPage.State state = new DepotBlobPage.State(blobIdent);
+		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		state.query = symbolName;
-		return DepotBlobPage.paramsOf(depotModel.getObject(), state);
+		return ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 	}
 	
 	public String getSymbol() {
@@ -319,7 +319,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		super.onDetach();
 	}
 

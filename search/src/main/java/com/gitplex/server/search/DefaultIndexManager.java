@@ -72,9 +72,9 @@ import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.BatchWorkManager;
-import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.ContentDetector;
@@ -100,18 +100,18 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final DepotManager depotManager;
+	private final ProjectManager projectManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
 	public DefaultIndexManager(ListenerRegistry listenerRegistry, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, DepotManager depotManager) {
+			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, ProjectManager projectManager) {
 		this.listenerRegistry = listenerRegistry;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
-		this.depotManager = depotManager;
+		this.projectManager = projectManager;
 	}
 
 	private String getCommitIndexVersion(final IndexSearcher searcher, AnyObjectId commitId) throws IOException {
@@ -305,9 +305,9 @@ public class DefaultIndexManager implements IndexManager {
 		return config;
 	}
 	
-	private BatchWorker getBatchWorker(Depot depot) {
-		Long depotId = depot.getId();
-		return new BatchWorker("depot-" + depot.getForkRoot().getId() + "-indexBlob", 1) {
+	private BatchWorker getBatchWorker(Project project) {
+		Long projectId = project.getId();
+		return new BatchWorker("project-" + project.getForkRoot().getId() + "-indexBlob", 1) {
 
 			@Override
 			public void doWork(Collection<Prioritized> works) {
@@ -316,12 +316,12 @@ public class DefaultIndexManager implements IndexManager {
 
 					@Override
 					public Void call() throws Exception {
-						Depot depot = depotManager.load(depotId);
+						Project project = projectManager.load(projectId);
 						IndexWork indexWork = (IndexWork) works.iterator().next();
 
-						Depot forkRoot = depot.getForkRoot();
-						if (!forkRoot.equals(depot) && !forkRoot.getRepository().hasObject(indexWork.getCommitId())) {
-							GitUtils.fetch(depot.getRepository(), indexWork.getCommitId(), forkRoot.getRepository(), 
+						Project forkRoot = project.getForkRoot();
+						if (!forkRoot.equals(project) && !forkRoot.getRepository().hasObject(indexWork.getCommitId())) {
+							GitUtils.fetch(project.getRepository(), indexWork.getCommitId(), forkRoot.getRepository(), 
 									null);
 						}
 						
@@ -335,9 +335,9 @@ public class DefaultIndexManager implements IndexManager {
 		};
 	}
 	
-	private IndexResult doIndex(Depot depot, ObjectId commit) {
+	private IndexResult doIndex(Project project, ObjectId commit) {
 		IndexResult indexResult;
-		File indexDir = storageManager.getIndexDir(depot);
+		File indexDir = storageManager.getIndexDir(project);
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
@@ -346,9 +346,9 @@ public class DefaultIndexManager implements IndexManager {
 						return new IndexResult(0, 0);
 					} else {
 						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-							logger.debug("Indexing commit (repository: {}, commit: {})", depot.getFQN(), commit.getName());
+							logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
 							try {
-								indexResult = index(depot.getRepository(), commit, writer, searcher);
+								indexResult = index(project.getRepository(), commit, writer, searcher);
 								writer.commit();
 							} catch (Exception e) {
 								writer.rollback();
@@ -360,8 +360,8 @@ public class DefaultIndexManager implements IndexManager {
 			} else {
 				try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
 					try {
-						logger.debug("Indexing commit (repository: {}, commit: {})", depot.getFQN(), commit.getName());
-						indexResult = index(depot.getRepository(), commit, writer, null);
+						logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
+						indexResult = index(project.getRepository(), commit, writer, null);
 						writer.commit();
 					} catch (Exception e) {
 						writer.rollback();
@@ -373,10 +373,10 @@ public class DefaultIndexManager implements IndexManager {
 			throw new RuntimeException(e);
 		}
 
-		listenerRegistry.post(new CommitIndexed(depot, commit.copy()));
+		listenerRegistry.post(new CommitIndexed(project, commit.copy()));
 		
-		logger.debug("Commit indexed (repository: {}, commit: {}, checked blobs: {}, indexed blobs: {})", 
-				depot.getFQN(), commit.name(), indexResult.getChecked(), indexResult.getIndexed());
+		logger.debug("Commit indexed (project: {}, commit: {}, checked blobs: {}, indexed blobs: {})", 
+				project.getName(), commit.name(), indexResult.getChecked(), indexResult.getIndexed());
 		
 		return indexResult;
 	}
@@ -393,8 +393,8 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public boolean isIndexed(Depot depot, ObjectId commit) {
-		File indexDir = storageManager.getIndexDir(depot.getForkRoot());
+	public boolean isIndexed(Project project, ObjectId commit) {
+		File indexDir = storageManager.getIndexDir(project.getForkRoot());
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
@@ -415,19 +415,19 @@ public class DefaultIndexManager implements IndexManager {
 		// as many tags might be pushed all at once when the repository is imported 
 		if (event.getRefName().startsWith(Constants.R_HEADS) && !event.getNewObjectId().equals(ObjectId.zeroId())) {
 			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, event.getNewObjectId());
-			batchWorkManager.submit(getBatchWorker(event.getDepot()), work);
+			batchWorkManager.submit(getBatchWorker(event.getProject()), work);
 		}
 	}
 	
 	@Override
-	public void indexAsync(Depot depot, ObjectId commit) {
+	public void indexAsync(Project project, ObjectId commit) {
 		int priority;
 		if (RequestCycle.get() != null)
 			priority = UI_INDEXING_PRIORITY;
 		else
 			priority = BACKEND_INDEXING_PRIORITY;
 		IndexWork work = new IndexWork(priority, commit);
-		batchWorkManager.submit(getBatchWorker(depot), work);
+		batchWorkManager.submit(getBatchWorker(project), work);
 	}
 	
 	private static class IndexWork extends Prioritized {

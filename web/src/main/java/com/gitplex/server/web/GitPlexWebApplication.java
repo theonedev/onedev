@@ -174,7 +174,7 @@ public class GitPlexWebApplication extends WebApplication {
 			
 		});
 		
-		mount(new UrlMapper(this));
+		mount(new GitPlexUrlMapper(this));
 	}
 
 	@Override

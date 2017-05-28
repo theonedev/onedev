@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.Review;
 import com.gitplex.server.persistence.dao.EntityManager;
@@ -26,7 +26,7 @@ public interface ReviewManager extends EntityManager<Review> {
 	 */
 	List<Review> findAll(PullRequest request);
 	
-	void delete(Account user, PullRequest request);
+	void delete(User user, PullRequest request);
 	
 	ReviewStatus checkRequest(PullRequest request);
 	
@@ -42,7 +42,7 @@ public interface ReviewManager extends EntityManager<Review> {
 	 * @return
 	 * 			result of the check. 
 	 */
-	boolean canModify(Account user, Depot depot, String branch, String file);
+	boolean canModify(User user, Project project, String branch, String file);
 	
 	/**
 	 * Check if specified user can push specified commit to specified ref.
@@ -58,6 +58,6 @@ public interface ReviewManager extends EntityManager<Review> {
 	 * @return
 	 * 			result of the check
 	 */
-	boolean canPush(Account user, Depot depot, String branchName, ObjectId oldObjectId, ObjectId newObjectId);
+	boolean canPush(User user, Project project, String branchName, ObjectId oldObjectId, ObjectId newObjectId);
 	
 }

@@ -74,7 +74,7 @@ public class HibernateProxySerializer extends JsonSerializer<HibernateProxy> {
 			JsonProcessingException {
 		/*
 		 * TODO: if Hibernate did use generics, or we wanted to allow use of
-		 * Jackson annotations to indicate type, should take that into account.
+		 * Jackson annotations to indicate type, should take that into user.
 		 */
 		Class<?> type = value.getClass();
 		/*

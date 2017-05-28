@@ -2,15 +2,11 @@ package com.gitplex.server.web.page.layout;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -19,32 +15,27 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.loader.Plugin;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
+import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.floating.AlignPlacement;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.account.overview.AccountOverviewPage;
-import com.gitplex.server.web.page.account.overview.NewOrganizationPage;
-import com.gitplex.server.web.page.account.setting.ProfileEditPage;
-import com.gitplex.server.web.page.account.tasks.TaskListPage;
 import com.gitplex.server.web.page.admin.SystemSettingPage;
 import com.gitplex.server.web.page.base.BasePage;
-import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
 import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
+import com.gitplex.server.web.page.user.TaskListPage;
+import com.gitplex.server.web.page.user.UserProfilePage;
 import com.gitplex.server.web.websocket.PageDataChanged;
 import com.gitplex.server.web.websocket.TaskChangedRegion;
 import com.gitplex.server.web.websocket.WebSocketRegion;
@@ -72,26 +63,19 @@ public abstract class LayoutPage extends BasePage {
 		
 		head.add(newContextHead("context"));
 		
-		if (isLoggedIn()) {
-			head.add(new DropdownLink("createNewDropdown") {
+		head.add(new ViewStateAwarePageLink<Void>("createProject", NewProjectPage.class) {
 
-				@Override
-				protected Component newContent(String id, FloatingPanel dropdown) {
-					Fragment fragment = new Fragment(id, "createNewFrag", LayoutPage.this);
-					fragment.add(new ViewStateAwarePageLink<Void>("createNewDepot", CreateDepotPage.class));
-					fragment.add(new ViewStateAwarePageLink<Void>("createNewOrganization", 
-							NewOrganizationPage.class, NewOrganizationPage.paramsOf(getLoginUser())));
-					return fragment;
-				}
-				
-			});
-		} else {
-			head.add(new WebMarkupContainer("createNewDropdown").setVisible(false));
-		}
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canCreateProjects());
+			}
+			
+		});
 		
 		head.add(new ExternalLink("docLink", GitPlex.getInstance().getDocLink()));
 		
-		Account user = getLoginUser();
+		User user = getLoginUser();
 		boolean signedIn = user != null;
 
 		head.add(new Link<Void>("login") {
@@ -136,36 +120,15 @@ public abstract class LayoutPage extends BasePage {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
 					Fragment fragment = new Fragment(id, "userMenuFrag", LayoutPage.this);
-					List<Account> organizations = SecurityUtils.getAccount().getOrganizations()
-							.stream()
-							.map(membership->membership.getOrganization())
-							.collect(Collectors.toList());
-					Collections.sort(organizations);
 
-					RepeatingView organizationsView = new RepeatingView("organizations");
-					fragment.add(organizationsView);
-					
-					if (!organizations.isEmpty()) {
-						for (Account organization: organizations) {
-							WebMarkupContainer item = new WebMarkupContainer(organizationsView.newChildId());
-							Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
-									AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
-							link.add(new Avatar("avatar", organization));
-							link.add(new Label("name", organization.getDisplayName()));
-							item.add(link);
-							organizationsView.add(item);
-						}
-					} else {
-						organizationsView.setVisible(false);
-					}
-
-					fragment.add(new ViewStateAwarePageLink<Void>("profile", ProfileEditPage.class, ProfileEditPage.paramsOf(user)));
+					fragment.add(new ViewStateAwarePageLink<Void>("profile", 
+							UserProfilePage.class, UserProfilePage.paramsOf(user)));
 					fragment.add(new ViewStateAwarePageLink<Void>("administration", SystemSettingPage.class) {
 
 						@Override
 						protected void onConfigure() {
 							super.onConfigure();
-							setVisible(SecurityUtils.canManageSystem());
+							setVisible(SecurityUtils.isAdministrator());
 						}
 						
 					});
@@ -221,23 +184,10 @@ public abstract class LayoutPage extends BasePage {
 	}
 	
 	@Nullable
-	protected Account getAccount() {
-		return getLoginUser();
-	}
-
-	@Nullable
-	protected Depot getDepot() {
+	protected Project getProject() {
 		return null;
 	}
 	
-	protected void onSelect(AjaxRequestTarget target, Account account) {
-		setResponsePage(AccountOverviewPage.class, AccountOverviewPage.paramsOf(account));
-	}
-	
-	protected void onSelect(AjaxRequestTarget target, Depot depot) {
-		setResponsePage(DepotBlobPage.class, DepotBlobPage.paramsOf(depot));
-	}
-
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();

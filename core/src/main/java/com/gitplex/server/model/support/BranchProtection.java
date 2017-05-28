@@ -12,9 +12,9 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.Team;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
+import com.gitplex.server.model.Group;
 import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.util.editable.annotation.BranchPattern;
 import com.gitplex.server.util.editable.annotation.Editable;
@@ -100,56 +100,33 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Nullable
-	public ReviewAppointment getReviewAppointment(Depot depot) {
+	public ReviewAppointment getReviewAppointment(Project project) {
 		if (reviewAppointmentOpt == null) {
 			if (reviewAppointmentExpr != null)
-				reviewAppointmentOpt = Optional.of(new ReviewAppointment(depot, reviewAppointmentExpr));
+				reviewAppointmentOpt = Optional.of(new ReviewAppointment(project, reviewAppointmentExpr));
 			else
 				reviewAppointmentOpt = Optional.empty();
 		}
 		return reviewAppointmentOpt.orElse(null);
 	}
 	
-	public void onDepotTransferred(Depot depot) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(depot);
+	public void onGroupRename(Project project, String oldName, String newName) {
+		ReviewAppointment reviewAppointment = getReviewAppointment(project);
 		if (reviewAppointment != null) {
-			reviewAppointment.getTeams().clear();
-			setReviewAppointmentExpr(reviewAppointment.toExpr());
-		}
-		
-		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
-			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(depot);
-			if (reviewAppointment != null) {
-				reviewAppointment.getTeams().clear();
-				String reviewAppointmentExpr = reviewAppointment.toExpr();
-				if (reviewAppointmentExpr != null)
-					fileProtection.setReviewAppointmentExpr(reviewAppointmentExpr);
-				else
-					it.remove();
-			} else {
-				it.remove();
-			}
-		}
-	}
-	
-	public void onTeamRename(Depot depot, String oldName, String newName) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(depot);
-		if (reviewAppointment != null) {
-			for (Team team: reviewAppointment.getTeams().keySet()) {
-				if (team.getName().equals(oldName))
-					team.setName(newName);
+			for (Group group: reviewAppointment.getGroups().keySet()) {
+				if (group.getName().equals(oldName))
+					group.setName(newName);
 			}
 			setReviewAppointmentExpr(reviewAppointment.toExpr());
 		}
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(depot);
+			reviewAppointment = fileProtection.getReviewAppointment(project);
 			if (reviewAppointment != null) {
-				for (Team team: reviewAppointment.getTeams().keySet()) {
-					if (team.getName().equals(oldName))
-						team.setName(newName);
+				for (Group group: reviewAppointment.getGroups().keySet()) {
+					if (group.getName().equals(oldName))
+						group.setName(newName);
 				}
 				fileProtection.setReviewAppointmentExpr(reviewAppointment.toExpr());
 			} else {
@@ -158,13 +135,13 @@ public class BranchProtection implements Serializable {
 		}
 	}
 	
-	public void onTeamDelete(Depot depot, String teamName) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(depot);
+	public void onGroupDelete(Project project, String groupName) {
+		ReviewAppointment reviewAppointment = getReviewAppointment(project);
 		if (reviewAppointment != null) {
-			for (Iterator<Map.Entry<Team, Integer>> it = reviewAppointment.getTeams().entrySet().iterator(); 
+			for (Iterator<Map.Entry<Group, Integer>> it = reviewAppointment.getGroups().entrySet().iterator(); 
 					it.hasNext();) {
-				Team team = it.next().getKey();
-				if (team.getName().equals(teamName))
+				Group group = it.next().getKey();
+				if (group.getName().equals(groupName))
 					it.remove();
 			}
 			setReviewAppointmentExpr(reviewAppointment.toExpr());
@@ -172,13 +149,13 @@ public class BranchProtection implements Serializable {
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(depot);
+			reviewAppointment = fileProtection.getReviewAppointment(project);
 			if (reviewAppointment != null) {
-				for (Iterator<Map.Entry<Team, Integer>> itTeam = reviewAppointment.getTeams().entrySet().iterator(); 
-						itTeam.hasNext();) {
-					Team team = itTeam.next().getKey();
-					if (team.getName().equals(teamName))
-						itTeam.remove();
+				for (Iterator<Map.Entry<Group, Integer>> itGroup = reviewAppointment.getGroups().entrySet().iterator(); 
+						itGroup.hasNext();) {
+					Group group = itGroup.next().getKey();
+					if (group.getName().equals(groupName))
+						itGroup.remove();
 				}
 				String reviewAppointmentExpr = reviewAppointment.toExpr();
 				if (reviewAppointmentExpr != null)
@@ -191,10 +168,10 @@ public class BranchProtection implements Serializable {
 		}
 	}
 	
-	public void onAccountRename(Depot depot, String oldName, String newName) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(depot);
+	public void onUserRename(Project project, String oldName, String newName) {
+		ReviewAppointment reviewAppointment = getReviewAppointment(project);
 		if (reviewAppointment != null) {
-			for (Account user: reviewAppointment.getUsers()) {
+			for (User user: reviewAppointment.getUsers()) {
 				if (user.getName().equals(oldName))
 					user.setName(newName);
 			}
@@ -203,9 +180,9 @@ public class BranchProtection implements Serializable {
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(depot);
+			reviewAppointment = fileProtection.getReviewAppointment(project);
 			if (reviewAppointment != null) {
-				for (Account user: reviewAppointment.getUsers()) {
+				for (User user: reviewAppointment.getUsers()) {
 					if (user.getName().equals(oldName))
 						user.setName(newName);
 				}
@@ -216,12 +193,12 @@ public class BranchProtection implements Serializable {
 		}		
 	}
 	
-	public void onAccountDelete(Depot depot, String accountName) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(depot);
+	public void onUserDelete(Project project, String userName) {
+		ReviewAppointment reviewAppointment = getReviewAppointment(project);
 		if (reviewAppointment != null) {
-			for (Iterator<Account> it = reviewAppointment.getUsers().iterator(); it.hasNext();) {
-				Account user = it.next();
-				if (user.getName().equals(accountName))
+			for (Iterator<User> it = reviewAppointment.getUsers().iterator(); it.hasNext();) {
+				User user = it.next();
+				if (user.getName().equals(userName))
 					it.remove();
 			}
 			setReviewAppointmentExpr(reviewAppointment.toExpr());
@@ -229,11 +206,11 @@ public class BranchProtection implements Serializable {
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(depot);
+			reviewAppointment = fileProtection.getReviewAppointment(project);
 			if (reviewAppointment != null) {
-				for (Iterator<Account> itUser = reviewAppointment.getUsers().iterator(); itUser.hasNext();) {
-					Account user = itUser.next();
-					if (user.getName().equals(accountName))
+				for (Iterator<User> itUser = reviewAppointment.getUsers().iterator(); itUser.hasNext();) {
+					User user = itUser.next();
+					if (user.getName().equals(userName))
 						itUser.remove();
 				}
 				String reviewAppointmentExpr = reviewAppointment.toExpr();

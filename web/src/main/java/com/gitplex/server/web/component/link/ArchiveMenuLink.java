@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.menu.MenuLink;
@@ -17,11 +17,11 @@ import com.gitplex.server.web.util.resource.ArchiveResourceReference;
 @SuppressWarnings("serial")
 public abstract class ArchiveMenuLink extends MenuLink {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
-	public ArchiveMenuLink(String id, IModel<Depot> depotModel) {
+	public ArchiveMenuLink(String id, IModel<Project> projectModel) {
 		super(id);
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public abstract class ArchiveMenuLink extends MenuLink {
 			@Override
 			public AbstractLink newLink(String id) {
 				return new ResourceLink<Void>(id, new ArchiveResourceReference(), 
-						ArchiveResource.paramsOf(depotModel.getObject(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
+						ArchiveResource.paramsOf(projectModel.getObject(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
 
 					@Override
 					protected CharSequence getOnClickScript(CharSequence url) {
@@ -58,7 +58,7 @@ public abstract class ArchiveMenuLink extends MenuLink {
 			@Override
 			public AbstractLink newLink(String id) {
 				return new ResourceLink<Void>(id, new ArchiveResourceReference(), 
-						ArchiveResource.paramsOf(depotModel.getObject(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
+						ArchiveResource.paramsOf(projectModel.getObject(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
 
 					@Override
 					protected CharSequence getOnClickScript(CharSequence url) {
@@ -74,7 +74,7 @@ public abstract class ArchiveMenuLink extends MenuLink {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		super.onDetach();
 	}
 

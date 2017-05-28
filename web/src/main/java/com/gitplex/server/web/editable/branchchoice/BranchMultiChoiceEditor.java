@@ -9,14 +9,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.component.branchchoice.BranchChoiceProvider;
 import com.gitplex.server.web.component.branchchoice.BranchMultiChoice;
 import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.PropertyEditor;
-import com.gitplex.server.web.page.depot.DepotPage;
+import com.gitplex.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
@@ -32,21 +32,21 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Depot>() {
+    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Project>() {
 
 			@Override
-			protected Depot load() {
-				DepotPage page = (DepotPage) getPage();
-				return page.getDepot();
+			protected Project load() {
+				ProjectPage page = (ProjectPage) getPage();
+				return page.getProject();
 			}
     		
     	});
 
-    	ArrayList<String> depotAndBranches = new ArrayList<>();
+    	ArrayList<String> projectAndBranches = new ArrayList<>();
 		if (getModelObject() != null) 
-			depotAndBranches.addAll(getModelObject());
+			projectAndBranches.addAll(getModelObject());
 		
-		input = new BranchMultiChoice("input", new Model(depotAndBranches), branchProvider);
+		input = new BranchMultiChoice("input", new Model(projectAndBranches), branchProvider);
         
         add(input);
 	}
@@ -58,11 +58,11 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> depotAndBranches = new ArrayList<>();
+		List<String> projectAndBranches = new ArrayList<>();
 		Collection<String> convertedInput = input.getConvertedInput();
 		if (convertedInput != null) 
-			depotAndBranches.addAll(convertedInput);
-		return depotAndBranches;
+			projectAndBranches.addAll(convertedInput);
+		return projectAndBranches;
 	}
 
 }

@@ -4,7 +4,7 @@ import java.util.Date;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequest;
 
 public abstract class PullRequestEvent {
@@ -20,7 +20,7 @@ public abstract class PullRequestEvent {
 	}
 	
 	@Nullable
-	public abstract Account getUser();
+	public abstract User getUser();
 
 	public abstract Date getDate();
 	

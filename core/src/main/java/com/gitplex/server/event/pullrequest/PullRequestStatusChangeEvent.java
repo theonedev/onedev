@@ -3,7 +3,7 @@ package com.gitplex.server.event.pullrequest;
 import java.util.Date;
 
 import com.gitplex.server.event.MarkdownAware;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequestStatusChange;
 
 public class PullRequestStatusChangeEvent extends PullRequestEvent implements MarkdownAware {
@@ -25,7 +25,7 @@ public class PullRequestStatusChangeEvent extends PullRequestEvent implements Ma
 	}
 
 	@Override
-	public Account getUser() {
+	public User getUser() {
 		return statusChange.getUser();
 	}
 

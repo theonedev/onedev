@@ -1,0 +1,26 @@
+#user.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
+	width: 220px;
+}
+#user.sidebar>table>tbody>tr>td.nav>.head {
+	margin: -20px 0 20px 0;
+	padding: 10px 10px 0 10px;
+	border-bottom: 1px solid #DDD;
+}
+#user.sidebar>table>tbody>tr>td.nav>.head>div.avatar img {
+	height: 200px;
+	width: 200px;
+	margin-bottom: 10px;
+}
+#user.sidebar>table>tbody>tr>td.content {
+	padding: 20px;
+}
+
+#user .avatar-edit .upload {
+	margin-right: 8px;
+}
+
+#user .authorization.list a.other-sources {
+	margin-left: 4px;
+	color: #DCB508;
+	vertical-align: middle;
+}

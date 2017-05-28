@@ -10,7 +10,7 @@ import com.gitplex.codeassist.InputCompletion;
 import com.gitplex.codeassist.InputStatus;
 import com.gitplex.codeassist.InputSuggestion;
 import com.gitplex.jsymbol.Range;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
 import com.gitplex.server.web.util.SuggestionUtils;
 import com.google.common.collect.Lists;
@@ -18,22 +18,22 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("serial")
 public class BranchPatternAssistBehavior extends InputAssistBehavior {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
-	public BranchPatternAssistBehavior(IModel<Depot> depotModel) {
-		this.depotModel = depotModel;
+	public BranchPatternAssistBehavior(IModel<Project> projectModel) {
+		this.projectModel = projectModel;
 	}
 
 	@Override
 	public void detach(Component component) {
 		super.detach(component);
-		depotModel.detach();
+		projectModel.detach();
 	}
 
 	@Override
 	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 		List<InputCompletion> completions = new ArrayList<>();
-		for (InputSuggestion suggestion: SuggestionUtils.suggestBranch(depotModel.getObject(), 
+		for (InputSuggestion suggestion: SuggestionUtils.suggestBranch(projectModel.getObject(), 
 				inputStatus.getContentBeforeCaret().trim())) {
 			int caret = suggestion.getCaret();
 			if (caret == -1)

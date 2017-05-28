@@ -23,7 +23,7 @@ public class ReviewInvitation extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Account user;
+	private User user;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -33,11 +33,11 @@ public class ReviewInvitation extends AbstractEntity {
 	
 	private Date date = new Date();
 	
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(Account user) {
+	public void setUser(User user) {
 		this.user = user;
 	}
 	

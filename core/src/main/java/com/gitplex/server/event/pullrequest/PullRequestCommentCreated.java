@@ -3,7 +3,7 @@ package com.gitplex.server.event.pullrequest;
 import java.util.Date;
 
 import com.gitplex.server.event.MarkdownAware;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.util.editable.annotation.Editable;
 
@@ -27,7 +27,7 @@ public class PullRequestCommentCreated extends PullRequestEvent implements Markd
 	}
 
 	@Override
-	public Account getUser() {
+	public User getUser() {
 		return comment.getUser();
 	}
 

@@ -35,7 +35,7 @@ import org.apache.wicket.util.string.Strings;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.page.home.DashboardPage;
@@ -63,7 +63,7 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				Account user = getLoginUser();
+				User user = getLoginUser();
 				if (user != null) 
 					tag.put("value", user.getDisplayName());
 			}
@@ -74,7 +74,7 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				Account user = getLoginUser();
+				User user = getLoginUser();
 				if (user != null)
 					tag.put("value", user.getEmail());
 			}
@@ -99,7 +99,7 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 				+ System.getProperty("java.version") + ", " 
 				+ System.getProperty("java.vm.vendor")));
 		serverProps.add(new Property("GitPlex Version", "EAP"));
-		Account user = getLoginUser();
+		User user = getLoginUser();
 		if (user != null) 
 			serverProps.add(new Property("GitPlex User", user.getName()));
 		else 

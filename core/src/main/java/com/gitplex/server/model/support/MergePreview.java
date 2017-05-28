@@ -80,7 +80,7 @@ public class MergePreview implements Serializable {
 		if (getRequestHead().equals(request.getHeadCommitHash())
 				&& getTargetHead().equals(request.getTarget().getObjectName())
 				&& getMergeStrategy() == request.getMergeStrategy()
-				&& (getMerged() == null || ObjectId.fromString(getMerged()).equals((request.getTargetDepot().getObjectId(request.getMergeRef(), false))))) {
+				&& (getMerged() == null || ObjectId.fromString(getMerged()).equals((request.getTargetProject().getObjectId(request.getMergeRef(), false))))) {
 			return false;
 		} else {
 			return true;

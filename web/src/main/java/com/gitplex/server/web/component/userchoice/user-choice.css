@@ -1,0 +1,15 @@
+.select2-container img.avatar {
+	margin-right: 6px;
+	margin-top: -2px;
+}
+.select2-container .user-name, .select2-container .user-fullname  {
+	font-style: normal;
+}
+.select2-results .user {
+	clear: both;
+}
+.select2-results .user .avatar {
+	height: 24px;
+	width: 24px;
+	margin-right: 6px;
+}

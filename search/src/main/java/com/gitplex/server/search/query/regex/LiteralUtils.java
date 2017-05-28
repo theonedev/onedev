@@ -25,7 +25,7 @@ public class LiteralUtils {
 	 * is set to true.<br> 
 	 * If however param <tt>outmost</tt> is set to false, we know that these two rows 
 	 * can still be concatenated with other rows, so simply checking substring 
-	 * occurrences is not sufficient, and we need to take prefix and suffix into account, 
+	 * occurrences is not sufficient, and we need to take prefix and suffix into user, 
 	 * so the rule to discard row2 becomes: 
 	 * <li> if start literals of row2 starts with prefix of row1 (prefix of row1 is 
 	 * defined as literals before the first opaque literal)

@@ -91,7 +91,7 @@
 		function changeOverflow(value) {
 			{
 				// Chrome/Safari-specific fix:
-				// When the textarea y-overflow is hidden, Chrome/Safari do not reflow the text to account for the space
+				// When the textarea y-overflow is hidden, Chrome/Safari do not reflow the text to user for the space
 				// made available by removing the scrollbar. The following forces the necessary text reflow.
 				var width = ta.style.width;
 				ta.style.width = '0px';

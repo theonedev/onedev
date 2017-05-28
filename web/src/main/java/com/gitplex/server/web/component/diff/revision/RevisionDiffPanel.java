@@ -68,7 +68,7 @@ import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.search.IndexManager;
@@ -81,7 +81,7 @@ import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
 import com.gitplex.server.web.component.comment.CodeCommentPanel;
 import com.gitplex.server.web.component.comment.CommentInput;
-import com.gitplex.server.web.component.comment.DepotAttachmentSupport;
+import com.gitplex.server.web.component.comment.ProjectAttachmentSupport;
 import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.blob.SourceAware;
 import com.gitplex.server.web.component.diff.diffstat.DiffStatBar;
@@ -111,7 +111,7 @@ public class RevisionDiffPanel extends Panel {
 	
 	private static final String DIFF_ID = "diff";
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final IModel<PullRequest> requestModel;
 
@@ -133,9 +133,9 @@ public class RevisionDiffPanel extends Panel {
 
 		@Override
 		protected List<DiffEntry> load() {
-			AnyObjectId oldRevId = depotModel.getObject().getObjectId(oldRev);
-			AnyObjectId newRevId = depotModel.getObject().getObjectId(newRev);
-			return GitUtils.diff(depotModel.getObject().getRepository(), oldRevId, newRevId);
+			AnyObjectId oldRevId = projectModel.getObject().getObjectId(oldRev);
+			AnyObjectId newRevId = projectModel.getObject().getObjectId(newRev);
+			return GitUtils.diff(projectModel.getObject().getRepository(), oldRevId, newRevId);
 		}
 		
 	};
@@ -153,7 +153,7 @@ public class RevisionDiffPanel extends Panel {
 
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
-						return depotModel.getObject().getBlob(blobIdent);
+						return projectModel.getObject().getBlob(blobIdent);
 					}
 
 	    		};
@@ -171,7 +171,7 @@ public class RevisionDiffPanel extends Panel {
 
 						@Override
 						public Blob getBlob(BlobIdent blobIdent) {
-							return depotModel.getObject().getBlob(blobIdent);
+							return projectModel.getObject().getBlob(blobIdent);
 						}
 						
 					});
@@ -187,7 +187,7 @@ public class RevisionDiffPanel extends Panel {
 
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
-						return depotModel.getObject().getBlob(blobIdent);
+						return projectModel.getObject().getBlob(blobIdent);
 					}
 					
 				});
@@ -261,7 +261,7 @@ public class RevisionDiffPanel extends Panel {
 
 	    					@Override
 	    					public Blob getBlob(BlobIdent blobIdent) {
-	    						return depotModel.getObject().getBlob(blobIdent);
+	    						return projectModel.getObject().getBlob(blobIdent);
 	    					}
 
 	    	    		};
@@ -386,12 +386,12 @@ public class RevisionDiffPanel extends Panel {
 
 	private ListView<BlobChange> diffsView;
 	
-	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
+	public RevisionDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			String oldRev, String newRev, IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel, 
 			@Nullable IModel<String> blameModel, @Nullable MarkSupport markSupport) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.requestModel = requestModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
@@ -461,19 +461,19 @@ public class RevisionDiffPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				Depot depot = depotModel.getObject();
+				Project project = projectModel.getObject();
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				RevCommit oldCommit = getOldCommit();
 				RevCommit newCommit = getNewCommit();
-				boolean oldCommitIndexed = indexManager.isIndexed(depot, oldCommit);
-				boolean newCommitIndexed = indexManager.isIndexed(depot, newCommit);
+				boolean oldCommitIndexed = indexManager.isIndexed(project, oldCommit);
+				boolean newCommitIndexed = indexManager.isIndexed(project, newCommit);
 				if (oldCommitIndexed && newCommitIndexed) {
 					setVisible(false);
 				} else {
 					if (!oldCommitIndexed)
-						indexManager.indexAsync(depot, oldCommit);
+						indexManager.indexAsync(project, oldCommit);
 					if (!newCommitIndexed)
-						indexManager.indexAsync(depot, newCommit);
+						indexManager.indexAsync(project, newCommit);
 					setVisible(true);
 				}
 			}
@@ -769,7 +769,7 @@ public class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				if (markSupport != null) {
-					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, 
+					item.add(new BlobDiffPanel(DIFF_ID, projectModel, requestModel, change, diffMode, 
 							getBlobBlameModel(change), new BlobCommentSupport() {
 	
 						@Override
@@ -811,19 +811,19 @@ public class RevisionDiffPanel extends Panel {
 							
 							String uuid = UUID.randomUUID().toString();
 							
-							String autosaveKey = "autosave:addCodeCommentOnDiff:" + depotModel.getObject().getId() 
+							String autosaveKey = "autosave:addCodeCommentOnDiff:" + projectModel.getObject().getId() 
 									+ ":" + change.getPath();
 							CommentInput contentInput;
 							form.add(contentInput = new CommentInput("content", Model.of(""), true) {
 
 								@Override
-								protected DepotAttachmentSupport getAttachmentSupport() {
-									return new DepotAttachmentSupport(depotModel.getObject(), uuid);
+								protected ProjectAttachmentSupport getAttachmentSupport() {
+									return new ProjectAttachmentSupport(projectModel.getObject(), uuid);
 								}
 
 								@Override
-								protected Depot getDepot() {
-									return depotModel.getObject();
+								protected Project getProject() {
+									return projectModel.getObject();
 								}
 								
 								@Override
@@ -877,7 +877,7 @@ public class RevisionDiffPanel extends Panel {
 									CodeComment comment = new CodeComment();
 									comment.setUUID(uuid);
 									comment.setRequest(requestModel.getObject());
-									comment.setUser(SecurityUtils.getAccount());
+									comment.setUser(SecurityUtils.getUser());
 									comment.setCommentPos(markPos);
 									comment.setContent(contentInput.getModelObject());
 									
@@ -946,7 +946,7 @@ public class RevisionDiffPanel extends Panel {
 
 					}));
 				} else {
-					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, 
+					item.add(new BlobDiffPanel(DIFF_ID, projectModel, requestModel, change, 
 							diffMode, getBlobBlameModel(change), null));
 				}
 			}
@@ -1153,7 +1153,7 @@ public class RevisionDiffPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				if (SecurityUtils.getAccount() != null) {
+				if (SecurityUtils.getUser() != null) {
 					((CodeCommentPanel)commentContainer.get("body")).onChangeStatus(target);
 					target.appendJavaScript("gitplex.server.revisionDiff.scrollToCommentBottom();");
 				} else {
@@ -1198,11 +1198,11 @@ public class RevisionDiffPanel extends Panel {
 	}
 	
 	private RevCommit getOldCommit() {
-		return depotModel.getObject().getRevCommit(oldRev);
+		return projectModel.getObject().getRevCommit(oldRev);
 	}
 	
 	private RevCommit getNewCommit() {
-		return depotModel.getObject().getRevCommit(newRev);
+		return projectModel.getObject().getRevCommit(newRev);
 	}
 	
 	@Nullable
@@ -1283,7 +1283,7 @@ public class RevisionDiffPanel extends Panel {
 		commentsModel.detach();
 		diffEntriesModel.detach();
 		changesAndCountModel.detach();
-		depotModel.detach();
+		projectModel.detach();
 		requestModel.detach();
 		if (blameModel != null)
 			blameModel.detach();

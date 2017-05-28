@@ -1,0 +1,17 @@
+<wicket:panel>
+	<div class="project-selector">
+		<wicket:enclosure child="search">
+		<div class="search">
+			<input wicket:id="search" class="form-control" placeholder="Search projects..."></input>
+		</div>
+		</wicket:enclosure>
+		<ul wicket:id="projects" class="list-unstyled projects autosize">
+			<li wicket:id="projects" class="project selectable">
+				<a wicket:id="link">
+					<i class="fa fa-ext fa-repo"></i> <span wicket:id="name"></span>
+				</a>
+			</li>
+		</ul>
+		<div wicket:id="noProjects" class="alert alert-warning">No projects found</div>
+	</div>
+</wicket:panel>

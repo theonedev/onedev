@@ -136,11 +136,12 @@ public class SelectionColumn<T, S> implements IStyledColumn<T, S> {
 					response.render(JavaScriptHeaderItem.forReference(WicketAjaxJQueryResourceReference.get()));
 
 					String template = 
-							"$('#%s').change(function() {\n" + 
-							"	var checked = this.checked;\n" +
-							"	$(this).closest('table').find('.row-selector input').each(function(){\n" +
-							"		this.checked = checked;\n" + 
-							"	});\n" + 
+							"$('#%s').change(function() {" + 
+							"	var checked = this.checked;" +
+							"	$(this).closest('table').find('.row-selector input').each(function() {" +
+							"		if (!$(this).prop('disabled')) " +
+							"			this.checked = checked;" + 
+							"	});" + 
 							"	%s" +
 							"});";
 					String script = String.format(

@@ -1,16 +1,8 @@
 <wicket:extend>
 	<div id="welcome">
-		<div class="title center">Welcome to GitPlex</div>
-		<p>
-		GitPlex uses the organization concept to organize users, teams and repositories 
-		in a central place to facilitate collaboration and permission management. 
-		We suggest to <a wicket:id="addOrganization">create an organization</a> 
-		to host shared repositories.
-		</p>
-		
-		<p>
-		You can also <a wicket:id="addDepot">add repository</a> into your own account
-		now, and transfer it into an organization later if necessary.  
-		</p>
+		<div class="head">Welcome to GitPlex</div>
+		<div class="body well">
+			You may <a wicket:id="addProject">add a project</a> or <a wicket:id="addUser">add an user</a> now
+		</div>
 	</div>
 </wicket:extend>

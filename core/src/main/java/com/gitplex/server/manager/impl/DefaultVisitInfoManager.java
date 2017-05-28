@@ -12,8 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
+import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
@@ -21,9 +21,9 @@ import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.VisitInfoManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.persistence.annotation.Transactional;
@@ -64,19 +64,19 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 		this.storageManager = storageManager;
 	}
 	
-	private synchronized Environment getEnv(Depot depot) {
-		Environment env = envs.get(depot.getId());
+	private synchronized Environment getEnv(Project project) {
+		Environment env = envs.get(project.getId());
 		if (env == null) {
 			EnvironmentConfig config = new EnvironmentConfig();
 			config.setEnvCloseForcedly(true);
-			env = Environments.newInstance(getInfoDir(depot), config);
-			envs.put(depot.getId(), env);
+			env = Environments.newInstance(getInfoDir(project), config);
+			envs.put(project.getId(), env);
 		}
 		return env;
 	}
 	
-	private File getInfoDir(Depot depot) {
-		File infoDir = new File(storageManager.getInfoDir(depot), INFO_DIR);
+	private File getInfoDir(Project project) {
+		File infoDir = new File(storageManager.getInfoDir(project), INFO_DIR);
 		if (!infoDir.exists()) 
 			FileUtils.createDir(infoDir);
 		return infoDir;
@@ -99,8 +99,8 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 	
 	@Override
-	public void visit(Account user, Depot depot) {
-		Environment env = getEnv(depot);
+	public void visit(User user, Project project) {
+		Environment env = getEnv(project);
 		Store store = getStore(env, DEFAULT_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
@@ -114,8 +114,8 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 
 	@Override
-	public void visit(Account user, PullRequest request) {
-		Environment env = getEnv(request.getTargetDepot());
+	public void visit(User user, PullRequest request) {
+		Environment env = getEnv(request.getTargetProject());
 		Store store = getStore(env, PULL_REQUEST_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
@@ -129,8 +129,8 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 
 	@Override
-	public void visit(Account user, CodeComment comment) {
-		Environment env = getEnv(comment.getRequest().getTargetDepot());
+	public void visit(User user, CodeComment comment) {
+		Environment env = getEnv(comment.getRequest().getTargetProject());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
@@ -144,8 +144,8 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 
 	@Override
-	public Date getVisitDate(Account user, Depot depot) {
-		Environment env = getEnv(depot);
+	public Date getVisitDate(User user, Project project) {
+		Environment env = getEnv(project);
 		Store store = getStore(env, DEFAULT_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Date>() {
 			
@@ -162,8 +162,8 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 
 	@Override
-	public Date getVisitDate(Account user, PullRequest request) {
-		Environment env = getEnv(request.getTargetDepot());
+	public Date getVisitDate(User user, PullRequest request) {
+		Environment env = getEnv(request.getTargetProject());
 		Store store = getStore(env, PULL_REQUEST_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Date>() {
 			
@@ -180,8 +180,8 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 
 	@Override
-	public Date getVisitDate(Account user, CodeComment comment) {
-		Environment env = getEnv(comment.getRequest().getTargetDepot());
+	public Date getVisitDate(User user, CodeComment comment) {
+		Environment env = getEnv(comment.getRequest().getTargetProject());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Date>() {
 			
@@ -243,14 +243,14 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 
 	@Transactional
 	@Listen
-	public void on(DepotDeleted event) {
-		Long depotId = event.getDepot().getId();
+	public void on(ProjectDeleted event) {
+		Long projectId = event.getProject().getId();
 		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
 				synchronized (envs) {
-					Environment env = envs.remove(depotId);
+					Environment env = envs.remove(projectId);
 					if (env != null)
 						env.close();
 				}

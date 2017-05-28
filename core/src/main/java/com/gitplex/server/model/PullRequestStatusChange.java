@@ -66,7 +66,7 @@ public class PullRequestStatusChange extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
-	private Account user;
+	private User user;
 	
 	private String userName;
 	
@@ -100,11 +100,11 @@ public class PullRequestStatusChange extends AbstractEntity {
 	}
 
 	@Nullable
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(Account user) {
+	public void setUser(User user) {
 		this.user = user;
 	}
 

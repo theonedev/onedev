@@ -9,14 +9,14 @@ import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ReviewInvitationManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.ReviewInvitation;
-import com.gitplex.server.web.component.accountchoice.AccountChoiceResourceReference;
+import com.gitplex.server.web.component.userchoice.UserChoiceResourceReference;
 import com.gitplex.server.web.component.select2.SelectToAddChoice;
 
 @SuppressWarnings("serial")
-public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
+public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 
 	private final IModel<PullRequest> requestModel;
 	
@@ -31,16 +31,16 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 		super.onInitialize();
 		
 		getSettings().setPlaceholder("Select user to add as reviewer...");
-		getSettings().setFormatResult("gitplex.server.accountChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("gitplex.server.accountChoiceFormatter.formatSelection");
-		getSettings().setEscapeMarkup("gitplex.server.accountChoiceFormatter.escapeMarkup");
+		getSettings().setFormatResult("gitplex.server.userChoiceFormatter.formatResult");
+		getSettings().setFormatSelection("gitplex.server.userChoiceFormatter.formatSelection");
+		getSettings().setEscapeMarkup("gitplex.server.userChoiceFormatter.escapeMarkup");
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(new AccountChoiceResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new UserChoiceResourceReference()));
 	}
 	
 	@Override
@@ -51,7 +51,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Account user) {
+	protected void onSelect(AjaxRequestTarget target, User user) {
 		PullRequest request = requestModel.getObject();
 		ReviewInvitation invitation = null;
 		for(ReviewInvitation each: request.getReviewInvitations()) {

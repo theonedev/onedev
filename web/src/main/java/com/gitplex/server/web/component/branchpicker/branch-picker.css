@@ -1,7 +1,7 @@
-.repository-and-branch {
+.project-and-branch {
 	white-space: nowrap;
 }
-.repository-and-branch>a {
+.project-and-branch>a {
 	color: #444;
 	text-decoration: none;
 	font-size: 16px;

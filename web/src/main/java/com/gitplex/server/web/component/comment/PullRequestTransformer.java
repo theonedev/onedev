@@ -6,7 +6,7 @@ import org.jsoup.nodes.Element;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.markdown.HtmlTransformer;
 import com.gitplex.server.util.markdown.PullRequestParser;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
 
 public class PullRequestTransformer extends PullRequestParser implements HtmlTransformer {
 	

@@ -2,21 +2,21 @@ package com.gitplex.server.web.component.avatar;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.web.util.AjaxPayload;
 
 public class AvatarChanged extends AjaxPayload {
 
-	private final Account account;
+	private final User user;
 	
-	public AvatarChanged(AjaxRequestTarget target, Account account) {
+	public AvatarChanged(AjaxRequestTarget target, User user) {
 		super(target);
 		
-		this.account = account;
+		this.user = user;
 	}
 
-	public Account getAccount() {
-		return account;
+	public User getUser() {
+		return user;
 	}
 
 }

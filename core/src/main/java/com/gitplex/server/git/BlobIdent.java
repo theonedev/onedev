@@ -10,7 +10,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.gitplex.server.git.exception.ObjectNotFoundException;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.google.common.base.Objects;
 
 public class BlobIdent implements Serializable, Comparable<BlobIdent> {
@@ -41,13 +41,13 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	public BlobIdent() {
 	}
 	
-	public BlobIdent(Depot depot, List<String> urlSegments) {
+	public BlobIdent(Project project, List<String> urlSegments) {
 		StringBuilder revisionBuilder = new StringBuilder();
 		for (int i=0; i<urlSegments.size(); i++) {
 			if (i != 0)
 				revisionBuilder.append("/");
 			revisionBuilder.append(urlSegments.get(i));
-			if (depot.getObjectId(revisionBuilder.toString(), false) != null) {
+			if (project.getObjectId(revisionBuilder.toString(), false) != null) {
 				revision = revisionBuilder.toString();
 				StringBuilder pathBuilder = new StringBuilder();
 				for (int j=i+1; j<urlSegments.size(); j++) {
@@ -57,7 +57,7 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 				}
 				if (pathBuilder.length() != 0) {
 					path = pathBuilder.toString();
-					mode = depot.getMode(revision, path);
+					mode = project.getMode(revision, path);
 				} else {
 					mode = FileMode.TREE.getBits();
 				}
@@ -67,7 +67,7 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		if (revisionBuilder.length() != 0) {
 			throw new ObjectNotFoundException("Revision not found: " + revisionBuilder.toString());
 		} else {
-			revision = depot.getDefaultBranch();
+			revision = project.getDefaultBranch();
 			mode = FileMode.TREE.getBits();
 		}
 	}

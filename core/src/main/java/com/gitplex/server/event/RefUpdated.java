@@ -2,11 +2,11 @@ package com.gitplex.server.event;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 
 public class RefUpdated {
 	
-	private final Depot depot;
+	private final Project project;
 	
 	private final String refName;
 	
@@ -14,15 +14,15 @@ public class RefUpdated {
 	
 	private final ObjectId newObjectId;
 	
-	public RefUpdated(Depot depot, String refName, ObjectId oldObjectId, ObjectId newObjectId) {
-		this.depot = depot;
+	public RefUpdated(Project project, String refName, ObjectId oldObjectId, ObjectId newObjectId) {
+		this.project = project;
 		this.refName = refName;
 		this.oldObjectId = oldObjectId;
 		this.newObjectId = newObjectId;
 	}
 
-	public Depot getDepot() {
-		return depot;
+	public Project getProject() {
+		return project;
 	}
 
 	public String getRefName() {

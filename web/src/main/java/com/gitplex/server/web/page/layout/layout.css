@@ -45,30 +45,30 @@ html, body {
 #main>.head>.actions a .fa {
 	font-size: 18px;
 }
-#main>.head>.account {
+#main>.head>.user {
 	margin-right: 0;
 }
-#main>.head>.account>.logged-in>.tasks {
+#main>.head>.user>.logged-in>.tasks {
 	color: #69B7F7;
 	margin-right: 16px;
 }
-#main>.head>.account>.logged-in>a, #main>.head>.account>.logged-in>span {
+#main>.head>.user>.logged-in>a, #main>.head>.user>.logged-in>span {
 	margin-right: 8px;
 	font-size: 20px;
 }
-#main>.head>.account>.logged-in>.menu {
+#main>.head>.user>.logged-in>.menu {
 	margin-right: 8px;
 }
-#main>.head>.account>.logged-out {
+#main>.head>.user>.logged-out {
 	padding-top: 4px;
 }
-#main>.head>.account>.logged-out a {
+#main>.head>.user>.logged-out a {
 	font-size: 16px;
 }
-#main>.head>.account>.logged-out>a:FIRST-CHILD {
+#main>.head>.user>.logged-out>a:FIRST-CHILD {
 	margin-right: 16px;
 }
-#main>.head>.account .avatar {
+#main>.head>.user .avatar {
 	width: 32px;
 	height: 32px;
 }
@@ -130,20 +130,7 @@ section>.head {
 	margin-bottom: 20px;
 }
 
-.floating>.content>.create-new {
-	padding: 12px;
-}
-.floating>.content>.create-new>a {
-	display: block;
-	text-decoration: none;
-	color: #444;
-	padding: 4px 8px;
-}
-.floating>.content>.create-new>a:hover {
-	background: #F0F0F0;
-}
-
-.create.depot {
+#project-add {
 	padding: 20px;
 }
 
@@ -158,16 +145,4 @@ section>.head {
 }
 .floating>.content>.user a:hover {
 	background: #F2F2F2;
-}
-.floating>.content>.user .organizations .title {
-	color: #999;
-	font-size: 16px;
-	padding: 0 12px 4px 12px;
-}
-.floating>.content>.user .organizations {
-	border-bottom: 1px solid #DDD;
-	margin-bottom: 8px;
-}
-.floating>.content>.user .organizations .avatar {
-	margin-right: 4px;
 }

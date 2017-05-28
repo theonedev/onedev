@@ -37,7 +37,7 @@ public class PullRequestComment extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
-	private Account user;
+	private User user;
 	
 	private String userName;
 	
@@ -57,11 +57,11 @@ public class PullRequestComment extends AbstractEntity {
 	}
 
 	@Nullable
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(@Nullable Account user) {
+	public void setUser(@Nullable User user) {
 		this.user = user;
 	}
 
@@ -90,8 +90,8 @@ public class PullRequestComment extends AbstractEntity {
 		return date;
 	}
 
-	public Depot getDepot() {
-		return request.getTargetDepot();
+	public Project getProject() {
+		return request.getTargetProject();
 	}
 
 	public String getAnchor() {

@@ -6,9 +6,8 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.support.tagcreator.DepotWriters;
-import com.gitplex.server.model.support.tagcreator.SpecifiedTeam;
+import com.gitplex.server.model.support.tagcreator.ProjectWriters;
+import com.gitplex.server.model.support.tagcreator.SpecifiedGroup;
 import com.gitplex.server.model.support.tagcreator.SpecifiedUser;
 import com.gitplex.server.model.support.tagcreator.TagCreator;
 import com.gitplex.server.util.editable.annotation.Editable;
@@ -25,7 +24,7 @@ public class TagProtection implements Serializable {
 	
 	private boolean noDeletion = true;
 	
-	private TagCreator tagCreator = new DepotWriters();
+	private TagCreator tagCreator = new ProjectWriters();
 
 	@Editable(order=100, description="Specify tag to be protected. Wildcard can be used to match multiple tags")
 	@TagPattern
@@ -66,28 +65,23 @@ public class TagProtection implements Serializable {
 		this.tagCreator = tagCreator;
 	}
 	
-	public void onDepotTransferred(Depot depot) {
-		if (getTagCreator() instanceof SpecifiedTeam)
-			setTagCreator(new DepotWriters());
-	}
-	
-	public void onTeamRename(String oldName, String newName) {
-		if (getTagCreator() instanceof SpecifiedTeam) {
-			SpecifiedTeam specifiedTeam = (SpecifiedTeam) getTagCreator();
-			if (specifiedTeam.getTeamName().equals(oldName))
-				specifiedTeam.setTeamName(newName);
+	public void onGroupRename(String oldName, String newName) {
+		if (getTagCreator() instanceof SpecifiedGroup) {
+			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getTagCreator();
+			if (specifiedGroup.getGroupName().equals(oldName))
+				specifiedGroup.setGroupName(newName);
 		}
 	}
 	
-	public void onTeamDelete(String teamName) {
-		if (getTagCreator() instanceof SpecifiedTeam) {
-			SpecifiedTeam specifiedTeam = (SpecifiedTeam) getTagCreator();
-			if (specifiedTeam.getTeamName().equals(teamName))
-				setTagCreator(new DepotWriters());
+	public void onGroupDelete(String groupName) {
+		if (getTagCreator() instanceof SpecifiedGroup) {
+			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getTagCreator();
+			if (specifiedGroup.getGroupName().equals(groupName))
+				setTagCreator(new ProjectWriters());
 		}
 	}
 	
-	public void onAccountRename(String oldName, String newName) {
+	public void onUserRename(String oldName, String newName) {
 		if (getTagCreator() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getTagCreator();
 			if (specifiedUser.getUserName().equals(oldName))
@@ -95,11 +89,11 @@ public class TagProtection implements Serializable {
 		}
 	}
 	
-	public void onAccountDelete(String accountName) {
+	public void onUserDelete(String userName) {
 		if (getTagCreator() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getTagCreator();
-			if (specifiedUser.getUserName().equals(accountName))
-				setTagCreator(new DepotWriters());
+			if (specifiedUser.getUserName().equals(userName))
+				setTagCreator(new ProjectWriters());
 		}
 	}
 

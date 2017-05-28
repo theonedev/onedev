@@ -11,22 +11,22 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 abstract class CreateBranchPanel extends Panel {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final String revision;
 	
 	private String branchName;
 	
-	public CreateBranchPanel(String id, IModel<Depot> depotModel, String revision) {
+	public CreateBranchPanel(String id, IModel<Project> projectModel, String revision) {
 		super(id);
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.revision = revision;
 	}
 
@@ -72,12 +72,12 @@ abstract class CreateBranchPanel extends Panel {
 					form.error("Invalid branch name.");
 					target.focusComponent(nameInput);
 					target.add(form);
-				} else if (depotModel.getObject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
+				} else if (projectModel.getObject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
 					form.error("Branch '" + branchName + "' already exists, please choose a different name.");
 					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					depotModel.getObject().createBranch(branchName, revision);
+					projectModel.getObject().createBranch(branchName, revision);
 					onCreate(target, branchName);
 				}
 			}
@@ -100,7 +100,7 @@ abstract class CreateBranchPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		
 		super.onDetach();
 	}

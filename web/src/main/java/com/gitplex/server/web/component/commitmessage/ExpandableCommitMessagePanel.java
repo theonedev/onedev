@@ -17,32 +17,32 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.util.Highlighter;
 import com.gitplex.server.util.Transformer;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
+import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 
 @SuppressWarnings("serial")
 public class ExpandableCommitMessagePanel extends Panel {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final IModel<RevCommit> commitModel;
 	
 	private final IModel<List<Pattern>> patternsModel;
 	
-	public ExpandableCommitMessagePanel(String id, IModel<Depot> depotModel, 
+	public ExpandableCommitMessagePanel(String id, IModel<Project> projectModel, 
 			IModel<RevCommit> commitModel, IModel<List<Pattern>> patternsModel) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.commitModel = commitModel;
 		this.patternsModel = patternsModel;
 	}
 
-	public ExpandableCommitMessagePanel(String id, IModel<Depot> depotModel, IModel<RevCommit> commitModel) {
-		this(id, depotModel, commitModel, new LoadableDetachableModel<List<Pattern>>() {
+	public ExpandableCommitMessagePanel(String id, IModel<Project> projectModel, IModel<RevCommit> commitModel) {
+		this(id, projectModel, commitModel, new LoadableDetachableModel<List<Pattern>>() {
 
 			@Override
 			protected List<Pattern> load() {
@@ -76,7 +76,7 @@ public class ExpandableCommitMessagePanel extends Panel {
 		
 		AbstractLink link = new ViewStateAwarePageLink<Void>("link",
 				CommitDetailPage.class,
-				CommitDetailPage.paramsOf(depotModel.getObject(), commitModel.getObject().name()));
+				CommitDetailPage.paramsOf(projectModel.getObject(), commitModel.getObject().name()));
 		
 		add(link);
 		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
@@ -124,7 +124,7 @@ public class ExpandableCommitMessagePanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		commitModel.detach();
 		patternsModel.detach();
 		

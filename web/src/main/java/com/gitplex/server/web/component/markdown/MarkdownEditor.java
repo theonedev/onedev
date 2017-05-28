@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.MarkdownManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.component.markdown.emoji.EmojiOnes;
@@ -249,7 +249,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 
 					AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 					List<Map<String, String>> userList = new ArrayList<>();
-					for (Account user: getUserMentionSupport().findUsers(userQuery, ATWHO_LIMIT)) {
+					for (User user: getUserMentionSupport().findUsers(userQuery, ATWHO_LIMIT)) {
 						Map<String, String> userMap = new HashMap<>();
 						userMap.put("name", user.getName());
 						if (user.getFullName() != null)

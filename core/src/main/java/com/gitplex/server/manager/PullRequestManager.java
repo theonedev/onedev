@@ -4,30 +4,30 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.support.DepotAndBranch;
+import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.persistence.dao.EntityManager;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
     @Nullable 
-    PullRequest findEffective(DepotAndBranch target, DepotAndBranch source);
+    PullRequest findEffective(ProjectAndBranch target, ProjectAndBranch source);
     
-    Collection<PullRequest> findAllOpenTo(DepotAndBranch target);
+    Collection<PullRequest> findAllOpenTo(ProjectAndBranch target);
 
-    Collection<PullRequest> findAllOpen(DepotAndBranch sourceOrTarget);
+    Collection<PullRequest> findAllOpen(ProjectAndBranch sourceOrTarget);
     
     @Nullable
-    PullRequest find(Depot target, long number);
+    PullRequest find(Project target, long number);
     
 	@Nullable
 	PullRequest find(String uuid);
 	
 	@Nullable
-	PullRequest findLatest(Depot depot, Account submitter);
+	PullRequest findLatest(Project project, User submitter);
     
     void discard(PullRequest request, @Nullable String note);
     
@@ -63,6 +63,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	void saveMergeStrategy(PullRequest request);
 	
-	int countOpen(Depot depot);
+	int countOpen(Project project);
 	
 }

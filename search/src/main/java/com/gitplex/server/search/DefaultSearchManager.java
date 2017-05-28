@@ -41,10 +41,10 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.jsymbol.Symbol;
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.depot.DepotDeleted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
+import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.search.hit.QueryHit;
@@ -69,16 +69,16 @@ public class DefaultSearchManager implements SearchManager {
 	}
 	
 	@Nullable
-	private SearcherManager getSearcherManager(Depot depot) throws InterruptedException {
+	private SearcherManager getSearcherManager(Project project) throws InterruptedException {
 		try {
-			SearcherManager searcherManager = searcherManagers.get(depot.getId());
+			SearcherManager searcherManager = searcherManagers.get(project.getId());
 			if (searcherManager == null) synchronized (searcherManagers) {
-				searcherManager = searcherManagers.get(depot.getId());
+				searcherManager = searcherManagers.get(project.getId());
 				if (searcherManager == null) {
-					Directory directory = FSDirectory.open(storageManager.getIndexDir(depot));
+					Directory directory = FSDirectory.open(storageManager.getIndexDir(project));
 					if (DirectoryReader.indexExists(directory)) {
 						searcherManager = new SearcherManager(directory, null);
-						searcherManagers.put(depot.getId(), searcherManager);
+						searcherManagers.put(project.getId(), searcherManager);
 					}
 				}
 			}
@@ -96,16 +96,16 @@ public class DefaultSearchManager implements SearchManager {
 	}
 	
 	@Override
-	public List<QueryHit> search(Depot depot, ObjectId commit, final BlobQuery query) 
+	public List<QueryHit> search(Project project, ObjectId commit, final BlobQuery query) 
 			throws InterruptedException {
 		List<QueryHit> hits = new ArrayList<>();
 
-		SearcherManager searcherManager = getSearcherManager(depot.getForkRoot());
+		SearcherManager searcherManager = getSearcherManager(project.getForkRoot());
 		if (searcherManager != null) {
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
 				try {
-					try (RevWalk revWalk = new RevWalk(depot.getRepository())){
+					try (RevWalk revWalk = new RevWalk(project.getRepository())){
 						final RevTree revTree = revWalk.parseCommit(commit).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
@@ -125,7 +125,7 @@ public class DefaultSearchManager implements SearchManager {
 									String blobPath = cachedBlobPaths.get(doc).utf8ToString();
 									
 									if (!checkedBlobPaths.contains(blobPath)) {
-										TreeWalk treeWalk = TreeWalk.forPath(depot.getRepository(), blobPath, revTree);									
+										TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), blobPath, revTree);									
 										if (treeWalk != null)
 											query.collect(searcher, treeWalk, hits);
 										checkedBlobPaths.add(blobPath);
@@ -159,9 +159,9 @@ public class DefaultSearchManager implements SearchManager {
 	}
 
 	@Override
-	public List<Symbol> getSymbols(Depot depot, ObjectId blobId, String blobPath) {
+	public List<Symbol> getSymbols(Project project, ObjectId blobId, String blobPath) {
 		try {
-			SearcherManager searcherManager = getSearcherManager(depot.getForkRoot());
+			SearcherManager searcherManager = getSearcherManager(project.getForkRoot());
 			if (searcherManager != null) {
 				try {
 					IndexSearcher searcher = searcherManager.acquire();
@@ -233,7 +233,7 @@ public class DefaultSearchManager implements SearchManager {
 	@Listen
 	public void on(CommitIndexed event) {
 		try {
-			getSearcherManager(event.getDepot()).maybeRefresh();
+			getSearcherManager(event.getProject()).maybeRefresh();
 		} catch (InterruptedException | IOException e) {
 			Throwables.propagate(e);
 		}
@@ -241,21 +241,21 @@ public class DefaultSearchManager implements SearchManager {
 
 	@Transactional
 	@Listen
-	public void on(DepotDeleted event) {
-		Long depotId = event.getDepot().getId();
+	public void on(ProjectDeleted event) {
+		Long projectId = event.getProject().getId();
 		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
 				synchronized (searcherManagers) {
-					SearcherManager searcherManager = searcherManagers.get(depotId);
+					SearcherManager searcherManager = searcherManagers.get(projectId);
 					if (searcherManager != null) {
 						try {
 							searcherManager.close();
 						} catch (IOException e) {
 							Throwables.propagate(e);
 						}
-						searcherManagers.remove(depotId);
+						searcherManagers.remove(projectId);
 					}
 				}
 			}

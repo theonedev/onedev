@@ -65,7 +65,7 @@ public class CodeComment extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
-	private Account user;
+	private User user;
 	
 	private String userName;
 
@@ -106,11 +106,11 @@ public class CodeComment extends AbstractEntity {
 	}
 	
 	@Nullable
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(@Nullable Account user) {
+	public void setUser(@Nullable User user) {
 		this.user = user;
 	}
 
@@ -200,7 +200,7 @@ public class CodeComment extends AbstractEntity {
 	}
 
 	public boolean isVisitedAfter(Date date) {
-		Account user = SecurityUtils.getAccount();
+		User user = SecurityUtils.getUser();
 		if (user != null) {
 			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
@@ -224,9 +224,9 @@ public class CodeComment extends AbstractEntity {
 			if (request.getHeadCommitHash().equals(markPos.getCommit())) {
 				codeChanged = false;
 			} else {
-				Depot depot = request.getTargetDepot();
-				try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
-					TreeWalk treeWalk = TreeWalk.forPath(depot.getRepository(), markPos.getPath(), 
+				Project project = request.getTargetProject();
+				try (RevWalk revWalk = new RevWalk(project.getRepository())) {
+					TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), markPos.getPath(), 
 							request.getHeadCommit().getTree());
 					if (treeWalk != null) {
 						ObjectId blobId = treeWalk.getObjectId(0);
@@ -234,7 +234,7 @@ public class CodeComment extends AbstractEntity {
 							BlobIdent blobIdent = new BlobIdent(request.getHeadCommitHash(), markPos.getPath(), 
 									treeWalk.getRawMode(0));
 							Blob newBlob = new Blob(blobIdent, blobId, treeWalk.getObjectReader()); 
-							Blob oldBlob = depot.getBlob(new BlobIdent(markPos.getCommit(), 
+							Blob oldBlob = project.getBlob(new BlobIdent(markPos.getCommit(), 
 									markPos.getPath(), FileMode.REGULAR_FILE.getBits()));
 							Preconditions.checkState(oldBlob != null && oldBlob.getText() != null);
 							

@@ -1,0 +1,6 @@
+#group.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
+	width: 220px;
+}
+#group.sidebar>table>tbody>tr>td.content {
+	padding: 20px;
+}

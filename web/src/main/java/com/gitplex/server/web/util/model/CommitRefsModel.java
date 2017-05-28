@@ -11,24 +11,24 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.gitplex.server.git.RefInfo;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 
 public class CommitRefsModel extends LoadableDetachableModel<Map<String, List<String>>> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
-	public CommitRefsModel(IModel<Depot> depotModel) {
-		this.depotModel = depotModel;
+	public CommitRefsModel(IModel<Project> projectModel) {
+		this.projectModel = projectModel;
 	}
 	
 	@Override
 	protected Map<String, List<String>> load() {
-		Depot depot = depotModel.getObject();
+		Project project = projectModel.getObject();
 		Map<String, List<String>> labels = new HashMap<>();
-		List<RefInfo> refInfos = depot.getBranches();
-		refInfos.addAll(depot.getTags());
+		List<RefInfo> refInfos = project.getBranches();
+		refInfos.addAll(project.getTags());
 		for (RefInfo refInfo: refInfos) {
 			if (refInfo.getPeeledObj() instanceof RevCommit) {
 				RevCommit commit = (RevCommit) refInfo.getPeeledObj();
@@ -45,7 +45,7 @@ public class CommitRefsModel extends LoadableDetachableModel<Map<String, List<St
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		super.onDetach();
 	}
 

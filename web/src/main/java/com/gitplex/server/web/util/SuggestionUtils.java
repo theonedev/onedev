@@ -14,11 +14,12 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.CommitInfoManager;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.Team;
+import com.gitplex.server.manager.GroupManager;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
+import com.gitplex.server.model.Group;
+import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.security.privilege.DepotPrivilege;
 import com.gitplex.server.util.stringmatch.PatternApplied;
 import com.gitplex.server.util.stringmatch.WildcardUtils;
 import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
@@ -26,11 +27,11 @@ import com.google.common.base.Preconditions;
 
 public class SuggestionUtils {
 	
-	public static List<InputSuggestion> suggestBranch(Depot depot, String matchWith) {
+	public static List<InputSuggestion> suggestBranch(Project project, String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (RefInfo ref: depot.getBranches()) {
+		for (RefInfo ref: project.getBranches()) {
 			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			int index = branch.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
@@ -41,11 +42,11 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestTag(Depot depot, String matchWith) {
+	public static List<InputSuggestion> suggestTag(Project project, String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (RefInfo ref: depot.getTags()) {
+		for (RefInfo ref: project.getTags()) {
 			String tag = GitUtils.ref2tag(ref.getRef().getName());
 			int index = tag.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
@@ -56,11 +57,11 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestUser(Depot depot, DepotPrivilege privilege, String matchWith) {
+	public static List<InputSuggestion> suggestUser(Project project, ProjectPrivilege privilege, String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (Account user: SecurityUtils.findUsersCan(depot, privilege)) {
+		for (User user: SecurityUtils.findUsersCan(project, privilege)) {
 			String name = user.getName();
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
@@ -71,11 +72,11 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestTeam(Depot depot, String matchWith) {
+	public static List<InputSuggestion> suggestGroup(String matchWith) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (Team team: depot.getAccount().getDefinedTeams()) {
-			String name = team.getName();
+		for (Group group: GitPlex.getInstance(GroupManager.class).findAll()) {
+			String name = group.getName();
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
@@ -85,9 +86,9 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestPath(Depot depot, String matchWith) {
+	public static List<InputSuggestion> suggestPath(Project project, String matchWith) {
 		CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
-		return suggestPath(commitInfoManager.getFiles(depot), matchWith);
+		return suggestPath(commitInfoManager.getFiles(project), matchWith);
 	}
 	
 	private static Set<String> getChildren(List<PatternApplied> allApplied, String path) {

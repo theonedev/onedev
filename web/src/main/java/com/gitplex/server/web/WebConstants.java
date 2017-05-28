@@ -11,7 +11,7 @@ public class WebConstants {
 	public static final String DATE_FORMAT = "yyyy-MM-dd";
 	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormat.forPattern(DATE_FORMAT);
 
-	public static final int DEFAULT_PAGE_SIZE = 25;
+	public static final int PAGE_SIZE = 25;
 	
 	/* diff constants */
 	public static final int DIFF_EXPAND_SIZE = 15;

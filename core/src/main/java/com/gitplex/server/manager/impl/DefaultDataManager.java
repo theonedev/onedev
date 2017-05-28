@@ -22,11 +22,11 @@ import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.launcher.bootstrap.BootstrapUtils;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.lifecycle.SystemStarting;
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
 import com.gitplex.server.manager.MailManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.Config;
 import com.gitplex.server.model.Config.Key;
 import com.gitplex.server.model.support.setting.BackupSetting;
@@ -51,7 +51,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 	private static final String BACKUP_DATETIME_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 	
-	private final AccountManager accountManager;
+	private final UserManager userManager;
 	
 	private final ConfigManager configManager;
 	
@@ -70,11 +70,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 	private String backupTaskId;
 	
 	@Inject
-	public DefaultDataManager(IdManager idManager, AccountManager accountManager, 
+	public DefaultDataManager(IdManager idManager, UserManager userManager, 
 			ConfigManager configManager, TaskScheduler taskScheduler, 
 			PersistManager persistManager, MailManager mailManager, 
 			Validator validator, PasswordService passwordService) {
-		this.accountManager = accountManager;
+		this.userManager = userManager;
 		this.configManager = configManager;
 		this.validator = validator;
 		this.idManager = idManager;
@@ -89,11 +89,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
-		Account administrator = accountManager.get(Account.ADMINISTRATOR_ID);		
+		User administrator = userManager.get(User.ROOT_ID);		
 		if (administrator == null) {
-			administrator = new Account();
-			administrator.setId(Account.ADMINISTRATOR_ID);
-			manualConfigs.add(new ManualConfig("Create Administator Account", administrator, 
+			administrator = new User();
+			administrator.setId(User.ROOT_ID);
+			manualConfigs.add(new ManualConfig("Create Administator User", administrator, 
 					Sets.newHashSet("description", "defaultPrivilege")) {
 
 				@Override
@@ -103,10 +103,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					Account account = (Account) getSetting();
-					account.setPassword(passwordService.encryptPassword(account.getPassword()));
-					accountManager.save(account, null);
-					idManager.init(Account.class);
+					User user = (User) getSetting();
+					user.setPassword(passwordService.encryptPassword(user.getPassword()));
+					userManager.save(user, null);
+					idManager.init(User.class);
 				}
 				
 			});
@@ -243,7 +243,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	@Sessional
 	protected void notifyBackupError(Exception e) {
-		Account root = accountManager.getRoot();
+		User root = userManager.getRoot();
 		String url = configManager.getSystemSetting().getServerUrl();
 		String body = String.format(""
 				+ "GitPlex url: <a href='%s'>%s</a>"

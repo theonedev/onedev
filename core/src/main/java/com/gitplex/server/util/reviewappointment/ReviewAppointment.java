@@ -13,43 +13,43 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.manager.TeamManager;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
-import com.gitplex.server.model.Team;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.manager.GroupManager;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
+import com.gitplex.server.model.Group;
 import com.gitplex.server.util.reviewappointment.ReviewAppointmentParser.CountContext;
 import com.gitplex.server.util.reviewappointment.ReviewAppointmentParser.CriteriaContext;
 import com.gitplex.server.util.reviewappointment.ReviewAppointmentParser.ExprContext;
 
 public class ReviewAppointment {
 	
-	private final List<Account> users = new ArrayList<>();
+	private final List<User> users = new ArrayList<>();
 	
-	private final Map<Team, Integer> teams = new LinkedHashMap<>();
+	private final Map<Group, Integer> groups = new LinkedHashMap<>();
 	
-	public ReviewAppointment(Depot depot, String expr) {
+	public ReviewAppointment(Project project, String expr) {
 		ExprContext exprContext = parse(expr);
 		
 		for (CriteriaContext criteriaContext: exprContext.criteria()) {
 			if (criteriaContext.userCriteria() != null) {
 				String userName = getBracedValue(criteriaContext.userCriteria().Value());
-				Account user = GitPlex.getInstance(AccountManager.class).findByName(userName);
+				User user = GitPlex.getInstance(UserManager.class).findByName(userName);
 				if (user != null) {
 					users.add(user);
 				}
-			} else if (criteriaContext.teamCriteria() != null) {
-				String teamName = getBracedValue(criteriaContext.teamCriteria().Value());
-				Team team = GitPlex.getInstance(TeamManager.class).find(depot.getAccount(), teamName);
-				if (team != null) {
-					CountContext countContext = criteriaContext.teamCriteria().count();
+			} else if (criteriaContext.groupCriteria() != null) {
+				String groupName = getBracedValue(criteriaContext.groupCriteria().Value());
+				Group group = GitPlex.getInstance(GroupManager.class).find(groupName);
+				if (group != null) {
+					CountContext countContext = criteriaContext.groupCriteria().count();
 					if (countContext != null) {
 						if (countContext.DIGIT() != null)
-							teams.put(team, Integer.parseInt(countContext.DIGIT().getText()));
+							groups.put(group, Integer.parseInt(countContext.DIGIT().getText()));
 						else
-							teams.put(team, 0);
+							groups.put(group, 0);
 					} else {
-						teams.put(team, 1);
+						groups.put(group, 1);
 					}
 				}
 			}
@@ -72,26 +72,26 @@ public class ReviewAppointment {
 		return value.substring(0, value.length()-1).trim();
 	}
 	
-	public List<Account> getUsers() {
+	public List<User> getUsers() {
 		return users;
 	}
 
-	public Map<Team, Integer> getTeams() {
-		return teams;
+	public Map<Group, Integer> getGroups() {
+		return groups;
 	}
 	
-	public boolean matches(Account user) {
-		for (Account eachUser: users) {
+	public boolean matches(User user) {
+		for (User eachUser: users) {
 			if (!eachUser.equals(user))
 				return false;
 		}
-		for (Map.Entry<Team, Integer> entry: teams.entrySet()) {
-			Team team = entry.getKey();
+		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
+			Group group = entry.getKey();
 			int requiredCount = entry.getValue();
-			if (requiredCount == 0 || requiredCount > team.getMembers().size())
-				requiredCount = team.getMembers().size();
+			if (requiredCount == 0 || requiredCount > group.getMembers().size())
+				requiredCount = group.getMembers().size();
 
-			if (requiredCount > 1 || requiredCount == 1 && !team.getMembers().contains(user))
+			if (requiredCount > 1 || requiredCount == 1 && !group.getMembers().contains(user))
 				return false;
 		}
 		return true;
@@ -100,10 +100,10 @@ public class ReviewAppointment {
 	@Nullable
 	public String toExpr() {
 		StringBuilder builder = new StringBuilder();
-		for (Account user: users)
+		for (User user: users)
 			builder.append("user(").append(user.getName()).append(") ");
-		for (Map.Entry<Team, Integer> entry: teams.entrySet()) {
-			builder.append("team(").append(entry.getKey().getName()).append(")");
+		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
+			builder.append("group(").append(entry.getKey().getName()).append(")");
 			if (entry.getValue() == 0)
 				builder.append(":all");
 			else if (entry.getValue() != 1)

@@ -387,7 +387,7 @@ public class RevCommit extends RevObject {
 	 * Parse the author identity from the raw buffer.
 	 * <p>
 	 * This method parses and returns the content of the author line, after
-	 * taking the commit's character set into account and decoding the author
+	 * taking the commit's character set into user and decoding the author
 	 * name and email address. This method is fairly expensive and produces a
 	 * new PersonIdent instance on each invocation. Callers should invoke this
 	 * method only if they are certain they will be outputting the result, and
@@ -413,7 +413,7 @@ public class RevCommit extends RevObject {
 	 * Parse the committer identity from the raw buffer.
 	 * <p>
 	 * This method parses and returns the content of the committer line, after
-	 * taking the commit's character set into account and decoding the committer
+	 * taking the commit's character set into user and decoding the committer
 	 * name and email address. This method is fairly expensive and produces a
 	 * new PersonIdent instance on each invocation. Callers should invoke this
 	 * method only if they are certain they will be outputting the result, and
@@ -439,7 +439,7 @@ public class RevCommit extends RevObject {
 	 * Parse the complete commit message and decode it to a string.
 	 * <p>
 	 * This method parses and returns the message portion of the commit buffer,
-	 * after taking the commit's character set into account and decoding the
+	 * after taking the commit's character set into user and decoding the
 	 * buffer using that character set. This method is a fairly expensive
 	 * operation and produces a new string on each invocation.
 	 *
@@ -461,7 +461,7 @@ public class RevCommit extends RevObject {
 	 * "oneline" format, suitable for output in a single line display.
 	 * <p>
 	 * This method parses and returns the message portion of the commit buffer,
-	 * after taking the commit's character set into account and decoding the
+	 * after taking the commit's character set into user and decoding the
 	 * buffer using that character set. This method is a fairly expensive
 	 * operation and produces a new string on each invocation.
 	 *

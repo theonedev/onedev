@@ -2,7 +2,7 @@ package com.gitplex.server.event.pullrequest;
 
 import java.util.Date;
 
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 
@@ -17,7 +17,7 @@ public class MergePreviewCalculated extends PullRequestEvent {
 	}
 
 	@Override
-	public Account getUser() {
+	public User getUser() {
 		return null;
 	}
 

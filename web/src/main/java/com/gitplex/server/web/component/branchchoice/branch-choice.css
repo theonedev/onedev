@@ -1,17 +1,17 @@
-.repository-and-branch {
+.project-and-branch {
 	width: 100%;
 }
-.repository-and-branch td {
+.project-and-branch td {
 	padding: 12px; 
 	white-space: nowrap;
 }
-.repository-and-branch td.name {
+.project-and-branch td.name {
 	text-align: right; 
 	padding-right: 0; 
 	font-size: 16px; 
 	width: 1%; 
 	padding-top: 16px;
 }
-.repository-and-branch .select2-choice {
+.project-and-branch .select2-choice {
 	width: 100%;
 }

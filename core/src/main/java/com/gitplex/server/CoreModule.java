@@ -5,7 +5,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Set;
 
 import javax.inject.Singleton;
 import javax.persistence.OneToMany;
@@ -45,20 +44,22 @@ import com.gitplex.server.command.RestoreDBCommand;
 import com.gitplex.server.command.UpgradeCommand;
 import com.gitplex.server.git.config.GitConfig;
 import com.gitplex.server.git.jackson.GitObjectMapperConfigurator;
-import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.AttachmentManager;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.BranchWatchManager;
+import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentReplyManager;
 import com.gitplex.server.manager.CodeCommentStatusChangeManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
-import com.gitplex.server.manager.DepotManager;
+import com.gitplex.server.manager.GroupAuthorizationManager;
+import com.gitplex.server.manager.GroupManager;
+import com.gitplex.server.manager.MembershipManager;
 import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.manager.MarkdownManager;
-import com.gitplex.server.manager.OrganizationMembershipManager;
+import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestReferenceManager;
@@ -69,27 +70,27 @@ import com.gitplex.server.manager.PullRequestWatchManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
 import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.manager.TeamAuthorizationManager;
-import com.gitplex.server.manager.TeamManager;
-import com.gitplex.server.manager.TeamMembershipManager;
 import com.gitplex.server.manager.UserAuthorizationManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.manager.WorkExecutor;
-import com.gitplex.server.manager.impl.DefaultAccountManager;
 import com.gitplex.server.manager.impl.DefaultAttachmentManager;
 import com.gitplex.server.manager.impl.DefaultBatchWorkManager;
 import com.gitplex.server.manager.impl.DefaultBranchWatchManager;
+import com.gitplex.server.manager.impl.DefaultCacheManager;
 import com.gitplex.server.manager.impl.DefaultCodeCommentManager;
 import com.gitplex.server.manager.impl.DefaultCodeCommentReplyManager;
 import com.gitplex.server.manager.impl.DefaultCodeCommentStatusChangeManager;
 import com.gitplex.server.manager.impl.DefaultCommitInfoManager;
 import com.gitplex.server.manager.impl.DefaultConfigManager;
 import com.gitplex.server.manager.impl.DefaultDataManager;
-import com.gitplex.server.manager.impl.DefaultDepotManager;
+import com.gitplex.server.manager.impl.DefaultGroupAuthorizationManager;
+import com.gitplex.server.manager.impl.DefaultGroupManager;
+import com.gitplex.server.manager.impl.DefaultMembershipManager;
 import com.gitplex.server.manager.impl.DefaultMailManager;
 import com.gitplex.server.manager.impl.DefaultMarkdownManager;
 import com.gitplex.server.manager.impl.DefaultNotificationManager;
-import com.gitplex.server.manager.impl.DefaultOrganizationMembershipManager;
+import com.gitplex.server.manager.impl.DefaultProjectManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestCommentManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestReferenceManager;
@@ -100,10 +101,8 @@ import com.gitplex.server.manager.impl.DefaultPullRequestWatchManager;
 import com.gitplex.server.manager.impl.DefaultReviewInvitationManager;
 import com.gitplex.server.manager.impl.DefaultReviewManager;
 import com.gitplex.server.manager.impl.DefaultStorageManager;
-import com.gitplex.server.manager.impl.DefaultTeamAuthorizationManager;
-import com.gitplex.server.manager.impl.DefaultTeamManager;
-import com.gitplex.server.manager.impl.DefaultTeamMembershipManager;
 import com.gitplex.server.manager.impl.DefaultUserAuthorizationManager;
+import com.gitplex.server.manager.impl.DefaultUserManager;
 import com.gitplex.server.manager.impl.DefaultVisitInfoManager;
 import com.gitplex.server.manager.impl.DefaultWorkExecutor;
 import com.gitplex.server.manager.impl.NotificationManager;
@@ -137,12 +136,9 @@ import com.gitplex.server.util.jetty.DefaultJettyRunner;
 import com.gitplex.server.util.jetty.JettyRunner;
 import com.gitplex.server.util.schedule.DefaultTaskScheduler;
 import com.gitplex.server.util.schedule.TaskScheduler;
-import com.gitplex.server.util.validation.AccountNameReservation;
 import com.gitplex.server.util.validation.DefaultEntityValidator;
-import com.gitplex.server.util.validation.DepotNameReservation;
 import com.gitplex.server.util.validation.EntityValidator;
 import com.gitplex.server.util.validation.ValidatorProvider;
-import com.google.common.collect.Sets;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.pmease.security.shiro.bcrypt.BCryptPasswordService;
@@ -189,28 +185,6 @@ public class CoreModule extends AbstractPluginModule {
 		
 		configurePersistence();
 		
-		/*
-		 * Contribute empty reservations to avoid Guice complain 
-		 */
-		contribute(AccountNameReservation.class, new AccountNameReservation() {
-			
-			@Override
-			public Set<String> getReserved() {
-				return Sets.newHashSet();
-			}
-		});
-
-		/*
-		 * Contribute empty reservations to avoid Guice complain 
-		 */
-		contribute(DepotNameReservation.class, new DepotNameReservation() {
-			
-			@Override
-			public Set<String> getReserved() {
-				return Sets.newHashSet();
-			}
-		});
-		
 		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
 		/*
@@ -224,8 +198,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentManager.class).to(DefaultCodeCommentManager.class);
 		bind(PullRequestManager.class).to(DefaultPullRequestManager.class);
 		bind(PullRequestUpdateManager.class).to(DefaultPullRequestUpdateManager.class);
-		bind(DepotManager.class).to(DefaultDepotManager.class);
-		bind(AccountManager.class).to(DefaultAccountManager.class);
+		bind(ProjectManager.class).to(DefaultProjectManager.class);
+		bind(UserManager.class).to(DefaultUserManager.class);
 		bind(ReviewInvitationManager.class).to(DefaultReviewInvitationManager.class);
 		bind(ReviewManager.class).to(DefaultReviewManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
@@ -235,10 +209,9 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CommitInfoManager.class).to(DefaultCommitInfoManager.class);
 		bind(VisitInfoManager.class).to(DefaultVisitInfoManager.class);
 		bind(BatchWorkManager.class).to(DefaultBatchWorkManager.class);
-		bind(TeamManager.class).to(DefaultTeamManager.class);
-		bind(OrganizationMembershipManager.class).to(DefaultOrganizationMembershipManager.class);
-		bind(TeamMembershipManager.class).to(DefaultTeamMembershipManager.class);
-		bind(TeamAuthorizationManager.class).to(DefaultTeamAuthorizationManager.class);
+		bind(GroupManager.class).to(DefaultGroupManager.class);
+		bind(MembershipManager.class).to(DefaultMembershipManager.class);
+		bind(GroupAuthorizationManager.class).to(DefaultGroupAuthorizationManager.class);
 		bind(UserAuthorizationManager.class).to(DefaultUserAuthorizationManager.class);
 		bind(PullRequestStatusChangeManager.class).to(DefaultPullRequestStatusChangeManager.class);
 		bind(CodeCommentReplyManager.class).to(DefaultCodeCommentReplyManager.class);
@@ -247,6 +220,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestReferenceManager.class).to(DefaultPullRequestReferenceManager.class);
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
 		bind(NotificationManager.class).to(DefaultNotificationManager.class);
+		bind(CacheManager.class).to(DefaultCacheManager.class);
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);

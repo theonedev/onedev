@@ -12,7 +12,7 @@ import org.json.JSONWriter;
 
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.ChoiceProvider;
 import com.gitplex.server.web.component.select2.Response;
@@ -20,18 +20,18 @@ import com.gitplex.server.web.component.select2.Response;
 @SuppressWarnings("serial")
 public class BranchChoiceProvider extends ChoiceProvider<String> {
 
-	private IModel<Depot> depotModel;
+	private IModel<Project> projectModel;
 
-	public BranchChoiceProvider(IModel<Depot> depotModel) {
-		this.depotModel = depotModel;
+	public BranchChoiceProvider(IModel<Project> projectModel) {
+		this.projectModel = projectModel;
 	}
 
 	@Override
 	public void query(String term, int page, Response<String> response) {
 		term = term.toLowerCase();
 		List<String> branches = new ArrayList<>();
-		Depot depot = depotModel.getObject();
-		for (RefInfo ref: depot.getBranches()) {
+		Project project = projectModel.getObject();
+		for (RefInfo ref: project.getBranches()) {
 			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			if (branch.toLowerCase().startsWith(term))
 				branches.add(branch);
@@ -39,8 +39,8 @@ public class BranchChoiceProvider extends ChoiceProvider<String> {
 		
 		Collections.sort(branches);
 
-		int first = page * WebConstants.DEFAULT_PAGE_SIZE;
-		int last = first + WebConstants.DEFAULT_PAGE_SIZE;
+		int first = page * WebConstants.PAGE_SIZE;
+		int last = first + WebConstants.PAGE_SIZE;
 		response.setHasMore(last<branches.size());
 		if (last > branches.size())
 			last = branches.size();
@@ -64,7 +64,7 @@ public class BranchChoiceProvider extends ChoiceProvider<String> {
 
 	@Override
 	public void detach() {
-		depotModel.detach();
+		projectModel.detach();
 		
 		super.detach();
 	}

@@ -11,8 +11,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(
-	indexes={@Index(columnList="g_depot_id"), @Index(columnList="g_user_id"), @Index(columnList="branch")}, 
-	uniqueConstraints={@UniqueConstraint(columnNames={"g_depot_id", "branch", "g_user_id"})
+	indexes={@Index(columnList="g_project_id"), @Index(columnList="g_user_id"), @Index(columnList="branch")}, 
+	uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "branch", "g_user_id"})
 })
 public class BranchWatch extends AbstractEntity {
 
@@ -20,21 +20,21 @@ public class BranchWatch extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Depot depot;
+	private Project project;
 	
 	@Column(nullable=false)
 	private String branch;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Account user;
+	private User user;
 	
-	public Depot getDepot() {
-		return depot;
+	public Project getProject() {
+		return project;
 	}
 
-	public void setDepot(Depot depot) {
-		this.depot = depot;
+	public void setProject(Project project) {
+		this.project = project;
 	}
 
 	public String getBranch() {
@@ -45,11 +45,11 @@ public class BranchWatch extends AbstractEntity {
 		this.branch = branch;
 	}
 
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(Account user) {
+	public void setUser(User user) {
 		this.user = user;
 	}
 }

@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.MailManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.web.behavior.testform.TestFormBehavior;
 import com.gitplex.server.web.behavior.testform.TestResult;
@@ -53,25 +53,25 @@ public class ForgetPage extends BasePage {
 
 					@Override
 					protected TestResult test() {
-						AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
-						Account user = accountManager.findByName(bean.getUserNameOrEmailAddress());
+						UserManager userManager = GitPlex.getInstance(UserManager.class);
+						User user = userManager.findByName(bean.getUserNameOrEmailAddress());
 						if (user == null) {
-							user = accountManager.findByEmail(bean.getUserNameOrEmailAddress());
+							user = userManager.findByEmail(bean.getUserNameOrEmailAddress());
 						}
 						if (user == null) {
-							return new TestResult.Failed("No account found with name or email: " + bean.getUserNameOrEmailAddress());
+							return new TestResult.Failed("No user found with name or email: " + bean.getUserNameOrEmailAddress());
 						} else {
 							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 							if (configManager.getMailSetting() != null) {
 								String password = RandomStringUtils.random(10, true, true);								
 								user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
-								accountManager.save(user);
+								userManager.save(user);
 								
 								MailManager mailManager = GitPlex.getInstance(MailManager.class);
 								try {
 									String mailBody = String.format("Dear %s, "
 										+ "<p style='margin: 16px 0;'>"
-										+ "Per your request, password of your account \"%s\" has been reset to:<br>"
+										+ "Per your request, password of your user \"%s\" has been reset to:<br>"
 										+ "%s<br><br>"
 										+ "Please login and change the password in your earliest convenience."
 										+ "<p style='margin: 16px 0;'>"
@@ -125,7 +125,7 @@ public class ForgetPage extends BasePage {
 		
 		private String userNameOrEmailAddress;
 
-		@Editable(name="Please specify your account name or email address")
+		@Editable(name="Please specify your user name or email address")
 		@NotEmpty
 		public String getUserNameOrEmailAddress() {
 			return userNameOrEmailAddress;

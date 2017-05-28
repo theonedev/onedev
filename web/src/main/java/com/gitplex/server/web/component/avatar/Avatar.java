@@ -10,29 +10,29 @@ import org.apache.wicket.markup.html.WebComponent;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.User;
 import com.gitplex.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
 public class Avatar extends WebComponent {
 
-	private final Long accountId;
+	private final Long userId;
 	
 	private String url;
 	
-	public Avatar(String id, @Nullable Account account) {
+	public Avatar(String id, @Nullable User user) {
 		super(id);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		if (account == null) {
-			accountId = null;
-		} else if (account.getId() == null) {
-			accountId = null;
+		if (user == null) {
+			userId = null;
+		} else if (user.getId() == null) {
+			userId = null;
 		} else {
-			accountId = account.getId();
+			userId = user.getId();
 		}
-		url = avatarManager.getAvatarUrl(account);
+		url = avatarManager.getAvatarUrl(user);
 	}
 	
 	public Avatar(String id, PersonIdent person) {
@@ -40,12 +40,12 @@ public class Avatar extends WebComponent {
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 		
-		Account account = GitPlex.getInstance(AccountManager.class).find(person);
-		if (account != null) { 
-			accountId = account.getId();
-			url = avatarManager.getAvatarUrl(account);
+		User user = GitPlex.getInstance(UserManager.class).find(person);
+		if (user != null) { 
+			userId = user.getId();
+			url = avatarManager.getAvatarUrl(user);
 		} else {
-			accountId = null;
+			userId = null;
 			url = avatarManager.getAvatarUrl(person);
 		}
 	}
@@ -56,9 +56,9 @@ public class Avatar extends WebComponent {
 		
 		if (event.getPayload() instanceof AvatarChanged) {
 			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
-			if (avatarChanged.getAccount().getId().equals(accountId)) {
+			if (avatarChanged.getUser().getId().equals(userId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getAccount());
+				url = avatarManager.getAvatarUrl(avatarChanged.getUser());
 				avatarChanged.getHandler().add(this);
 			}
 		}

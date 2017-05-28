@@ -1,0 +1,23 @@
+<wicket:extend>
+	<section class="user list">
+		<div class="head clearfix">
+			<div class="pull-left">
+				<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by name"></input>
+			</div>
+			<div class="pull-left">
+				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New User</a>
+			</div>
+		</div>
+		<div class="body">
+			<table wicket:id="users" class="users table table-hover"></table>
+		</div>
+	</section>
+	<wicket:fragment wicket:id="nameFrag">
+		<a wicket:id="avatarLink"></a>
+		<a wicket:id="nameLink"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="actionFrag">
+		<a wicket:id="setting" title="Setting of this user"><i class="fa fa-cog"></i></a>
+		<a wicket:id="delete" title="Delete this user"><i class="fa fa-trash"></i></a>
+	</wicket:fragment>
+</wicket:extend>

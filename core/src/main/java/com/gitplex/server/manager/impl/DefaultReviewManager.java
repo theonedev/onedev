@@ -27,20 +27,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.Review;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.ReviewInvitation;
-import com.gitplex.server.model.Team;
+import com.gitplex.server.model.Group;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.FileProtection;
 import com.gitplex.server.persistence.annotation.Sessional;
@@ -48,9 +48,9 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
-import com.gitplex.server.security.ObjectPermission;
+import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.security.privilege.DepotPrivilege;
+import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 
@@ -62,18 +62,18 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 	
 	private static final int MAX_CONTRIBUTION_FILES = 100;
 	
-	private final AccountManager accountManager;
+	private final UserManager userManager;
 
 	private final PullRequestManager pullRequestManager;
 	
 	private final PullRequestStatusChangeManager pullRequestStatusChangeManager;
 	
 	@Inject
-	public DefaultReviewManager(Dao dao, AccountManager accountManager, 
+	public DefaultReviewManager(Dao dao, UserManager userManager, 
 			PullRequestManager pullRequestManager, PullRequestStatusChangeManager pullRequestStatusChangeManager) {
 		super(dao);
 		
-		this.accountManager = accountManager;
+		this.userManager = userManager;
 		this.pullRequestManager = pullRequestManager;
 		this.pullRequestStatusChangeManager = pullRequestStatusChangeManager;
 	}
@@ -116,7 +116,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 
 	@Transactional
 	@Override
-	public void delete(Account user, PullRequest request) {
+	public void delete(User user, PullRequest request) {
 		for (Iterator<Review> it = request.getReviews().iterator(); it.hasNext();) {
 			Review review = it.next();
 			if (review.getUser().equals(user)) {
@@ -130,7 +130,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 		statusChange.setRequest(request);
 		statusChange.setType(Type.WITHDRAWED_REVIEW);
 		statusChange.setNote("Review of user '" + user.getDisplayName() + "' is withdrawed");
-		statusChange.setUser(accountManager.getCurrent());
+		statusChange.setUser(userManager.getCurrent());
 		pullRequestStatusChangeManager.save(statusChange);
 		
 		request.setLastEvent(statusChange);
@@ -138,27 +138,27 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 	}
 
 	@Override
-	public boolean canModify(Account user, Depot depot, String branch, String file) {
-		BranchProtection branchProtection = depot.getBranchProtection(branch);
+	public boolean canModify(User user, Project project, String branch, String file) {
+		BranchProtection branchProtection = project.getBranchProtection(branch);
 		if (branchProtection != null) {
-			if (branchProtection.getReviewAppointment(depot) != null 
-					&& !branchProtection.getReviewAppointment(depot).matches(user)) {
+			if (branchProtection.getReviewAppointment(project) != null 
+					&& !branchProtection.getReviewAppointment(project).matches(user)) {
 				return false;
 			}
 			FileProtection fileProtection = branchProtection.getFileProtection(file);
-			if (fileProtection != null && !fileProtection.getReviewAppointment(depot).matches(user))
+			if (fileProtection != null && !fileProtection.getReviewAppointment(project).matches(user))
 				return false;
 		}			
 		return true;
 	}
 
-	private Set<String> getChangedFiles(Depot depot, ObjectId oldObjectId, ObjectId newObjectId) {
+	private Set<String> getChangedFiles(Project project, ObjectId oldObjectId, ObjectId newObjectId) {
 		Set<String> changedFiles = new HashSet<>();
-		try (TreeWalk treeWalk = new TreeWalk(depot.getRepository())) {
+		try (TreeWalk treeWalk = new TreeWalk(project.getRepository())) {
 			treeWalk.setFilter(TreeFilter.ANY_DIFF);
 			treeWalk.setRecursive(true);
-			RevCommit oldCommit = depot.getRevCommit(oldObjectId);
-			RevCommit newCommit = depot.getRevCommit(newObjectId);
+			RevCommit oldCommit = project.getRevCommit(oldObjectId);
+			RevCommit newCommit = project.getRevCommit(newObjectId);
 			treeWalk.addTree(oldCommit.getTree());
 			treeWalk.addTree(newCommit.getTree());
 			while (treeWalk.next()) {
@@ -171,17 +171,17 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 	}
 	
 	@Override
-	public boolean canPush(Account user, Depot depot, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
-		BranchProtection branchProtection = depot.getBranchProtection(branch);
+	public boolean canPush(User user, Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
+		BranchProtection branchProtection = project.getBranchProtection(branch);
 		if (branchProtection != null) {
-			if (branchProtection.getReviewAppointment(depot) != null 
-					&& !branchProtection.getReviewAppointment(depot).matches(user)) {
+			if (branchProtection.getReviewAppointment(project) != null 
+					&& !branchProtection.getReviewAppointment(project).matches(user)) {
 				return false;
 			}
 			
-			for (String changedFile: getChangedFiles(depot, oldObjectId, newObjectId)) {
+			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId)) {
 				FileProtection fileProtection = branchProtection.getFileProtection(changedFile);
-				if (fileProtection != null && !fileProtection.getReviewAppointment(depot).matches(user))
+				if (fileProtection != null && !fileProtection.getReviewAppointment(project).matches(user))
 					return false;
 			}
 		}
@@ -192,22 +192,22 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 
 		private final PullRequest request;
 		
-		private final List<Account> awaitingReviewers = new ArrayList<>();
+		private final List<User> awaitingReviewers = new ArrayList<>();
 		
-		private final Map<Account, Review> effectiveReviews = new HashMap<>();
+		private final Map<User, Review> effectiveReviews = new HashMap<>();
 		
 		@Override
-		public List<Account> getAwaitingReviewers() {
+		public List<User> getAwaitingReviewers() {
 			return awaitingReviewers;
 		}
 
 		@Override
-		public Map<Account, Review> getEffectiveReviews() {
+		public Map<User, Review> getEffectiveReviews() {
 			return effectiveReviews;
 		}
 
 		@Nullable
-		private ReviewInvitation getInvitation(Account user) {
+		private ReviewInvitation getInvitation(User user) {
 			for (ReviewInvitation invitation: request.getReviewInvitations()) {
 				if (invitation.getUser().equals(user))
 					return invitation;
@@ -229,9 +229,9 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 				}
 			}
 
-			BranchProtection branchProtection = request.getTargetDepot().getBranchProtection(request.getTargetBranch());
+			BranchProtection branchProtection = request.getTargetProject().getBranchProtection(request.getTargetBranch());
 			if (branchProtection != null) {
-				ReviewAppointment appointment = branchProtection.getReviewAppointment(request.getTargetDepot());
+				ReviewAppointment appointment = branchProtection.getReviewAppointment(request.getTargetProject());
 				if (appointment != null) 
 					checkReviews(appointment, request.getLatestUpdate());
 
@@ -244,20 +244,20 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 						FileProtection fileProtection = branchProtection.getFileProtection(file);
 						if (fileProtection != null && !checkedFileProtections.contains(fileProtection)) {
 							checkedFileProtections.add(fileProtection);
-							checkReviews(fileProtection.getReviewAppointment(request.getTargetDepot()), update);
+							checkReviews(fileProtection.getReviewAppointment(request.getTargetProject()), update);
 						}
 					}
 				}
 			}
 			
-			ObjectPermission writePermission = ObjectPermission.ofDepotWrite(request.getTargetDepot());
-			if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writePermission)) {
-				Collection<Account> writers = SecurityUtils.findUsersCan(request.getTargetDepot(), 
-						DepotPrivilege.WRITE);
+			if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(
+					new ProjectPermission(request.getTargetProject(), ProjectPrivilege.WRITE))) {
+				Collection<User> writers = SecurityUtils.findUsersCan(request.getTargetProject(), 
+						ProjectPrivilege.WRITE);
 				checkReviews(writers, 1, request.getLatestUpdate(), true);
 			}
 			
-			for (Iterator<Map.Entry<Account, Review>> it = effectiveReviews.entrySet().iterator(); it.hasNext();) {
+			for (Iterator<Map.Entry<User, Review>> it = effectiveReviews.entrySet().iterator(); it.hasNext();) {
 				Review review = it.next().getValue();
 				if (review.isCheckMerged()) {
 					if (request.getMergePreview() == null 
@@ -272,7 +272,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 		}
 		
 		private void checkReviews(ReviewAppointment appointment, PullRequestUpdate update) {
-			for (Account user: appointment.getUsers()) {
+			for (User user: appointment.getUsers()) {
 				if (!user.equals(request.getSubmitter()) && !awaitingReviewers.contains(user)) {
 					Review effectiveReview = user.getReviewAfter(update);
 					if (effectiveReview == null) {
@@ -284,21 +284,21 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 				}
 			}
 			
-			for (Map.Entry<Team, Integer> entry: appointment.getTeams().entrySet()) {
-				Team team = entry.getKey();
+			for (Map.Entry<Group, Integer> entry: appointment.getGroups().entrySet()) {
+				Group group = entry.getKey();
 				int requiredCount = entry.getValue();
-				checkReviews(team.getMembers(), requiredCount, update, false);
+				checkReviews(group.getMembers(), requiredCount, update, false);
 			}
 		}
 		
-		private void checkReviews(Collection<Account> users, int requiredCount, PullRequestUpdate update, 
+		private void checkReviews(Collection<User> users, int requiredCount, PullRequestUpdate update, 
 				boolean excludeAutoReviews) {
 			if (requiredCount == 0)
 				requiredCount = users.size();
 			
 			int effectiveCount = 0;
-			Set<Account> potentialReviewers = new HashSet<>();
-			for (Account user: users) {
+			Set<User> potentialReviewers = new HashSet<>();
+			for (User user: users) {
 				if (user.equals(request.getSubmitter())) {
 					effectiveCount++;
 				} else if (awaitingReviewers.contains(user)) {
@@ -321,17 +321,17 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			}
 
 			int missingCount = requiredCount - effectiveCount;
-			Set<Account> reviewers = new HashSet<>();
+			Set<User> reviewers = new HashSet<>();
 			
-			List<Account> candidateReviewers = new ArrayList<>();
-			for (Account user: potentialReviewers) {
+			List<User> candidateReviewers = new ArrayList<>();
+			for (User user: potentialReviewers) {
 				ReviewInvitation invitation = getInvitation(user);
 				if (invitation != null && invitation.getType() != ReviewInvitation.Type.EXCLUDE)
 					candidateReviewers.add(user);
 			}
 			
 			sortByContributions(candidateReviewers, update);
-			for (Account user: candidateReviewers) {
+			for (User user: candidateReviewers) {
 				reviewers.add(user);
 				if (reviewers.size() == missingCount)
 					break;
@@ -339,13 +339,13 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			
 			if (reviewers.size() < missingCount) {
 				candidateReviewers = new ArrayList<>();
-				for (Account user: potentialReviewers) {
+				for (User user: potentialReviewers) {
 					ReviewInvitation invitation = getInvitation(user);
 					if (invitation == null) 
 						candidateReviewers.add(user);
 				}
 				sortByContributions(candidateReviewers, update);
-				for (Account user: candidateReviewers) {
+				for (User user: candidateReviewers) {
 					reviewers.add(user);
 					if (reviewers.size() == missingCount)
 						break;
@@ -353,7 +353,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			}
 			if (reviewers.size() < missingCount) {
 				List<ReviewInvitation> excludedInvitations = new ArrayList<>();
-				for (Account user: potentialReviewers) {
+				for (User user: potentialReviewers) {
 					ReviewInvitation invitation = getInvitation(user);
 					if (invitation != null && invitation.getType() == ReviewInvitation.Type.EXCLUDE)
 						excludedInvitations.add(invitation);
@@ -373,16 +373,16 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 				throw new RuntimeException(errorMessage);
 			}
 
-			for (Account user: reviewers) {
+			for (User user: reviewers) {
 				awaitingReviewers.add(user);
 				inviteReviewer(user);
 			}
 		}
 		
-		private void sortByContributions(List<Account> users, PullRequestUpdate update) {
+		private void sortByContributions(List<User> users, PullRequestUpdate update) {
 			CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
-			Map<Account, Integer> contributions = new HashMap<>();
-			for (Account user: users)
+			Map<User, Integer> contributions = new HashMap<>();
+			for (User user: users)
 				contributions.put(user, 0);
 
 			int count = 0;
@@ -404,12 +404,12 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			users.sort((user1, user2)-> contributions.get(user2) - contributions.get(user1));
 		}
 		
-		private int addContributions(Map<Account, Integer> contributions, CommitInfoManager commitInfoManager, 
+		private int addContributions(Map<User, Integer> contributions, CommitInfoManager commitInfoManager, 
 				String file, PullRequestUpdate update) {
 			int addedContributions = 0;
-			for (Map.Entry<Account, Integer> entry: contributions.entrySet()) {
-				Account user = entry.getKey();
-				int fileContribution = commitInfoManager.getContributions(update.getRequest().getTargetDepot(), user, 
+			for (Map.Entry<User, Integer> entry: contributions.entrySet()) {
+				User user = entry.getKey();
+				int fileContribution = commitInfoManager.getContributions(update.getRequest().getTargetProject(), user, 
 						file);
 				entry.setValue(entry.getValue() + fileContribution);
 				addedContributions += fileContribution;
@@ -417,7 +417,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			return addedContributions;
 		}
 		
-		private void inviteReviewer(Account user) {
+		private void inviteReviewer(User user) {
 			ReviewInvitation invitation = getInvitation(user);
 			if (invitation != null) {
 				invitation.setType(ReviewInvitation.Type.RULE);

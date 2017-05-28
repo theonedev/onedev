@@ -10,7 +10,7 @@ import org.hibernate.criterion.Restrictions;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.MarkdownAware;
 import com.gitplex.server.event.pullrequest.PullRequestEvent;
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestReferenceManager;
 import com.gitplex.server.model.PullRequest;
@@ -27,14 +27,14 @@ public class DefaultPullRequestReferenceManager extends AbstractEntityManager<Pu
 
 	private final MarkdownManager markdownManager;
 	
-	private final AccountManager accountManager;
+	private final UserManager userManager;
 	
 	@Inject
-	public DefaultPullRequestReferenceManager(Dao dao, AccountManager accountManager, 
+	public DefaultPullRequestReferenceManager(Dao dao, UserManager userManager, 
 			MarkdownManager markdownManager) {
 		super(dao);
 		this.markdownManager = markdownManager;
-		this.accountManager = accountManager;
+		this.userManager = userManager;
 	}
 
 	@Transactional
@@ -55,7 +55,7 @@ public class DefaultPullRequestReferenceManager extends AbstractEntityManager<Pu
 							reference.setReferencedBy(event.getRequest());
 							reference.setReferenced(referenced);
 							reference.setDate(new Date());
-							reference.setUser(accountManager.getCurrent());
+							reference.setUser(userManager.getCurrent());
 							save(reference);
 						}
 					}					

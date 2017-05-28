@@ -18,7 +18,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobChange;
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.util.diff.DiffUtils;
@@ -34,7 +34,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 
 	private static final String CONTENT_ID = "content";
 	
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -46,12 +46,12 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 	
 	private final BlobCommentSupport markSupport;
 	
-	public BlobDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
+	public BlobDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
 			@Nullable BlobCommentSupport markSupport) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.requestModel = requestModel;
 		this.change = change;
 		this.blameModel = blameModel;
@@ -82,7 +82,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 				else
 					add(newFragment("Empty file removed.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, blameModel, markSupport));
+				add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, markSupport));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -118,7 +118,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 						&& (markSupport == null || markSupport.getComments().isEmpty())) {
 					add(newFragment("Content is identical", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, blameModel, markSupport));
+					add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, markSupport));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));
@@ -146,7 +146,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 	}
 
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		requestModel.detach();
 		
 		if (blameModel != null)

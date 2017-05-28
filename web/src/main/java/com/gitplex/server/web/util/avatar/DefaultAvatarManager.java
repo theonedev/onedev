@@ -18,7 +18,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.LockUtils;
@@ -43,21 +43,21 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Transactional
 	@Override
-	public String getAvatarUrl(@Nullable Account account) {
-		if (account == null) {
+	public String getAvatarUrl(@Nullable User user) {
+		if (user == null) {
 			return AVATARS_BASE_URL + "gitplex.png";
-		} else if (account.getId() == null) {
+		} else if (user.getId() == null) {
 			return AVATARS_BASE_URL + "default.png";
 		} else {
-			File avatarFile = getUploaded(account);
+			File avatarFile = getUploaded(user);
 			if (avatarFile.exists()) { 
-				return AVATARS_BASE_URL + "uploaded/" + account.getId() + "?version=" + avatarFile.lastModified();
+				return AVATARS_BASE_URL + "uploaded/" + user.getId() + "?version=" + avatarFile.lastModified();
 			}
 			
-			if (configManager.getSystemSetting().isGravatarEnabled() && !account.isOrganization())
-				return Gravatar.getURL(account.getEmail(), GRAVATAR_SIZE);
+			if (configManager.getSystemSetting().isGravatarEnabled())
+				return Gravatar.getURL(user.getEmail(), GRAVATAR_SIZE);
 			else 
-				return generateAvatar(account.getDisplayName(), account.getEmail());
+				return generateAvatar(user.getDisplayName(), user.getEmail());
 		}
 	}
 	
@@ -114,17 +114,17 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 	
 	@Override
-	public File getUploaded(Account account) {
-		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/" + account.getId());
+	public File getUploaded(User user) {
+		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/" + user.getId());
 	}
 
 	@Transactional
 	@Override
-	public void useAvatar(Account account, FileUpload upload) {
-		Lock avatarLock = LockUtils.getLock("uploaded-avatar:" + account.getId());
+	public void useAvatar(User user, FileUpload upload) {
+		Lock avatarLock = LockUtils.getLock("uploaded-avatar:" + user.getId());
 		avatarLock.lock();
 		try {
-			File avatarFile = getUploaded(account);
+			File avatarFile = getUploaded(user);
 			if (upload != null) {
 				FileUtils.createDir(avatarFile.getParentFile());
 				try {

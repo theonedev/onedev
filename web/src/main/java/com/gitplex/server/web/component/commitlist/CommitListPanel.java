@@ -28,7 +28,7 @@ import org.joda.time.DateTime;
 
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.ContributorAvatars;
@@ -37,31 +37,31 @@ import com.gitplex.server.web.component.commitgraph.CommitGraphUtils;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
-import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.util.model.CommitRefsModel;
 
 @SuppressWarnings("serial")
 public class CommitListPanel extends Panel {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final IModel<List<RevCommit>> commitsModel;
 	
-	private final IModel<Map<String, List<String>>> labelsModel = new CommitRefsModel(new AbstractReadOnlyModel<Depot>() {
+	private final IModel<Map<String, List<String>>> labelsModel = new CommitRefsModel(new AbstractReadOnlyModel<Project>() {
 
 		@Override
-		public Depot getObject() {
-			return depotModel.getObject();
+		public Project getObject() {
+			return projectModel.getObject();
 		}
 		
 	});
 	
 	private WebMarkupContainer container;
 	
-	public CommitListPanel(String id, IModel<Depot> depotModel, IModel<List<RevCommit>> commitsModel) {
+	public CommitListPanel(String id, IModel<Project> projectModel, IModel<List<RevCommit>> commitsModel) {
 		super(id);
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
 			@Override
@@ -129,7 +129,7 @@ public class CommitListPanel extends Panel {
 					fragment.add(new ContributorAvatars("avatar", 
 							commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-					fragment.add(new ExpandableCommitMessagePanel("message", depotModel, item.getModel()));
+					fragment.add(new ExpandableCommitMessagePanel("message", projectModel, item.getModel()));
 
 					RepeatingView labelsView = new RepeatingView("labels");
 
@@ -145,16 +145,16 @@ public class CommitListPanel extends Panel {
 
 					CommitDetailPage.State commitState = new CommitDetailPage.State();
 					commitState.revision = commit.name();
-					PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), commitState);
+					PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
 					Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 					fragment.add(hashLink);
 					hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 					fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 
-					DepotBlobPage.State browseState = new DepotBlobPage.State(
+					ProjectBlobPage.State browseState = new ProjectBlobPage.State(
 							new BlobIdent(commit.name(), null, FileMode.TYPE_TREE));
-					params = DepotBlobPage.paramsOf(depotModel.getObject(), browseState);
-					fragment.add(new ViewStateAwarePageLink<Void>("browseCode", DepotBlobPage.class, params));
+					params = ProjectBlobPage.paramsOf(projectModel.getObject(), browseState);
+					fragment.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
 					
 					item.add(AttributeAppender.append("class", "commit clearfix commit-item-" + itemIndex++));
 				} else {
@@ -202,7 +202,7 @@ public class CommitListPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		commitsModel.detach();
 		
 		super.onDetach();

@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.MailManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.util.ExceptionUtils;
 import com.gitplex.server.web.behavior.testform.TestFormBehavior;
 import com.gitplex.server.web.behavior.testform.TestResult;
@@ -62,7 +62,7 @@ public class MailSettingPage extends AdministrationPage {
 
 					@Override
 					protected TestResult test() {
-						Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
+						User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 						try {
 							GitPlex.getInstance(MailManager.class).sendMail(mailSettingHolder.getMailSetting(), 
 									Sets.newHashSet(currentUser.getEmail()), 

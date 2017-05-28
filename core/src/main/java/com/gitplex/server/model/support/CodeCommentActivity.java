@@ -11,7 +11,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
 import com.gitplex.server.model.AbstractEntity;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.CodeComment;
 
 @MappedSuperclass
@@ -25,7 +25,7 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
-	private Account user;
+	private User user;
 	
 	private String userName;
 
@@ -44,11 +44,11 @@ public abstract class CodeCommentActivity extends AbstractEntity {
 	}
 
 	@Nullable
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public void setUser(Account user) {
+	public void setUser(User user) {
 		this.user = user;
 	}
 

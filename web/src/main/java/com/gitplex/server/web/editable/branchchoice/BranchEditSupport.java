@@ -43,10 +43,10 @@ public class BranchEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        List<String> depotAndBranches = model.getObject();
-						        if (depotAndBranches != null && !depotAndBranches.isEmpty()) {
+						        List<String> projectAndBranches = model.getObject();
+						        if (projectAndBranches != null && !projectAndBranches.isEmpty()) {
 						        	List<String> branches = new ArrayList<>();
-						        	for (String each: depotAndBranches) {
+						        	for (String each: projectAndBranches) {
 						        		branches.add(each);
 						        	}
 						            return new Label(id, StringUtils.join(branches, ", " ));
@@ -73,9 +73,9 @@ public class BranchEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        String depotAndBranch = model.getObject();
-						        if (depotAndBranch != null) {
-						        	return new Label(id, depotAndBranch);
+						        String projectAndBranch = model.getObject();
+						        if (projectAndBranch != null) {
+						        	return new Label(id, projectAndBranch);
 						        } else {
 									return new NotDefinedLabel(id);
 						        }

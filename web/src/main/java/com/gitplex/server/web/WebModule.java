@@ -21,9 +21,6 @@ import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.server.git.exception.GitException;
 import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.util.markdown.HtmlTransformer;
-import com.gitplex.server.util.validation.AccountNameReservation;
-import com.gitplex.server.util.validation.DepotNameReservation;
-import com.gitplex.server.util.validation.TeamNameReservation;
 import com.gitplex.server.web.component.comment.MentionTransformer;
 import com.gitplex.server.web.component.comment.PullRequestTransformer;
 import com.gitplex.server.web.component.diff.DiffRenderer;
@@ -33,7 +30,7 @@ import com.gitplex.server.web.editable.DefaultEditSupportRegistry;
 import com.gitplex.server.web.editable.EditSupport;
 import com.gitplex.server.web.editable.EditSupportLocator;
 import com.gitplex.server.web.editable.EditSupportRegistry;
-import com.gitplex.server.web.page.depot.blob.render.BlobRendererContribution;
+import com.gitplex.server.web.page.project.blob.render.BlobRendererContribution;
 import com.gitplex.server.web.util.avatar.AvatarManager;
 import com.gitplex.server.web.util.avatar.DefaultAvatarManager;
 import com.gitplex.server.web.util.commitmessagetransform.CommitMessageTransformer;
@@ -74,10 +71,6 @@ public class WebModule extends AbstractPluginModule {
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
-		contribute(AccountNameReservation.class, WebAccountNameReservation.class);
-		contribute(DepotNameReservation.class, WebDepotNameReservation.class);
-		contribute(TeamNameReservation.class, WebTeamNameReservation.class);
-		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
 		bind(CommitIndexedBroadcaster.class);
@@ -110,7 +103,7 @@ public class WebModule extends AbstractPluginModule {
 			
 		});
 
-		bind(UrlManager.class).to(WicketUrlManager.class);
+		bind(UrlManager.class).to(DefaultUrlManager.class);
 		bind(CodeCommentChangeBroadcaster.class);
 		bind(PullRequestChangeBroadcaster.class);
 		bind(TaskChangeBroadcaster.class);

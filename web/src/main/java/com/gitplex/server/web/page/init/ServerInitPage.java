@@ -12,8 +12,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.init.InitStage;
 import com.gitplex.server.util.init.ManualConfig;
@@ -96,7 +96,7 @@ public class ServerInitPage extends BasePage {
 				@Override
 				protected void finished() {
 					WebSession.get().logout();
-					Account root = GitPlex.getInstance(AccountManager.class).getRoot();
+					User root = GitPlex.getInstance(UserManager.class).getRoot();
 					SecurityUtils.getSubject().runAs(root.getPrincipals());
 					throw new RestartResponseException(WelcomePage.class);
 				}

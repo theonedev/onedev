@@ -1,0 +1,36 @@
+package com.gitplex.server.web.page.project;
+
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+
+@SuppressWarnings("serial")
+public class NoBranchesPage extends ProjectPage {
+
+	public NoBranchesPage(PageParameters params) {
+		super(params);
+		
+		if (getProject().getDefaultBranch() != null)
+			throw new RestartResponseException(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new Label("url1", getProject().getUrl()));
+		add(new Label("url2", getProject().getUrl()));
+		add(new Label("url3", getProject().getUrl()));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new NoBranchesResourceReference()));
+	}
+
+}

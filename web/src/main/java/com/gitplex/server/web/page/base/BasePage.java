@@ -42,8 +42,8 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.User;
 import com.gitplex.server.web.assets.Assets;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.page.init.ServerInitPage;
@@ -267,8 +267,8 @@ public abstract class BasePage extends WebPage {
 	}
 	
 	@Nullable
-	protected final Account getLoginUser() {
-		return GitPlex.getInstance(AccountManager.class).getCurrent();
+	protected final User getLoginUser() {
+		return GitPlex.getInstance(UserManager.class).getCurrent();
 	}
 	
 	public void unauthorized() {

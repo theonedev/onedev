@@ -3,7 +3,7 @@ package com.gitplex.server.event.pullrequest;
 import java.util.Date;
 
 import com.gitplex.server.event.MarkdownAware;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 
@@ -20,8 +20,8 @@ public class PullRequestOpened extends PullRequestEvent implements MarkdownAware
 	}
 
 	@Override
-	public Account getUser() {
-		return Account.getForDisplay(getRequest().getSubmitter(), getRequest().getSubmitterName());
+	public User getUser() {
+		return User.getForDisplay(getRequest().getSubmitter(), getRequest().getSubmitterName());
 	}
 
 	@Override

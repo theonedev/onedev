@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.event.RefUpdated;
-import com.gitplex.server.manager.DepotManager;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.manager.ProjectManager;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.util.StringUtils;
 import com.google.common.base.Preconditions;
@@ -37,15 +37,15 @@ public class GitPostReceiveCallback extends HttpServlet {
 	
     public static final String PATH = "/git-postreceive-callback";
     
-    private final DepotManager depotManager;
+    private final ProjectManager projectManager;
 
     private final ListenerRegistry listenerRegistry;
     
     private final UnitOfWork unitOfWork;
     
     @Inject
-    public GitPostReceiveCallback(DepotManager depotManager, UnitOfWork unitOfWork, ListenerRegistry listenerRegistry) {
-    	this.depotManager = depotManager;
+    public GitPostReceiveCallback(ProjectManager projectManager, UnitOfWork unitOfWork, ListenerRegistry listenerRegistry) {
+    	this.projectManager = projectManager;
     	this.unitOfWork = unitOfWork;
         this.listenerRegistry = listenerRegistry;
     }
@@ -64,7 +64,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         List<String> fields = LoaderUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Long depotId = Long.valueOf(fields.get(0));
+        Long projectId = Long.valueOf(fields.get(0));
         Long userId = Long.valueOf(fields.get(1));
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -86,9 +86,9 @@ public class GitPostReceiveCallback extends HttpServlet {
 
 			@Override
 			public void run() {
-				ThreadContext.bind(Account.asSubject(userId));
+				ThreadContext.bind(User.asSubject(userId));
 		        try {
-		            Depot depot = depotManager.load(depotId);
+		            Project project = projectManager.load(projectId);
 		            
 			        int pos = 0;
 			        while (true) {
@@ -100,19 +100,19 @@ public class GitPostReceiveCallback extends HttpServlet {
 			        	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
 			        	
 			        	if (!newObjectId.equals(ObjectId.zeroId())) {
-			        		depot.cacheObjectId(refName, newObjectId);
+			        		project.cacheObjectId(refName, newObjectId);
 			        	} else {
 			        		newObjectId = ObjectId.zeroId();
-			        		depot.cacheObjectId(refName, null);
+			        		project.cacheObjectId(refName, null);
 			        	}
 			        	
 			        	String branch = GitUtils.ref2branch(refName);
-			        	if (branch != null && depot.getDefaultBranch() == null) {
-			        		RefUpdate refUpdate = depot.updateRef("HEAD");
+			        	if (branch != null && project.getDefaultBranch() == null) {
+			        		RefUpdate refUpdate = project.updateRef("HEAD");
 			        		GitUtils.linkRef(refUpdate, refName);
 			        	}
 			        	
-			        	listenerRegistry.post(new RefUpdated(depot, refName, oldObjectId, newObjectId));
+			        	listenerRegistry.post(new RefUpdated(project, refName, oldObjectId, newObjectId));
 			    		
 			        	field = field.substring(40);
 			        	if (field.length() == 0)

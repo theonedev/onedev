@@ -19,8 +19,8 @@ import org.eclipse.jgit.lib.Constants;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.AttachmentManager;
-import com.gitplex.server.manager.DepotManager;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.manager.ProjectManager;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.security.SecurityUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -29,9 +29,7 @@ public class AttachmentResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String PARAM_ACCOUNT = "account";
-	
-	private static final String PARAM_DEPOT = "depot";
+	private static final String PARAM_DEPOT = "project";
 	
 	private static final String PARAM_UUID = "uuid";
 	
@@ -41,23 +39,19 @@ public class AttachmentResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String userName = params.get(PARAM_ACCOUNT).toString();
-		if (StringUtils.isBlank(userName))
-			throw new IllegalArgumentException("account name has to be specified");
-		
 		String repoName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
 		if (StringUtils.isBlank(repoName))
-			throw new IllegalArgumentException("repository name has to be specified");
+			throw new IllegalArgumentException("project name has to be specified");
 		
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
 			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Depot depot = GitPlex.getInstance(DepotManager.class).find(userName, repoName);
+		Project project = GitPlex.getInstance(ProjectManager.class).find(repoName);
 		
-		if (depot == null) 
-			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);
+		if (project == null) 
+			throw new EntityNotFoundException("Unable to find project " + repoName);
 		
-		if (!SecurityUtils.canRead(depot)) 
+		if (!SecurityUtils.canRead(project)) 
 			throw new UnauthorizedException();
 
 		String storage = params.get(PARAM_UUID).toString();
@@ -68,7 +62,7 @@ public class AttachmentResource extends AbstractResource {
 		if (StringUtils.isBlank(attachment))
 			throw new IllegalArgumentException("attachment parameter has to be specified");
 
-		File attachmentFile = new File(getAttachmentDir(depot, storage), attachment);
+		File attachmentFile = new File(getAttachmentDir(project, storage), attachment);
 		
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(attachmentFile.length());
@@ -97,17 +91,16 @@ public class AttachmentResource extends AbstractResource {
 		return response;
 	}
 
-	private static File getAttachmentDir(Depot depot, String uuid) {
-		return GitPlex.getInstance(AttachmentManager.class).getAttachmentDir(depot, uuid);		
+	private static File getAttachmentDir(Project project, String uuid) {
+		return GitPlex.getInstance(AttachmentManager.class).getAttachmentDir(project, uuid);		
 	}
 	
-	public static PageParameters paramsOf(Depot depot, String attachmentDirUUID, String attachmentName) {
+	public static PageParameters paramsOf(Project project, String attachmentDirUUID, String attachmentName) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_ACCOUNT, depot.getAccount().getName());
-		params.set(PARAM_DEPOT, depot.getName());
+		params.set(PARAM_DEPOT, project.getName());
 		params.set(PARAM_UUID, attachmentDirUUID);
 		params.set(PARAM_ATTACHMENT, attachmentName);
-		final File attachmentFile = new File(getAttachmentDir(depot, attachmentDirUUID), attachmentName);
+		final File attachmentFile = new File(getAttachmentDir(project, attachmentDirUUID), attachmentName);
 		params.set("v", attachmentFile.lastModified());
 		
 		return params;

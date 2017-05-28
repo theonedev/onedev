@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.persistence.dao.EntityManager;
 
@@ -22,5 +22,5 @@ public interface PullRequestUpdateManager extends EntityManager<PullRequestUpdat
 	@Nullable
 	PullRequestUpdate find(String uuid);
 	
-	List<PullRequestUpdate> findAllAfter(Depot depot, @Nullable String updateUUID);
+	List<PullRequestUpdate> findAllAfter(Project project, @Nullable String updateUUID);
 }

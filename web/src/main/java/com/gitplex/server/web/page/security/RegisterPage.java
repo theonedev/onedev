@@ -11,34 +11,34 @@ import org.apache.wicket.markup.html.link.Link;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
 import com.gitplex.server.manager.ConfigManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
-import com.gitplex.server.web.page.account.AccountPage;
-import com.gitplex.server.web.page.account.setting.AvatarEditPage;
 import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.home.DashboardPage;
+import com.gitplex.server.web.page.user.AvatarEditPage;
+import com.gitplex.server.web.page.user.UserPage;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
 	
 	public RegisterPage() {
 		if (!GitPlex.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister())
-			throw new UnauthenticatedException("Account self-register is disabled");
+			throw new UnauthenticatedException("User self-register is disabled");
 		if (getLoginUser() != null)
-			throw new IllegalStateException("Can not sign up an account while signed in");
+			throw new IllegalStateException("Can not sign up an user while signed in");
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		final Account account = new Account();
-		final BeanEditor<?> editor = BeanContext.editBean("editor", account, Account.getUserExcludeProperties());
+		final User user = new User();
+		final BeanEditor<?> editor = BeanContext.editBean("editor", user);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -46,23 +46,23 @@ public class RegisterPage extends BasePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = accountManager.findByName(account.getName());
-				if (accountWithSameName != null) {
+				UserManager userManager = GitPlex.getInstance(UserManager.class);
+				User userWithSameName = userManager.findByName(user.getName());
+				if (userWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
-							.addError("This name has already been used by another account.");
+							.addError("This name has already been used by another user.");
 				} 
-				Account accountWithSameEmail = accountManager.findByEmail(account.getEmail());
-				if (accountWithSameEmail != null) {
+				User userWithSameEmail = userManager.findByEmail(user.getEmail());
+				if (userWithSameEmail != null) {
 					editor.getErrorContext(new PathSegment.Property("email"))
-							.addError("This email has already been used by another account.");
+							.addError("This email has already been used by another user.");
 				} 
 				if (!editor.hasErrors(true)) {
-					account.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(account.getPassword()));
-					accountManager.save(account, null);
-					Session.get().success("New account registered");
-					SecurityUtils.getSubject().runAs(account.getPrincipals());
-					setResponsePage(AvatarEditPage.class, AccountPage.paramsOf(account));
+					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(user.getPassword()));
+					userManager.save(user, null);
+					Session.get().success("New user registered");
+					SecurityUtils.getSubject().runAs(user.getPrincipals());
+					setResponsePage(AvatarEditPage.class, UserPage.paramsOf(user));
 				}
 			}
 			

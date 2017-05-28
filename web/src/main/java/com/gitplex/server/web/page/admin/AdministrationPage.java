@@ -11,8 +11,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
-import com.gitplex.server.web.page.admin.account.NewUserPage;
-import com.gitplex.server.web.page.admin.account.UserListPage;
+import com.gitplex.server.web.page.admin.group.NewGroupPage;
+import com.gitplex.server.web.page.admin.group.GroupListPage;
+import com.gitplex.server.web.page.admin.user.NewUserPage;
+import com.gitplex.server.web.page.admin.user.UserListPage;
 import com.gitplex.server.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
@@ -20,7 +22,7 @@ public abstract class AdministrationPage extends LayoutPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canManageSystem();
+		return SecurityUtils.isAdministrator();
 	}
 	
 	@Override
@@ -33,6 +35,7 @@ public abstract class AdministrationPage extends LayoutPage {
 		tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
 		tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));
 		tabs.add(new AdministrationTab("User Management", "fa fa-fw fa-user", UserListPage.class, NewUserPage.class));
+		tabs.add(new AdministrationTab("Group Management", "fa fa-fw fa-group", GroupListPage.class, NewGroupPage.class));
 		tabs.add(new AdministrationTab("Server Log", "fa fa-fw fa-file-text-o", ServerLogPage.class));
 		tabs.add(new AdministrationTab("Server Information", "fa fa-fw fa-desktop", ServerInformationPage.class));
 		

@@ -50,7 +50,7 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.BlameCommand;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.TextRange;
@@ -73,18 +73,18 @@ import com.gitplex.server.web.component.diff.revision.BlobCommentSupport;
 import com.gitplex.server.web.component.diff.revision.DiffViewMode;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
-import com.gitplex.server.web.page.depot.blob.DepotBlobPage;
-import com.gitplex.server.web.page.depot.blob.render.BlobRenderContext.Mode;
-import com.gitplex.server.web.page.depot.commit.CommitDetailPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.page.depot.pullrequest.requestdetail.mergepreview.MergePreviewPage;
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import com.gitplex.server.web.page.project.commit.CommitDetailPage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.util.DateUtils;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel implements SourceAware {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -108,12 +108,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private BlameInfo blameInfo;
 	
-	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
+	public TextDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
 			@Nullable BlobCommentSupport markSupport) {
 		super(id);
 		
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.requestModel = requestModel;
 		this.change = change;
 		this.diffMode = diffMode;
@@ -136,7 +136,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private BlameInfo getBlameInfo() {
 		blameInfo = new BlameInfo();
-		BlameCommand cmd = new BlameCommand(depotModel.getObject().getGitDir());
+		BlameCommand cmd = new BlameCommand(projectModel.getObject().getGitDir());
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
 			cmd.commitHash(getOldCommit().name()).file(oldPath);
@@ -191,19 +191,19 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			
 		})).setOutputMarkupId(true));
 		
-		Depot depot = depotModel.getObject();
+		Project project = projectModel.getObject();
 		PullRequest request = requestModel.getObject();
-		DepotBlobPage.State viewState = new DepotBlobPage.State(change.getBlobIdent());
+		ProjectBlobPage.State viewState = new ProjectBlobPage.State(change.getBlobIdent());
 	
 		viewState.requestId = PullRequest.idOf(request);
-		PageParameters params = DepotBlobPage.paramsOf(depot, viewState);
-		actions.add(new ViewStateAwarePageLink<Void>("viewFile", DepotBlobPage.class, params));
+		PageParameters params = ProjectBlobPage.paramsOf(project, viewState);
+		actions.add(new ViewStateAwarePageLink<Void>("viewFile", ProjectBlobPage.class, params));
 		
 		if (change.getType() != ChangeType.DELETE) {
 			if (request != null 
 					&& request.getSource() != null 
 					&& request.getSource().getObjectName(false) != null
-					&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), change.getPath())
+					&& SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), change.getPath())
 					&& (getPage() instanceof RequestChangesPage || getPage() instanceof MergePreviewPage)) { 
 				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
@@ -212,27 +212,27 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					public void onClick() {
 						BlobIdent blobIdent = new BlobIdent(request.getSourceBranch(), change.getPath(), 
 								FileMode.REGULAR_FILE.getBits());
-						DepotBlobPage.State editState = new DepotBlobPage.State(blobIdent);
+						ProjectBlobPage.State editState = new ProjectBlobPage.State(blobIdent);
 						editState.requestId = request.getId();
 						editState.mode = Mode.EDIT;
-						PageParameters params = DepotBlobPage.paramsOf(request.getSourceDepot(), editState);
-						setResponsePage(DepotBlobPage.class, params);
+						PageParameters params = ProjectBlobPage.paramsOf(request.getSourceProject(), editState);
+						setResponsePage(ProjectBlobPage.class, params);
 					}
 					
 				};
 				editLink.add(AttributeAppender.append("title", "Edit on source branch"));
 				actions.add(editLink);
-			} else if (SecurityUtils.canModify(depot, change.getBlobIdent().revision, change.getPath()) 
-					&& depot.getBranchRef(change.getBlobIdent().revision) != null) {
+			} else if (SecurityUtils.canModify(project, change.getBlobIdent().revision, change.getPath()) 
+					&& project.getBranchRef(change.getBlobIdent().revision) != null) {
 				// we are on a branch 
 				Link<Void> editLink = new Link<Void>("editFile") {
 
 					@Override
 					public void onClick() {
-						DepotBlobPage.State editState = new DepotBlobPage.State(change.getBlobIdent());
+						ProjectBlobPage.State editState = new ProjectBlobPage.State(change.getBlobIdent());
 						editState.mode = Mode.EDIT;
-						PageParameters params = DepotBlobPage.paramsOf(depot, editState);
-						setResponsePage(DepotBlobPage.class, params);
+						PageParameters params = ProjectBlobPage.paramsOf(project, editState);
+						setResponsePage(ProjectBlobPage.class, params);
 					}
 					
 				};
@@ -342,11 +342,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					script = String.format("gitplex.server.textDiff.openSelectionPopover('%s', %s, %s, '%s', '%s', %s, %s);", 
 							getMarkupId(), jsonOfPosition, getJson(mark), markSupport.getMarkUrl(mark), 
 							JavaScriptEscape.escapeJavaScript(getMarkedText(mark)),
-							requestModel.getObject()!=null, SecurityUtils.getAccount()!=null);
+							requestModel.getObject()!=null, SecurityUtils.getUser()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "addComment":
-					Preconditions.checkNotNull(SecurityUtils.getAccount());
+					Preconditions.checkNotNull(SecurityUtils.getUser());
 					
 					mark = getMark(params, "param1", "param2", "param3", "param4", "param5");
 					markSupport.onAddComment(target, mark);
@@ -370,21 +370,21 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		add(blameMessageBehavior = new BlameMessageBehavior() {
 			
 			@Override
-			protected Depot getDepot() {
-				return depotModel.getObject();
+			protected Project getProject() {
+				return projectModel.getObject();
 			}
 		});
 		
-		symbolTooltip = new SymbolTooltipPanel("symbolTooltip", depotModel) {
+		symbolTooltip = new SymbolTooltipPanel("symbolTooltip", projectModel) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				setResponsePage(DepotBlobPage.class, getQueryHitParams(hit));
+				setResponsePage(ProjectBlobPage.class, getQueryHitParams(hit));
 			}
 
 			@Override
 			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
-				setResponsePage(DepotBlobPage.class, getFindOccurrencesParams());
+				setResponsePage(ProjectBlobPage.class, getFindOccurrencesParams());
 			}
 
 			@Override
@@ -453,11 +453,11 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	}
 	
 	private RevCommit getOldCommit() {
-		return depotModel.getObject().getRevCommit(change.getOldBlobIdent().revision);
+		return projectModel.getObject().getRevCommit(change.getOldBlobIdent().revision);
 	}
 	
 	private RevCommit getNewCommit() {
-		return depotModel.getObject().getRevCommit(change.getNewBlobIdent().revision);
+		return projectModel.getObject().getRevCommit(change.getNewBlobIdent().revision);
 	}
 	
 	@Override
@@ -716,7 +716,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			CommitDetailPage.State state = new CommitDetailPage.State();
 			state.revision = commit.getHash();
 			state.whitespaceOption = change.getWhitespaceOption();
-			PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), state);
+			PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), state);
 			String url = urlFor(CommitDetailPage.class, params).toString();
 			if (diffMode == DiffViewMode.UNIFIED) {
 				builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>", 
@@ -1101,7 +1101,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		requestModel.detach();
 		
 		if (blameModel != null)

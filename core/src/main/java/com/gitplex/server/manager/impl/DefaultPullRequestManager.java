@@ -2,10 +2,10 @@ package com.gitplex.server.manager.impl;
 
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofOpen;
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSource;
-import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSourceDepot;
+import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSourceProject;
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSubmitter;
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTarget;
-import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTargetDepot;
+import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTargetProject;
 import static com.gitplex.server.model.support.MergeStrategy.ALWAYS_MERGE;
 import static com.gitplex.server.model.support.MergeStrategy.MERGE_IF_NECESSARY;
 import static com.gitplex.server.model.support.MergeStrategy.REBASE_MERGE;
@@ -43,20 +43,20 @@ import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
-import com.gitplex.server.event.depot.DepotDeleted;
+import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.event.pullrequest.MergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.Review;
 import com.gitplex.server.model.PullRequestStatusChange;
@@ -64,7 +64,7 @@ import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.model.support.CloseInfo;
-import com.gitplex.server.model.support.DepotAndBranch;
+import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.persistence.UnitOfWork;
@@ -91,7 +91,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final AccountManager accountManager;
+	private final UserManager userManager;
 	
 	private final UnitOfWork unitOfWork;
 	
@@ -107,7 +107,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
-			ReviewInvitationManager reviewInvitationManager, AccountManager accountManager, 
+			ReviewInvitationManager reviewInvitationManager, UserManager userManager, 
 			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
 			ListenerRegistry listenerRegistry, UnitOfWork unitOfWork, 
 			PullRequestStatusChangeManager pullRequestStatusChangeManager) {
@@ -115,7 +115,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.reviewInvitationManager = reviewInvitationManager;
-		this.accountManager = accountManager;
+		this.userManager = userManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
 		this.listenerRegistry = listenerRegistry;
@@ -141,22 +141,22 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void restoreSourceBranch(PullRequest request, String note) {
-		Preconditions.checkState(!request.isOpen() && request.getSourceDepot() != null);
+		Preconditions.checkState(!request.isOpen() && request.getSourceProject() != null);
 		if (request.getSource().getObjectName(false) == null) {
 			RevCommit latestCommit = request.getHeadCommit();
 			try {
-				request.getSourceDepot().git().branchCreate().setName(request.getSourceBranch()).setStartPoint(latestCommit).call();
+				request.getSourceProject().git().branchCreate().setName(request.getSourceBranch()).setStartPoint(latestCommit).call();
 			} catch (Exception e) {
 				Throwables.propagate(e);
 			}
-			request.getSourceDepot().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
+			request.getSourceProject().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
 			
 			PullRequestStatusChange statusChange = new PullRequestStatusChange();
 			statusChange.setDate(new Date());
 			statusChange.setNote(note);
 			statusChange.setRequest(request);
 			statusChange.setType(Type.RESTORED_SOURCE_BRANCH);
-			statusChange.setUser(accountManager.getCurrent());
+			statusChange.setUser(userManager.getCurrent());
 			pullRequestStatusChangeManager.save(statusChange);
 			
 			request.setLastEvent(statusChange);
@@ -167,7 +167,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void deleteSourceBranch(PullRequest request, String note) {
-		Preconditions.checkState(!request.isOpen() && request.getSourceDepot() != null); 
+		Preconditions.checkState(!request.isOpen() && request.getSourceProject() != null); 
 		
 		if (request.getSource().getObjectName(false) != null) {
 			request.getSource().delete();
@@ -177,7 +177,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			statusChange.setNote(note);
 			statusChange.setRequest(request);
 			statusChange.setType(Type.DELETED_SOURCE_BRANCH);
-			statusChange.setUser(accountManager.getCurrent());
+			statusChange.setUser(userManager.getCurrent());
 			pullRequestStatusChangeManager.save(statusChange);
 			
 			request.setLastEvent(statusChange);
@@ -188,7 +188,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void reopen(PullRequest request, String note) {
-		Account user = accountManager.getCurrent();
+		User user = userManager.getCurrent();
 		request.setCloseInfo(null);
 
 		PullRequestStatusChange statusChange = new PullRequestStatusChange();
@@ -207,7 +207,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
  	public void discard(PullRequest request, String note) {
-		Account user = accountManager.getCurrent();
+		User user = userManager.getCurrent();
 		Date date = new Date();
 		
 		CloseInfo closeInfo = new CloseInfo();
@@ -233,17 +233,17 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		String merged = Preconditions.checkNotNull(preview.getMerged());
 		
 		ObjectId mergedId = ObjectId.fromString(merged);
-		RevCommit mergedCommit = request.getTargetDepot().getRevCommit(mergedId);
+		RevCommit mergedCommit = request.getTargetProject().getRevCommit(mergedId);
 		
         PersonIdent committer = new PersonIdent(GitPlex.NAME, "");
         
-		Depot targetDepot = request.getTargetDepot();
+		Project targetProject = request.getTargetProject();
 		MergeStrategy strategy = request.getMergeStrategy();
 		if ((strategy == ALWAYS_MERGE || strategy == MERGE_IF_NECESSARY || strategy == SQUASH_MERGE) 
 				&& !preview.getMerged().equals(preview.getRequestHead()) 
 				&& !mergedCommit.getFullMessage().equals(request.getCommitMessage())) {
-			try (	RevWalk revWalk = new RevWalk(targetDepot.getRepository());
-					ObjectInserter inserter = targetDepot.getRepository().newObjectInserter()) {
+			try (	RevWalk revWalk = new RevWalk(targetProject.getRepository());
+					ObjectInserter inserter = targetProject.getRepository().newObjectInserter()) {
 		        CommitBuilder newCommit = new CommitBuilder();
 		        newCommit.setAuthor(mergedCommit.getAuthorIdent());
 		        newCommit.setCommitter(committer);
@@ -259,7 +259,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	        preview = new MergePreview(preview.getTargetHead(), preview.getRequestHead(), 
 	        		preview.getMergeStrategy(), merged);
 	        request.setLastMergePreview(preview);
-			RefUpdate refUpdate = targetDepot.updateRef(request.getMergeRef());
+			RefUpdate refUpdate = targetProject.updateRef(request.getMergeRef());
 			refUpdate.setNewObjectId(mergedId);
 			GitUtils.updateRef(refUpdate);
 		}
@@ -268,14 +268,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		String targetRef = request.getTargetRef();
 		ObjectId targetHeadId = ObjectId.fromString(preview.getTargetHead());
-		RefUpdate refUpdate = targetDepot.updateRef(targetRef);
+		RefUpdate refUpdate = targetProject.updateRef(targetRef);
 		refUpdate.setRefLogIdent(committer);
 		refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
 		refUpdate.setExpectedOldObjectId(targetHeadId);
 		refUpdate.setNewObjectId(mergedId);
 		GitUtils.updateRef(refUpdate);
 		
-		request.getTargetDepot().cacheObjectId(request.getTargetRef(), mergedId);
+		request.getTargetProject().cacheObjectId(request.getTargetRef(), mergedId);
 		
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
@@ -287,8 +287,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				ThreadContext.bind(subject);
 				try {
 					PullRequest request = load(requestId);
-					request.getTargetDepot().cacheObjectId(request.getTargetRef(), newTargetHeadId);
-					listenerRegistry.post(new RefUpdated(request.getTargetDepot(), targetRef, 
+					request.getTargetProject().cacheObjectId(request.getTargetRef(), newTargetHeadId);
+					listenerRegistry.post(new RefUpdated(request.getTargetProject(), targetRef, 
 								targetHeadId, newTargetHeadId));
 				} finally {
 					ThreadContext.unbindSubject();
@@ -298,15 +298,15 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		});
 	}
 	
-	private long getNextNumber(Depot depot) {
+	private long getNextNumber(Project project) {
 		AtomicLong nextNumber;
 		synchronized (nextNumbers) {
-			nextNumber = nextNumbers.get(depot.getUUID());
+			nextNumber = nextNumbers.get(project.getUUID());
 		}
 		if (nextNumber == null) {
 			long maxNumber;
-			Query query = getSession().createQuery("select max(number) from PullRequest where targetDepot=:depot");
-			query.setParameter("depot", depot);
+			Query query = getSession().createQuery("select max(number) from PullRequest where targetProject=:project");
+			query.setParameter("project", project);
 			Object result = query.uniqueResult();
 			if (result != null) {
 				maxNumber = (Long)result;
@@ -319,10 +319,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			 * if there are limited connections. 
 			 */
 			synchronized (nextNumbers) {
-				nextNumber = nextNumbers.get(depot.getUUID());
+				nextNumber = nextNumbers.get(project.getUUID());
 				if (nextNumber == null) {
 					nextNumber = new AtomicLong(maxNumber+1);
-					nextNumbers.put(depot.getUUID(), nextNumber);
+					nextNumbers.put(project.getUUID(), nextNumber);
 				}
 			}
 		} 
@@ -332,14 +332,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void open(PullRequest request) {
-		request.setNumber(getNextNumber(request.getTargetDepot()));
+		request.setNumber(getNextNumber(request.getTargetProject()));
 		dao.persist(request);
 		
-		RefUpdate refUpdate = request.getTargetDepot().updateRef(request.getBaseRef());
+		RefUpdate refUpdate = request.getTargetProject().updateRef(request.getBaseRef());
 		refUpdate.setNewObjectId(ObjectId.fromString(request.getBaseCommitHash()));
 		GitUtils.updateRef(refUpdate);
 		
-		refUpdate = request.getTargetDepot().updateRef(request.getHeadRef());
+		refUpdate = request.getTargetProject().updateRef(request.getHeadRef());
 		refUpdate.setNewObjectId(ObjectId.fromString(request.getHeadCommitHash()));
 		GitUtils.updateRef(refUpdate);
 		
@@ -383,8 +383,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	private void checkUpdate(PullRequest request) {
 		if (!request.getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			ObjectId mergeBase = GitUtils.getMergeBase(
-					request.getTargetDepot().getRepository(), request.getTarget().getObjectId(), 
-					request.getSourceDepot().getRepository(), request.getSource().getObjectId(), 
+					request.getTargetProject().getRepository(), request.getTarget().getObjectId(), 
+					request.getSourceProject().getRepository(), request.getSource().getObjectId(), 
 					GitUtils.branch2ref(request.getSourceBranch()));
 			if (mergeBase != null) {
 				PullRequestUpdate update = new PullRequestUpdate();
@@ -394,7 +394,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				request.addUpdate(update);
 				pullRequestUpdateManager.save(update, true);
 				
-				RefUpdate refUpdate = request.getTargetDepot().updateRef(request.getHeadRef());
+				RefUpdate refUpdate = request.getTargetProject().updateRef(request.getHeadRef());
 				refUpdate.setNewObjectId(ObjectId.fromString(request.getHeadCommitHash()));
 				GitUtils.updateRef(refUpdate);
 			}
@@ -405,8 +405,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public void check(PullRequest request) {
 		if (request.isOpen()) {
-			if (request.getSourceDepot() == null) {
-				discard(request, "Source repository no longer exists");
+			if (request.getSourceProject() == null) {
+				discard(request, "Source project no longer exists");
 			} else if (request.getSource().getObjectId(false) == null) {
 				discard(request, "Source branch no longer exists");
 			} else if (request.getTarget().getObjectId(false) == null) {
@@ -483,50 +483,50 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						try {
 							MergePreview preview = request.getLastMergePreview();
 							if (request.isOpen() && !request.isMergeIntoTarget() && (preview == null || preview.isObsolete(request))) {
-								logger.info("Calculating merge preview of pull request #{} in repository '{}'...", 
-										request.getNumber(), request.getTargetDepot());
+								logger.info("Calculating merge preview of pull request #{} in project '{}'...", 
+										request.getNumber(), request.getTargetProject());
 								String requestHead = request.getHeadCommitHash();
 								String targetHead = request.getTarget().getObjectName();
-								Depot targetDepot = request.getTargetDepot();
+								Project targetProject = request.getTargetProject();
 								preview = new MergePreview(targetHead, requestHead, request.getMergeStrategy(), null);
 								request.setLastMergePreview(preview);
 								String mergeRef = request.getMergeRef();
 								ObjectId requestHeadId = ObjectId.fromString(requestHead);
 								ObjectId targetHeadId = ObjectId.fromString(targetHead);
 								if ((preview.getMergeStrategy() == MERGE_IF_NECESSARY) 
-										&& GitUtils.isMergedInto(targetDepot.getRepository(), targetHeadId, requestHeadId)) {
+										&& GitUtils.isMergedInto(targetProject.getRepository(), targetHeadId, requestHeadId)) {
 									preview.setMerged(requestHead);
-									RefUpdate refUpdate = targetDepot.updateRef(mergeRef);
+									RefUpdate refUpdate = targetProject.updateRef(mergeRef);
 									refUpdate.setNewObjectId(ObjectId.fromString(requestHead));
 									GitUtils.updateRef(refUpdate);
 								} else {
 									PersonIdent user = new PersonIdent(GitPlex.NAME, "");
 									ObjectId merged;
 									if (preview.getMergeStrategy() == REBASE_MERGE) {
-										merged = GitUtils.rebase(targetDepot.getRepository(), requestHeadId, targetHeadId, user);
+										merged = GitUtils.rebase(targetProject.getRepository(), requestHeadId, targetHeadId, user);
 									} else if (preview.getMergeStrategy() == SQUASH_MERGE) {
-										merged = GitUtils.merge(targetDepot.getRepository(), 
+										merged = GitUtils.merge(targetProject.getRepository(), 
 												requestHeadId, targetHeadId, true, user, request.getCommitMessage());
 									} else {
-										merged = GitUtils.merge(targetDepot.getRepository(), 
+										merged = GitUtils.merge(targetProject.getRepository(), 
 												requestHeadId, targetHeadId, false, user, request.getCommitMessage());
 									} 
 									
 									if (merged != null) {
 										preview.setMerged(merged.name());
-										RefUpdate refUpdate = targetDepot.updateRef(mergeRef);
+										RefUpdate refUpdate = targetProject.updateRef(mergeRef);
 										refUpdate.setNewObjectId(merged);
 										GitUtils.updateRef(refUpdate);
 									} else {
-										RefUpdate refUpdate = targetDepot.updateRef(mergeRef);
+										RefUpdate refUpdate = targetProject.updateRef(mergeRef);
 										GitUtils.deleteRef(refUpdate);
 									}
 								}
 								dao.persist(request);
 
 								listenerRegistry.post(new MergePreviewCalculated(request));
-								logger.info("Merge preview of pull request #{} in repository '{}' is calculated.", 
-										request.getNumber(), request.getTargetDepot());						
+								logger.info("Merge preview of pull request #{} in project '{}' is calculated.", 
+										request.getNumber(), request.getTargetProject());						
 							}
 						} catch (Exception e) {
 							logger.error("Error calculating pull request merge preview", e);
@@ -542,15 +542,15 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Transactional
 	@Listen
-	public void on(DepotDeleted event) {
-    	for (PullRequest request: event.getDepot().getOutgoingRequests()) {
-    		if (!request.getTargetDepot().equals(event.getDepot()) && request.isOpen())
-        		discard(request, "Source repository is deleted.");
+	public void on(ProjectDeleted event) {
+    	for (PullRequest request: event.getProject().getOutgoingRequests()) {
+    		if (!request.getTargetProject().equals(event.getProject()) && request.isOpen())
+        		discard(request, "Source project is deleted.");
     	}
     	
-    	Query query = getSession().createQuery("update PullRequest set sourceDepot=null where "
-    			+ "sourceDepot=:depot");
-    	query.setParameter("depot", event.getDepot());
+    	Query query = getSession().createQuery("update PullRequest set sourceProject=null where "
+    			+ "sourceProject=:project");
+    	query.setParameter("project", event.getProject());
     	query.executeUpdate();
 	}
 	
@@ -559,10 +559,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void on(RefUpdated event) {
 		String branch = GitUtils.ref2branch(event.getRefName());
 		if (branch != null) {
-			DepotAndBranch depotAndBranch = new DepotAndBranch(event.getDepot(), branch);
+			ProjectAndBranch projectAndBranch = new ProjectAndBranch(event.getProject(), branch);
 			Criterion criterion = Restrictions.and(
 					ofOpen(), 
-					Restrictions.or(ofSource(depotAndBranch), ofTarget(depotAndBranch)));
+					Restrictions.or(ofSource(projectAndBranch), ofTarget(projectAndBranch)));
 			for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
 				check(request);
 			}
@@ -571,7 +571,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public PullRequest findEffective(DepotAndBranch target, DepotAndBranch source) {
+	public PullRequest findEffective(ProjectAndBranch target, ProjectAndBranch source) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		Criterion merged = Restrictions.and(
 				Restrictions.eq("closeInfo.closeStatus", CloseInfo.Status.MERGED), 
@@ -584,10 +584,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public PullRequest findLatest(Depot depot, Account submitter) {
+	public PullRequest findLatest(Project project, User submitter) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
-		criteria.add(Restrictions.or(ofSourceDepot(depot), ofTargetDepot(depot)));
+		criteria.add(Restrictions.or(ofSourceProject(project), ofTargetProject(project)));
 		criteria.add(ofSubmitter(submitter));
 		criteria.addOrder(Order.desc("id"));
 		return find(criteria);
@@ -595,7 +595,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public Collection<PullRequest> findAllOpenTo(DepotAndBranch target) {
+	public Collection<PullRequest> findAllOpenTo(ProjectAndBranch target) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofTarget(target));
 		criteria.add(ofOpen());
@@ -604,7 +604,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public Collection<PullRequest> findAllOpen(DepotAndBranch sourceOrTarget) {
+	public Collection<PullRequest> findAllOpen(ProjectAndBranch sourceOrTarget) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
 		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
@@ -613,18 +613,18 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public int countOpen(Depot depot) {
+	public int countOpen(Project project) {
 		EntityCriteria<PullRequest> criteria = newCriteria();
 		criteria.add(PullRequest.CriterionHelper.ofOpen());
-		criteria.add(PullRequest.CriterionHelper.ofTargetDepot(depot));
+		criteria.add(PullRequest.CriterionHelper.ofTargetProject(project));
 		return count(criteria);
 	}
 
 	@Sessional
 	@Override
-	public PullRequest find(Depot target, long number) {
+	public PullRequest find(Project target, long number) {
 		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(Restrictions.eq("targetDepot", target));
+		criteria.add(Restrictions.eq("targetProject", target));
 		criteria.add(Restrictions.eq("number", number));
 		return find(criteria);
 	}
@@ -687,7 +687,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		statusChange.setDate(new Date());
 		statusChange.setRequest(request);
 		statusChange.setType(Type.CHANGED_MERGE_STRATEGY);
-		statusChange.setUser(accountManager.getCurrent());
+		statusChange.setUser(userManager.getCurrent());
 		
 		pullRequestStatusChangeManager.save(statusChange);
 		

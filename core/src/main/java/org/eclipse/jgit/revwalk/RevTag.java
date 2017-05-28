@@ -182,7 +182,7 @@ public class RevTag extends RevObject {
 	 * Parse the tagger identity from the raw buffer.
 	 * <p>
 	 * This method parses and returns the content of the tagger line, after
-	 * taking the tag's character set into account and decoding the tagger
+	 * taking the tag's character set into user and decoding the tagger
 	 * name and email address. This method is fairly expensive and produces a
 	 * new PersonIdent instance on each invocation. Callers should invoke this
 	 * method only if they are certain they will be outputting the result, and
@@ -204,7 +204,7 @@ public class RevTag extends RevObject {
 	 * Parse the complete tag message and decode it to a string.
 	 * <p>
 	 * This method parses and returns the message portion of the tag buffer,
-	 * after taking the tag's character set into account and decoding the buffer
+	 * after taking the tag's character set into user and decoding the buffer
 	 * using that character set. This method is a fairly expensive operation and
 	 * produces a new string on each invocation.
 	 *
@@ -226,7 +226,7 @@ public class RevTag extends RevObject {
 	 * "oneline" format, suitable for output in a single line display.
 	 * <p>
 	 * This method parses and returns the message portion of the tag buffer,
-	 * after taking the tag's character set into account and decoding the buffer
+	 * after taking the tag's character set into user and decoding the buffer
 	 * using that character set. This method is a fairly expensive operation and
 	 * produces a new string on each invocation.
 	 *

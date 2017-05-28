@@ -5,7 +5,7 @@
 				<a wicket:id="home" title="Dashboard"><i class="fa fa-ext fa-gitplex-logo"></i></a>
 			</div>
 			<div wicket:id="context" class="context pull-left"></div>
-			<div class="account pull-right">
+			<div class="user pull-right">
 			  	<wicket:enclosure child="login">
 			  		<div class="logged-out">
 				  		<a wicket:id="login">Log in</a>
@@ -21,7 +21,7 @@
 			  	</wicket:enclosure>
 			</div>
 			<div class="actions pull-right">
-				<a wicket:id="createNewDropdown" title="Create new repository or organization"><i class="fa fa-plus"></i> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="createProject" title="Create new project"><i class="fa fa-plus"></i></a>
 				<a wicket:id="docLink" title="Help"><i class="fa fa-question"></i></a>
 			</div>
 			<div class="search pull-right">
@@ -40,27 +40,8 @@
 			</div>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="createNewFrag">
-		<div class="create-new">
-			<a wicket:id="createNewDepot">Create new repository</a>
-			<a wicket:id="createNewOrganization">Create new organization</a>
-		</div>
-	</wicket:fragment>
 	<wicket:fragment wicket:id="userMenuFrag">
 		<div class="user">
-			<wicket:enclosure child="organizations">
-				<div class="organizations">
-					<div class="title">Organizations</div>
-					<ul class="list-unstyled">
-						<li wicket:id="organizations">
-							<a wicket:id="link">
-								<img wicket:id="avatar"></img>
-								<span wicket:id="name"></span>
-							</a>
-						</li>
-					</ul>
-				</div>
-			</wicket:enclosure>		
 			<a wicket:id="administration"><i class="fa fa-fw fa-wrench"></i> Server administration</a>
 			<a wicket:id="profile"><i class="fa fa-fw fa-gear"></i> My profile</a>
 			<a wicket:id="logout"><i class="fa fa-fw fa-sign-out"></i> Logout</a>

@@ -12,8 +12,8 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.model.Account;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.User;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.security.SecurityUtils;
 import com.google.common.base.Preconditions;
@@ -23,7 +23,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 abstract class CreateTagPanel extends Panel {
 
-	private final IModel<Depot> depotModel;
+	private final IModel<Project> projectModel;
 	
 	private final String revision;
 	
@@ -31,9 +31,9 @@ abstract class CreateTagPanel extends Panel {
 	
 	private String tagMessage;
 	
-	public CreateTagPanel(String id, IModel<Depot> depotModel, String revision) {
+	public CreateTagPanel(String id, IModel<Project> projectModel, String revision) {
 		super(id);
-		this.depotModel = depotModel;
+		this.projectModel = projectModel;
 		this.revision = revision;
 	}
 
@@ -96,24 +96,24 @@ abstract class CreateTagPanel extends Panel {
 					form.error("Tag name is not valid.");
 					target.focusComponent(nameInput);
 					target.add(form);
-				} else if (depotModel.getObject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
+				} else if (projectModel.getObject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
 					form.error("Tag '" + tagName + "' already exists, please choose a different name.");
 					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					Depot depot = depotModel.getObject();
-					Account user = Preconditions.checkNotNull(SecurityUtils.getAccount());
+					Project project = projectModel.getObject();
+					User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
 					String errorMessage = null;
-					TagProtection protection = depot.getTagProtection(tagName);
+					TagProtection protection = project.getTagProtection(tagName);
 					if (protection != null)
-						errorMessage = protection.getTagCreator().getNotMatchMessage(depot, user);
+						errorMessage = protection.getTagCreator().getNotMatchMessage(project, user);
 	    			if (errorMessage != null) {
 						form.error("Unable to create protected tag: " + errorMessage);
 						target.focusComponent(nameInput);
 						target.add(form);
 	    			} else {
-						depot.tag(tagName, revision, user.asPerson(), tagMessage);
+						project.tag(tagName, revision, user.asPerson(), tagMessage);
 						onCreate(target, tagName);
 	    			}
 				}
@@ -137,7 +137,7 @@ abstract class CreateTagPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		depotModel.detach();
+		projectModel.detach();
 		
 		super.onDetach();
 	}

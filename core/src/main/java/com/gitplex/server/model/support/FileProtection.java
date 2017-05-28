@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.PathPattern;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
@@ -44,9 +44,9 @@ public class FileProtection implements Serializable {
 		this.reviewAppointmentExpr = reviewAppointmentExpr;
 	}
 	
-	public ReviewAppointment getReviewAppointment(Depot depot) {
+	public ReviewAppointment getReviewAppointment(Project project) {
 		if (reviewAppointment == null)
-			reviewAppointment = new ReviewAppointment(depot, reviewAppointmentExpr);
+			reviewAppointment = new ReviewAppointment(project, reviewAppointmentExpr);
 		return reviewAppointment;
 	}
 	

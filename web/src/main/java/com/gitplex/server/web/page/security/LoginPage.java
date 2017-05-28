@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.AccountManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.MailManager;
-import com.gitplex.server.model.Account;
+import com.gitplex.server.model.User;
 import com.gitplex.server.web.WebSession;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.base.BasePage;
@@ -59,18 +59,18 @@ public class LoginPage extends BasePage {
 				
 				String feedback = null;
 				
-				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+				UserManager userManager = GitPlex.getInstance(UserManager.class);
 				if (userName != null) {
-					Account user = accountManager.findByName(userName);
+					User user = userManager.findByName(userName);
 					if (user != null && user.getPassword() != null && user.getPassword().startsWith("@hash^prefix@")) {
 						String hashAlgorithmChangeMessage = "GitPlex password hash algorithm has been changed for security reason.";
-						if (user.isAdministrator()) {
+						if (user.isRoot()) {
 							feedback = hashAlgorithmChangeMessage + " Please reset administrator password by running "
 									+ "reset_admin_password command from GitPlex bin directory"; 
 						} else {
 							String password = RandomStringUtils.random(10, true, true);								
 							user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
-							accountManager.save(user);
+							userManager.save(user);
 							
 							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 							if (configManager.getMailSetting() != null) {
@@ -80,7 +80,7 @@ public class LoginPage extends BasePage {
 									String mailBody = String.format("Dear %s, "
 										+ "<p style='margin: 16px 0;'>"
 										+ hashAlgorithmChangeMessage
-										+ " As a result of this, password of your account \"%s\" has been reset to:<br>"
+										+ " As a result of this, password of your user \"%s\" has been reset to:<br>"
 										+ "%s<br><br>"
 										+ "-- Sent by GitPlex", 
 										user.getDisplayName(), user.getName(), password);
@@ -88,7 +88,7 @@ public class LoginPage extends BasePage {
 									mailManager.sendMail(configManager.getMailSetting(), Arrays.asList(user.getEmail()), 
 											"Your GitPlex password has been reset", mailBody);
 									feedback = hashAlgorithmChangeMessage  
-										+ " As a result of this, password of your account has been reset and sent to "
+										+ " As a result of this, password of your user has been reset and sent to "
 										+ "address " + user.getEmail();
 								} catch (Exception e) {
 									logger.error("Error sending password reset email", e);
@@ -185,7 +185,7 @@ public class LoginPage extends BasePage {
 		});
 
 		boolean enableSelfRegister = GitPlex.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister();
-		add(new ViewStateAwarePageLink<Void>("registerAccount", RegisterPage.class).setVisible(enableSelfRegister));
+		add(new ViewStateAwarePageLink<Void>("registerUser", RegisterPage.class).setVisible(enableSelfRegister));
 	}
 
 	@Override

@@ -17,7 +17,7 @@ import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.manager.AttachmentManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.model.Depot;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
@@ -50,30 +50,30 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	}
 	
 	@Override
-	public File getAttachmentDir(Depot depot, String attachmentDirUUID) {
-		File attachmentDir = getPermanentAttachmentDir(depot, attachmentDirUUID);
+	public File getAttachmentDir(Project project, String attachmentDirUUID) {
+		File attachmentDir = getPermanentAttachmentDir(project, attachmentDirUUID);
 		if (attachmentDir.exists())
 			return attachmentDir;
 		else
-			return getTempAttachmentDir(depot, attachmentDirUUID); 
+			return getTempAttachmentDir(project, attachmentDirUUID); 
 	}
 
-	private File getPermanentAttachmentDir(Depot depot, String attachmentDirUUID) {
+	private File getPermanentAttachmentDir(Project project, String attachmentDirUUID) {
 		String category = attachmentDirUUID.substring(0, 2);
-		return new File(storageManager.getAttachmentDir(depot), "permanent/" + category + "/" + attachmentDirUUID);
+		return new File(storageManager.getAttachmentDir(project), "permanent/" + category + "/" + attachmentDirUUID);
 	}
 	
-	private File getTempAttachmentDir(Depot depot) {
-		return new File(storageManager.getAttachmentDir(depot), "temp");
+	private File getTempAttachmentDir(Project project) {
+		return new File(storageManager.getAttachmentDir(project), "temp");
 	}
 	
-	private File getTempAttachmentDir(Depot depot, String attachmentDirUUID) {
-		return new File(getTempAttachmentDir(depot), attachmentDirUUID);
+	private File getTempAttachmentDir(Project project, String attachmentDirUUID) {
+		return new File(getTempAttachmentDir(project), attachmentDirUUID);
 	}
 
-	private void makeAttachmentPermanent(Depot depot, String attachmentDirUUID) {
-		File tempAttachmentDir = getTempAttachmentDir(depot, attachmentDirUUID);
-		File permanentAttachmentDir = getPermanentAttachmentDir(depot, attachmentDirUUID);
+	private void makeAttachmentPermanent(Project project, String attachmentDirUUID) {
+		File tempAttachmentDir = getTempAttachmentDir(project, attachmentDirUUID);
+		File permanentAttachmentDir = getPermanentAttachmentDir(project, attachmentDirUUID);
 		if (tempAttachmentDir.exists() && !permanentAttachmentDir.exists()) {
 			try {
 				FileUtils.moveDirectory(tempAttachmentDir, permanentAttachmentDir);
@@ -96,8 +96,8 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Override
 	public void execute() {
 		try {
-			for (Depot depot: dao.findAll(Depot.class)) {
-				File tempDir = getTempAttachmentDir(depot);
+			for (Project project: dao.findAll(Project.class)) {
+				File tempDir = getTempAttachmentDir(project);
 				if (tempDir.exists()) {
 					for (File file: tempDir.listFiles()) {
 						if (System.currentTimeMillis() - file.lastModified() > TEMP_PRESERVE_PERIOD) {
@@ -126,7 +126,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	
 					@Override
 					public void run() {
-						makeAttachmentPermanent(request.getTargetDepot(), request.getUUID());
+						makeAttachmentPermanent(request.getTargetProject(), request.getUUID());
 					}
 					
 				});
@@ -136,7 +136,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 					@Override
 					public void run() {
-						makeAttachmentPermanent(comment.getRequest().getTargetDepot(), comment.getUUID());
+						makeAttachmentPermanent(comment.getRequest().getTargetProject(), comment.getUUID());
 					}
 					
 				});
@@ -147,12 +147,12 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Depot) {
-			Depot depot = (Depot) event.getEntity();
-			FileUtils.deleteDir(storageManager.getAttachmentDir(depot));
+		if (event.getEntity() instanceof Project) {
+			Project project = (Project) event.getEntity();
+			FileUtils.deleteDir(storageManager.getAttachmentDir(project));
 		} else if (event.getEntity() instanceof CodeComment) {
 			CodeComment comment = (CodeComment) event.getEntity();
-			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getRequest().getTargetDepot(), comment.getUUID());
+			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getRequest().getTargetProject(), comment.getUUID());
 			if (permanentAttachmentDir.exists())
 				FileUtils.deleteDir(permanentAttachmentDir);
 		}

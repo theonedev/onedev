@@ -1,0 +1,92 @@
+#project-setting>table>tbody>tr>td.nav {
+	width: 200px;
+	border-right: 1px solid #DDD;
+	white-space: nowrap;
+	padding: 20px 0;
+}
+#project-setting>table>tbody>tr>td.nav a {
+	display: block;
+	color: #666;
+	text-decoration: none;
+	padding: 6px 12px;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+#project-setting>table>tbody>tr>td.nav li:hover a {
+	background: #F5F5F5;
+	color: #010203;
+}
+#project-setting>table>tbody>tr>td.nav li.active a {
+	background: #E8E8E8;
+	color: #010203;
+	font-weight: bold;
+}
+#project-setting>table>tbody>tr>td.content {
+	padding: 20px;
+}
+#project-setting .general-setting form .delete {
+	margin-right: 0;
+}
+#project-setting .drag-handle {
+	cursor: move;
+}
+#project-setting .panel-list .drag-handle {
+	margin-right: 8px;
+}
+#project-setting .panel-list .panel-heading a {
+	color: #444; 
+	margin-right: 8px;
+}
+#project-setting .panel-list .add-new {
+	display: block; 
+	padding: 16px; 
+	background: #F2F2F2; 
+	border: 1px solid #DDD; 
+	border-radius: 4px; 
+	font-size: 16px; 
+	color: #444; 
+	margin-bottom: 16px;
+}
+#project-setting .panel-list a.add-new:hover {
+	text-decoration: none; 
+	background-color: #EBEBEB; 
+	border-color: #ADADAD;
+}
+#project-setting .panel-list a.add-new .fa {
+	margin-left: 8px;
+}
+#project-setting .panel-list .concrete.list td.path, 
+#project-setting .panel-list .concrete.list td.reviewerNames,
+#project-setting .panel-list .concrete.list td.reviewAppointment {
+	width: 45%;
+}
+
+#project-setting .authorization .list table td.actions {
+	width: 20%;
+	white-space: nowrap;
+}
+#project-setting .authorization .list td.name .note {
+	font-size: 12px;
+	color: #888;
+	margin-top: 4px;
+}
+#project-setting .authorization .list td.privilege {
+	width: 20%;
+}
+
+.modal .transfer-project .message {
+	font-size: 13px;
+	margin-bottom: 20px;
+}
+
+#project-setting .commit-message-transform>label {
+	float: left;
+	margin-right: 4px;
+}
+#project-setting .commit-message-transform>.help-block {
+	margin-top: 20px;
+}
+#project-setting .authorization.list a.other-sources {
+	margin-left: 4px;
+	color: #DCB508;
+	vertical-align: middle;
+}

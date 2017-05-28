@@ -98,7 +98,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public void deleteRefs() {
-		GitUtils.deleteRef(getRequest().getTargetDepot().updateRef(getHeadRef()));
+		GitUtils.deleteRef(getRequest().getTargetProject().updateRef(getHeadRef()));
 	}	
 	
 	/**
@@ -110,7 +110,7 @@ public class PullRequestUpdate extends AbstractEntity {
 		if (changedFiles == null) {
 			changedFiles = new HashSet<>();
 			
-			Repository repository = getRequest().getWorkDepot().getRepository();
+			Repository repository = getRequest().getWorkProject().getRepository();
 			try (	RevWalk revWalk = new RevWalk(repository);
 					TreeWalk treeWalk = new TreeWalk(repository)) {
 				RevCommit mergeBaseCommit = revWalk.parseCommit(ObjectId.fromString(getMergeBaseCommitHash()));
@@ -222,7 +222,7 @@ public class PullRequestUpdate extends AbstractEntity {
 		if (commits == null) {
 			commits = new ArrayList<>();
 			
-			try (RevWalk revWalk = new RevWalk(getRequest().getWorkDepot().getRepository())) {
+			try (RevWalk revWalk = new RevWalk(getRequest().getWorkProject().getRepository())) {
 				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
 				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
 				
@@ -245,7 +245,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public RevCommit getHeadCommit() {
-		return request.getWorkDepot().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
+		return request.getWorkProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
 	}
 	
 }
