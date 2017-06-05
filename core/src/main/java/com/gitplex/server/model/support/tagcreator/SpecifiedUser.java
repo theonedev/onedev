@@ -18,7 +18,7 @@ public class SpecifiedUser implements TagCreator {
 	private String userName;
 
 	@Editable(name="User")
-	@UserChoice(type=UserChoice.Type.DEPOT_WRITER)
+	@UserChoice(type=UserChoice.Type.PROJECT_WRITER)
 	@NotEmpty
 	public String getUserName() {
 		return userName;

@@ -29,7 +29,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ProjectManager;
-import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.manager.UserInfoManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.floating.FloatingPanel;
@@ -54,20 +54,20 @@ import com.google.common.base.Preconditions;
 @SuppressWarnings("serial")
 public abstract class ProjectPage extends LayoutPage {
 
-	private static final String PARAM_DEPOT = "project";
+	private static final String PARAM_PROJECT = "project";
 
 	protected final IModel<Project> projectModel;
 	
 	public static PageParameters paramsOf(Project project) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_DEPOT, project.getName());
+		params.set(PARAM_PROJECT, project.getName());
 		return params;
 	}
 	
 	public ProjectPage(PageParameters params) {
 		super(params);
 		
-		String projectName = params.get(PARAM_DEPOT).toString();
+		String projectName = params.get(PARAM_PROJECT).toString();
 		Preconditions.checkNotNull(projectName);
 		
 		if (projectName.endsWith(Constants.DOT_GIT_EXT))
@@ -116,7 +116,7 @@ public abstract class ProjectPage extends LayoutPage {
 	protected void onAfterRender() {
 		super.onAfterRender();
 		if (getLoginUser() != null)
-			GitPlex.getInstance(VisitInfoManager.class).visit(getLoginUser(), getProject());
+			GitPlex.getInstance(UserInfoManager.class).visit(getLoginUser(), getProject());
 	}
 
 	@Override
@@ -168,7 +168,6 @@ public abstract class ProjectPage extends LayoutPage {
 		return SecurityUtils.canRead(getProject());
 	}
 	
-	@Override
 	public Project getProject() {
 		return projectModel.getObject();
 	}

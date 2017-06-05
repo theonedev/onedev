@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -44,11 +43,10 @@ import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.support.CloseInfo;
-import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.model.support.LastEvent;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
-import com.gitplex.server.security.ProjectPrivilege;
+import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.diff.WhitespaceOption;
@@ -731,18 +729,6 @@ public class PullRequest extends AbstractEntity {
 			return projectAndBranch.getObjectId(false);
 		else
 			return null;
-	}
-	
-	public List<User> getRemainingReviewers() {
-		ReviewStatus checkStatus = getReviewStatus();
-		Collection<User> users = SecurityUtils.findUsersCan(getTargetProject(), ProjectPrivilege.READ);
-		users.removeAll(checkStatus.getAwaitingReviewers());
-		for (Review review: checkStatus.getEffectiveReviews().values())
-			users.remove(review.getUser());
-		users.remove(SecurityUtils.getUser());
-		List<User> userList = new ArrayList<>(users);
-		userList.sort(Comparator.comparing(User::getName));
-		return userList;
 	}
 	
 	public static class ComparingInfo implements Serializable {

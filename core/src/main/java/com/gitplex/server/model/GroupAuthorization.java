@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.gitplex.server.security.ProjectPrivilege;
+import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 
 @Entity
 @Table(
@@ -55,4 +56,8 @@ public class GroupAuthorization extends AbstractEntity {
 		this.privilege = privilege;
 	}
 
+	public GroupAuthorizationFacade getFacade() {
+		return new GroupAuthorizationFacade(this);
+	}
+	
 }

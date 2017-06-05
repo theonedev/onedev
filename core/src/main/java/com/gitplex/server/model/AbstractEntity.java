@@ -35,15 +35,17 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof AbstractEntity))
-			return false;
-		if (this == other)
+		if (this == other) {
 			return true;
-		AbstractEntity otherEntity = (AbstractEntity) other;
-		if (getId() == null || otherEntity.getId() == null)
-			return super.equals(other);
-		else 
-			return new EqualsBuilder().append(getId(), otherEntity.getId()).isEquals();
+		} else if (other instanceof AbstractEntity) {
+			AbstractEntity otherEntity = (AbstractEntity) other;
+			if (getId() == null || otherEntity.getId() == null)
+				return super.equals(other);
+			else 
+				return new EqualsBuilder().append(getId(), otherEntity.getId()).isEquals();
+		} else {
+			return false;
+		}
 	}
 
 	@Override

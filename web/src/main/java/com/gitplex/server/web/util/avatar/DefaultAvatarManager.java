@@ -23,6 +23,7 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.LockUtils;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.facade.UserFacade;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
@@ -43,7 +44,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Transactional
 	@Override
-	public String getAvatarUrl(@Nullable User user) {
+	public String getAvatarUrl(@Nullable UserFacade user) {
 		if (user == null) {
 			return AVATARS_BASE_URL + "gitplex.png";
 		} else if (user.getId() == null) {
@@ -114,7 +115,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 	
 	@Override
-	public File getUploaded(User user) {
+	public File getUploaded(UserFacade user) {
 		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/" + user.getId());
 	}
 
@@ -124,7 +125,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		Lock avatarLock = LockUtils.getLock("uploaded-avatar:" + user.getId());
 		avatarLock.lock();
 		try {
-			File avatarFile = getUploaded(user);
+			File avatarFile = getUploaded(user.getFacade());
 			if (upload != null) {
 				FileUtils.createDir(avatarFile.getParentFile());
 				try {

@@ -6,28 +6,28 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.google.common.collect.Lists;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.GroupManager;
-import com.gitplex.server.model.Group;
+import com.gitplex.server.manager.CacheManager;
+import com.gitplex.server.util.facade.GroupFacade;
 import com.gitplex.server.web.component.select2.ChoiceProvider;
+import com.google.common.collect.Lists;
 
-public abstract class AbstractGroupChoiceProvider extends ChoiceProvider<Group> {
+public abstract class AbstractGroupChoiceProvider extends ChoiceProvider<GroupFacade> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public void toJson(Group choice, JSONWriter writer) throws JSONException {
+	public void toJson(GroupFacade choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId()).key("name").value(choice.getName());
 	}
 
 	@Override
-	public Collection<Group> toChoices(Collection<String> ids) {
-		List<Group> groups = Lists.newArrayList();
-		GroupManager groupManager = GitPlex.getInstance(GroupManager.class);
+	public Collection<GroupFacade> toChoices(Collection<String> ids) {
+		List<GroupFacade> groups = Lists.newArrayList();
+		CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			groups.add(groupManager.load(id));
+			groups.add(cacheManager.getGroup(id));
 		}
 
 		return groups;

@@ -60,11 +60,11 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 	private File getPermanentAttachmentDir(Project project, String attachmentDirUUID) {
 		String category = attachmentDirUUID.substring(0, 2);
-		return new File(storageManager.getAttachmentDir(project), "permanent/" + category + "/" + attachmentDirUUID);
+		return new File(storageManager.getProjectAttachmentDir(project.getId()), "permanent/" + category + "/" + attachmentDirUUID);
 	}
 	
 	private File getTempAttachmentDir(Project project) {
-		return new File(storageManager.getAttachmentDir(project), "temp");
+		return new File(storageManager.getProjectAttachmentDir(project.getId()), "temp");
 	}
 	
 	private File getTempAttachmentDir(Project project, String attachmentDirUUID) {
@@ -149,7 +149,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
-			FileUtils.deleteDir(storageManager.getAttachmentDir(project));
+			FileUtils.deleteDir(storageManager.getProjectAttachmentDir(project.getId()));
 		} else if (event.getEntity() instanceof CodeComment) {
 			CodeComment comment = (CodeComment) event.getEntity();
 			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getRequest().getTargetProject(), comment.getUUID());

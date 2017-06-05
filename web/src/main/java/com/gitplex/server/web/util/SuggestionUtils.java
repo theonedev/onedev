@@ -15,11 +15,11 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.GroupManager;
-import com.gitplex.server.model.User;
-import com.gitplex.server.model.Project;
 import com.gitplex.server.model.Group;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.util.stringmatch.PatternApplied;
 import com.gitplex.server.util.stringmatch.WildcardUtils;
 import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
@@ -61,7 +61,7 @@ public class SuggestionUtils {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (User user: SecurityUtils.findUsersCan(project, privilege)) {
+		for (UserFacade user: SecurityUtils.getAuthorizedUsers(project.getFacade(), privilege)) {
 			String name = user.getName();
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {

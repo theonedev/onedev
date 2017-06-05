@@ -1,6 +1,6 @@
 .contributor {
-	color: #999;
+	color: #888;
 }
-.contributor .name {
+.contributor a {
 	color: #666;
 }

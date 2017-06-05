@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -38,23 +37,25 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.RefUpdated;
+import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
-import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.NameAndEmail;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.manager.WorkExecutor;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.UnitOfWork;
+import com.gitplex.server.persistence.annotation.Sessional;
+import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.VersionUtils;
 import com.gitplex.server.util.concurrent.Prioritized;
-import com.gitplex.server.util.concurrent.PrioritizedRunnable;
+import com.gitplex.server.util.facade.ProjectFacade;
+import com.gitplex.server.util.facade.UserFacade;
 import com.google.common.base.Charsets;
 
 import jetbrains.exodus.ArrayByteIterable;
@@ -74,6 +75,8 @@ import jetbrains.exodus.env.TransactionalExecutable;
 public class DefaultCommitInfoManager implements CommitInfoManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
+
+	private static final int INFO_VERSION = 1;
 	
 	private static final String INFO_DIR = "commit";
 	
@@ -97,8 +100,6 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	
 	private final StorageManager storageManager;
 	
-	private final WorkExecutor workExecutor;
-	
 	private final BatchWorkManager batchWorkManager;
 	
 	private final ProjectManager projectManager;
@@ -117,18 +118,17 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	
 	@Inject
 	public DefaultCommitInfoManager(ProjectManager projectManager, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, WorkExecutor workExecutor) {
+			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
-		this.workExecutor = workExecutor;
 	}
 	
 	private void doCollect(Project project, List<RevCommit> commits) {
 		logger.debug("Collecting commits info (project: {}, commits: {})...", project, commits.size());
 		
-		Environment env = getEnv(project);
+		Environment env = getEnv(project.getId());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store commitsStore = getStore(env, COMMITS_STORE);
 		Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE); 
@@ -316,22 +316,22 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 				new ArrayByteIterable(byteBuffer.array()));
 	}
 	
-	private Environment getEnv(final Project project) {
+	private Environment getEnv(Long projectId) {
 		synchronized (envs) {
-			Environment env = envs.get(project.getId());
+			Environment env = envs.get(projectId);
 			if (env == null) {
 				EnvironmentConfig config = new EnvironmentConfig();
 				config.setEnvCloseForcedly(true);
 				config.setLogFileSize(64*1024);
-				env = Environments.newInstance(getInfoDir(project), config);
-				envs.put(project.getId(), env);
+				env = Environments.newInstance(getInfoDir(projectId), config);
+				envs.put(projectId, env);
 			}
 			return env;
 		}
 	}
 	
-	private File getInfoDir(Project project) {
-		File infoDir = new File(storageManager.getInfoDir(project), INFO_DIR);
+	private File getInfoDir(Long projectId) {
+		File infoDir = new File(storageManager.getProjectInfoDir(projectId), INFO_DIR);
 		if (!infoDir.exists()) 
 			FileUtils.createDir(infoDir);
 		return infoDir;
@@ -350,7 +350,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	public List<NameAndEmail> getAuthors(Project project) {
 		List<NameAndEmail> authors = authorsCache.get(project.getId());
 		if (authors == null) {
-			Environment env = getEnv(project);
+			Environment env = getEnv(project.getId());
 			Store store = getStore(env, DEFAULT_STORE);
 
 			authors = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
@@ -378,7 +378,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	public List<NameAndEmail> getCommitters(Project project) {
 		List<NameAndEmail> committers = committersCache.get(project.getId());
 		if (committers == null) {
-			Environment env = getEnv(project);
+			Environment env = getEnv(project.getId());
 			Store store = getStore(env, DEFAULT_STORE);
 
 			committers = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
@@ -406,7 +406,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	public List<String> getFiles(Project project) {
 		List<String> files = filesCache.get(project.getId());
 		if (files == null) {
-			Environment env = getEnv(project);
+			Environment env = getEnv(project.getId());
 			final Store store = getStore(env, DEFAULT_STORE);
 
 			files = env.computeInReadonlyTransaction(new TransactionalComputable<List<String>>() {
@@ -434,9 +434,9 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 	
 	@Override
-	public int getContributions(Project project, User user, String path) {
+	public int getContributions(ProjectFacade project, UserFacade user, String path) {
 		if (user.getEmail() != null) {
-			Environment env = getEnv(project);
+			Environment env = getEnv(project.getId());
 			Store store = getStore(env, CONTRIBUTIONS_STORE);
 			return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
 
@@ -457,7 +457,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	
 	@Override
 	public Set<ObjectId> getDescendants(Project project, final ObjectId ancestor) {
-		Environment env = getEnv(project);
+		Environment env = getEnv(project.getId());
 		final Store store = getStore(env, COMMITS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
@@ -508,7 +508,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 
 	@Override
 	public Set<ObjectId> getChildren(Project project, final ObjectId parent) {
-		Environment env = getEnv(project);
+		Environment env = getEnv(project.getId());
 		final Store store = getStore(env, COMMITS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
@@ -542,16 +542,17 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 
 	@Listen
-	public void on(ProjectDeleted event) {
-		Project project = event.getProject();
-		synchronized (envs) {
-			Environment env = envs.remove(project.getId());
-			if (env != null)
-				env.close();
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Project) {
+			synchronized (envs) {
+				Environment env = envs.remove(event.getEntity().getId());
+				if (env != null)
+					env.close();
+			}
+			filesCache.remove(event.getEntity().getId());
+			commitCountCache.remove(event.getEntity().getId());
+			authorsCache.remove(event.getEntity().getId());
 		}
-		filesCache.remove(project.getId());
-		commitCountCache.remove(project.getId());
-		authorsCache.remove(project.getId());
 	}
 	
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
@@ -589,49 +590,44 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 		};		
 	}
 	
-	@Override
-	public Future<?> requestToCollect(Project project) {
-		return workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
-			
-			@Override
-			public void run() {
-				List<RevCommit> commits = new ArrayList<>();
-				try (RevWalk revWalk = new RevWalk(project.getRepository())) {
-					Collection<Ref> refs = new ArrayList<>();
-					refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
-					refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
+	private void collect(Project project) {
+		List<RevCommit> commits = new ArrayList<>();
+		try (RevWalk revWalk = new RevWalk(project.getRepository())) {
+			Collection<Ref> refs = new ArrayList<>();
+			refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
+			refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
 
-					for (Ref ref: refs) {
-						RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
-						if (revObj instanceof RevCommit) {
-							RevCommit commit = (RevCommit) revObj;
-							Environment env = getEnv(project);
-							Store commitsStore = getStore(env, COMMITS_STORE);
-							boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
-								
-								@Override
-								public Boolean compute(Transaction txn) {
-									byte[] keyBytes = new byte[20];
-									commit.copyRawTo(keyBytes, 0);
-									ByteIterable key = new ArrayByteIterable(keyBytes);
-									byte[] valueBytes = getBytes(commitsStore.get(txn, key));
-									return valueBytes != null && valueBytes.length%2 != 0;
-								}
-								
-							});
-							if (!collected) 
-								commits.add(commit);
+			for (Ref ref: refs) {
+				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
+				if (revObj instanceof RevCommit) {
+					RevCommit commit = (RevCommit) revObj;
+					Environment env = getEnv(project.getId());
+					Store commitsStore = getStore(env, COMMITS_STORE);
+					boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
+						
+						@Override
+						public Boolean compute(Transaction txn) {
+							byte[] keyBytes = new byte[20];
+							commit.copyRawTo(keyBytes, 0);
+							ByteIterable key = new ArrayByteIterable(keyBytes);
+							byte[] valueBytes = getBytes(commitsStore.get(txn, key));
+							return valueBytes != null && valueBytes.length%2 != 0;
 						}
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+						
+					});
+					if (!collected) 
+						commits.add(commit);
 				}
-				
-				if (!commits.isEmpty())
-					doCollect(project, commits);
 			}
-			
-		});
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		commits.sort(Comparator.comparing(RevCommit::getCommitTime));
+		for (RevCommit commit: commits) {
+			CollectingWork work = new CollectingWork(PRIORITY, commit.getId());
+			batchWorkManager.submit(getBatchWorker(project), work);
+		}
 	}
 
 	@Listen
@@ -642,13 +638,22 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 		}
 	}
 
+	@Sessional
+	@Listen
+	public void on(SystemStarted event) {
+		for (Project project: projectManager.findAll()) {
+			VersionUtils.checkInfoVersion(getInfoDir(project.getId()), INFO_VERSION);
+			collect(project);
+		}
+	}
+	
 	@Listen
 	public void on(RefUpdated event) {
 		if (!event.getNewObjectId().equals(ObjectId.zeroId())) {
 			RevCommit commit = event.getProject().getRevCommit(event.getNewObjectId(), false);
 			if (commit != null) {
-				CollectingWork refUpdate = new CollectingWork(PRIORITY, commit.getId());
-				batchWorkManager.submit(getBatchWorker(event.getProject()), refUpdate);
+				CollectingWork work = new CollectingWork(PRIORITY, commit.getId());
+				batchWorkManager.submit(getBatchWorker(event.getProject()), work);
 			}
 		}
 	}
@@ -657,7 +662,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	public int getCommitCount(Project project) {
 		Integer commitCount = commitCountCache.get(project.getId());
 		if (commitCount == null) {
-			Environment env = getEnv(project);
+			Environment env = getEnv(project.getId());
 			Store store = getStore(env, DEFAULT_STORE);
 
 			commitCount = env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
@@ -699,20 +704,39 @@ public class DefaultCommitInfoManager implements CommitInfoManager {
 	}
 
 	@Override
-	public void cloneInfo(Project from, Project to) {
-		BackupStrategy backupStrategy = getEnv(from).getBackupStrategy();
+	public void cloneInfo(Project source, Project target) {
+		BackupStrategy backupStrategy = getEnv(source.getId()).getBackupStrategy();
 		try {
+			File targetDir = getInfoDir(target.getId());
 			backupStrategy.beforeBackup();
 			try {
 				for (FileDescriptor descriptor: backupStrategy.listFiles()) {
-					FileUtils.copyFileToDirectory(descriptor.getFile(), getInfoDir(to));
+					FileUtils.copyFileToDirectory(descriptor.getFile(), targetDir);
 				}
 			} finally {
 				backupStrategy.afterBackup();
 			}
+			VersionUtils.writeInfoVersion(targetDir, INFO_VERSION);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Nullable
+	@Override
+	public ObjectId getLastCommit(Project project) {
+		Environment env = getEnv(project.getId());
+		Store defaultStore = getStore(env, DEFAULT_STORE);
+
+		return env.computeInTransaction(new TransactionalComputable<ObjectId>() {
+			
+			@Override
+			public ObjectId compute(Transaction txn) {
+				byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
+				return bytes != null? ObjectId.fromRaw(bytes): null;
+			}
+			
+		});
 	}
 
 }

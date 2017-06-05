@@ -28,7 +28,7 @@ gitplex.server.folderView = function(containerId, lastCommitsUrl) {
 							html += "<span>" + lastCommit.authorName + "</span>";
 						
 						$row.children(".last-commit.author").empty().append(html);
-						$row.children(".last-commit.when").append("<span class='when'>" + lastCommit.when + "</span>");
+						$row.children(".last-commit.when").append("<span>" + lastCommit.when + "</span>");
 						$row.children(".last-commit.message").append("<a href='" + lastCommit.url + "'>" + lastCommit.summary + "</a>");
 					}
 				});

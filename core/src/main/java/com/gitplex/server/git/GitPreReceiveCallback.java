@@ -113,7 +113,8 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    		Preconditions.checkNotNull(user);
 
 	    		if (refName.startsWith(PullRequest.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
-	    			if (!user.asSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.ADMIN))) {
+	    			if (!user.asSubject().isPermitted(
+	    					new ProjectPermission(project.getFacade(), ProjectPrivilege.ADMIN))) {
 	    				error(output, refName, "Only project administrators can update gitplex refs.");
 	    				break;
 	    			}

@@ -42,11 +42,11 @@ import org.slf4j.LoggerFactory;
 import com.gitplex.jsymbol.Symbol;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.lifecycle.SystemStopping;
-import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;
 import com.google.common.base.Throwables;
@@ -75,7 +75,7 @@ public class DefaultSearchManager implements SearchManager {
 			if (searcherManager == null) synchronized (searcherManagers) {
 				searcherManager = searcherManagers.get(project.getId());
 				if (searcherManager == null) {
-					Directory directory = FSDirectory.open(storageManager.getIndexDir(project));
+					Directory directory = FSDirectory.open(storageManager.getProjectIndexDir(project.getId()));
 					if (DirectoryReader.indexExists(directory)) {
 						searcherManager = new SearcherManager(directory, null);
 						searcherManagers.put(project.getId(), searcherManager);
@@ -241,26 +241,28 @@ public class DefaultSearchManager implements SearchManager {
 
 	@Transactional
 	@Listen
-	public void on(ProjectDeleted event) {
-		Long projectId = event.getProject().getId();
-		dao.doAfterCommit(new Runnable() {
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Project) {
+			Long projectId = event.getEntity().getId();
+			dao.doAfterCommit(new Runnable() {
 
-			@Override
-			public void run() {
-				synchronized (searcherManagers) {
-					SearcherManager searcherManager = searcherManagers.get(projectId);
-					if (searcherManager != null) {
-						try {
-							searcherManager.close();
-						} catch (IOException e) {
-							Throwables.propagate(e);
+				@Override
+				public void run() {
+					synchronized (searcherManagers) {
+						SearcherManager searcherManager = searcherManagers.get(projectId);
+						if (searcherManager != null) {
+							try {
+								searcherManager.close();
+							} catch (IOException e) {
+								Throwables.propagate(e);
+							}
+							searcherManagers.remove(projectId);
 						}
-						searcherManagers.remove(projectId);
 					}
 				}
-			}
-			
-		});
+				
+			});
+		}
 	}
 
 	@Listen

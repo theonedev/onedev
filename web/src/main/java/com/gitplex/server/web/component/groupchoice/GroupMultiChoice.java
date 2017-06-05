@@ -6,13 +6,13 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.model.Group;
+import com.gitplex.server.util.facade.GroupFacade;
 import com.gitplex.server.web.component.select2.Select2MultiChoice;
 
 @SuppressWarnings("serial")
-public class GroupMultiChoice extends Select2MultiChoice<Group> {
+public class GroupMultiChoice extends Select2MultiChoice<GroupFacade> {
 
-	public GroupMultiChoice(String id, IModel<Collection<Group>> groupsModel, 
+	public GroupMultiChoice(String id, IModel<Collection<GroupFacade>> groupsModel, 
 			AbstractGroupChoiceProvider choiceProvider) {
 		super(id, groupsModel, choiceProvider);
 	}

@@ -60,24 +60,6 @@
 	width: 45%;
 }
 
-#project-setting .authorization .list table td.actions {
-	width: 20%;
-	white-space: nowrap;
-}
-#project-setting .authorization .list td.name .note {
-	font-size: 12px;
-	color: #888;
-	margin-top: 4px;
-}
-#project-setting .authorization .list td.privilege {
-	width: 20%;
-}
-
-.modal .transfer-project .message {
-	font-size: 13px;
-	margin-bottom: 20px;
-}
-
 #project-setting .commit-message-transform>label {
 	float: left;
 	margin-right: 4px;
@@ -90,3 +72,6 @@
 	color: #DCB508;
 	vertical-align: middle;
 }
+#project-setting .authorization.list .head .select2-container {
+	width: 240px;
+} 

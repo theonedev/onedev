@@ -82,7 +82,7 @@ class LastCommitsResource extends AbstractResource {
 					User user = userManager.find(author);
 					if (user != null) {
 						info.authorName = HtmlEscape.escapeHtml5(user.getDisplayName());
-						info.authorAvatarUrl = avatarManager.getAvatarUrl(user);
+						info.authorAvatarUrl = avatarManager.getAvatarUrl(user.getFacade());
 						params = UserProfilePage.paramsOf(user);
 						info.authorUrl = RequestCycle.get().urlFor(UserProfilePage.class, params).toString();
 					} else {

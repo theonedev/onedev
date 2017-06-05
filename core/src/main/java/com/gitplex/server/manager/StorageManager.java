@@ -2,8 +2,6 @@ package com.gitplex.server.manager;
 
 import java.io.File;
 
-import com.gitplex.server.model.Project;
-
 public interface StorageManager {
     
 	/**
@@ -12,7 +10,7 @@ public interface StorageManager {
 	 * @return
 	 * 			directory to store git repository, the directory will be exist after calling this method
 	 */
-    File getGitDir(Project project);
+    File getProjectGitDir(Long projectId);
     
     /**
      * Get directory to store Lucene index of specified project
@@ -20,7 +18,7 @@ public interface StorageManager {
      * @return
      * 			directory to store lucene index, the directory will be exist after calling this method
      */
-    File getIndexDir(Project project);
+    File getProjectIndexDir(Long projectId);
 
     /**
      * Get directory to store additional info of specified project
@@ -28,7 +26,7 @@ public interface StorageManager {
      * @return
      * 			directory to store additional info, the directory will be exist after calling this method
      */
-    File getInfoDir(Project project);
+    File getProjectInfoDir(Long projectId);
     
     /**
      * Get directory to store attachments of specified project
@@ -36,6 +34,8 @@ public interface StorageManager {
      * @return 
      * 			directory store attachments, the directory will be exist after calling this method
      */
-    File getAttachmentDir(Project project);
+    File getProjectAttachmentDir(Long projectId);
+    
+    File getUserInfoDir(Long userId);
     
 }

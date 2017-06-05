@@ -19,30 +19,34 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.manager.MembershipManager;
+import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.UserManager;
-import com.gitplex.server.model.GroupAuthorization;
-import com.gitplex.server.model.Membership;
-import com.gitplex.server.model.User;
-import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.security.permission.CreateProjects;
 import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.security.permission.PublicPermission;
 import com.gitplex.server.security.permission.SystemAdministration;
 import com.gitplex.server.security.permission.UserAdministration;
+import com.gitplex.server.util.facade.GroupAuthorizationFacade;
+import com.gitplex.server.util.facade.GroupFacade;
+import com.gitplex.server.util.facade.MembershipFacade;
+import com.gitplex.server.util.facade.UserAuthorizationFacade;
+import com.gitplex.server.util.facade.UserFacade;
 
 @Singleton
 public class SecurityRealm extends AuthorizingRealm {
 
     private final UserManager userManager;
     
+    private final CacheManager cacheManager;
+    
 	@Inject
-    public SecurityRealm(UserManager userManager, MembershipManager groupMembershipManager) {
+    public SecurityRealm(UserManager userManager, CacheManager cacheManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
 		setCredentialsMatcher(passwordMatcher);
 		
     	this.userManager = userManager;
+    	this.cacheManager = cacheManager;
     }
 
 	@SuppressWarnings("serial")
@@ -67,24 +71,34 @@ public class SecurityRealm extends AuthorizingRealm {
 				Collection<Permission> permissions = new ArrayList<>();
 				permissions.add(new PublicPermission());
                 if (userId != 0L) {
-                    User user = userManager.get(userId);
+                    UserFacade user = cacheManager.getUser(userId);
                     if (user != null) {
                     	if (user.isRoot()) 
                     		permissions.add(new SystemAdministration());
                     	permissions.add(new UserAdministration(user));
-                    	for (Membership membership: user.getMemberships()) {
-                    		if (membership.getGroup().isAdministrator())
-                    			permissions.add(new SystemAdministration());
-                    		if (membership.getGroup().isCanCreateProjects())
-                    			permissions.add(new CreateProjects());
-                    		for (GroupAuthorization authorization: membership.getGroup().getAuthorizations()) {
-                    			permissions.add(new ProjectPermission(
-                    					authorization.getProject(), authorization.getPrivilege()));
+                    	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+                    		if (membership.getUserId().equals(userId)) {
+                    			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
+                        		if (group.isAdministrator())
+                        			permissions.add(new SystemAdministration());
+                        		if (group.isCanCreateProjects())
+                        			permissions.add(new CreateProjects());
+                        		for (GroupAuthorizationFacade authorization: 
+                        				cacheManager.getGroupAuthorizations().values()) {
+                        			if (authorization.getGroupId().equals(group.getId())) {
+                            			permissions.add(new ProjectPermission(
+                            					cacheManager.getProject(authorization.getProjectId()), 
+                            					authorization.getPrivilege()));
+                        			}
+                        		}
                     		}
                     	}
-                    	for (UserAuthorization authorization: user.getAuthorizations()) {
-                    		permissions.add(new ProjectPermission(
-                    				authorization.getProject(), authorization.getPrivilege()));
+                    	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+                    		if (authorization.getUserId().equals(userId)) {
+                        		permissions.add(new ProjectPermission(
+                        				cacheManager.getProject(authorization.getProjectId()), 
+                        				authorization.getPrivilege()));
+                    		}
                     	}
                     }
                 }

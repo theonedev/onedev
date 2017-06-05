@@ -1,8 +1,5 @@
 package com.gitplex.server.manager.impl;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -13,7 +10,7 @@ import org.hibernate.ReplicationMode;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.lifecycle.SystemStarted;
-import com.gitplex.server.event.lifecycle.SystemStarting;
+import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
@@ -23,25 +20,20 @@ import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 @Singleton
 public class DefaultUserManager extends AbstractEntityManager<User> implements UserManager {
 
     private final PasswordService passwordService;
     
-    private final ReadWriteLock idLock = new ReentrantReadWriteLock();
-    		
-	private final BiMap<String, Long> emailToId = HashBiMap.create();
-	
-	private final BiMap<String, Long> nameToId = HashBiMap.create();
-	
+    private final CacheManager cacheManager;
+    
 	@Inject
-    public DefaultUserManager(Dao dao, PasswordService passwordService) {
+    public DefaultUserManager(Dao dao, CacheManager cacheManager, PasswordService passwordService) {
         super(dao);
         
         this.passwordService = passwordService;
+        this.cacheManager = cacheManager;
     }
 
     @Transactional
@@ -61,22 +53,6 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     				protection.onUserRename(oldName, user.getName());
     		}
     	}
-    	
-    	doAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				idLock.writeLock().lock();
-				try {
-					nameToId.inverse().put(user.getId(), user.getName());
-					if (user.getEmail() != null)
-						emailToId.inverse().put(user.getId(), user.getEmail());
-				} finally {
-					idLock.writeLock().unlock();
-				}
-			}
-    		
-    	});
     }
     
     @Override
@@ -155,66 +131,32 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 			for (TagProtection protection: project.getTagProtections())
 				protection.onUserDelete(user.getName());
 		}
-		
-		doAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				idLock.writeLock().lock();
-				try {
-					emailToId.inverse().remove(user.getId());
-					nameToId.inverse().remove(user.getId());
-				} finally {
-					idLock.writeLock().unlock();
-				}
-			}
-			
-		});
 	}
 
 	@Sessional
     @Override
     public User findByName(String userName) {
-    	idLock.readLock().lock();
-    	try {
-    		Long id = nameToId.get(userName);
-    		if (id != null)
-    			return load(id);
-    		else
-    			return null;
-    	} finally {
-    		idLock.readLock().unlock();
-    	}
+		Long id = cacheManager.getUserIdByName(userName);
+		if (id != null) 
+			return load(id);
+		else
+			return null;
     }
 
 	@Sessional
     @Override
     public User findByEmail(String email) {
-    	idLock.readLock().lock();
-    	try {
-    		Long id = emailToId.get(email);
-    		if (id != null)
-    			return load(id);
-    		else
-    			return null;
-    	} finally {
-    		idLock.readLock().unlock();
-    	}
+		Long id = cacheManager.getUserIdByEmail(email);
+		if (id != null) 
+			return load(id);
+		else
+			return null;
     }
 	
     @Sessional
     @Override
     public User find(PersonIdent person) {
-    	idLock.readLock().lock();
-    	try {
-    		Long id = emailToId.get(person.getEmailAddress());
-    		if (id != null)
-    			return load(id);
-    		else
-    			return null;
-    	} finally {
-    		idLock.readLock().unlock();
-    	}
+    	return findByEmail(person.getEmailAddress());
     }
     
     @Override
@@ -228,20 +170,10 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 		return null;
 	}
 
-	@Sessional
-	@Listen
-	public void on(SystemStarting event) {
-        for (User user: findAll()) {
-        	if (user.getEmail() != null)
-        		emailToId.inverse().put(user.getId(), user.getEmail());
-        	nameToId.inverse().put(user.getId(), user.getName());
-        }
-	}
-
 	@Listen
 	public void on(SystemStarted event) {
-		// Fix a critical issue that password of self-registered users are not hashed
 		for (User user: findAll()) {
+			// Fix a critical issue that password of self-registered users are not hashed
 			if (user.getPassword() != null && !user.getPassword().startsWith("$2a$10") 
 					&& !user.getPassword().startsWith("@hash^prefix@")) {
 				user.setPassword(passwordService.encryptPassword(user.getPassword()));
@@ -249,5 +181,5 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 			}
 		}
 	}
-
+	
 }

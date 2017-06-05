@@ -2,6 +2,7 @@ package com.gitplex.server.web.component.projectselector;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -120,11 +121,11 @@ public abstract class ProjectSelector extends Panel {
 			protected List<Project> load() {
 				List<Project> projects = new ArrayList<>();
 				for (Project project: projectsModel.getObject()) {
-					if (project.matches(searchInput)) {
+					if (project.matchesQuery(searchInput)) {
 						projects.add(project);
 					}
 				}
-				projects.sort(Project::compareLastVisit);
+				projects.sort(Comparator.comparing(Project::getName));
 				return projects;
 			}
 			

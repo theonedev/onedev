@@ -1,5 +1,8 @@
 package com.gitplex.server.util.facade;
 
+import com.gitplex.server.model.GroupAuthorization;
+import com.gitplex.server.security.ProjectPrivilege;
+
 public class GroupAuthorizationFacade extends EntityFacade {
 
 	private static final long serialVersionUID = 1L;
@@ -8,11 +11,14 @@ public class GroupAuthorizationFacade extends EntityFacade {
 	
 	private final Long projectId;
 	
-	public GroupAuthorizationFacade(Long id, Long groupId, Long projectId) {
-		super(id);
+	private final ProjectPrivilege privilege;
 	
-		this.groupId = groupId;
-		this.projectId = projectId;
+	public GroupAuthorizationFacade(GroupAuthorization groupAuthorization) {
+		super(groupAuthorization.getId());
+
+		groupId = groupAuthorization.getGroup().getId();
+		projectId = groupAuthorization.getProject().getId();
+		privilege = groupAuthorization.getPrivilege();
 	}
 
 	public Long getGroupId() {
@@ -21,6 +27,10 @@ public class GroupAuthorizationFacade extends EntityFacade {
 
 	public Long getProjectId() {
 		return projectId;
+	}
+
+	public ProjectPrivilege getPrivilege() {
+		return privilege;
 	}
 
 }

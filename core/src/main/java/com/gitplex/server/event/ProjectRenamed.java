@@ -1,4 +1,4 @@
-package com.gitplex.server.event.project;
+package com.gitplex.server.event;
 
 import com.gitplex.server.model.Project;
 

@@ -75,7 +75,7 @@ public class AvatarEditPage extends UserPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-				setVisible(avatarManager.getUploaded(userModel.getObject()).exists());
+				setVisible(avatarManager.getUploaded(userModel.getObject().getFacade()).exists());
 			}
 
 			@Override

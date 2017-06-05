@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -29,12 +31,14 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.GitPlex;
+import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.MembershipManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Membership;
-import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.facade.MembershipFacade;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
@@ -85,18 +89,24 @@ public class GroupMembershipsPage extends GroupPage {
 			
 		});
 		
-		add(new SelectToAddChoice<User>("addNew", new AbstractUserChoiceProvider() {
+		add(new SelectToAddChoice<UserFacade>("addNew", new AbstractUserChoiceProvider() {
 
 			@Override
-			public void query(String term, int page, Response<User> response) {
-				List<User> nonMembers = new ArrayList<>();
-				for (User user: GitPlex.getInstance(UserManager.class).findAll()) {
-					if (user.matches(searchInput) && !getGroup().getMembers().contains(user))
+			public void query(String term, int page, Response<UserFacade> response) {
+				List<UserFacade> nonMembers = new ArrayList<>();
+				CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
+				Set<Long> memberIds = new HashSet<>();
+				for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+					if (membership.getGroupId().equals(getGroup().getId()))
+						memberIds.add(membership.getUserId());
+				}
+				for (UserFacade user: cacheManager.getUsers().values()) {
+					if (user.matchesQuery(term) && !memberIds.contains(user.getId()))
 						nonMembers.add(user);
 				}
 				Collections.sort(nonMembers);
 				Collections.reverse(nonMembers);
-				new ResponseFiller<User>(response).fill(nonMembers, page, WebConstants.PAGE_SIZE);
+				new ResponseFiller<>(response).fill(nonMembers, page, WebConstants.PAGE_SIZE);
 			}
 
 		}) {
@@ -112,12 +122,13 @@ public class GroupMembershipsPage extends GroupPage {
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, User selection) {
+			protected void onSelect(AjaxRequestTarget target, UserFacade selection) {
 				Membership membership = new Membership();
 				membership.setGroup(getGroup());
-				membership.setUser(selection);
+				membership.setUser(GitPlex.getInstance(UserManager.class).load(selection.getId()));
 				GitPlex.getInstance(MembershipManager.class).save(membership);
 				target.add(membershipsTable);
+				Session.get().success("Member added");
 			}
 			
 			@Override

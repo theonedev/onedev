@@ -32,6 +32,7 @@ import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ReviewStatus;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.behavior.dropdown.DropdownHover;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.UserLink;
@@ -241,7 +242,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 			}
 		                                                                                                                              
 			@Override
-			protected void onSelect(AjaxRequestTarget target, User user) {
+			protected void onSelect(AjaxRequestTarget target, UserFacade user) {
 				super.onSelect(target, user);
 				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}

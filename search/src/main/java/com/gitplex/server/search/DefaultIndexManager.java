@@ -337,7 +337,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private IndexResult doIndex(Project project, ObjectId commit) {
 		IndexResult indexResult;
-		File indexDir = storageManager.getIndexDir(project);
+		File indexDir = storageManager.getProjectIndexDir(project.getId());
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
@@ -394,7 +394,7 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Override
 	public boolean isIndexed(Project project, ObjectId commit) {
-		File indexDir = storageManager.getIndexDir(project.getForkRoot());
+		File indexDir = storageManager.getProjectIndexDir(project.getForkRoot().getId());
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {

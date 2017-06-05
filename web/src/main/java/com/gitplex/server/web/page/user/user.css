@@ -24,3 +24,8 @@
 	color: #DCB508;
 	vertical-align: middle;
 }
+
+#user .membership.list .head .select2-container, 
+#user .authorization.list .head .select2-container {
+	width: 240px;
+} 

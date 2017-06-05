@@ -27,17 +27,15 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.Password;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.util.validation.annotation.UserName;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 @Entity
-@Table(indexes={
-		@Index(columnList="email"), @Index(columnList="fullName"), 
-		@Index(columnList="noSpaceName"), @Index(columnList="noSpaceFullName")})
+@Table(indexes={@Index(columnList="email"), @Index(columnList="fullName")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractEntity implements AuthenticationInfo {
@@ -56,11 +54,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Column(unique=true)
 	private String email;
-	
-	@Column(nullable=false)
-	private String noSpaceName;
-	
-	private String noSpaceFullName;
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -135,7 +128,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
     public void setName(String name) {
     	this.name = name;
-    	noSpaceName = StringUtils.deleteWhitespace(name);
     }
     
 	@Editable(order=150, autocomplete="new-password")
@@ -166,7 +158,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
-		noSpaceFullName = StringUtils.deleteWhitespace(fullName);
 	}
 	
 	@Editable(order=300)
@@ -196,17 +187,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.requestTasks = requestTasks;
 	}
 
-	@Nullable
-	public Review getReviewAfter(PullRequestUpdate update) {
-		for (Review review: update.getRequest().getReviews()) {
-			if (review.getUser().equals(this) && review.getUpdate() != null 
-					&& review.getUpdate().getId()>=update.getId()) {
-				return review;
-			}
-		}
-		return null;
-	}
-	
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)
@@ -225,26 +205,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			return getName();
 	}
 	
-	public boolean matches(@Nullable String searchTerm) {
-		if (searchTerm == null)
-			searchTerm = "";
-		else
-			searchTerm = searchTerm.toLowerCase().trim();
-		
-		return getName().toLowerCase().contains(searchTerm) 
-				|| fullName!=null && fullName.toLowerCase().contains(searchTerm);
-	}
-
 	public boolean isRoot() {
 		return ROOT_ID.equals(getId());
-	}
-
-	public String getNoSpaceName() {
-		return noSpaceName;
-	}
-
-	public String getNoSpaceFullName() {
-		return noSpaceFullName;
 	}
 
 	public long getVersion() {
@@ -303,6 +265,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			}
 		}
 		return groups;
+	}
+
+	public UserFacade getFacade() {
+		return new UserFacade(this);
 	}
 	
 }

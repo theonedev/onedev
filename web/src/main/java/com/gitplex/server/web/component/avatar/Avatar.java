@@ -32,7 +32,7 @@ public class Avatar extends WebComponent {
 		} else {
 			userId = user.getId();
 		}
-		url = avatarManager.getAvatarUrl(user);
+		url = avatarManager.getAvatarUrl(user.getFacade());
 	}
 	
 	public Avatar(String id, PersonIdent person) {
@@ -43,7 +43,7 @@ public class Avatar extends WebComponent {
 		User user = GitPlex.getInstance(UserManager.class).find(person);
 		if (user != null) { 
 			userId = user.getId();
-			url = avatarManager.getAvatarUrl(user);
+			url = avatarManager.getAvatarUrl(user.getFacade());
 		} else {
 			userId = null;
 			url = avatarManager.getAvatarUrl(person);
@@ -58,7 +58,7 @@ public class Avatar extends WebComponent {
 			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
 			if (avatarChanged.getUser().getId().equals(userId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getUser());
+				url = avatarManager.getAvatarUrl(avatarChanged.getUser().getFacade());
 				avatarChanged.getHandler().add(this);
 			}
 		}

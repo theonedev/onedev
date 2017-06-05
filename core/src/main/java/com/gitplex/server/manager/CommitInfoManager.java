@@ -2,21 +2,19 @@ package com.gitplex.server.manager;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
 
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.git.NameAndEmail;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.util.facade.ProjectFacade;
+import com.gitplex.server.util.facade.UserFacade;
 
 public interface CommitInfoManager {
 	
-	Future<?> requestToCollect(Project project);
-	
 	List<String> getFiles(Project project);
 	
-	int getContributions(Project project, User user, String path);
+	int getContributions(ProjectFacade project, UserFacade user, String path);
 	
 	int getCommitCount(Project project);
 	
@@ -51,5 +49,7 @@ public interface CommitInfoManager {
 	Set<ObjectId> getChildren(Project project, ObjectId parent);
 
 	void cloneInfo(Project from, Project to);
+	
+	ObjectId getLastCommit(Project project);
 	
 }

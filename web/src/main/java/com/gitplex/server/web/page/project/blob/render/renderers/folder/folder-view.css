@@ -18,7 +18,7 @@
 	color: #444;
 	font-size: 13px;
 }
-.folder-view>table>tbody>tr>td.last-commit .when {
+.folder-view>table>tbody>tr>td.last-commit.author span, .folder-view>table>tbody>tr>td.last-commit.when {
 	color: #888;
 }
 .folder-view>table>tbody>tr:first-child>td {

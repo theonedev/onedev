@@ -3,8 +3,6 @@ package com.gitplex.server.web.page.layout;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.event.IEvent;
@@ -21,7 +19,6 @@ import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.loader.Plugin;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
-import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.avatar.AvatarLink;
@@ -181,11 +178,6 @@ public abstract class LayoutPage extends BasePage {
 
 	protected boolean isFootVisible() {
 		return true;
-	}
-	
-	@Nullable
-	protected Project getProject() {
-		return null;
 	}
 	
 	@Override

@@ -254,11 +254,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						userMap.put("name", user.getName());
 						if (user.getFullName() != null)
 							userMap.put("fullName", user.getFullName());
-						if (user.getNoSpaceFullName() != null)
-							userMap.put("searchKey", user.getNoSpaceName() + " " + user.getNoSpaceFullName());
-						else
-							userMap.put("searchKey", user.getNoSpaceName());
-						String avatarUrl = avatarManager.getAvatarUrl(user);
+						String noSpaceName = StringUtils.deleteWhitespace(user.getName());
+						if (user.getFullName() != null) {
+							String noSpaceFullName = StringUtils.deleteWhitespace(user.getFullName());
+							userMap.put("searchKey", noSpaceName + " " + noSpaceFullName);
+						} else {
+							userMap.put("searchKey", noSpaceName);
+						}
+						String avatarUrl = avatarManager.getAvatarUrl(user.getFacade());
 						userMap.put("avatarUrl", avatarUrl);
 						userList.add(userMap);
 					}

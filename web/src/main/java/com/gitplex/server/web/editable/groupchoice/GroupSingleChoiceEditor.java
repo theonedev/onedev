@@ -6,7 +6,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.GroupManager;
-import com.gitplex.server.model.Group;
+import com.gitplex.server.util.facade.GroupFacade;
 import com.gitplex.server.web.component.groupchoice.GroupChoiceProvider;
 import com.gitplex.server.web.component.groupchoice.GroupSingleChoice;
 import com.gitplex.server.web.editable.ErrorContext;
@@ -27,9 +27,9 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Group group;
+		GroupFacade group;
 		if (getModelObject() != null)
-			group = GitPlex.getInstance(GroupManager.class).find(getModelObject());
+			group = GitPlex.getInstance(GroupManager.class).find(getModelObject()).getFacade();
 		else
 			group = null;
 		
@@ -49,7 +49,7 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		Group group = input.getConvertedInput();
+		GroupFacade group = input.getConvertedInput();
 		if (group != null)
 			return group.getName();
 		else

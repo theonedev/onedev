@@ -8,6 +8,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.gitplex.server.util.facade.MembershipFacade;
+
 @Entity
 @Table(
 		indexes={@Index(columnList="g_user_id"), @Index(columnList="g_group_id")},
@@ -41,4 +43,8 @@ public class Membership extends AbstractEntity {
 		this.group = group;
 	}
 
+	public MembershipFacade getFacade() {
+		return new MembershipFacade(this);
+	}
+	
 }

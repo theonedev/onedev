@@ -2,17 +2,17 @@ package com.gitplex.server.security.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import com.gitplex.server.model.User;
+import com.gitplex.server.util.facade.UserFacade;
 
 public class UserAdministration implements Permission {
 	
-	private final User user;
+	private final UserFacade user;
 
-	public UserAdministration(User user) {
+	public UserAdministration(UserFacade user) {
 		this.user = user;
 	}
 
-	public User getUser() {
+	public UserFacade getUser() {
 		return user;
 	}
 

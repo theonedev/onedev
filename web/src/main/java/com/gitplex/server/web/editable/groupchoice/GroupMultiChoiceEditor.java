@@ -12,6 +12,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.GroupManager;
 import com.gitplex.server.model.Group;
+import com.gitplex.server.util.facade.GroupFacade;
 import com.gitplex.server.web.component.groupchoice.GroupChoiceProvider;
 import com.gitplex.server.web.component.groupchoice.GroupMultiChoice;
 import com.gitplex.server.web.editable.ErrorContext;
@@ -33,13 +34,13 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<Group> groups = new ArrayList<>();
+    	List<GroupFacade> groups = new ArrayList<>();
 		if (getModelObject() != null) {
 			GroupManager groupManager = GitPlex.getInstance(GroupManager.class);
 			for (String groupName: getModelObject()) {
 				Group group = groupManager.find(groupName);
 				if (group != null)
-					groups.add(group);
+					groups.add(group.getFacade());
 			}
 		} 
 		
@@ -57,9 +58,9 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
 		List<String> groupNames = new ArrayList<>();
-		Collection<Group> groups = input.getConvertedInput();
+		Collection<GroupFacade> groups = input.getConvertedInput();
 		if (groups != null) {
-			for (Group group: groups)
+			for (GroupFacade group: groups)
 				groupNames.add(group.getName());
 		} 
 		return groupNames;

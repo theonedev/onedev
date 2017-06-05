@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
+import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.CodeComment;
@@ -25,16 +26,46 @@ import com.gitplex.server.security.permission.CreateProjects;
 import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.security.permission.SystemAdministration;
 import com.gitplex.server.security.permission.UserAdministration;
+import com.gitplex.server.util.facade.GroupAuthorizationFacade;
+import com.gitplex.server.util.facade.GroupFacade;
+import com.gitplex.server.util.facade.MembershipFacade;
+import com.gitplex.server.util.facade.ProjectFacade;
+import com.gitplex.server.util.facade.UserAuthorizationFacade;
+import com.gitplex.server.util.facade.UserFacade;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
-	public static Collection<User> findUsersCan(Project project, ProjectPrivilege privilege) {
-		Set<User> authorizedUsers = new HashSet<User>();
-		for (User user: GitPlex.getInstance(UserManager.class).findAll()) {
-			if (user.asSubject().isPermitted(new ProjectPermission(project, privilege))) {
+	public static Collection<UserFacade> getAuthorizedUsers(ProjectFacade project, ProjectPrivilege privilege) {
+		CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
+		Collection<UserFacade> authorizedUsers = new HashSet<>();
+		if (project.isPublicRead() && privilege == ProjectPrivilege.READ) {
+			for (UserFacade user: cacheManager.getUsers().values())
 				authorizedUsers.add(user);
+		} else {
+			authorizedUsers.add(GitPlex.getInstance(UserManager.class).getRoot().getFacade());
+
+			Set<Long> authorizedGroupIds = new HashSet<>();
+			for (GroupFacade group: cacheManager.getGroups().values()) {
+				if (group.isAdministrator()) 
+					authorizedGroupIds.add(group.getId());
+			}
+			for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
+				if (authorization.getProjectId().equals(project.getId()) && authorization.getPrivilege().implies(privilege))
+					authorizedGroupIds.add(authorization.getGroupId());
+			}
+			for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+				if (authorizedGroupIds.contains(membership.getGroupId()))
+					authorizedUsers.add(cacheManager.getUser(membership.getUserId()));
+			}
+
+			for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+				if (authorization.getProjectId().equals(project.getId()) 
+						&& authorization.getPrivilege().implies(privilege)) {
+					authorizedUsers.add(cacheManager.getUser(authorization.getUserId()));
+				}
 			}
 		}
+		
 		return authorizedUsers;
 	}
 
@@ -145,7 +176,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canManage(User user) {
-		return getSubject().isPermitted(new UserAdministration(user));
+		return getSubject().isPermitted(new UserAdministration(user.getFacade()));
 	}
 	
 	public static boolean canCreateProjects() {
@@ -153,15 +184,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canRead(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.READ));
+		return getSubject().isPermitted(new ProjectPermission(project.getFacade(), ProjectPrivilege.READ));
 	}
 	
 	public static boolean canWrite(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.WRITE));
+		return getSubject().isPermitted(new ProjectPermission(project.getFacade(), ProjectPrivilege.WRITE));
 	}
 
 	public static boolean canManage(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.ADMIN));
+		return getSubject().isPermitted(new ProjectPermission(project.getFacade(), ProjectPrivilege.ADMIN));
 	}
 	
 	public static boolean isAdministrator() {

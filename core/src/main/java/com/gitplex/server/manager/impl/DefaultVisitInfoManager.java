@@ -13,7 +13,6 @@ import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.lifecycle.SystemStopping;
-import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
@@ -21,14 +20,16 @@ import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.VisitInfoManager;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.util.VersionUtils;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -44,9 +45,9 @@ import jetbrains.exodus.env.TransactionalExecutable;
 @Singleton
 public class DefaultVisitInfoManager implements VisitInfoManager {
 
-	private static final String INFO_DIR = "visit";
+	private static final int INFO_VERSION = 1;
 	
-	private static final String DEFAULT_STORE = "default";
+	private static final String INFO_DIR = "visit";
 	
 	private static final String PULL_REQUEST_STORE = "pullRequest";
 	
@@ -64,19 +65,21 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 		this.storageManager = storageManager;
 	}
 	
-	private synchronized Environment getEnv(Project project) {
-		Environment env = envs.get(project.getId());
+	private synchronized Environment getEnv(Long projectId) {
+		Environment env = envs.get(projectId);
 		if (env == null) {
+			File infoDir = getInfoDir(projectId);
+			VersionUtils.checkInfoVersion(infoDir, INFO_VERSION);
 			EnvironmentConfig config = new EnvironmentConfig();
 			config.setEnvCloseForcedly(true);
-			env = Environments.newInstance(getInfoDir(project), config);
-			envs.put(project.getId(), env);
+			env = Environments.newInstance(infoDir, config);
+			envs.put(projectId, env);
 		}
 		return env;
 	}
 	
-	private File getInfoDir(Project project) {
-		File infoDir = new File(storageManager.getInfoDir(project), INFO_DIR);
+	private File getInfoDir(Long projectId) {
+		File infoDir = new File(storageManager.getProjectInfoDir(projectId), INFO_DIR);
 		if (!infoDir.exists()) 
 			FileUtils.createDir(infoDir);
 		return infoDir;
@@ -99,23 +102,8 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 	
 	@Override
-	public void visit(User user, Project project) {
-		Environment env = getEnv(project);
-		Store store = getStore(env, DEFAULT_STORE);
-		env.executeInTransaction(new TransactionalExecutable() {
-			
-			@Override
-			public void execute(Transaction txn) {
-				store.put(txn, new StringByteIterable(user.getUUID()), 
-						new ArrayByteIterable(longToBytes(System.currentTimeMillis()+1000L)));
-			}
-			
-		});
-	}
-
-	@Override
 	public void visit(User user, PullRequest request) {
-		Environment env = getEnv(request.getTargetProject());
+		Environment env = getEnv(request.getTargetProject().getId());
 		Store store = getStore(env, PULL_REQUEST_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
@@ -130,7 +118,7 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 
 	@Override
 	public void visit(User user, CodeComment comment) {
-		Environment env = getEnv(comment.getRequest().getTargetProject());
+		Environment env = getEnv(comment.getRequest().getTargetProject().getId());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
@@ -144,26 +132,8 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 	}
 
 	@Override
-	public Date getVisitDate(User user, Project project) {
-		Environment env = getEnv(project);
-		Store store = getStore(env, DEFAULT_STORE);
-		return env.computeInTransaction(new TransactionalComputable<Date>() {
-			
-			@Override
-			public Date compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringByteIterable(user.getUUID())));
-				if (bytes != null)
-					return new Date(bytesToLong(bytes));
-				else
-					return null;
-			}
-			
-		});
-	}
-
-	@Override
 	public Date getVisitDate(User user, PullRequest request) {
-		Environment env = getEnv(request.getTargetProject());
+		Environment env = getEnv(request.getTargetProject().getId());
 		Store store = getStore(env, PULL_REQUEST_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Date>() {
 			
@@ -181,7 +151,7 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 
 	@Override
 	public Date getVisitDate(User user, CodeComment comment) {
-		Environment env = getEnv(comment.getRequest().getTargetProject());
+		Environment env = getEnv(comment.getRequest().getTargetProject().getId());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Date>() {
 			
@@ -243,20 +213,22 @@ public class DefaultVisitInfoManager implements VisitInfoManager {
 
 	@Transactional
 	@Listen
-	public void on(ProjectDeleted event) {
-		Long projectId = event.getProject().getId();
-		dao.doAfterCommit(new Runnable() {
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Project) {
+			Long projectId = event.getEntity().getId();
+			dao.doAfterCommit(new Runnable() {
 
-			@Override
-			public void run() {
-				synchronized (envs) {
-					Environment env = envs.remove(projectId);
-					if (env != null)
-						env.close();
+				@Override
+				public void run() {
+					synchronized (envs) {
+						Environment env = envs.remove(projectId);
+						if (env != null)
+							env.close();
+					}
 				}
-			}
-			
-		});
+				
+			});
+		}
 	}
 	
 	@Listen

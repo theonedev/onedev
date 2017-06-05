@@ -1,12 +1,9 @@
 package com.gitplex.server.manager;
 
-import java.util.Collection;
-
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.Repository;
 
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.dao.EntityManager;
 
@@ -33,6 +30,4 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Repository getRepository(Project project);
 	
-	Collection<Project> findAllAccessible(@Nullable User user);
-
 }

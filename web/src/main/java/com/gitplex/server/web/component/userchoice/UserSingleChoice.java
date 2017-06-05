@@ -4,14 +4,13 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.model.User;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.component.select2.Select2Choice;
 
 @SuppressWarnings("serial")
-public class UserSingleChoice extends Select2Choice<User> {
+public class UserSingleChoice extends Select2Choice<UserFacade> {
 
-	public UserSingleChoice(String id, IModel<User> model, 
-			AbstractUserChoiceProvider choiceProvider) {
+	public UserSingleChoice(String id, IModel<UserFacade> model, AbstractUserChoiceProvider choiceProvider) {
 		super(id, model, choiceProvider);
 	}
 

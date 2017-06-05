@@ -4,13 +4,13 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.model.Project;
+import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.web.component.select2.Select2Choice;
 
 @SuppressWarnings("serial")
-public class AbstractProjectChoice extends Select2Choice<Project> {
+public class AbstractProjectChoice extends Select2Choice<ProjectFacade> {
 
-	public AbstractProjectChoice(String id, IModel<Project> projectModel, 
+	public AbstractProjectChoice(String id, IModel<ProjectFacade> projectModel, 
 			AbstractProjectChoiceProvider choiceProvider) {
 		super(id, projectModel, choiceProvider);
 	}

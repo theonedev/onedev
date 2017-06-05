@@ -14,7 +14,9 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.server.util.facade.GroupFacade;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -95,13 +97,8 @@ public class Group extends AbstractEntity {
 		this.memberships = memberships;
 	}
 
-	public boolean matches(@Nullable String searchTerm) {
-		if (searchTerm == null)
-			searchTerm = "";
-		else
-			searchTerm = searchTerm.toLowerCase().trim();
-		
-		return getName().toLowerCase().contains(searchTerm);
+	public boolean matchesQuery(@Nullable String queryTerm) {
+		return StringUtils.matchesQuery(name, queryTerm);
 	}
 	
 	public Collection<User> getMembers() {
@@ -128,6 +125,10 @@ public class Group extends AbstractEntity {
 	public int compareTo(AbstractEntity entity) {
 		Group group = (Group) entity;
 		return getName().compareTo(group.getName());
+	}
+
+	public GroupFacade getFacade() {
+		return new GroupFacade(this);
 	}
 	
 }

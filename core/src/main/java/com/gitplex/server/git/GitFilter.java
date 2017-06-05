@@ -130,7 +130,7 @@ public class GitFilter implements Filter {
 		environments.put("GITPLEX_URL", serverUrl);
 		environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
 		environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
-		File gitDir = storageManager.getGitDir(project);
+		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.canRead(project)) {
@@ -191,7 +191,7 @@ public class GitFilter implements Filter {
 		Project project = getProject(request, response, projectInfo);
 		String service = request.getParameter("service");
 		
-		File gitDir = storageManager.getGitDir(project);
+		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (service.contains("upload")) {
 			if (!SecurityUtils.canRead(project)) {

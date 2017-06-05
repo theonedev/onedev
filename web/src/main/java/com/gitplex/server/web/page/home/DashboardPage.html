@@ -9,13 +9,16 @@
 			</div>
 		</div>
 		<div class="body">
-			<ul wicket:id="projects" class="list-unstyled">
-				<li wicket:id="projects">
-					<a wicket:id="link"><i class="fa fa-ext fa-repo"></i> <span wicket:id="name"></span></a> 
-				</li>
-			</ul>	
-			<div class="center"><ul wicket:id="projectsPageNav"></ul></div>
-			<div wicket:id="noProjects" class="alert alert-warning">No projects found</div>
+			<table wicket:id="projects" class="projects table"></table>
 		</div>		
 	</div>
+	<wicket:fragment wicket:id="projectFrag">
+		<i class="fa fa-ext fa-repo"></i> <a wicket:id="link"><span wicket:id="name"></span></a> 
+	</wicket:fragment>
+	<wicket:fragment wicket:id="authorFrag">
+		<a wicket:id="avatar"></a> <a wicket:id="name"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="commitMessageFrag">
+		<a wicket:id="link"><span wicket:id="message"></span></a> 
+	</wicket:fragment>
 </wicket:extend>

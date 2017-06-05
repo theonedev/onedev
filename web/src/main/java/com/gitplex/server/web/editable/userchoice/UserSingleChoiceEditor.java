@@ -8,6 +8,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.util.editable.annotation.UserChoice;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.component.userchoice.UserChoiceProvider;
 import com.gitplex.server.web.component.userchoice.UserSingleChoice;
 import com.gitplex.server.web.editable.ErrorContext;
@@ -38,7 +39,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			user = null;
 		
-    	input = new UserSingleChoice("input", Model.of(user), new UserChoiceProvider(type));
+    	input = new UserSingleChoice("input", Model.of(user.getFacade()), new UserChoiceProvider(type));
         input.setConvertEmptyInputStringToNull(true);
         
         // add this to control allowClear flag of select2
@@ -54,7 +55,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		User user = input.getConvertedInput();
+		UserFacade user = input.getConvertedInput();
 		if (user != null)
 			return user.getName();
 		else

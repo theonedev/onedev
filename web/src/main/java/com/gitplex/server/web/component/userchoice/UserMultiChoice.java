@@ -6,16 +6,14 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.model.User;
-import com.gitplex.server.web.component.userchoice.UserChoiceResourceReference;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.component.select2.Select2MultiChoice;
 
-public class UserMultiChoice extends Select2MultiChoice<User> {
+public class UserMultiChoice extends Select2MultiChoice<UserFacade> {
 
 	private static final long serialVersionUID = 1L;
 
-	public UserMultiChoice(String id, IModel<Collection<User>> model, 
-			AbstractUserChoiceProvider choiceProvider) {
+	public UserMultiChoice(String id, IModel<Collection<UserFacade>> model, AbstractUserChoiceProvider choiceProvider) {
 		super(id, model, choiceProvider);
 	}
 

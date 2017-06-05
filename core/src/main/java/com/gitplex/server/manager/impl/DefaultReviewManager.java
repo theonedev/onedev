@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -27,20 +28,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
-import com.gitplex.server.model.User;
+import com.gitplex.server.manager.ReviewManager;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.Group;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.Review;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
-import com.gitplex.server.model.Group;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.FileProtection;
 import com.gitplex.server.persistence.annotation.Sessional;
@@ -52,6 +53,8 @@ import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.util.ReviewStatus;
+import com.gitplex.server.util.facade.ProjectFacade;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 
 @Singleton
@@ -207,10 +210,21 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 		}
 
 		@Nullable
-		private ReviewInvitation getInvitation(User user) {
+		private ReviewInvitation getInvitation(Long userId) {
 			for (ReviewInvitation invitation: request.getReviewInvitations()) {
-				if (invitation.getUser().equals(user))
+				if (invitation.getUser().getId().equals(userId))
 					return invitation;
+			}
+			return null;
+		}
+		
+		@Nullable
+		private Review getReviewAfter(Long userId, PullRequestUpdate update) {
+			for (Review review: update.getRequest().getReviews()) {
+				if (review.getUser().getId().equals(userId) && review.getUpdate() != null 
+						&& review.getUpdate().getId()>=update.getId()) {
+					return review;
+				}
 			}
 			return null;
 		}
@@ -221,11 +235,12 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			for (ReviewInvitation invitation: request.getReviewInvitations()) {
 				if (!invitation.getUser().equals(request.getSubmitter()) 
 						&& invitation.getType() == ReviewInvitation.Type.MANUAL) {
-					Review effectiveReview = invitation.getUser().getReviewAfter(request.getLatestUpdate());
+					UserFacade user = invitation.getUser().getFacade();
+					Review effectiveReview = getReviewAfter(user.getId(), request.getLatestUpdate());
 					if (effectiveReview == null) 
 						awaitingReviewers.add(invitation.getUser());
 					else
-						effectiveReviews.put(effectiveReview.getUser(), effectiveReview);
+						effectiveReviews.put(invitation.getUser(), effectiveReview);
 				}
 			}
 
@@ -250,10 +265,10 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 				}
 			}
 			
-			if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(
-					new ProjectPermission(request.getTargetProject(), ProjectPrivilege.WRITE))) {
-				Collection<User> writers = SecurityUtils.findUsersCan(request.getTargetProject(), 
-						ProjectPrivilege.WRITE);
+			ProjectFacade project = request.getTargetProject().getFacade();
+			Permission writePermission = new ProjectPermission(project, ProjectPrivilege.WRITE); 
+			if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writePermission)) {
+				Collection<UserFacade> writers = SecurityUtils.getAuthorizedUsers(project, ProjectPrivilege.WRITE);
 				checkReviews(writers, 1, request.getLatestUpdate(), true);
 			}
 			
@@ -271,15 +286,23 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			
 		}
 		
+		private boolean isAwaitingReviewer(Long userId) {
+			for (User user: awaitingReviewers) {
+				if (user.getId().equals(userId))
+					return true;
+			}
+			return false;
+		}
+		
 		private void checkReviews(ReviewAppointment appointment, PullRequestUpdate update) {
 			for (User user: appointment.getUsers()) {
-				if (!user.equals(request.getSubmitter()) && !awaitingReviewers.contains(user)) {
-					Review effectiveReview = user.getReviewAfter(update);
+				if (!user.equals(request.getSubmitter()) && !isAwaitingReviewer(user.getId())) {
+					Review effectiveReview = getReviewAfter(user.getId(), update);
 					if (effectiveReview == null) {
 						awaitingReviewers.add(user);
-						inviteReviewer(user);
+						inviteReviewer(user.getId());
 					} else {
-						effectiveReviews.put(effectiveReview.getUser(), effectiveReview);
+						effectiveReviews.put(user, effectiveReview);
 					}
 				}
 			}
@@ -287,24 +310,31 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			for (Map.Entry<Group, Integer> entry: appointment.getGroups().entrySet()) {
 				Group group = entry.getKey();
 				int requiredCount = entry.getValue();
-				checkReviews(group.getMembers(), requiredCount, update, false);
+				checkReviews(getFacades(group.getMembers()), requiredCount, update, false);
 			}
 		}
 		
-		private void checkReviews(Collection<User> users, int requiredCount, PullRequestUpdate update, 
+		private Collection<UserFacade> getFacades(Collection<User> users) {
+			Collection<UserFacade> facades = new HashSet<>();
+			for (User user: users)
+				facades.add(user.getFacade());
+			return facades;
+		}
+		
+		private void checkReviews(Collection<UserFacade> users, int requiredCount, PullRequestUpdate update, 
 				boolean excludeAutoReviews) {
 			if (requiredCount == 0)
 				requiredCount = users.size();
 			
 			int effectiveCount = 0;
-			Set<User> potentialReviewers = new HashSet<>();
-			for (User user: users) {
-				if (user.equals(request.getSubmitter())) {
+			Set<UserFacade> potentialReviewers = new HashSet<>();
+			for (UserFacade user: users) {
+				if (user.getId().equals(request.getSubmitter().getId())) {
 					effectiveCount++;
-				} else if (awaitingReviewers.contains(user)) {
+				} else if (isAwaitingReviewer(user.getId())) {
 					requiredCount--;
 				} else {
-					Review effectiveReview = user.getReviewAfter(update);
+					Review effectiveReview = getReviewAfter(user.getId(), update);
 					if (effectiveReview != null) {
 						if (!excludeAutoReviews || !effectiveReview.isAutoCheck()) {						
 							effectiveCount++;
@@ -321,17 +351,17 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			}
 
 			int missingCount = requiredCount - effectiveCount;
-			Set<User> reviewers = new HashSet<>();
+			Set<UserFacade> reviewers = new HashSet<>();
 			
-			List<User> candidateReviewers = new ArrayList<>();
-			for (User user: potentialReviewers) {
-				ReviewInvitation invitation = getInvitation(user);
+			List<UserFacade> candidateReviewers = new ArrayList<>();
+			for (UserFacade user: potentialReviewers) {
+				ReviewInvitation invitation = getInvitation(user.getId());
 				if (invitation != null && invitation.getType() != ReviewInvitation.Type.EXCLUDE)
 					candidateReviewers.add(user);
 			}
 			
 			sortByContributions(candidateReviewers, update);
-			for (User user: candidateReviewers) {
+			for (UserFacade user: candidateReviewers) {
 				reviewers.add(user);
 				if (reviewers.size() == missingCount)
 					break;
@@ -339,13 +369,13 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			
 			if (reviewers.size() < missingCount) {
 				candidateReviewers = new ArrayList<>();
-				for (User user: potentialReviewers) {
-					ReviewInvitation invitation = getInvitation(user);
+				for (UserFacade user: potentialReviewers) {
+					ReviewInvitation invitation = getInvitation(user.getId());
 					if (invitation == null) 
 						candidateReviewers.add(user);
 				}
 				sortByContributions(candidateReviewers, update);
-				for (User user: candidateReviewers) {
+				for (UserFacade user: candidateReviewers) {
 					reviewers.add(user);
 					if (reviewers.size() == missingCount)
 						break;
@@ -353,15 +383,15 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			}
 			if (reviewers.size() < missingCount) {
 				List<ReviewInvitation> excludedInvitations = new ArrayList<>();
-				for (User user: potentialReviewers) {
-					ReviewInvitation invitation = getInvitation(user);
+				for (UserFacade user: potentialReviewers) {
+					ReviewInvitation invitation = getInvitation(user.getId());
 					if (invitation != null && invitation.getType() == ReviewInvitation.Type.EXCLUDE)
 						excludedInvitations.add(invitation);
 				}
 				excludedInvitations.sort(Comparator.comparing(ReviewInvitation::getDate));
 				
 				for (ReviewInvitation invitation: excludedInvitations) {
-					reviewers.add(invitation.getUser());
+					reviewers.add(invitation.getUser().getFacade());
 					if (reviewers.size() == missingCount)
 						break;
 				}
@@ -373,16 +403,17 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 				throw new RuntimeException(errorMessage);
 			}
 
-			for (User user: reviewers) {
-				awaitingReviewers.add(user);
-				inviteReviewer(user);
+			UserManager userManager = GitPlex.getInstance(UserManager.class);
+			for (UserFacade user: reviewers) {
+				awaitingReviewers.add(userManager.load(user.getId()));
+				inviteReviewer(user.getId());
 			}
 		}
 		
-		private void sortByContributions(List<User> users, PullRequestUpdate update) {
+		private void sortByContributions(List<UserFacade> users, PullRequestUpdate update) {
 			CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
-			Map<User, Integer> contributions = new HashMap<>();
-			for (User user: users)
+			Map<UserFacade, Integer> contributions = new HashMap<>();
+			for (UserFacade user: users)
 				contributions.put(user, 0);
 
 			int count = 0;
@@ -404,27 +435,27 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			users.sort((user1, user2)-> contributions.get(user2) - contributions.get(user1));
 		}
 		
-		private int addContributions(Map<User, Integer> contributions, CommitInfoManager commitInfoManager, 
+		private int addContributions(Map<UserFacade, Integer> contributions, CommitInfoManager commitInfoManager, 
 				String file, PullRequestUpdate update) {
 			int addedContributions = 0;
-			for (Map.Entry<User, Integer> entry: contributions.entrySet()) {
-				User user = entry.getKey();
-				int fileContribution = commitInfoManager.getContributions(update.getRequest().getTargetProject(), user, 
-						file);
+			for (Map.Entry<UserFacade, Integer> entry: contributions.entrySet()) {
+				UserFacade user = entry.getKey();
+				int fileContribution = commitInfoManager.getContributions(
+						update.getRequest().getTargetProject().getFacade(), user, file);
 				entry.setValue(entry.getValue() + fileContribution);
 				addedContributions += fileContribution;
 			}
 			return addedContributions;
 		}
 		
-		private void inviteReviewer(User user) {
-			ReviewInvitation invitation = getInvitation(user);
+		private void inviteReviewer(Long userId) {
+			ReviewInvitation invitation = getInvitation(userId);
 			if (invitation != null) {
 				invitation.setType(ReviewInvitation.Type.RULE);
 			} else {
 				invitation = new ReviewInvitation();
 				invitation.setRequest(request);
-				invitation.setUser(user);
+				invitation.setUser(GitPlex.getInstance(UserManager.class).load(userId));
 				invitation.setType(ReviewInvitation.Type.RULE);
 				request.getReviewInvitations().add(invitation);
 			}

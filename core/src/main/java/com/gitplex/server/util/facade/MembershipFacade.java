@@ -1,5 +1,7 @@
 package com.gitplex.server.util.facade;
 
+import com.gitplex.server.model.Membership;
+
 public class MembershipFacade extends EntityFacade {
 
 	private static final long serialVersionUID = 1L;
@@ -8,11 +10,11 @@ public class MembershipFacade extends EntityFacade {
 	
 	private final Long userId;
 	
-	public MembershipFacade(Long id, Long groupId, Long userId) {
-		super(id);
+	public MembershipFacade(Membership membership) {
+		super(membership.getId());
 		
-		this.groupId = groupId;
-		this.userId = userId;
+		groupId = membership.getGroup().getId();
+		userId = membership.getUser().getId();
 	}
 
 	public Long getGroupId() {

@@ -43,36 +43,36 @@ import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
-import com.gitplex.server.event.project.ProjectDeleted;
 import com.gitplex.server.event.pullrequest.MergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestStatusChangeManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
-import com.gitplex.server.model.User;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.Review;
 import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.CloseInfo;
-import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
+import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.ReviewStatus;
@@ -542,16 +542,19 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Transactional
 	@Listen
-	public void on(ProjectDeleted event) {
-    	for (PullRequest request: event.getProject().getOutgoingRequests()) {
-    		if (!request.getTargetProject().equals(event.getProject()) && request.isOpen())
-        		discard(request, "Source project is deleted.");
-    	}
-    	
-    	Query query = getSession().createQuery("update PullRequest set sourceProject=null where "
-    			+ "sourceProject=:project");
-    	query.setParameter("project", event.getProject());
-    	query.executeUpdate();
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Project) {
+			Project project = (Project) event.getEntity();
+	    	for (PullRequest request: project.getOutgoingRequests()) {
+	    		if (!request.getTargetProject().equals(project) && request.isOpen())
+	        		discard(request, "Source project is deleted.");
+	    	}
+	    	
+	    	Query query = getSession().createQuery("update PullRequest set sourceProject=null where "
+	    			+ "sourceProject=:project");
+	    	query.setParameter("project", project);
+	    	query.executeUpdate();
+		}
 	}
 	
 	@Transactional

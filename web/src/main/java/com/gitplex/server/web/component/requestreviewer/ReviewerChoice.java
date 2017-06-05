@@ -9,14 +9,15 @@ import org.apache.wicket.model.IModel;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ReviewInvitationManager;
-import com.gitplex.server.model.User;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.ReviewInvitation;
-import com.gitplex.server.web.component.userchoice.UserChoiceResourceReference;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.component.select2.SelectToAddChoice;
+import com.gitplex.server.web.component.userchoice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
-public abstract class ReviewerChoice extends SelectToAddChoice<User> {
+public abstract class ReviewerChoice extends SelectToAddChoice<UserFacade> {
 
 	private final IModel<PullRequest> requestModel;
 	
@@ -51,7 +52,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, User user) {
+	protected void onSelect(AjaxRequestTarget target, UserFacade user) {
 		PullRequest request = requestModel.getObject();
 		ReviewInvitation invitation = null;
 		for(ReviewInvitation each: request.getReviewInvitations()) {
@@ -63,7 +64,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 		if (invitation == null) {
 			invitation = new ReviewInvitation();
 			invitation.setRequest(request);
-			invitation.setUser(user);
+			invitation.setUser(GitPlex.getInstance(UserManager.class).load(user.getId()));
 			request.getReviewInvitations().add(invitation);
 		}
 		invitation.setType(ReviewInvitation.Type.MANUAL);

@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -33,12 +34,14 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.GitPlex;
+import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.GroupAuthorizationManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.GroupAuthorization;
-import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.ProjectPrivilege;
+import com.gitplex.server.util.facade.GroupAuthorizationFacade;
+import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.datatable.DefaultDataTable;
@@ -91,18 +94,24 @@ public class GroupAuthorizationsPage extends GroupPage {
 			
 		});
 		
-		add(new SelectToAddChoice<Project>("addNew", new AbstractProjectChoiceProvider() {
+		add(new SelectToAddChoice<ProjectFacade>("addNew", new AbstractProjectChoiceProvider() {
 
 			@Override
-			public void query(String term, int page, Response<Project> response) {
-				List<Project> notAuthorized = new ArrayList<>();
-				for (Project project: GitPlex.getInstance(ProjectManager.class).findAll()) {
-					if (project.matches(searchInput) && !getGroup().getAuthorizedProjects().contains(project))
-						notAuthorized.add(project);
+			public void query(String term, int page, Response<ProjectFacade> response) {
+				List<ProjectFacade> notAuthorizedProjects = new ArrayList<>();
+				CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
+				Collection<Long> authorizedProjectIds = new HashSet<>();
+				for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
+					if (authorization.getGroupId().equals(getGroup().getId()))
+						authorizedProjectIds.add(authorization.getProjectId());
 				}
-				Collections.sort(notAuthorized);
-				Collections.reverse(notAuthorized);
-				new ResponseFiller<Project>(response).fill(notAuthorized, page, WebConstants.PAGE_SIZE);
+				for (ProjectFacade project: cacheManager.getProjects().values()) {
+					if (project.matchesQuery(term) && !authorizedProjectIds.contains(project.getId()))
+						notAuthorizedProjects.add(project);
+				}
+				Collections.sort(notAuthorizedProjects);
+				Collections.reverse(notAuthorizedProjects);
+				new ResponseFiller<ProjectFacade>(response).fill(notAuthorizedProjects, page, WebConstants.PAGE_SIZE);
 			}
 
 		}) {
@@ -118,12 +127,13 @@ public class GroupAuthorizationsPage extends GroupPage {
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Project selection) {
+			protected void onSelect(AjaxRequestTarget target, ProjectFacade selection) {
 				GroupAuthorization authorization = new GroupAuthorization();
 				authorization.setGroup(getGroup());
-				authorization.setProject(selection);
+				authorization.setProject(GitPlex.getInstance(ProjectManager.class).load(selection.getId()));
 				GitPlex.getInstance(GroupAuthorizationManager.class).save(authorization);
 				target.add(authorizationsTable);
+				Session.get().success("Project added");
 			}
 			
 			@Override

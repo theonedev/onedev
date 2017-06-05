@@ -2,21 +2,21 @@ package com.gitplex.server.security.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import com.gitplex.server.model.Project;
 import com.gitplex.server.security.ProjectPrivilege;
+import com.gitplex.server.util.facade.ProjectFacade;
 
 public class ProjectPermission implements Permission {
 
-	private final Project project;
+	private final ProjectFacade project;
 	
 	private final ProjectPrivilege privilege;
 	
-	public ProjectPermission(Project project, ProjectPrivilege privilege) {
+	public ProjectPermission(ProjectFacade project, ProjectPrivilege privilege) {
 		this.project = project;
 		this.privilege = privilege;
 	}
 	
-	public Project getProject() {
+	public ProjectFacade getProject() {
 		return project;
 	}
 

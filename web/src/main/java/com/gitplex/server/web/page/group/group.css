@@ -4,3 +4,7 @@
 #group.sidebar>table>tbody>tr>td.content {
 	padding: 20px;
 }
+#group .authorization.list .head .select2-container,
+#group .membership.list .head .select2-container {
+	width: 240px;
+} 

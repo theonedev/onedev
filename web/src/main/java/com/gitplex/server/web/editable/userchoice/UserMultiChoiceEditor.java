@@ -13,6 +13,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.util.editable.annotation.UserChoice;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.component.userchoice.UserChoiceProvider;
 import com.gitplex.server.web.component.userchoice.UserMultiChoice;
 import com.gitplex.server.web.editable.ErrorContext;
@@ -38,13 +39,13 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<User> users = new ArrayList<>();
+    	List<UserFacade> users = new ArrayList<>();
 		if (getModelObject() != null) {
 			UserManager userManager = GitPlex.getInstance(UserManager.class);
 			for (String userName: getModelObject()) {
 				User user = userManager.findByName(userName);
 				if (user != null)
-					users.add(user);
+					users.add(user.getFacade());
 			}
 		} 
 		
@@ -62,9 +63,9 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
 		List<String> userNames = new ArrayList<>();
-		Collection<User> users = input.getConvertedInput();
+		Collection<UserFacade> users = input.getConvertedInput();
 		if (users != null) {
-			for (User user: users)
+			for (UserFacade user: users)
 				userNames.add(user.getName());
 		} 
 		return userNames;

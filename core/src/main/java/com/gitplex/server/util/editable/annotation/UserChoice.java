@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UserChoice {
 	
-	public enum Type{ALL, DEPOT_READER, DEPOT_WRITER, DEPOT_ADMINISTRATOR} 
+	public enum Type{ALL, PROJECT_READER, PROJECT_WRITER, PROJECT_ADMINISTRATOR} 
 	
 	Type type() default Type.ALL;
 }

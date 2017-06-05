@@ -59,7 +59,7 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 		} else {
 			tooltip = null;
 		}
-		url = avatarManager.getAvatarUrl(user);
+		url = avatarManager.getAvatarUrl(user.getFacade());
 	}
 	
 	public AvatarLink(String id, PersonIdent person) {
@@ -75,7 +75,7 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 		if (user != null) { 
 			userId = user.getId();
 			params = UserPage.paramsOf(user);
-			url = avatarManager.getAvatarUrl(user);
+			url = avatarManager.getAvatarUrl(user.getFacade());
 		} else {
 			userId = null;
 			params = new PageParameters();
@@ -106,7 +106,7 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
 			if (avatarChanged.getUser().getId().equals(userId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getUser());
+				url = avatarManager.getAvatarUrl(avatarChanged.getUser().getFacade());
 				avatarChanged.getHandler().add(this);
 			}
 		}

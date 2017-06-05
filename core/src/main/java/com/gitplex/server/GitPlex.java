@@ -122,13 +122,10 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void postStart() {
-		initStage = null;
-
 		listenerRegistry.post(new SystemStarted());
-		
 		ThreadContext.unbindSubject();
-		
 		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");
+		initStage = null;
 	}
 
 	public String guessServerUrl() {

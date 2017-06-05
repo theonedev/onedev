@@ -36,14 +36,17 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
+import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserAuthorizationManager;
-import com.gitplex.server.model.GroupAuthorization;
-import com.gitplex.server.model.Membership;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.permission.SystemAdministration;
+import com.gitplex.server.util.facade.GroupAuthorizationFacade;
+import com.gitplex.server.util.facade.MembershipFacade;
+import com.gitplex.server.util.facade.ProjectFacade;
+import com.gitplex.server.util.facade.UserAuthorizationFacade;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.datatable.DefaultDataTable;
@@ -64,68 +67,93 @@ public class UserAuthorizationsPage extends UserPage {
 
 	private String searchInput;
 	
-	private DataTable<Project, Void> authorizationsTable;
+	private DataTable<Long, Void> authorizationsTable;
 	
-	private SelectionColumn<Project, Void> selectionColumn;
+	private SelectionColumn<Long, Void> selectionColumn;
 	
-	private IModel<Map<Project, ProjectPrivilege>> projectAuthorizationsModel = 
-			new LoadableDetachableModel<Map<Project, ProjectPrivilege>>() {
+	private IModel<Map<Long, UserAuthorizationFacade>> explicitProjectAuthorizationsModel = 
+			new LoadableDetachableModel<Map<Long, UserAuthorizationFacade>>() {
 
 		@Override
-		protected Map<Project, ProjectPrivilege> load() {
-			Map<Project, ProjectPrivilege> projectAuthorizations = new HashMap<>();
-			Collection<Project> projectsAuthorizedFromOtherSources = new HashSet<>();
+		protected Map<Long, UserAuthorizationFacade> load() {
+			Map<Long, UserAuthorizationFacade> authorizations = new HashMap<>();
+			for (UserAuthorizationFacade authorization: 
+					GitPlex.getInstance(CacheManager.class).getUserAuthorizations().values()) {
+				if (authorization.getUserId().equals(getUser().getId()))
+					authorizations.put(authorization.getProjectId(), authorization);
+			}
+			return authorizations;
+		}
+		
+	};
+	private IModel<Map<Long, ProjectPrivilege>> projectAuthorizationsModel = 
+			new LoadableDetachableModel<Map<Long, ProjectPrivilege>>() {
+
+		@Override
+		protected Map<Long, ProjectPrivilege> load() {
+			Map<Long, ProjectPrivilege> projectAuthorizations = new HashMap<>();
+			Collection<Long> projectsAuthorizedFromOtherSources = new HashSet<>();
+			CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
+			
 			if (getUser().asSubject().isPermitted(new SystemAdministration())) {
-				for (Project project: GitPlex.getInstance(ProjectManager.class).findAll()) {
-					projectAuthorizations.put(project, ProjectPrivilege.ADMIN);
-					projectsAuthorizedFromOtherSources.add(project);
+				for (ProjectFacade project: cacheManager.getProjects().values()) {
+					projectAuthorizations.put(project.getId(), ProjectPrivilege.ADMIN);
+					projectsAuthorizedFromOtherSources.add(project.getId());
 				}
 			} else {
-				for (UserAuthorization authorization: getUser().getAuthorizations()) 
-					projectAuthorizations.put(authorization.getProject(), authorization.getPrivilege());
-				for (Membership membership: getUser().getMemberships()) {
-					for (GroupAuthorization authorization: membership.getGroup().getAuthorizations()) {
-						ProjectPrivilege existingPrivilege = projectAuthorizations.get(authorization.getProject());
-						if (existingPrivilege == null || authorization.getPrivilege().implies(existingPrivilege))
-							projectAuthorizations.put(authorization.getProject(), authorization.getPrivilege());
-						projectsAuthorizedFromOtherSources.add(authorization.getProject());
+				for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) { 
+					if (authorization.getUserId().equals(getUser().getId()))
+						projectAuthorizations.put(authorization.getProjectId(), authorization.getPrivilege());
+				}
+				Collection<Long> groupIds = new HashSet<>();
+				for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+					if (membership.getUserId().equals(getUser().getId()))
+						groupIds.add(membership.getGroupId());
+				}
+				for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
+					if (groupIds.contains(authorization.getGroupId())) {
+						ProjectPrivilege privilege = projectAuthorizations.get(authorization.getProjectId());
+						if (privilege == null || authorization.getPrivilege().implies(privilege))
+							projectAuthorizations.put(authorization.getProjectId(), authorization.getPrivilege());
+						projectsAuthorizedFromOtherSources.add(authorization.getProjectId());
 					}
 				}
-				for (Project project: GitPlex.getInstance(ProjectManager.class).findAll()) {
+				for (ProjectFacade project: cacheManager.getProjects().values()) {
 					if (project.isPublicRead()) {
-						if (!projectAuthorizations.containsKey(project))
-							projectAuthorizations.put(project, ProjectPrivilege.READ);
-						projectsAuthorizedFromOtherSources.add(project);
+						if (!projectAuthorizations.containsKey(project.getId()))
+							projectAuthorizations.put(project.getId(), ProjectPrivilege.READ);
+						projectsAuthorizedFromOtherSources.add(project.getId());
 					}
 				}
 			}
 
-			Map<Project, UserAuthorization> userAuthorizationMap = getUserAuthorizationMap();
-			List<Project> projects = new ArrayList<>(projectAuthorizations.keySet());
-			Collections.sort(projects, new Comparator<Project>() {
+			Map<Long, UserAuthorizationFacade> explicitProjectAuthorizations = getExplicitProjectAuthorizations();
+			List<Long> projectIds = new ArrayList<>(projectAuthorizations.keySet());
+			Collections.sort(projectIds, new Comparator<Long>() {
 
 				@Override
-				public int compare(Project o1, Project o2) {
+				public int compare(Long o1, Long o2) {
 					if (projectsAuthorizedFromOtherSources.contains(o1)) {
 						if (projectsAuthorizedFromOtherSources.contains(o2)) {
-							return o1.getName().compareTo(o2.getName());
+							return o1.compareTo(o2);
 						} else {
-							return -1;
+							return 1;
 						}
 					} else {
 						if (projectsAuthorizedFromOtherSources.contains(o2)) {
-							return 1;
+							return -1;
 						} else {
-							return userAuthorizationMap.get(o2).getId().compareTo(userAuthorizationMap.get(o1).getId());
+							return explicitProjectAuthorizations.get(o2).getId()
+									.compareTo(explicitProjectAuthorizations.get(o1).getId());
 						}
 					}
 				}
 				
 			});	
 			
-			Map<Project, ProjectPrivilege> sortedProjectAuthorizations = new LinkedHashMap<>();
-			for (Project project: projects)
-				sortedProjectAuthorizations.put(project, projectAuthorizations.get(project));
+			Map<Long, ProjectPrivilege> sortedProjectAuthorizations = new LinkedHashMap<>();
+			for (Long projectId: projectIds)
+				sortedProjectAuthorizations.put(projectId, projectAuthorizations.get(projectId));
 			
 			return sortedProjectAuthorizations;
 		}
@@ -138,26 +166,23 @@ public class UserAuthorizationsPage extends UserPage {
 
 	@Override
 	protected void onDetach() {
+		explicitProjectAuthorizationsModel.detach();
 		projectAuthorizationsModel.detach();
 		super.onDetach();
 	}
 	
-	private Map<Project, UserAuthorization> getUserAuthorizationMap() {
-		Map<Project, UserAuthorization> userAuthorizationMap = new HashMap<>();
-		for (UserAuthorization authorization: getUser().getAuthorizations()) {
-			userAuthorizationMap.put(authorization.getProject(), authorization);
-		}
-		return userAuthorizationMap;
+	private Map<Long, UserAuthorizationFacade> getExplicitProjectAuthorizations() {
+		return explicitProjectAuthorizationsModel.getObject();
 	}
 
-	private Map<Project, ProjectPrivilege> getProjectAuthorizations() {
+	private Map<Long, ProjectPrivilege> getProjectAuthorizations() {
 		return projectAuthorizationsModel.getObject();
 	}
 	
-	private boolean isPrivilegeFromOtherSources(Project project) {
-		UserAuthorization userAuthorization = getUserAuthorizationMap().get(project);
-		ProjectPrivilege privilege = getProjectAuthorizations().get(project);
-		return userAuthorization == null || !userAuthorization.getPrivilege().implies(privilege);
+	private boolean isPrivilegeFromOtherSources(Long projectId) {
+		UserAuthorizationFacade authorization = getExplicitProjectAuthorizations().get(projectId);
+		ProjectPrivilege privilege = getProjectAuthorizations().get(projectId);
+		return authorization == null || !authorization.getPrivilege().implies(privilege);
 	}
 	
 	@Override
@@ -177,19 +202,19 @@ public class UserAuthorizationsPage extends UserPage {
 			
 		});
 		
-		add(new SelectToAddChoice<Project>("addNew", new AbstractProjectChoiceProvider() {
+		add(new SelectToAddChoice<ProjectFacade>("addNew", new AbstractProjectChoiceProvider() {
 
 			@Override
-			public void query(String term, int page, Response<Project> response) {
-				List<Project> notAuthorized = new ArrayList<>();
+			public void query(String term, int page, Response<ProjectFacade> response) {
+				List<ProjectFacade> notAuthorizedProjects = new ArrayList<>();
 				
-				for (Project project: GitPlex.getInstance(ProjectManager.class).findAll()) {
-					if (project.matches(searchInput) && !getProjectAuthorizations().containsKey(project))
-						notAuthorized.add(project);
+				for (ProjectFacade project: GitPlex.getInstance(CacheManager.class).getProjects().values()) {
+					if (project.matchesQuery(term) && !getProjectAuthorizations().containsKey(project.getId()))
+						notAuthorizedProjects.add(project);
 				}
-				Collections.sort(notAuthorized);
-				Collections.reverse(notAuthorized);
-				new ResponseFiller<Project>(response).fill(notAuthorized, page, WebConstants.PAGE_SIZE);
+				Collections.sort(notAuthorizedProjects);
+				Collections.reverse(notAuthorizedProjects);
+				new ResponseFiller<ProjectFacade>(response).fill(notAuthorizedProjects, page, WebConstants.PAGE_SIZE);
 			}
 
 		}) {
@@ -205,12 +230,13 @@ public class UserAuthorizationsPage extends UserPage {
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Project selection) {
+			protected void onSelect(AjaxRequestTarget target, ProjectFacade selection) {
 				UserAuthorization authorization = new UserAuthorization();
 				authorization.setUser(getUser());
-				authorization.setProject(selection);
+				authorization.setProject(GitPlex.getInstance(ProjectManager.class).load(selection.getId()));
 				GitPlex.getInstance(UserAuthorizationManager.class).save(authorization);
 				target.add(authorizationsTable);
+				Session.get().success("Project added");
 			}
 			
 			@Override
@@ -227,14 +253,16 @@ public class UserAuthorizationsPage extends UserPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Collection<UserAuthorization> authorizationsToDelete = new HashSet<>();
-				Map<Project, UserAuthorization> userAuthorizationMap = getUserAuthorizationMap();
-				for (IModel<Project> model: selectionColumn.getSelections()) {
-					UserAuthorization authorization = userAuthorizationMap.get(model.getObject());
-					if (authorization != null)
-						authorizationsToDelete.add(authorization);
+				Map<Long, UserAuthorizationFacade> explicitProjectAuthorizations = getExplicitProjectAuthorizations();
+				UserAuthorizationManager userAuthorizationManager = GitPlex.getInstance(UserAuthorizationManager.class);
+				for (IModel<Long> model: selectionColumn.getSelections()) {
+					UserAuthorizationFacade authorization = explicitProjectAuthorizations.get(model.getObject());
+					if (authorization != null) {
+						authorizationsToDelete.add(userAuthorizationManager.load(authorization.getId()));
+						explicitProjectAuthorizations.remove(model.getObject());
+					}
 				}
-				GitPlex.getInstance(UserAuthorizationManager.class).delete(authorizationsToDelete);
-				getUser().getAuthorizations().removeAll(authorizationsToDelete);
+				userAuthorizationManager.delete(authorizationsToDelete);
 				target.add(authorizationsTable);
 				selectionColumn.getSelections().clear();
 				target.add(this);
@@ -245,9 +273,8 @@ public class UserAuthorizationsPage extends UserPage {
 				super.onConfigure();
 				
 				boolean hasLocalPrivileges = false;
-				for (IModel<Project> model: selectionColumn.getSelections()) {
-					Project project = model.getObject();
-					if (!isPrivilegeFromOtherSources(project)) {
+				for (IModel<Long> model: selectionColumn.getSelections()) {
+					if (!isPrivilegeFromOtherSources(model.getObject())) {
 						hasLocalPrivileges = true;
 						break;
 					}
@@ -259,9 +286,9 @@ public class UserAuthorizationsPage extends UserPage {
 		deleteSelected.setOutputMarkupPlaceholderTag(true);
 		add(deleteSelected);
 
-		List<IColumn<Project, Void>> columns = new ArrayList<>();
+		List<IColumn<Long, Void>> columns = new ArrayList<>();
 		
-		selectionColumn = new SelectionColumn<Project, Void>() {
+		selectionColumn = new SelectionColumn<Long, Void>() {
 			
 			@Override
 			protected void onSelectionChange(AjaxRequestTarget target) {
@@ -271,18 +298,20 @@ public class UserAuthorizationsPage extends UserPage {
 		};
 		columns.add(selectionColumn);
 		
-		columns.add(new AbstractColumn<Project, Void>(Model.of("Project")) {
+		columns.add(new AbstractColumn<Long, Void>(Model.of("Project")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, 
-					IModel<Project> rowModel) {
+			public void populateItem(Item<ICellPopulator<Long>> cellItem, String componentId, 
+					IModel<Long> rowModel) {
 				Fragment fragment = new Fragment(componentId, "projectFrag", UserAuthorizationsPage.this);
+				Project project = GitPlex.getInstance(ProjectManager.class).load(rowModel.getObject());
+				String projectName = project.getName();
 				fragment.add(new BookmarkablePageLink<Void>("project", ProjectBlobPage.class, 
-						ProjectBlobPage.paramsOf(rowModel.getObject())) {
+						ProjectBlobPage.paramsOf(project)) {
 
 					@Override
 					public IModel<?> getBody() {
-						return Model.of(rowModel.getObject().getName());
+						return Model.of(projectName);
 					}
 
 				});
@@ -290,11 +319,11 @@ public class UserAuthorizationsPage extends UserPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Project, Void>(Model.of("Permission")) {
+		columns.add(new AbstractColumn<Long, Void>(Model.of("Permission")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId,
-					IModel<Project> rowModel) {
+			public void populateItem(Item<ICellPopulator<Long>> cellItem, String componentId,
+					IModel<Long> rowModel) {
 				Fragment fragment = new Fragment(componentId, "privilegeFrag", UserAuthorizationsPage.this) {
 
 					@Override
@@ -319,20 +348,33 @@ public class UserAuthorizationsPage extends UserPage {
 							@Override
 							protected void onSelect(AjaxRequestTarget target, ProjectPrivilege privilege) {
 								dropdown.close();
-								Project project = rowModel.getObject();
-								UserAuthorization userAuthorization = getUserAuthorizationMap().get(project);
-								if (userAuthorization == null) {
+								Long projectId = rowModel.getObject();
+								
+								Map<Long, UserAuthorizationFacade> explicitProjectAuthorizations = 
+										getExplicitProjectAuthorizations();
+								UserAuthorizationFacade userAuthorizationFacade = 
+										explicitProjectAuthorizations.get(projectId);
+								UserAuthorizationManager userAuthorizationManager = 
+										GitPlex.getInstance(UserAuthorizationManager.class);
+								UserAuthorization userAuthorization;
+								if (userAuthorizationFacade == null) {
 									userAuthorization = new UserAuthorization();
 									userAuthorization.setUser(getUser());
-									userAuthorization.setProject(project);
-									getUser().getAuthorizations().add(userAuthorization);
+									userAuthorization.setProject(
+											GitPlex.getInstance(ProjectManager.class).load(projectId));
+								} else {
+									userAuthorization = userAuthorizationManager.load(userAuthorizationFacade.getId()); 
 								}
 								userAuthorization.setPrivilege(privilege);
-								if (getProjectAuthorizations().get(project) != privilege) {
-									Session.get().warn("Specified permission is not taking effect as a higher permission is granted from other sources");
-								}
-								GitPlex.getInstance(UserAuthorizationManager.class).save(userAuthorization);
+								userAuthorizationManager.save(userAuthorization);
+								explicitProjectAuthorizations.put(projectId, userAuthorization.getFacade());
+								
 								target.add(fragment);
+								
+								if (getProjectAuthorizations().get(projectId) != privilege) {
+									Session.get().warn("Specified permission is not taking effect as a higher "
+											+ "permission is granted from other sources");
+								}
 							}
 							
 						};
@@ -359,9 +401,9 @@ public class UserAuthorizationsPage extends UserPage {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						Project project = rowModel.getObject();
+						Project project = GitPlex.getInstance(ProjectManager.class).load(rowModel.getObject());
 						return new PrivilegeSourcePanel(id, getUser(), project, 
-								getProjectAuthorizations().get(project));
+								getProjectAuthorizations().get(project.getId()));
 					}
 					
 				});
@@ -371,37 +413,39 @@ public class UserAuthorizationsPage extends UserPage {
 			}
 		});
 		
-		SortableDataProvider<Project, Void> dataProvider = new SortableDataProvider<Project, Void>() {
+		SortableDataProvider<Long, Void> dataProvider = new SortableDataProvider<Long, Void>() {
 
+			private List<Long> getProjectIds() {
+				List<Long> projectIds = new ArrayList<>();
+				CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
+				for (Long projectId: getProjectAuthorizations().keySet()) {
+					if (cacheManager.getProject(projectId).matchesQuery(searchInput))
+						projectIds.add(projectId);
+				}
+				return projectIds;
+			}
+			
 			@Override
-			public Iterator<? extends Project> iterator(long first, long count) {
-				List<Project> projects = new ArrayList<>(getProjectAuthorizations().keySet());
-				if (first + count <= projects.size())
-					return projects.subList((int)first, (int)(first+count)).iterator();
+			public Iterator<? extends Long> iterator(long first, long count) {
+				List<Long> projectIds = getProjectIds();
+				if (first + count <= projectIds.size())
+					return projectIds.subList((int)first, (int)(first+count)).iterator();
 				else
-					return projects.subList((int)first, projects.size()).iterator();
+					return projectIds.subList((int)first, projectIds.size()).iterator();
 			}
 
 			@Override
 			public long size() {
-				return getProjectAuthorizations().size();
+				return getProjectIds().size();
 			}
 
 			@Override
-			public IModel<Project> model(Project object) {
-				Long projectId = object.getId();
-				return new LoadableDetachableModel<Project>() {
-
-					@Override
-					protected Project load() {
-						return GitPlex.getInstance(ProjectManager.class).load(projectId);
-					}
-					
-				};
+			public IModel<Long> model(Long object) {
+				return Model.of(object);
 			}
 		};
 		
-		add(authorizationsTable = new DefaultDataTable<Project, Void>("authorizations", columns, 
+		add(authorizationsTable = new DefaultDataTable<Long, Void>("authorizations", columns, 
 				dataProvider, WebConstants.PAGE_SIZE));
 	}
 }

@@ -58,7 +58,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.GitPlex;
@@ -71,10 +70,10 @@ import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.git.Submodule;
 import com.gitplex.server.git.exception.NotFileException;
 import com.gitplex.server.git.exception.ObjectNotFoundException;
+import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.manager.VisitInfoManager;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.CommitMessageTransformSetting;
 import com.gitplex.server.model.support.TagProtection;
@@ -86,6 +85,7 @@ import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.Markdown;
+import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.validation.annotation.ProjectName;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -165,11 +165,13 @@ public class Project extends AbstractEntity {
     
     private transient Map<String, Optional<Ref>> refCache;
     
-    private transient Optional<String> defaultBranch;
+    private transient Optional<String> defaultBranchOptional;
     
     private transient Collection<Group> authorizedGroups;
     
     private transient Collection<User> authorizedUsers;
+    
+    private transient Optional<RevCommit> lastCommitOptional;
     
 	@Editable(order=100)
 	@ProjectName
@@ -303,7 +305,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	public File getGitDir() {
-		return AppLoader.getInstance(StorageManager.class).getGitDir(this);
+		return GitPlex.getInstance(StorageManager.class).getProjectGitDir(getId());
 	}
 	
 	/**
@@ -349,28 +351,28 @@ public class Project extends AbstractEntity {
 	
 	@Nullable
 	public String getDefaultBranch() {
-		if (defaultBranch == null) {
+		if (defaultBranchOptional == null) {
 			try {
 				Ref headRef = getRepository().findRef("HEAD");
 				if (headRef != null 
 						&& headRef.isSymbolic() 
 						&& headRef.getTarget().getName().startsWith(Constants.R_HEADS) 
 						&& headRef.getObjectId() != null) {
-					defaultBranch = Optional.of(Repository.shortenRefName(headRef.getTarget().getName()));
+					defaultBranchOptional = Optional.of(Repository.shortenRefName(headRef.getTarget().getName()));
 				} else {
-					defaultBranch = Optional.absent();
+					defaultBranchOptional = Optional.absent();
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		return defaultBranch.orNull();
+		return defaultBranchOptional.orNull();
 	}
 	
 	public void setDefaultBranch(String defaultBranchName) {
 		RefUpdate refUpdate = updateRef("HEAD");
 		GitUtils.linkRef(refUpdate, GitUtils.branch2ref(defaultBranchName));
-		defaultBranch = null;
+		defaultBranchOptional = null;
 	}
 	
 	private Map<BlobIdent, Blob> getBlobCache() {
@@ -492,7 +494,7 @@ public class Project extends AbstractEntity {
 			path = "";
 		
 		final File cacheDir = new File(
-				GitPlex.getInstance(StorageManager.class).getInfoDir(this), 
+				GitPlex.getInstance(StorageManager.class).getProjectInfoDir(getId()), 
 				"last_commits/" + path + "/gitplex_last_commits");
 		
 		final ReadWriteLock lock;
@@ -768,13 +770,8 @@ public class Project extends AbstractEntity {
 		return version;
 	}
 
-	public boolean matches(@Nullable String searchTerm) {
-		if (searchTerm == null)
-			searchTerm = "";
-		else
-			searchTerm = searchTerm.toLowerCase().trim();
-		
-		return getName().toLowerCase().contains(searchTerm);
+	public boolean matchesQuery(@Nullable String queryTerm) {
+		return StringUtils.matchesQuery(name, queryTerm);
 	}
 	
 	public RefUpdate updateRef(String refName) {
@@ -809,27 +806,6 @@ public class Project extends AbstractEntity {
 			return children;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-	}
-
-	public static int compareLastVisit(Project project1, Project project2) {
-		User user = SecurityUtils.getUser();
-		if (user != null) {
-			Date date1 = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, project1);
-			Date date2 = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, project2);
-			if (date1 != null) {
-				if (date2 != null)
-					return date2.compareTo(date1);
-				else
-					return -1;
-			} else {
-				if (date2 != null)
-					return 1;
-				else
-					return project1.compareTo(project2);
-			}
-		} else {
-			return project1.compareTo(project2);
 		}
 	}
 
@@ -890,4 +866,35 @@ public class Project extends AbstractEntity {
 		return authorizedUsers;
 	}
 	
+	public ProjectFacade getFacade() {
+		return new ProjectFacade(this);
+	}
+
+	public RevCommit getLastCommit() {
+		if (lastCommitOptional == null) {
+			ObjectId commitId = GitPlex.getInstance(CommitInfoManager.class).getLastCommit(this);
+			if (commitId == null) {
+				RevCommit lastCommit = null;
+				try {
+					for (Ref ref: getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values()) {
+						RevCommit commit = getRevCommit(ref.getObjectId(), false);
+						if (commit != null) {
+							if (lastCommit != null) {
+								if (commit.getCommitTime() > lastCommit.getCommitTime())
+									lastCommit = commit;
+							} else {
+								lastCommit = commit;
+							}
+						}
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				lastCommitOptional = Optional.fromNullable(lastCommit);
+			} else {
+				lastCommitOptional = Optional.fromNullable(getRevCommit(commitId));
+			}
+		}
+		return lastCommitOptional.orNull();
+	}
 }
