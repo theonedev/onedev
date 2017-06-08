@@ -417,21 +417,21 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					closeAsMerged(request, true, null);
 				} else {
 					MergePreview mergePreview = request.getMergePreview();
-					ReviewStatus checkStatus = request.getReviewStatus();					
+					ReviewStatus reviewStatus = request.getReviewStatus();					
 					
 					for (ReviewInvitation invitation: request.getReviewInvitations()) {
-						if (checkStatus.getAwaitingReviewers().contains(invitation.getUser()))
+						if (reviewStatus.getAwaitingReviewers().contains(invitation.getUser()))
 							reviewInvitationManager.save(invitation);
 					}
 					
 					boolean hasDisapprovals = false;
-					for (Review review: checkStatus.getEffectiveReviews().values()) {
+					for (Review review: reviewStatus.getEffectiveReviews().values()) {
 						if (!review.isApproved()) {
 							hasDisapprovals = true;
 							break;
 						}
 					}
-					if (!hasDisapprovals && checkStatus.getAwaitingReviewers().isEmpty() 
+					if (!hasDisapprovals && reviewStatus.getAwaitingReviewers().isEmpty() 
 							&& mergePreview != null && mergePreview.getMerged() != null) {
 						merge(request);
 					}

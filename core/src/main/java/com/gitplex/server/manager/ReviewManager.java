@@ -2,6 +2,8 @@ package com.gitplex.server.manager;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.model.User;
@@ -15,6 +17,9 @@ public interface ReviewManager extends EntityManager<Review> {
 
 	@Override
 	void save(Review review);
+	
+	@Nullable
+	Review find(PullRequest request, User user, String commit);
 	
 	/**
 	 * Find list of reviews ordered by review date for specified pull request.

@@ -59,7 +59,7 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 		} else {
 			tooltip = null;
 		}
-		url = avatarManager.getAvatarUrl(user.getFacade());
+		url = avatarManager.getAvatarUrl(user!=null?user.getFacade():null);
 	}
 	
 	public AvatarLink(String id, PersonIdent person) {

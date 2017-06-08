@@ -15,10 +15,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ReviewManager;
-import com.gitplex.server.model.User;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Review;
+import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
 
 @Path("/reviews")
@@ -59,13 +59,23 @@ public class ReviewResource {
 
     @POST
     public Long save(@NotNull @Valid Review review) {
-    	if (!SecurityUtils.canWrite(review.getRequest().getTargetProject()))
+    	User user = userManager.getCurrent();
+    	if (!SecurityUtils.canRead(review.getRequest().getTargetProject()) || user == null)
     		throw new UnauthorizedException();
-    	
-    	review.setUser(userManager.getCurrent());
-    	
+		
+    	if (review.isNew()) {
+    		Review existingReview = reviewManager.find(review.getRequest(), user, review.getCommit());
+    		if (existingReview != null) {
+        		existingReview.setApproved(review.isApproved());
+        		existingReview.setAutoCheck(review.isAutoCheck());
+        		existingReview.setCheckMerged(review.isCheckMerged());
+        		existingReview.setNote(review.getNote());
+        		reviewManager.save(existingReview);
+        		return existingReview.getId();
+    		}
+    	} 
+    	review.setUser(user);
     	reviewManager.save(review);
-    	
     	return review.getId();
     }
     

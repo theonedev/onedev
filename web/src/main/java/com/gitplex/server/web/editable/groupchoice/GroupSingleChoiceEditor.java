@@ -6,6 +6,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.GroupManager;
+import com.gitplex.server.model.Group;
 import com.gitplex.server.util.facade.GroupFacade;
 import com.gitplex.server.web.component.groupchoice.GroupChoiceProvider;
 import com.gitplex.server.web.component.groupchoice.GroupSingleChoice;
@@ -27,13 +28,14 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		GroupFacade group;
+		Group group;
 		if (getModelObject() != null)
-			group = GitPlex.getInstance(GroupManager.class).find(getModelObject()).getFacade();
+			group = GitPlex.getInstance(GroupManager.class).find(getModelObject());
 		else
 			group = null;
 		
-    	input = new GroupSingleChoice("input", Model.of(group), new GroupChoiceProvider());
+		GroupFacade facade = group!=null?group.getFacade():null;
+    	input = new GroupSingleChoice("input", Model.of(facade), new GroupChoiceProvider());
         input.setConvertEmptyInputStringToNull(true);
 
         // add this to control allowClear flag of select2

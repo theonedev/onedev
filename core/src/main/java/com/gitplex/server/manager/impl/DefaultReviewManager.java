@@ -58,8 +58,7 @@ import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 
 @Singleton
-public class DefaultReviewManager extends AbstractEntityManager<Review> 
-		implements ReviewManager {
+public class DefaultReviewManager extends AbstractEntityManager<Review> implements ReviewManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultReviewManager.class);
 	
@@ -461,5 +460,15 @@ public class DefaultReviewManager extends AbstractEntityManager<Review>
 			}
 		}
 		
+	}
+
+	@Override
+	public Review find(PullRequest request, User user, String commit) {
+		EntityCriteria<Review> criteria = EntityCriteria.of(Review.class);
+		criteria.add(Restrictions.eq("user", user))
+				.add(Restrictions.eq("request", request))
+				.add(Restrictions.eq("commit", commit));
+		return find(criteria);
 	}	
+	
 }
