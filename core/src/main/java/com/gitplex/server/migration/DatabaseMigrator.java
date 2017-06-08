@@ -2,10 +2,16 @@ package com.gitplex.server.migration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import javax.inject.Singleton;
 
+import org.apache.commons.compress.compressors.FileNameUtil;
 import org.dom4j.Element;
 
 import com.gitplex.server.util.FileUtils;
@@ -32,7 +38,7 @@ public class DatabaseMigrator {
 
 	private void migrate2(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("depots.xml")) {
+			if (file.getName().startsWith("Depots.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					Element gateKeeperElement = element.element("gateKeeper");
@@ -73,7 +79,7 @@ public class DatabaseMigrator {
 	
 	private void migrate4(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Users.xml")) {
+			if (file.getName().startsWith("Accounts.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					Element avatarUploadDateElement = element.element("avatarUploadDate");
@@ -170,13 +176,13 @@ public class DatabaseMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
-			} else if (file.getName().startsWith("Users.xml")) {
+			} else if (file.getName().startsWith("Accounts.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					element.element("reviewEffort").detach();
 				}
 				dom.writeToFile(file, false);
-			} else if (file.getName().startsWith("depots.xml")) {
+			} else if (file.getName().startsWith("Depots.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					element.element("gateKeepers").detach();
@@ -227,6 +233,94 @@ public class DatabaseMigrator {
 				dom.writeToFile(file, false);
 			}
 		}	
+	}
+	
+	private void migrate9(File dataDir, Stack<Integer> versions) {
+		try {
+			Map<String, String> userIdToName = new HashMap<>();
+			for (File file: dataDir.listFiles()) {
+				if (file.getName().startsWith("Accounts.xml")) {
+					File renamedFile = new File(dataDir, file.getName().replace("Accounts.xml", "Users.xml"));
+					FileUtils.moveFile(file, renamedFile);
+					String content = FileUtils.readFileToString(renamedFile, Charsets.UTF_8);
+					content = StringUtils.replace(content, "com.gitplex.server.model.Account", 
+							"com.gitplex.server.model.User");
+					VersionedDocument dom = VersionedDocument.fromXML(content);
+					for (Element element: dom.getRootElement().elements()) {
+						userIdToName.put(element.elementText("id"), element.elementText("name"));
+						if (element.elementTextTrim("organization").equals("true")) {
+							element.detach();
+						} else {
+							element.element("organization").detach();
+							element.element("defaultPrivilege").detach();
+							element.element("noSpaceName").detach();
+							if (element.element("noSpaceFullName") != null)
+								element.element("noSpaceFullName").detach();
+						}
+					}
+					dom.writeToFile(renamedFile, false);
+				}
+			}
+			for (File file: dataDir.listFiles()) {
+				if (file.getName().startsWith("Depots.xml")) {
+					File renamedFile = new File(dataDir, file.getName().replace("Depots.xml", "Projects.xml"));
+					FileUtils.moveFile(file, renamedFile);
+					String content = FileUtils.readFileToString(renamedFile, Charsets.UTF_8);
+					content = StringUtils.replace(content, "com.gitplex.server.model.Depot", 
+							"com.gitplex.server.model.Project");
+					VersionedDocument dom = VersionedDocument.fromXML(content);
+					for (Element element: dom.getRootElement().elements()) {
+						String accountId = element.elementText("account");
+						element.element("account").detach();
+						String depotName = element.elementText("name");
+						element.element("name").setText(userIdToName.get(accountId) + "." + depotName);
+						if (element.element("defaultPrivilege") != null	)
+							element.element("defaultPrivilege").detach();
+					}
+					dom.writeToFile(renamedFile, false);
+				} else if (file.getName().startsWith("BranchWatchs.xml")) {
+					VersionedDocument dom = VersionedDocument.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) {
+						element.element("depot").setName("project");
+					}
+					dom.writeToFile(file, false);
+				} else if (file.getName().startsWith("PullRequests.xml")) {
+					VersionedDocument dom = VersionedDocument.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) {
+						element.element("targetDepot").setName("targetProject");
+						if (element.element("sourceDepot") != null)
+							element.element("sourceDepot").setName("sourceProject");
+					}
+					dom.writeToFile(file, false);
+				} else if (file.getName().startsWith("Teams.xml") 
+						|| file.getName().startsWith("TeamMemberships.xml")
+						|| file.getName().startsWith("TeamAuthorizations.xml")
+						|| file.getName().startsWith("OrganizationMemberships.xml")
+						|| file.getName().startsWith("UserAuthorizations.xml")) {
+					FileUtils.deleteFile(file);
+				} else if (file.getName().startsWith("Configs.xml")) {
+					VersionedDocument dom = VersionedDocument.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) {
+						if (element.elementText("key").equals("SYSTEM")) {
+							String storagePath = element.element("setting").elementText("storagePath");
+							File storageDir = new File(storagePath);
+							File repositoriesDir = new File(storageDir, "repositories");
+							if (repositoriesDir.exists()) {
+								File projectsDir = new File(storageDir, "projects");
+								FileUtils.moveDirectory(repositoriesDir, projectsDir);
+								for (File projectDir: projectsDir.listFiles()) {
+									File infoDir = new File(projectDir, "info");
+									if (infoDir.exists())
+										FileUtils.deleteDir(infoDir);
+								}
+							}
+						}
+					}					
+				}
+			}		
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }

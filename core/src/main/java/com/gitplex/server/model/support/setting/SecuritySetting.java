@@ -11,7 +11,7 @@ public class SecuritySetting implements Serializable {
 
 	private boolean enableSelfRegister = true;
 
-	@Editable(description="User can self-register users if this option is enabled")
+	@Editable(description="User can self-register if this option is enabled")
 	public boolean isEnableSelfRegister() {
 		return enableSelfRegister;
 	}

@@ -56,7 +56,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.storagePath = storagePath;
 	}
 
-	@Editable(order=200, description="GitPlex relies on git command line to manage projects. The minimum "
+	@Editable(order=200, description="GitPlex requires git command line to manage repositories. The minimum "
 			+ "required version is 1.8.0.")
 	@Valid
 	@NotNull
