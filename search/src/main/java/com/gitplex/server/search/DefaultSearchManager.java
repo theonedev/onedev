@@ -243,20 +243,19 @@ public class DefaultSearchManager implements SearchManager {
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
-			Long projectId = event.getEntity().getId();
 			dao.doAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
 					synchronized (searcherManagers) {
-						SearcherManager searcherManager = searcherManagers.get(projectId);
+						Long projectId = event.getEntity().getId();						
+						SearcherManager searcherManager = searcherManagers.remove(projectId);
 						if (searcherManager != null) {
 							try {
 								searcherManager.close();
 							} catch (IOException e) {
 								Throwables.propagate(e);
 							}
-							searcherManagers.remove(projectId);
 						}
 					}
 				}

@@ -146,6 +146,20 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	query.executeUpdate();
 
     	dao.remove(project);
+
+    	dao.doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				synchronized (repositoryCache) {
+	    			Repository repository = repositoryCache.remove(project.getId());
+	    			if (repository != null) 
+	    				repository.close();
+	    		}
+				
+			}
+			
+		});
     }
     
     @Override
@@ -239,7 +253,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		for (Project project: findAll())
 			checkGit(project);
 	}
-	
+
 	@Transactional
 	@Listen
 	public void on(RefUpdated event) {
