@@ -400,7 +400,9 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 					}
 					
 				}));
-				if (rowModel.getObject().equals(SecurityUtils.getUser().getId())) {
+				
+				Long userId = rowModel.getObject();
+				if (userId.equals(SecurityUtils.getUser().getId()) && !isPrivilegeFromOtherSources(userId)) {
 					dropdown.add(AttributeAppender.append("disabled", "true"));
 					dropdown.setEnabled(false);
 				}

@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.ajax.markup.html.repeater.data.table.AjaxNavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -18,6 +20,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToo
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -25,6 +28,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -36,6 +40,7 @@ import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
+import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.MembershipFacade;
@@ -45,11 +50,11 @@ import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.UserLink;
-import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.layout.LayoutPage;
 import com.gitplex.server.web.page.layout.NewProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
+import com.gitplex.server.web.page.project.setting.general.GeneralSettingPage;
 import com.gitplex.server.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -57,6 +62,37 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class DashboardPage extends LayoutPage {
 
+	private boolean showOrphanProjects;
+	
+	private final IModel<List<ProjectFacade>> orphanProjectsModel = new LoadableDetachableModel<List<ProjectFacade>>() {
+
+		@Override
+		protected List<ProjectFacade> load() {
+			CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
+			List<ProjectFacade> projects = new ArrayList<>();
+			
+			Set<Long> projectIdsWithExplicitAdministrators = new HashSet<>();
+			for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+				if (authorization.getPrivilege() == ProjectPrivilege.ADMIN)
+					projectIdsWithExplicitAdministrators.add(authorization.getProjectId());
+			}
+			for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
+				if (authorization.getPrivilege() == ProjectPrivilege.ADMIN)
+					projectIdsWithExplicitAdministrators.add(authorization.getProjectId());
+			}
+			
+			for (ProjectFacade project: cacheManager.getProjects().values()) {
+				if (!projectIdsWithExplicitAdministrators.contains(project.getId()) 
+						&& project.matchesQuery(searchInput)) {
+					projects.add(project);
+				}
+			}
+			projects.sort(ProjectFacade::compareLastVisit);
+			return projects;
+		}
+		
+	};
+	
 	private final IModel<List<ProjectFacade>> projectsModel = new LoadableDetachableModel<List<ProjectFacade>>() {
 
 		@Override
@@ -127,6 +163,51 @@ public class DashboardPage extends LayoutPage {
 			}
 			
 		});
+
+		WebMarkupContainer orphanProjectsNote = new WebMarkupContainer("orphanProjectsNote") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(showOrphanProjects);
+			}
+			
+		};
+		orphanProjectsNote.setOutputMarkupPlaceholderTag(true);
+		add(orphanProjectsNote);
+		
+		add(new AjaxLink<Void>("showOrphanProjects") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return showOrphanProjects?"active":"";
+					}
+					
+				}));
+				setOutputMarkupPlaceholderTag(true);				
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showOrphanProjects = !showOrphanProjects;
+				target.add(this);
+				target.add(projectsTable);
+				target.add(orphanProjectsNote);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator() && !orphanProjectsModel.getObject().isEmpty());
+			}
+			
+		});
 		
 		List<IColumn<ProjectFacade, Void>> columns = new ArrayList<>();
 		
@@ -137,8 +218,14 @@ public class DashboardPage extends LayoutPage {
 					IModel<ProjectFacade> rowModel) {
 				Fragment fragment = new Fragment(componentId, "projectFrag", DashboardPage.this);
 				Project project = GitPlex.getInstance(ProjectManager.class).load(rowModel.getObject().getId());
-				Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
-						ProjectBlobPage.class, ProjectBlobPage.paramsOf(project)); 
+				Link<Void> link; 
+				if (showOrphanProjects) {
+					link = new BookmarkablePageLink<Void>("link", GeneralSettingPage.class, 
+							GeneralSettingPage.paramsOf(project)); 
+				} else {
+					link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, 
+							ProjectBlobPage.paramsOf(project)); 
+				}
 				link.add(new Label("name", project.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);
@@ -206,7 +293,11 @@ public class DashboardPage extends LayoutPage {
 
 			@Override
 			public Iterator<? extends ProjectFacade> iterator(long first, long count) {
-				List<ProjectFacade> projects = projectsModel.getObject();
+				List<ProjectFacade> projects;
+				if (showOrphanProjects)
+					projects = orphanProjectsModel.getObject();
+				else
+					projects = projectsModel.getObject();
 				if (first + count <= projects.size())
 					return projects.subList((int)first, (int)(first+count)).iterator();
 				else
@@ -215,7 +306,10 @@ public class DashboardPage extends LayoutPage {
 
 			@Override
 			public long size() {
-				return projectsModel.getObject().size();
+				if (showOrphanProjects)
+					return orphanProjectsModel.getObject().size();
+				else
+					return projectsModel.getObject().size();
 			}
 
 			@Override
@@ -240,6 +334,7 @@ public class DashboardPage extends LayoutPage {
 
 	@Override
 	protected void onDetach() {
+		orphanProjectsModel.detach();
 		projectsModel.detach();
 		super.onDetach();
 	}

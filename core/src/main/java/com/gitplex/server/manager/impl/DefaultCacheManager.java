@@ -1,6 +1,7 @@
 package com.gitplex.server.manager.impl;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -178,6 +179,24 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						projectsLock.writeLock().unlock();
 					}
+					userAuthorizationsLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, UserAuthorizationFacade>> it = userAuthorizations.entrySet().iterator(); it.hasNext();) {
+							if (it.next().getValue().getProjectId().equals(event.getEntity().getId()))
+								it.remove();
+						}
+					} finally {
+						userAuthorizationsLock.writeLock().unlock();
+					}
+					groupAuthorizationsLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, GroupAuthorizationFacade>> it = groupAuthorizations.entrySet().iterator(); it.hasNext();) {
+							if (it.next().getValue().getProjectId().equals(event.getEntity().getId()))
+								it.remove();
+						}
+					} finally {
+						groupAuthorizationsLock.writeLock().unlock();
+					}
 				} else if (event.getEntity() instanceof User) {
 					usersLock.writeLock().lock();
 					try {
@@ -187,12 +206,48 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						usersLock.writeLock().unlock();
 					}
+					userAuthorizationsLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, UserAuthorizationFacade>> it = userAuthorizations.entrySet().iterator(); it.hasNext();) {
+							if (it.next().getValue().getUserId().equals(event.getEntity().getId()))
+								it.remove();
+						}
+					} finally {
+						userAuthorizationsLock.writeLock().unlock();
+					}
+					membershipsLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, MembershipFacade>> it = memberships.entrySet().iterator(); it.hasNext();) {
+							if (it.next().getValue().getUserId().equals(event.getEntity().getId()))
+								it.remove();
+						}
+					} finally {
+						membershipsLock.writeLock().unlock();
+					}
 				} else if (event.getEntity() instanceof Group) {
 					groupsLock.writeLock().lock();
 					try {
 						groups.remove(event.getEntity().getId());
 					} finally {
 						groupsLock.writeLock().unlock();
+					}
+					groupAuthorizationsLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, GroupAuthorizationFacade>> it = groupAuthorizations.entrySet().iterator(); it.hasNext();) {
+							if (it.next().getValue().getGroupId().equals(event.getEntity().getId()))
+								it.remove();
+						}
+					} finally {
+						groupAuthorizationsLock.writeLock().unlock();
+					}
+					membershipsLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, MembershipFacade>> it = memberships.entrySet().iterator(); it.hasNext();) {
+							if (it.next().getValue().getUserId().equals(event.getEntity().getId()))
+								it.remove();
+						}
+					} finally {
+						membershipsLock.writeLock().unlock();
 					}
 				} else if (event.getEntity() instanceof Membership) {
 					membershipsLock.writeLock().lock();

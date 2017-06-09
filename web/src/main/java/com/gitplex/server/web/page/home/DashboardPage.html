@@ -7,8 +7,14 @@
 			<div class="pull-left">
 				<a wicket:id="createProject" class="btn btn-default"><i class="fa fa-plus"></i> Create Project</a>
 			</div>
+			<div class="pull-left">
+				<a wicket:id="showOrphanProjects" class="btn btn-default"><i class="fa fa-ext fa-repo"></i> Orphan Projects</a>
+			</div>
 		</div>
 		<div class="body">
+			<div wicket:id="orphanProjectsNote" class="alert alert-warning">Orphan projects are those without explicit administrators. For instance, 
+			project forked/created by some user will become orphan if that user account is deleted. You may delete orphan projects 
+			to save resource or assign someone else as explicit project administrator if it is still useful.</div>
 			<table wicket:id="projects" class="projects table"></table>
 		</div>		
 	</div>

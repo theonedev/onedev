@@ -116,7 +116,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	
     	dao.persist(project);
     	
-    	if (isNew && !SecurityUtils.isAdministrator()) {
+    	if (isNew) {
     		UserAuthorization authorization = new UserAuthorization();
     		authorization.setPrivilege(ProjectPrivilege.ADMIN);
     		authorization.setProject(project);

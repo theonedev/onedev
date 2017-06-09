@@ -180,7 +180,7 @@ public abstract class MoreInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(SecurityUtils.getUser() != null));
+		}.setVisible(SecurityUtils.canCreateProjects()));
 	}
 	
 	private Project getProject() {
