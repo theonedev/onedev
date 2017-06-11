@@ -6,17 +6,15 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.server.web.editable.BeanDescriptor;
 import com.gitplex.server.web.editable.BeanEditor;
-import com.gitplex.server.web.editable.EditSupportRegistry;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.page.home.DashboardPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
@@ -106,10 +104,9 @@ public class UserProfilePage extends UserPage {
 			fragment.add(form);
 			add(fragment);
 		} else {
-			EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-			BeanContext<Serializable> editContext = registry.getBeanEditContext(
-					User.class, Sets.newHashSet("password"));
-			add(editContext.renderForView("content", Model.of(getUser())));
+			User user = new User();
+			new BeanDescriptor(User.class).copyProperties(getUser(), user);
+			add(BeanContext.viewBean("content", user, Sets.newHashSet("password")));
 		}
 
 	}
