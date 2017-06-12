@@ -22,6 +22,11 @@ public class ProjectNameValidator implements ConstraintValidator<ProjectName, St
 			String message = "Only alphanumeric, underscore, dash, and dot are accepted";
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
+		} else if (value.equals("new")) {
+			constraintContext.disableDefaultConstraintViolation();
+			String message = "'new' is reserved and can not be used as project name";
+			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+			return false;
 		} else {
 			return true;
 		}

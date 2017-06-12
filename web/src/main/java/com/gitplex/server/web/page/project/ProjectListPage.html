@@ -1,5 +1,5 @@
 <wicket:extend>
-	<div id="dashboard">
+	<div class="project list">
 		<div class="head clearfix">
 			<div class="pull-left">
 				<input wicket:id="filterProjects" class="form-control search" placeholder="Filter projects"></input>
@@ -15,7 +15,7 @@
 			<div wicket:id="orphanProjectsNote" class="alert alert-warning">Orphan projects are those without explicit administrators. For instance, 
 			project forked/created by some user will become orphan if that user account is deleted. You may delete orphan projects 
 			to save resource or assign someone else as explicit project administrator if it is still useful.</div>
-			<table wicket:id="projects" class="projects table"></table>
+			<table wicket:id="projects" class="table"></table>
 		</div>		
 	</div>
 	<wicket:fragment wicket:id="projectFrag">

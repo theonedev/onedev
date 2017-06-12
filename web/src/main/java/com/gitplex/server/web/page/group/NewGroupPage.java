@@ -1,24 +1,34 @@
-package com.gitplex.server.web.page.admin.group;
+package com.gitplex.server.web.page.group;
 
+import java.util.List;
+
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.GroupManager;
 import com.gitplex.server.model.Group;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.ComponentRenderer;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
-import com.gitplex.server.web.page.admin.AdministrationPage;
-import com.gitplex.server.web.page.group.GroupMembershipsPage;
+import com.gitplex.server.web.page.layout.LayoutPage;
 import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
-public class NewGroupPage extends AdministrationPage {
+public class NewGroupPage extends LayoutPage {
 
 	private Group group = new Group();
 	
@@ -83,4 +93,55 @@ public class NewGroupPage extends AdministrationPage {
 		add(form);
 	}
 
+	@Override
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
+		
+		breadcrumbs.add(new ComponentRenderer() {
+
+			@Override
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, GroupListPage.class) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Groups");
+					}
+					
+				};
+			}
+			
+		});
+
+		breadcrumbs.add(new ComponentRenderer() {
+			
+			@Override
+			public Component render(String componentId) {
+				return new Label(componentId, "New Group") {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("div");
+					}
+					
+				};
+			}
+			
+		});
+		
+		return breadcrumbs;
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.isAdministrator();
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new GroupResourceReference()));
+	}
+	
 }

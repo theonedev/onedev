@@ -1,23 +1,33 @@
-package com.gitplex.server.web.page.admin.user;
+package com.gitplex.server.web.page.user;
+
+import java.util.List;
 
 import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.ComponentRenderer;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
-import com.gitplex.server.web.page.admin.AdministrationPage;
-import com.gitplex.server.web.page.user.UserMembershipsPage;
+import com.gitplex.server.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
-public class NewUserPage extends AdministrationPage {
+public class NewUserPage extends LayoutPage {
 
 	private User user = new User();
 	
@@ -79,6 +89,57 @@ public class NewUserPage extends AdministrationPage {
 			
 		}));
 		add(form);
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.isAdministrator();
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new UserResourceReference()));
+	}
+
+	@Override
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
+		
+		breadcrumbs.add(new ComponentRenderer() {
+
+			@Override
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, UserListPage.class) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Users");
+					}
+					
+				};
+			}
+			
+		});
+
+		breadcrumbs.add(new ComponentRenderer() {
+			
+			@Override
+			public Component render(String componentId) {
+				return new Label(componentId, "New User") {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("div");
+					}
+					
+				};
+			}
+			
+		});
+		
+		return breadcrumbs;
 	}
 
 }

@@ -15,17 +15,15 @@ import com.gitplex.server.web.page.admin.SecuritySettingPage;
 import com.gitplex.server.web.page.admin.ServerInformationPage;
 import com.gitplex.server.web.page.admin.ServerLogPage;
 import com.gitplex.server.web.page.admin.SystemSettingPage;
-import com.gitplex.server.web.page.admin.group.GroupListPage;
-import com.gitplex.server.web.page.admin.group.NewGroupPage;
-import com.gitplex.server.web.page.admin.user.NewUserPage;
-import com.gitplex.server.web.page.admin.user.UserListPage;
 import com.gitplex.server.web.page.group.GroupAuthorizationsPage;
-import com.gitplex.server.web.page.group.GroupProfilePage;
+import com.gitplex.server.web.page.group.GroupListPage;
 import com.gitplex.server.web.page.group.GroupMembershipsPage;
+import com.gitplex.server.web.page.group.GroupProfilePage;
+import com.gitplex.server.web.page.group.NewGroupPage;
 import com.gitplex.server.web.page.init.ServerInitPage;
-import com.gitplex.server.web.page.init.WelcomePage;
-import com.gitplex.server.web.page.layout.NewProjectPage;
+import com.gitplex.server.web.page.project.NewProjectPage;
 import com.gitplex.server.web.page.project.NoBranchesPage;
+import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.branches.ProjectBranchesPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
@@ -49,9 +47,11 @@ import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
 import com.gitplex.server.web.page.test.TestPage;
 import com.gitplex.server.web.page.user.AvatarEditPage;
+import com.gitplex.server.web.page.user.NewUserPage;
 import com.gitplex.server.web.page.user.PasswordEditPage;
 import com.gitplex.server.web.page.user.TaskListPage;
 import com.gitplex.server.web.page.user.UserAuthorizationsPage;
+import com.gitplex.server.web.page.user.UserListPage;
 import com.gitplex.server.web.page.user.UserMembershipsPage;
 import com.gitplex.server.web.page.user.UserProfilePage;
 import com.gitplex.server.web.util.mapper.WebPageMapper;
@@ -64,7 +64,6 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 
 	public GitPlexUrlMapper(WebApplication app) {
 		add(new WebPageMapper("init", ServerInitPage.class));
-		add(new WebPageMapper("welcome", WelcomePage.class));
 		addAdministrationPages();
 		addUserPages();
 		addGroupPages();
@@ -72,7 +71,6 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		addSecurityPages();
 		
 		add(new WebPageMapper("test", TestPage.class));
-		add(new WebPageMapper("new-project", NewProjectPage.class));
 		
 		addResources();
 	}
@@ -93,10 +91,6 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addAdministrationPages() {
-		add(new WebPageMapper("administration/users", UserListPage.class));
-		add(new WebPageMapper("administration/users/new", NewUserPage.class));
-		add(new WebPageMapper("administration/groups", GroupListPage.class));
-		add(new WebPageMapper("administration/groups/new", NewGroupPage.class));
 		add(new WebPageMapper("administration/settings/system", SystemSettingPage.class));
 		add(new WebPageMapper("administration/settings/mail", MailSettingPage.class));
 		add(new WebPageMapper("administration/settings/backup", DatabaseBackupPage.class));
@@ -106,6 +100,8 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addUserPages() {
+		add(new WebPageMapper("users", UserListPage.class));
+		add(new WebPageMapper("users/new", NewUserPage.class));
 		add(new WebPageMapper("users/${user}/profile", UserProfilePage.class));
 		add(new WebPageMapper("users/${user}/groups", UserMembershipsPage.class));
 		add(new WebPageMapper("users/${user}/authorizations", UserAuthorizationsPage.class));
@@ -115,12 +111,16 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addGroupPages() {
+		add(new WebPageMapper("groups", GroupListPage.class));
+		add(new WebPageMapper("groups/new", NewGroupPage.class));
 		add(new WebPageMapper("groups/${group}/profile", GroupProfilePage.class));
 		add(new WebPageMapper("groups/${group}/members", GroupMembershipsPage.class));
 		add(new WebPageMapper("groups/${group}/authorizations", GroupAuthorizationsPage.class));
 	}
 	
 	private void addProjectPages() {
+		add(new WebPageMapper("projects", ProjectListPage.class));
+		add(new WebPageMapper("projects/new", NewProjectPage.class));
 		add(new WebPageMapper("projects/${project}", ProjectBlobPage.class));
 
 		add(new WebPageMapper("projects/${project}/blob/#{revision}/#{path}", ProjectBlobPage.class) {

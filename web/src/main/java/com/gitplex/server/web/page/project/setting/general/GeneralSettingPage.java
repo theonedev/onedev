@@ -16,7 +16,7 @@ import com.gitplex.server.web.component.confirmdelete.ConfirmDeleteProjectModal;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
-import com.gitplex.server.web.page.home.DashboardPage;
+import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")
@@ -89,7 +89,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 					
 					@Override
 					protected void onDeleted(AjaxRequestTarget target) {
-						setResponsePage(DashboardPage.class);						
+						setResponsePage(ProjectListPage.class);						
 					}
 					
 					@Override

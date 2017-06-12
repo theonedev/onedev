@@ -22,6 +22,7 @@ import com.gitplex.server.web.WebSession;
 import com.gitplex.server.web.component.wizard.ManualConfigStep;
 import com.gitplex.server.web.component.wizard.Wizard;
 import com.gitplex.server.web.page.base.BasePage;
+import com.gitplex.server.web.page.dashboard.DashboardPage;
 
 @SuppressWarnings("serial")
 public class ServerInitPage extends BasePage {
@@ -98,7 +99,7 @@ public class ServerInitPage extends BasePage {
 					WebSession.get().logout();
 					User root = GitPlex.getInstance(UserManager.class).getRoot();
 					SecurityUtils.getSubject().runAs(root.getPrincipals());
-					throw new RestartResponseException(WelcomePage.class);
+					throw new RestartResponseException(DashboardPage.class);
 				}
 				
 			});

@@ -4,6 +4,7 @@ html, body {
 #main>.head {
 	background: #010203;
 	padding: 8px 16px;
+	color: #CCC;
 }
 #main>.head>div {
 	margin-right: 20px;
@@ -16,25 +17,15 @@ html, body {
 	font-size: 28px;
 	color: #EEE;
 }
-#main>.head>.context {
-	color: #CCC;
+#main>.head>.breadcrumb {
+	padding: 0;
+	margin: 0;
+	background: inherit;
+	border-radius: 0;
 	font-size: 20px;
 }
-#main>.head>.search {
-	padding-top: 2px;
-	position: relative;
-}
-#main>.head>.search input {
-	background: #333;
-	border: 1px solid #333;
-	box-shadow: none;
-	transition: none;
-	color: #CCC;
-}
-#main>.head>.search input:FOCUS {
-	background: #DDD;
-	border-color: #DDD;
-	color: #333;
+#main>.head>.breadcrumb .separator {
+	margin: 0 8px;
 }
 #main>.head>.actions {
 	padding-top: 7px;
@@ -124,10 +115,6 @@ html, body {
 }
 #main>.foot>div {
 	white-space: nowrap;
-}
-section>.head {
-	font-size: 18px;
-	margin-bottom: 20px;
 }
 
 #project-add {

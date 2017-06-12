@@ -19,7 +19,7 @@ import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.page.base.BasePage;
-import com.gitplex.server.web.page.home.DashboardPage;
+import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.page.user.AvatarEditPage;
 import com.gitplex.server.web.page.user.UserPage;
 
@@ -74,7 +74,7 @@ public class RegisterPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(DashboardPage.class);
+				setResponsePage(ProjectListPage.class);
 			}
 			
 		});

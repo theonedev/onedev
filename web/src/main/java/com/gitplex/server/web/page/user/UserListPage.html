@@ -1,5 +1,5 @@
 <wicket:extend>
-	<section class="user list">
+	<div class="user list">
 		<div class="head clearfix">
 			<div class="pull-left">
 				<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by name"></input>
@@ -11,13 +11,13 @@
 		<div class="body">
 			<table wicket:id="users" class="users table table-hover"></table>
 		</div>
-	</section>
+	</div>
 	<wicket:fragment wicket:id="nameFrag">
 		<a wicket:id="avatarLink"></a>
 		<a wicket:id="nameLink"></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionFrag">
-		<a wicket:id="setting" title="Setting of this user"><i class="fa fa-cog"></i></a>
+		<a wicket:id="profile" title="Profile of this user"><i class="fa fa-cog"></i></a>
 		<a wicket:id="delete" title="Delete this user"><i class="fa fa-trash"></i></a>
 	</wicket:fragment>
 </wicket:extend>

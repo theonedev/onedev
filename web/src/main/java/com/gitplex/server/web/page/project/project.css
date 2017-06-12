@@ -1,16 +1,13 @@
-#project-head .pull-left {
+.breadcrumb .project .pull-left {
 	margin-right: 4px;
 }
-#project-head .more-info {
+.breadcrumb .project .more-info {
 	background: #444;
 	padding: 0 8px;
 	border-radius: 4px;
 	font-size: 14px;
 	margin-top: 6px;
 	margin-left: 8px;
-}
-#project-head .more-info:hover, #project-head .more-info.dropdown-open {
-	background: #777;
 }
 
 #project>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
@@ -49,4 +46,43 @@
 #project>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text,
 #project>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.badge {
 	display: none;
+}
+
+.project.list, .new-project {
+	padding: 20px;
+}
+.project.list table {
+	font-size: 13px;
+}
+.project.list table td.project {
+	font-size: 14px;
+}
+
+.project.list table a {
+	color: #444;
+}
+.project.list table td.author img.avatar {
+	width: 20px;
+	height: 20px;
+}
+.project.list table td.author span, .project.list table td.commit-date {
+	color: #888;
+}
+
+.no-branches {
+	padding: 20px;
+}
+.no-branches>.body>ul {
+	background: #333;
+	color: #EEE;
+	border-radius: 4px;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	margin: 4px 0 16px 0;
+}
+.no-branches>.body>ul>li:before {
+	content: "$";
+	margin-right: 8px;
+}
+.no-branches>.body>.help-block {
+	margin-top: -8px;
 }

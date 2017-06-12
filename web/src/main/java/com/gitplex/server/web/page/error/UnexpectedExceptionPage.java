@@ -38,7 +38,7 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.web.page.home.DashboardPage;
+import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -119,8 +119,8 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 			}
 			
 		});
-		add(new BookmarkablePageLink<Void>("dashboardTop", DashboardPage.class));
-		add(new BookmarkablePageLink<Void>("dashboardBottom", DashboardPage.class));
+		add(new BookmarkablePageLink<Void>("dashboardTop", ProjectListPage.class));
+		add(new BookmarkablePageLink<Void>("dashboardBottom", ProjectListPage.class));
 		
 		add(new WebMarkupContainer("dashboardUrl") {
 

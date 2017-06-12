@@ -1,9 +1,10 @@
-package com.gitplex.server.web.page.admin.user;
+package com.gitplex.server.web.page.user;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -11,6 +12,8 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
@@ -28,18 +31,19 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.datatable.DefaultDataTable;
 import com.gitplex.server.web.component.link.UserLink;
-import com.gitplex.server.web.page.admin.AdministrationPage;
-import com.gitplex.server.web.page.user.UserPage;
-import com.gitplex.server.web.page.user.UserProfilePage;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.page.layout.LayoutPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
-public class UserListPage extends AdministrationPage {
+public class UserListPage extends LayoutPage {
 
 	private DataTable<User, Void> usersTable;
 	
@@ -77,6 +81,12 @@ public class UserListPage extends AdministrationPage {
 			public void onClick() {
 				setResponsePage(NewUserPage.class);
 			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator());
+			}
 			
 		});
 		
@@ -111,7 +121,7 @@ public class UserListPage extends AdministrationPage {
 				Fragment fragment = new Fragment(componentId, "actionFrag", UserListPage.this);
 				fragment.add(AttributeAppender.append("class", "actions"));
 				
-				fragment.add(new Link<Void>("setting") {
+				fragment.add(new Link<Void>("profile") {
 
 					@Override
 					public void onClick() {
@@ -128,6 +138,12 @@ public class UserListPage extends AdministrationPage {
 					@Override
 					public void onClick() {
 						GitPlex.getInstance(UserManager.class).delete(rowModel.getObject());
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.isAdministrator());
 					}
 
 				}.add(new ConfirmOnClick("Do you really want to delete user '" + user.getDisplayName() + "'?")));
@@ -168,4 +184,33 @@ public class UserListPage extends AdministrationPage {
 				WebConstants.PAGE_SIZE));
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new UserResourceReference()));
+	}
+
+	@Override
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
+		
+		breadcrumbs.add(new ComponentRenderer() {
+
+			@Override
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, UserListPage.class) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Users");
+					}
+					
+				};
+			}
+			
+		});
+
+		return breadcrumbs;
+	}
+	
 }

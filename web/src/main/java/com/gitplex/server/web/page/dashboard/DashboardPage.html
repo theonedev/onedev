@@ -1,0 +1,18 @@
+<wicket:extend>
+	<div id="dashboard">
+		<div class="summary">
+			<a wicket:id="projects"><i class="fa fa-ext fa-fw fa-repo"></i> <span wicket:id="count"></span> projects</a> <a wicket:id="addProject"><i class="fa fa-plus"></i> add new</a>
+		</div>
+		<div class="summary">
+			<a wicket:id="users"><i class="fa fa-user fa-fw"></i> <span wicket:id="count"></span> users</a> <a wicket:id="addUser"><i class="fa fa-plus"></i> add new</a>
+		</div>
+		<div class="summary">
+			<a wicket:id="groups"><i class="fa fa-group fa-fw"></i> <span wicket:id="count"></span> groups</a> <a wicket:id="addGroup"><i class="fa fa-plus"></i> add new</a>
+		</div>
+		<wicket:enclosure child="administration">
+		<div class="summary">
+			<a wicket:id="administration"><i class="fa fa-cog fa-fw"></i> server administration</a>
+		</div>
+		</wicket:enclosure>
+	</div>
+</wicket:extend>

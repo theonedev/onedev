@@ -1,7 +1,6 @@
-package com.gitplex.server.web.page.home;
+package com.gitplex.server.web.page.project;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,19 +38,18 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
-import com.gitplex.server.model.User;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
-import com.gitplex.server.util.facade.MembershipFacade;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserAuthorizationFacade;
+import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.UserLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.layout.LayoutPage;
-import com.gitplex.server.web.page.layout.NewProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.setting.general.GeneralSettingPage;
@@ -60,7 +58,7 @@ import com.gitplex.server.web.util.DateUtils;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class DashboardPage extends LayoutPage {
+public class ProjectListPage extends LayoutPage {
 
 	private boolean showOrphanProjects;
 	
@@ -97,34 +95,8 @@ public class DashboardPage extends LayoutPage {
 
 		@Override
 		protected List<ProjectFacade> load() {
-			CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
-			List<ProjectFacade> projects = new ArrayList<>();
-			
-			if (SecurityUtils.isAdministrator()) {
-				projects.addAll(cacheManager.getProjects().values());
-			} else {
-				for (ProjectFacade project: cacheManager.getProjects().values()) {
-					if (project.isPublicRead())
-						projects.add(project);
-				}
-				User user = getLoginUser();
-				if (user != null) {
-					Collection<Long> groupIds = new HashSet<>();
-					for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-						if (membership.getUserId().equals(user.getId())) 
-							groupIds.add(membership.getGroupId());
-					}
-					for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
-						if (groupIds.contains(authorization.getGroupId()))
-							projects.add(cacheManager.getProject(authorization.getProjectId()));
-					}
-					for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-						if (authorization.getUserId().equals(user.getId()))
-							projects.add(cacheManager.getProject(authorization.getProjectId()));
-					}
-				}
-			}
-			
+			List<ProjectFacade> projects = new ArrayList<>(GitPlex.getInstance(ProjectManager.class)
+					.getAccessibleProjects(getLoginUser()));
 			for (Iterator<ProjectFacade> it = projects.iterator(); it.hasNext();) {
 				if (!it.next().matchesQuery(searchInput))
 					it.remove();
@@ -216,7 +188,7 @@ public class DashboardPage extends LayoutPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<ProjectFacade>> cellItem, String componentId, 
 					IModel<ProjectFacade> rowModel) {
-				Fragment fragment = new Fragment(componentId, "projectFrag", DashboardPage.this);
+				Fragment fragment = new Fragment(componentId, "projectFrag", ProjectListPage.this);
 				Project project = GitPlex.getInstance(ProjectManager.class).load(rowModel.getObject().getId());
 				Link<Void> link; 
 				if (showOrphanProjects) {
@@ -241,7 +213,7 @@ public class DashboardPage extends LayoutPage {
 				Project project = GitPlex.getInstance(ProjectManager.class).load(rowModel.getObject().getId());
 				RevCommit lastCommit = project.getLastCommit();
 				if (lastCommit != null) {
-					Fragment fragment = new Fragment(componentId, "authorFrag", DashboardPage.this);
+					Fragment fragment = new Fragment(componentId, "authorFrag", ProjectListPage.this);
 					fragment.add(new AvatarLink("avatar", lastCommit.getAuthorIdent()));
 					fragment.add(new UserLink("name", lastCommit.getAuthorIdent()));
 					cellItem.add(fragment);
@@ -260,7 +232,7 @@ public class DashboardPage extends LayoutPage {
 				Project project = GitPlex.getInstance(ProjectManager.class).load(rowModel.getObject().getId());
 				RevCommit lastCommit = project.getLastCommit();
 				if (lastCommit != null) {
-					Fragment fragment = new Fragment(componentId, "commitMessageFrag", DashboardPage.this);
+					Fragment fragment = new Fragment(componentId, "commitMessageFrag", ProjectListPage.this);
 					PageParameters params = CommitDetailPage.paramsOf(project, lastCommit.name());
 					Link<Void> link = new BookmarkablePageLink<Void>("link", CommitDetailPage.class, params);
 					link.add(new Label("message", lastCommit.getShortMessage()));
@@ -342,12 +314,30 @@ public class DashboardPage extends LayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new DashboardResourceReference()));
+		response.render(CssHeaderItem.forReference(new ProjectResourceReference()));
 	}
 
 	@Override
-	protected Component newContextHead(String componentId) {
-		return new Label(componentId, "Projects");
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
+		
+		breadcrumbs.add(new ComponentRenderer() {
+
+			@Override
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, ProjectListPage.class) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Projects");
+					}
+					
+				};
+			}
+			
+		});
+
+		return breadcrumbs;
 	}
 
 }

@@ -1,7 +1,9 @@
 package com.gitplex.server.web.page.layout;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -12,7 +14,11 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.launcher.loader.AppLoader;
@@ -21,13 +27,15 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.floating.AlignPlacement;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.admin.SystemSettingPage;
 import com.gitplex.server.web.page.base.BasePage;
+import com.gitplex.server.web.page.dashboard.DashboardPage;
+import com.gitplex.server.web.page.project.NewProjectPage;
 import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
@@ -57,8 +65,16 @@ public abstract class LayoutPage extends BasePage {
 		add(head);
 		
 		head.add(new ViewStateAwarePageLink<Void>("home", getApplication().getHomePage()));
-		
-		head.add(newContextHead("context"));
+
+		head.add(new ListView<ComponentRenderer>("breadcrumbs", getBreadcrumbs()) {
+
+			@Override
+			protected void populateItem(ListItem<ComponentRenderer> item) {
+				item.add(item.getModelObject().render("nav"));
+				item.add(new WebMarkupContainer("separator").setVisible(item.getIndex() != getList().size()-1));
+			}
+			
+		});
 		
 		head.add(new ViewStateAwarePageLink<Void>("createProject", NewProjectPage.class) {
 
@@ -120,15 +136,6 @@ public abstract class LayoutPage extends BasePage {
 
 					fragment.add(new ViewStateAwarePageLink<Void>("profile", 
 							UserProfilePage.class, UserProfilePage.paramsOf(user)));
-					fragment.add(new ViewStateAwarePageLink<Void>("administration", SystemSettingPage.class) {
-
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							setVisible(SecurityUtils.isAdministrator());
-						}
-						
-					});
 					fragment.add(new ViewStateAwarePageLink<Void>("logout", LogoutPage.class));
 					
 					return fragment;
@@ -160,9 +167,26 @@ public abstract class LayoutPage extends BasePage {
 		});
 	}
 
-	protected Component newContextHead(String componentId) {
-		return new WebMarkupContainer(componentId);
-	}
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = new ArrayList<>();
+		
+		breadcrumbs.add(new ComponentRenderer() {
+			
+			@Override
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, DashboardPage.class) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Home");
+					}
+					
+				};
+			}
+		});
+		
+		return breadcrumbs;
+	};
 	
 	protected boolean isLoggedIn() {
 		return getLoginUser() != null;

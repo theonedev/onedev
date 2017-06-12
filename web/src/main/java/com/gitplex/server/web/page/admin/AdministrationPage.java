@@ -6,15 +6,14 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.ComponentRenderer;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
-import com.gitplex.server.web.page.admin.group.NewGroupPage;
-import com.gitplex.server.web.page.admin.group.GroupListPage;
-import com.gitplex.server.web.page.admin.user.NewUserPage;
-import com.gitplex.server.web.page.admin.user.UserListPage;
 import com.gitplex.server.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
@@ -34,8 +33,6 @@ public abstract class AdministrationPage extends LayoutPage {
 		tabs.add(new AdministrationTab("Security Setting", "fa fa-fw fa-lock", SecuritySettingPage.class));
 		tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
 		tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));
-		tabs.add(new AdministrationTab("User Management", "fa fa-fw fa-user", UserListPage.class, NewUserPage.class));
-		tabs.add(new AdministrationTab("Group Management", "fa fa-fw fa-group", GroupListPage.class, NewGroupPage.class));
 		tabs.add(new AdministrationTab("Server Log", "fa fa-fw fa-file-text-o", ServerLogPage.class));
 		tabs.add(new AdministrationTab("Server Information", "fa fa-fw fa-desktop", ServerInformationPage.class));
 		
@@ -49,8 +46,26 @@ public abstract class AdministrationPage extends LayoutPage {
 	}
 
 	@Override
-	protected Component newContextHead(String componentId) {
-		return new Label(componentId, "Server Administration");
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
+		
+		breadcrumbs.add(new ComponentRenderer() {
+
+			@Override
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, SystemSettingPage.class) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Administration");
+					}
+					
+				};
+			}
+			
+		});
+		
+		return breadcrumbs;
 	}
 
 }

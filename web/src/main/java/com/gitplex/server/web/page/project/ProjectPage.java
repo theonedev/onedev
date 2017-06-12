@@ -12,11 +12,12 @@ import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -32,8 +33,10 @@ import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserInfoManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.layout.LayoutPage;
@@ -179,25 +182,68 @@ public abstract class ProjectPage extends LayoutPage {
 	}
 
 	@Override
-	protected Component newContextHead(String componentId) {
-		Fragment fragment = new Fragment(componentId, "contextHeadFrag", this);
-		fragment.add(new Label("projectName", getProject().getName()));
-		fragment.add(new DropdownLink("projectMoreInfo") {
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
+		
+		breadcrumbs.add(new ComponentRenderer() {
 
 			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new MoreInfoPanel(id, projectModel) {
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, ProjectListPage.class) {
 
 					@Override
-					protected void onPromptForkOption(AjaxRequestTarget target) {
-						dropdown.close();
+					public IModel<?> getBody() {
+						return Model.of("Projects");
 					}
 					
 				};
 			}
 			
 		});
-		return fragment;
+
+		breadcrumbs.add(new ComponentRenderer() {
+			
+			@Override
+			public Component render(String componentId) {
+				Fragment fragment = new Fragment(componentId, "breadcrumbFrag", ProjectPage.this) {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("div");
+					}
+					
+				};
+				fragment.add(new BookmarkablePageLink<Void>("name", ProjectBlobPage.class, 
+						ProjectBlobPage.paramsOf(getProject())) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of(getProject().getName());
+					}
+					
+				});
+				fragment.add(new DropdownLink("moreInfo") {
+
+					@Override
+					protected Component newContent(String id, FloatingPanel dropdown) {
+						return new MoreInfoPanel(id, projectModel) {
+
+							@Override
+							protected void onPromptForkOption(AjaxRequestTarget target) {
+								dropdown.close();
+							}
+							
+						};
+					}
+					
+				});
+				return fragment;
+			}
+			
+		});
+		
+		return breadcrumbs;
 	}
 
 }

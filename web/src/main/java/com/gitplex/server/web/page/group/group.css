@@ -8,3 +8,10 @@
 #group .membership.list .head .select2-container {
 	width: 240px;
 } 
+
+.group.list, .new-group {
+	padding: 20px;
+}
+.group.list .actions a {
+	color: #666;
+}

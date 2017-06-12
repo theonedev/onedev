@@ -8,12 +8,15 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.GroupManager;
 import com.gitplex.server.model.Group;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.ComponentRenderer;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.layout.LayoutPage;
@@ -73,8 +76,35 @@ public abstract class GroupPage extends LayoutPage {
 	}
 
 	@Override
-	protected Component newContextHead(String componentId) {
-		return new Label(componentId, "Group - " + getGroup().getName());
-	}
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
+		
+		breadcrumbs.add(new ComponentRenderer() {
 
+			@Override
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, GroupListPage.class) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Groups");
+					}
+					
+				};
+			}
+			
+		});
+
+		breadcrumbs.add(new ComponentRenderer() {
+			
+			@Override
+			public Component render(String componentId) {
+				return new Label(componentId, getGroup().getName());
+			}
+			
+		});
+		
+		return breadcrumbs;
+	}
+	
 }

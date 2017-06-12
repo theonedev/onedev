@@ -3,6 +3,8 @@ package com.gitplex.server.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +36,7 @@ import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserAuthorizationManager;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.TagProtection;
@@ -44,6 +47,10 @@ import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.facade.GroupAuthorizationFacade;
+import com.gitplex.server.util.facade.MembershipFacade;
+import com.gitplex.server.util.facade.ProjectFacade;
+import com.gitplex.server.util.facade.UserAuthorizationFacade;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
@@ -274,6 +281,37 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 				}
 			}
 		}
+	}
+
+	@Override
+	public Collection<ProjectFacade> getAccessibleProjects(User user) {
+		Collection<ProjectFacade> projects = new HashSet<>();
+		
+		if (SecurityUtils.isAdministrator()) {
+			projects.addAll(cacheManager.getProjects().values());
+		} else {
+			for (ProjectFacade project: cacheManager.getProjects().values()) {
+				if (project.isPublicRead())
+					projects.add(project);
+			}
+			if (user != null) {
+				Collection<Long> groupIds = new HashSet<>();
+				for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+					if (membership.getUserId().equals(user.getId())) 
+						groupIds.add(membership.getGroupId());
+				}
+				for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
+					if (groupIds.contains(authorization.getGroupId()))
+						projects.add(cacheManager.getProject(authorization.getProjectId()));
+				}
+				for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+					if (authorization.getUserId().equals(user.getId()))
+						projects.add(cacheManager.getProject(authorization.getProjectId()));
+				}
+			}
+		}
+		
+		return projects;
 	}
 
 }

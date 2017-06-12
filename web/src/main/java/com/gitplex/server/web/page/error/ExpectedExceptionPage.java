@@ -10,7 +10,7 @@ import org.apache.wicket.util.string.Strings;
 import com.gitplex.server.util.WordUtils;
 import com.gitplex.server.web.component.MultilineLabel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.home.DashboardPage;
+import com.gitplex.server.web.page.project.ProjectListPage;
 
 @SuppressWarnings("serial")
 public class ExpectedExceptionPage extends BaseErrorPage {
@@ -39,7 +39,7 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 		container.add(new Label("title", title));
 		container.add(new Label("description", exception.getMessage()));
 		
-		container.add(new ViewStateAwarePageLink<Void>("dashboard", DashboardPage.class));
+		container.add(new ViewStateAwarePageLink<Void>("dashboard", ProjectListPage.class));
 		
 		container.add(new AjaxLink<Void>("showDetail") {
 

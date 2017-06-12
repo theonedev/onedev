@@ -29,3 +29,13 @@
 #user .authorization.list .head .select2-container {
 	width: 240px;
 } 
+
+.user.list, .new-user {
+	padding: 20px;
+}
+.user.list .actions a {
+	color: #666;
+}
+.new-user .actions .btn {
+	margin-right: 20px;
+}

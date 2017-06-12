@@ -1,8 +1,8 @@
 package com.gitplex.server.web.page.user;
 
-import org.apache.wicket.request.resource.CssResourceReference;
+import com.gitplex.server.web.page.base.BaseDependentCssResourceReference;
 
-public class UserResourceReference extends CssResourceReference {
+public class UserResourceReference extends BaseDependentCssResourceReference {
 
 	private static final long serialVersionUID = 1L;
 

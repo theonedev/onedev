@@ -4,7 +4,10 @@
 			<div class="logo pull-left">
 				<a wicket:id="home" title="Dashboard"><i class="fa fa-ext fa-gitplex-logo"></i></a>
 			</div>
-			<div wicket:id="context" class="context pull-left"></div>
+			<div wicket:id="breadcrumbs" class="breadcrumb pull-left clearfix">
+				<a wicket:id="nav" class="nav pull-left"></a>
+				<div wicket:id="separator" class="separator pull-left">></div>
+			</div>
 			<div class="user pull-right">
 			  	<wicket:enclosure child="login">
 			  		<div class="logged-out">
@@ -42,7 +45,6 @@
 	</div>
 	<wicket:fragment wicket:id="userMenuFrag">
 		<div class="user">
-			<a wicket:id="administration"><i class="fa fa-fw fa-wrench"></i> Server administration</a>
 			<a wicket:id="profile"><i class="fa fa-fw fa-gear"></i> My profile</a>
 			<a wicket:id="logout"><i class="fa fa-fw fa-sign-out"></i> Logout</a>
 		</div>

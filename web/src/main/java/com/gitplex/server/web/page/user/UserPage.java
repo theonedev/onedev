@@ -9,12 +9,14 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
@@ -97,8 +99,35 @@ public abstract class UserPage extends LayoutPage {
 	}
 
 	@Override
-	protected Component newContextHead(String componentId) {
-		return new Label(componentId, "User - " + getUser().getDisplayName());
+	protected List<ComponentRenderer> getBreadcrumbs() {
+		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
+
+		breadcrumbs.add(new ComponentRenderer() {
+
+			@Override
+			public Component render(String componentId) {
+				return new ViewStateAwarePageLink<Void>(componentId, UserListPage.class) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("Users");
+					}
+					
+				};
+			}
+			
+		});
+		
+		breadcrumbs.add(new ComponentRenderer() {
+			
+			@Override
+			public Component render(String componentId) {
+				return new Label(componentId, getUser().getDisplayName());
+			}
+			
+		});
+		
+		return breadcrumbs;
 	}
 
 }
