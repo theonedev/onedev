@@ -11,7 +11,7 @@ import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
-import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.CodeCommentsPage;
 
 @SuppressWarnings("serial")
 class UnresolvedCodeCommentsPanel extends GenericPanel<PullRequest> {
@@ -26,12 +26,12 @@ class UnresolvedCodeCommentsPanel extends GenericPanel<PullRequest> {
 		
 		PullRequest request = getModelObject();
 		
-		PageParameters params = RequestCodeCommentsPage.paramsOf(request, getState());
-		add(new ViewStateAwarePageLink<Void>("link", RequestCodeCommentsPage.class, params));
+		PageParameters params = CodeCommentsPage.paramsOf(request, getState());
+		add(new ViewStateAwarePageLink<Void>("link", CodeCommentsPage.class, params));
 	}
 	
-	private RequestCodeCommentsPage.State getState() {
-		RequestCodeCommentsPage.State state = new RequestCodeCommentsPage.State();
+	private CodeCommentsPage.State getState() {
+		CodeCommentsPage.State state = new CodeCommentsPage.State();
 		state.setUnresolved(true);
 		state.setUserName(GitPlex.getInstance(UserManager.class).getCurrent().getName());
 		return state;

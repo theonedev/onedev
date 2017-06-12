@@ -27,13 +27,10 @@ html, body {
 #main>.head>.breadcrumb .separator {
 	margin: 0 8px;
 }
-#main>.head>.actions {
+#main>.head>.help {
 	padding-top: 7px;
 }
-#main>.head>.actions>a {
-	margin-right: 20px;
-}
-#main>.head>.actions a .fa {
+#main>.head>.help .fa {
 	font-size: 18px;
 }
 #main>.head>.user {

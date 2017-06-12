@@ -31,7 +31,7 @@ import com.gitplex.server.web.page.project.commit.ProjectCommitsPage;
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
 import com.gitplex.server.web.page.project.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.CodeCommentsPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.page.project.pullrequest.requestlist.RequestListPage;
@@ -154,7 +154,7 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		add(new WebPageMapper("projects/${project}/pulls/new", NewRequestPage.class));
 		add(new WebPageMapper("projects/${project}/pulls/${request}", RequestOverviewPage.class));
 		add(new WebPageMapper("projects/${project}/pulls/${request}/overview", RequestOverviewPage.class));
-		add(new WebPageMapper("projects/${project}/pulls/${request}/code-comments", RequestCodeCommentsPage.class));
+		add(new WebPageMapper("projects/${project}/pulls/${request}/code-comments", CodeCommentsPage.class));
 		add(new WebPageMapper("projects/${project}/pulls/${request}/changes", RequestChangesPage.class));
 		add(new WebPageMapper("projects/${project}/pulls/${request}/merge-preview", MergePreviewPage.class));
 

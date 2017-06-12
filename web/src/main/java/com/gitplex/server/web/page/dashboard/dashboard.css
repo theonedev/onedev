@@ -5,7 +5,9 @@
 #dashboard .summary {
 	margin-bottom: 20px;
 	border-bottom: 1px solid #DDD;
-	padding-bottom: 20px;
+}
+#dashboard .summary .help-block {
+	margin-bottom: 20px;
 }
 #dashboard .summary a {
 	color: #444;

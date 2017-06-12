@@ -55,7 +55,7 @@ import com.gitplex.server.web.util.DateUtils;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
-public class RequestCodeCommentsPage extends RequestDetailPage {
+public class CodeCommentsPage extends RequestDetailPage {
 
 	private static final String PARAM_USER = "user";
 	
@@ -73,7 +73,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 	
 	private List<String> commentedFiles;
 	
-	public RequestCodeCommentsPage(PageParameters params) {
+	public CodeCommentsPage(PageParameters params) {
 		super(params);
 		
 		state = new State();
@@ -123,7 +123,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 			public void onClick() {
 				State state = new State();
 				state.userName = SecurityUtils.getUser().getName();
-				setResponsePage(RequestCodeCommentsPage.class, paramsOf(getPullRequest(), state));
+				setResponsePage(CodeCommentsPage.class, paramsOf(getPullRequest(), state));
 			}
 			
 		});
@@ -140,7 +140,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 				State state = new State();
 				state.userName = SecurityUtils.getUser().getName();
 				state.unresolved = true;
-				setResponsePage(RequestCodeCommentsPage.class, paramsOf(getPullRequest(), state));
+				setResponsePage(CodeCommentsPage.class, paramsOf(getPullRequest(), state));
 			}
 			
 		});
@@ -150,7 +150,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 			public void onClick() {
 				State state = new State();
 				state.unresolved = true;
-				setResponsePage(RequestCodeCommentsPage.class, paramsOf(getPullRequest(), state));
+				setResponsePage(CodeCommentsPage.class, paramsOf(getPullRequest(), state));
 			}
 			
 		});
@@ -159,7 +159,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 			@Override
 			public void onClick() {
 				PageParameters params = paramsOf(getPullRequest());
-				setResponsePage(RequestCodeCommentsPage.class, params);
+				setResponsePage(CodeCommentsPage.class, params);
 			}
 			
 		});
@@ -185,7 +185,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem,
 					String componentId, IModel<CodeComment> rowModel) {
 				CodeComment comment = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "commentFrag", RequestCodeCommentsPage.this);
+				Fragment fragment = new Fragment(componentId, "commentFrag", CodeCommentsPage.this);
 				Link<Void> titleLink = new Link<Void>("title") {
 
 					@Override
@@ -297,7 +297,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new RequestCodeCommentsCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new CodeCommentsCssResourceReference()));
 	}
 
 	public List<String> getCommentedFiles() {
@@ -437,7 +437,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 		@SuppressWarnings("unused")
 		private static List<String> getCommentedFiles() {
 			IPageRequestHandler handler = (IPageRequestHandler) RequestCycle.get().getActiveRequestHandler();
-			return ((RequestCodeCommentsPage)handler.getPage()).getCommentedFiles();
+			return ((CodeCommentsPage)handler.getPage()).getCommentedFiles();
 		}
 		
 	}	

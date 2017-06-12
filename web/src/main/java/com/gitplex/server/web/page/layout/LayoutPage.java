@@ -35,7 +35,6 @@ import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.dashboard.DashboardPage;
-import com.gitplex.server.web.page.project.NewProjectPage;
 import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.page.security.LogoutPage;
 import com.gitplex.server.web.page.security.RegisterPage;
@@ -72,16 +71,6 @@ public abstract class LayoutPage extends BasePage {
 			protected void populateItem(ListItem<ComponentRenderer> item) {
 				item.add(item.getModelObject().render("nav"));
 				item.add(new WebMarkupContainer("separator").setVisible(item.getIndex() != getList().size()-1));
-			}
-			
-		});
-		
-		head.add(new ViewStateAwarePageLink<Void>("createProject", NewProjectPage.class) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canCreateProjects());
 			}
 			
 		});
