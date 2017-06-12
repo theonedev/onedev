@@ -31,6 +31,12 @@
 	padding: 8px 8px 0 8px;
 	border-left: 4px solid white;
 }
+#request-list td.request img.avatar {
+	width: 20px;
+	height: 20px;
+	vertical-align: text-top;
+}
+
 #request-list td.request.new {
 	border-left: 4px solid #4667EE;
 }
@@ -68,6 +74,4 @@
 #request-list td.result .norecords-td {
 	padding: 20px;
 	font-size: 20px;
-	text-align: center;
-	font-style: italic;
 }

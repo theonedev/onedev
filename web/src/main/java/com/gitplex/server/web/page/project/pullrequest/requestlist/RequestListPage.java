@@ -49,7 +49,6 @@ import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
-import com.gitplex.server.web.page.project.pullrequest.requestlist.SearchOption.Direction;
 import com.gitplex.server.web.page.project.pullrequest.requestlist.SearchOption.Status;
 import com.gitplex.server.web.util.DateUtils;
 
@@ -63,8 +62,8 @@ public class RequestListPage extends ProjectPage {
 	static {
 		sortNames.put(new SortOption("submitDate", false), "Newest");
 		sortNames.put(new SortOption("submitDate", true), "Oldest");
-		sortNames.put(new SortOption("lastEventDate", false), "Recently updated");
-		sortNames.put(new SortOption("lastEventDate", true), "Least recently updated");
+		sortNames.put(new SortOption("lastEvent.date", false), "Recently updated");
+		sortNames.put(new SortOption("lastEvent.date", true), "Least recently updated");
 	}
 	
 	private SearchOption searchOption;
@@ -95,7 +94,30 @@ public class RequestListPage extends ProjectPage {
 
 						@Override
 						public String getLabel() {
-							return "Open requests submitted by me";
+							return "Open requests";
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									searchOption = new SearchOption();
+									searchOption.setStatus(Status.OPEN);
+									
+									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
+								}
+								
+							};
+						}
+						
+					});
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "My open requests";
 						}
 
 						@Override
@@ -115,78 +137,54 @@ public class RequestListPage extends ProjectPage {
 						}
 						
 					});
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Closed requests";
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									searchOption = new SearchOption();
+									searchOption.setStatus(Status.CLOSED);
+									
+									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
+								}
+								
+							};
+						}
+						
+					});
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "My closed requests";
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									searchOption = new SearchOption();
+									searchOption.setStatus(Status.CLOSED);
+									searchOption.setSubmitterName(userName);
+
+									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
+								}
+								
+							};
+						}
+						
+					});
 				}
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "All open requests";
-					}
-
-					@Override
-					public AbstractLink newLink(String id) {
-						return new Link<Void>(id) {
-
-							@Override
-							public void onClick() {
-								searchOption = new SearchOption();
-								searchOption.setStatus(Status.OPEN);
-								
-								setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-							}
-							
-						};
-					}
-					
-				});
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Incoming open requests";
-					}
-
-					@Override
-					public AbstractLink newLink(String id) {
-						return new Link<Void>(id) {
-
-							@Override
-							public void onClick() {
-								searchOption = new SearchOption();
-								searchOption.setDirection(Direction.INCOMING);
-								searchOption.setStatus(Status.OPEN);
-								
-								setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-							}
-							
-						};
-					}
-					
-				});
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Outgoing open requests";
-					}
-
-					@Override
-					public AbstractLink newLink(String id) {
-						return new Link<Void>(id) {
-
-							@Override
-							public void onClick() {
-								searchOption = new SearchOption();
-								searchOption.setDirection(Direction.OUTGOING);
-								searchOption.setStatus(Status.OPEN);
-								
-								setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-							}
-							
-						};
-					}
-					
-				});
 				return menuItems;
 			}
 			

@@ -601,7 +601,7 @@ public class ProjectBranchesPage extends ProjectPage {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
 							SearchOption searchOption = new SearchOption();
 							searchOption.setStatus(Status.OPEN);
-							searchOption.setBranch(branch);
+							searchOption.setTargetBranch(branch);
 							PageParameters params = RequestListPage.paramsOf(getProject(), searchOption, new SortOption());
 							bodyFrag.add(new ViewStateAwarePageLink<Void>("openRequests", RequestListPage.class, params));
 							bodyFrag.add(new Label("branch", branch));

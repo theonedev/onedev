@@ -1,7 +1,5 @@
 package com.gitplex.server.web.page.project.pullrequest.requestlist;
 
-import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSource;
-import static com.gitplex.server.model.PullRequest.CriterionHelper.ofSourceProject;
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTarget;
 import static com.gitplex.server.model.PullRequest.CriterionHelper.ofTargetProject;
 
@@ -17,15 +15,13 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.persistence.dao.EntityCriteria;
-import com.gitplex.server.util.editable.annotation.UserChoice;
 import com.gitplex.server.util.editable.annotation.BranchChoice;
 import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.server.util.editable.annotation.UserChoice;
 
 @SuppressWarnings("serial")
 @Editable
 public class SearchOption implements Serializable {
-	
-	private static final String PARAM_DIRECTION = "direction";
 	
 	private static final String PARAM_STATUS = "status";
 	
@@ -39,17 +35,13 @@ public class SearchOption implements Serializable {
 	
 	private static final String PARAM_END_DATE = "end";
 	
-	public enum Direction {INCOMING, OUTGOING, ALL};
-	
 	public enum Status {OPEN, CLOSED, ALL};
-	
-	private Direction direction = Direction.ALL;
 	
 	private Status status = Status.OPEN;
 
 	private String submitterName;
 	
-	private String branch;
+	private String targetBranch;
 	
 	private String title;
 	
@@ -57,16 +49,6 @@ public class SearchOption implements Serializable {
 	
 	private Date endDate;
 	
-	@Editable(order=50)
-	@NotNull
-	public Direction getDirection() {
-		return direction;
-	}
-
-	public void setDirection(Direction direction) {
-		this.direction = direction;
-	}
-
 	@Editable(order=100)
 	@NotNull
 	public Status getStatus() {
@@ -89,12 +71,12 @@ public class SearchOption implements Serializable {
 
 	@Editable(order=400, description="Target branch for incoming request, or source branch for outgoing request")
 	@BranchChoice
-	public String getBranch() {
-		return branch;
+	public String getTargetBranch() {
+		return targetBranch;
 	}
 
-	public void setBranch(String branch) {
-		this.branch = branch;
+	public void setTargetBranch(String targetBranch) {
+		this.targetBranch = targetBranch;
 	}
 
 	@Editable(order=500, name="Title Containing")
@@ -128,17 +110,13 @@ public class SearchOption implements Serializable {
 	}
 	
 	public SearchOption(PageParameters params) {
-		String value = params.get(PARAM_DIRECTION).toString();
-		if (value != null)
-			direction = Direction.valueOf(value);
-		
-		value = params.get(PARAM_STATUS).toString();
+		String value = params.get(PARAM_STATUS).toString();
 		if (value != null)
 			status = Status.valueOf(value);
 		
 		submitterName = params.get(PARAM_SUBMITTER).toString();
 		
-		branch = params.get(PARAM_BRANCH).toString();
+		targetBranch = params.get(PARAM_BRANCH).toString();
 		title = params.get(PARAM_TITLE).toString();
 		
 		value = params.get(PARAM_BEGIN_DATE).toString();
@@ -152,23 +130,10 @@ public class SearchOption implements Serializable {
 
 	public EntityCriteria<PullRequest> getCriteria(Project project) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		if (direction == Direction.INCOMING) { 
-			if (branch != null)
-				criteria.add(ofTarget(new ProjectAndBranch(project, branch)));
-			else
-				criteria.add(ofTargetProject(project));
-		} else if (direction == Direction.OUTGOING) {
-			if (branch != null)
-				criteria.add(ofSource(new ProjectAndBranch(project, branch)));
-			else
-				criteria.add(ofSourceProject(project));
-		} else if (branch != null) {
-			criteria.add(Restrictions.or(
-					ofTarget(new ProjectAndBranch(project, branch)), 
-					ofSource(new ProjectAndBranch(project, branch))));
-		} else {
-			criteria.add(Restrictions.or(ofTargetProject(project), ofSourceProject(project)));
-		}
+		if (targetBranch != null)
+			criteria.add(ofTarget(new ProjectAndBranch(project, targetBranch)));
+		else
+			criteria.add(ofTargetProject(project));
 		
 		if (status == Status.OPEN) 
 			criteria.add(PullRequest.CriterionHelper.ofOpen());
@@ -188,12 +153,11 @@ public class SearchOption implements Serializable {
 	}
 	
 	public void fillPageParams(PageParameters params) {
-		params.set(PARAM_DIRECTION, direction.name());
 		params.set(PARAM_STATUS, status.name());
 		if (submitterName != null)
 			params.set(PARAM_SUBMITTER, submitterName);
-		if (branch != null)
-			params.set(PARAM_BRANCH, branch);
+		if (targetBranch != null)
+			params.set(PARAM_BRANCH, targetBranch);
 		if (title != null)
 			params.set(PARAM_TITLE, title);
 		if (beginDate != null)

@@ -75,7 +75,6 @@ import com.gitplex.server.web.page.security.LoginPage;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.PageDataChanged;
 import com.gitplex.server.web.websocket.WebSocketRegion;
-import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -585,18 +584,7 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 
 			@Override
 			public String getObject() {
-				PullRequest request = getPullRequest();
-				if (request.getTitle() == null) {
-					List<RevCommit> commits = commitsModel.getObject();
-					Preconditions.checkState(!commits.isEmpty());
-					if (commits.size() == 1) {
-						request.setTitle(commits.get(0).getShortMessage());
-					} else if (!request.getSourceBranch().equals("master") 
-							&& !request.getSourceBranch().equals(request.getTargetBranch())) {
-						request.setTitle(request.getSourceBranch());
-					}
-				}
-				return request.getTitle();
+				return getPullRequest().getTitle();
 			}
 
 			@Override
@@ -748,8 +736,11 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(getPullRequest().getBaseCommit()));
-		regions.add(new CommitIndexedRegion(getPullRequest().getHeadCommit()));
+		PullRequest request = getPullRequest();
+		if (request != null) {
+			regions.add(new CommitIndexedRegion(request.getBaseCommit()));
+			regions.add(new CommitIndexedRegion(request.getHeadCommit()));
+		}
 		return regions;
 	}
 	

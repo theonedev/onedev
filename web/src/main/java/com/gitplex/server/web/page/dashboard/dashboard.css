@@ -8,6 +8,7 @@
 }
 #dashboard .summary .help-block {
 	margin-bottom: 20px;
+	margin-left: 4px;
 }
 #dashboard .summary a {
 	color: #444;

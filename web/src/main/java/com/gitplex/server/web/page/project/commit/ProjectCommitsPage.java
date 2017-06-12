@@ -45,15 +45,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.java.JavaEscape;
 
-import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.RevListCommand;
-import com.gitplex.server.manager.WorkExecutor;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.support.ProjectAndRevision;
 import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.util.concurrent.PrioritizedCallable;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.ContributorAvatars;
@@ -81,8 +78,6 @@ import jersey.repackaged.com.google.common.base.Joiner;
 public class ProjectCommitsPage extends ProjectPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectCommitsPage.class);
-	
-	private static final int LOG_PRIORITY = 1;
 	
 	private static final String GIT_ERROR_START = "Command error output: ";
 	
@@ -172,15 +167,7 @@ public class ProjectCommitsPage extends ProjectPage {
 				if (command.revisions().isEmpty() && state.compareWith != null)
 					command.revisions(Lists.newArrayList(state.compareWith));
 				
-				commitHashes = GitPlex.getInstance(WorkExecutor.class).submit(new PrioritizedCallable<List<String>>(LOG_PRIORITY) {
-
-					@Override
-					public List<String> call() throws Exception {
-						return command.call();
-					}
-					
-				}).get();
-				
+				commitHashes = command.call();
 			} catch (Exception e) {
 				if (e.getMessage() != null && e.getMessage().contains(GIT_ERROR_START)) {
 					queryForm.error(StringUtils.substringAfter(e.getMessage(), GIT_ERROR_START));

@@ -258,6 +258,9 @@ form>.test-feedback {
 .input-group .select2-container.form-control .select2-choices {
 	border-radius: 0 4px 4px 0;
 }
+.select2-container .avatar {
+	margin-right: 4px;
+}
 	
 /* Ajax Loading Indicator */
 #ajax-loading-indicator {
