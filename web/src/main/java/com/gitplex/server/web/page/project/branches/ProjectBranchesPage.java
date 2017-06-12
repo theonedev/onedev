@@ -63,7 +63,6 @@ import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.branchchoice.BranchChoiceProvider;
 import com.gitplex.server.web.component.branchchoice.BranchSingleChoice;
-import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
@@ -431,7 +430,6 @@ public class ProjectBranchesPage extends ProjectPage {
 				item.add(link);
 				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(lastCommit.name()))));
 				
-				item.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent(), true));
 				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
 				link.add(new Label("message", lastCommit.getShortMessage()));
 				item.add(link);

@@ -13,6 +13,7 @@
 #repo-tags .annotated {
 	color: #999;
 	font-size: 12px;
+	margin-left: 8px;
 }
 #repo-tags .annotated a {
 	color: #666;

@@ -39,7 +39,6 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
-import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
 import com.gitplex.server.web.component.link.ArchiveMenuLink;
 import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -50,7 +49,6 @@ import com.gitplex.server.web.page.project.NoBranchesPage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
-import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -260,10 +258,8 @@ public class ProjectTagsPage extends ProjectPage {
 					Fragment fragment = new Fragment("annotated", "annotatedFrag", ProjectTagsPage.this);
 					if (revTag.getTaggerIdent() != null) {
 						fragment.add(new UserLink("author", revTag.getTaggerIdent()));
-						fragment.add(new Label("date", DateUtils.formatDate(revTag.getTaggerIdent().getWhen())));
 					} else {
 						fragment.add(new WebMarkupContainer("author").setVisible(false));
-						fragment.add(new WebMarkupContainer("date").setVisible(false));
 					}
 					Label message = new Label("message", revTag.getFullMessage());
 					message.setOutputMarkupId(true);
@@ -285,8 +281,6 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 				item.add(link);
 				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
-				
-				item.add(new ContributorPanel("contributor", commit.getAuthorIdent(), commit.getCommitterIdent(), true));
 				
 				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
 				link.add(new Label("message", commit.getShortMessage()));

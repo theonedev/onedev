@@ -22,7 +22,6 @@
 								<a wicket:id="hashLink" class="hash btn btn-default btn-xs"><span wicket:id="hash"></span></a>
 								<a wicket:id="copyHash" class="btn btn-default btn-xs"><i class="fa fa-clipboard"></i></a>
 							</span>
-							<span wicket:id="contributor"></span>
 							<a wicket:id="messageLink" class="message"><span wicket:id="message"></span></a>
 						</div>
 					</td>
@@ -39,12 +38,7 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="annotatedFrag">
-		<wicket:enclosure child="date">
-		<span class="middot"></span>
-		<span wicket:id="date"></span>
-		</wicket:enclosure>
 		<wicket:enclosure child="author">
-		<span class="middot"></span>
 		<a wicket:id="author"></a> 
 		</wicket:enclosure>
 		<a wicket:id="messageToggle" class="ellipsis-expander"><i class="fa fa-ellipsis-h"></i></a>
