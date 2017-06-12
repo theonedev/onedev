@@ -20,6 +20,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.manager.CacheManager;
+import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.security.permission.CreateProjects;
 import com.gitplex.server.security.permission.ProjectPermission;
@@ -39,14 +40,17 @@ public class SecurityRealm extends AuthorizingRealm {
     
     private final CacheManager cacheManager;
     
+    private final ConfigManager configManager;
+    
 	@Inject
-    public SecurityRealm(UserManager userManager, CacheManager cacheManager) {
+    public SecurityRealm(UserManager userManager, CacheManager cacheManager, ConfigManager configManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
 		setCredentialsMatcher(passwordMatcher);
 		
     	this.userManager = userManager;
     	this.cacheManager = cacheManager;
+    	this.configManager = configManager;
     }
 
 	@SuppressWarnings("serial")
@@ -69,38 +73,41 @@ public class SecurityRealm extends AuthorizingRealm {
 			@Override
 			public Collection<Permission> getObjectPermissions() {
 				Collection<Permission> permissions = new ArrayList<>();
-				permissions.add(new PublicPermission());
-                if (userId != 0L) {
-                    UserFacade user = cacheManager.getUser(userId);
-                    if (user != null) {
-                    	if (user.isRoot()) 
-                    		permissions.add(new SystemAdministration());
-                    	permissions.add(new UserAdministration(user));
-                    	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-                    		if (membership.getUserId().equals(userId)) {
-                    			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
-                        		if (group.isAdministrator())
-                        			permissions.add(new SystemAdministration());
-                        		if (group.isCanCreateProjects())
-                        			permissions.add(new CreateProjects());
-                        		for (GroupAuthorizationFacade authorization: 
-                        				cacheManager.getGroupAuthorizations().values()) {
-                        			if (authorization.getGroupId().equals(group.getId())) {
-                            			permissions.add(new ProjectPermission(
-                            					cacheManager.getProject(authorization.getProjectId()), 
-                            					authorization.getPrivilege()));
-                        			}
-                        		}
+
+				UserFacade user = null;
+                if (userId != 0L) 
+                    user = cacheManager.getUser(userId);
+                if (user != null) {
+					permissions.add(new PublicPermission());
+                	if (user.isRoot()) 
+                		permissions.add(new SystemAdministration());
+                	permissions.add(new UserAdministration(user));
+                	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+                		if (membership.getUserId().equals(userId)) {
+                			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
+                    		if (group.isAdministrator())
+                    			permissions.add(new SystemAdministration());
+                    		if (group.isCanCreateProjects())
+                    			permissions.add(new CreateProjects());
+                    		for (GroupAuthorizationFacade authorization: 
+                    				cacheManager.getGroupAuthorizations().values()) {
+                    			if (authorization.getGroupId().equals(group.getId())) {
+                        			permissions.add(new ProjectPermission(
+                        					cacheManager.getProject(authorization.getProjectId()), 
+                        					authorization.getPrivilege()));
+                    			}
                     		}
-                    	}
-                    	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-                    		if (authorization.getUserId().equals(userId)) {
-                        		permissions.add(new ProjectPermission(
-                        				cacheManager.getProject(authorization.getProjectId()), 
-                        				authorization.getPrivilege()));
-                    		}
-                    	}
-                    }
+                		}
+                	}
+                	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+                		if (authorization.getUserId().equals(userId)) {
+                    		permissions.add(new ProjectPermission(
+                    				cacheManager.getProject(authorization.getProjectId()), 
+                    				authorization.getPrivilege()));
+                		}
+                	}
+                } else if (configManager.getSecuritySetting().isEnableAnonymousAccess()) {
+					permissions.add(new PublicPermission());
                 }
 				return permissions;
 			}

@@ -10,7 +10,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.gitplex.server.manager.ProjectManager;
@@ -41,7 +40,7 @@ public class ProjectResource {
     	Project project = dao.load(Project.class, id);
 
     	if (!SecurityUtils.canRead(project))
-    		throw new UnauthenticatedException();
+			throw new UnauthorizedException("Unauthorized access to project " + project.getName());
     	else
     		return project;
     }

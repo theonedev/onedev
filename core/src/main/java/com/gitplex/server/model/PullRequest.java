@@ -51,7 +51,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.ReviewStatus;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.util.editable.EditableUtils;
-import com.gitplex.server.util.jackson.ExternalView;
+import com.gitplex.server.util.jackson.RestView;
 import com.google.common.base.Preconditions;
 
 @Entity
@@ -455,7 +455,7 @@ public class PullRequest extends AbstractEntity {
 	 * 			it will trigger a re-calculation, and client should call this method later 
 	 * 			to get the calculated result 
 	 */
-	@JsonView(ExternalView.class)
+	@JsonView(RestView.class)
 	@Nullable
 	public MergePreview getMergePreview() {
 		if (mergePreviewOpt == null)
@@ -486,24 +486,24 @@ public class PullRequest extends AbstractEntity {
 		this.mergeStrategy = mergeStrategy;
 	}
 
-	@JsonView(ExternalView.class)
+	@JsonView(RestView.class)
 	public PullRequestUpdate getLatestUpdate() {
 		return getSortedUpdates().get(getSortedUpdates().size()-1);
 	}
 	
-	@JsonView(ExternalView.class)
+	@JsonView(RestView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
 		return REFS_PREFIX + getNumber() + "/base";
 	}
 
-	@JsonView(ExternalView.class)
+	@JsonView(RestView.class)
 	public String getMergeRef() {
 		Preconditions.checkNotNull(getId());
 		return REFS_PREFIX + getNumber() + "/merge";
 	}
 
-	@JsonView(ExternalView.class)
+	@JsonView(RestView.class)
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
 		return REFS_PREFIX + getNumber() + "/head";

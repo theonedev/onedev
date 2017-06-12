@@ -26,10 +26,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.Password;
 import com.gitplex.server.util.facade.UserFacade;
+import com.gitplex.server.util.jackson.DefaultView;
 import com.gitplex.server.util.validation.annotation.UserName;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -132,6 +134,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
 	@Editable(order=150, autocomplete="new-password")
 	@Password(confirmative=true)
+	@JsonView(DefaultView.class)
 	@NotEmpty
 	public String getPassword() {
 		return password;

@@ -177,18 +177,6 @@ public abstract class LayoutPage extends BasePage {
 		return breadcrumbs;
 	};
 	
-	protected boolean isLoggedIn() {
-		return getLoginUser() != null;
-	}
-	
-	protected boolean isRemembered() {
-		return SecurityUtils.getSubject().isRemembered();
-	}
-	
-	protected boolean isAuthenticated() {
-		return SecurityUtils.getSubject().isAuthenticated();
-	}
-
 	protected boolean isFootVisible() {
 		return true;
 	}
@@ -196,10 +184,15 @@ public abstract class LayoutPage extends BasePage {
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		if (isLoggedIn()) {
+		if (getLoginUser() != null) {
 			regions.add(new TaskChangedRegion(getLoginUser().getId()));
 		}
 		return regions;
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canAccessPublic();
 	}
 
 	@Override

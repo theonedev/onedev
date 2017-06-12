@@ -48,9 +48,9 @@ import com.gitplex.server.web.assets.Assets;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.page.init.ServerInitPage;
 import com.gitplex.server.web.page.security.LoginPage;
+import com.gitplex.server.web.websocket.PageDataChanged;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
-import com.gitplex.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {

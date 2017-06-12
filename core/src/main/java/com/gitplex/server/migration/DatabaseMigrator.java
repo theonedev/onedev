@@ -314,8 +314,11 @@ public class DatabaseMigrator {
 										FileUtils.deleteDir(infoDir);
 								}
 							}
+						} else if (element.elementText("key").equals("SECURITY")) {
+							element.element("setting").addElement("enableAnonymousAccess").setText("false");
 						}
-					}					
+					}		
+					dom.writeToFile(file, false);
 				}
 			}		
 		} catch (IOException e) {

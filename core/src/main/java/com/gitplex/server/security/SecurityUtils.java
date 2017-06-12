@@ -24,6 +24,7 @@ import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.security.permission.CreateProjects;
 import com.gitplex.server.security.permission.ProjectPermission;
+import com.gitplex.server.security.permission.PublicPermission;
 import com.gitplex.server.security.permission.SystemAdministration;
 import com.gitplex.server.security.permission.UserAdministration;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
@@ -181,6 +182,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static boolean canCreateProjects() {
 		return getSubject().isPermitted(new CreateProjects());
+	}
+	
+	public static boolean canAccessPublic() {
+		return getSubject().isPermitted(new PublicPermission());
 	}
 	
 	public static boolean canRead(Project project) {

@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.Email;
 
@@ -19,6 +20,7 @@ import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;
+import com.gitplex.server.security.SecurityUtils;
 
 @Path("/users")
 @Consumes(MediaType.WILDCARD)
@@ -39,6 +41,8 @@ public class UserResource {
 			@QueryParam("name") String name, 
 			@Email @QueryParam("email") String email, 
 			@QueryParam("fullName") String fullName) {
+    	if (!SecurityUtils.canAccessPublic())
+    		throw new UnauthorizedException("Unauthorized access to user profiles");
     	EntityCriteria<User> criteria = EntityCriteria.of(User.class);
 		if (name != null)
 			criteria.add(Restrictions.eq("name", name));
@@ -52,6 +56,8 @@ public class UserResource {
     @GET
     @Path("/{id}")
     public User get(@PathParam("id") Long id) {
+    	if (!SecurityUtils.canAccessPublic())
+    		throw new UnauthorizedException("Unauthorized access to user profile");
     	return dao.load(User.class, id);
     }
     

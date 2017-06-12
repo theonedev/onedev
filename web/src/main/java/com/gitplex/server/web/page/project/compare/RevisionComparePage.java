@@ -370,7 +370,10 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				if (mergeBase != null && isLoggedIn() && state.leftSide.getBranch()!=null && state.rightSide.getBranch()!=null) {
+				if (mergeBase != null 
+						&& getLoginUser() != null 
+						&& state.leftSide.getBranch()!=null 
+						&& state.rightSide.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();
 					setVisible(request == null && !mergeBase.equals(rightCommitId));
 				} else {
