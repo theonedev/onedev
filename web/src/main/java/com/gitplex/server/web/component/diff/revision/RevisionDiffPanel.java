@@ -1,6 +1,5 @@
 package com.gitplex.server.web.component.diff.revision;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,6 +72,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.search.IndexManager;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.PathComparator;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.diff.DiffUtils;
 import com.gitplex.server.util.diff.WhitespaceOption;
@@ -272,8 +272,8 @@ public class RevisionDiffPanel extends Panel {
 	    		}
 	    	}
 
-	    	normalizedChanges.sort((change1, change2)
-	    			->Paths.get(change1.getPath()).compareTo(Paths.get(change2.getPath())));
+	    	PathComparator comparator = new PathComparator();
+	    	normalizedChanges.sort((change1, change2)->comparator.compare(change1.getPath(), change2.getPath()));
 	    	
 			List<BlobChange> diffChanges = new ArrayList<>();
 			if (normalizedChanges.size() > WebConstants.MAX_DIFF_FILES)
@@ -599,7 +599,7 @@ public class RevisionDiffPanel extends Panel {
 		}
 		
 		List<String> listOfInvolvedPaths = new ArrayList<>(setOfInvolvedPaths);
-		listOfInvolvedPaths.sort((path1, path2)->Paths.get(path1).compareTo(Paths.get(path2)));
+		listOfInvolvedPaths.sort(new PathComparator());
 		
 		filterInput.add(new InputAssistBehavior() {
 			

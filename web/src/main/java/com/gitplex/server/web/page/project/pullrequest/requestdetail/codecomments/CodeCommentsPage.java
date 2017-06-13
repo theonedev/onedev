@@ -1,7 +1,6 @@
 package com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments;
 
 import java.io.Serializable;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -35,15 +34,16 @@ import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CodeCommentManager;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.PathComparator;
 import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.util.editable.annotation.UserChoice;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.FileChoice;
+import com.gitplex.server.util.editable.annotation.UserChoice;
 import com.gitplex.server.util.stringmatch.WildcardUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.link.UserLink;
@@ -311,7 +311,7 @@ public class CodeCommentsPage extends RequestDetailPage {
 			for (CodeComment comment: getPullRequest().getCodeComments()) {
 				commentedFiles.add(comment.getCommentPos().getPath());
 			}
-			commentedFiles.sort((file1, file2)->Paths.get(file1).compareTo(Paths.get(file2)));
+			commentedFiles.sort(new PathComparator());
 		}
 		return commentedFiles;
 	}

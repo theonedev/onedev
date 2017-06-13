@@ -1,10 +1,9 @@
 package com.gitplex.server.util.markdown;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.gitplex.server.util.PathUtils;
 import com.vladsch.flexmark.ast.Image;
 import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.html.CustomNodeRenderer;
@@ -80,8 +79,7 @@ public class UrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
     	if (urlToResolve.contains(":") || urlToResolve.startsWith("/") || urlToResolve.startsWith("#")) {
     		return urlToResolve;
     	} else {
-        	Path resolvedPath = Paths.get(baseUrl).resolveSibling(urlToResolve);
-        	return resolvedPath.normalize().toString().replace('\\', '/');
+        	return PathUtils.normalize(PathUtils.resolveSibling(baseUrl, urlToResolve));
     	}
     }
     

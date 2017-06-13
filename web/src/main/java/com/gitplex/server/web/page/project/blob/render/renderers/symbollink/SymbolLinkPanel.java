@@ -2,9 +2,7 @@ package com.gitplex.server.web.page.project.blob.render.renderers.symbollink;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -18,6 +16,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
@@ -35,9 +34,8 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		super.onInitialize();
 
 		Blob blob = context.getProject().getBlob(context.getBlobIdent());
-		String targetPath = FilenameUtils.normalize(
-				Paths.get(context.getBlobIdent().path).resolveSibling(
-						blob.getText().getContent()).toString(), true);
+		String targetPath = PathUtils.normalize(
+				PathUtils.resolveSibling(context.getBlobIdent().path, blob.getText().getContent()));
 		if (targetPath != null && (targetPath.startsWith("/") || new File(targetPath).isAbsolute())) 
 			targetPath = null;
 

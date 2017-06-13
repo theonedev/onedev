@@ -1,13 +1,10 @@
 package com.gitplex.server.web.util.resourcebundle;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.wicket.markup.head.CssReferenceHeaderItem;
 import org.apache.wicket.markup.head.IReferenceHeaderItem;
 import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
@@ -17,6 +14,8 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.request.resource.ResourceReference.Key;
 import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
+
+import com.gitplex.server.util.PathUtils;
 
 /*
  * When css is bundled, and its access url can be changed (unless its resource is annotated with @ResourceBundle), 
@@ -39,25 +38,23 @@ class BundleAwareResourceReferenceFactory implements IResourceReferenceFactory {
 		if (PackageResource.exists(key)) {
 			return new PackageResourceReference(key);
 		} else {
-			Path keyPath = Paths.get(key.getName());
 			for (ConcatResourceBundleReference<? extends IReferenceHeaderItem> bundle: bundles) {
 				if (bundle.getScope().getName().equals(key.getScope())) {
-					Path bundleParentPath = getParentPath(bundle.getName());
-					Path relativePath;
+					String bundleParentPath = getParentPath(bundle.getName());
+					String relativePath;
 					if (bundleParentPath != null)
-						relativePath = bundleParentPath.relativize(keyPath);
+						relativePath = PathUtils.relativize(bundleParentPath, key.getName());
 					else
-						relativePath = keyPath;
+						relativePath = key.getName();
 					for (IReferenceHeaderItem headerItem: bundle.getProvidedResources()) {
-						Path referenceParentPath = getParentPath(headerItem.getReference().getName());
+						String referenceParentPath = getParentPath(headerItem.getReference().getName());
 						String possibleName;
 						if (referenceParentPath != null)
-							possibleName = referenceParentPath.resolve(relativePath).toString();
+							possibleName = PathUtils.resolve(referenceParentPath, relativePath);
 						else
 							possibleName = relativePath.toString();
-						possibleName = FilenameUtils.normalize(possibleName);
+						possibleName = PathUtils.normalize(possibleName);
 						if (possibleName != null) {
-							possibleName = possibleName.replace('\\', '/');
 							Key possibleKey = new Key(headerItem.getReference().getScope().getName(), possibleName, 
 									key.getLocale(), key.getStyle(), key.getVariation());
 							if (PackageResource.exists(possibleKey)) {
@@ -72,12 +69,13 @@ class BundleAwareResourceReferenceFactory implements IResourceReferenceFactory {
 	}
 
 	@Nullable
-	private Path getParentPath(String pathName) {
+	private String getParentPath(String pathName) {
 		String parentPath = pathName;
 		int lastIndex = parentPath.lastIndexOf('/');
 		if (lastIndex != -1)
-			return Paths.get(parentPath.substring(0, lastIndex));
+			return parentPath.substring(0, lastIndex);
 		else
 			return null;
 	}
+	
 }

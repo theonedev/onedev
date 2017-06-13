@@ -3,8 +3,6 @@ package com.gitplex.server.web.component.markdown;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,9 +40,10 @@ import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.BlobIdentFilter;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.web.component.projectfilepicker.ProjectFilePicker;
+import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.projectfilepicker.ProjectFilePicker;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -165,8 +164,8 @@ class InsertUrlPanel extends Panel {
 								String baseUrl = markdownEditor.getBaseUrl();
 								String referenceUrl = urlFor(ProjectBlobPage.class, 
 										ProjectBlobPage.paramsOf(blobReferenceSupport.getProject(), blobIdent)).toString();
-								Path relativized = Paths.get(baseUrl).relativize(Paths.get(referenceUrl));							
-								String relativePath = relativized.toString().replace('\\', '/').substring("../".length());
+								String relativized = PathUtils.relativize(baseUrl, referenceUrl);							
+								String relativePath = relativized.toString().substring("../".length());
 								markdownEditor.insertUrl(target, isImage, relativePath, blobIdent.getName(), null);
 								markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
 								dropdown.close();

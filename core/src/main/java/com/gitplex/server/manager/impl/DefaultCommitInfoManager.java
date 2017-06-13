@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,11 +49,13 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.concurrent.Prioritized;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -72,7 +74,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 	private static final int INFO_VERSION = 1;
 	
-	private static final long LOG_FILE_SIZE = 64*1024;
+	private static final long LOG_FILE_SIZE = 256*1024;
 	
 	private static final String INFO_DIR = "commit";
 	
@@ -384,7 +386,19 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 					byte[] bytes = getBytes(store.get(txn, FILES_KEY));
 					if (bytes != null) {
 						List<String> files = new ArrayList<>((Set<String>)SerializationUtils.deserialize(bytes));
-						files.sort((file1, file2)->Paths.get(file1).compareTo(Paths.get(file2)));
+						Map<String, List<String>> segmentsMap = new HashMap<>();
+						Splitter splitter = Splitter.on("/");
+						for (String file: files) {
+							segmentsMap.put(file, splitter.splitToList(file));
+						}
+						files.sort(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								return PathUtils.compare(segmentsMap.get(o1), segmentsMap.get(o2));
+							}
+							
+						});
 						return files;
 					} else {
 						return new ArrayList<>();

@@ -86,7 +86,7 @@ public class WildcardUtils {
         return -1;
     }
     
-    private static List<Range> getLiteralRanges(String pattern) {
+    public static List<Range> getLiteralRanges(String pattern) {
 		List<Range> literalRanges = new ArrayList<>();
 		int pos = 0;
 		int index = pattern.indexOf('*');

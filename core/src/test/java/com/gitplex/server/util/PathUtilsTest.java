@@ -2,6 +2,7 @@ package com.gitplex.server.util;
 
 import static com.gitplex.server.util.PathUtils.matchLongest;
 import static com.gitplex.server.util.PathUtils.matchSegments;
+import static com.gitplex.server.util.PathUtils.resolveSibling;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -35,4 +36,13 @@ public class PathUtilsTest {
 		assertNull(matchSegments("mayhello/worldtwo", "hello/world", true));
 		assertNull(matchSegments("hello0/world/hello.gif", "hello", false));
 	}
+
+	@Test
+	public void testResolveSibling() {
+		assertEquals(resolveSibling("hello", "world"), "world");
+		assertEquals(resolveSibling("hello/", "world"), "hello/world");
+		assertEquals(resolveSibling("hello/world", "file"), "hello/file");
+		assertEquals(resolveSibling("hello/world", "/file"), "/file");
+	}
+	
 }
