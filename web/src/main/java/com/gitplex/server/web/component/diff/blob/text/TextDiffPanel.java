@@ -45,7 +45,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blame;
 import com.gitplex.server.git.BlobChange;
 import com.gitplex.server.git.BlobIdent;
-import com.gitplex.server.git.Commit;
+import com.gitplex.server.git.BlameCommit;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.BlameCommand;
 import com.gitplex.server.manager.CodeCommentManager;
@@ -705,7 +705,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	}
 	
 	private void appendBlame(StringBuilder builder, int oldLineNo, int newLineNo) {
-		Commit commit;
+		BlameCommit commit;
 		if (newLineNo != -1)
 			commit = Preconditions.checkNotNull(blameInfo.newBlame.get(newLineNo));
 		else
@@ -1208,9 +1208,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private static class BlameInfo implements Serializable {
 		
-		Map<Integer, Commit> oldBlame = new HashMap<>();
+		Map<Integer, BlameCommit> oldBlame = new HashMap<>();
 		
-		Map<Integer, Commit> newBlame = new HashMap<>();
+		Map<Integer, BlameCommit> newBlame = new HashMap<>();
 		
 		String lastCommitHash;
 		

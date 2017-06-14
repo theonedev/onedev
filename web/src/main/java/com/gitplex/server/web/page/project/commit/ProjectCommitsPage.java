@@ -112,7 +112,6 @@ public class ProjectCommitsPage extends ProjectPage {
 		@Override
 		protected Commits load() {
 			Commits commits = new Commits();
-			
 			List<String> commitHashes;
 			try {
 				RevListCommand command = new RevListCommand(getProject().getGitDir());

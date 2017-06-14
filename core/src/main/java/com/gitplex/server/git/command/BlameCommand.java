@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.jsymbol.Range;
 import com.gitplex.server.git.Blame;
-import com.gitplex.server.git.Commit;
+import com.gitplex.server.git.BlameCommit;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.util.execution.Commandline;
 import com.gitplex.server.util.execution.ExecuteResult;
@@ -71,10 +71,10 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 		Commandline cmd = buildCmd();
 		
 		final Map<String, Blame> blames = new HashMap<>();
-		final Map<String, Commit> commitMap = new HashMap<>();
+		final Map<String, BlameCommit> commitMap = new HashMap<>();
 		
-		final AtomicReference<Commit> commitRef = new AtomicReference<>(null);
-		final BriefCommitBuilder commitBuilder = new BriefCommitBuilder();
+		final AtomicReference<BlameCommit> commitRef = new AtomicReference<>(null);
+		final CommitBuilder commitBuilder = new CommitBuilder();
 		
 		final AtomicBoolean endOfFile = new AtomicBoolean(false);
 		final AtomicInteger beginLine = new AtomicInteger(0);
@@ -93,7 +93,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 					commitBuilder.hash = null;
 				} else if (commitBuilder.hash == null) {
 					commitBuilder.hash = StringUtils.substringBefore(line, " ");
-					Commit commit = commitRef.get();
+					BlameCommit commit = commitRef.get();
 					if (commit != null && !commitBuilder.hash.equals(commit.getHash())) {
 						Blame blame = blames.get(commit.getHash());
 						if (blame == null) {
@@ -142,7 +142,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 			result.checkReturnCode();
 		
 		if (endLine.get() > beginLine.get()) {
-			Commit commit = commitRef.get();
+			BlameCommit commit = commitRef.get();
 			Blame blame = blames.get(commit.getHash());
 			if (blame == null) {
 				blame = new Blame(commit, new ArrayList<Range>());
@@ -157,7 +157,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 		return blames;
 	}
 
-    private static class BriefCommitBuilder {
+    private static class CommitBuilder {
         
     	private Date committerDate;
     	
@@ -175,8 +175,8 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
         
         private String summary;
         
-    	private Commit build() {
-    		return new Commit(
+    	private BlameCommit build() {
+    		return new BlameCommit(
     				hash, 
     				GitUtils.newPersonIdent(committer, committerEmail, committerDate), 
     				GitUtils.newPersonIdent(author, authorEmail, authorDate), 

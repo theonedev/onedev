@@ -248,23 +248,30 @@ gitplex.server = {
 			e.stopPropagation();
 		});
 
+		var ajaxCalls = 0;
 		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
-			var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
-			if ($ajaxLoadingIndicator[0].timer)
-				clearTimeout($ajaxLoadingIndicator[0].timer);
-			$ajaxLoadingIndicator[0].timer = setTimeout(function() {
-				if (!$ajaxLoadingIndicator.is(":visible") && $(".ajax-indicator:visible").length == 0)
-					$ajaxLoadingIndicator.show();
-			}, 2000);		
+			if (ajaxCalls == 0) {
+				var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
+				if ($ajaxLoadingIndicator[0].timer)
+					clearTimeout($ajaxLoadingIndicator[0].timer);
+				$ajaxLoadingIndicator[0].timer = setTimeout(function() {
+					if (!$ajaxLoadingIndicator.is(":visible") && $(".ajax-indicator:visible").length == 0)
+						$ajaxLoadingIndicator.show();
+				}, 2000);		
+			}
+			ajaxCalls++;
 		});
 		
-		Wicket.Event.subscribe('/ajax/call/complete', function() {
-			var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
-			if ($ajaxLoadingIndicator[0].timer) {
-				clearTimeout($ajaxLoadingIndicator[0].timer);
-				$ajaxLoadingIndicator[0].timer = null;
+		Wicket.Event.subscribe('/ajax/call/done', function() {
+			ajaxCalls--;
+			if (ajaxCalls == 0) {
+				var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
+				if ($ajaxLoadingIndicator[0].timer) {
+					clearTimeout($ajaxLoadingIndicator[0].timer);
+					$ajaxLoadingIndicator[0].timer = null;
+				}
+				$ajaxLoadingIndicator.hide();
 			}
-			$ajaxLoadingIndicator.hide();
 		});
 	}, 
 		

@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
 
-public class Commit implements Serializable {
+public class BlameCommit implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -21,14 +21,14 @@ public class Commit implements Serializable {
     
     private final PersonIdent author;
     
-    public Commit(String hash, PersonIdent committer, PersonIdent author, String subject) {
+    public BlameCommit(String hash, PersonIdent committer, PersonIdent author, String subject) {
     	this.hash = checkNotNull(hash, "hash");
     	this.committer = checkNotNull(committer, "committer");
     	this.author = checkNotNull(author, "author");
     	this.subject = checkNotNull(subject, "subject");
     }
 
-    public Commit(Commit commit) {
+    public BlameCommit(BlameCommit commit) {
     	this(commit.getHash(), commit.getCommitter(), commit.getAuthor(), commit.getSubject());
     }
 
@@ -56,9 +56,9 @@ public class Commit implements Serializable {
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) return true;
-		if (!(other instanceof Commit)) return false;
+		if (!(other instanceof BlameCommit)) return false;
 		
-		Commit rhs = (Commit) other;
+		BlameCommit rhs = (BlameCommit) other;
 		return Objects.equal(hash, rhs.hash);
 	}
 	
@@ -90,10 +90,10 @@ public class Commit implements Serializable {
         
         public String subject;
 		
-		public Commit build() {
+		public BlameCommit build() {
 			PersonIdent committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
 			PersonIdent author = GitUtils.newPersonIdent(authorName, authorEmail, authorDate);
-			return new Commit(hash, committer, author, subject.trim());
+			return new BlameCommit(hash, committer, author, subject.trim());
 		}
     }
 }
