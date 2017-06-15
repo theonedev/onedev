@@ -631,7 +631,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						List<CollectingWork> collectingWorks = new ArrayList<>();
 						for (Object work: works)
 							collectingWorks.add((CollectingWork)work);
-						Collections.sort(collectingWorks);
+						Collections.sort(collectingWorks, new CommitTimeComparator());
 						for (CollectingWork work: collectingWorks) {
 							logger.debug("Collecting commit information up to ref '{}' in project '{}'...", 
 									work.getRefName(), project.getName());
@@ -679,7 +679,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			throw new RuntimeException(e);
 		}
 
-		Collections.sort(works);
+		Collections.sort(works, new CommitTimeComparator());
 		
 		for (CollectingWork work: works)
 			batchWorkManager.submit(getBatchWorker(project), work);
@@ -733,7 +733,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		return commitCount;
 	}
 
-	static class CollectingWork extends Prioritized implements Comparable<CollectingWork> {
+	static class CollectingWork extends Prioritized {
 		
 		private final String refName;
 		
@@ -753,9 +753,13 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			return refName;
 		}
 
+	}
+	
+	static class CommitTimeComparator implements Comparator<CollectingWork> {
+
 		@Override
-		public int compareTo(CollectingWork o) {
-			return commit.getCommitTime() - o.getCommit().getCommitTime();
+		public int compare(CollectingWork o1, CollectingWork o2) {
+			return o1.getCommit().getCommitTime() - o2.getCommit().getCommitTime();
 		}
 		
 	}
