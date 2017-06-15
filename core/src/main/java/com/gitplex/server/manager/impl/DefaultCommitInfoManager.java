@@ -624,22 +624,13 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 					@Override
 					public Void call() throws Exception {
 						Project project = projectManager.load(projectId);
-						List<ObjectId> commitIds = new ArrayList<>();
-						if (works.size() > 1) {
-							try (RevWalk revWalk = new RevWalk(project.getRepository())) {
-								List<RevCommit> commits = new ArrayList<>();
-								for (Object work: works)
-									commits.add(revWalk.parseCommit(((CollectingWork)work).getCommitId()));
-								commits.sort(Comparator.comparing(RevCommit::getCommitTime));
-								for (RevCommit commit: commits)
-									commitIds.add(commit.copy());
-							}
-						} else {
-							CollectingWork collectingWork = (CollectingWork) works.iterator().next();
-							commitIds.add(collectingWork.getCommitId());
+						List<RevCommit> commits = new ArrayList<>();
+						for (Object work: works)
+							commits.add(((CollectingWork)work).getCommit());
+						commits.sort(Comparator.comparing(RevCommit::getCommitTime));
+						for (RevCommit commit: commits) {
+							doCollect(project, commit.copy(), true);
 						}
-						for (ObjectId commitId: commitIds)
-							doCollect(project, commitId, true);
 						return null;
 					}
 					
@@ -684,7 +675,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 		commits.sort(Comparator.comparing(RevCommit::getCommitTime));
 		for (RevCommit commit: commits) {
-			CollectingWork work = new CollectingWork(PRIORITY, commit.copy());
+			CollectingWork work = new CollectingWork(PRIORITY, commit);
 			batchWorkManager.submit(getBatchWorker(project), work);
 		}
 	}
@@ -701,8 +692,13 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	@Listen
 	public void on(RefUpdated event) {
 		if (!event.getNewObjectId().equals(ObjectId.zeroId())) {
-			CollectingWork work = new CollectingWork(PRIORITY, event.getNewObjectId());
-			batchWorkManager.submit(getBatchWorker(event.getProject()), work);
+			try (RevWalk revWalk = new RevWalk(event.getProject().getRepository())) {
+				RevCommit commit = GitUtils.parseCommit(revWalk, event.getNewObjectId());
+				if (commit != null) {
+					CollectingWork work = new CollectingWork(PRIORITY, commit);
+					batchWorkManager.submit(getBatchWorker(event.getProject()), work);
+				}
+			}
 		}
 	}
 
@@ -732,15 +728,15 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 	static class CollectingWork extends Prioritized {
 		
-		private final ObjectId commitId;
+		private final RevCommit commit;
 		
-		public CollectingWork(int priority, ObjectId commitId) {
+		public CollectingWork(int priority, RevCommit commit) {
 			super(priority);
-			this.commitId = commitId;
+			this.commit = commit;
 		}
 
-		public ObjectId getCommitId() {
-			return commitId;
+		public RevCommit getCommit() {
+			return commit;
 		}
 		
 	}
