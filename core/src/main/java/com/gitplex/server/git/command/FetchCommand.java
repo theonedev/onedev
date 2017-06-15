@@ -46,7 +46,7 @@ public class FetchCommand extends GitCommand<Void> {
 
 			@Override
 			public void consume(String line) {
-				logger.debug(line);
+				logger.trace(line);
 			}
 			
 		}, new LineConsumer() {

@@ -40,7 +40,7 @@ public abstract class CurlConfig implements Serializable, Validatable {
 	
 					@Override
 					public void consume(String line) {
-						logger.debug(line);
+						logger.trace(line);
 					}
 					
 				}, new LineConsumer() {

@@ -122,7 +122,7 @@ public class Commandline  {
         processBuilder.environment().putAll(environments);
 		
         if (logger.isDebugEnabled()) {
-    		logger.debug("Executing command: " + this);
+    		logger.trace("Executing command: " + this);
     		logger.trace("Command working directory: " + 
     				processBuilder.directory().getAbsolutePath());
     		StringBuffer buffer = new StringBuffer();

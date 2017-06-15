@@ -130,7 +130,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 			public void consume(String line) {
 				if (line.startsWith("fatal: file ") && line.contains("has only ")) {
 					endOfFile.set(true);
-					logger.debug(line.substring("fatal: ".length()));
+					logger.trace(line.substring("fatal: ".length()));
 				} else {
 					logger.error(line);
 				}

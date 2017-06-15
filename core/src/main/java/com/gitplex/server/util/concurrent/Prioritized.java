@@ -13,9 +13,4 @@ public class Prioritized implements PriorityAware {
 		return priority;
 	}
 
-	@Override
-	public int compareTo(PriorityAware o) {
-		return priority - o.getPriority();
-	}
-	
 }

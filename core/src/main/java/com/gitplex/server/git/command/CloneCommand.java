@@ -82,7 +82,7 @@ public class CloneCommand extends GitCommand<Void> {
 
 			@Override
 			public void consume(String line) {
-				logger.debug(line);
+				logger.trace(line);
 			}
 			
 		}, new LineConsumer(){
@@ -90,7 +90,7 @@ public class CloneCommand extends GitCommand<Void> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("Cloning into ") || line.equals("done."))
-					logger.debug(line);
+					logger.trace(line);
 				else if (line.contains("You appear to have cloned an empty repository"))
 					logger.warn(line);
 				else

@@ -375,9 +375,6 @@ public class DefaultIndexManager implements IndexManager {
 
 		listenerRegistry.post(new CommitIndexed(project, commit.copy()));
 		
-		logger.debug("Commit indexed (project: {}, commit: {}, checked blobs: {}, indexed blobs: {})", 
-				project.getName(), commit.name(), indexResult.getChecked(), indexResult.getIndexed());
-		
 		return indexResult;
 	}
 

@@ -32,6 +32,8 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.RefUpdated;
@@ -74,6 +76,8 @@ import jetbrains.exodus.env.TransactionalExecutable;
 @Singleton
 public class DefaultCommitInfoManager extends AbstractEnvironmentManager implements CommitInfoManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
+	
 	private static final int INFO_VERSION = 1;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
@@ -624,12 +628,14 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 					@Override
 					public Void call() throws Exception {
 						Project project = projectManager.load(projectId);
-						List<RevCommit> commits = new ArrayList<>();
+						List<CollectingWork> collectingWorks = new ArrayList<>();
 						for (Object work: works)
-							commits.add(((CollectingWork)work).getCommit());
-						commits.sort(Comparator.comparing(RevCommit::getCommitTime));
-						for (RevCommit commit: commits) {
-							doCollect(project, commit.copy(), true);
+							collectingWorks.add((CollectingWork)work);
+						Collections.sort(collectingWorks);
+						for (CollectingWork work: collectingWorks) {
+							logger.debug("Collecting commit information up to ref '{}' in project '{}'...", 
+									work.getRefName(), project.getName());
+							doCollect(project, work.getCommit().copy(), true);
 						}
 						return null;
 					}
@@ -641,7 +647,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	}
 	
 	private void collect(Project project) {
-		List<RevCommit> commits = new ArrayList<>();
+		List<CollectingWork> works = new ArrayList<>();
 		try (RevWalk revWalk = new RevWalk(project.getRepository())) {
 			Collection<Ref> refs = new ArrayList<>();
 			refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
@@ -666,18 +672,17 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						
 					});
 					if (!collected) 
-						commits.add(commit);
+						works.add(new CollectingWork(PRIORITY, commit, ref.getName()));
 				}
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 
-		commits.sort(Comparator.comparing(RevCommit::getCommitTime));
-		for (RevCommit commit: commits) {
-			CollectingWork work = new CollectingWork(PRIORITY, commit);
+		Collections.sort(works);
+		
+		for (CollectingWork work: works)
 			batchWorkManager.submit(getBatchWorker(project), work);
-		}
 	}
 
 	@Sessional
@@ -691,11 +696,13 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	@Listen
 	public void on(RefUpdated event) {
-		if (!event.getNewObjectId().equals(ObjectId.zeroId())) {
+		if (!event.getNewObjectId().equals(ObjectId.zeroId()) 
+				&& (event.getRefName().startsWith(Constants.R_HEADS) 
+						|| event.getRefName().startsWith(Constants.R_TAGS))) {
 			try (RevWalk revWalk = new RevWalk(event.getProject().getRepository())) {
 				RevCommit commit = GitUtils.parseCommit(revWalk, event.getNewObjectId());
 				if (commit != null) {
-					CollectingWork work = new CollectingWork(PRIORITY, commit);
+					CollectingWork work = new CollectingWork(PRIORITY, commit, event.getRefName());
 					batchWorkManager.submit(getBatchWorker(event.getProject()), work);
 				}
 			}
@@ -726,17 +733,29 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		return commitCount;
 	}
 
-	static class CollectingWork extends Prioritized {
+	static class CollectingWork extends Prioritized implements Comparable<CollectingWork> {
+		
+		private final String refName;
 		
 		private final RevCommit commit;
 		
-		public CollectingWork(int priority, RevCommit commit) {
+		public CollectingWork(int priority, RevCommit commit, String refName) {
 			super(priority);
 			this.commit = commit;
+			this.refName = refName;
 		}
 
 		public RevCommit getCommit() {
 			return commit;
+		}
+
+		public String getRefName() {
+			return refName;
+		}
+
+		@Override
+		public int compareTo(CollectingWork o) {
+			return commit.getCommitTime() - o.getCommit().getCommitTime();
 		}
 		
 	}
