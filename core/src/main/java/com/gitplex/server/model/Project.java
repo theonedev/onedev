@@ -70,7 +70,6 @@ import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.git.Submodule;
 import com.gitplex.server.git.exception.NotFileException;
 import com.gitplex.server.git.exception.ObjectNotFoundException;
-import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
@@ -872,28 +871,23 @@ public class Project extends AbstractEntity {
 
 	public RevCommit getLastCommit() {
 		if (lastCommitOptional == null) {
-			ObjectId commitId = GitPlex.getInstance(CommitInfoManager.class).getLastCommit(this);
-			if (commitId == null) {
-				RevCommit lastCommit = null;
-				try {
-					for (Ref ref: getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values()) {
-						RevCommit commit = getRevCommit(ref.getObjectId(), false);
-						if (commit != null) {
-							if (lastCommit != null) {
-								if (commit.getCommitTime() > lastCommit.getCommitTime())
-									lastCommit = commit;
-							} else {
+			RevCommit lastCommit = null;
+			try {
+				for (Ref ref: getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values()) {
+					RevCommit commit = getRevCommit(ref.getObjectId(), false);
+					if (commit != null) {
+						if (lastCommit != null) {
+							if (commit.getCommitTime() > lastCommit.getCommitTime())
 								lastCommit = commit;
-							}
+						} else {
+							lastCommit = commit;
 						}
 					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
 				}
-				lastCommitOptional = Optional.fromNullable(lastCommit);
-			} else {
-				lastCommitOptional = Optional.fromNullable(getRevCommit(commitId));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
+			lastCommitOptional = Optional.fromNullable(lastCommit);
 		}
 		return lastCommitOptional.orNull();
 	}
