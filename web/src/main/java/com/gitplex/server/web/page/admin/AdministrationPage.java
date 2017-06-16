@@ -14,6 +14,13 @@ import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
+import com.gitplex.server.web.page.admin.authenticator.AuthenticatorPage;
+import com.gitplex.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import com.gitplex.server.web.page.admin.mailsetting.MailSettingPage;
+import com.gitplex.server.web.page.admin.securitysetting.SecuritySettingPage;
+import com.gitplex.server.web.page.admin.serverinformation.ServerInformationPage;
+import com.gitplex.server.web.page.admin.serverlog.ServerLogPage;
+import com.gitplex.server.web.page.admin.systemsetting.SystemSettingPage;
 import com.gitplex.server.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
@@ -31,6 +38,7 @@ public abstract class AdministrationPage extends LayoutPage {
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new AdministrationTab("System Setting", "fa fa-fw fa-sliders", SystemSettingPage.class));
 		tabs.add(new AdministrationTab("Security Setting", "fa fa-fw fa-lock", SecuritySettingPage.class));
+		tabs.add(new AdministrationTab("External Authentication", "fa fa-fw fa-key", AuthenticatorPage.class));
 		tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
 		tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));
 		tabs.add(new AdministrationTab("Server Log", "fa fa-fw fa-file-text-o", ServerLogPage.class));

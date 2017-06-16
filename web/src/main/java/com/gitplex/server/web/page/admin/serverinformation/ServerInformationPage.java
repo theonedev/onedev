@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page.admin;
+package com.gitplex.server.web.page.admin.serverinformation;
 
 import java.util.Date;
 
@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.web.page.admin.AdministrationPage;
 import com.gitplex.server.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar;

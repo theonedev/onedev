@@ -166,10 +166,6 @@ public class Project extends AbstractEntity {
     
     private transient Optional<String> defaultBranchOptional;
     
-    private transient Collection<Group> authorizedGroups;
-    
-    private transient Collection<User> authorizedUsers;
-    
     private transient Optional<RevCommit> lastCommitOptional;
     
 	@Editable(order=100)
@@ -845,26 +841,6 @@ public class Project extends AbstractEntity {
 		return null;
 	}
 
-	public Collection<Group> getAuthorizedGroups() {
-		if (authorizedGroups == null) {
-			authorizedGroups = new HashSet<>();
-			for (GroupAuthorization authorization: getGroupAuthorizations()) {
-				authorizedGroups.add(authorization.getGroup());
-			}
-		}
-		return authorizedGroups;
-	}
-	
-	public Collection<User> getAuthorizedUsers() {
-		if (authorizedUsers == null) {
-			authorizedUsers = new HashSet<>();
-			for (UserAuthorization authorization: getUserAuthorizations()) {
-				authorizedUsers.add(authorization.getUser());
-			}
-		}
-		return authorizedUsers;
-	}
-	
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(this);
 	}

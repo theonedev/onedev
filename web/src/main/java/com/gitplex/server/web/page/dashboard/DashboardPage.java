@@ -15,7 +15,7 @@ import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.ComponentRenderer;
-import com.gitplex.server.web.page.admin.SystemSettingPage;
+import com.gitplex.server.web.page.admin.systemsetting.SystemSettingPage;
 import com.gitplex.server.web.page.group.GroupListPage;
 import com.gitplex.server.web.page.group.NewGroupPage;
 import com.gitplex.server.web.page.layout.LayoutPage;

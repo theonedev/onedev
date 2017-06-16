@@ -142,29 +142,20 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (securityConfig == null) {
 			configManager.saveSecuritySetting(new SecuritySetting());
 		} 
-		
-		Config mailConfig = configManager.getConfig(Key.MAIL);
-		Serializable mailSetting = null;
-		if (mailConfig == null) {
-			mailSetting = new MailSetting();
-		} else if (mailConfig.getSetting() != null) {
-			if (!validator.validate(mailConfig.getSetting()).isEmpty())
-				mailSetting = mailConfig.getSetting();
+		Config authenticatorConfig = configManager.getConfig(Key.AUTHENTICATOR);
+		if (authenticatorConfig == null) {
+			configManager.saveAuthenticator(null);
 		}
 		
-		if (mailSetting != null) {
-			manualConfigs.add(new ManualConfig("Specify Mail Setting", mailSetting) {
+		Config mailConfig = configManager.getConfig(Key.MAIL);
+		if (mailConfig == null) {
+			configManager.saveMailSetting(null);
+		} else if (mailConfig.getSetting() != null && !validator.validate(mailConfig.getSetting()).isEmpty()) {
+			manualConfigs.add(new ManualConfig("Specify Mail Setting", mailConfig.getSetting()) {
 
 				@Override
 				public Skippable getSkippable() {
-					return new Skippable() {
-
-						@Override
-						public void skip() {
-							configManager.saveMailSetting(null);
-						}
-						
-					};
+					return null;
 				}
 
 				@Override

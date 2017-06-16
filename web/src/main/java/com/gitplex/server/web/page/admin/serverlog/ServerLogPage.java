@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page.admin;
+package com.gitplex.server.web.page.admin.serverlog;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ResourceLink;
 
+import com.gitplex.server.web.page.admin.AdministrationPage;
 import com.gitplex.server.web.util.resource.ServerLogResource;
 import com.gitplex.server.web.util.resource.ServerLogResourceReference;
 import com.google.common.base.Joiner;

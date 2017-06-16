@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page.admin;
+package com.gitplex.server.web.page.admin.databasebackup;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +14,7 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.persistence.PersistManager;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
 public class DatabaseBackupPage extends AdministrationPage {

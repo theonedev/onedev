@@ -8,6 +8,7 @@ import com.gitplex.server.model.support.setting.MailSetting;
 import com.gitplex.server.model.support.setting.SecuritySetting;
 import com.gitplex.server.model.support.setting.SystemSetting;
 import com.gitplex.server.persistence.dao.EntityManager;
+import com.gitplex.server.security.authenticator.Authenticator;
 
 public interface ConfigManager extends EntityManager<Config> {
 	
@@ -86,4 +87,10 @@ public interface ConfigManager extends EntityManager<Config> {
 	SecuritySetting getSecuritySetting();
 	
 	void saveSecuritySetting(SecuritySetting securitySetting);
+	
+	@Nullable
+	Authenticator getAuthenticator();
+	
+	void saveAuthenticator(@Nullable Authenticator authenticator);
+	
 }

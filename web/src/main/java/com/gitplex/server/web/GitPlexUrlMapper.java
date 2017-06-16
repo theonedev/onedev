@@ -9,12 +9,13 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
-import com.gitplex.server.web.page.admin.DatabaseBackupPage;
-import com.gitplex.server.web.page.admin.MailSettingPage;
-import com.gitplex.server.web.page.admin.SecuritySettingPage;
-import com.gitplex.server.web.page.admin.ServerInformationPage;
-import com.gitplex.server.web.page.admin.ServerLogPage;
-import com.gitplex.server.web.page.admin.SystemSettingPage;
+import com.gitplex.server.web.page.admin.authenticator.AuthenticatorPage;
+import com.gitplex.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import com.gitplex.server.web.page.admin.mailsetting.MailSettingPage;
+import com.gitplex.server.web.page.admin.securitysetting.SecuritySettingPage;
+import com.gitplex.server.web.page.admin.serverinformation.ServerInformationPage;
+import com.gitplex.server.web.page.admin.serverlog.ServerLogPage;
+import com.gitplex.server.web.page.admin.systemsetting.SystemSettingPage;
 import com.gitplex.server.web.page.group.GroupAuthorizationsPage;
 import com.gitplex.server.web.page.group.GroupListPage;
 import com.gitplex.server.web.page.group.GroupMembershipsPage;
@@ -95,6 +96,7 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		add(new WebPageMapper("administration/settings/mail", MailSettingPage.class));
 		add(new WebPageMapper("administration/settings/backup", DatabaseBackupPage.class));
 		add(new WebPageMapper("administration/settings/security", SecuritySettingPage.class));
+		add(new WebPageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 		add(new WebPageMapper("administration/server-log", ServerLogPage.class));
 		add(new WebPageMapper("administration/server-information", ServerInformationPage.class));
 	}

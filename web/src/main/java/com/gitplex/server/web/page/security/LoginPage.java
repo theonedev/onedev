@@ -113,7 +113,7 @@ public class LoginPage extends BasePage {
 						continueToOriginalDestination();
 						setResponsePage(getApplication().getHomePage());
 					} catch (AuthenticationException ae) {
-						error("Invalid user name and/or password.");
+						error("Authentication not passed");
 					}
 				}
 			}

@@ -2,6 +2,8 @@ package com.gitplex.server.web.behavior.testform;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.unbescape.html.HtmlEscape;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 
@@ -15,21 +17,20 @@ public abstract class TestFormBehavior extends AbstractPostAjaxBehavior {
 		if (result.isSuccessful()) {
 			feedbackHtml = String.format(
 					"<div class='test-feedback alert alert-success'>%s</div>", 
-					result.getMessage());					
+					HtmlEscape.escapeHtml5(result.getMessage()));					
 		} else {
 			feedbackHtml = String.format(
 					"<div class='test-feedback alert alert-danger'>%s</div>", 
-					result.getMessage());					
+					HtmlEscape.escapeHtml5(result.getMessage()));					
 		} 
-		feedbackHtml = StringUtils.replace(feedbackHtml, "'", "\\'");
-		feedbackHtml = StringUtils.replace(feedbackHtml, "\n", " ");
+		feedbackHtml = StringUtils.replace(feedbackHtml, "\n", "<br>");
 		target.appendJavaScript(String.format("var $button = $('#%s');"
 				+ "$button.removeAttr('disabled');"
 				+ "$button.val($button[0].prevValue);"
 				+ "$button.html($button[0].prevHtml);"
 				+ "$button.closest('form').append('%s');"
 				+ "$button.removeClass('ajax-indicator');", 
-				getComponent().getMarkupId(), feedbackHtml));
+				getComponent().getMarkupId(), JavaScriptEscape.escapeJavaScript(feedbackHtml)));
 	}
 
 	public void requestTest(AjaxRequestTarget target) {

@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page.admin;
+package com.gitplex.server.web.page.admin.databasebackup;
 
 import java.io.Serializable;
 

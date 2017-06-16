@@ -56,9 +56,9 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
 import com.gitplex.server.manager.GroupAuthorizationManager;
 import com.gitplex.server.manager.GroupManager;
-import com.gitplex.server.manager.MembershipManager;
 import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.manager.MarkdownManager;
+import com.gitplex.server.manager.MembershipManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.PullRequestCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
@@ -87,9 +87,9 @@ import com.gitplex.server.manager.impl.DefaultConfigManager;
 import com.gitplex.server.manager.impl.DefaultDataManager;
 import com.gitplex.server.manager.impl.DefaultGroupAuthorizationManager;
 import com.gitplex.server.manager.impl.DefaultGroupManager;
-import com.gitplex.server.manager.impl.DefaultMembershipManager;
 import com.gitplex.server.manager.impl.DefaultMailManager;
 import com.gitplex.server.manager.impl.DefaultMarkdownManager;
+import com.gitplex.server.manager.impl.DefaultMembershipManager;
 import com.gitplex.server.manager.impl.DefaultNotificationManager;
 import com.gitplex.server.manager.impl.DefaultProjectManager;
 import com.gitplex.server.manager.impl.DefaultPullRequestCommentManager;
@@ -127,9 +127,11 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.DefaultDao;
 import com.gitplex.server.security.BasicAuthenticationFilter;
 import com.gitplex.server.security.DefaultFilterChainResolver;
+import com.gitplex.server.security.DefaultPasswordService;
 import com.gitplex.server.security.DefaultWebSecurityManager;
 import com.gitplex.server.security.FilterChainConfigurator;
-import com.gitplex.server.security.SecurityRealm;
+import com.gitplex.server.security.GitPlexAuthorizingRealm;
+import com.gitplex.server.security.authenticator.Authenticator;
 import com.gitplex.server.util.ClassUtils;
 import com.gitplex.server.util.jackson.ObjectMapperConfigurator;
 import com.gitplex.server.util.jackson.ObjectMapperProvider;
@@ -143,7 +145,6 @@ import com.gitplex.server.util.validation.EntityValidator;
 import com.gitplex.server.util.validation.ValidatorProvider;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
-import com.pmease.security.shiro.bcrypt.BCryptPasswordService;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.converters.basic.NullConverter;
@@ -228,11 +229,11 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
 	    
-		bind(AuthorizingRealm.class).to(SecurityRealm.class);
+		bind(AuthorizingRealm.class).to(GitPlexAuthorizingRealm.class);
 		bind(WebSecurityManager.class).to(DefaultWebSecurityManager.class);
 		bind(FilterChainResolver.class).to(DefaultFilterChainResolver.class);
 		bind(BasicAuthenticationFilter.class);
-		bind(PasswordService.class).to(BCryptPasswordService.class).in(Singleton.class);
+		bind(PasswordService.class).to(DefaultPasswordService.class);
 		bind(ShiroFilter.class);
 		install(new ShiroAopModule());
         contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
@@ -245,6 +246,7 @@ public class CoreModule extends AbstractPluginModule {
             }
             
         });
+        contributeFromPackage(Authenticator.class, Authenticator.class);
         
 		bind(EntityValidator.class).to(DefaultEntityValidator.class);
 	}

@@ -2,7 +2,6 @@ package com.gitplex.server.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -88,10 +87,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestTask> requestTasks = new ArrayList<>();
 
-    private transient Collection<Project> authorizedProjects;
-    
-    private transient Collection<Group> groups;
-    
     @Override
     public PrincipalCollection getPrincipals() {
         return new SimplePrincipalCollection(getId(), "");
@@ -147,11 +142,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
      * 			password to set
      */
     public void setPassword(String password) {
-    	if (password != null) {
-    		this.password = password;
-    	} else {
-    		this.password = null;
-    	}
+    	this.password = password;
     }
     
 	@Editable(order=200)
@@ -248,26 +239,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			user.setName(userName);
 		}
 		return user;
-	}
-
-	public Collection<Project> getAuthorizedProjects() {
-		if (authorizedProjects == null) {
-			authorizedProjects = new HashSet<>();
-			for (UserAuthorization authorization: getAuthorizations()) {
-				authorizedProjects.add(authorization.getProject());
-			}
-		}
-		return authorizedProjects;
-	}
-	
-	public Collection<Group> getGroups() {
-		if (groups == null) {
-			groups = new HashSet<>();
-			for (Membership membership: getMemberships()) {
-				groups.add(membership.getGroup());
-			}
-		}
-		return groups;
 	}
 
 	public UserFacade getFacade() {

@@ -7,6 +7,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
+import com.gitplex.server.migration.VersionedDocument;
 import com.gitplex.server.model.Config;
 import com.gitplex.server.model.Config.Key;
 import com.gitplex.server.model.support.setting.BackupSetting;
@@ -18,6 +19,7 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.security.authenticator.Authenticator;
 import com.google.common.base.Preconditions;
 
 @Singleton
@@ -32,6 +34,8 @@ public class DefaultConfigManager extends AbstractEntityManager<Config> implemen
 	private volatile Long backupSettingConfigId;
 	
 	private volatile Long securitySettingConfigId;
+	
+	private volatile Long authenticatorConfigId;
 	
 	@Inject
 	public DefaultConfigManager(Dao dao, DataManager dataManager) {
@@ -151,6 +155,36 @@ public class DefaultConfigManager extends AbstractEntityManager<Config> implemen
 			config.setKey(Key.SECURITY);
 		}
 		config.setSetting(securitySetting);
+		dao.persist(config);
+	}
+	
+	@Sessional
+	@Override
+	public Authenticator getAuthenticator() {
+        Config config;
+        if (authenticatorConfigId == null) {
+    		config = getConfig(Key.AUTHENTICATOR);
+    		Preconditions.checkNotNull(config);
+    		authenticatorConfigId = config.getId();
+        } else {
+            config = load(authenticatorConfigId);
+        }
+        VersionedDocument dom = (VersionedDocument) config.getSetting();
+        if (dom != null)
+        	return (Authenticator) dom.toBean();
+        else
+        	return null;
+	}
+
+	@Transactional
+	@Override
+	public void saveAuthenticator(Authenticator authenticator) {
+		Config config = getConfig(Key.AUTHENTICATOR);
+		if (config == null) {
+			config = new Config();
+			config.setKey(Key.AUTHENTICATOR);
+		}
+		config.setSetting(VersionedDocument.fromBean(authenticator));
 		dao.persist(config);
 	}
 	

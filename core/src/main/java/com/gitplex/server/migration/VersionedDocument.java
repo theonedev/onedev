@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
@@ -31,16 +32,16 @@ import org.dom4j.QName;
 import org.dom4j.Visitor;
 import org.dom4j.XPath;
 import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
-import org.dom4j.io.XPP3Reader;
 import org.xml.sax.EntityResolver;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.util.ClassUtils;
 import com.gitplex.server.util.FileUtils;
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.core.util.HierarchicalStreams;
 import com.thoughtworks.xstream.io.xml.Dom4JReader;
@@ -398,7 +399,7 @@ public final class VersionedDocument implements Document, Externalizable {
 	
 	public static VersionedDocument fromXML(String xml) {
 		try {
-			return new VersionedDocument(new XPP3Reader().read(xml.toCharArray()));
+			return new VersionedDocument(new SAXReader().read(new StringReader(xml)));
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
 		}

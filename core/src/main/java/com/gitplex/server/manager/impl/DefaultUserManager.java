@@ -20,6 +20,7 @@ import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.util.StringUtils;
 
 @Singleton
 public class DefaultUserManager extends AbstractEntityManager<User> implements UserManager {
@@ -174,7 +175,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 	public void on(SystemStarted event) {
 		for (User user: findAll()) {
 			// Fix a critical issue that password of self-registered users are not hashed
-			if (user.getPassword() != null && !user.getPassword().startsWith("$2a$10") 
+			if (StringUtils.isNotBlank(user.getPassword()) && !user.getPassword().startsWith("$2a$10") 
 					&& !user.getPassword().startsWith("@hash^prefix@")) {
 				user.setPassword(passwordService.encryptPassword(user.getPassword()));
 				save(user);

@@ -5,9 +5,11 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * This entity stores object in serialized form, with one entity 
@@ -16,11 +18,19 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  */
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@DynamicUpdate
 public class Config extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Key {SYSTEM, MAIL, BACKUP, SECURITY};
+	public enum Key {SYSTEM, MAIL, BACKUP, SECURITY, AUTHENTICATOR};
+	
+	/*
+	 * Optimistic lock is necessary to ensure database integrity when update 
+	 * information such as authenticator default group names 
+	 */
+	@Version
+	private long version;
 	
 	@Column(nullable=false, unique=true)
 	private Key key;

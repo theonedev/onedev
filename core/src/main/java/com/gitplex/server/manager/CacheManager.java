@@ -51,4 +51,8 @@ public interface CacheManager {
 	
 	@Nullable
 	Long getProjectIdByName(String name);
+	
+	@Nullable
+	Long getGroupIdByName(String name);
+	
 }

@@ -42,8 +42,6 @@ public class Group extends AbstractEntity {
 	
 	private transient Collection<User> members;
 	
-	private transient Collection<Project> authorizedProjects;
-	
 	@Editable(order=100)
 	@NotEmpty
 	public String getName() {
@@ -111,16 +109,6 @@ public class Group extends AbstractEntity {
 		return members;
 	}
 
-	public Collection<Project> getAuthorizedProjects() {
-		if (authorizedProjects == null) {
-			authorizedProjects = new HashSet<>();
-			for (GroupAuthorization authorization: getAuthorizations()) {
-				authorizedProjects.add(authorization.getProject());
-			}
-		}
-		return authorizedProjects;
-	}
-	
 	@Override
 	public int compareTo(AbstractEntity entity) {
 		Group group = (Group) entity;

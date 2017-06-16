@@ -21,6 +21,7 @@ import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.loader.ImplementationRegistry;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.editable.annotation.Horizontal;
+import com.gitplex.server.util.editable.annotation.NullChoice;
 import com.gitplex.server.util.editable.annotation.Vertical;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
@@ -129,7 +130,18 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 				fragment.replace(newBeanEditor(propertyValue));
 			}
 			
-		}, implementationNames);
+		}, implementationNames) {
+
+			@Override
+			protected String getNullValidDisplayValue() {
+				NullChoice nullChoice = getPropertyDescriptor().getPropertyGetter().getAnnotation(NullChoice.class);
+				if (nullChoice != null)
+					return nullChoice.value();
+				else
+					return super.getNullValidDisplayValue();
+			}
+			
+		};
 		
 		typeSelector.setNullValid(!getPropertyDescriptor().isPropertyRequired());
 		typeSelector.add(new AjaxFormComponentUpdatingBehavior("change"){

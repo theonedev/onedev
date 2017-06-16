@@ -20,6 +20,7 @@ import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Group;
 import com.gitplex.server.model.GroupAuthorization;
+import com.gitplex.server.model.Membership;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.ProjectPrivilege;
@@ -79,14 +80,14 @@ public class PrivilegeSourcePanel extends Panel {
 			@Override
 			protected List<Group> load() {
 				List<Group> groups = new ArrayList<>();
-				for (Group group: user.getGroups()) {
-					if (group.isAdministrator()) {
-						groups.add(group);
+				for (Membership membership: user.getMemberships()) {
+					if (membership.getGroup().isAdministrator()) {
+						groups.add(membership.getGroup());
 					} else {
-						for (GroupAuthorization authorization: group.getAuthorizations()) {
+						for (GroupAuthorization authorization: membership.getGroup().getAuthorizations()) {
 							if (authorization.getProject().equals(project) 
 									&& authorization.getPrivilege() == privilege) {
-								groups.add(group);
+								groups.add(membership.getGroup());
 								break;
 							}
 						}

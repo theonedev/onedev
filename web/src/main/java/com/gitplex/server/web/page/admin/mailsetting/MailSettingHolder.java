@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page.admin;
+package com.gitplex.server.web.page.admin.mailsetting;
 
 import java.io.Serializable;
 

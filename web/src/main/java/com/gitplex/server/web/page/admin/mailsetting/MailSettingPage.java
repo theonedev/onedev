@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page.admin;
+package com.gitplex.server.web.page.admin.mailsetting;
 
 import java.io.Serializable;
 
@@ -24,6 +24,7 @@ import com.gitplex.server.web.behavior.testform.TestResult;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.EditorChanged;
+import com.gitplex.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
 public class MailSettingPage extends AdministrationPage {

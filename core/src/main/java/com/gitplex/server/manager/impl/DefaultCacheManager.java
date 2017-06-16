@@ -58,6 +58,8 @@ public class DefaultCacheManager implements CacheManager {
 	
 	private final Map<Long, GroupFacade> groups = new HashMap<>();
 	
+	private final BiMap<String, Long> groupIdsByName = HashBiMap.create();
+	
 	private final ReadWriteLock groupsLock = new ReentrantReadWriteLock();
 	
 	private final Map<Long, MembershipFacade> memberships = new HashMap<>();
@@ -91,8 +93,10 @@ public class DefaultCacheManager implements CacheManager {
 			if (user.getEmail() != null)
 				userIdsByEmail.inverse().put(user.getId(), user.getEmail());
 		}
-		for (Group group: dao.findAll(Group.class))
+		for (Group group: dao.findAll(Group.class)) {
 			groups.put(group.getId(), group.getFacade());
+			groupIdsByName.inverse().put(group.getId(), group.getName());
+		}
 		for (Membership membership: dao.findAll(Membership.class))
 			memberships.put(membership.getId(), membership.getFacade());
 		for (GroupAuthorization groupAuthorization: dao.findAll(GroupAuthorization.class))
@@ -131,7 +135,9 @@ public class DefaultCacheManager implements CacheManager {
 				} else if (event.getEntity() instanceof Group) {
 					groupsLock.writeLock().lock();
 					try {
-						groups.put(event.getEntity().getId(), ((Group) event.getEntity()).getFacade());
+						GroupFacade group = ((Group) event.getEntity()).getFacade();
+						groups.put(event.getEntity().getId(), group);
+						groupIdsByName.inverse().put(group.getId(), group.getName());
 					} finally {
 						groupsLock.writeLock().unlock();
 					}
@@ -228,6 +234,7 @@ public class DefaultCacheManager implements CacheManager {
 					groupsLock.writeLock().lock();
 					try {
 						groups.remove(event.getEntity().getId());
+						groupIdsByName.inverse().remove(event.getEntity().getId());
 					} finally {
 						groupsLock.writeLock().unlock();
 					}
@@ -383,6 +390,16 @@ public class DefaultCacheManager implements CacheManager {
 			return projectIdsByName.get(name);
 		} finally {
 			projectsLock.readLock().unlock();
+		}
+	}
+	
+	@Override
+	public Long getGroupIdByName(String name) {
+		groupsLock.readLock().lock();
+		try {
+			return groupIdsByName.get(name);
+		} finally {
+			groupsLock.readLock().unlock();
 		}
 	}
 	

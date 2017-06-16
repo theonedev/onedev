@@ -1,4 +1,4 @@
-package com.gitplex.server.web.page.admin;
+package com.gitplex.server.web.page.admin.securitysetting;
 
 import org.apache.wicket.markup.html.form.Form;
 
@@ -6,6 +6,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.model.support.setting.SecuritySetting;
 import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
 public class SecuritySettingPage extends AdministrationPage {

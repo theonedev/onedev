@@ -1,0 +1,28 @@
+<wicket:extend>
+	<form wicket:id="authenticator" class="authenticator leave-confirm">
+		<div wicket:id="editor"></div>
+		<div class="actions">
+			<input wicket:id="save" type="submit" class="btn btn-primary dirty-aware" value="Save setting"></input>
+			<input wicket:id="test" type="submit" class="btn btn-primary" value="Test setting"></input>
+		</div>
+	</form>
+	<wicket:fragment wicket:id="testFrag">
+		<form wicket:id="form" class="authenticator-test">
+			<div class="modal-header">
+				<button wicket:id="close" type="button" class="close">&times;</button>
+				<h4 id="modal-title" class="modal-title">
+					Authentication Test
+				</h4>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="editor"></div>
+			</div>
+			<div class="modal-footer">
+				<div class="form-group">
+					<button wicket:id="ok" class="btn btn-primary">Ok</button>
+					<button wicket:id="cancel" class="btn btn-default">Cancel</button>
+				</div>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:extend>
