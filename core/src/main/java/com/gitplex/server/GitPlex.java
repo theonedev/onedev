@@ -26,13 +26,12 @@ import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStarting;
 import com.gitplex.server.event.lifecycle.SystemStopped;
 import com.gitplex.server.event.lifecycle.SystemStopping;
-import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.persistence.PersistManager;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Sessional;
-import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.init.InitStage;
 import com.gitplex.server.util.init.ManualConfig;
 import com.gitplex.server.util.jetty.JettyRunner;
@@ -53,8 +52,6 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private final PersistManager persistManager;
 	
-	private final Dao dao;
-	
 	private final UnitOfWork unitOfWork;
 	
 	private final ConfigManager configManager;
@@ -71,12 +68,11 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	@Inject
 	public GitPlex(JettyRunner jettyRunner, TaskScheduler taskScheduler, PersistManager persistManager, 
-			Dao dao, UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, 
-			ConfigManager configManager, UserManager userManager, ListenerRegistry listenerRegistry) {
+			UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager, 
+			UserManager userManager, ListenerRegistry listenerRegistry) {
 		this.jettyRunner = jettyRunner;
 		this.taskScheduler = taskScheduler;
 		this.persistManager = persistManager;
-		this.dao = dao;
 		this.unitOfWork = unitOfWork;
 		this.configManager = configManager;
 		this.dataManager = dataManager;
@@ -97,22 +93,17 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		
 		persistManager.start();
 		
+		List<ManualConfig> manualConfigs = dataManager.init();
+		if (!manualConfigs.isEmpty()) {
+			logger.warn("Please set up the server at " + guessServerUrl());
+			initStage = new InitStage("Server Setup", manualConfigs);
+			
+			initStage.waitForFinish();
+		}
+
 		unitOfWork.begin();
 		try {
-			List<ManualConfig> manualConfigs = dataManager.init();
-			
-			if (!manualConfigs.isEmpty()) {
-				logger.warn("Please set up the server at " + guessServerUrl());
-				initStage = new InitStage("Server Setup", manualConfigs);
-				
-				initStage.waitForFinish();
-				
-				// clear session in order to pick up changes made in interactive setup 
-				dao.getSession().clear();
-			}
-
 			ThreadContext.bind(userManager.getRoot().asSubject());
-			
 			listenerRegistry.post(new SystemStarting());
 		} finally {
 			unitOfWork.end();
