@@ -4,14 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
 import javax.inject.Singleton;
 
-import org.apache.commons.compress.compressors.FileNameUtil;
 import org.dom4j.Element;
 
 import com.gitplex.server.util.FileUtils;
@@ -237,7 +235,8 @@ public class DatabaseMigrator {
 	
 	private void migrate9(File dataDir, Stack<Integer> versions) {
 		try {
-			Map<String, String> userIdToName = new HashMap<>();
+			Map<String, String> accountIdToName = new HashMap<>();
+			Set<String> userIds = new HashSet<>();
 			for (File file: dataDir.listFiles()) {
 				if (file.getName().startsWith("Accounts.xml")) {
 					File renamedFile = new File(dataDir, file.getName().replace("Accounts.xml", "Users.xml"));
@@ -247,10 +246,11 @@ public class DatabaseMigrator {
 							"com.gitplex.server.model.User");
 					VersionedDocument dom = VersionedDocument.fromXML(content);
 					for (Element element: dom.getRootElement().elements()) {
-						userIdToName.put(element.elementText("id"), element.elementText("name"));
+						accountIdToName.put(element.elementText("id"), element.elementText("name"));
 						if (element.elementTextTrim("organization").equals("true")) {
 							element.detach();
 						} else {
+							userIds.add(element.elementText("id"));
 							element.element("organization").detach();
 							element.element("defaultPrivilege").detach();
 							element.element("noSpaceName").detach();
@@ -273,15 +273,27 @@ public class DatabaseMigrator {
 						String accountId = element.elementText("account");
 						element.element("account").detach();
 						String depotName = element.elementText("name");
-						element.element("name").setText(userIdToName.get(accountId) + "." + depotName);
+						element.element("name").setText(accountIdToName.get(accountId) + "." + depotName);
 						if (element.element("defaultPrivilege") != null	)
 							element.element("defaultPrivilege").detach();
 					}
 					dom.writeToFile(renamedFile, false);
+				} else if (file.getName().startsWith("PullRequestWatchs.xml")) {
+					VersionedDocument dom = VersionedDocument.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) {
+						if (!userIds.contains(element.elementText("user"))) {
+							element.detach();
+						}
+					}
+					dom.writeToFile(file, false);
 				} else if (file.getName().startsWith("BranchWatchs.xml")) {
 					VersionedDocument dom = VersionedDocument.fromFile(file);
 					for (Element element: dom.getRootElement().elements()) {
-						element.element("depot").setName("project");
+						if (!userIds.contains(element.elementText("user"))) {
+							element.detach();
+						} else {
+							element.element("depot").setName("project");
+						}
 					}
 					dom.writeToFile(file, false);
 				} else if (file.getName().startsWith("PullRequests.xml")) {

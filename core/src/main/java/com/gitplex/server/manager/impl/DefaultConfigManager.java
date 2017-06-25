@@ -184,7 +184,10 @@ public class DefaultConfigManager extends AbstractEntityManager<Config> implemen
 			config = new Config();
 			config.setKey(Key.AUTHENTICATOR);
 		}
-		config.setSetting(VersionedDocument.fromBean(authenticator));
+		if (authenticator != null)
+			config.setSetting(VersionedDocument.fromBean(authenticator));
+		else
+			config.setSetting(null);
 		dao.persist(config);
 	}
 	
