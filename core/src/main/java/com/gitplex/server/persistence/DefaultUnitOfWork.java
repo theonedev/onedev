@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.util.ObjectReference;
+import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -70,13 +71,21 @@ public class DefaultUnitOfWork implements UnitOfWork {
 	
 	@Override
 	public <T> T call(Callable<T> callable) {
-		begin();
-		try {
-			return callable.call();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		} finally {
-			end();
+		if (persistManager.getSessionFactory() != null) {
+			begin();
+			try {
+				return callable.call();
+			} catch (Exception e) {
+				throw Throwables.propagate(e);
+			} finally {
+				end();
+			}
+		} else {
+			try {
+				return callable.call();
+			} catch (Exception e) {
+				throw Throwables.propagate(e);
+			}
 		}
 	}
 
@@ -86,13 +95,21 @@ public class DefaultUnitOfWork implements UnitOfWork {
 
 			@Override
 			public void run() {
-				begin();
-				try {
-					runnable.run();
-				} catch (Exception e) {
-					logger.error("Error executing within unit of work.", e);
-				} finally {
-					end();
+				if (persistManager.getSessionFactory() != null) {
+					begin();
+					try {
+						runnable.run();
+					} catch (Exception e) {
+						logger.error("Error executing within unit of work.", e);
+					} finally {
+						end();
+					}
+				} else {
+					try {
+						runnable.run();
+					} catch (Exception e) {
+						logger.error("Error executing within unit of work.", e);
+					}
 				}
 			}
 			
@@ -101,11 +118,15 @@ public class DefaultUnitOfWork implements UnitOfWork {
 
 	@Override
 	public void run(Runnable runnable) {
-		begin();
-		try {
+		if (persistManager.getSessionFactory() != null) {
+			begin();
+			try {
+				runnable.run();
+			} finally {
+				end();
+			}
+		} else {
 			runnable.run();
-		} finally {
-			end();
 		}
 	}
 

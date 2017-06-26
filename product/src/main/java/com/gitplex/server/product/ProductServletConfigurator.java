@@ -14,12 +14,12 @@ import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.server.git.GitFilter;
 import com.gitplex.server.git.GitPostReceiveCallback;
 import com.gitplex.server.git.GitPreReceiveCallback;
-import com.gitplex.server.persistence.HibernateFilter;
 import com.gitplex.server.security.DefaultWebEnvironment;
 import com.gitplex.server.util.jetty.ClasspathAssetServlet;
 import com.gitplex.server.util.jetty.FileAssetServlet;
@@ -33,8 +33,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 
 	private final ServerConfig serverConfig;
 	
-	private final HibernateFilter hibernateFilter;
-	
 	private final ShiroFilter shiroFilter;
 	
     private final GitFilter gitFilter;
@@ -44,22 +42,23 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	private final GitPostReceiveCallback postReceiveServlet;
 	
 	private final WicketServlet wicketServlet;
+	
+	private final ServletContainer jerseyServlet;
 
 	private final WebSocketManager webSocketManager;
 	
 	@Inject
-	public ProductServletConfigurator(ServerConfig serverConfig, HibernateFilter hibernateFilter, 
-			ShiroFilter shiroFilter, GitFilter gitFilter, GitPreReceiveCallback preReceiveServlet, 
-			GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet, 
-			WebSocketManager webSocketManager) {
+	public ProductServletConfigurator(ServerConfig serverConfig, ShiroFilter shiroFilter, GitFilter gitFilter, 
+			GitPreReceiveCallback preReceiveServlet, GitPostReceiveCallback postReceiveServlet, 
+			WicketServlet wicketServlet, WebSocketManager webSocketManager, ServletContainer jerseyServlet) {
 		this.serverConfig = serverConfig;
-		this.hibernateFilter = hibernateFilter;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
 		this.preReceiveServlet = preReceiveServlet;
 		this.postReceiveServlet = postReceiveServlet;
 		this.wicketServlet = wicketServlet;
 		this.webSocketManager = webSocketManager;
+		this.jerseyServlet = jerseyServlet;
 	}
 	
 	@Override
@@ -67,9 +66,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		context.setContextPath("/");
 		
 		context.getSessionHandler().getSessionManager().setMaxInactiveInterval(serverConfig.getSessionTimeout());
-		
-		FilterHolder hibernateFilterHolder = new FilterHolder(hibernateFilter);
-		context.addFilter(hibernateFilterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 		
 		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, DefaultWebEnvironment.class.getName());
 		context.addEventListener(new EnvironmentLoaderListener());
@@ -119,6 +115,9 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		ServletHolder fileServletHolder = new ServletHolder(new FileAssetServlet(Bootstrap.getSiteDir()));
 		context.addServlet(fileServletHolder, "/site/*");
 		context.addServlet(fileServletHolder, "/robots.txt");
+		
+		ServletHolder jerseyServletHolder = new ServletHolder(jerseyServlet);
+		context.addServlet(jerseyServletHolder, "/rest/*");
 	}
 
 }

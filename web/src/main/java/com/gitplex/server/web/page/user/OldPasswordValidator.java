@@ -17,7 +17,7 @@ public class OldPasswordValidator implements ConstraintValidator<OldPassword, St
 		if (value != null) {
 			UserPage page = (UserPage) WicketUtils.getPage();
 			PasswordService passwordService = AppLoader.getInstance(PasswordService.class);
-			if (!passwordService.passwordsMatch(value, (String) page.getUser().getCredentials())) {
+			if (!passwordService.passwordsMatch(value, (String) page.getUser().getPassword())) {
 				constraintContext.disableDefaultConstraintViolation();
 				constraintContext.buildConstraintViolationWithTemplate("Old password does not match").addConstraintViolation();
 				return false;

@@ -36,9 +36,11 @@ import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.WorkExecutor;
 import com.gitplex.server.model.User;
+import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.util.concurrent.PrioritizedRunnable;
+import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.serverconfig.ServerConfig;
 
 @Singleton
@@ -78,7 +80,8 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
+	@Sessional
+	protected ProjectFacade getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
 			throws IOException {
 		projectInfo = StringUtils.stripStart(StringUtils.stripEnd(projectInfo, "/"), "/");
 
@@ -98,7 +101,7 @@ public class GitFilter implements Filter {
 			throw new GitException(String.format("Unable to find project %s", projectName));
 		}
 		
-		return project;
+		return project.getFacade();
 	}
 	
 	private void doNotCache(HttpServletResponse response) {
@@ -114,7 +117,7 @@ public class GitFilter implements Filter {
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Project project = getProject(request, response, projectInfo);
+		ProjectFacade project = getProject(request, response, projectInfo);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
@@ -133,9 +136,8 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
-			if (!SecurityUtils.canRead(project)) {
+			if (!SecurityUtils.canRead(project))
 				throw new UnauthorizedException("You do not have permission to pull from this project.");
-			}
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
 				@Override
@@ -188,15 +190,14 @@ public class GitFilter implements Filter {
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
 		String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Project project = getProject(request, response, projectInfo);
+		ProjectFacade project = getProject(request, response, projectInfo);
 		String service = request.getParameter("service");
 		
 		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (service.contains("upload")) {
-			if (!SecurityUtils.canRead(project)) {
+			if (!SecurityUtils.canRead(project)) 
 				throw new UnauthorizedException("You do not have permission to pull from this project.");
-			}
 			writeInitial(response, service);
 			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {

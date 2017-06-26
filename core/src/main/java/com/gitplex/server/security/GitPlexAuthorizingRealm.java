@@ -30,6 +30,7 @@ import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Group;
 import com.gitplex.server.model.Membership;
 import com.gitplex.server.model.User;
+import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.security.authenticator.Authenticated;
 import com.gitplex.server.security.authenticator.Authenticator;
@@ -75,13 +76,54 @@ public class GitPlexAuthorizingRealm extends AuthorizingRealm {
     	this.groupManager = groupManager;
     }
 
-	@SuppressWarnings("serial")
+	@Sessional
+	protected Collection<Permission> getObjectPermissionsInSession(Long userId) {
+		Collection<Permission> permissions = new ArrayList<>();
+
+		UserFacade user = null;
+        if (userId != 0L) 
+            user = cacheManager.getUser(userId);
+        if (user != null) {
+			permissions.add(new PublicPermission());
+        	if (user.isRoot()) 
+        		permissions.add(new SystemAdministration());
+        	permissions.add(new UserAdministration(user));
+        	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+        		if (membership.getUserId().equals(userId)) {
+        			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
+            		if (group.isAdministrator())
+            			permissions.add(new SystemAdministration());
+            		if (group.isCanCreateProjects())
+            			permissions.add(new CreateProjects());
+            		for (GroupAuthorizationFacade authorization: 
+            				cacheManager.getGroupAuthorizations().values()) {
+            			if (authorization.getGroupId().equals(group.getId())) {
+                			permissions.add(new ProjectPermission(
+                					cacheManager.getProject(authorization.getProjectId()), 
+                					authorization.getPrivilege()));
+            			}
+            		}
+        		}
+        	}
+        	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+        		if (authorization.getUserId().equals(userId)) {
+            		permissions.add(new ProjectPermission(
+            				cacheManager.getProject(authorization.getProjectId()), 
+            				authorization.getPrivilege()));
+        		}
+        	}
+        } else if (configManager.getSecuritySetting().isEnableAnonymousAccess()) {
+			permissions.add(new PublicPermission());
+        }
+		return permissions;
+	}
+	
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-		Long userId = (Long) principals.getPrimaryPrincipal();
-		
 		return new AuthorizationInfo() {
 			
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public Collection<String> getStringPermissions() {
 				return new HashSet<>();
@@ -94,51 +136,13 @@ public class GitPlexAuthorizingRealm extends AuthorizingRealm {
 			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				Collection<Permission> permissions = new ArrayList<>();
-
-				UserFacade user = null;
-                if (userId != 0L) 
-                    user = cacheManager.getUser(userId);
-                if (user != null) {
-					permissions.add(new PublicPermission());
-                	if (user.isRoot()) 
-                		permissions.add(new SystemAdministration());
-                	permissions.add(new UserAdministration(user));
-                	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-                		if (membership.getUserId().equals(userId)) {
-                			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
-                    		if (group.isAdministrator())
-                    			permissions.add(new SystemAdministration());
-                    		if (group.isCanCreateProjects())
-                    			permissions.add(new CreateProjects());
-                    		for (GroupAuthorizationFacade authorization: 
-                    				cacheManager.getGroupAuthorizations().values()) {
-                    			if (authorization.getGroupId().equals(group.getId())) {
-                        			permissions.add(new ProjectPermission(
-                        					cacheManager.getProject(authorization.getProjectId()), 
-                        					authorization.getPrivilege()));
-                    			}
-                    		}
-                		}
-                	}
-                	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-                		if (authorization.getUserId().equals(userId)) {
-                    		permissions.add(new ProjectPermission(
-                    				cacheManager.getProject(authorization.getProjectId()), 
-                    				authorization.getPrivilege()));
-                		}
-                	}
-                } else if (configManager.getSecuritySetting().isEnableAnonymousAccess()) {
-					permissions.add(new PublicPermission());
-                }
-				return permissions;
+				return getObjectPermissionsInSession((Long) principals.getPrimaryPrincipal());
 			}
 		};
 	}
 	
 	@Transactional
-	@Override
-	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) 
+	protected AuthenticationInfo doGetAuthenticationInfoInTransaction(AuthenticationToken token) 
 			throws AuthenticationException {
     	User user = userManager.findByName(((UsernamePasswordToken) token).getUsername());
     	if (user != null && user.isRoot())
@@ -224,7 +228,14 @@ public class GitPlexAuthorizingRealm extends AuthorizingRealm {
         	}
     	}
     	
-    	return user;
+    	return user;		
+	}
+	
+	@Override
+	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) 
+			throws AuthenticationException {
+		// transaction annotation can not be applied to final method, so we relay to another method
+		return doGetAuthenticationInfoInTransaction(token);
 	}
 	
 }

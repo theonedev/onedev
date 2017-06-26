@@ -4,13 +4,13 @@ import javax.inject.Singleton;
 
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.server.rest.jersey.JerseyConfigurator;
-import com.gitplex.server.rest.jersey.JerseyServletConfigurator;
 import com.gitplex.server.rest.jersey.ResourceConfigProvider;
+import com.gitplex.server.rest.jersey.DefaultServletContainer;
 import com.gitplex.server.security.FilterChainConfigurator;
-import com.gitplex.server.util.jetty.ServletConfigurator;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -23,9 +23,8 @@ public class RestModule extends AbstractPluginModule {
 		super.configure();
 		
 		bind(ResourceConfig.class).toProvider(ResourceConfigProvider.class).in(Singleton.class);
+		bind(ServletContainer.class).to(DefaultServletContainer.class);
 		
-		contribute(ServletConfigurator.class, JerseyServletConfigurator.class);
-
 		contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
 
 			@Override

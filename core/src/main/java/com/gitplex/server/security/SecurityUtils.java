@@ -177,7 +177,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canManage(User user) {
-		return getSubject().isPermitted(new UserAdministration(user.getFacade()));
+		return canManage(user.getFacade());
+	}
+	
+	public static boolean canManage(UserFacade user) {
+		return getSubject().isPermitted(new UserAdministration(user));
 	}
 	
 	public static boolean canCreateProjects() {
@@ -189,15 +193,27 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canRead(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project.getFacade(), ProjectPrivilege.READ));
+		return canRead(project.getFacade());
+	}
+	
+	public static boolean canRead(ProjectFacade project) {
+		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.READ));
 	}
 	
 	public static boolean canWrite(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project.getFacade(), ProjectPrivilege.WRITE));
+		return canWrite(project.getFacade());
 	}
 
+	public static boolean canWrite(ProjectFacade project) {
+		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.WRITE));
+	}
+	
 	public static boolean canManage(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project.getFacade(), ProjectPrivilege.ADMIN));
+		return canManage(project.getFacade());
+	}
+	
+	public static boolean canManage(ProjectFacade project) {
+		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.ADMIN));
 	}
 	
 	public static boolean isAdministrator() {
