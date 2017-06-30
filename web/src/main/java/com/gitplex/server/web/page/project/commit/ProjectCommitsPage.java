@@ -67,12 +67,12 @@ import com.gitplex.server.web.page.project.commit.CommitQueryParser.QueryContext
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
 import com.gitplex.server.web.util.ajaxlistener.IndicateLoadingListener;
 import com.gitplex.server.web.util.model.CommitRefsModel;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import jersey.repackaged.com.google.common.base.Joiner;
 
 @SuppressWarnings("serial")
 public class ProjectCommitsPage extends ProjectPage {

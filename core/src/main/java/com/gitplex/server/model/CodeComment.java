@@ -32,7 +32,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
-import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.LastEvent;
@@ -202,7 +202,7 @@ public class CodeComment extends AbstractEntity {
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
+			Date visitDate = GitPlex.getInstance(VisitManager.class).getVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;

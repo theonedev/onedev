@@ -23,8 +23,7 @@ import com.gitplex.server.web.page.project.NewProjectPage;
 import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.page.user.NewUserPage;
 import com.gitplex.server.web.page.user.UserListPage;
-
-import jersey.repackaged.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class DashboardPage extends LayoutPage {

@@ -34,10 +34,6 @@ public class Review extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	private boolean checkMerged;
-	
-	private boolean autoCheck;
-	
 	private boolean approved;
 	
 	private transient Optional<PullRequestUpdate> updateOpt;
@@ -74,22 +70,6 @@ public class Review extends AbstractEntity {
 
 	public void setApproved(boolean approved) {
 		this.approved = approved;
-	}
-
-	public boolean isCheckMerged() {
-		return checkMerged;
-	}
-
-	public void setCheckMerged(boolean checkMerged) {
-		this.checkMerged = checkMerged;
-	}
-
-	public boolean isAutoCheck() {
-		return autoCheck;
-	}
-
-	public void setAutoCheck(boolean autoCheck) {
-		this.autoCheck = autoCheck;
 	}
 
 	public String getNote() {

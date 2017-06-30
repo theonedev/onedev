@@ -13,7 +13,7 @@ import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.manager.StorageManager;
-import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
@@ -32,7 +32,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultVisitInfoManager extends AbstractEnvironmentManager implements VisitInfoManager {
+public class DefaultVisitManager extends AbstractEnvironmentManager implements VisitManager {
 
 	private static final int INFO_VERSION = 1;
 	
@@ -47,7 +47,7 @@ public class DefaultVisitInfoManager extends AbstractEnvironmentManager implemen
 	private final Dao dao;
 	
 	@Inject
-	public DefaultVisitInfoManager(Dao dao, StorageManager storageManager) {
+	public DefaultVisitManager(Dao dao, StorageManager storageManager) {
 		this.dao = dao;
 		this.storageManager = storageManager;
 	}

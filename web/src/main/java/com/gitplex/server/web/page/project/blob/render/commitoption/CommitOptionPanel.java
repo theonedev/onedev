@@ -65,10 +65,10 @@ import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.ajaxlistener.TrackViewStateListener;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import jersey.repackaged.com.google.common.base.Objects;
 
 @SuppressWarnings("serial")
 public class CommitOptionPanel extends Panel {

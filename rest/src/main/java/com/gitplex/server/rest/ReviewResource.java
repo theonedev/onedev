@@ -67,8 +67,6 @@ public class ReviewResource {
     		Review existingReview = reviewManager.find(review.getRequest(), user, review.getCommit());
     		if (existingReview != null) {
         		existingReview.setApproved(review.isApproved());
-        		existingReview.setAutoCheck(review.isAutoCheck());
-        		existingReview.setCheckMerged(review.isCheckMerged());
         		existingReview.setNote(review.getNote());
         		reviewManager.save(existingReview);
         		return existingReview.getId();

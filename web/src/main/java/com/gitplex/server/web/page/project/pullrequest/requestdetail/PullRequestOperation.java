@@ -38,8 +38,6 @@ public enum PullRequestOperation {
 		public void operate(PullRequest request, String comment) {
 			Review review = new Review();
 			review.setApproved(true);
-			review.setAutoCheck(false);
-			review.setCheckMerged(false);
 			review.setCommit(request.getHeadCommitHash());
 			review.setNote(comment);
 			review.setRequest(request);
@@ -59,8 +57,6 @@ public enum PullRequestOperation {
 		public void operate(PullRequest request, String comment) {
 			Review review = new Review();
 			review.setApproved(false);
-			review.setAutoCheck(false);
-			review.setCheckMerged(false);
 			review.setCommit(request.getHeadCommitHash());
 			review.setNote(comment);
 			review.setRequest(request);

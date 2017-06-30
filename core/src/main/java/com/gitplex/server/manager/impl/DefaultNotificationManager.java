@@ -32,7 +32,7 @@ import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.manager.PullRequestTaskManager;
 import com.gitplex.server.manager.PullRequestWatchManager;
 import com.gitplex.server.manager.UrlManager;
-import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.BranchWatch;
 import com.gitplex.server.model.PullRequest;
@@ -57,7 +57,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	
 	private final UrlManager urlManager;
 	
-	private final VisitInfoManager visitInfoManager;
+	private final VisitManager visitInfoManager;
 	
 	private final MarkdownManager markdownManager;
 	
@@ -67,7 +67,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	
 	@Inject
 	public DefaultNotificationManager(MarkdownManager markdownManager, BranchWatchManager branchWatchManager, 
-			MailManager mailManager, UrlManager urlManager, VisitInfoManager visitInfoManager, 
+			MailManager mailManager, UrlManager urlManager, VisitManager visitInfoManager, 
 			PullRequestWatchManager pullRequestWatchManager, PullRequestTaskManager pullRequestTaskManager) {
 		this.branchWatchManager = branchWatchManager;
 		this.mailManager = mailManager;

@@ -41,7 +41,7 @@ import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.ReviewManager;
-import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.support.CloseInfo;
 import com.gitplex.server.model.support.LastEvent;
 import com.gitplex.server.model.support.MergePreview;
@@ -72,7 +72,7 @@ public class PullRequest extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String REFS_PREFIX = "refs/pulls/";
+	public static final String REFS_PREFIX = "refs/pull/";
 	
 	public static final int MAX_CODE_COMMENTS = 1000;
 	 
@@ -682,7 +682,7 @@ public class PullRequest extends AbstractEntity {
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = GitPlex.getInstance(VisitInfoManager.class).getVisitDate(user, this);
+			Date visitDate = GitPlex.getInstance(VisitManager.class).getVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;

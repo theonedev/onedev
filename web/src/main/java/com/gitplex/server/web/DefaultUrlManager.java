@@ -40,7 +40,7 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlFor(request.getTarget().getProject()) + "/pulls/" + request.getNumber();
+		return urlFor(request.getTarget().getProject()) + "/pull/" + request.getNumber();
 	}
 
 	@Override

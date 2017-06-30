@@ -8,7 +8,7 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
 
-public interface VisitInfoManager {
+public interface VisitManager {
 	
 	void visit(User user, PullRequest request);
 	

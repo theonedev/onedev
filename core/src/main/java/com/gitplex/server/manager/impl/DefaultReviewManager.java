@@ -24,8 +24,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CommitInfoManager;
@@ -60,8 +58,6 @@ import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 @Singleton
 public class DefaultReviewManager extends AbstractEntityManager<Review> implements ReviewManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultReviewManager.class);
-	
 	private static final int MAX_CONTRIBUTION_FILES = 100;
 	
 	private final UserManager userManager;
@@ -268,19 +264,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 			Permission writePermission = new ProjectPermission(project, ProjectPrivilege.WRITE); 
 			if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writePermission)) {
 				Collection<UserFacade> writers = SecurityUtils.getAuthorizedUsers(project, ProjectPrivilege.WRITE);
-				checkReviews(writers, 1, request.getLatestUpdate(), true);
-			}
-			
-			for (Iterator<Map.Entry<User, Review>> it = effectiveReviews.entrySet().iterator(); it.hasNext();) {
-				Review review = it.next().getValue();
-				if (review.isCheckMerged()) {
-					if (request.getMergePreview() == null 
-							|| !review.getCommit().equals(request.getMergePreview().getMerged())) {
-						if (!awaitingReviewers.contains(review.getUser()))
-							awaitingReviewers.add(review.getUser());
-						it.remove();
-					}
-				}
+				checkReviews(writers, 1, request.getLatestUpdate());
 			}
 			
 		}
@@ -309,7 +293,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 			for (Map.Entry<Group, Integer> entry: appointment.getGroups().entrySet()) {
 				Group group = entry.getKey();
 				int requiredCount = entry.getValue();
-				checkReviews(getFacades(group.getMembers()), requiredCount, update, false);
+				checkReviews(getFacades(group.getMembers()), requiredCount, update);
 			}
 		}
 		
@@ -320,8 +304,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 			return facades;
 		}
 		
-		private void checkReviews(Collection<UserFacade> users, int requiredCount, PullRequestUpdate update, 
-				boolean excludeAutoReviews) {
+		private void checkReviews(Collection<UserFacade> users, int requiredCount, PullRequestUpdate update) {
 			if (requiredCount == 0)
 				requiredCount = users.size();
 			
@@ -335,12 +318,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 				} else {
 					Review effectiveReview = getReviewAfter(user.getId(), update);
 					if (effectiveReview != null) {
-						if (!excludeAutoReviews || !effectiveReview.isAutoCheck()) {						
-							effectiveCount++;
-						} else {
-							logger.warn("Auto review made by {} is ignored while checking reviews of pull request #{}", 
-									user.getDisplayName(), update.getRequest().getNumber());
-						}
+						effectiveCount++;
 					} else {
 						potentialReviewers.add(user);
 					}

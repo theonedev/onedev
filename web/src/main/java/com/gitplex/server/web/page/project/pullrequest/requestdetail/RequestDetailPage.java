@@ -55,7 +55,7 @@ import org.apache.wicket.util.visit.IVisitor;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
-import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
@@ -352,7 +352,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 					@Override
 					public void onEndRequest(RequestCycle cycle) {
 						if (SecurityUtils.getUser() != null) { 
-							GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getUser(), 
+							GitPlex.getInstance(VisitManager.class).visit(SecurityUtils.getUser(), 
 									getPullRequest());
 						}
 					}

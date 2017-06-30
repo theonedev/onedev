@@ -152,13 +152,13 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		add(new WebPageMapper("projects/${project}/branches", ProjectBranchesPage.class));
 		add(new WebPageMapper("projects/${project}/tags", ProjectTagsPage.class));
 
-		add(new WebPageMapper("projects/${project}/pulls", RequestListPage.class));
-		add(new WebPageMapper("projects/${project}/pulls/new", NewRequestPage.class));
-		add(new WebPageMapper("projects/${project}/pulls/${request}", RequestOverviewPage.class));
-		add(new WebPageMapper("projects/${project}/pulls/${request}/overview", RequestOverviewPage.class));
-		add(new WebPageMapper("projects/${project}/pulls/${request}/code-comments", CodeCommentsPage.class));
-		add(new WebPageMapper("projects/${project}/pulls/${request}/changes", RequestChangesPage.class));
-		add(new WebPageMapper("projects/${project}/pulls/${request}/merge-preview", MergePreviewPage.class));
+		add(new WebPageMapper("projects/${project}/pull", RequestListPage.class));
+		add(new WebPageMapper("projects/${project}/pull/new", NewRequestPage.class));
+		add(new WebPageMapper("projects/${project}/pull/${request}", RequestOverviewPage.class));
+		add(new WebPageMapper("projects/${project}/pull/${request}/overview", RequestOverviewPage.class));
+		add(new WebPageMapper("projects/${project}/pull/${request}/code-comments", CodeCommentsPage.class));
+		add(new WebPageMapper("projects/${project}/pull/${request}/changes", RequestChangesPage.class));
+		add(new WebPageMapper("projects/${project}/pull/${request}/merge-preview", MergePreviewPage.class));
 
 		add(new WebPageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
 		add(new WebPageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));

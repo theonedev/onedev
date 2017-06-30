@@ -14,7 +14,6 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
-import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.rest.jersey.ValidQueryParams;
 import com.gitplex.server.security.SecurityUtils;
 
@@ -24,20 +23,17 @@ import com.gitplex.server.security.SecurityUtils;
 @Singleton
 public class ProjectResource {
 
-	private final Dao dao;
-	
 	private final ProjectManager projectManager;
 	
 	@Inject
-	public ProjectResource(Dao dao, ProjectManager projectManager) {
-		this.dao = dao;
+	public ProjectResource(ProjectManager projectManager) {
 		this.projectManager = projectManager;
 	}
 	
 	@Path("/{id}")
     @GET
     public Project get(@PathParam("id") Long id) {
-    	Project project = dao.load(Project.class, id);
+    	Project project = projectManager.load(id);
 
     	if (!SecurityUtils.canRead(project))
 			throw new UnauthorizedException("Unauthorized access to project " + project.getName());

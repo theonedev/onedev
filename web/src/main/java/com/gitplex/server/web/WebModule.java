@@ -42,9 +42,8 @@ import com.gitplex.server.web.websocket.PullRequestChangeBroadcaster;
 import com.gitplex.server.web.websocket.TaskChangeBroadcaster;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.vladsch.flexmark.Extension;
-
-import jersey.repackaged.com.google.common.collect.Sets;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

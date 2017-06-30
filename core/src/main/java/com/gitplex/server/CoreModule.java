@@ -73,7 +73,8 @@ import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.UserAuthorizationManager;
 import com.gitplex.server.manager.UserInfoManager;
 import com.gitplex.server.manager.UserManager;
-import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.manager.VerificationManager;
+import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.manager.WorkExecutor;
 import com.gitplex.server.manager.impl.DefaultAttachmentManager;
 import com.gitplex.server.manager.impl.DefaultBatchWorkManager;
@@ -105,7 +106,8 @@ import com.gitplex.server.manager.impl.DefaultStorageManager;
 import com.gitplex.server.manager.impl.DefaultUserAuthorizationManager;
 import com.gitplex.server.manager.impl.DefaultUserInfoManager;
 import com.gitplex.server.manager.impl.DefaultUserManager;
-import com.gitplex.server.manager.impl.DefaultVisitInfoManager;
+import com.gitplex.server.manager.impl.DefaultVerificationManager;
+import com.gitplex.server.manager.impl.DefaultVisitManager;
 import com.gitplex.server.manager.impl.DefaultWorkExecutor;
 import com.gitplex.server.manager.impl.NotificationManager;
 import com.gitplex.server.migration.JpaConverter;
@@ -210,7 +212,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestTaskManager.class).to(DefaultPullRequestTaskManager.class);
 		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(CommitInfoManager.class).to(DefaultCommitInfoManager.class);
-		bind(VisitInfoManager.class).to(DefaultVisitInfoManager.class);
+		bind(VisitManager.class).to(DefaultVisitManager.class);
 		bind(UserInfoManager.class).to(DefaultUserInfoManager.class);
 		bind(BatchWorkManager.class).to(DefaultBatchWorkManager.class);
 		bind(GroupManager.class).to(DefaultGroupManager.class);
@@ -225,6 +227,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
 		bind(NotificationManager.class).to(DefaultNotificationManager.class);
 		bind(CacheManager.class).to(DefaultCacheManager.class);
+		bind(VerificationManager.class).to(DefaultVerificationManager.class);
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);

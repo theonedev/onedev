@@ -17,8 +17,8 @@ import javax.ws.rs.core.MediaType;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
+import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;
 import com.gitplex.server.security.SecurityUtils;
@@ -33,17 +33,17 @@ public class PullRequestResource {
 	
 	private static final String CLOSED = "closed";
 	
-	private final Dao dao;
+	private final PullRequestManager pullRequestManager;
 	
 	@Inject
-	public PullRequestResource(Dao dao) {
-		this.dao = dao;
+	public PullRequestResource(PullRequestManager pullRequestManager) {
+		this.pullRequestManager = pullRequestManager;
 	}
 
     @GET
     @Path("/{id}")
     public PullRequest get(@PathParam("id") Long id) {
-    	PullRequest request = dao.load(PullRequest.class, id);
+    	PullRequest request = pullRequestManager.load(id);
     	
     	if (!SecurityUtils.canRead(request.getTargetProject()))
     		throw new UnauthorizedException();
@@ -83,7 +83,7 @@ public class PullRequestResource {
 		if (endDate != null)
 			criteria.add(Restrictions.le("submitDate", endDate));
 
-		List<PullRequest> requests = dao.findAll(criteria);
+		List<PullRequest> requests = pullRequestManager.findAll(criteria);
 		
 		for (PullRequest request: requests) {
 	    	if (!SecurityUtils.canRead(request.getTarget().getProject()))

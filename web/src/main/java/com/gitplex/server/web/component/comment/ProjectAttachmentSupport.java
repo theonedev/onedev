@@ -21,8 +21,7 @@ import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.util.resource.AttachmentResource;
 import com.gitplex.server.web.util.resource.AttachmentResourceReference;
 import com.google.common.base.Preconditions;
-
-import jersey.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Throwables;
 
 public class ProjectAttachmentSupport implements AttachmentSupport {
 

@@ -40,7 +40,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentReplyManager;
 import com.gitplex.server.manager.CodeCommentStatusChangeManager;
-import com.gitplex.server.manager.VisitInfoManager;
+import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.CodeCommentReply;
@@ -61,9 +61,9 @@ import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 import com.gitplex.server.web.websocket.PageDataChanged;
+import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentPanel extends Panel {
@@ -616,7 +616,7 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					public void onEndRequest(RequestCycle cycle) {
 						if (SecurityUtils.getUser() != null) {
-							GitPlex.getInstance(VisitInfoManager.class).visit(SecurityUtils.getUser(), getComment());
+							GitPlex.getInstance(VisitManager.class).visit(SecurityUtils.getUser(), getComment());
 						}
 					}
 					
