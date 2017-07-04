@@ -43,11 +43,18 @@ public class RepositoryResource {
     	} else {
     		Map<String, Object> entity = new HashMap<>();
     		Map<String, String> permissionsMap = new HashMap<>();
+    		entity.put("name", project.getName());
     		permissionsMap.put("admin", String.valueOf(SecurityUtils.canManage(project)));
     		permissionsMap.put("push", String.valueOf(SecurityUtils.canWrite(project)));
     		permissionsMap.put("pull", "true");
     		entity.put("permissions", permissionsMap);
-    		entity.put("name", project.getName());
+    		
+    		Map<String, String> ownerMap = new HashMap<>();
+    		ownerMap.put("login", "projects");
+    		ownerMap.put("id", "1000000");
+    		
+    		entity.put("owner", ownerMap);
+    		
     		return Response.ok(entity, RestConstants.JSON_UTF8).build();
     	}
     }
