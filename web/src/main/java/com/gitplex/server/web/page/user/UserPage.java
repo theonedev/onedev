@@ -16,6 +16,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -64,7 +65,10 @@ public abstract class UserPage extends LayoutPage {
 		tabs.add(new UserTab("Profile", "fa fa-fw fa-list-alt", UserProfilePage.class));
 		if (SecurityUtils.canManage(getUser())) {
 			tabs.add(new UserTab("Edit Avatar", "fa fa-fw fa-picture-o", AvatarEditPage.class));
-			tabs.add(new UserTab("Change Password", "fa fa-fw fa-key", PasswordEditPage.class));
+			
+			if (StringUtils.isNotBlank(getUser().getPassword()))
+				tabs.add(new UserTab("Change Password", "fa fa-fw fa-key", PasswordEditPage.class));
+			tabs.add(new UserTab("Access Token", "fa fa-fw fa-key", TokenGeneratePage.class));
 		}
 		tabs.add(new UserTab("Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
 		if (SecurityUtils.isAdministrator()) 

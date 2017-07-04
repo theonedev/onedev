@@ -20,8 +20,8 @@ import javax.validation.Payload;
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=OldPasswordValidator.class) 
-@interface OldPassword {
+@Constraint(validatedBy=CurrentPasswordValidator.class) 
+@interface CurrentPassword {
 
 	String message() default "Old password does not match";
 	

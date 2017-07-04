@@ -17,7 +17,7 @@ public class PasswordEditBean implements Serializable {
 	private String newPassword;
 
 	@Editable(order=100)
-	@OldPassword
+	@CurrentPassword
 	@Password
 	@NotEmpty
 	public String getOldPassword() {

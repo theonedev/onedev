@@ -39,3 +39,11 @@
 .new-user .actions .btn {
 	margin-right: 20px;
 }
+
+.token-generate .token-value {
+	margin-top: 20px;
+}
+.token-generate .token-value a {
+	color: #444;
+	margin-left: 4px;
+}

@@ -53,9 +53,8 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
 	        HttpServletRequest httpRequest = WebUtils.toHttp(request);
 	        String authzHeader = httpRequest.getHeader(AUTHORIZATION_HEADER);
 	        if (authzHeader != null) {
-	            String authzScheme = HttpServletRequest.BASIC_AUTH.toLowerCase(Locale.ENGLISH);
-	            
-	            if (authzHeader.toLowerCase(Locale.ENGLISH).startsWith(authzScheme)) {
+	            if (authzHeader.toLowerCase(Locale.ENGLISH).startsWith("basic") 
+	            		|| authzHeader.toLowerCase(Locale.ENGLISH).startsWith("token")) {
 	            	String authToken = StringUtils.substringAfter(authzHeader, " ");
 	                String decoded = Base64.decodeToString(authToken);
 	                String userName = StringUtils.substringBefore(decoded, ":").trim();

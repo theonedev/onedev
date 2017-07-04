@@ -51,6 +51,7 @@ import com.gitplex.server.web.page.user.AvatarEditPage;
 import com.gitplex.server.web.page.user.NewUserPage;
 import com.gitplex.server.web.page.user.PasswordEditPage;
 import com.gitplex.server.web.page.user.TaskListPage;
+import com.gitplex.server.web.page.user.TokenGeneratePage;
 import com.gitplex.server.web.page.user.UserAuthorizationsPage;
 import com.gitplex.server.web.page.user.UserListPage;
 import com.gitplex.server.web.page.user.UserMembershipsPage;
@@ -110,6 +111,7 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		add(new WebPageMapper("users/${user}/tasks", TaskListPage.class));
 		add(new WebPageMapper("users/${user}/avatar", AvatarEditPage.class));
 		add(new WebPageMapper("users/${user}/password", PasswordEditPage.class));
+		add(new WebPageMapper("users/${user}/token", TokenGeneratePage.class));
 	}
 
 	private void addGroupPages() {
