@@ -4,12 +4,13 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.support.ProjectAndBranch;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.MergePreview;
+import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.persistence.dao.EntityManager;
+import com.gitplex.server.util.QualityCheckStatus;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
@@ -28,6 +29,8 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	@Nullable
 	PullRequest findLatest(Project project, User submitter);
+	
+	Collection<PullRequest> findOpenByVerifyCommit(String commitHash);
     
     void discard(PullRequest request, @Nullable String note);
     
@@ -64,5 +67,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	void saveMergeStrategy(PullRequest request);
 	
 	int countOpen(Project project);
+	
+	QualityCheckStatus checkQuality(PullRequest request);
 	
 }

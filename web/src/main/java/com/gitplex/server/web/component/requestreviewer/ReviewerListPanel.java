@@ -31,7 +31,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.ReviewStatus;
+import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.behavior.dropdown.DropdownHover;
 import com.gitplex.server.web.component.avatar.AvatarLink;
@@ -71,13 +71,13 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				PullRequest request = getPullRequest();
 				List<User> reviewers = new ArrayList<>();
 				
-				List<Review> reviews = new ArrayList<>(request.getReviewStatus().getEffectiveReviews().values());
+				List<Review> reviews = new ArrayList<>(request.getQualityCheckStatus().getEffectiveReviews().values());
 				Collections.sort(reviews);
 				
 				for (Review review: reviews)
 					reviewers.add(review.getUser());
 				
-				for (User awaitingReviewer: request.getReviewStatus().getAwaitingReviewers())
+				for (User awaitingReviewer: request.getQualityCheckStatus().getAwaitingReviewers())
 					reviewers.add(awaitingReviewer);
 				
 				return reviewers;
@@ -92,7 +92,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				item.add(new UserLink("name", item.getModelObject()));
 				
 				PullRequest request = getPullRequest();
-				Review review = request.getReviewStatus().getEffectiveReviews().get(item.getModelObject());
+				Review review = request.getQualityCheckStatus().getEffectiveReviews().get(item.getModelObject());
 				
 				WebMarkupContainer result = new WebMarkupContainer("result");
 				if (review != null) {
@@ -153,12 +153,12 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						}
 						
 						if (invitation != null) {
-							request.clearReviewStatus();
+							request.clearQualityStatus();
 							invitation.setDate(new Date());
 							boolean removed;
 							if (request.isNew()) {
 								invitation.setType(ReviewInvitation.Type.EXCLUDE);
-								removed = !request.getReviewStatus().getAwaitingReviewers().contains(reviewer);								
+								removed = !request.getQualityCheckStatus().getAwaitingReviewers().contains(reviewer);								
 							} else {
 								removed = GitPlex.getInstance(ReviewInvitationManager.class).exclude(invitation);
 							}
@@ -198,7 +198,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 						
 						PullRequest request = getPullRequest();
 						User reviewer = item.getModelObject();
-						Review review = request.getReviewStatus().getEffectiveReviews().get(reviewer);
+						Review review = request.getQualityCheckStatus().getEffectiveReviews().get(reviewer);
 						setVisible(review != null 
 								&& (reviewer.equals(SecurityUtils.getUser()) 
 										|| SecurityUtils.canManage(request.getTargetProject())));
@@ -208,7 +208,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						User reviewer = item.getModelObject();
-						request.clearReviewStatus();
+						request.clearQualityStatus();
 						GitPlex.getInstance(ReviewManager.class).delete(reviewer, request);
 						reviewersModel.detach();
 						send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
@@ -224,7 +224,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				ReviewStatus reviewCheckStatus = getPullRequest().getReviewStatus();
+				QualityCheckStatus reviewCheckStatus = getPullRequest().getQualityCheckStatus();
 				setVisible(reviewCheckStatus.getAwaitingReviewers().isEmpty() 
 						&& reviewCheckStatus.getEffectiveReviews().isEmpty());
 			}

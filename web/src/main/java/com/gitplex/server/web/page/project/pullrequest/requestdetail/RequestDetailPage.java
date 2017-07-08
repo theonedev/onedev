@@ -14,6 +14,7 @@ import static com.gitplex.server.web.page.project.pullrequest.requestdetail.Pull
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -55,6 +56,7 @@ import org.apache.wicket.util.visit.IVisitor;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
@@ -65,6 +67,7 @@ import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.ProjectAttachmentSupport;
 import com.gitplex.server.web.component.floating.FloatingPanel;
@@ -77,6 +80,7 @@ import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.PageTabLink;
 import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
+import com.gitplex.server.web.component.verification.VerificationStatusPanel;
 import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.NoBranchesPage;
@@ -311,7 +315,8 @@ public abstract class RequestDetailPage extends ProjectPage {
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("File Changes", RequestChangesPage.class));
 		tabs.add(new RequestTab("Code Comments", CodeCommentsPage.class));
-		tabs.add(new RequestTab("Merge Preview", MergePreviewPage.class));
+		if (request.isOpen())
+			tabs.add(new RequestTab("Merge Preview", MergePreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 	}
@@ -502,7 +507,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 			protected void onInitialize() {
 				super.onInitialize();
 
-				Link<Void> link = new Link<Void>("mergePreview") {
+				add(new Link<Void>("mergePreview") {
 					
 					@Override
 					public void onClick() {
@@ -511,8 +516,19 @@ public abstract class RequestDetailPage extends ProjectPage {
 						setResponsePage(MergePreviewPage.class, params);
 					}
 
-				};
-				add(link);
+				});
+
+				add(new VerificationStatusPanel("verificationStatus", 
+						new LoadableDetachableModel<Map<String, Verification>>() {
+
+					@Override
+					protected Map<String, Verification> load() {
+						return GitPlex.getInstance(VerificationManager.class)
+								.getVerifications(getProject(), getPullRequest().getMergePreview().getMerged());
+					}
+					
+				}));
+				
 			}
 
 			@Override

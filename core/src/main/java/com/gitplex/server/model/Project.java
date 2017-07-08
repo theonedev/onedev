@@ -867,4 +867,10 @@ public class Project extends AbstractEntity {
 		}
 		return lastCommitOptional.orNull();
 	}
+
+	@Override
+	public String toString() {
+		return getName();
+	}
+	
 }

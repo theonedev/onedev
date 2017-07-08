@@ -43,18 +43,18 @@
 	border-top: 1px dashed #BBB; 
 	border-bottom: 1px dashed #BBB;
 }
-#new-request>.body>.status>.can-send form>table td.name {
-	width: 160px; 
+#new-request>.body>.status>.can-send form>table>tbody>tr>td.name {
+	width: 200px; 
 	font-size: 18px; 
 	padding-right: 8px;
 }
-#new-request>.body>.status>.can-send form>table td.value {
+#new-request>.body>.status>.can-send form>table>tbody>tr>td.value {
 	padding-left: 8px;
 }
 #new-request>.body>.status>.can-send form>table {
 	margin-bottom: 16px;
 }
-#new-request>.body>.status>.can-send form>table td.name .required:BEFORE {
+#new-request>.body>.status>.can-send form>table>tbody>tr>td.name .required:BEFORE {
 	content: "*"; 
 	color: red;
 }

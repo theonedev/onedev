@@ -6,10 +6,14 @@ import java.util.Map;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.Review;
 
-public interface ReviewStatus {
+public interface QualityCheckStatus {
 
 	List<User> getAwaitingReviewers();
 
 	Map<User, Review> getEffectiveReviews();
+	
+	List<String> getAwaitingVerifications();
+	
+	Map<String, Verification> getEffectiveVerifications();
 	
 }

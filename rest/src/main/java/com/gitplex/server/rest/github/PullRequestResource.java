@@ -127,14 +127,27 @@ public class PullRequestResource {
 		}
 		
 		Map<String, Object> headMap = new HashMap<>();
-		if (request.getSourceBranch() != null)
+		if (request.getSourceBranch() != null) {
 			headMap.put("ref", request.getSourceBranch());
+			headMap.put("label", request.getSourceBranch());
+		}
 		headMap.put("sha", request.getHeadCommitHash());
+		if (request.getSourceProject() != null) {
+			Map<String, Object> repoMap = new HashMap<>();
+			repoMap.put("id", "1000000");
+			repoMap.put("name", request.getSourceProject().getName());
+			headMap.put("repo", repoMap);
+		}
 		requestMap.put("head", headMap);
 		
 		Map<String, Object> baseMap = new HashMap<>();
 		baseMap.put("ref", request.getTargetBranch());
 		baseMap.put("sha", request.getBaseCommitHash());
+		Map<String, Object> repoMap = new HashMap<>();
+		repoMap.put("id", "1000000");
+		repoMap.put("name", request.getTargetProject().getName());
+		baseMap.put("repo", repoMap);
+		
 		requestMap.put("base", baseMap);
 
 		if (request.getSubmitter() != null) {

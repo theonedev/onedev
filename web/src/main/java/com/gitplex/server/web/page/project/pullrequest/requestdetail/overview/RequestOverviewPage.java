@@ -43,6 +43,7 @@ import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.PullRequestWatch;
 import com.gitplex.server.model.User;
+import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
@@ -51,6 +52,7 @@ import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.ProjectAttachmentSupport;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.requestreviewer.ReviewerListPanel;
+import com.gitplex.server.web.component.verification.RequiredVerificationsPanel;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.activity.CommentedActivity;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.activity.OpenedActivity;
@@ -371,6 +373,14 @@ public class RequestOverviewPage extends RequestDetailPage {
 		
 		add(newMergeStrategyContainer());
 		add(new ReviewerListPanel("reviewers", requestModel));
+		
+		BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch());
+		if (protection != null && !protection.getVerifications().isEmpty() && protection.isVerifyMerges()) {
+			add(new Label("verifyMerges", "(On Merged Commit)"));
+		} else {
+			add(new WebMarkupContainer("verifyMerges"));
+		}
+		add(new RequiredVerificationsPanel("verifications", requestModel));
 		add(newWatchContainer());
 		add(newManageContainer());
 	}

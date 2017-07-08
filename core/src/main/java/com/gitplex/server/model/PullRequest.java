@@ -38,9 +38,9 @@ import org.hibernate.criterion.Restrictions;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationEvent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.PullRequestManager;
-import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.support.CloseInfo;
 import com.gitplex.server.model.support.LastEvent;
@@ -48,7 +48,7 @@ import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.ReviewStatus;
+import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.jackson.RestView;
@@ -66,7 +66,10 @@ import com.google.common.base.Preconditions;
 				@Index(columnList="title"), @Index(columnList="uuid"), 
 				@Index(columnList="numberStr"), @Index(columnList="noSpaceTitle"), 
 				@Index(columnList="number"), @Index(columnList="g_targetProject_id"), 
-				@Index(columnList="g_sourceProject_id"), @Index(columnList="g_submitter_id")},
+				@Index(columnList="g_sourceProject_id"), @Index(columnList="g_submitter_id"),
+				@Index(columnList="headCommitHash"), @Index(columnList="PREVIEW_REQUEST_HEAD"), 
+				@Index(columnList="closeDate"), @Index(columnList="closeStatus"), 
+				@Index(columnList="g_closedBy_id"), @Index(columnList="closedByName")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetProject_id", "number"})})
 public class PullRequest extends AbstractEntity {
 
@@ -107,6 +110,9 @@ public class PullRequest extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String baseCommitHash;
+	
+	@Column(nullable=false)
+	private String headCommitHash;
 	
 	@Embedded
 	private LastEvent lastEvent;
@@ -170,7 +176,7 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
-	private transient ReviewStatus reviewStatus;
+	private transient QualityCheckStatus qualityStatus;
 	
 	private transient Boolean mergedIntoTarget;
 
@@ -309,9 +315,13 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public String getHeadCommitHash() {
-		return getLatestUpdate().getHeadCommitHash();
+		return headCommitHash;
 	}
 
+	public void setHeadCommitHash(String headCommitHash) {
+		this.headCommitHash = headCommitHash;
+	}
+	
 	public RevCommit getBaseCommit() {
 		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()));
 	}
@@ -405,14 +415,14 @@ public class PullRequest extends AbstractEntity {
 		this.watches = watches;
 	}
 
-	public ReviewStatus getReviewStatus() {
-		if (reviewStatus == null)
-			reviewStatus = GitPlex.getInstance(ReviewManager.class).checkRequest(this);
-		return reviewStatus;
+	public QualityCheckStatus getQualityCheckStatus() {
+		if (qualityStatus == null)
+			qualityStatus = GitPlex.getInstance(PullRequestManager.class).checkQuality(this);
+		return qualityStatus;
 	}
 	
-	public void clearReviewStatus() {
-		reviewStatus = null;
+	public void clearQualityStatus() {
+		qualityStatus = null;
 	}
 
 	@Nullable
@@ -659,7 +669,7 @@ public class PullRequest extends AbstractEntity {
 		String commitMessage = getTitle() + "\n\n";
 		if (getDescription() != null)
 			commitMessage += getDescription() + "\n\n";
-		commitMessage += "This commit is created as result of accepting pull request #" + getNumber();
+		commitMessage += "Merged commit of pull request #" + getNumber();
 		return commitMessage;
 	}
 	
@@ -722,6 +732,14 @@ public class PullRequest extends AbstractEntity {
 		setLastCodeCommentEventDate(event.getDate());
 	}
 
+	public void setLastEvent(PullRequestVerificationEvent event) {
+		LastEvent lastEvent = new LastEvent();
+		lastEvent.setDate(event.getDate());
+		lastEvent.setType(EditableUtils.getName(event.getClass()));
+		lastEvent.setUser(event.getUser());
+		setLastEvent(lastEvent);
+	}
+	
 	@Nullable
 	public ObjectId getSourceHead() {
 		ProjectAndBranch projectAndBranch = getSource();

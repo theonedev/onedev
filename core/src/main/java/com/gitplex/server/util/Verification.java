@@ -9,7 +9,7 @@ public class Verification implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Status {SUCCESS, FAILURE, ERROR, PENDING};
+	public enum Status {SUCCESS, FAILURE, ERROR, RUNNING};
 	
 	private final Status status; 
 	

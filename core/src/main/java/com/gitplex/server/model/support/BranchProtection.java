@@ -18,6 +18,7 @@ import com.gitplex.server.model.Group;
 import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.util.editable.annotation.BranchPattern;
 import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.server.util.editable.annotation.VerificationChoice;
 import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 
 @Editable
@@ -32,6 +33,10 @@ public class BranchProtection implements Serializable {
 	private boolean noDeletion = true;
 	
 	private String reviewAppointmentExpr;
+	
+	private List<String> verifications = new ArrayList<>();
+	
+	private boolean verifyMerges;
 	
 	private transient Optional<ReviewAppointment> reviewAppointmentOpt;
 	
@@ -67,7 +72,7 @@ public class BranchProtection implements Serializable {
 		this.noDeletion = noDeletion;
 	}
 
-	@Editable(order=400, name="Reviewers", description="Optionally specify required reviewers for changes of "
+	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "
 			+ "specified branch. Note that the user submitting the change is considered to reviewed the change "
 			+ "automatically")
 	@com.gitplex.server.util.editable.annotation.ReviewAppointment
@@ -79,7 +84,27 @@ public class BranchProtection implements Serializable {
 		this.reviewAppointmentExpr = reviewAppointmentExpr;
 	}
 
-	@Editable(order=500, description="Optionally specify additional users to review particular paths. For each changed file, "
+	@Editable(order=500, name="Required Verifications", description="Optionally specify required verifications")
+	@VerificationChoice
+	public List<String> getVerifications() {
+		return verifications;
+	}
+
+	public void setVerifications(List<String> verifications) {
+		this.verifications = verifications;
+	}
+
+	@Editable(order=600, name="Verify Merged Commit", description="For required verifications specified above, this option determines whether or "
+			+ "not to verify merged commits of relevant pull requests")
+	public boolean isVerifyMerges() {
+		return verifyMerges;
+	}
+
+	public void setVerifyMerges(boolean verifyMerges) {
+		this.verifyMerges = verifyMerges;
+	}
+
+	@Editable(order=700, description="Optionally specify additional users to review particular paths. For each changed file, "
 			+ "the first matched file protection setting will be used")
 	@NotNull
 	public List<FileProtection> getFileProtections() {

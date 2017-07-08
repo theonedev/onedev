@@ -20,6 +20,9 @@
 	color: #555;
 	margin-right: 8px;
 }
+#repo-branches>.list>table td.detail>.branch>.verification-status {
+	margin-right: 8px;
+}
 #repo-branches>.list>table td.detail>.commit {
 	margin: 8px 0;
 }

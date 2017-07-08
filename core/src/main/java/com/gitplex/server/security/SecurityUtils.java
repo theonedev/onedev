@@ -10,7 +10,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CacheManager;
-import com.gitplex.server.manager.ReviewManager;
+import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
@@ -168,11 +168,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canModify(Project project, String branch, String file) {
-		return canWrite(project) && GitPlex.getInstance(ReviewManager.class).canModify(getUser(), project, branch, file); 
+		return canWrite(project) && !GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(getUser(), project, branch, file); 
 	}
 	
 	public static boolean canPush(Project project, String branchName, ObjectId oldObjectId, ObjectId newObjectId) {
-		return canWrite(project) && GitPlex.getInstance(ReviewManager.class).canPush(getUser(), project, branchName, 
+		return canWrite(project) && !GitPlex.getInstance(ProjectManager.class).isPushNeedsQualityCheck(getUser(), project, branchName, 
 				oldObjectId, newObjectId); 
 	}
 	

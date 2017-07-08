@@ -48,11 +48,11 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
+import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserManager;
-import com.gitplex.server.manager.ReviewManager;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.Provider;
 import com.gitplex.server.util.diff.WhitespaceOption;
@@ -318,9 +318,9 @@ public class CommitOptionPanel extends Panel {
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
 				
-				if (!GitPlex.getInstance(ReviewManager.class).canModify(SecurityUtils.getUser(), context.getProject(), 
+				if (GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(SecurityUtils.getUser(), context.getProject(), 
 						context.getBlobIdent().revision, context.getNewPath())) {
-					CommitOptionPanel.this.error("Adding of file '" + context.getNewPath() + "' need to be reviewed. "
+					CommitOptionPanel.this.error("Adding of file '" + context.getNewPath() + "' need to be reviewed/verified. "
 							+ "Please submit pull request instead");
 					target.add(feedback);
 					return false;

@@ -70,7 +70,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<UserFacade> {
 		invitation.setType(ReviewInvitation.Type.MANUAL);
 		invitation.setDate(new Date());
 
-		request.clearReviewStatus();
+		request.clearQualityStatus();
 		
 		if (!request.isNew())
 			GitPlex.getInstance(ReviewInvitationManager.class).invite(invitation);

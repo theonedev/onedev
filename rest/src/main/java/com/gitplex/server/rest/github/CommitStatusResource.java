@@ -63,8 +63,10 @@ public class CommitStatusResource {
     	if (!SecurityUtils.canWrite(project))
     		throw new UnauthorizedException();
     	
-    	Verification verification = new Verification(
-    			Verification.Status.valueOf(commitStatus.get("state").toUpperCase()), 
+    	String state = commitStatus.get("state").toUpperCase();
+    	if (state.equals("PENDING"))
+    		state = "RUNNING";
+    	Verification verification = new Verification(Verification.Status.valueOf(state), 
     			new Date(), commitStatus.get("description"), commitStatus.get("target_url"));
     	String context = commitStatus.get("context");
     	if (context == null)

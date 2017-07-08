@@ -18,7 +18,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.MarkdownAware;
-import com.gitplex.server.event.pullrequest.MergePreviewCalculated;
+import com.gitplex.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
@@ -26,6 +26,8 @@ import com.gitplex.server.event.pullrequest.PullRequestEvent;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.event.pullrequest.PullRequestUpdated;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationEvent;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationRunning;
 import com.gitplex.server.manager.BranchWatchManager;
 import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.manager.MarkdownManager;
@@ -99,7 +101,7 @@ public class DefaultNotificationManager implements NotificationManager {
 			for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) {
 				pullRequestTaskManager.delete(task);
 			}
-		} else if (event instanceof MergePreviewCalculated) {
+		} else if (event instanceof PullRequestMergePreviewCalculated) {
 			if (request.getSubmitter() != null && request.getMergePreview() != null) {
 				if (request.getMergePreview().getMerged() != null) {
 					EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
@@ -262,7 +264,8 @@ public class DefaultNotificationManager implements NotificationManager {
 					|| type == Type.DISCARDED || type == Type.WITHDRAWED_REVIEW) {
 				notifyWatchers = true;
 			}
-		} else if (!(event instanceof MergePreviewCalculated)) {
+		} else if (!(event instanceof PullRequestMergePreviewCalculated) 
+				&& !(event instanceof PullRequestVerificationRunning)) {
 			notifyWatchers = true;
 		}
 		
@@ -306,7 +309,9 @@ public class DefaultNotificationManager implements NotificationManager {
 				} else {
 					if (event.getUser() != null) {
 						activity = event.getUser().getDisplayName() + " " + activity;
-					} else if (event instanceof PullRequestUpdated || event instanceof MergePreviewCalculated) {
+					} else if (event instanceof PullRequestUpdated 
+							|| event instanceof PullRequestMergePreviewCalculated 
+							|| event instanceof PullRequestVerificationEvent) {
 						activity = StringUtils.capitalize(activity);
 					} else {
 						activity = "GitPlex " + activity;

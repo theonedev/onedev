@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -45,12 +46,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.java.JavaEscape;
 
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.RevListCommand;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.support.ProjectAndRevision;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.ContributorAvatars;
@@ -59,6 +63,7 @@ import com.gitplex.server.web.component.commitgraph.CommitGraphUtils;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.verification.VerificationStatusPanel;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitQueryParser.CriteriaContext;
@@ -499,6 +504,15 @@ public class ProjectCommitsPage extends ProjectPage {
 			item.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
+			
+			item.add(new VerificationStatusPanel("verificationStatus", new LoadableDetachableModel<Map<String, Verification>>() {
+
+				@Override
+				protected Map<String, Verification> load() {
+					return GitPlex.getInstance(VerificationManager.class).getVerifications(getProject(), commit.name());
+				}
+				
+			}));
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {

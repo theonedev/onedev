@@ -308,7 +308,10 @@ public class DatabaseMigrator {
 						|| file.getName().startsWith("TeamMemberships.xml")
 						|| file.getName().startsWith("TeamAuthorizations.xml")
 						|| file.getName().startsWith("OrganizationMemberships.xml")
-						|| file.getName().startsWith("UserAuthorizations.xml")) {
+						|| file.getName().startsWith("UserAuthorizations.xml")
+						|| file.getName().startsWith("PullRequest")
+						|| file.getName().startsWith("Review")
+						|| file.getName().startsWith("ReviewInvitation")) {
 					FileUtils.deleteFile(file);
 				} else if (file.getName().startsWith("Configs.xml")) {
 					VersionedDocument dom = VersionedDocument.fromFile(file);

@@ -50,6 +50,8 @@ import com.gitplex.server.model.support.MergeStrategy;
 import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.QualityCheckStatus;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.component.branchpicker.AffinalBranchPicker;
 import com.gitplex.server.web.component.comment.CommentInput;
@@ -64,6 +66,7 @@ import com.gitplex.server.web.component.requestreviewer.ReviewerListPanel;
 import com.gitplex.server.web.component.tabbable.AjaxActionTab;
 import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
+import com.gitplex.server.web.component.verification.RequiredVerificationsPanel;
 import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.project.NoBranchesPage;
 import com.gitplex.server.web.page.project.ProjectPage;
@@ -169,6 +172,7 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 				pullRequestRef.get().setMergeStrategy(MergeStrategy.ALWAYS_MERGE);
 				
 				pullRequestRef.get().setBaseCommitHash(baseCommitId.name());
+				pullRequestRef.get().setHeadCommitHash(source.getObjectName());
 				if (pullRequestRef.get().getBaseCommitHash().equals(source.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setCloseDate(new Date());
@@ -179,7 +183,7 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 				PullRequestUpdate update = new PullRequestUpdate();
 				pullRequestRef.get().addUpdate(update);
 				update.setRequest(pullRequestRef.get());
-				update.setHeadCommitHash(source.getObjectName());
+				update.setHeadCommitHash(pullRequestRef.get().getHeadCommitHash());
 				update.setMergeBaseCommitHash(pullRequestRef.get().getBaseCommitHash());
 			}
 			requestModel = new LoadableDetachableModel<PullRequest>() {
@@ -568,8 +572,18 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 				
 				PullRequest request = getPullRequest();
 				
+				QualityCheckStatus qualityCheckStatus = request.getQualityCheckStatus();
+				boolean hasUnsuccessVerifications = false;
+				for (Verification verification: qualityCheckStatus.getEffectiveVerifications().values()) {
+					if (verification.getStatus() != Verification.Status.SUCCESS) {
+						hasUnsuccessVerifications = true;
+						break;
+					}
+				}
 				setVisible(request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE 
-						&& request.getReviewStatus().getAwaitingReviewers().isEmpty());
+						&& qualityCheckStatus.getAwaitingReviewers().isEmpty()
+						&& !hasUnsuccessVerifications
+						&& qualityCheckStatus.getAwaitingVerifications().isEmpty());
 			}
 			
 		}.setOutputMarkupPlaceholderTag(true));
@@ -697,6 +711,8 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 		}.setOutputMarkupId(true));
 		
 		form.add(new ReviewerListPanel("reviewers", requestModel));
+
+		form.add(new RequiredVerificationsPanel("verifications", requestModel));
 		
 		return fragment;
 	}

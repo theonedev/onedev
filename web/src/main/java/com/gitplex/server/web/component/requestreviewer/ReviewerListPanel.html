@@ -1,15 +1,15 @@
 <wicket:panel>
 	<table class="reviewers">
 		<tr wicket:id="reviewers">
-			<td class="reviewer">
-				<a wicket:id="avatar"></a> <a wicket:id="name"></a>
-			</td>
 			<td class="result">
 				<span wicket:id="result"></span>
 			</td>
+			<td class="reviewer">
+				<a wicket:id="avatar"></a> <a wicket:id="name"></a>
+			</td>
 			<td class="actions">
-				<a wicket:id="delete" title="Remove this reviewer"><i class="fa fa-trash"></i></a>
 				<a wicket:id="withdraw" title="Withdraw this review"><i class="fa fa-undo"></i></a>
+				<a wicket:id="delete" title="Remove this reviewer"><i class="fa fa-trash"></i></a>
 			</td>
 		</tr>
 		<wicket:container wicket:id="noReviewers">

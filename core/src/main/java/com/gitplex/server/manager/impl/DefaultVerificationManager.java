@@ -15,14 +15,23 @@ import javax.inject.Singleton;
 import org.apache.commons.lang.SerializationUtils;
 
 import com.gitplex.launcher.loader.Listen;
+import com.gitplex.launcher.loader.ListenerRegistry;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationEvent;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationFailed;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationInError;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationRunning;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationSucceeded;
+import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.Verification;
+import com.gitplex.server.util.Verification.Status;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -43,22 +52,30 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 	
 	private static final String VERIFICATIONS_STORE = "verifications";
 	
-	private static final String VERIFICATION_CONTEXTS_KEY = "verificationContexts";
+	private static final String VERIFICATION_NAMES_KEY = "verificationNames";
 	
-	private static final long MAX_VERIFICATION_CONTEXTS = 1000;
+	private static final long MAX_VERIFICATION_NAMES = 1000;
 	
 	private final StorageManager storageManager;
+	
+	private final PullRequestManager pullRequestManager;
+	
+	private final ListenerRegistry listenerRegistry;
 	
 	private final Dao dao;
 	
 	@Inject
-	public DefaultVerificationManager(Dao dao, StorageManager storageManager) {
+	public DefaultVerificationManager(Dao dao, StorageManager storageManager, PullRequestManager pullRequestManager, 
+			ListenerRegistry listenerRegistry) {
 		this.dao = dao;
 		this.storageManager = storageManager;
+		this.pullRequestManager = pullRequestManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 	
+	@Transactional
 	@Override
-	public void saveVerification(Project project, String commit, String context, Verification verification) {
+	public void saveVerification(Project project, String commit, String name, Verification verification) {
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store verificationsStore = getStore(env, VERIFICATIONS_STORE);
@@ -67,25 +84,25 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 			@SuppressWarnings("unchecked")
 			@Override
 			public void execute(Transaction txn) {
-				ByteIterable key = new StringByteIterable(VERIFICATION_CONTEXTS_KEY);
+				ByteIterable key = new StringByteIterable(VERIFICATION_NAMES_KEY);
 				byte[] bytes = getBytes(defaultStore.get(txn, key));
-				Map<String, Date> verificationContexts;
+				Map<String, Date> verificationNames;
 				if (bytes != null)
-					verificationContexts = (Map<String, Date>) SerializationUtils.deserialize(bytes);
+					verificationNames = (Map<String, Date>) SerializationUtils.deserialize(bytes);
 				else
-					verificationContexts = new HashMap<>();
+					verificationNames = new HashMap<>();
 				
-				verificationContexts.put(context, verification.getDate());
+				verificationNames.put(name, verification.getDate());
 
-				if (verificationContexts.size() > MAX_VERIFICATION_CONTEXTS) {
-					List<String> contextList = new ArrayList<>(verificationContexts.keySet());
-					contextList.sort((o1, o2)->verificationContexts.get(o1).compareTo(verificationContexts.get(o2)));
-					for (int i=0; i<contextList.size()-MAX_VERIFICATION_CONTEXTS; i++)
-						verificationContexts.remove(contextList.get(i));
+				if (verificationNames.size() > MAX_VERIFICATION_NAMES) {
+					List<String> nameList = new ArrayList<>(verificationNames.keySet());
+					nameList.sort((o1, o2)->verificationNames.get(o1).compareTo(verificationNames.get(o2)));
+					for (int i=0; i<nameList.size()-MAX_VERIFICATION_NAMES; i++)
+						verificationNames.remove(nameList.get(i));
 				}
 				
 				defaultStore.put(txn, key, 
-						new ArrayByteIterable(SerializationUtils.serialize((Serializable) verificationContexts)));
+						new ArrayByteIterable(SerializationUtils.serialize((Serializable) verificationNames)));
 				
 				key = new StringByteIterable(commit);
 				bytes = getBytes(verificationsStore.get(txn, key));
@@ -95,12 +112,30 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 				else
 					verifications = new HashMap<>();
 
-				verifications.put(context, verification);
+				verifications.put(name, verification);
 				
 				verificationsStore.put(txn, key, new ArrayByteIterable(SerializationUtils.serialize((Serializable) verifications)));
 			}
 			
 		});
+		
+		for (PullRequest request: pullRequestManager.findOpenByVerifyCommit(commit)) {
+			PullRequestVerificationEvent event;
+			if (verification.getStatus() == Status.ERROR)
+				event = new PullRequestVerificationInError(request);
+			else if (verification.getStatus() == Status.FAILURE)
+				event = new PullRequestVerificationFailed(request);
+			else if (verification.getStatus() == Status.RUNNING)
+				event = new PullRequestVerificationRunning(request);
+			else
+				event = new PullRequestVerificationSucceeded(request);
+			
+			listenerRegistry.post(event);
+			
+			request.setLastEvent(event);
+			pullRequestManager.save(request);
+		}
+		
 	}
 
 	@Override
@@ -116,7 +151,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 				if (bytes != null)
 					return (Map<String, Verification>) SerializationUtils.deserialize(bytes);
 				else
-					return null;
+					return new HashMap<>();
 			}
 			
 		});
@@ -151,7 +186,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 	}
 
 	@Override
-	public Collection<String> getVerificationContexts(Project project) {
+	public Collection<String> getVerificationNames(Project project) {
 		Environment env = getEnv(project.getId().toString());
 		Store store = getStore(env, DEFAULT_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Collection<String>>() {
@@ -159,7 +194,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 			@SuppressWarnings("unchecked")
 			@Override
 			public Collection<String> compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringByteIterable(VERIFICATION_CONTEXTS_KEY)));
+				byte[] bytes = getBytes(store.get(txn, new StringByteIterable(VERIFICATION_NAMES_KEY)));
 				if (bytes != null)
 					return ((Map<String, Date>) SerializationUtils.deserialize(bytes)).keySet();
 				else

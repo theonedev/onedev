@@ -26,8 +26,8 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
+import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserManager;
-import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.dropzonefield.DropzoneField;
@@ -85,16 +85,16 @@ abstract class BlobUploadPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				ReviewManager reviewManager = GitPlex.getInstance(ReviewManager.class);
+				ProjectManager projectManager = GitPlex.getInstance(ProjectManager.class);
 				Map<String, BlobContent> newBlobs = new HashMap<>();
 				for (FileUpload upload: uploads) {
 					String blobPath = upload.getClientFileName();
 					if (context.getBlobIdent().path != null)
 						blobPath = context.getBlobIdent().path + "/" + blobPath;
 					
-					if (!reviewManager.canModify(SecurityUtils.getUser(), context.getProject(), 
+					if (projectManager.isModificationNeedsQualityCheck(SecurityUtils.getUser(), context.getProject(), 
 							context.getBlobIdent().revision, blobPath)) {
-						form.error("Adding of file '" + blobPath + "' need to be reviewed. "
+						form.error("Adding of file '" + blobPath + "' need to be reviewed/verified. "
 								+ "Please submit pull request instead");
 						target.add(feedback);
 						return;

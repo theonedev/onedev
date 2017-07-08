@@ -12,7 +12,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.ReviewStatus;
+import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.Response;
@@ -31,7 +31,7 @@ public class ReviewerProvider extends AbstractUserChoiceProvider {
 	@Override
 	public void query(String term, int page, Response<UserFacade> response) {
 		PullRequest request = requestModel.getObject();
-		ReviewStatus checkStatus = request.getReviewStatus();
+		QualityCheckStatus checkStatus = request.getQualityCheckStatus();
 		Collection<UserFacade> users = SecurityUtils.getAuthorizedUsers(request.getTargetProject().getFacade(), 
 				ProjectPrivilege.READ);
 		for (User reviewer: checkStatus.getAwaitingReviewers())

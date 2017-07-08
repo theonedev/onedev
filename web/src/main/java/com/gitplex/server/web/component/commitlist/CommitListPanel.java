@@ -26,9 +26,12 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.ContributorAvatars;
@@ -37,6 +40,7 @@ import com.gitplex.server.web.component.commitgraph.CommitGraphUtils;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.verification.VerificationStatusPanel;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.util.model.CommitRefsModel;
@@ -143,6 +147,18 @@ public class CommitListPanel extends Panel {
 					fragment.add(new ContributorPanel("contribution", 
 							commit.getAuthorIdent(), commit.getCommitterIdent(), true));
 
+					String commitHash = commit.name();
+					fragment.add(new VerificationStatusPanel("verificationStatus", 
+							new LoadableDetachableModel<Map<String, Verification>>() {
+
+						@Override
+						protected Map<String, Verification> load() {
+							return GitPlex.getInstance(VerificationManager.class)
+									.getVerifications(projectModel.getObject(), commitHash);
+						}
+						
+					}));
+					
 					CommitDetailPage.State commitState = new CommitDetailPage.State();
 					commitState.revision = commit.name();
 					PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);

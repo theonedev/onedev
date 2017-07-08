@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
@@ -19,6 +20,9 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +39,12 @@ import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserAuthorizationManager;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.UserAuthorization;
 import com.gitplex.server.model.support.BranchProtection;
+import com.gitplex.server.model.support.FileProtection;
 import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
@@ -47,6 +53,7 @@ import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.MembershipFacade;
 import com.gitplex.server.util.facade.ProjectFacade;
@@ -65,6 +72,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     
     private final UserAuthorizationManager userAuthorizationManager;
     
+    private final VerificationManager verificationManager;
+    
     private final CacheManager cacheManager;
     
     private final String gitReceiveHook;
@@ -73,12 +82,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry, 
-    		UserAuthorizationManager userAuthorizationManager, CacheManager cacheManager) {
+    		UserAuthorizationManager userAuthorizationManager, VerificationManager verificationManager, 
+    		CacheManager cacheManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
         this.listenerRegistry = listenerRegistry;
         this.userAuthorizationManager = userAuthorizationManager;
+        this.verificationManager = verificationManager;
         this.cacheManager = cacheManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
@@ -312,6 +323,64 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		}
 		
 		return projects;
+	}
+
+	private Set<String> getChangedFiles(Project project, ObjectId oldObjectId, ObjectId newObjectId) {
+		Set<String> changedFiles = new HashSet<>();
+		try (TreeWalk treeWalk = new TreeWalk(project.getRepository())) {
+			treeWalk.setFilter(TreeFilter.ANY_DIFF);
+			treeWalk.setRecursive(true);
+			RevCommit oldCommit = project.getRevCommit(oldObjectId);
+			RevCommit newCommit = project.getRevCommit(newObjectId);
+			treeWalk.addTree(oldCommit.getTree());
+			treeWalk.addTree(newCommit.getTree());
+			while (treeWalk.next()) {
+				changedFiles.add(treeWalk.getPathString());
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return changedFiles;
+	}
+	
+	@Override
+	public boolean isModificationNeedsQualityCheck(User user, Project project, String branch, String file) {
+		BranchProtection branchProtection = project.getBranchProtection(branch);
+		if (branchProtection != null) {
+			if (branchProtection.getReviewAppointment(project) != null 
+					&& !branchProtection.getReviewAppointment(project).matches(user)) {
+				return true;
+			}
+			if (!branchProtection.getVerifications().isEmpty())
+				return true;
+			
+			FileProtection fileProtection = branchProtection.getFileProtection(file);
+			if (fileProtection != null && !fileProtection.getReviewAppointment(project).matches(user))
+				return true;
+		}			
+		return false;
+	}
+
+	@Override
+	public boolean isPushNeedsQualityCheck(User user, Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
+		BranchProtection branchProtection = project.getBranchProtection(branch);
+		if (branchProtection != null) {
+			if (branchProtection.getReviewAppointment(project) != null 
+					&& !branchProtection.getReviewAppointment(project).matches(user)) {
+				return true;
+			}
+
+			Map<String, Verification> verifications = verificationManager.getVerifications(project, newObjectId.name());
+			if (!verifications.keySet().containsAll(branchProtection.getVerifications()))
+				return true;
+			
+			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId)) {
+				FileProtection fileProtection = branchProtection.getFileProtection(changedFile);
+				if (fileProtection != null && !fileProtection.getReviewAppointment(project).matches(user))
+					return true;
+			}
+		}
+		return false;
 	}
 
 }

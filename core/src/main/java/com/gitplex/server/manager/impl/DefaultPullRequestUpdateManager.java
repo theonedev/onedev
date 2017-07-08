@@ -88,8 +88,9 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			lastEvent.setDate(event.getDate());
 			lastEvent.setType(EditableUtils.getName(event.getClass()));
 			request.setLastEvent(lastEvent);
-			pullRequestManager.save(request);
 		}
+		request.setHeadCommitHash(update.getHeadCommitHash());
+		pullRequestManager.save(request);
 	}
 
 	@Sessional

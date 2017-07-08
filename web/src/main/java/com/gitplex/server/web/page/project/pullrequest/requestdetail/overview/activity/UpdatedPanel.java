@@ -1,6 +1,7 @@
 package com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.activity;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -17,15 +18,19 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequestUpdate;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.verification.VerificationStatusPanel;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 
@@ -79,6 +84,18 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				};
 				item.add(new ExpandableCommitMessagePanel("message", projectModel, item.getModel()));
 
+				String commitHash = commit.name();
+				item.add(new VerificationStatusPanel("verificationStatus", 
+						new LoadableDetachableModel<Map<String, Verification>>() {
+
+					@Override
+					protected Map<String, Verification> load() {
+						return GitPlex.getInstance(VerificationManager.class)
+								.getVerifications(projectModel.getObject(), commitHash);
+					}
+					
+				}));
+				
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();
 				PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);

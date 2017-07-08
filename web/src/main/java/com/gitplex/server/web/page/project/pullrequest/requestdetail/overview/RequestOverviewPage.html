@@ -22,21 +22,32 @@
 			<td class="info">
 				<div class="well">
 					<div class="reviewers">
-						<label>Reviewers:</label>
+						<label>Required Reviewers</label>
 						<div wicket:id="reviewers"></div>
 					</div>
+					<wicket:enclosure child="verifications">
+					<div class="verifications">
+						<label>Required Verifications</label> 
+						<div wicket:id="verifyMerges" class="verify-merges"></div>
+						<div wicket:id="verifications"></div>
+					</div>
+					</wicket:enclosure>
 					<div wicket:id="mergeStrategy" class="merge-strategy">
 						<div>
-							<label>Merge Strategy:</label> 						
-							<select wicket:id="editor"></select> 
-							<span wicket:id="viewer"></span>
+							<label>Merge Strategy</label> 	
+							<div>
+								<select wicket:id="editor" class="form-control"></select> 
+								<span wicket:id="viewer"></span>
+							</div>					
 						</div>
 						<div wicket:id="help" class="help-block"></div>
 					</div>
 					<div wicket:id="watch" class="watch">
 						<div>
-							<label>Watch Status:</label>
-							<select wicket:id="option"></select>
+							<label>Watch Status</label>
+							<div>
+								<select wicket:id="option" class="form-control"></select>
+							</div>
 						</div>
 						<div wicket:id="help" class="help-block"></div>
 					</div>

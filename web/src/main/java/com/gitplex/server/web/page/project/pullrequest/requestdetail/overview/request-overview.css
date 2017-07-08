@@ -270,12 +270,16 @@
 	margin-bottom: 0; 
 }
 #request-detail .info>div>.reviewers>div,
+#request-detail .info>div>.verifications>div,
 #request-detail .info>div>.merge-strategy, 
 #request-detail .info>div>.watch {
 	padding-bottom: 20px; 
 }
-#request-detail .info>div>.reviewers .no-reviewers {
+
+#request-detail .info>div>.reviewers .no-reviewers, 
+#request-detail .info>div>.verifications .no-verifications {
 	font-size: 14px;
+	padding-left: 0;
 }
 
 #request-detail .info .help-block {
@@ -304,4 +308,14 @@
 
 #request-detail .info .manage .help-block {
 	margin-bottom: 12px;
+}
+
+#request-detail .hash-and-status>div>.verification-status {
+	margin-right: 4px;
+}
+
+#request-detail .verifications>.verify-merges {
+	font-size: 13px;
+	color: #888;
+	padding-bottom: 8px !important;
 }

@@ -19,7 +19,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.manager.ProjectManager;
-import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
@@ -43,13 +42,10 @@ public class GitPreReceiveCallback extends HttpServlet {
 	
 	private final UserManager userManager;
 	
-	private final ReviewManager reviewManager;
-	
 	@Inject
-	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager, ReviewManager reviewManager) {
+	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager) {
 		this.projectManager = projectManager;
 		this.userManager = userManager;
-		this.reviewManager = reviewManager;
 	}
 	
 	private void error(Output output, String refName, String... messages) {
@@ -131,9 +127,9 @@ public class GitPreReceiveCallback extends HttpServlet {
 		    				if (protection != null && protection.isNoForcedPush())
 			    				error(output, refName, "Can not force-push to this branch according to branch protection setting");
 		    			} else {
-		    				if (!reviewManager.canPush(user, project, branchName, oldObjectId, newObjectId)) {
+		    				if (projectManager.isPushNeedsQualityCheck(user, project, branchName, oldObjectId, newObjectId)) {
 		    					error(output, refName, 
-		    							"Your changes need to be reviewed. Please submit pull request instead");
+		    							"Your changes need to be reviewed/verified. Please submit pull request instead");
 		    				}
 		    			}
 	    			}

@@ -12,16 +12,24 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.util.diff.WhitespaceOption;
+import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
+import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.PageDataChanged;
@@ -80,6 +88,23 @@ public class MergePreviewPage extends RequestDetailPage {
 		MergePreview preview = getPullRequest().getMergePreview();
 		if (getPullRequest().isOpen() && preview != null && preview.getMerged() != null) {
 			fragment = new Fragment("content", "availableFrag", this);
+
+			CommitDetailPage.State commitState = new CommitDetailPage.State();
+			commitState.revision = preview.getTargetHead();
+			PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
+			Link<Void> hashLink = new ViewStateAwarePageLink<Void>("targetHead", CommitDetailPage.class, params);
+			fragment.add(hashLink);
+			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getTargetHead())));
+			fragment.add(new WebMarkupContainer("copyTargetHead").add(new CopyClipboardBehavior(Model.of(preview.getTargetHead()))));
+			
+			commitState = new CommitDetailPage.State();
+			commitState.revision = preview.getMerged();
+			params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
+			hashLink = new ViewStateAwarePageLink<Void>("mergedCommit", CommitDetailPage.class, params);
+			fragment.add(hashLink);
+			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMerged())));
+			fragment.add(new WebMarkupContainer("copyMergedCommit").add(new CopyClipboardBehavior(Model.of(preview.getMerged()))));
+			
 			fragment.add(new AjaxLink<Void>("refresh") {
 
 				@Override

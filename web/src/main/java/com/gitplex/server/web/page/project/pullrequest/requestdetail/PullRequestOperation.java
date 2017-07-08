@@ -130,7 +130,7 @@ public enum PullRequestOperation {
 	private static boolean canReview(PullRequest request) {
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
 		
-		return request.getReviewStatus().getAwaitingReviewers().contains(user);
+		return request.getQualityCheckStatus().getAwaitingReviewers().contains(user);
 	}
 
 	public abstract void operate(PullRequest request, @Nullable String comment);

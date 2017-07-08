@@ -53,12 +53,14 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.BranchWatchManager;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.BranchWatch;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.branchchoice.BranchChoiceProvider;
@@ -67,6 +69,7 @@ import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
+import com.gitplex.server.web.component.verification.VerificationStatusPanel;
 import com.gitplex.server.web.page.project.NoBranchesPage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
@@ -395,6 +398,18 @@ public class ProjectBranchesPage extends ProjectPage {
 				link.add(new Label("name", branch));
 				item.add(link);
 				
+				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId());
+				
+				String lastCommitHash = lastCommit.name();
+				item.add(new VerificationStatusPanel("verificationStatus", new LoadableDetachableModel<Map<String, Verification>>() {
+
+					@Override
+					protected Map<String, Verification> load() {
+						return GitPlex.getInstance(VerificationManager.class).getVerifications(getProject(), lastCommitHash);
+					}
+					
+				}));
+				
 				item.add(new AjaxLink<Void>("makeDefault") {
 
 					@Override
@@ -422,7 +437,6 @@ public class ProjectBranchesPage extends ProjectPage {
 					
 				});
 				
-				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId());
 				PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name());
 
 				link = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);

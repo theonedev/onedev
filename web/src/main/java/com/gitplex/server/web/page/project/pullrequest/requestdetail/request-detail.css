@@ -89,6 +89,10 @@
 	color: #399529; 
 	font-size: 16px;
 }
+#request-detail>.summary .no-conflict .verification-status {
+	margin-right: 0;
+	margin-left: -3px;
+}
 #request-detail>.summary .no-conflict>* {
 	margin-right: 4px;
 }

@@ -43,9 +43,11 @@ import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
-import com.gitplex.server.event.pullrequest.MergePreviewCalculated;
+import com.gitplex.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationEvent;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationRunning;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.MarkdownManager;
@@ -75,7 +77,9 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.BatchWorker;
-import com.gitplex.server.util.ReviewStatus;
+import com.gitplex.server.util.QualityCheckStatus;
+import com.gitplex.server.util.QualityCheckStatusImpl;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.concurrent.Prioritized;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -417,21 +421,31 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					closeAsMerged(request, true, null);
 				} else {
 					MergePreview mergePreview = request.getMergePreview();
-					ReviewStatus reviewStatus = request.getReviewStatus();					
+					QualityCheckStatus qualityCheckStatus = request.getQualityCheckStatus();					
 					
 					for (ReviewInvitation invitation: request.getReviewInvitations()) {
-						if (reviewStatus.getAwaitingReviewers().contains(invitation.getUser()))
+						if (qualityCheckStatus.getAwaitingReviewers().contains(invitation.getUser()))
 							reviewInvitationManager.save(invitation);
 					}
 					
-					boolean hasDisapprovals = false;
-					for (Review review: reviewStatus.getEffectiveReviews().values()) {
+					boolean hasDisapprovedReviews = false;
+					for (Review review: qualityCheckStatus.getEffectiveReviews().values()) {
 						if (!review.isApproved()) {
-							hasDisapprovals = true;
+							hasDisapprovedReviews = true;
 							break;
 						}
 					}
-					if (!hasDisapprovals && reviewStatus.getAwaitingReviewers().isEmpty() 
+					boolean hasUnsuccessVerifications = false;
+					for (Verification verification: qualityCheckStatus.getEffectiveVerifications().values()) {
+						if (verification.getStatus() != Verification.Status.SUCCESS) {
+							hasUnsuccessVerifications = true;
+							break;
+						}
+					}
+					
+					if (!hasDisapprovedReviews && !hasUnsuccessVerifications 
+							&& qualityCheckStatus.getAwaitingReviewers().isEmpty()
+							&& qualityCheckStatus.getAwaitingVerifications().isEmpty()
 							&& mergePreview != null && mergePreview.getMerged() != null) {
 						merge(request);
 					}
@@ -524,7 +538,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 								}
 								dao.persist(request);
 
-								listenerRegistry.post(new MergePreviewCalculated(request));
+								listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
 								logger.info("Merge preview of pull request #{} in project '{}' is calculated.", 
 										request.getNumber(), request.getTargetProject());						
 							}
@@ -650,7 +664,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 	
 	@Listen
-	public void on(MergePreviewCalculated event) {
+	public void on(PullRequestVerificationEvent event) {
+		if (!(event instanceof PullRequestVerificationRunning))
+			checkAsync(event.getRequest());
+	}
+	
+	@Listen
+	public void on(PullRequestMergePreviewCalculated event) {
 		checkAsync(event.getRequest());
 	}
 	
@@ -697,6 +717,24 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		request.setLastEvent(statusChange);
 		
 		save(request);
+	}
+
+	@Transactional
+	@Override
+	public QualityCheckStatus checkQuality(PullRequest request) {
+		return new QualityCheckStatusImpl(request);
+	}
+
+	@Transactional
+	@Override
+	public Collection<PullRequest> findOpenByVerifyCommit(String commitHash) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(PullRequest.CriterionHelper.ofOpen());
+		Criterion verifyCommitCriterion = Restrictions.or(
+				Restrictions.eq("headCommitHash", commitHash), 
+				Restrictions.eq("lastMergePreview.merged", commitHash));
+		criteria.add(verifyCommitCriterion);
+		return findAll(criteria);
 	}
 
 }

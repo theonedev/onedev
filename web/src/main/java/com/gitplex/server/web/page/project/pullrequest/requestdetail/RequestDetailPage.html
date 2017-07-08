@@ -47,7 +47,10 @@
 				<div wicket:id="noConflict" class="no-conflict">
 					<label><i class="fa fa-check-circle"></i> Able to merge without conflicts</label> 
 					<wicket:enclosure child="mergePreview">
-						<span class="middot"></span> Target branch will be updated to the <a wicket:id="mergePreview">merge result</a> upon approvals of all reviewers
+						<span class="middot"></span> Target branch will be updated to the 
+						<a wicket:id="mergePreview">merge result</a> 
+						<span wicket:id="verificationStatus" class="verification-status"></span> 
+						upon approvals of all reviewers and verifications
 					</wicket:enclosure>
 				</div>
 				<div wicket:id="conflict" class="conflict">

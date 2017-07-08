@@ -7,11 +7,11 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable(name="merge preview calculated")
-public class MergePreviewCalculated extends PullRequestEvent {
+public class PullRequestMergePreviewCalculated extends PullRequestEvent {
 
 	private Date date;
 	
-	public MergePreviewCalculated(PullRequest request) {
+	public PullRequestMergePreviewCalculated(PullRequest request) {
 		super(request);
 		date = new Date();
 	}

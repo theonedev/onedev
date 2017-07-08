@@ -40,10 +40,12 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CommitInfoManager;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.MarkPos;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.avatar.ContributorAvatars;
@@ -54,6 +56,7 @@ import com.gitplex.server.web.component.createtag.CreateTagLink;
 import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
+import com.gitplex.server.web.component.verification.VerificationStatusPanel;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.branches.ProjectBranchesPage;
@@ -209,6 +212,15 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent(), true));
 
+		add(new VerificationStatusPanel("verificationStatus", new LoadableDetachableModel<Map<String, Verification>>() {
+
+			@Override
+			protected Map<String, Verification> load() {
+				return GitPlex.getInstance(VerificationManager.class).getVerifications(getProject(), getCommit().name());
+			}
+			
+		}));
+		
 		add(new Label("hash", GitUtils.abbreviateSHA(getCommit().name())));
 		add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(getCommit().name()))));
 		
