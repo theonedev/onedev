@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.util.ContentDetector;
+import com.google.common.base.Charsets;
 
 @SuppressWarnings("serial")
 class SourceFormComponent extends FormComponentPanel<byte[]> {
@@ -35,7 +36,7 @@ class SourceFormComponent extends FormComponentPanel<byte[]> {
 	public void convertInput() {
 		String content = input.getConvertedInput();
 		if (content != null)
-			setConvertedInput(content.getBytes(Charset.forName(charset)));
+			setConvertedInput(content.getBytes(Charsets.UTF_8));
 		else
 			setConvertedInput(new byte[0]);
 	}
