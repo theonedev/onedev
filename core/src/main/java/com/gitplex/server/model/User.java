@@ -116,7 +116,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
         return new Subject.Builder(securityManager).principals(asPrincipal(userId)).buildSubject();
     }
     
-    @Editable(name="User Name", order=100)
+    @Editable(name="Login Name", order=100)
 	@UserName
 	@NotEmpty
 	public String getName() {

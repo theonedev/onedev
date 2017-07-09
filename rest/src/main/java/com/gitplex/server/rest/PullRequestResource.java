@@ -1,8 +1,8 @@
 package com.gitplex.server.rest;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,7 +23,7 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;
 import com.gitplex.server.security.SecurityUtils;
 
-@Path("/pullrequests")
+@Path("/pulls")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
@@ -40,24 +40,23 @@ public class PullRequestResource {
 		this.pullRequestManager = pullRequestManager;
 	}
 
+    @Path("/{pullRequestId}")
     @GET
-    @Path("/{id}")
-    public PullRequest get(@PathParam("id") Long id) {
-    	PullRequest request = pullRequestManager.load(id);
-    	
+    public PullRequest get(@PathParam("pullRequestId") Long pullRequestId) {
+    	PullRequest request = pullRequestManager.load(pullRequestId);
     	if (!SecurityUtils.canRead(request.getTargetProject()))
     		throw new UnauthorizedException();
-    	
     	return request;
     }
         
     @ValidQueryParams
     @GET
     public Collection<PullRequest> query(
-    		@QueryParam("targetProjectId") Long targetProjectId, @QueryParam("targetBranch") String targetBranch,
-    		@QueryParam("sourceProjectId") Long sourceProjectId, @QueryParam("sourceBranch") String sourceBranch, 
-    		@QueryParam("submitterId") Long submitterId, @QueryParam("status") String status, 
-    		@QueryParam("beginDate") Date beginDate, @QueryParam("endDate") Date endDate) {
+    		@QueryParam("targetProject") String targetProjectId, @QueryParam("targetBranch") String targetBranch,
+    		@QueryParam("sourceProject") String sourceProjectId, @QueryParam("sourceBranch") String sourceBranch,
+    		@QueryParam("number") Long number, @QueryParam("submitter") String submitterId, 
+    		@QueryParam("status") String status, @QueryParam("beginDate") Date beginDate, 
+    		@QueryParam("endDate") Date endDate) {
     	
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 
@@ -71,6 +70,9 @@ public class PullRequestResource {
     	if (sourceBranch != null)
     		criteria.add(Restrictions.eq("sourceBranch", sourceBranch));
 		
+    	if (number != null)
+    		criteria.add(Restrictions.eq("number", number));
+    	
 		if (OPEN.equalsIgnoreCase(status)) 
 			criteria.add(PullRequest.CriterionHelper.ofOpen());
 		else if (CLOSED.equalsIgnoreCase(status)) 
@@ -83,11 +85,10 @@ public class PullRequestResource {
 		if (endDate != null)
 			criteria.add(Restrictions.le("submitDate", endDate));
 
-		List<PullRequest> requests = pullRequestManager.findAll(criteria);
-		
-		for (PullRequest request: requests) {
-	    	if (!SecurityUtils.canRead(request.getTarget().getProject()))
-	    		throw new UnauthorizedException("Unauthorized access to pull request " + request.getTarget() + "/" + request.getId());
+		Collection<PullRequest> requests = new ArrayList<>();
+		for (PullRequest request: pullRequestManager.findAll(criteria)) {
+	    	if (SecurityUtils.canRead(request.getTarget().getProject()))
+	    		requests.add(request);
 		}
 		return requests;
     }

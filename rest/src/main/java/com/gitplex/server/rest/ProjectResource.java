@@ -1,5 +1,8 @@
 package com.gitplex.server.rest;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -11,9 +14,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.shiro.authz.UnauthorizedException;
+import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;
 import com.gitplex.server.security.SecurityUtils;
 
@@ -30,24 +35,31 @@ public class ProjectResource {
 		this.projectManager = projectManager;
 	}
 	
-	@Path("/{id}")
+	@ValidQueryParams
+	@GET
+    public Collection<Project> query(@QueryParam("name") String projectName) {
+		EntityCriteria<Project> criteria = projectManager.newCriteria();
+		if (projectName != null)
+			criteria.add(Restrictions.eq("name", projectName));
+		
+		Collection<Project> projects = new ArrayList<>();
+		
+		for (Project project: projectManager.findAll(criteria)) {
+	    	if (SecurityUtils.canRead(project))
+	    		projects.add(project);
+		}
+		
+		return projects;
+    }
+    
+	@Path("/{projectId}")
     @GET
-    public Project get(@PathParam("id") Long id) {
-    	Project project = projectManager.load(id);
-
+    public Project get(@PathParam("projectId") Long projectId) {
+    	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canRead(project))
 			throw new UnauthorizedException("Unauthorized access to project " + project.getName());
     	else
     		return project;
     }
-    
-	@ValidQueryParams
-	@GET
-	public Project query(@QueryParam("name") String name) {
-		Project project = projectManager.find(name);
-		if (project != null && !SecurityUtils.canRead(project)) 
-			throw new UnauthorizedException("Unauthorized access to project " + project.getName());
-		return project;
-	}
-
+	
 }

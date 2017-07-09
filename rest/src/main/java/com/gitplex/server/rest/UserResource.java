@@ -16,8 +16,8 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.Email;
 
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
-import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.rest.jersey.ValidQueryParams;
 import com.gitplex.server.security.SecurityUtils;
@@ -28,37 +28,32 @@ import com.gitplex.server.security.SecurityUtils;
 @Singleton
 public class UserResource {
 
-	private final Dao dao;
+	private final UserManager userManager;
 	
 	@Inject
-	public UserResource(Dao dao) {
-		this.dao = dao;
+	public UserResource(UserManager userManager) {
+		this.userManager = userManager;
 	}
 	
 	@ValidQueryParams
 	@GET
-	public Collection<User> query(
-			@QueryParam("name") String name, 
-			@Email @QueryParam("email") String email, 
-			@QueryParam("fullName") String fullName) {
+	public Collection<User> query(@QueryParam("name") String name, @Email @QueryParam("email") String email) {
     	if (!SecurityUtils.canAccessPublic())
     		throw new UnauthorizedException("Unauthorized access to user profiles");
     	EntityCriteria<User> criteria = EntityCriteria.of(User.class);
-		if (name != null)
-			criteria.add(Restrictions.eq("name", name));
+    	if (name != null)
+    		criteria.add(Restrictions.eq("name", name));
 		if (email != null)
 			criteria.add(Restrictions.eq("email", email));
-		if (fullName != null)
-			criteria.add(Restrictions.eq("fullName", fullName));
-		return dao.findAll(criteria);
+		return userManager.findAll(criteria);
 	}
 	
     @GET
-    @Path("/{id}")
-    public User get(@PathParam("id") Long id) {
+    @Path("/{userId}")
+    public User get(@PathParam("userId") Long userId) {
     	if (!SecurityUtils.canAccessPublic())
     		throw new UnauthorizedException("Unauthorized access to user profile");
-    	return dao.load(User.class, id);
+    	return userManager.load(userId);
     }
     
 }
