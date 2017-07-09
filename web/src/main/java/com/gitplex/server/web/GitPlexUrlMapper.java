@@ -56,7 +56,8 @@ import com.gitplex.server.web.page.user.UserAuthorizationsPage;
 import com.gitplex.server.web.page.user.UserListPage;
 import com.gitplex.server.web.page.user.UserMembershipsPage;
 import com.gitplex.server.web.page.user.UserProfilePage;
-import com.gitplex.server.web.util.mapper.WebPageMapper;
+import com.gitplex.server.web.util.mapper.GitPlexPageMapper;
+import com.gitplex.server.web.util.mapper.GitPlexResourceMapper;
 import com.gitplex.server.web.util.resource.ArchiveResourceReference;
 import com.gitplex.server.web.util.resource.AttachmentResourceReference;
 import com.gitplex.server.web.util.resource.RawBlobResourceReference;
@@ -65,14 +66,14 @@ import com.gitplex.server.web.util.resource.ServerLogResourceReference;
 public class GitPlexUrlMapper extends CompoundRequestMapper {
 
 	public GitPlexUrlMapper(WebApplication app) {
-		add(new WebPageMapper("init", ServerInitPage.class));
+		add(new GitPlexPageMapper("init", ServerInitPage.class));
 		addAdministrationPages();
 		addUserPages();
 		addGroupPages();
 		addProjectPages();
 		addSecurityPages();
 		
-		add(new WebPageMapper("test", TestPage.class));
+		add(new GitPlexPageMapper("test", TestPage.class));
 		
 		addResources();
 	}
@@ -80,54 +81,54 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 	private void addResources() {
 		add(new ResourceMapper("resource/server-log", new ServerLogResourceReference()));
 		add(new ResourceMapper("projects/${project}/archive/${revision}", new ArchiveResourceReference()));
-		add(new ResourceMapper("projects/${project}/raw/${revision}/${path}", new RawBlobResourceReference()));
+		add(new GitPlexResourceMapper("projects/${project}/raw/${revision}/${path}", new RawBlobResourceReference()));
 		add(new ResourceMapper("projects/${project}/attachment/${uuid}/${attachment}", 
 				new AttachmentResourceReference()));
 	}
 	
 	private void addSecurityPages() {
-		add(new WebPageMapper("login", LoginPage.class));
-		add(new WebPageMapper("logout", LogoutPage.class));
-		add(new WebPageMapper("register", RegisterPage.class));
-		add(new WebPageMapper("forget", ForgetPage.class));
+		add(new GitPlexPageMapper("login", LoginPage.class));
+		add(new GitPlexPageMapper("logout", LogoutPage.class));
+		add(new GitPlexPageMapper("register", RegisterPage.class));
+		add(new GitPlexPageMapper("forget", ForgetPage.class));
 	}
 	
 	private void addAdministrationPages() {
-		add(new WebPageMapper("administration/settings/system", SystemSettingPage.class));
-		add(new WebPageMapper("administration/settings/mail", MailSettingPage.class));
-		add(new WebPageMapper("administration/settings/backup", DatabaseBackupPage.class));
-		add(new WebPageMapper("administration/settings/security", SecuritySettingPage.class));
-		add(new WebPageMapper("administration/settings/authenticator", AuthenticatorPage.class));
-		add(new WebPageMapper("administration/server-log", ServerLogPage.class));
-		add(new WebPageMapper("administration/server-information", ServerInformationPage.class));
+		add(new GitPlexPageMapper("administration/settings/system", SystemSettingPage.class));
+		add(new GitPlexPageMapper("administration/settings/mail", MailSettingPage.class));
+		add(new GitPlexPageMapper("administration/settings/backup", DatabaseBackupPage.class));
+		add(new GitPlexPageMapper("administration/settings/security", SecuritySettingPage.class));
+		add(new GitPlexPageMapper("administration/settings/authenticator", AuthenticatorPage.class));
+		add(new GitPlexPageMapper("administration/server-log", ServerLogPage.class));
+		add(new GitPlexPageMapper("administration/server-information", ServerInformationPage.class));
 	}
 	
 	private void addUserPages() {
-		add(new WebPageMapper("users", UserListPage.class));
-		add(new WebPageMapper("users/new", NewUserPage.class));
-		add(new WebPageMapper("users/${user}/profile", UserProfilePage.class));
-		add(new WebPageMapper("users/${user}/groups", UserMembershipsPage.class));
-		add(new WebPageMapper("users/${user}/authorizations", UserAuthorizationsPage.class));
-		add(new WebPageMapper("users/${user}/tasks", TaskListPage.class));
-		add(new WebPageMapper("users/${user}/avatar", AvatarEditPage.class));
-		add(new WebPageMapper("users/${user}/password", PasswordEditPage.class));
-		add(new WebPageMapper("users/${user}/token", TokenGeneratePage.class));
+		add(new GitPlexPageMapper("users", UserListPage.class));
+		add(new GitPlexPageMapper("users/new", NewUserPage.class));
+		add(new GitPlexPageMapper("users/${user}/profile", UserProfilePage.class));
+		add(new GitPlexPageMapper("users/${user}/groups", UserMembershipsPage.class));
+		add(new GitPlexPageMapper("users/${user}/authorizations", UserAuthorizationsPage.class));
+		add(new GitPlexPageMapper("users/${user}/tasks", TaskListPage.class));
+		add(new GitPlexPageMapper("users/${user}/avatar", AvatarEditPage.class));
+		add(new GitPlexPageMapper("users/${user}/password", PasswordEditPage.class));
+		add(new GitPlexPageMapper("users/${user}/token", TokenGeneratePage.class));
 	}
 
 	private void addGroupPages() {
-		add(new WebPageMapper("groups", GroupListPage.class));
-		add(new WebPageMapper("groups/new", NewGroupPage.class));
-		add(new WebPageMapper("groups/${group}/profile", GroupProfilePage.class));
-		add(new WebPageMapper("groups/${group}/members", GroupMembershipsPage.class));
-		add(new WebPageMapper("groups/${group}/authorizations", GroupAuthorizationsPage.class));
+		add(new GitPlexPageMapper("groups", GroupListPage.class));
+		add(new GitPlexPageMapper("groups/new", NewGroupPage.class));
+		add(new GitPlexPageMapper("groups/${group}/profile", GroupProfilePage.class));
+		add(new GitPlexPageMapper("groups/${group}/members", GroupMembershipsPage.class));
+		add(new GitPlexPageMapper("groups/${group}/authorizations", GroupAuthorizationsPage.class));
 	}
 	
 	private void addProjectPages() {
-		add(new WebPageMapper("projects", ProjectListPage.class));
-		add(new WebPageMapper("projects/new", NewProjectPage.class));
-		add(new WebPageMapper("projects/${project}", ProjectBlobPage.class));
+		add(new GitPlexPageMapper("projects", ProjectListPage.class));
+		add(new GitPlexPageMapper("projects/new", NewProjectPage.class));
+		add(new GitPlexPageMapper("projects/${project}", ProjectBlobPage.class));
 
-		add(new WebPageMapper("projects/${project}/blob/#{revision}/#{path}", ProjectBlobPage.class) {
+		add(new GitPlexPageMapper("projects/${project}/blob/#{revision}/#{path}", ProjectBlobPage.class) {
 			
 			/*
 			 * This logic is added to prevent url "/projects/<project>" from being redirected to 
@@ -147,28 +148,28 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 			}
 			
 		});
-		add(new WebPageMapper("projects/${project}/commit/${revision}", CommitDetailPage.class));
-		add(new WebPageMapper("projects/${project}/commits", ProjectCommitsPage.class));
-		add(new WebPageMapper("projects/${project}/compare", RevisionComparePage.class));
+		add(new GitPlexPageMapper("projects/${project}/commit/${revision}", CommitDetailPage.class));
+		add(new GitPlexPageMapper("projects/${project}/commits", ProjectCommitsPage.class));
+		add(new GitPlexPageMapper("projects/${project}/compare", RevisionComparePage.class));
 
-		add(new WebPageMapper("projects/${project}/branches", ProjectBranchesPage.class));
-		add(new WebPageMapper("projects/${project}/tags", ProjectTagsPage.class));
+		add(new GitPlexPageMapper("projects/${project}/branches", ProjectBranchesPage.class));
+		add(new GitPlexPageMapper("projects/${project}/tags", ProjectTagsPage.class));
 
-		add(new WebPageMapper("projects/${project}/pull", RequestListPage.class));
-		add(new WebPageMapper("projects/${project}/pull/new", NewRequestPage.class));
-		add(new WebPageMapper("projects/${project}/pull/${request}", RequestOverviewPage.class));
-		add(new WebPageMapper("projects/${project}/pull/${request}/overview", RequestOverviewPage.class));
-		add(new WebPageMapper("projects/${project}/pull/${request}/code-comments", CodeCommentsPage.class));
-		add(new WebPageMapper("projects/${project}/pull/${request}/changes", RequestChangesPage.class));
-		add(new WebPageMapper("projects/${project}/pull/${request}/merge-preview", MergePreviewPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull", RequestListPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull/new", NewRequestPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull/${request}", RequestOverviewPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull/${request}/overview", RequestOverviewPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull/${request}/code-comments", CodeCommentsPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull/${request}/changes", RequestChangesPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull/${request}/merge-preview", MergePreviewPage.class));
 
-		add(new WebPageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
-		add(new WebPageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));
-		add(new WebPageMapper("projects/${project}/settings/branch-protection", BranchProtectionPage.class));
-		add(new WebPageMapper("projects/${project}/settings/tag-protection", TagProtectionPage.class));
-		add(new WebPageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));
+		add(new GitPlexPageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
+		add(new GitPlexPageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));
+		add(new GitPlexPageMapper("projects/${project}/settings/branch-protection", BranchProtectionPage.class));
+		add(new GitPlexPageMapper("projects/${project}/settings/tag-protection", TagProtectionPage.class));
+		add(new GitPlexPageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));
 		
-		add(new WebPageMapper("projects/${project}/no-branches", NoBranchesPage.class));
+		add(new GitPlexPageMapper("projects/${project}/no-branches", NoBranchesPage.class));
 	}
 
 }

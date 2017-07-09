@@ -6,9 +6,9 @@ import org.apache.wicket.request.mapper.parameter.IPageParametersEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.ResourceReference;
 
-public class WebResourceMapper extends ResourceMapper {
+public class GitPlexResourceMapper extends ResourceMapper {
 
-	public WebResourceMapper(String path, ResourceReference resourceReference) {
+	public GitPlexResourceMapper(String path, ResourceReference resourceReference) {
 		super(path, resourceReference);
 	}
 

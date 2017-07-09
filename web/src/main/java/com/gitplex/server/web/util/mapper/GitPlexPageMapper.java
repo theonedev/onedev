@@ -7,9 +7,9 @@ import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.request.mapper.parameter.IPageParametersEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-public class WebPageMapper extends MountedMapper {
+public class GitPlexPageMapper extends MountedMapper {
 
-	public WebPageMapper(String mountPath, Class<? extends IRequestablePage> pageClass) {
+	public GitPlexPageMapper(String mountPath, Class<? extends IRequestablePage> pageClass) {
 		super(mountPath, pageClass);
 	}
 
