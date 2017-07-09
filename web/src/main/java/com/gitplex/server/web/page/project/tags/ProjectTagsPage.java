@@ -2,6 +2,7 @@ package com.gitplex.server.web.page.project.tags;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -32,11 +33,14 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
 
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.link.ArchiveMenuLink;
@@ -45,6 +49,7 @@ import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
+import com.gitplex.server.web.component.verification.VerificationStatusPanel;
 import com.gitplex.server.web.page.project.NoBranchesPage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
@@ -252,6 +257,17 @@ public class ProjectTagsPage extends ProjectPage {
 						ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), state));
 				link.add(new Label("name", tagName));
 				item.add(link);
+				
+				String commitHash = ref.getPeeledObj().name();
+				item.add(new VerificationStatusPanel("verificationStatus", 
+						new LoadableDetachableModel<Map<String, Verification>>() {
+
+					@Override
+					protected Map<String, Verification> load() {
+						return GitPlex.getInstance(VerificationManager.class).getVerifications(getProject(), commitHash);
+					}
+					
+				}));
 
 				if (ref.getObj() instanceof RevTag) {
 					RevTag revTag = (RevTag) ref.getObj();
