@@ -40,13 +40,13 @@ public class DefaultReviewInvitationManager extends AbstractEntityManager<Review
 		invitation.setType(ReviewInvitation.Type.EXCLUDE);
 		PullRequest request = invitation.getRequest();
 		
-		save(invitation);
-		
 		User reviewer = invitation.getUser();
 		if (request.getQualityCheckStatus().getAwaitingReviewers().contains(reviewer) 
 				|| request.getQualityCheckStatus().getEffectiveReviews().containsKey(reviewer)) {
 			return false;
 		} else {
+			save(invitation);
+			
 			PullRequestStatusChange statusChange = new PullRequestStatusChange();
 			statusChange.setDate(new Date());
 			statusChange.setRequest(request);
