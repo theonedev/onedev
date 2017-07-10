@@ -77,7 +77,7 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 							@Override
 							public void run() {
 								try {
-									worker.doWork(works.working);
+									worker.doWorks(works.working);
 								} catch (Exception e) {
 									logger.error("Error doing works", e);
 								} finally {

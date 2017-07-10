@@ -108,7 +108,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 			        	
 			        	String branch = GitUtils.ref2branch(refName);
 			        	if (branch != null && project.getDefaultBranch() == null) {
-			        		RefUpdate refUpdate = project.updateRef("HEAD");
+			        		RefUpdate refUpdate = GitUtils.getRefUpdate(project.getRepository(), "HEAD");
 			        		GitUtils.linkRef(refUpdate, refName);
 			        	}
 			        	

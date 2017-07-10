@@ -53,7 +53,7 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.codeassist.InputCompletion;
 import com.gitplex.codeassist.InputStatus;
@@ -360,7 +360,7 @@ public class RevisionDiffPanel extends Panel {
 		protected Collection<CodeComment> load() {
 			if (markSupport != null && requestModel.getObject() != null) {
 				return GitPlex.getInstance(CodeCommentManager.class).findAll(requestModel.getObject(), 
-						getOldCommit(), getNewCommit());
+						getOldCommitId(), getNewCommitId());
 			} else {
 				return new ArrayList<>();
 			}
@@ -463,10 +463,12 @@ public class RevisionDiffPanel extends Panel {
 
 				Project project = projectModel.getObject();
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
-				RevCommit oldCommit = getOldCommit();
-				RevCommit newCommit = getNewCommit();
-				boolean oldCommitIndexed = indexManager.isIndexed(project, oldCommit);
-				boolean newCommitIndexed = indexManager.isIndexed(project, newCommit);
+				ObjectId oldCommit = getOldCommitId();
+				ObjectId newCommit = getNewCommitId();
+				boolean oldCommitIndexed = oldCommit.equals(ObjectId.zeroId()) 
+						|| indexManager.isIndexed(project, oldCommit);
+				boolean newCommitIndexed = newCommit.equals(ObjectId.zeroId()) 
+						|| indexManager.isIndexed(project, newCommit);
 				if (oldCommitIndexed && newCommitIndexed) {
 					setVisible(false);
 				} else {
@@ -1197,12 +1199,20 @@ public class RevisionDiffPanel extends Panel {
 		return commentContainer;
 	}
 	
-	private RevCommit getOldCommit() {
-		return projectModel.getObject().getRevCommit(oldRev);
+	private ObjectId getOldCommitId() {
+		if (oldRev.equals(ObjectId.zeroId().toString())) {
+			return ObjectId.zeroId();
+		} else {
+			return projectModel.getObject().getRevCommit(oldRev);
+		}
 	}
 	
-	private RevCommit getNewCommit() {
-		return projectModel.getObject().getRevCommit(newRev);
+	private ObjectId getNewCommitId() {
+		if (newRev.equals(ObjectId.zeroId().toString())) {
+			return ObjectId.zeroId();
+		} else {
+			return projectModel.getObject().getRevCommit(newRev);
+		}
 	}
 	
 	@Nullable
@@ -1211,8 +1221,8 @@ public class RevisionDiffPanel extends Panel {
 			CodeComment comment = ((CommentSupport)markSupport).getOpenComment();
 			if (comment != null) {
 				String commit = comment.getCommentPos().getCommit();
-				String oldCommitHash = getOldCommit().name();
-				String newCommitHash = getNewCommit().name();
+				String oldCommitHash = getOldCommitId().name();
+				String newCommitHash = getNewCommitId().name();
 				if (commit.equals(oldCommitHash) || commit.equals(newCommitHash))
 					return comment;
 			}
@@ -1226,8 +1236,8 @@ public class RevisionDiffPanel extends Panel {
 			MarkPos mark = markSupport.getMark();
 			if (mark != null) {
 				String commit = mark.getCommit();
-				String oldCommitHash = getOldCommit().name();
-				String newCommitHash = getNewCommit().name();
+				String oldCommitHash = getOldCommitId().name();
+				String newCommitHash = getNewCommitId().name();
 				if (commit.equals(oldCommitHash) || commit.equals(newCommitHash))
 					return mark;
 			}

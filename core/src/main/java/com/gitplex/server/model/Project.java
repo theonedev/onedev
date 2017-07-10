@@ -365,7 +365,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	public void setDefaultBranch(String defaultBranchName) {
-		RefUpdate refUpdate = updateRef("HEAD");
+		RefUpdate refUpdate = GitUtils.getRefUpdate(getRepository(), "HEAD");
 		GitUtils.linkRef(refUpdate, GitUtils.branch2ref(defaultBranchName));
 		defaultBranchOptional = null;
 	}
@@ -767,14 +767,6 @@ public class Project extends AbstractEntity {
 
 	public boolean matchesQuery(@Nullable String queryTerm) {
 		return StringUtils.matchesQuery(name, queryTerm);
-	}
-	
-	public RefUpdate updateRef(String refName) {
-		try {
-			return getRepository().updateRef(refName);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 	
 	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter) {

@@ -307,25 +307,49 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private BatchWorker getBatchWorker(Project project) {
 		Long projectId = project.getId();
+		
 		return new BatchWorker("project-" + project.getForkRoot().getId() + "-indexBlob", 1) {
 
 			@Override
-			public void doWork(Collection<Prioritized> works) {
+			public void doWorks(Collection<Prioritized> works) {
 				Preconditions.checkState(works.size() == 1);
+				
+				ObjectId commitId = ((IndexWork) works.iterator().next()).getCommitId();
+				
+				AtomicReference<Repository> projectRepositoryRef = new AtomicReference<>(null);
+				AtomicReference<Repository> forkRootRepositoryRef = new AtomicReference<>(null);
+				AtomicReference<File> forkRootIndexDirRef = new AtomicReference<>(null);
+				AtomicReference<Long> forkRootIdRef = new AtomicReference<>(null);
+				AtomicReference<String> forkRootNameRef = new AtomicReference<>(null);
+				
 				unitOfWork.call(new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
 						Project project = projectManager.load(projectId);
-						IndexWork indexWork = (IndexWork) works.iterator().next();
-
 						Project forkRoot = project.getForkRoot();
-						if (!forkRoot.equals(project) && !forkRoot.getRepository().hasObject(indexWork.getCommitId())) {
-							GitUtils.fetch(project.getRepository(), indexWork.getCommitId(), forkRoot.getRepository(), 
-									null);
-						}
+						forkRootIdRef.set(forkRoot.getId());
+						forkRootNameRef.set(forkRoot.getName());
+						projectRepositoryRef.set(project.getRepository());
+						forkRootRepositoryRef.set(forkRoot.getRepository());
+						forkRootIndexDirRef.set(storageManager.getProjectIndexDir(forkRoot.getId()));
 						
-						doIndex(forkRoot, indexWork.getCommitId());
+						return null;
+					}
+					
+				});
+				
+				if (!forkRootIdRef.get().equals(projectId) && !forkRootRepositoryRef.get().hasObject(commitId)) {
+					GitUtils.fetch(projectRepositoryRef.get(), commitId, forkRootRepositoryRef.get(), null);
+				}
+				doIndex(forkRootRepositoryRef.get(), forkRootIndexDirRef.get(), commitId, forkRootNameRef.get());
+				
+				unitOfWork.call(new Callable<Void>() {
+					
+					@Override
+					public Void call() throws Exception {
+						Project project = projectManager.load(projectId);
+						listenerRegistry.post(new CommitIndexed(project, commitId.copy()));
 						return null;
 					}
 					
@@ -335,9 +359,8 @@ public class DefaultIndexManager implements IndexManager {
 		};
 	}
 	
-	private IndexResult doIndex(Project project, ObjectId commit) {
+	private IndexResult doIndex(Repository repository, File indexDir, ObjectId commit, String projectName) {
 		IndexResult indexResult;
-		File indexDir = storageManager.getProjectIndexDir(project.getId());
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
@@ -346,9 +369,9 @@ public class DefaultIndexManager implements IndexManager {
 						return new IndexResult(0, 0);
 					} else {
 						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-							logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
 							try {
-								indexResult = index(project.getRepository(), commit, writer, searcher);
+								logger.debug("Indexing commit (project: {}, commit: {})", projectName, commit.getName());
+								indexResult = index(repository, commit, writer, searcher);
 								writer.commit();
 							} catch (Exception e) {
 								writer.rollback();
@@ -360,8 +383,8 @@ public class DefaultIndexManager implements IndexManager {
 			} else {
 				try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
 					try {
-						logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
-						indexResult = index(project.getRepository(), commit, writer, null);
+						logger.debug("Indexing commit (project: {}, commit: {})", projectName, commit.getName());
+						indexResult = index(repository, commit, writer, null);
 						writer.commit();
 					} catch (Exception e) {
 						writer.rollback();
@@ -373,8 +396,6 @@ public class DefaultIndexManager implements IndexManager {
 			throw new RuntimeException(e);
 		}
 
-		listenerRegistry.post(new CommitIndexed(project, commit.copy()));
-		
 		return indexResult;
 	}
 

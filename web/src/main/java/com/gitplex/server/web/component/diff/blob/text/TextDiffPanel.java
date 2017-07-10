@@ -31,7 +31,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
@@ -43,9 +43,9 @@ import com.gitplex.jsyntax.TokenUtils;
 import com.gitplex.jsyntax.Tokenized;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blame;
+import com.gitplex.server.git.BlameCommit;
 import com.gitplex.server.git.BlobChange;
 import com.gitplex.server.git.BlobIdent;
-import com.gitplex.server.git.BlameCommit;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.BlameCommand;
 import com.gitplex.server.manager.CodeCommentManager;
@@ -452,12 +452,22 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			appendEqual(builder, block, i, 0);
 	}
 	
-	private RevCommit getOldCommit() {
-		return projectModel.getObject().getRevCommit(change.getOldBlobIdent().revision);
+	private ObjectId getOldCommit() {
+		String oldRev = change.getOldBlobIdent().revision;
+		if (oldRev.equals(ObjectId.zeroId().toString())) {
+			return ObjectId.zeroId();
+		} else {
+			return projectModel.getObject().getRevCommit(oldRev);
+		}
 	}
 	
-	private RevCommit getNewCommit() {
-		return projectModel.getObject().getRevCommit(change.getNewBlobIdent().revision);
+	private ObjectId getNewCommit() {
+		String newRev = change.getNewBlobIdent().revision;
+		if (newRev.equals(ObjectId.zeroId().toString())) {
+			return ObjectId.zeroId();
+		} else {
+			return projectModel.getObject().getRevCommit(newRev);
+		}
 	}
 	
 	@Override

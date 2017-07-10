@@ -25,6 +25,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
@@ -36,6 +37,7 @@ import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
@@ -76,11 +78,22 @@ public class GitUtils {
 	
 	public static List<DiffEntry> diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId) {
 		List<DiffEntry> diffs = new ArrayList<>();
-		try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
+		try (	DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);
+				RevWalk revWalk = new RevWalk(repository);
+				ObjectReader reader = repository.newObjectReader();) {
 	    	diffFormatter.setRepository(repository);
 	    	diffFormatter.setDetectRenames(true);
 	    	diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-	    	for (DiffEntry entry: diffFormatter.scan(oldRevId, newRevId)) {
+	    	
+	    	CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
+	    	if (!oldRevId.equals(ObjectId.zeroId()))
+	    		oldTreeParser.reset(reader, revWalk.parseCommit(oldRevId).getTree());
+	    	
+	    	CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
+	    	if (!newRevId.equals(ObjectId.zeroId()))
+	    		newTreeParser.reset(reader, revWalk.parseCommit(newRevId).getTree());
+	    	
+	    	for (DiffEntry entry: diffFormatter.scan(oldTreeParser, newTreeParser)) {
 	    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
 	    				|| !Objects.equal(entry.getOldMode(), entry.getNewMode())
 	    				|| entry.getOldId()==null || !entry.getOldId().isComplete()
@@ -470,6 +483,14 @@ public class GitUtils {
     	return new File(gitDir, "objects").exists();
     }
     
+	public static RefUpdate getRefUpdate(Repository repository, String refName) {
+		try {
+			return repository.updateRef(refName);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public static void updateRef(RefUpdate refUpdate) {
 		try {
 			RefUpdate.Result result = refUpdate.forceUpdate();

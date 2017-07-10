@@ -523,9 +523,9 @@ public class PullRequest extends AbstractEntity {
 	 * Delete refs of this pull request, without touching refs of its updates.
 	 */
 	public void deleteRefs() {
-		GitUtils.deleteRef(getTargetProject().updateRef(getBaseRef()));
-		GitUtils.deleteRef(getTargetProject().updateRef(getMergeRef()));
-		GitUtils.deleteRef(getTargetProject().updateRef(getHeadRef()));
+		GitUtils.deleteRef(GitUtils.getRefUpdate(getTargetProject().getRepository(), getBaseRef()));
+		GitUtils.deleteRef(GitUtils.getRefUpdate(getTargetProject().getRepository(), getMergeRef()));
+		GitUtils.deleteRef(GitUtils.getRefUpdate(getTargetProject().getRepository(), getHeadRef()));
 	}
 	
 	public static class CriterionHelper {

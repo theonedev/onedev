@@ -67,7 +67,8 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 						.setRefSpecs(new RefSpec(GitUtils.branch2ref(request.getSourceBranch()) + ":" + update.getHeadRef()))
 						.call();
 				if (!request.getTargetProject().getObjectId(update.getHeadRef()).equals(updateHeadId)) {
-					RefUpdate refUpdate = request.getTargetProject().updateRef(update.getHeadRef());
+					RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), 
+							update.getHeadRef());
 					refUpdate.setNewObjectId(updateHeadId);
 					GitUtils.updateRef(refUpdate);
 				}
@@ -75,7 +76,8 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 				Throwables.propagate(e);
 			}
 		} else {
-			RefUpdate refUpdate = request.getTargetProject().updateRef(update.getHeadRef());
+			RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), 
+					update.getHeadRef());
 			refUpdate.setNewObjectId(updateHeadId);
 			GitUtils.updateRef(refUpdate);
 		}

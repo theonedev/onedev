@@ -49,5 +49,5 @@ public abstract class BatchWorker {
 			return new HashCodeBuilder(17, 37).append(id).toHashCode();
 	}
 	
-	public abstract void doWork(Collection<Prioritized> works);
+	public abstract void doWorks(Collection<Prioritized> works);
 }

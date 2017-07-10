@@ -91,7 +91,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	
 	private ObjectId resolvedCompareWith;
 	
-	private RevisionDiffPanel revisionDiff;
+	private WebMarkupContainer revisionDiff;
 	
 	public CommitDetailPage(PageParameters params) {
 		super(params);
@@ -226,17 +226,15 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		
 		newParentsContainer(null);
 
-		if (getCommit().getParentCount() != 0) {
-			newRevisionDiff(null);
-		} else {
-			add(new WebMarkupContainer("revisionDiff").setVisible(false));
-		}
+		newRevisionDiff(null);
 	}
 	
 	private void newParentsContainer(@Nullable AjaxRequestTarget target) {
-		WebMarkupContainer parentsContainer = new WebMarkupContainer("parents");
-		parentsContainer.setOutputMarkupId(true);
-		if (getParents().size() == 1) {
+		WebMarkupContainer parents;
+		if (getParents().size() == 0) {
+			parents = new WebMarkupContainer("parents");
+		} else if (getParents().size() == 1) {
+			parents = new Fragment("parents", "singleParentFrag", this);
 			RevCommit parent = getParents().get(0);
 			State newState = new State();
 			newState.revision = parent.name();
@@ -245,12 +243,13 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 			Link<Void> link = new ViewStateAwarePageLink<Void>("parent", CommitDetailPage.class, 
 					paramsOf(projectModel.getObject(), newState));
 			link.add(new Label("label", GitUtils.abbreviateSHA(parent.name())));
-			parentsContainer.add(link);
-			parentsContainer.add(new WebMarkupContainer("parents").setVisible(false));
+			parents.add(link);
+			parents.add(new WebMarkupContainer("parents").setVisible(false));
 		} else {
-			parentsContainer.add(new WebMarkupContainer("parent").setVisible(false));
-			parentsContainer.add(new Label("count", getParents().size() + " parents"));
-			parentsContainer.add(new ListView<RevCommit>("parents", new LoadableDetachableModel<List<RevCommit>>() {
+			parents = new Fragment("parents", "multiParentsFrag", this);
+			parents.add(new WebMarkupContainer("parent").setVisible(false));
+			parents.add(new Label("count", getParents().size() + " parents"));
+			parents.add(new ListView<RevCommit>("parents", new LoadableDetachableModel<List<RevCommit>>() {
 
 				@Override
 				protected List<RevCommit> load() {
@@ -280,7 +279,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 							state.compareWith = item.getModelObject().name();
 							resolvedCompareWith = item.getModelObject().copy();
 							
-							target.add(parentsContainer);
+							target.add(parents);
 							newRevisionDiff(target);
 							pushState(target);
 						}
@@ -297,17 +296,20 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 				
 			});
 		}		
+		parents.setOutputMarkupId(true);
 		if (target != null) {
-			replace(parentsContainer);
-			target.add(parentsContainer);
+			replace(parents);
+			target.add(parents);
 		} else {
-			add(parentsContainer);
+			add(parents);
 		}
 	}
 	
 	private ObjectId getCompareWith() {
 		List<RevCommit> parents = getParents();
-		if (resolvedCompareWith != null) {
+		if (parents.size() == 0) {
+			return ObjectId.zeroId();
+		} else if (resolvedCompareWith != null) {
 			if (parents.contains(resolvedCompareWith)) 
 				return resolvedCompareWith;
 			else

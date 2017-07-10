@@ -29,6 +29,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -137,8 +138,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		this.executorService = executorService;
 	}
 	
-	private void doCollect(Project project, ObjectId commitId, boolean divide) {
-		Environment env = getEnv(project.getId().toString());
+	private void doCollect(Long projectId, Repository repository, ObjectId commitId, boolean divide) {
+		Environment env = getEnv(projectId.toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 
 		if (divide) {
@@ -156,14 +157,14 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				
 			});
 			if (lastCommitId != null) {
-				try (RevWalk revWalk = new RevWalk(project.getRepository())) {
+				try (RevWalk revWalk = new RevWalk(repository)) {
 					if (GitUtils.parseCommit(revWalk, lastCommitId) != null)
 						revisions.add("^" + lastCommitId.name());
 				} 
 			}
 			
 			int count = 0;
-			for (String commitHash: new RevListCommand(project.getGitDir()).revisions(revisions).call()) {
+			for (String commitHash: new RevListCommand(repository.getDirectory()).revisions(revisions).call()) {
 				count++;
 				if (count > COLLECT_BATCH_SIZE) {
 					intermediateCommitIds.add(ObjectId.fromString(commitHash));
@@ -172,10 +173,10 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			}
 			
 			for (int i=intermediateCommitIds.size()-1; i>=0; i--) {
-				doCollect(project, intermediateCommitIds.get(i), false);
+				doCollect(projectId, repository, intermediateCommitIds.get(i), false);
 			}
 			
-			doCollect(project, commitId, false);
+			doCollect(projectId, repository, commitId, false);
 		} else {
 			Store commitsStore = getStore(env, COMMITS_STORE);
 			Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE); 
@@ -243,7 +244,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 									if (lastCommitId != null)
 										revisions.add("^" + lastCommitId.name());
 									
-									new LogCommand(project.getGitDir()) {
+									new LogCommand(repository.getDirectory()) {
 
 										@Override
 										protected void consume(LogCommit commit) {
@@ -338,19 +339,19 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						if (newCommitCount != prevCommitCount) {
 							bytes = SerializationUtils.serialize(newCommitCount);
 							defaultStore.put(txn, COMMIT_COUNT_KEY, new ArrayByteIterable(bytes));
-							commitCountCache.put(project.getId(), newCommitCount);
+							commitCountCache.put(projectId, newCommitCount);
 						}
 						
 						if (!authors.equals(prevAuthors)) {
 							bytes = SerializationUtils.serialize((Serializable) authors);
 							defaultStore.put(txn, AUTHORS_KEY, new ArrayByteIterable(bytes));
-							authorsCache.remove(project.getId());
+							authorsCache.remove(projectId);
 						} 
 						
 						if (!committers.equals(prevCommitters)) {
 							bytes = SerializationUtils.serialize((Serializable) committers);
 							defaultStore.put(txn, COMMITTERS_KEY, new ArrayByteIterable(bytes));
-							committersCache.remove(project.getId());
+							committersCache.remove(projectId);
 						}
 						
 						if (files.size() > MAX_COLLECTING_FILES) {
@@ -361,7 +362,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						}
 						bytes = SerializationUtils.serialize((Serializable) files);
 						defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
-						filesCache.remove(project.getId());
+						filesCache.remove(projectId);
 						
 						bytes = new byte[20];
 						commitId.copyRawTo(bytes, 0);
@@ -622,25 +623,34 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		return new BatchWorker("project-" + projectId + "-collectCommitInfo") {
 
 			@Override
-			public void doWork(Collection<Prioritized> works) {
+			public void doWorks(Collection<Prioritized> works) {
+				AtomicReference<List<CollectingWork>> collectingWorksRef = new AtomicReference<>(null);
+				AtomicReference<String> projectNameRef = new AtomicReference<>(null);
+				AtomicReference<Repository> repositoryRef = new AtomicReference<>(null);
+				
 				unitOfWork.call(new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
 						Project project = projectManager.load(projectId);
+						projectNameRef.set(project.getName());
+						repositoryRef.set(project.getRepository());
+						
 						List<CollectingWork> collectingWorks = new ArrayList<>();
 						for (Object work: works)
 							collectingWorks.add((CollectingWork)work);
 						Collections.sort(collectingWorks, new CommitTimeComparator());
-						for (CollectingWork work: collectingWorks) {
-							logger.debug("Collecting commit information up to ref '{}' in project '{}'...", 
-									work.getRefName(), project.getName());
-							doCollect(project, work.getCommit().copy(), true);
-						}
+						collectingWorksRef.set(collectingWorks);
 						return null;
 					}
 					
 				});
+
+				for (CollectingWork work: collectingWorksRef.get()) {
+					logger.debug("Collecting commit information up to ref '{}' in project '{}'...", 
+							work.getRefName(), projectNameRef.get());
+					doCollect(projectId, repositoryRef.get(), work.getCommit().copy(), true);
+				}
 			}
 			
 		};		
