@@ -1,13 +1,14 @@
 gitplex.server.modal = {
 	onDomReady: function(containerId, closeCallback) {
-		var $modal = $("#" + containerId + ">.modal");
+		var $modal = $("#" + containerId);
 		$modal.data("closeCallback", closeCallback);
 		
 		$modal.data("keydown", function(e) {
 			if (e.keyCode == 27 
 					&& $(".select2-drop:visible").length == 0 
 					&& $("body>.floating").length == 0 
-					&& $(".atwho-view:visible").length == 0) {
+					&& $(".atwho-view:visible").length == 0
+					&& $modal.nextAll(".modal").length == 0) {
 				gitplex.server.modal.close($modal, true);
 			}
 		});
@@ -24,7 +25,7 @@ gitplex.server.modal = {
 		
 		$(document).off("keydown", $modal.data("keydown"));
 		
-		$modal.modal("hide").parent().remove();
+		$modal.modal("hide").remove();
 	}
 	
 };

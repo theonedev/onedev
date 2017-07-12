@@ -33,7 +33,7 @@ public abstract class CreateTagLink extends ModalLink {
 	
 	@Override
 	protected Component newContent(String id, ModalPanel modal) {
-		return new CreateTagPanel(id, projectModel, revision) {
+		return new CreateTagPanel(id, projectModel, null, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String tag) {

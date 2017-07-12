@@ -1,6 +1,7 @@
 <wicket:panel>
 	<form wicket:id="form" class="create-branch">
 		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
 			<h4 class="modal-title">Specify Branch Name</h4>
 		</div>
 		<div class="modal-body">
@@ -8,10 +9,8 @@
 			<input wicket:id="name" class="form-control autofocus">
 		</div>
 		<div class="modal-footer">
-			<div class="form-group">
-				<button wicket:id="create" class="btn btn-primary">Create</button>
-				<button wicket:id="cancel" class="btn btn-default">Cancel</button>
-			</div>
+			<button wicket:id="create" class="btn btn-primary">Create</button>
+			<button wicket:id="cancel" class="btn btn-default">Cancel</button>
 		</div>
 	</form>
 </wicket:panel>

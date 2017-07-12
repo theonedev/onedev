@@ -91,6 +91,16 @@ abstract class CreateBranchPanel extends Panel {
 			}
 			
 		});
+		
+		form.add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCancel(target);
+			}
+			
+		});
+		
 		add(form);
 	}
 	

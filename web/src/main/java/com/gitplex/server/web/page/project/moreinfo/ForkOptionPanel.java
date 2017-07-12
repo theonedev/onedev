@@ -74,6 +74,15 @@ abstract class ForkOptionPanel extends Panel {
 			}
 			
 		});
+		form.add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onClose(target);
+			}
+			
+		});
+		
 		add(form);
 	}
 	

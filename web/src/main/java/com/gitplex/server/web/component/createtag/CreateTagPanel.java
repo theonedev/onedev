@@ -1,8 +1,12 @@
 package com.gitplex.server.web.component.createtag;
 
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -21,7 +25,7 @@ import com.google.common.base.Preconditions;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-abstract class CreateTagPanel extends Panel {
+public abstract class CreateTagPanel extends Panel {
 
 	private final IModel<Project> projectModel;
 	
@@ -31,9 +35,10 @@ abstract class CreateTagPanel extends Panel {
 	
 	private String tagMessage;
 	
-	public CreateTagPanel(String id, IModel<Project> projectModel, String revision) {
+	public CreateTagPanel(String id, IModel<Project> projectModel, @Nullable String tagName, String revision) {
 		super(id);
 		this.projectModel = projectModel;
+		this.tagName = tagName;
 		this.revision = revision;
 	}
 
@@ -45,25 +50,29 @@ abstract class CreateTagPanel extends Panel {
 		form.setOutputMarkupId(true);
 		form.add(new NotificationPanel("feedback", form));
 		
-		final TextField<String> nameInput;
-		form.add(nameInput = new TextField<String>("name", new IModel<String>() {
+		Component nameInput;
+		if (tagName == null) {
+			form.add(nameInput = new TextField<String>("name", new IModel<String>() {
 
-			@Override
-			public void detach() {
-			}
+				@Override
+				public void detach() {
+				}
 
-			@Override
-			public String getObject() {
-				return tagName;
-			}
+				@Override
+				public String getObject() {
+					return tagName;
+				}
 
-			@Override
-			public void setObject(String object) {
-				tagName = object;
-			}
-			
-		}));
-		nameInput.setOutputMarkupId(true);
+				@Override
+				public void setObject(String object) {
+					tagName = object;
+				}
+				
+			}));
+			nameInput.setOutputMarkupId(true);
+		} else {
+			form.add(nameInput = new WebMarkupContainer("name").setVisible(false));
+		}
 		
 		form.add(new TextArea<String>("message", new IModel<String>() {
 
@@ -121,6 +130,14 @@ abstract class CreateTagPanel extends Panel {
 
 		});
 		form.add(new AjaxLink<Void>("cancel") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCancel(target);
+			}
+			
+		});
+		form.add(new AjaxLink<Void>("close") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {

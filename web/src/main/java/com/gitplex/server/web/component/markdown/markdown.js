@@ -315,18 +315,15 @@ gitplex.server.markdown = {
 	       	   		"</div>");
 			// Make sure to append to body to avoid z-index issues causing modal to sit in background
 	       	$("body").append($modal);
-	       	$modal.modal({show: true, backdrop: "static", keyboard: true});
+	       	$modal.modal({show: true, backdrop: "static", keyboard: false});
 	       	$modal.on('hidden.bs.modal', function (e) {
 	       		$modal.remove();
 	       		$input.focus();
 	       	});
-	       	$modal.keydown(function(e) {
-	       		if (e.keyCode == 27) 
-	       			$input.data("ignoreEsc", true);
-	       	});
 	       	$modal.keyup(function(e) {
-	       		if (e.keyCode == 27)
-	       			$input.data("ignoreEsc", true);
+	       		if (e.keyCode == 27) {
+	       			$modal.modal("hide");
+	       		}
 	       	});
 	       	if (isImage)
 	       		callback("selectImage");

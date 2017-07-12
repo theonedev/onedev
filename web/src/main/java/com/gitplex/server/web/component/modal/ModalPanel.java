@@ -72,6 +72,7 @@ public abstract class ModalPanel extends Panel {
 
 		});
 		
+		add(AttributeAppender.append("class", "modal"));
 		setOutputMarkupId(true);
 	}
 	

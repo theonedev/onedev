@@ -44,6 +44,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;
 import com.gitplex.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
+import com.gitplex.server.web.component.createtag.CreateTagPanel;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.tabbable.AjaxActionTab;
