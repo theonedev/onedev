@@ -18,10 +18,11 @@ public final class ManyToOneSerializer extends StdSerializer<AbstractEntity> {
 	public void serialize(AbstractEntity value, JsonGenerator jgen,
 			SerializerProvider provider) throws IOException,
 			JsonGenerationException {
-		if (value != null)
+		if (value != null) {
 			jgen.writeNumber(value.getId());
-		else
+		} else {
 			jgen.writeNull();
+		}
 	}
 	
 }

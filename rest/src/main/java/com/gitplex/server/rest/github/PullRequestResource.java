@@ -30,6 +30,7 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.persistence.dao.EntityCriteria;
+import com.gitplex.server.rest.PageUtils;
 import com.gitplex.server.rest.RestConstants;
 import com.gitplex.server.security.SecurityUtils;
 import com.google.common.base.Preconditions;
@@ -201,19 +202,22 @@ public class PullRequestResource {
     		criteria.add(Restrictions.eq("targetBranch", branch));
     		
     	if (page == null)
-    		page = 0;
-    	else
-    		page--;
+    		page = 1;
     	
-    	if (perPage == null)
+    	if (perPage == null || perPage > RestConstants.PAGE_SIZE) 
     		perPage = RestConstants.PAGE_SIZE;
-    	
+
+    	int totalCount = pullRequestManager.count(criteria);
+
     	List<Map<String, Object>> entity = new ArrayList<>();
-		for (PullRequest request: pullRequestManager.findRange(criteria, page, perPage)) {
+		for (PullRequest request: pullRequestManager.findRange(criteria, (page-1)*perPage, perPage)) {
 			entity.add(getRequestMap(request, uriInfo));
 		}
-		
-		return Response.ok(entity, RestConstants.JSON_UTF8).build();
+
+		return Response
+				.ok(entity, RestConstants.JSON_UTF8)
+				.links(PageUtils.getNavLinks(uriInfo, totalCount, perPage, page))
+				.build();
     }
     
 }

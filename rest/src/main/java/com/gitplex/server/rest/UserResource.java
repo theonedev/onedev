@@ -10,7 +10,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
@@ -37,7 +40,8 @@ public class UserResource {
 	
 	@ValidQueryParams
 	@GET
-	public Collection<User> query(@QueryParam("name") String name, @Email @QueryParam("email") String email) {
+	public Response query(@QueryParam("name") String name, @Email @QueryParam("email") String email, 
+			@QueryParam("per_page") Integer perPage, @QueryParam("page") Integer page, @Context UriInfo uriInfo) {
     	if (!SecurityUtils.canAccessPublic())
     		throw new UnauthorizedException("Unauthorized access to user profiles");
     	EntityCriteria<User> criteria = EntityCriteria.of(User.class);
@@ -45,7 +49,21 @@ public class UserResource {
     		criteria.add(Restrictions.eq("name", name));
 		if (email != null)
 			criteria.add(Restrictions.eq("email", email));
-		return userManager.findAll(criteria);
+		
+    	if (page == null)
+    		page = 1;
+    	
+    	if (perPage == null || perPage > RestConstants.PAGE_SIZE) 
+    		perPage = RestConstants.PAGE_SIZE;
+
+    	int totalCount = userManager.count(criteria);
+
+    	Collection<User> users = userManager.findRange(criteria, (page-1)*perPage, perPage);
+		
+		return Response
+				.ok(users, RestConstants.JSON_UTF8)
+				.links(PageUtils.getNavLinks(uriInfo, totalCount, perPage, page))
+				.build();
 	}
 	
     @GET

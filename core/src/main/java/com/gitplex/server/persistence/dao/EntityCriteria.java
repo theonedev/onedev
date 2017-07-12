@@ -2,6 +2,7 @@ package com.gitplex.server.persistence.dao;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
@@ -45,8 +46,9 @@ public class EntityCriteria<T extends AbstractEntity> implements CriteriaSpecifi
 	 * to actually run the query.
 	 */
 	public Criteria getExecutableCriteria(Session session) {
-		impl.setSession( ( SessionImplementor ) session );
-		return impl;
+		CriteriaImpl clone = (CriteriaImpl) SerializationUtils.clone(impl);
+		clone.setSession( ( SessionImplementor ) session );
+		return clone;
 	}
 	
 	public static <T extends AbstractEntity> EntityCriteria<T> of(Class<T> clazz) {

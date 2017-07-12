@@ -1,6 +1,5 @@
 package com.gitplex.server.rest;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -12,7 +11,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
@@ -51,12 +53,13 @@ public class PullRequestResource {
         
     @ValidQueryParams
     @GET
-    public Collection<PullRequest> query(
+    public Response query(
     		@QueryParam("targetProject") String targetProjectId, @QueryParam("targetBranch") String targetBranch,
     		@QueryParam("sourceProject") String sourceProjectId, @QueryParam("sourceBranch") String sourceBranch,
     		@QueryParam("number") Long number, @QueryParam("submitter") String submitterId, 
     		@QueryParam("status") String status, @QueryParam("beginDate") Date beginDate, 
-    		@QueryParam("endDate") Date endDate) {
+    		@QueryParam("endDate") Date endDate, @QueryParam("per_page") Integer perPage, 
+    		@QueryParam("page") Integer page, @Context UriInfo uriInfo) {
     	
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 
@@ -85,12 +88,26 @@ public class PullRequestResource {
 		if (endDate != null)
 			criteria.add(Restrictions.le("submitDate", endDate));
 
-		Collection<PullRequest> requests = new ArrayList<>();
-		for (PullRequest request: pullRequestManager.findAll(criteria)) {
-	    	if (SecurityUtils.canRead(request.getTarget().getProject()))
-	    		requests.add(request);
+    	if (page == null)
+    		page = 1;
+    	
+    	if (perPage == null || perPage > RestConstants.PAGE_SIZE) 
+    		perPage = RestConstants.PAGE_SIZE;
+
+    	int totalCount = pullRequestManager.count(criteria);
+
+    	Collection<PullRequest> requests = pullRequestManager.findRange(criteria, (page-1)*perPage, perPage);
+		for (PullRequest request: requests) {
+	    	if (!SecurityUtils.canRead(request.getTargetProject())) {
+	    		throw new UnauthorizedException("Unable to access pull requests of project '" 
+	    				+ request.getTargetProject() + "'");
+	    	}
 		}
-		return requests;
+
+		return Response
+				.ok(requests, RestConstants.JSON_UTF8)
+				.links(PageUtils.getNavLinks(uriInfo, totalCount, perPage, page))
+				.build();
     }
     
 }
