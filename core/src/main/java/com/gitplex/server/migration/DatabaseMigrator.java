@@ -278,14 +278,6 @@ public class DatabaseMigrator {
 							element.element("defaultPrivilege").detach();
 					}
 					dom.writeToFile(renamedFile, false);
-				} else if (file.getName().startsWith("PullRequestWatchs.xml")) {
-					VersionedDocument dom = VersionedDocument.fromFile(file);
-					for (Element element: dom.getRootElement().elements()) {
-						if (!userIds.contains(element.elementText("user"))) {
-							element.detach();
-						}
-					}
-					dom.writeToFile(file, false);
 				} else if (file.getName().startsWith("BranchWatchs.xml")) {
 					VersionedDocument dom = VersionedDocument.fromFile(file);
 					for (Element element: dom.getRootElement().elements()) {
@@ -294,14 +286,6 @@ public class DatabaseMigrator {
 						} else {
 							element.element("depot").setName("project");
 						}
-					}
-					dom.writeToFile(file, false);
-				} else if (file.getName().startsWith("PullRequests.xml")) {
-					VersionedDocument dom = VersionedDocument.fromFile(file);
-					for (Element element: dom.getRootElement().elements()) {
-						element.element("targetDepot").setName("targetProject");
-						if (element.element("sourceDepot") != null)
-							element.element("sourceDepot").setName("sourceProject");
 					}
 					dom.writeToFile(file, false);
 				} else if (file.getName().startsWith("Teams.xml") 
