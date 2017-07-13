@@ -665,12 +665,18 @@ public class PullRequest extends AbstractEntity {
 		return commits;
 	}
 	
-	public String getCommitMessage() {
-		String commitMessage = getTitle() + "\n\n";
-		if (getDescription() != null)
-			commitMessage += getDescription() + "\n\n";
-		commitMessage += "Merged commit of pull request #" + getNumber();
-		return commitMessage;
+	public String getCommitMessage(MergeStrategy mergeStrategy) {
+		if (mergeStrategy == MergeStrategy.SQUASH_MERGE) {
+			String commitMessage = getTitle() + "\n\n";
+			if (getDescription() != null)
+				commitMessage += getDescription() + "\n\n";
+			commitMessage += "Squashed commit of pull request #" + getNumber();
+			return commitMessage;
+		} else if (mergeStrategy == MergeStrategy.ALWAYS_MERGE || mergeStrategy == MergeStrategy.MERGE_IF_NECESSARY) {
+			return "Merge pull request #" + getNumber() + "\n\n" + getTitle();
+		} else {
+			throw new IllegalStateException("Unexpected merge strategy: " + mergeStrategy);
+		}
 	}
 	
 	public LastEvent getLastEvent() {

@@ -247,13 +247,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		MergeStrategy strategy = request.getMergeStrategy();
 		if ((strategy == ALWAYS_MERGE || strategy == MERGE_IF_NECESSARY || strategy == SQUASH_MERGE) 
 				&& !preview.getMerged().equals(preview.getRequestHead()) 
-				&& !mergedCommit.getFullMessage().equals(request.getCommitMessage())) {
+				&& !mergedCommit.getFullMessage().equals(request.getCommitMessage(strategy))) {
 			try (	RevWalk revWalk = new RevWalk(targetProject.getRepository());
 					ObjectInserter inserter = targetProject.getRepository().newObjectInserter()) {
 		        CommitBuilder newCommit = new CommitBuilder();
 		        newCommit.setAuthor(mergedCommit.getAuthorIdent());
 		        newCommit.setCommitter(committer);
-		        newCommit.setMessage(request.getCommitMessage());
+		        newCommit.setMessage(request.getCommitMessage(strategy));
 		        newCommit.setTreeId(mergedCommit.getTree());
 		        newCommit.setParentIds(mergedCommit.getParents());
 		        mergedId = inserter.insert(newCommit);
@@ -542,11 +542,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							if (mergePreview.getMergeStrategy() == REBASE_MERGE) {
 								merged = GitUtils.rebase(repositoryRef.get(), requestHeadId, targetHeadId, user);
 							} else if (mergePreview.getMergeStrategy() == SQUASH_MERGE) {
-								merged = GitUtils.merge(repositoryRef.get(), 
-										requestHeadId, targetHeadId, true, user, request.getCommitMessage());
+								merged = GitUtils.merge(repositoryRef.get(), requestHeadId, targetHeadId, true, user, 
+										request.getCommitMessage(mergePreview.getMergeStrategy()));
 							} else {
 								merged = GitUtils.merge(repositoryRef.get(), requestHeadId, targetHeadId, false, user, 
-										request.getCommitMessage());
+										request.getCommitMessage(mergePreview.getMergeStrategy()));
 							} 
 							
 							RefUpdate refUpdate = GitUtils.getRefUpdate(repositoryRef.get(), mergeRefRef.get());
