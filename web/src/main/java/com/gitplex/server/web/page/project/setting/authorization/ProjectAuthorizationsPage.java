@@ -137,7 +137,7 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 			}
 			if (getProject().isPublicRead()) {
 				for (UserFacade user: cacheManager.getUsers().values()) {
-					ProjectPrivilege userPrivilege = userAuthorizations.get(user);
+					ProjectPrivilege userPrivilege = userAuthorizations.get(user.getId());
 					if (userPrivilege == null || ProjectPrivilege.READ.implies(userPrivilege))
 						userAuthorizations.put(user.getId(), ProjectPrivilege.READ);
 					usersAuthorizedFromOtherSources.add(user.getId());
