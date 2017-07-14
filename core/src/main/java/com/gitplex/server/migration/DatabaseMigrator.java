@@ -261,6 +261,11 @@ public class DatabaseMigrator {
 					dom.writeToFile(renamedFile, false);
 				}
 			}
+			
+			long lastUserAuthorizationId = 0;
+			VersionedDocument userAuthorizationsDom = new VersionedDocument();
+			Element userAuthorizationListElement = userAuthorizationsDom.addElement("list");
+			
 			for (File file: dataDir.listFiles()) {
 				if (file.getName().startsWith("Depots.xml")) {
 					File renamedFile = new File(dataDir, file.getName().replace("Depots.xml", "Projects.xml"));
@@ -276,7 +281,22 @@ public class DatabaseMigrator {
 						element.element("name").setText(accountIdToName.get(accountId) + "." + depotName);
 						if (element.element("defaultPrivilege") != null	)
 							element.element("defaultPrivilege").detach();
+						
+						String adminId;
+						if (userIds.contains(accountId)) {
+							adminId = accountId;
+						} else {
+							adminId = "1";
+						}
+						Element userAuthorizationElement = 
+								userAuthorizationListElement.addElement("com.gitplex.server.model.UserAuthorization");
+						userAuthorizationElement.addAttribute("revision", "0.0");
+						userAuthorizationElement.addElement("id").setText(String.valueOf(++lastUserAuthorizationId));
+						userAuthorizationElement.addElement("user").setText(adminId);
+						userAuthorizationElement.addElement("project").setText(element.elementText("id"));
+						userAuthorizationElement.addElement("privilege").setText("ADMIN");
 					}
+					
 					dom.writeToFile(renamedFile, false);
 				} else if (file.getName().startsWith("BranchWatchs.xml")) {
 					VersionedDocument dom = VersionedDocument.fromFile(file);
@@ -319,7 +339,8 @@ public class DatabaseMigrator {
 					}		
 					dom.writeToFile(file, false);
 				}
-			}		
+			}	
+			userAuthorizationsDom.writeToFile(new File(dataDir, "UserAuthorizations.xml"), false);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
