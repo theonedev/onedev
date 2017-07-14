@@ -39,10 +39,11 @@ public class UserLink extends ViewStateAwarePageLink<Void> {
 	public UserLink(String id, PersonIdent person) {
 		super(id, UserProfilePage.class);
 		User user = GitPlex.getInstance(UserManager.class).find(person);
-		name = person.getName();
 		if (user != null) { 
 			params = UserPage.paramsOf(user);
+			name = user.getDisplayName();
 		} else {
+			name = person.getName();
 			params = new PageParameters();
 		}
 	}
