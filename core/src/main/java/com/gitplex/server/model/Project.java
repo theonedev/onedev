@@ -341,7 +341,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	public String getUrl() {
-		return GitPlex.getInstance(ConfigManager.class).getSystemSetting().getServerUrl() + "/" + getName();
+		return GitPlex.getInstance(ConfigManager.class).getSystemSetting().getServerUrl() + "/projects/" + getName();
 	}
 	
 	@Nullable
