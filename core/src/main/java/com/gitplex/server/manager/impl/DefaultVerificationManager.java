@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -198,7 +199,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 				if (bytes != null)
 					return ((Map<String, Date>) SerializationUtils.deserialize(bytes)).keySet();
 				else
-					return null;
+					return new HashSet<>();
 			}
 			
 		});

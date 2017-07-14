@@ -86,7 +86,7 @@ public abstract class ModalPanel extends Panel {
 		AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 		
 		if (target != null) {
-			String script = String.format("gitplex.server.modal.close($('#%s>.modal'), false);", getMarkupId(true));
+			String script = String.format("gitplex.server.modal.close($('#%s'), false);", getMarkupId(true));
 			target.appendJavaScript(script);
 		}
 		remove();

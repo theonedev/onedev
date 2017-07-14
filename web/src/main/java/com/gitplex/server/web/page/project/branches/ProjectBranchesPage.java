@@ -647,6 +647,14 @@ public class ProjectBranchesPage extends ProjectPage {
 							}
 							
 						});
+						fragment.add(new AjaxLink<Void>("close") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								modal.close();
+							}
+							
+						});
 						return fragment;
 					}
 					

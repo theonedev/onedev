@@ -454,7 +454,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private ObjectId getOldCommit() {
 		String oldRev = change.getOldBlobIdent().revision;
-		if (oldRev.equals(ObjectId.zeroId().toString())) {
+		if (oldRev.equals(ObjectId.zeroId().name().toString())) {
 			return ObjectId.zeroId();
 		} else {
 			return projectModel.getObject().getRevCommit(oldRev);
@@ -463,7 +463,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private ObjectId getNewCommit() {
 		String newRev = change.getNewBlobIdent().revision;
-		if (newRev.equals(ObjectId.zeroId().toString())) {
+		if (newRev.equals(ObjectId.zeroId().name().toString())) {
 			return ObjectId.zeroId();
 		} else {
 			return projectModel.getObject().getRevCommit(newRev);
