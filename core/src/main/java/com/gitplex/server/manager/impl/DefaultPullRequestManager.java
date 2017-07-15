@@ -460,7 +460,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Sessional
 	@Override
 	public MergePreview previewMerge(PullRequest request) {
-		if (request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE) {
+		if (!request.isNew() && request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE) {
 			MergePreview lastPreview = request.getLastMergePreview();
 			if (request.isOpen() && !request.isMergeIntoTarget() 
 					&& (lastPreview == null || lastPreview.isObsolete(request))) {
