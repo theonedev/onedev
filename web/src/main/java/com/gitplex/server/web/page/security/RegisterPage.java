@@ -30,7 +30,7 @@ public class RegisterPage extends BasePage {
 		if (!GitPlex.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister())
 			throw new UnauthenticatedException("User self-register is disabled");
 		if (getLoginUser() != null)
-			throw new IllegalStateException("Can not sign up an user while signed in");
+			throw new IllegalStateException("Can not sign up a user while signed in");
 	}
 	
 	@Override

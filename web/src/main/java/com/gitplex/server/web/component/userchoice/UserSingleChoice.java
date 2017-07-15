@@ -17,7 +17,7 @@ public class UserSingleChoice extends Select2Choice<UserFacade> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Choose an user ...");
+		getSettings().setPlaceholder("Choose a user ...");
 		getSettings().setFormatResult("gitplex.server.userChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.server.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.server.userChoiceFormatter.escapeMarkup");
