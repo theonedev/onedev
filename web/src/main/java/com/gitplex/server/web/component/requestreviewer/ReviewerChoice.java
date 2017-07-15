@@ -56,7 +56,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<UserFacade> {
 		PullRequest request = requestModel.getObject();
 		ReviewInvitation invitation = null;
 		for(ReviewInvitation each: request.getReviewInvitations()) {
-			if (each.getUser().equals(user)) {
+			if (each.getUser().getFacade().equals(user)) {
 				invitation = each;
 				break;
 			}
