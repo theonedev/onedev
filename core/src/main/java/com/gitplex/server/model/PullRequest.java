@@ -673,7 +673,7 @@ public class PullRequest extends AbstractEntity {
 			commitMessage += "Squashed commit of pull request #" + getNumber();
 			return commitMessage;
 		} else if (mergeStrategy == MergeStrategy.ALWAYS_MERGE || mergeStrategy == MergeStrategy.MERGE_IF_NECESSARY) {
-			return "Merge pull request #" + getNumber() + "\n\n" + getTitle();
+			return String.format("Merge pull request #%d - %s", getNumber(), getTitle());
 		} else {
 			throw new IllegalStateException("Unexpected merge strategy: " + mergeStrategy);
 		}

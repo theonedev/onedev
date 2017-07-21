@@ -204,6 +204,7 @@ public class QualityCheckStatusImpl implements QualityCheckStatus {
 			} else {
 				Review effectiveReview = getReviewAfter(user.getId(), update);
 				if (effectiveReview != null) {
+					effectiveReviews.put(GitPlex.getInstance(UserManager.class).load(user.getId()), effectiveReview);					
 					effectiveCount++;
 				} else {
 					potentialReviewers.add(user);

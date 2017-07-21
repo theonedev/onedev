@@ -394,6 +394,14 @@ public class UpgradeCommand extends DefaultPersistManager {
 		}
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
+		File gitplexAvatar = new File(upgradeDir, "site/avatars/gitplex.png");
+		if (!gitplexAvatar.exists()) {
+			try {
+				FileUtils.copyFile(new File(Bootstrap.getSiteDir(), "avatars/gitplex.png"), gitplexAvatar);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		for (File file: Bootstrap.getSiteLibDir().listFiles()) {
 			// end user may put some custom program files in site lib before upgrade, 
 			// to override site lib of old version
