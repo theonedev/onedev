@@ -114,7 +114,6 @@
 
 .conflict-resolve-instruction {
 	padding: 8px; 
-	width: 400px;
 }
 .conflict-resolve-instruction .terminal {
 	background: #333;
@@ -122,6 +121,8 @@
 	border-radius: 4px;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	margin: 4px 0 16px 0;
+	white-space: nowrap;
+	padding: 4px;
 }
 
 #request-detail>ul.tabs>li>a .fa-circle {
