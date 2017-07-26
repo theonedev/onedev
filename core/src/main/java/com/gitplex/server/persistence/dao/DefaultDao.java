@@ -89,10 +89,8 @@ public class DefaultDao implements Dao, Serializable {
 	@Override
 	public <T extends AbstractEntity> List<T> findRange(EntityCriteria<T> entityCriteria, int firstResult, int maxResults) {
 		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
-		if (firstResult != 0)
-			criteria.setFirstResult(firstResult);
-		if (maxResults != 0)
-			criteria.setMaxResults(maxResults);
+		criteria.setFirstResult(firstResult);
+		criteria.setMaxResults(maxResults);
 		return criteria.list();
 	}
 
@@ -125,7 +123,7 @@ public class DefaultDao implements Dao, Serializable {
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> List<T> findAll(Class<T> entityClass) {
-		return findRange(EntityCriteria.of(entityClass), 0, 0);
+		return findRange(EntityCriteria.of(entityClass), 0, Integer.MAX_VALUE);
 	}
 
 	@Override

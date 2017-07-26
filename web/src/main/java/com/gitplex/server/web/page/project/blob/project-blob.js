@@ -76,11 +76,11 @@ gitplex.server.projectBlob = {
 		});
 		
 		document.addEventListener("keydown", function(e) {
-			if (e.altKey && e.shiftKey && $(".modal:visible").length == 0) {
-				if (e.keyCode === 70) {
+			if (e.altKey && $(".modal:visible").length == 0) {
+				if (e.keyCode === 81) {
 					e.preventDefault();
 					callback("quickSearch");
-				} else if (e.keyCode === 84) {
+				} else if (e.keyCode === 65) {
 					e.preventDefault();
 					callback("advancedSearch");
 				}

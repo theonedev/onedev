@@ -1,11 +1,13 @@
 package com.gitplex.server.manager;
 
+import javax.annotation.Nullable;
+
 import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.CodeCommentReply;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.model.PullRequestStatusChange;
-import com.gitplex.server.model.support.CodeCommentActivity;
 
 public interface UrlManager {
 	
@@ -17,8 +19,8 @@ public interface UrlManager {
 	
 	String urlFor(PullRequestStatusChange statusChange);
 	
-	String urlFor(CodeComment comment);
+	String urlFor(CodeComment comment, @Nullable PullRequest request);
 
-	String urlFor(CodeCommentActivity activity);
+	String urlFor(CodeCommentReply reply, @Nullable PullRequest request);
 	
 }

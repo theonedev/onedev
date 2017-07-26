@@ -15,6 +15,7 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.GroupManager;
+import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.Group;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.security.ProjectPrivilege;
@@ -81,6 +82,20 @@ public class SuggestionUtils {
 			if (index != -1) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
 				suggestions.add(new InputSuggestion(name, matchRange));
+			}
+		}
+		return suggestions;
+	}
+	
+	public static List<InputSuggestion> suggestVerifications(Project project, String matchWith) {
+		String lowerCaseMatchWith = matchWith.toLowerCase();
+		int numSuggestions = 0;
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (String verificationName: GitPlex.getInstance(VerificationManager.class).getVerificationNames(project)) {
+			int index = verificationName.toLowerCase().indexOf(lowerCaseMatchWith);
+			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
+				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(verificationName, matchRange));
 			}
 		}
 		return suggestions;

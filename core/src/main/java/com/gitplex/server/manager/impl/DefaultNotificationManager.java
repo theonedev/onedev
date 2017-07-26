@@ -18,9 +18,13 @@ import org.hibernate.criterion.Restrictions;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.MarkdownAware;
+import com.gitplex.server.event.codecomment.CodeCommentCreated;
+import com.gitplex.server.event.codecomment.CodeCommentEvent;
+import com.gitplex.server.event.codecomment.CodeCommentReplied;
 import com.gitplex.server.event.pullrequest.PullRequestMergePreviewCalculated;
-import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentReplied;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestEvent;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
@@ -78,6 +82,41 @@ public class DefaultNotificationManager implements NotificationManager {
 		this.markdownManager = markdownManager;
 		this.pullRequestTaskManager = pullRequestTaskManager;
 		this.pullRequestWatchManager = pullRequestWatchManager;
+	}
+	
+	@Transactional
+	@Listen
+	public void on(CodeCommentEvent event) {
+		if (event.getRequest() == null) {
+			MarkdownAware markdownAware = (MarkdownAware) event;
+			String markdown = markdownAware.getMarkdown();
+			String html = markdownManager.render(markdown, null, false);
+			Collection<User> mentionUsers = new MentionParser().parseMentions(html);
+			if (!mentionUsers.isEmpty()) {
+				String url;
+				if (event instanceof CodeCommentCreated)
+					url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
+				else 
+					url = urlManager.urlFor(((CodeCommentReplied)event).getReply(), null);
+				
+				String subject = String.format("You are mentioned in a code comment on file '%s'", 
+						event.getComment().getMarkPos().getPath());
+				String body = String.format(""
+						+ "Dear Users,"
+						+ "<p style='margin: 16px 0;'>"
+						+ "%s."
+						+ "<p style='margin: 16px 0;'>"
+						+ "<div style='padding-left: 16px; border-left: 4px solid #CCC;'>%s</div>"
+						+ "<p style='margin: 16px 0;'>"
+						+ "Visit <a href='%s'>%s</a> for details."
+						+ "<p style='margin: 16px 0;'>"
+						+ "-- Sent by GitPlex", 
+						subject, markdownManager.escape(markdown), url, url);
+				
+				mailManager.sendMailAsync(mentionUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
+						subject, body);
+			}
+		}
 	}
 	
 	@Transactional
@@ -188,7 +227,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		
 		// handle mentions
 		Set<User> mentionUsers = new HashSet<>();
-		if (event instanceof MarkdownAware) {
+		if (event instanceof MarkdownAware && (!(event instanceof PullRequestCodeCommentEvent) || !((PullRequestCodeCommentEvent)event).isPassive())) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			if (markdown != null) {
@@ -201,9 +240,9 @@ public class DefaultNotificationManager implements NotificationManager {
 					else if (event instanceof PullRequestStatusChangeEvent) 
 						url = urlManager.urlFor(((PullRequestStatusChangeEvent)event).getStatusChange());
 					else if (event instanceof PullRequestCodeCommentCreated)
-						url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment());
-					else if (event instanceof PullRequestCodeCommentActivityEvent)
-						url = urlManager.urlFor(((PullRequestCodeCommentActivityEvent)event).getActivity());
+						url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment(), request);
+					else if (event instanceof PullRequestCodeCommentReplied)
+						url = urlManager.urlFor(((PullRequestCodeCommentReplied)event).getReply(), request);
 					else 
 						url = urlManager.urlFor(event.getRequest());
 					

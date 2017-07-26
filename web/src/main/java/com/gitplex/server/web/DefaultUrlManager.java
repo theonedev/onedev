@@ -1,16 +1,26 @@
 package com.gitplex.server.web;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
 
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.CodeCommentReply;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestComment;
 import com.gitplex.server.model.PullRequestStatusChange;
-import com.gitplex.server.model.support.CodeCommentActivity;
+import com.gitplex.server.model.support.CompareContext;
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+import com.gitplex.server.web.page.project.compare.RevisionComparePage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
+import com.google.common.base.Splitter;
 
 @Singleton
 public class DefaultUrlManager implements UrlManager {
@@ -28,14 +38,40 @@ public class DefaultUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(CodeComment comment) {
-		return urlFor(comment.getRequest()) + "/codecomments/" + comment.getId();
+	public String urlFor(CodeComment comment, PullRequest request) {
+		PageParametersEncoder paramsEncoder = new PageParametersEncoder();
+		if (request != null) {
+			PageParameters params = new PageParameters();
+			RequestChangesPage.fillParams(params, RequestChangesPage.getState(comment));
+			return urlFor(request) + "/changes" + paramsEncoder.encodePageParameters(params);
+		} else {
+			CompareContext compareContext = comment.getCompareContext();
+			if (!compareContext.getCompareCommit().equals(comment.getMarkPos().getCommit())) {
+				String url = urlFor(comment.getProject());
+				PageParameters params = new PageParameters();
+				RevisionComparePage.fillParams(params, RevisionComparePage.getState(comment));
+				return url + "/compare" + paramsEncoder.encodePageParameters(params);
+			} else {
+				String url = urlFor(comment.getProject());
+				PageParameters params = new PageParameters();
+				ProjectBlobPage.State state = ProjectBlobPage.getState(comment);
+				state.blobIdent.path = null;
+				state.blobIdent.revision = null;
+				params.set(0, comment.getMarkPos().getCommit());
+				List<String> pathSegments = Splitter.on("/").splitToList(comment.getMarkPos().getPath());
+				for (int i=0; i<pathSegments.size(); i++) {
+					params.set(i+1, pathSegments.get(i));
+				}
+				ProjectBlobPage.fillParams(params, state);
+				return url + "/blob/" + paramsEncoder.encodePageParameters(params);
+			}
+		}
 	}
 
 	@Override
-	public String urlFor(CodeCommentActivity activity) {
-		String url = urlFor(activity.getComment());
-		return url + "#" + activity.getAnchor();
+	public String urlFor(CodeCommentReply reply, PullRequest request) {
+		String url = urlFor(reply.getComment(), request);
+		return url + "#" + reply.getAnchor();
 	}
 
 	@Override

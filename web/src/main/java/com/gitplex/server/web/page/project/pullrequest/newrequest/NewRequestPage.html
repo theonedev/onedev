@@ -83,6 +83,10 @@
 						<td class="value">
 							<select wicket:id="mergeStrategy" class="form-control"></select>
 							<div wicket:id="mergeStrategyHelp" class="help-block"></div>							
+							<div wicket:id="immediateMergeNote" class="alert alert-warning immediate-merge">
+								<i class="fa fa-warning"></i> This pull request will be merged immediately after being created.<br>
+								Use the strategy <i>Do Not Merge</i> if you want to review your changes without merging now. 
+							</div>
 						</td>
 					</tr>
 					<tr class="reviewers">
@@ -96,9 +100,6 @@
 				</table>
 				<div class="clearfix">
 					<input wicket:id="send" type="submit" class="btn btn-primary pull-left" value="Create Pull Request"></input>
-					<div wicket:id="immediateMergeNote" class="alert alert-warning pull-left immediate-merge">
-						<i class="fa fa-warning"></i> This pull request will be merged immediately after being created
-					</div>
 				</div>
 			</form>
 		</div>	

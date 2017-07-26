@@ -371,24 +371,49 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 		});
 		
-		add(newMergeStrategyContainer());
-		add(new ReviewerListPanel("reviewers", requestModel));
+		WebMarkupContainer sideInfoContainer = new WebMarkupContainer("sideInfo") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+					IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
+					partialPageRequestHandler.add(this);
+				}
+				
+			}
+			
+		};
+		sideInfoContainer.setOutputMarkupId(true);
+		add(sideInfoContainer);
+		
+		sideInfoContainer.add(newMergeStrategyContainer());
+		sideInfoContainer.add(new ReviewerListPanel("reviewers", requestModel));
 		
 		BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch());
 		if (protection != null && !protection.getVerifications().isEmpty() && protection.isVerifyMerges()) {
-			add(new Label("verifyMerges", "(On Merged Commit)"));
+			sideInfoContainer.add(new Label("verifyMerges", "(On Merged Commit)"));
 		} else {
-			add(new WebMarkupContainer("verifyMerges"));
+			sideInfoContainer.add(new WebMarkupContainer("verifyMerges"));
 		}
-		add(new RequiredVerificationsPanel("verifications", requestModel));
-		add(newWatchContainer());
-		add(newManageContainer());
+		sideInfoContainer.add(new RequiredVerificationsPanel("verifications", requestModel));
+		
+		sideInfoContainer.add(newWatchContainer());
+		sideInfoContainer.add(newManageContainer());
 	}
 	
 	private WebMarkupContainer newManageContainer() {
 		WebMarkupContainer container = new WebMarkupContainer("manage");
 		container.setVisible(SecurityUtils.canModify(getPullRequest()));
 		container.add(new Link<Void>("synchronize") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isOpen());
+			}
 
 			@Override
 			public void onClick() {
@@ -412,20 +437,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 	}
 
 	private WebMarkupContainer newMergeStrategyContainer() {
-		WebMarkupContainer mergeStrategyContainer = new WebMarkupContainer("mergeStrategy") {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-					IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
-					partialPageRequestHandler.add(this);
-				}
-				
-			}
-		};
+		WebMarkupContainer mergeStrategyContainer = new WebMarkupContainer("mergeStrategy");
 		mergeStrategyContainer.setOutputMarkupId(true);
 
 		IModel<MergeStrategy> mergeStrategyModel = new IModel<MergeStrategy>() {
@@ -454,7 +466,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(SecurityUtils.canModify(getPullRequest()));						
+				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));						
 			}
 			
 		};
@@ -482,7 +494,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(!SecurityUtils.canModify(getPullRequest()));						
+				setVisible(getPullRequest().isMerged() || !SecurityUtils.canModify(getPullRequest()));						
 			}
 			
 		});
@@ -494,7 +506,16 @@ public class RequestOverviewPage extends RequestDetailPage {
 				return getPullRequest().getMergeStrategy().getDescription();
 			}
 			
-		}));
+		}) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));						
+			}
+			
+		});
 		
 		return mergeStrategyContainer;
 	}

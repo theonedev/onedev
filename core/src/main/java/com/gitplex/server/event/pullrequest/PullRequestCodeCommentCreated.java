@@ -5,13 +5,14 @@ import java.util.Date;
 import com.gitplex.server.event.MarkdownAware;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 
 @Editable(name="commented code")
 public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent implements MarkdownAware {
 
-	public PullRequestCodeCommentCreated(CodeComment comment) {
-		super(comment);
+	public PullRequestCodeCommentCreated(PullRequest request, CodeComment comment, boolean passive) {
+		super(request, comment, passive);
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package com.gitplex.server.manager;
 
 import java.io.File;
 
-import com.gitplex.server.model.Project;
+import com.gitplex.server.util.facade.ProjectFacade;
 
 public interface AttachmentManager {
 
@@ -13,6 +13,6 @@ public interface AttachmentManager {
 	 * 			directory to store attachment of specified project and uuid. The directory may not exist 
 	 * 			if there is no any attachment saved
 	 */
-    File getAttachmentDir(Project project, String attachmentDirUUID);
+    File getAttachmentDir(ProjectFacade project, String attachmentDirUUID);
 
 }

@@ -1,6 +1,6 @@
-grammar ReviewAppointment;
+grammar ReviewRequirementSpec;
 
-expr: ' '* criteria (' '+ criteria)* ' '* EOF;
+spec: ' '* criteria (' '+ criteria)* ' '* EOF;
 
 criteria: userCriteria | groupCriteria;
 

@@ -469,7 +469,7 @@ gitplex.server.textDiff = {
 			return $tooltip;
 		}, alignment);
 	},
-	openSelectionPopover: function(containerId, position, mark, markUrl, markedText, hasPullRequest, loggedIn) {
+	openSelectionPopover: function(containerId, position, mark, markUrl, markedText, loggedIn) {
 		var $container = $("#" + containerId);
 		
 		var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
@@ -483,7 +483,7 @@ gitplex.server.textDiff = {
 		clipboard.on("success", function(e) {
 			clipboard.destroy();
 		});
-		if (hasPullRequest && loggedIn) {
+		if (loggedIn) {
 			$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
 			$content.children("a.comment").click(function() {
 				if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
@@ -493,7 +493,7 @@ gitplex.server.textDiff = {
 				$container.data("callback")("addComment", mark.leftSide, 
 						mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 			});
-		} else if (!loggedIn) {
+		} else {
 			$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
 		}			
 		

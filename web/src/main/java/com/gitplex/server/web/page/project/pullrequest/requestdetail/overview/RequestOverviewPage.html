@@ -19,12 +19,14 @@
 					</form>
 				</div>
 			</td>
-			<td class="info">
-				<div class="well">
+			<td class="side-info">
+				<div wicket:id="sideInfo" class="well">
+					<wicket:enclosure child="reviewers">
 					<div class="reviewers">
 						<label>Required Reviewers</label>
 						<div wicket:id="reviewers"></div>
 					</div>
+					</wicket:enclosure>
 					<wicket:enclosure child="verifications">
 					<div class="verifications">
 						<label>Required Verifications</label> 

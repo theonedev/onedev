@@ -24,14 +24,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.MarkdownManager;
-import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.manager.ReviewInvitationManager;
-import com.gitplex.server.model.User;
+import com.gitplex.server.manager.ReviewManager;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
+import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.behavior.dropdown.DropdownHover;
 import com.gitplex.server.web.component.avatar.AvatarLink;
@@ -42,29 +41,12 @@ import com.gitplex.server.web.websocket.PageDataChanged;
 @SuppressWarnings("serial")
 public class ReviewerListPanel extends GenericPanel<PullRequest> {
 
+	private final IModel<List<User>> reviewersModel;
+	
 	public ReviewerListPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
-	}
-
-	private PullRequest getPullRequest() {
-		return getModelObject();
-	}
-	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (event.getPayload() instanceof PageDataChanged) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			pageDataChanged.getHandler().add(this);
-		}
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
 		
-		IModel<List<User>> reviewersModel = new LoadableDetachableModel<List<User>>() {
+		reviewersModel = new LoadableDetachableModel<List<User>>() {
 
 			@Override
 			protected List<User> load() {
@@ -77,13 +59,49 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				for (Review review: reviews)
 					reviewers.add(review.getUser());
 				
-				for (User awaitingReviewer: request.getQualityCheckStatus().getAwaitingReviewers())
-					reviewers.add(awaitingReviewer);
+				for (User awaitingReviewer: request.getQualityCheckStatus().getAwaitingReviewers()) {
+					if (!request.isMerged())
+						reviewers.add(awaitingReviewer);
+				}
 				
 				return reviewers;
 			}
 			
-		};
+		};		
+	}
+
+	private PullRequest getPullRequest() {
+		return getModelObject();
+	}
+	
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (isVisibleInHierarchy() && event.getPayload() instanceof PageDataChanged) {
+			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+			pageDataChanged.getHandler().add(this);
+		}
+	}
+	
+	@Override
+	protected void onDetach() {
+		reviewersModel.detach();
+		super.onDetach();
+	}
+
+	@Override
+	protected void onConfigure() {
+		super.onConfigure();
+		
+		PullRequest request = getPullRequest();
+		setVisible(!reviewersModel.getObject().isEmpty() || SecurityUtils.canModify(request) && !request.isMerged());
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
 		add(new ListView<User>("reviewers", reviewersModel) {
 
 			@Override
@@ -219,18 +237,6 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 			
 		});
 		
-		add(new WebMarkupContainer("noReviewers") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				QualityCheckStatus reviewCheckStatus = getPullRequest().getQualityCheckStatus();
-				setVisible(reviewCheckStatus.getAwaitingReviewers().isEmpty() 
-						&& reviewCheckStatus.getEffectiveReviews().isEmpty());
-			}
-			
-		});
-		
 		add(new ReviewerChoice("addReviewer", getModel()) {
 
 			@Override
@@ -238,7 +244,7 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 				super.onConfigure();
 
 				PullRequest request = getPullRequest();
-				setVisible(SecurityUtils.canModify(request));
+				setVisible(SecurityUtils.canModify(request) && !request.isMerged());
 			}
 		                                                                                                                              
 			@Override

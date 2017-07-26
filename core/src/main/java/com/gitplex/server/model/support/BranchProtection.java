@@ -12,14 +12,14 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.server.model.User;
-import com.gitplex.server.model.Project;
 import com.gitplex.server.model.Group;
+import com.gitplex.server.model.User;
 import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.util.editable.annotation.BranchPattern;
 import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.server.util.editable.annotation.ReviewRequirementSpec;
 import com.gitplex.server.util.editable.annotation.VerificationChoice;
-import com.gitplex.server.util.reviewappointment.ReviewAppointment;
+import com.gitplex.server.util.reviewrequirement.ReviewRequirement;
 
 @Editable
 public class BranchProtection implements Serializable {
@@ -32,13 +32,13 @@ public class BranchProtection implements Serializable {
 	
 	private boolean noDeletion = true;
 	
-	private String reviewAppointmentExpr;
+	private String reviewRequirementSpec;
 	
 	private List<String> verifications = new ArrayList<>();
 	
 	private boolean verifyMerges;
 	
-	private transient Optional<ReviewAppointment> reviewAppointmentOpt;
+	private transient Optional<ReviewRequirement> reviewRequirementOpt;
 	
 	private List<FileProtection> fileProtections = new ArrayList<>();
 
@@ -73,18 +73,19 @@ public class BranchProtection implements Serializable {
 	}
 
 	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "
-			+ "specified branch. Note that the user submitting the change is considered to reviewed the change "
-			+ "automatically")
-	@com.gitplex.server.util.editable.annotation.ReviewAppointment
-	public String getReviewAppointmentExpr() {
-		return reviewAppointmentExpr;
+			+ "specified branch. GitPlex assumes that the user submitting the change has completed the review already.")
+	@ReviewRequirementSpec
+	public String getReviewRequirementSpec() {
+		return reviewRequirementSpec;
 	}
 
-	public void setReviewAppointmentExpr(String reviewAppointmentExpr) {
-		this.reviewAppointmentExpr = reviewAppointmentExpr;
+	public void setReviewRequirementSpec(String reviewRequirementSpec) {
+		this.reviewRequirementSpec = reviewRequirementSpec;
 	}
 
-	@Editable(order=500, name="Required Verifications", description="Optionally specify required verifications")
+	@Editable(order=500, name="Required Verifications", description="Optionally choose required verifications. "
+			+ "Available verifications are populated as external system (such as CI system) verifies and publishes "
+			+ "commit status of current project")
 	@VerificationChoice
 	public List<String> getVerifications() {
 		return verifications;
@@ -94,8 +95,8 @@ public class BranchProtection implements Serializable {
 		this.verifications = verifications;
 	}
 
-	@Editable(order=600, name="Verify Merged Commit", description="For required verifications specified above, this option determines whether or "
-			+ "not to verify merged commits of relevant pull requests")
+	@Editable(order=600, name="Verify Merged Commits", description="For required verifications specified above, this "
+			+ "option determines whether or not to verify merged commits of relevant pull requests")
 	public boolean isVerifyMerges() {
 		return verifyMerges;
 	}
@@ -125,66 +126,66 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Nullable
-	public ReviewAppointment getReviewAppointment(Project project) {
-		if (reviewAppointmentOpt == null) {
-			if (reviewAppointmentExpr != null)
-				reviewAppointmentOpt = Optional.of(new ReviewAppointment(project, reviewAppointmentExpr));
+	public ReviewRequirement getReviewRequirement() {
+		if (reviewRequirementOpt == null) {
+			if (reviewRequirementSpec != null)
+				reviewRequirementOpt = Optional.of(new ReviewRequirement(reviewRequirementSpec));
 			else
-				reviewAppointmentOpt = Optional.empty();
+				reviewRequirementOpt = Optional.empty();
 		}
-		return reviewAppointmentOpt.orElse(null);
+		return reviewRequirementOpt.orElse(null);
 	}
 	
-	public void onGroupRename(Project project, String oldName, String newName) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(project);
-		if (reviewAppointment != null) {
-			for (Group group: reviewAppointment.getGroups().keySet()) {
+	public void onGroupRename(String oldName, String newName) {
+		ReviewRequirement reviewRequirement = getReviewRequirement();
+		if (reviewRequirement != null) {
+			for (Group group: reviewRequirement.getGroups().keySet()) {
 				if (group.getName().equals(oldName))
 					group.setName(newName);
 			}
-			setReviewAppointmentExpr(reviewAppointment.toExpr());
+			setReviewRequirementSpec(reviewRequirement.toSpec());
 		}
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(project);
-			if (reviewAppointment != null) {
-				for (Group group: reviewAppointment.getGroups().keySet()) {
+			reviewRequirement = fileProtection.getReviewRequirement();
+			if (reviewRequirement != null) {
+				for (Group group: reviewRequirement.getGroups().keySet()) {
 					if (group.getName().equals(oldName))
 						group.setName(newName);
 				}
-				fileProtection.setReviewAppointmentExpr(reviewAppointment.toExpr());
+				fileProtection.setReviewRequirementSpec(reviewRequirement.toSpec());
 			} else {
 				it.remove();
 			}
 		}
 	}
 	
-	public void onGroupDelete(Project project, String groupName) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(project);
-		if (reviewAppointment != null) {
-			for (Iterator<Map.Entry<Group, Integer>> it = reviewAppointment.getGroups().entrySet().iterator(); 
+	public void onGroupDelete(String groupName) {
+		ReviewRequirement reviewRequirement = getReviewRequirement();
+		if (reviewRequirement != null) {
+			for (Iterator<Map.Entry<Group, Integer>> it = reviewRequirement.getGroups().entrySet().iterator(); 
 					it.hasNext();) {
 				Group group = it.next().getKey();
 				if (group.getName().equals(groupName))
 					it.remove();
 			}
-			setReviewAppointmentExpr(reviewAppointment.toExpr());
+			setReviewRequirementSpec(reviewRequirement.toSpec());
 		}
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(project);
-			if (reviewAppointment != null) {
-				for (Iterator<Map.Entry<Group, Integer>> itGroup = reviewAppointment.getGroups().entrySet().iterator(); 
+			reviewRequirement = fileProtection.getReviewRequirement();
+			if (reviewRequirement != null) {
+				for (Iterator<Map.Entry<Group, Integer>> itGroup = reviewRequirement.getGroups().entrySet().iterator(); 
 						itGroup.hasNext();) {
 					Group group = itGroup.next().getKey();
 					if (group.getName().equals(groupName))
 						itGroup.remove();
 				}
-				String reviewAppointmentExpr = reviewAppointment.toExpr();
-				if (reviewAppointmentExpr != null)
-					fileProtection.setReviewAppointmentExpr(reviewAppointmentExpr);
+				String reviewRequirementSpec = reviewRequirement.toSpec();
+				if (reviewRequirementSpec != null)
+					fileProtection.setReviewRequirementSpec(reviewRequirementSpec);
 				else
 					it.remove();
 			} else {
@@ -193,54 +194,54 @@ public class BranchProtection implements Serializable {
 		}
 	}
 	
-	public void onUserRename(Project project, String oldName, String newName) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(project);
-		if (reviewAppointment != null) {
-			for (User user: reviewAppointment.getUsers()) {
+	public void onUserRename(String oldName, String newName) {
+		ReviewRequirement reviewRequirement = getReviewRequirement();
+		if (reviewRequirement != null) {
+			for (User user: reviewRequirement.getUsers()) {
 				if (user.getName().equals(oldName))
 					user.setName(newName);
 			}
-			setReviewAppointmentExpr(reviewAppointment.toExpr());
+			setReviewRequirementSpec(reviewRequirement.toSpec());
 		}
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(project);
-			if (reviewAppointment != null) {
-				for (User user: reviewAppointment.getUsers()) {
+			reviewRequirement = fileProtection.getReviewRequirement();
+			if (reviewRequirement != null) {
+				for (User user: reviewRequirement.getUsers()) {
 					if (user.getName().equals(oldName))
 						user.setName(newName);
 				}
-				fileProtection.setReviewAppointmentExpr(reviewAppointment.toExpr());
+				fileProtection.setReviewRequirementSpec(reviewRequirement.toSpec());
 			} else {
 				it.remove();
 			}
 		}		
 	}
 	
-	public void onUserDelete(Project project, String userName) {
-		ReviewAppointment reviewAppointment = getReviewAppointment(project);
-		if (reviewAppointment != null) {
-			for (Iterator<User> it = reviewAppointment.getUsers().iterator(); it.hasNext();) {
+	public void onUserDelete(String userName) {
+		ReviewRequirement reviewRequirement = getReviewRequirement();
+		if (reviewRequirement != null) {
+			for (Iterator<User> it = reviewRequirement.getUsers().iterator(); it.hasNext();) {
 				User user = it.next();
 				if (user.getName().equals(userName))
 					it.remove();
 			}
-			setReviewAppointmentExpr(reviewAppointment.toExpr());
+			setReviewRequirementSpec(reviewRequirement.toSpec());
 		}
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection fileProtection = it.next();
-			reviewAppointment = fileProtection.getReviewAppointment(project);
-			if (reviewAppointment != null) {
-				for (Iterator<User> itUser = reviewAppointment.getUsers().iterator(); itUser.hasNext();) {
+			reviewRequirement = fileProtection.getReviewRequirement();
+			if (reviewRequirement != null) {
+				for (Iterator<User> itUser = reviewRequirement.getUsers().iterator(); itUser.hasNext();) {
 					User user = itUser.next();
 					if (user.getName().equals(userName))
 						itUser.remove();
 				}
-				String reviewAppointmentExpr = reviewAppointment.toExpr();
-				if (reviewAppointmentExpr != null)
-					fileProtection.setReviewAppointmentExpr(reviewAppointmentExpr);
+				String reviewRequirementSpec = reviewRequirement.toSpec();
+				if (reviewRequirementSpec != null)
+					fileProtection.setReviewRequirementSpec(reviewRequirementSpec);
 				else
 					it.remove();
 			} else {

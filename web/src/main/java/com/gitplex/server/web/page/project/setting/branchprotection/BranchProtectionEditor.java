@@ -1,20 +1,13 @@
 package com.gitplex.server.web.page.project.setting.branchprotection;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.gitplex.server.model.User;
-import com.gitplex.server.model.Project;
 import com.gitplex.server.model.support.BranchProtection;
-import com.gitplex.server.util.reviewappointment.ReviewAppointment;
 import com.gitplex.server.web.editable.BeanContext;
-import com.gitplex.server.web.page.project.ProjectPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -37,15 +30,6 @@ abstract class BranchProtectionEditor extends Panel {
 		
 		Form<?> form = new Form<Void>("form");
 		form.add(new NotificationPanel("feedback", form));
-		
-		Project project = ((ProjectPage) getPage()).getProject();
-		
-		List<String> reviewerNames = new ArrayList<>();
-		ReviewAppointment reviewAppointment = protection.getReviewAppointment(project);
-		if (reviewAppointment != null) {
-			for (User user: reviewAppointment.getUsers())
-				reviewerNames.add(user.getName());
-		}
 		
 		form.add(BeanContext.editBean("editor", protection));
 			

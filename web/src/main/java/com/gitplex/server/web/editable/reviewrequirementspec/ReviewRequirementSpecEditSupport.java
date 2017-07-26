@@ -1,4 +1,4 @@
-package com.gitplex.server.web.editable.reviewappointment;
+package com.gitplex.server.web.editable.reviewrequirementspec;
 
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.server.util.editable.annotation.ReviewAppointment;
+import com.gitplex.server.util.editable.annotation.ReviewRequirementSpec;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.EditSupport;
 import com.gitplex.server.web.editable.NotDefinedLabel;
@@ -17,7 +17,7 @@ import com.gitplex.server.web.editable.PropertyEditor;
 import com.gitplex.server.web.editable.PropertyViewer;
 
 @SuppressWarnings("serial")
-public class ReviewAppointmentEditSupport implements EditSupport {
+public class ReviewRequirementSpecEditSupport implements EditSupport {
 
 	@Override
 	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
@@ -28,9 +28,9 @@ public class ReviewAppointmentEditSupport implements EditSupport {
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 		Method propertyGetter = propertyDescriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(ReviewAppointment.class) != null) {
+        if (propertyGetter.getAnnotation(ReviewRequirementSpec.class) != null) {
         	if (propertyGetter.getReturnType() != String.class) {
-	    		throw new RuntimeException("Annotation 'ReviewAppointment' should be applied to property "
+	    		throw new RuntimeException("Annotation 'ReviewRequirementSpec' should be applied to property "
 	    				+ "with type 'String'.");
         	}
     		return new PropertyContext<String>(propertyDescriptor) {
@@ -54,7 +54,7 @@ public class ReviewAppointmentEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new ReviewAppointmentEditor(componentId, this, model);
+		        	return new ReviewRequirementSpecEditor(componentId, this, model);
 				}
     			
     		};

@@ -1,6 +1,7 @@
 package com.gitplex.server.model;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -24,18 +25,21 @@ import javax.persistence.Version;
 
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
+import com.gitplex.server.event.codecomment.CodeCommentEvent;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.VisitManager;
-import com.gitplex.server.model.support.CodeCommentActivity;
-import com.gitplex.server.model.support.MarkPos;
+import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.LastEvent;
+import com.gitplex.server.model.support.MarkPos;
+import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.diff.DiffUtils;
 import com.gitplex.server.util.diff.WhitespaceOption;
@@ -49,7 +53,7 @@ import com.google.common.base.Preconditions;
  */
 @Entity
 @Table(indexes={
-		@Index(columnList="g_request_id"), @Index(columnList="g_user_id"),
+		@Index(columnList="g_project_id"), @Index(columnList="g_user_id"),
 		@Index(columnList="commit"), @Index(columnList="path")})
 @DynamicUpdate 
 public class CodeComment extends AbstractEntity {
@@ -61,7 +65,7 @@ public class CodeComment extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private PullRequest request;
+	private Project project;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
@@ -82,29 +86,28 @@ public class CodeComment extends AbstractEntity {
 	@Embedded
 	private MarkPos markPos;
 	
-	private boolean resolved;
+	@Embedded
+	private CompareContext compareContext;
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentStatusChange> statusChanges= new ArrayList<>();
+	private Collection<CodeCommentRelation> relations = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
 	
-	private transient List<CodeCommentActivity> activities;
+	private transient Boolean contextChanged;
 	
-	private transient Boolean codeChanged;
-	
-	public PullRequest getRequest() {
-		return request;
+	public Project getProject() {
+		return project;
 	}
-	
-	public void setRequest(PullRequest request) {
-		this.request = request;
+
+	public void setProject(Project project) {
+		this.project = project;
 	}
-	
+
 	@Nullable
 	public User getUser() {
 		return user;
@@ -143,11 +146,11 @@ public class CodeComment extends AbstractEntity {
 		this.date = date;
 	}
 
-	public MarkPos getCommentPos() {
+	public MarkPos getMarkPos() {
 		return markPos;
 	}
 
-	public void setCommentPos(MarkPos markPos) {
+	public void setMarkPos(MarkPos markPos) {
 		this.markPos = markPos;
 	}
 
@@ -159,12 +162,12 @@ public class CodeComment extends AbstractEntity {
 		this.replies = replies;
 	}
 
-	public Collection<CodeCommentStatusChange> getStatusChanges() {
-		return statusChanges;
+	public Collection<CodeCommentRelation> getRelations() {
+		return relations;
 	}
 
-	public void setStatusChanges(Collection<CodeCommentStatusChange> statusChanges) {
-		this.statusChanges = statusChanges;
+	public void setRelations(Collection<CodeCommentRelation> relations) {
+		this.relations = relations;
 	}
 
 	public String getUUID() {
@@ -175,12 +178,12 @@ public class CodeComment extends AbstractEntity {
 		this.uuid = uuid;
 	}
 
-	public boolean isResolved() {
-		return resolved;
+	public CompareContext getCompareContext() {
+		return compareContext;
 	}
 
-	public void setResolved(boolean resolved) {
-		this.resolved = resolved;
+	public void setCompareContext(CompareContext compareContext) {
+		this.compareContext = compareContext;
 	}
 
 	public LastEvent getLastEvent() {
@@ -191,7 +194,7 @@ public class CodeComment extends AbstractEntity {
 		this.lastEvent = lastEvent;
 	}
 	
-	public void setLastEvent(PullRequestCodeCommentEvent event) {
+	public void setLastEvent(CodeCommentEvent event) {
 		LastEvent lastEvent = new LastEvent();
 		lastEvent.setDate(event.getDate());
 		lastEvent.setType(EditableUtils.getName(event.getClass()));
@@ -208,21 +211,30 @@ public class CodeComment extends AbstractEntity {
 			return true;
 		}
 	}
-
-	public List<CodeCommentActivity> getActivities() {
-		if (activities == null) {
-			activities= new ArrayList<>();
-			activities.addAll(getReplies());
-			activities.addAll(getStatusChanges());
-			activities.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
-		}
-		return activities;
+	
+	public ComparingInfo getComparingInfo() {
+		return new ComparingInfo(markPos.getCommit(), compareContext);
 	}
-
-	public boolean isCodeChanged() {
-		if (codeChanged == null) {
+	
+	@Nullable
+	public TextRange mapRange(BlobIdent blobIdent) {
+		RevCommit commit = project.getRevCommit(blobIdent.revision);
+		if (commit.name().equals(getMarkPos().getCommit())) {
+			return getMarkPos().getRange();
+		} else {
+			List<String> newLines = GitUtils.readLines(getProject().getRepository(), 
+					commit, blobIdent.path, WhitespaceOption.DEFAULT);
+			List<String> oldLines = GitUtils.readLines(getProject().getRepository(), 
+					project.getRevCommit(getMarkPos().getCommit()), getMarkPos().getPath(), 
+					WhitespaceOption.DEFAULT);
+			return DiffUtils.mapRange(DiffUtils.mapLines(oldLines, newLines), getMarkPos().getRange());
+		}
+	}
+	
+	public boolean isContextChanged(PullRequest request) {
+		if (contextChanged == null) {
 			if (request.getHeadCommitHash().equals(markPos.getCommit())) {
-				codeChanged = false;
+				contextChanged = false;
 			} else {
 				Project project = request.getTargetProject();
 				try (RevWalk revWalk = new RevWalk(project.getRepository())) {
@@ -254,26 +266,50 @@ public class CodeComment extends AbstractEntity {
 								for (int oldLine=oldBeginLine; oldLine<=oldEndLine; oldLine++) {
 									Integer newLine = lineMapping.get(oldLine);
 									if (newLine == null || newLine.intValue() != oldLine-oldBeginLine+newBeginLine) {
-										codeChanged = true;
+										contextChanged = true;
 										break;
 									}
 								}
-								if (codeChanged == null)
-									codeChanged = false;
+								if (contextChanged == null)
+									contextChanged = false;
 							} else {
-								codeChanged = true;
+								contextChanged = true;
 							}
 						} else  {
-							codeChanged = true;
+							contextChanged = true;
 						}
 					} else {
-						codeChanged = true;
+						contextChanged = true;
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
 		}
-		return codeChanged;
+		return contextChanged;
 	}
+	
+	public static class ComparingInfo implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final String commit;
+		
+		private final CompareContext compareContext;
+		
+		public ComparingInfo(String commit, CompareContext compareContext) {
+			this.commit = commit;
+			this.compareContext = compareContext;
+		}
+		
+		public String getCommit() {
+			return commit;
+		}
+
+		public CompareContext getCompareContext() {
+			return compareContext;
+		}
+		
+	}
+	
 }

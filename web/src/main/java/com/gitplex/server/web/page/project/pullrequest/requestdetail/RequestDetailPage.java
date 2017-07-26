@@ -85,7 +85,7 @@ import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.NoBranchesPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.CodeCommentsPage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.util.DateUtils;
@@ -314,7 +314,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 		
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("File Changes", RequestChangesPage.class));
-		tabs.add(new RequestTab("Code Comments", CodeCommentsPage.class));
+		tabs.add(new RequestTab("Code Comments", RequestCodeCommentsPage.class));
 		if (request.isOpen())
 			tabs.add(new RequestTab("Merge Preview", MergePreviewPage.class));
 		
@@ -713,11 +713,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 			
 		});
 		
-		WebMarkupContainer hint;
-		if (operation == APPROVE)
-			hint = new UnresolvedCodeCommentsPanel(HINT_ID, requestModel);
-		else
-			hint = new WebMarkupContainer(HINT_ID);
+		WebMarkupContainer hint = new WebMarkupContainer(HINT_ID);
 		hint.setOutputMarkupPlaceholderTag(true);
 		fragment.add(hint);
 		
@@ -938,9 +934,9 @@ public abstract class RequestDetailPage extends ProjectPage {
 		
 		@Override
 		public Component render(String componentId) {
-			if (getMainPageClass() == CodeCommentsPage.class) {
+			if (getMainPageClass() == RequestCodeCommentsPage.class) {
 				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", RequestDetailPage.this);
-				Link<Void> link = new ViewStateAwarePageLink<Void>("link", CodeCommentsPage.class, paramsOf(getPullRequest())) {
+				Link<Void> link = new ViewStateAwarePageLink<Void>("link", RequestCodeCommentsPage.class, paramsOf(getPullRequest())) {
 
 					@Override
 					public void onEvent(IEvent<?> event) {

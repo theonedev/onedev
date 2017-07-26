@@ -16,6 +16,7 @@ import com.gitplex.jsyntax.TokenUtils;
 import com.gitplex.jsyntax.Tokenized;
 import com.gitplex.jsyntax.Tokenizer;
 import com.gitplex.jsyntax.TokenizerRegistry;
+import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.diff.DiffMatchPatch.Diff;
 import com.gitplex.server.util.diff.DiffMatchPatch.Operation;
@@ -254,6 +255,20 @@ public class DiffUtils {
 
 	public static <T> Map<Integer, Integer> mapLines(List<T> oldLines, List<T> newLines) {
 		return mapLines(diff(oldLines, newLines));
+	}
+	
+	public static TextRange mapRange(Map<Integer, Integer> lineMapping, TextRange range) {
+		int oldBeginLine = range.getBeginLine();
+		int oldEndLine = range.getEndLine();
+		Integer newBeginLine = lineMapping.get(oldBeginLine);
+		Integer newEndLine = lineMapping.get(oldEndLine);
+		if (newBeginLine != null && newEndLine != null && newEndLine >= newBeginLine) {
+			TextRange newRange = new TextRange(newBeginLine, range.getBeginChar(), 
+					newEndLine, range.getEndChar()); 
+			return newRange;
+		} else {
+			return null;
+		}
 	}
 	
 	public static <T> int getNewLineAround(List<T> oldLines, List<T> newLines, int oldLine) {

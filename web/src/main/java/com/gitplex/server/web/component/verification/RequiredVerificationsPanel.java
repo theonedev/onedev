@@ -21,7 +21,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.Verification.Status;
 import com.gitplex.server.web.websocket.PageDataChanged;
@@ -29,29 +28,12 @@ import com.gitplex.server.web.websocket.PageDataChanged;
 @SuppressWarnings("serial")
 public class RequiredVerificationsPanel extends GenericPanel<PullRequest> {
 
+	private final IModel<List<String>> verificationsModel;
+	
 	public RequiredVerificationsPanel(String id, IModel<PullRequest> model) {
 		super(id, model);
-	}
 
-	private PullRequest getPullRequest() {
-		return getModelObject();
-	}
-	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (event.getPayload() instanceof PageDataChanged && isVisible()) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			pageDataChanged.getHandler().add(this);
-		}
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		IModel<List<String>> verificationsModel = new LoadableDetachableModel<List<String>>() {
+		verificationsModel = new LoadableDetachableModel<List<String>>() {
 
 			@Override
 			protected List<String> load() {
@@ -73,6 +55,32 @@ public class RequiredVerificationsPanel extends GenericPanel<PullRequest> {
 			}
 			
 		};
+	}
+
+	private PullRequest getPullRequest() {
+		return getModelObject();
+	}
+	
+	@Override
+	protected void onDetach() {
+		verificationsModel.detach();
+		super.onDetach();
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+
+		if (event.getPayload() instanceof PageDataChanged && isVisibleInHierarchy()) {
+			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+			pageDataChanged.getHandler().add(this);
+		}
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
 		add(new ListView<String>("verifications", verificationsModel) {
 
 			@Override
@@ -129,10 +137,7 @@ public class RequiredVerificationsPanel extends GenericPanel<PullRequest> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		
-		QualityCheckStatus qualityStatus = getPullRequest().getQualityCheckStatus();
-		setVisible(!qualityStatus.getAwaitingVerifications().isEmpty() 
-				|| !qualityStatus.getEffectiveVerifications().isEmpty());
+		setVisible(!verificationsModel.getObject().isEmpty());
 	}
 
 	@Override

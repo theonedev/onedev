@@ -41,7 +41,7 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 		if (oldName != null && !oldName.equals(group.getName())) {
 			for (Project project: projectManager.findAll()) {
 				for (BranchProtection protection: project.getBranchProtections()) 
-					protection.onGroupRename(project, oldName, group.getName());
+					protection.onGroupRename(oldName, group.getName());
 				for (TagProtection protection: project.getTagProtections())
 					protection.onGroupRename(oldName, group.getName());
 			}
@@ -60,7 +60,7 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	public void delete(Group group) {
 		for (Project project: projectManager.findAll()) {
 			for (BranchProtection protection: project.getBranchProtections()) 
-				protection.onGroupDelete(project, group.getName());
+				protection.onGroupDelete(group.getName());
 			for (TagProtection protection: project.getTagProtections())
 				protection.onGroupDelete(group.getName());
 		}

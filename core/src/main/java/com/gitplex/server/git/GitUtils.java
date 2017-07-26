@@ -38,6 +38,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
@@ -46,6 +47,7 @@ import com.gitplex.server.git.command.FetchCommand;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.git.exception.RefUpdateException;
 import com.gitplex.server.util.LockUtils;
+import com.gitplex.server.util.diff.WhitespaceOption;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -529,6 +531,24 @@ public class GitUtils {
 			RefUpdate.Result result = refUpdate.link(target);
 			if (result != RefUpdate.Result.FORCED && result != RefUpdate.Result.NEW && result != RefUpdate.Result.NO_CHANGE)
 				throw new RefUpdateException(result);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static List<String> readLines(Repository repository, RevCommit commit, String path, 
+			WhitespaceOption whitespaceOption) {
+		try {
+			TreeWalk treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(repository, path, commit.getTree()));
+			ObjectId blobId = treeWalk.getObjectId(0);
+			ObjectReader objectReader = treeWalk.getObjectReader();
+			BlobIdent blobIdent = new BlobIdent(commit.name(), path, FileMode.REGULAR_FILE.getBits()); 
+			Blob blob = new Blob(blobIdent, blobId, objectReader);
+			List<String> normalizedLines = new ArrayList<>();
+			for (String line: Preconditions.checkNotNull(blob.getText()).getLines()) {
+				normalizedLines.add(whitespaceOption.process(line));
+			}
+			return normalizedLines;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

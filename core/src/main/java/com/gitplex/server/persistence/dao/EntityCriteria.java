@@ -75,14 +75,14 @@ public class EntityCriteria<T extends AbstractEntity> implements CriteriaSpecifi
 		return this;
 	}
 
-	public EntityCriteria<T> createCriteria(String associationPath, String alias)
+	public Criteria createCriteria(String associationPath, String alias)
 	throws HibernateException {
-		return new EntityCriteria<T>( impl, criteria.createCriteria(associationPath, alias) );
+		return criteria.createCriteria(associationPath, alias);
 	}
 
-	public EntityCriteria<T> createCriteria(String associationPath)
+	public Criteria createCriteria(String associationPath)
 	throws HibernateException {
-		return new EntityCriteria<T>( impl, criteria.createCriteria(associationPath) );
+		return criteria.createCriteria(associationPath);
 	}
 
 	public String getAlias() {

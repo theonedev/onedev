@@ -883,8 +883,7 @@ gitplex.server.markdown = {
     	if (isImage)
     		message = "!" + message;
     	
-    	// Use range instead of caret here to avoid scrolling to bottom in Chrome
-    	$input.range(message);
+    	gitplex.server.markdown.updateUploadMessage($input, message, replaceMessage);
     	
     	if (!name) {
     		var offset = isImage?2:1;

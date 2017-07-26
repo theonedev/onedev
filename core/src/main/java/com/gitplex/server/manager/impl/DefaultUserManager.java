@@ -49,7 +49,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	if (oldName != null && !oldName.equals(user.getName())) {
     		for (Project project: dao.findAll(Project.class)) {
     			for (BranchProtection protection: project.getBranchProtections())
-    				protection.onUserRename(project, oldName, user.getName());
+    				protection.onUserRename(oldName, user.getName());
     			for (TagProtection protection: project.getTagProtections())
     				protection.onUserRename(oldName, user.getName());
     		}
@@ -128,7 +128,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 		
 		for (Project project: dao.findAll(Project.class)) {
 			for (BranchProtection protection: project.getBranchProtections())
-				protection.onUserDelete(project, user.getName());
+				protection.onUserDelete(user.getName());
 			for (TagProtection protection: project.getTagProtections())
 				protection.onUserDelete(user.getName());
 		}

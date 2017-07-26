@@ -1,4 +1,4 @@
-package com.gitplex.server.web.editable.reviewappointment;
+package com.gitplex.server.web.editable.reviewrequirementspec;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -7,7 +7,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.gitplex.server.model.Project;
-import com.gitplex.server.web.component.reviewappointment.ReviewAppointmentInput;
+import com.gitplex.server.web.component.reviewrequirementspec.ReviewRequirementSpecInput;
 import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.editable.PropertyDescriptor;
@@ -15,11 +15,11 @@ import com.gitplex.server.web.editable.PropertyEditor;
 import com.gitplex.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
-public class ReviewAppointmentEditor extends PropertyEditor<String> {
+public class ReviewRequirementSpecEditor extends PropertyEditor<String> {
 	
-	private ReviewAppointmentInput input;
+	private ReviewRequirementSpecInput input;
 	
-	public ReviewAppointmentEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	public ReviewRequirementSpecEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -27,7 +27,7 @@ public class ReviewAppointmentEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-    	input = new ReviewAppointmentInput("input", new AbstractReadOnlyModel<Project>() {
+    	input = new ReviewRequirementSpecInput("input", new AbstractReadOnlyModel<Project>() {
 
 			@Override
 			public Project getObject() {

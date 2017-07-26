@@ -42,6 +42,7 @@ import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.layout.LayoutPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.branches.ProjectBranchesPage;
+import com.gitplex.server.web.page.project.comments.ProjectCodeCommentsPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.commit.ProjectCommitsPage;
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
@@ -137,6 +138,9 @@ public abstract class ProjectPage extends LayoutPage {
 		
 		tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
 				0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class));
+		
+		tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
+				0, ProjectCodeCommentsPage.class));
 		
 		tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
 		

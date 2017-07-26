@@ -289,10 +289,14 @@ public class RequestListPage extends ProjectPage {
 				
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (request.getLastEvent() != null) {
-					User userForDisplay = User.getForDisplay(request.getLastEvent().getUser(), 
-							request.getLastEvent().getUserName());
-					lastEventContainer.add(new UserLink("user", userForDisplay));
 					String description = request.getLastEvent().getType();
+					if (description.contains(" ")) {
+						lastEventContainer.add(new WebMarkupContainer("user").setVisible(false));
+					} else {
+						User userForDisplay = User.getForDisplay(request.getLastEvent().getUser(), 
+								request.getLastEvent().getUserName());
+						lastEventContainer.add(new UserLink("user", userForDisplay));
+					}
 					lastEventContainer.add(new Label("description", description));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getLastEvent().getDate())));
 				} else {

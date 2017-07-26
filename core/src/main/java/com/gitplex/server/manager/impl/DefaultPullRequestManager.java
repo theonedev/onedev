@@ -373,7 +373,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		request.setCloseInfo(closeInfo);
 		
 		if (dueToMerged)
-			note = "Source branch is already merged to target branch by some one";
+			note = "Source branch is merged into target branch outside of the pull request";
 		
 		PullRequestStatusChange statusChange = new PullRequestStatusChange();
 		statusChange.setDate(date);

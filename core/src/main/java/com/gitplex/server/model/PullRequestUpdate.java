@@ -29,6 +29,7 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.manager.impl.DefaultCodeCommentRelationManager;
 import com.google.common.base.Preconditions;
 
 @Entity

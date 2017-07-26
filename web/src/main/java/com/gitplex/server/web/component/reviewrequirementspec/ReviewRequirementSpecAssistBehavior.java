@@ -1,4 +1,4 @@
-package com.gitplex.server.web.component.reviewappointment;
+package com.gitplex.server.web.component.reviewrequirementspec;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,12 +15,12 @@ import com.gitplex.codeassist.grammar.LexerRuleRefElementSpec;
 import com.gitplex.codeassist.grammar.RuleRefElementSpec;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.security.ProjectPrivilege;
-import com.gitplex.server.util.reviewappointment.ReviewAppointmentParser;
+import com.gitplex.server.util.reviewrequirement.ReviewRequirementSpecParser;
 import com.gitplex.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import com.gitplex.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class ReviewAppointmentAssistBehavior extends ANTLRAssistBehavior {
+public class ReviewRequirementSpecAssistBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
@@ -28,8 +28,8 @@ public class ReviewAppointmentAssistBehavior extends ANTLRAssistBehavior {
 	
 	private static final String VALUE_CLOSE = ")";
 	
-	public ReviewAppointmentAssistBehavior(IModel<Project> projectModel) {
-		super(ReviewAppointmentParser.class, "expr");
+	public ReviewRequirementSpecAssistBehavior(IModel<Project> projectModel) {
+		super(ReviewRequirementSpecParser.class, "spec");
 		this.projectModel = projectModel;
 	}
 

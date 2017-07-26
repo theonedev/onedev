@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.util.QuotedString;
@@ -49,51 +50,67 @@ public abstract class LogCommand extends GitCommand<Void> {
         	cmd.addArgs("--branches");
         }
   
-        cmd.addArgs("--name-only", "--no-renames");
+        cmd.addArgs("--name-status", "--find-renames=100%", "--find-copies=100%");
         
-        LogCommit.Builder commitBuilder = new LogCommit.Builder();
-        
-        AtomicBoolean changedFilesBlock = new AtomicBoolean();
-        
+        AtomicReference<LogCommit.Builder> commitBuilderRef = new AtomicReference<>();
+        AtomicBoolean inFileChangesBlock = new AtomicBoolean();
         cmd.execute(new LineConsumer() {
 
             @Override
             public void consume(String line) {
             	if (line.equals("*** commit_begin ***")) {
-            		if (commitBuilder.hash!= null)
-	            		LogCommand.this.consume(commitBuilder.build());
-            		commitBuilder.hash = null;
-            		commitBuilder.committerName = null;
-            		commitBuilder.committerEmail = null;
-            		commitBuilder.committerDate = null;
-            		commitBuilder.authorName = null;
-            		commitBuilder.authorEmail = null;
-            		commitBuilder.authorDate = null;
-            		commitBuilder.parentHashes = new ArrayList<>();
-            		commitBuilder.changedFiles = new ArrayList<>();
-            		changedFilesBlock.set(false);
-            	} else if (changedFilesBlock.get()) {
-    				if (line.trim().length() != 0 && commitBuilder.changedFiles != null)
-    					commitBuilder.changedFiles.add(QuotedString.GIT_PATH.dequote(line));
+            		if (commitBuilderRef.get() != null)
+	            		LogCommand.this.consume(commitBuilderRef.get().build());
+            		commitBuilderRef.set(new LogCommit.Builder());
+            		inFileChangesBlock.set(false);
+            	} else if (inFileChangesBlock.get()) {
+            		FileChange.Action action = null;
+            		if (line.startsWith("A")) 
+            			action = FileChange.Action.ADD;
+            		else if (line.startsWith("M"))
+            			action = FileChange.Action.MODIFY;
+            		else if (line.startsWith("D"))
+            			action = FileChange.Action.DELETE;
+            		else if (line.startsWith("C"))
+            			action = FileChange.Action.COPY;
+            		else if (line.startsWith("R"))
+            			action = FileChange.Action.RENAME;
+            		else if (line.startsWith("T"))
+            			action = FileChange.Action.TYPE;
+            		
+            		if (action != null) {
+            			String path = QuotedString.GIT_PATH.dequote(StringUtils.substringAfter(line, "\t")).trim();
+            			String path1;
+            			String path2;
+            			if (path.indexOf('\t') != -1) {
+            				path1 = StringUtils.substringBefore(path, "\t").trim();
+            				path2 = StringUtils.substringAfter(path, "\t").trim();
+            			} else {
+            				path1 = path2 = path;
+            			}
+            			FileChange fileChange = new FileChange(action, path1, path2);
+        				commitBuilderRef.get().fileChanges.add(fileChange);
+            		}
             	} else if (line.startsWith("hash:")) {
-                	commitBuilder.hash = line.substring("hash:".length());
+                	commitBuilderRef.get().hash = line.substring("hash:".length());
             	} else if (line.startsWith("author:")) {
-                	commitBuilder.authorName = line.substring("author:".length());
+            		commitBuilderRef.get().authorName = line.substring("author:".length());
             	} else if (line.startsWith("committer:")) {
-                	commitBuilder.committerName = line.substring("committer:".length());
+            		commitBuilderRef.get().committerName = line.substring("committer:".length());
             	} else if (line.startsWith("authorEmail:")) {
-                	commitBuilder.authorEmail = line.substring("authorEmail:".length());
+            		commitBuilderRef.get().authorEmail = line.substring("authorEmail:".length());
             	} else if (line.startsWith("committerEmail:")) {
-                	commitBuilder.committerEmail = line.substring("committerEmail:".length());
+            		commitBuilderRef.get().committerEmail = line.substring("committerEmail:".length());
             	} else if (line.startsWith("parents:")) {
                 	for (String each: StringUtils.split(line.substring("parents:".length()), " "))
-                		commitBuilder.parentHashes.add(each);
+                		commitBuilderRef.get().parentHashes.add(each);
             	} else if (line.startsWith("committerDate:")) {
-                	commitBuilder.committerDate = GitUtils.parseRawDate(line.substring("committerDate:".length()).trim());
+            		commitBuilderRef.get().committerDate = 
+            				GitUtils.parseRawDate(line.substring("committerDate:".length()).trim());
             	} else if (line.startsWith("authorDate:")) {
-	            	commitBuilder.authorDate = GitUtils.parseRawDate(line.substring("authorDate:".length()).trim());
-	            	if (commitBuilder.changedFiles != null)
-	            		changedFilesBlock.set(true);
+            		commitBuilderRef.get().authorDate = 
+            				GitUtils.parseRawDate(line.substring("authorDate:".length()).trim());
+	            	inFileChangesBlock.set(true);
             	}
             }
             
@@ -106,8 +123,8 @@ public abstract class LogCommand extends GitCommand<Void> {
         	
         }).checkReturnCode();
 
-        if (commitBuilder.hash != null)
-        	consume(commitBuilder.build());
+        if (commitBuilderRef.get() != null)
+        	consume(commitBuilderRef.get().build());
         
         return null;
     }

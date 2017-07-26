@@ -11,7 +11,6 @@ import org.eclipse.jgit.transport.RefSpec;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Throwables;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.event.pullrequest.PullRequestUpdated;
 import com.gitplex.server.git.GitUtils;
@@ -28,6 +27,7 @@ import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.util.editable.EditableUtils;
+import com.google.common.base.Throwables;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 
@@ -105,7 +105,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 
 	@Sessional
 	@Override
-	public List<PullRequestUpdate> findAllAfter(Project project, String updateUUID) {
+	public List<PullRequestUpdate> findAllAfter(Project project, String updateUUID, int count) {
 		EntityCriteria<PullRequestUpdate> criteria = newCriteria();
 		criteria.createCriteria("request").add(Restrictions.eq("targetProject", project));
 		criteria.addOrder(Order.asc("id"));
@@ -115,7 +115,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 				criteria.add(Restrictions.gt("id", update.getId()));
 			}
 		}
-		return findAll(criteria);
+		return findRange(criteria, 0, count);
 	}
 
 }

@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.server.model.Project;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.PathPattern;
-import com.gitplex.server.util.reviewappointment.ReviewAppointment;
+import com.gitplex.server.util.editable.annotation.ReviewRequirementSpec;
+import com.gitplex.server.util.reviewrequirement.ReviewRequirement;
 
 @Editable
 public class FileProtection implements Serializable {
@@ -16,9 +16,9 @@ public class FileProtection implements Serializable {
 
 	private String path;
 	
-	private String reviewAppointmentExpr;
+	private String reviewRequirementSpec;
 	
-	private transient ReviewAppointment reviewAppointment;
+	private transient ReviewRequirement reviewRequirement;
 	
 	@Editable(order=100, description="Specify path to be protected. Wildcard can be used in the path "
 			+ "to match multiple files")
@@ -34,20 +34,20 @@ public class FileProtection implements Serializable {
 
 	@Editable(order=200, name="Reviewers", description="Optionally specify required reviewers if specified path is "
 			+ "changed. Note that the user submitting the change is considered to reviewed the change automatically")
-	@com.gitplex.server.util.editable.annotation.ReviewAppointment
+	@ReviewRequirementSpec
 	@NotEmpty
-	public String getReviewAppointmentExpr() {
-		return reviewAppointmentExpr;
+	public String getReviewRequirementSpec() {
+		return reviewRequirementSpec;
 	}
 
-	public void setReviewAppointmentExpr(String reviewAppointmentExpr) {
-		this.reviewAppointmentExpr = reviewAppointmentExpr;
+	public void setReviewRequirementSpec(String reviewRequirementSpec) {
+		this.reviewRequirementSpec = reviewRequirementSpec;
 	}
 	
-	public ReviewAppointment getReviewAppointment(Project project) {
-		if (reviewAppointment == null)
-			reviewAppointment = new ReviewAppointment(project, reviewAppointmentExpr);
-		return reviewAppointment;
+	public ReviewRequirement getReviewRequirement() {
+		if (reviewRequirement == null)
+			reviewRequirement = new ReviewRequirement(reviewRequirementSpec);
+		return reviewRequirement;
 	}
 	
 }

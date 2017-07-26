@@ -72,9 +72,7 @@
 	width: auto;
 }
 #new-request .immediate-merge.alert {
-	margin-bottom: 0;
-	padding: 6px;
-	margin-left: 8px;
+	margin: 12px 0 0 0;
 }
 #new-request>.body>.nav-tabs {
 	margin-bottom: 20px;

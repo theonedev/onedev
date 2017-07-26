@@ -2,17 +2,11 @@ package com.gitplex.server.web.page.project.blob.search.quick;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
 
-import org.apache.commons.io.Charsets;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -34,20 +28,15 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.http.WebRequest;
-import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.SearchManager;
-import com.gitplex.server.search.hit.FileHit;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.query.BlobQuery;
 import com.gitplex.server.search.query.FileQuery;
@@ -60,17 +49,11 @@ import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.search.result.SearchResultPanel;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 
 @SuppressWarnings("serial")
 public abstract class QuickSearchPanel extends Panel {
 
-	private static final int MAX_RECENT_OPENED = 30;
-	
 	private static final int MAX_QUERY_ENTRIES = 15;
-	
-	private static final String COOKIE_RECENT_OPENED = "quickSearch.recentOpened";
 	
 	private final IModel<Project> projectModel;
 	
@@ -87,36 +70,8 @@ public abstract class QuickSearchPanel extends Panel {
 		
 		this.projectModel = projectModel;
 		this.revisionModel = revisionModel;
-		
-		Project project = projectModel.getObject();
-		for (String blobPath: getRecentOpened()) {
-			try {
-				RevTree revTree = project.getRevCommit(revisionModel.getObject()).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), blobPath, revTree);
-				if (treeWalk != null && treeWalk.getRawMode(0) != FileMode.TREE.getBits()) {
-					symbolHits.add(new FileHit(blobPath, null));
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
-	private List<String> getRecentOpened() {
-		List<String> recentOpened = new ArrayList<>();
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie(COOKIE_RECENT_OPENED);
-		if (cookie != null && cookie.getValue() != null) {
-			try {
-				String decoded = URLDecoder.decode(cookie.getValue(), Charsets.UTF_8.name());
-				recentOpened.addAll(Splitter.on("\n").splitToList(decoded));
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
-			}
-		} 
-		return recentOpened;
-	}
-	
 	private List<QueryHit> querySymbols(String searchInput, int count) {
 		SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 		ObjectId commit = projectModel.getObject().getRevCommit(revisionModel.getObject());		
@@ -230,7 +185,6 @@ public abstract class QuickSearchPanel extends Panel {
 						if (activeHit instanceof MoreSymbolHit) { 
 							moreSymbolHitsBehavior.requestRun(target);
 						} else {
-							storeRecentOpened(activeHit.getBlobPath());
 							onSelect(target, activeHit);
 						}
 					}
@@ -253,24 +207,6 @@ public abstract class QuickSearchPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
-	}
-	
-	private void storeRecentOpened(String blobPath) {
-		List<String> recentOpened = getRecentOpened();
-		recentOpened.remove(blobPath);
-		recentOpened.add(0, blobPath);
-		while (recentOpened.size() > MAX_RECENT_OPENED)
-			recentOpened.remove(recentOpened.size()-1);
-		String encoded;
-		try {
-			encoded = URLEncoder.encode(Joiner.on("\n").join(recentOpened), Charsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-		Cookie cookie = new Cookie(COOKIE_RECENT_OPENED, encoded);
-		cookie.setMaxAge(Integer.MAX_VALUE);
-		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-		response.addCookie(cookie);
 	}
 	
 	private void newSearchResult(@Nullable AjaxRequestTarget target) {
@@ -305,7 +241,6 @@ public abstract class QuickSearchPanel extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						storeRecentOpened(hit.getBlobPath());
 						onSelect(target, hit);
 					}
 					

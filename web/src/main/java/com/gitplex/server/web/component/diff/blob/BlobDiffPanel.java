@@ -44,11 +44,11 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 	
 	private final DiffViewMode diffMode;
 	
-	private final BlobCommentSupport markSupport;
+	private final BlobCommentSupport commentSupport;
 	
 	public BlobDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
-			@Nullable BlobCommentSupport markSupport) {
+			@Nullable BlobCommentSupport commentSupport) {
 		super(id);
 		
 		this.projectModel = projectModel;
@@ -56,7 +56,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 		this.change = change;
 		this.blameModel = blameModel;
 		this.diffMode = diffMode;
-		this.markSupport = markSupport;
+		this.commentSupport = commentSupport;
 	}
 	
 	private Fragment newFragment(String message, boolean warning) {
@@ -82,7 +82,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 				else
 					add(newFragment("Empty file removed.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, markSupport));
+				add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, commentSupport));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -115,10 +115,10 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 				} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_FILE_DIFF_LINES) {
 					add(newFragment("Diff is too large to be displayed.", true));
 				} else if (change.getAdditions() + change.getDeletions() == 0 
-						&& (markSupport == null || markSupport.getComments().isEmpty())) {
+						&& (commentSupport == null || commentSupport.getComments().isEmpty())) {
 					add(newFragment("Content is identical", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, markSupport));
+					add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, commentSupport));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));

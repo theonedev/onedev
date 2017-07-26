@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -344,19 +345,21 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	}
 	
 	@Override
-	public boolean isModificationNeedsQualityCheck(User user, Project project, String branch, String file) {
+	public boolean isModificationNeedsQualityCheck(User user, Project project, String branch, @Nullable String file) {
 		BranchProtection branchProtection = project.getBranchProtection(branch);
 		if (branchProtection != null) {
-			if (branchProtection.getReviewAppointment(project) != null 
-					&& !branchProtection.getReviewAppointment(project).matches(user)) {
+			if (branchProtection.getReviewRequirement() != null 
+					&& !branchProtection.getReviewRequirement().matches(user)) {
 				return true;
 			}
 			if (!branchProtection.getVerifications().isEmpty())
 				return true;
 			
-			FileProtection fileProtection = branchProtection.getFileProtection(file);
-			if (fileProtection != null && !fileProtection.getReviewAppointment(project).matches(user))
-				return true;
+			if (file != null) {
+				FileProtection fileProtection = branchProtection.getFileProtection(file);
+				if (fileProtection != null && !fileProtection.getReviewRequirement().matches(user))
+					return true;
+			}
 		}			
 		return false;
 	}
@@ -365,18 +368,19 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	public boolean isPushNeedsQualityCheck(User user, Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
 		BranchProtection branchProtection = project.getBranchProtection(branch);
 		if (branchProtection != null) {
-			if (branchProtection.getReviewAppointment(project) != null 
-					&& !branchProtection.getReviewAppointment(project).matches(user)) {
+			if (branchProtection.getReviewRequirement() != null 
+					&& !branchProtection.getReviewRequirement().matches(user)) {
 				return true;
 			}
 
 			Map<String, Verification> verifications = verificationManager.getVerifications(project, newObjectId.name());
-			if (!verifications.keySet().containsAll(branchProtection.getVerifications()))
+			if (!verifications.keySet().containsAll(branchProtection.getVerifications())) {
 				return true;
+			}
 			
 			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId)) {
 				FileProtection fileProtection = branchProtection.getFileProtection(changedFile);
-				if (fileProtection != null && !fileProtection.getReviewAppointment(project).matches(user))
+				if (fileProtection != null && !fileProtection.getReviewRequirement().matches(user))
 					return true;
 			}
 		}

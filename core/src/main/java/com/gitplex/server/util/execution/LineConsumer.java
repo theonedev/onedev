@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import com.google.common.base.Charsets;
+
 /**
  * heavily inspired from LogOutputStream
  * this stream class calls back the P4Handler on each line of stdout or stderr read
@@ -48,7 +50,7 @@ public abstract class LineConsumer extends OutputStream {
     }
     
     public LineConsumer() {
-    	
+    	this(Charsets.UTF_8.name());
     }
     
     public String getEncoding() {

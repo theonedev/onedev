@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -43,6 +44,7 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.VisitManager;
 import com.gitplex.server.model.support.CloseInfo;
+import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.LastEvent;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
@@ -155,9 +157,6 @@ public class PullRequest extends AbstractEntity {
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<Review> reviews = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<CodeComment> codeComments = new ArrayList<>();
-	
 	@OneToMany(mappedBy="referenced", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> referencedBy = new ArrayList<>();
 	
@@ -175,6 +174,9 @@ public class PullRequest extends AbstractEntity {
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
+	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<CodeCommentRelation> codeCommentRelations = new ArrayList<>();
 	
 	private transient QualityCheckStatus qualityStatus;
 	
@@ -383,14 +385,6 @@ public class PullRequest extends AbstractEntity {
 		this.comments = comments;
 	}
 
-	public Collection<CodeComment> getCodeComments() {
-		return codeComments;
-	}
-
-	public void setCodeComments(Collection<CodeComment> codeComments) {
-		this.codeComments = codeComments;
-	}
-
 	public Collection<PullRequestStatusChange> getStatusChanges() {
 		return statusChanges;
 	}
@@ -415,6 +409,14 @@ public class PullRequest extends AbstractEntity {
 		this.watches = watches;
 	}
 
+	public Collection<CodeCommentRelation> getCodeCommentRelations() {
+		return codeCommentRelations;
+	}
+
+	public void setCodeCommentRelations(Collection<CodeCommentRelation> codeCommentRelations) {
+		this.codeCommentRelations = codeCommentRelations;
+	}
+	
 	public QualityCheckStatus getQualityCheckStatus() {
 		if (qualityStatus == null)
 			qualityStatus = GitPlex.getInstance(PullRequestManager.class).checkQuality(this);
@@ -670,10 +672,11 @@ public class PullRequest extends AbstractEntity {
 			String commitMessage = getTitle() + "\n\n";
 			if (getDescription() != null)
 				commitMessage += getDescription() + "\n\n";
-			commitMessage += "Squashed commit of pull request #" + getNumber();
+			commitMessage += String.format("Squashed commit of pull request #%d of project '%s'", 
+					getNumber(), getTargetProject().getName());
 			return commitMessage;
 		} else if (mergeStrategy == MergeStrategy.ALWAYS_MERGE || mergeStrategy == MergeStrategy.MERGE_IF_NECESSARY) {
-			return String.format("Merge pull request #%d - %s", getNumber(), getTitle());
+			return String.format("Merge pull request #%d of project '%s'", getNumber(), getTargetProject().getName());
 		} else {
 			throw new IllegalStateException("Unexpected merge strategy: " + mergeStrategy);
 		}
@@ -753,6 +756,46 @@ public class PullRequest extends AbstractEntity {
 			return projectAndBranch.getObjectId(false);
 		else
 			return null;
+	}
+	
+	@Nullable
+	public ComparingInfo getRequestComparingInfo(CodeComment.ComparingInfo commentComparingInfo) {
+		List<String> commits = new ArrayList<>();
+		commits.add(getBaseCommitHash());
+		for (PullRequestUpdate update: getSortedUpdates()) {
+			commits.addAll(update.getCommits().stream().map(RevCommit::getName).collect(Collectors.toList()));
+		}
+		String commit = commentComparingInfo.getCommit();
+		CompareContext compareContext = commentComparingInfo.getCompareContext();
+		if (commit.equals(compareContext.getCompareCommit())) {
+			int index = commits.indexOf(commit);
+			if (index == 0) {
+				return null;
+			} else {
+				return new ComparingInfo(commits.get(index-1), commit, 
+						compareContext.getWhitespaceOption(), compareContext.getPathFilter());
+			}
+		} else {
+			int commitIndex = commits.indexOf(commit);
+			int compareCommitIndex = commits.indexOf(compareContext.getCompareCommit());
+			if (commitIndex == -1 || compareCommitIndex == -1) {
+				return null;
+			} else if (compareContext.isLeftSide()) {
+				if (compareCommitIndex < commitIndex) {
+					return new ComparingInfo(compareContext.getCompareCommit(), commit, 
+							compareContext.getWhitespaceOption(), compareContext.getPathFilter());
+				} else {
+					return null;
+				}
+			} else {
+				if (commitIndex < compareCommitIndex) {
+					return new ComparingInfo(commit, compareContext.getCompareCommit(), 
+							compareContext.getWhitespaceOption(), compareContext.getPathFilter());
+				} else {
+					return null;
+				}
+			}
+		} 
 	}
 	
 	public static class ComparingInfo implements Serializable {

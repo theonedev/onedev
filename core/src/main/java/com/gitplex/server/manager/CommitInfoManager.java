@@ -1,5 +1,6 @@
 package com.gitplex.server.manager;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -51,5 +52,7 @@ public interface CommitInfoManager {
 	void cloneInfo(Project from, Project to);
 	
 	ObjectId getLastCommit(Project project);
+	
+	Collection<String> getPossibleHistoryPaths(Project project, String path);
 	
 }

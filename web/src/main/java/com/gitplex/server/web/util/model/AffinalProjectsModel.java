@@ -1,6 +1,5 @@
 package com.gitplex.server.web.util.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -15,25 +14,16 @@ import com.gitplex.server.security.SecurityUtils;
 @SuppressWarnings("serial")
 public class AffinalProjectsModel extends LoadableDetachableModel<Collection<Project>> {
 
-	private final Long repoId;
+	private final Long projectId;
 	
-	public AffinalProjectsModel(Long repoId) {
-		this.repoId = repoId;
+	public AffinalProjectsModel(Long projectId) {
+		this.projectId = projectId;
 	}
 	
 	@Override
 	protected Collection<Project> load() {
-		Project project = GitPlex.getInstance(Dao.class).load(Project.class, repoId);;
-		List<Project> affinals = new ArrayList<>(project.getForkDescendants());
-		affinals.remove(project);
-		if (project.getForkedFrom() != null)
-			affinals.remove(project.getForkedFrom());
-		affinals.sort((repo1, repo2) -> {
-			return repo1.getName().compareTo(repo2.getName());
-		});
-		if (project.getForkedFrom() != null)
-			affinals.add(0, project.getForkedFrom());
-		affinals.add(0, project);
+		Project project = GitPlex.getInstance(Dao.class).load(Project.class, projectId);
+		List<Project> affinals = project.getForkRoot().getForkDescendants();
 		for (Iterator<Project> it = affinals.iterator(); it.hasNext();) {
 			if (!SecurityUtils.canRead(it.next()))
 				it.remove();

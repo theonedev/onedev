@@ -32,7 +32,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
-import com.gitplex.server.util.reviewappointment.ReviewAppointment;
+import com.gitplex.server.util.reviewrequirement.ReviewRequirement;
 
 public class QualityCheckStatusImpl implements QualityCheckStatus {
 
@@ -95,9 +95,9 @@ public class QualityCheckStatusImpl implements QualityCheckStatus {
 
 		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(request.getTargetBranch());
 		if (branchProtection != null) {
-			ReviewAppointment appointment = branchProtection.getReviewAppointment(request.getTargetProject());
-			if (appointment != null) 
-				checkReviews(appointment, request.getLatestUpdate());
+			ReviewRequirement reviewRequirement = branchProtection.getReviewRequirement();
+			if (reviewRequirement != null) 
+				checkReviews(reviewRequirement, request.getLatestUpdate());
 
 			if (branchProtection.getVerifications() != null)
 				checkVerifications(branchProtection.getVerifications(), branchProtection.isVerifyMerges());
@@ -111,7 +111,7 @@ public class QualityCheckStatusImpl implements QualityCheckStatus {
 					FileProtection fileProtection = branchProtection.getFileProtection(file);
 					if (fileProtection != null && !checkedFileProtections.contains(fileProtection)) {
 						checkedFileProtections.add(fileProtection);
-						checkReviews(fileProtection.getReviewAppointment(request.getTargetProject()), update);
+						checkReviews(fileProtection.getReviewRequirement(), update);
 					}
 				}
 			}
@@ -163,8 +163,8 @@ public class QualityCheckStatusImpl implements QualityCheckStatus {
 		}
 	}
 	
-	private void checkReviews(ReviewAppointment appointment, PullRequestUpdate update) {
-		for (User user: appointment.getUsers()) {
+	private void checkReviews(ReviewRequirement reviewRequirement, PullRequestUpdate update) {
+		for (User user: reviewRequirement.getUsers()) {
 			if (!user.equals(request.getSubmitter()) && !isAwaitingReviewer(user.getId())) {
 				Review effectiveReview = getReviewAfter(user.getId(), update);
 				if (effectiveReview == null) {
@@ -176,7 +176,7 @@ public class QualityCheckStatusImpl implements QualityCheckStatus {
 			}
 		}
 		
-		for (Map.Entry<Group, Integer> entry: appointment.getGroups().entrySet()) {
+		for (Map.Entry<Group, Integer> entry: reviewRequirement.getGroups().entrySet()) {
 			Group group = entry.getKey();
 			int requiredCount = entry.getValue();
 			checkReviews(getFacades(group.getMembers()), requiredCount, update);

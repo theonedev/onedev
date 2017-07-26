@@ -38,7 +38,9 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
@@ -57,7 +59,7 @@ import com.gitplex.server.web.component.branchpicker.AffinalBranchPicker;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.ProjectAttachmentSupport;
 import com.gitplex.server.web.component.commitlist.CommitListPanel;
-import com.gitplex.server.web.component.diff.revision.MarkSupport;
+import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -82,7 +84,7 @@ import com.gitplex.server.web.websocket.WebSocketRegion;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends ProjectPage implements MarkSupport {
+public class NewRequestPage extends ProjectPage implements CommentSupport {
 
 	private static final String TABS_ID = "tabs";
 	
@@ -95,6 +97,8 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 	private IModel<List<RevCommit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
+	
+	private Long commentId;
 	
 	private MarkPos mark;
 	
@@ -164,27 +168,33 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 					source.getProject().getRepository(), source.getObjectId(), 
 					GitUtils.branch2ref(source.getBranch()));
 			if (baseCommitId != null) {
-				pullRequestRef.set(new PullRequest());
-				pullRequestRef.get().setTarget(target);
-				pullRequestRef.get().setSource(source);
-				pullRequestRef.get().setSubmitter(currentUser);
+				PullRequest request = new PullRequest();
+				pullRequestRef.set(request);
+				request.setTarget(target);
+				request.setSource(source);
+				request.setSubmitter(currentUser);
 				
-				pullRequestRef.get().setMergeStrategy(MergeStrategy.ALWAYS_MERGE);
-				
-				pullRequestRef.get().setBaseCommitHash(baseCommitId.name());
-				pullRequestRef.get().setHeadCommitHash(source.getObjectName());
-				if (pullRequestRef.get().getBaseCommitHash().equals(source.getObjectName())) {
+				request.setBaseCommitHash(baseCommitId.name());
+				request.setHeadCommitHash(source.getObjectName());
+				if (request.getBaseCommitHash().equals(source.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setCloseDate(new Date());
 					closeInfo.setCloseStatus(CloseInfo.Status.MERGED);
-					pullRequestRef.get().setCloseInfo(closeInfo);
+					request.setCloseInfo(closeInfo);
 				}
 	
 				PullRequestUpdate update = new PullRequestUpdate();
-				pullRequestRef.get().addUpdate(update);
-				update.setRequest(pullRequestRef.get());
-				update.setHeadCommitHash(pullRequestRef.get().getHeadCommitHash());
-				update.setMergeBaseCommitHash(pullRequestRef.get().getBaseCommitHash());
+				request.addUpdate(update);
+				update.setRequest(request);
+				update.setHeadCommitHash(request.getHeadCommitHash());
+				update.setMergeBaseCommitHash(request.getBaseCommitHash());
+				
+				if (request.getQualityCheckStatus().getAwaitingReviewers().isEmpty()) { 
+					// this often means that we are merging from trunk to our own branch 
+					request.setMergeStrategy(MergeStrategy.MERGE_IF_NECESSARY);
+				} else {
+					request.setMergeStrategy(MergeStrategy.ALWAYS_MERGE);
+				}
 			}
 			requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -554,40 +564,6 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 			}
 		});
 		
-		form.add(new WebMarkupContainer("immediateMergeNote") {
-			
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged payload = (PageDataChanged) event.getPayload();
-					payload.getHandler().add(this);
-				}
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				PullRequest request = getPullRequest();
-				
-				QualityCheckStatus qualityCheckStatus = request.getQualityCheckStatus();
-				boolean hasUnsuccessVerifications = false;
-				for (Verification verification: qualityCheckStatus.getEffectiveVerifications().values()) {
-					if (verification.getStatus() != Verification.Status.SUCCESS) {
-						hasUnsuccessVerifications = true;
-						break;
-					}
-				}
-				setVisible(request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE 
-						&& qualityCheckStatus.getAwaitingReviewers().isEmpty()
-						&& !hasUnsuccessVerifications
-						&& qualityCheckStatus.getAwaitingVerifications().isEmpty());
-			}
-			
-		}.setOutputMarkupPlaceholderTag(true));
-		
 		WebMarkupContainer titleContainer = new WebMarkupContainer("title");
 		form.add(titleContainer);
 		final TextField<String> titleInput = new TextField<String>("title", new IModel<String>() {
@@ -710,6 +686,40 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 			
 		}.setOutputMarkupId(true));
 		
+		form.add(new WebMarkupContainer("immediateMergeNote") {
+			
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged payload = (PageDataChanged) event.getPayload();
+					payload.getHandler().add(this);
+				}
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				PullRequest request = getPullRequest();
+				
+				QualityCheckStatus qualityCheckStatus = request.getQualityCheckStatus();
+				boolean hasUnsuccessVerifications = false;
+				for (Verification verification: qualityCheckStatus.getEffectiveVerifications().values()) {
+					if (verification.getStatus() != Verification.Status.SUCCESS) {
+						hasUnsuccessVerifications = true;
+						break;
+					}
+				}
+				setVisible(request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE 
+						&& qualityCheckStatus.getAwaitingReviewers().isEmpty()
+						&& !hasUnsuccessVerifications
+						&& qualityCheckStatus.getAwaitingVerifications().isEmpty());
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		form.add(new ReviewerListPanel("reviewers", requestModel));
 
 		form.add(new RequiredVerificationsPanel("verifications", requestModel));
@@ -759,5 +769,48 @@ public class NewRequestPage extends ProjectPage implements MarkSupport {
 		}
 		return regions;
 	}
-	
+
+	@Override
+	public void onMark(AjaxRequestTarget target, MarkPos mark) {
+		this.mark = mark;
+	}
+
+	@Override
+	public CodeComment getOpenComment() {
+		if (commentId != null)
+			return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+		else
+			return null;
+	}
+
+	@Override
+	public void onAddComment(AjaxRequestTarget target, MarkPos mark) {
+		this.commentId = null;
+		this.mark = mark;
+	}
+
+	@Override
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+		if (comment != null) {
+			commentId = comment.getId();
+			mark = comment.getMarkPos();
+		} else {
+			commentId = null;
+		}
+	}
+
+	@Override
+	public String getCommentUrl(CodeComment comment) {
+		RevisionComparePage.State state = new RevisionComparePage.State();
+		mark = comment.getMarkPos();
+		state.commentId = comment.getId();
+		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
+		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getHeadCommitHash());
+		state.pathFilter = pathFilter;
+		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+		state.whitespaceOption = whitespaceOption;
+		state.compareWithMergeBase = false;
+		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getProject(), state)).toString();
+	}
+
 }

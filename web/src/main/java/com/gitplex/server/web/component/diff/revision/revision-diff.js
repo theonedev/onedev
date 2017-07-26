@@ -17,6 +17,19 @@ gitplex.server.revisionDiff = {
 			gitplex.server.revisionDiff.reposition();
 		});
 		gitplex.server.revisionDiff.reposition();
+		console.log(window.location.hash);
+		if (window.location.hash) {
+			var $anchor = $(window.location.hash);
+			if ($anchor.length != 0) {
+				setTimeout(function() {
+					var detailOffset = $(".revision-diff>.body>.detail").offset().top;
+					if ($(window).scrollTop() <= detailOffset) {
+						$(window).scrollTop(detailOffset);
+					} 
+					$anchor.closest(".code-comment").parent().scrollIntoView($anchor);
+				}, 100);
+			}
+		} 
 	},
 	reposition: function(e) {
 		if ($(".revision-diff>.body>.detail").length == 0)
@@ -88,15 +101,6 @@ gitplex.server.revisionDiff = {
 				}
 			});
 		}
-	},
-	scrollToCommentBottom: function() {
-		var $comment = $(".revision-diff>.body>.detail>.comment");
-		if ($(window).scrollTop() < $comment.offset().top)
-			$(window).scrollTop($comment.offset().top);
-		setTimeout(function() {
-			var $body = $comment.find(">.content>.body");
-			$body.scrollTop($body[0].scrollHeight);
-		}, 0);
 	}
 };
 $(function() {

@@ -154,6 +154,9 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<UserAuthorization> userAuthorizations = new ArrayList<>();
 	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<CodeComment> codeComments = new ArrayList<>();
+	
 	private transient Repository repository;
 	
     private transient Map<BlobIdent, Blob> blobCache;
@@ -759,6 +762,14 @@ public class Project extends AbstractEntity {
 
 	public void setAuthorizedUsers(Collection<UserAuthorization> userAuthorizations) {
 		this.userAuthorizations = userAuthorizations;
+	}
+
+	public Collection<CodeComment> getCodeComments() {
+		return codeComments;
+	}
+
+	public void setCodeComments(Collection<CodeComment> codeComments) {
+		this.codeComments = codeComments;
 	}
 
 	public long getVersion() {

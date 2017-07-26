@@ -21,17 +21,6 @@
 .source-view>.comment>.content>.head .locate {
 	font-size: 20px;
 }
-.source-view>.comment>.content>.head .resolve {
-	margin-right: 0;
-	margin-top: -2px;
-	font-size: 20px;
-}
-.source-view>.comment>.content>.head .resolve.resolved {
-	color: #24BE10;
-}
-.source-view>.comment>.content>.head .resolve.unresolved {
-	color: #BBB;
-}
 
 .source-view>.comment>.content>.head .permanent {
 	margin-top: 2px;

@@ -22,6 +22,7 @@ import com.gitplex.server.manager.AttachmentManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.facade.ProjectFacade;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
@@ -29,7 +30,7 @@ public class AttachmentResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String PARAM_DEPOT = "project";
+	private static final String PARAM_PROJECT = "project";
 	
 	private static final String PARAM_UUID = "uuid";
 	
@@ -39,7 +40,7 @@ public class AttachmentResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String repoName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
+		String repoName = Preconditions.checkNotNull(params.get(PARAM_PROJECT).toString());
 		if (StringUtils.isBlank(repoName))
 			throw new IllegalArgumentException("project name has to be specified");
 		
@@ -62,7 +63,7 @@ public class AttachmentResource extends AbstractResource {
 		if (StringUtils.isBlank(attachment))
 			throw new IllegalArgumentException("attachment parameter has to be specified");
 
-		File attachmentFile = new File(getAttachmentDir(project, storage), attachment);
+		File attachmentFile = new File(getAttachmentDir(project.getFacade(), storage), attachment);
 		
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(attachmentFile.length());
@@ -91,13 +92,13 @@ public class AttachmentResource extends AbstractResource {
 		return response;
 	}
 
-	private static File getAttachmentDir(Project project, String uuid) {
+	private static File getAttachmentDir(ProjectFacade project, String uuid) {
 		return GitPlex.getInstance(AttachmentManager.class).getAttachmentDir(project, uuid);		
 	}
 	
-	public static PageParameters paramsOf(Project project, String attachmentDirUUID, String attachmentName) {
+	public static PageParameters paramsOf(ProjectFacade project, String attachmentDirUUID, String attachmentName) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_DEPOT, project.getName());
+		params.set(PARAM_PROJECT, project.getName());
 		params.set(PARAM_UUID, attachmentDirUUID);
 		params.set(PARAM_ATTACHMENT, attachmentName);
 		final File attachmentFile = new File(getAttachmentDir(project, attachmentDirUUID), attachmentName);

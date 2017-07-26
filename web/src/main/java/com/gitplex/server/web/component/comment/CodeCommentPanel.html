@@ -4,7 +4,7 @@
 			<i class="fa fa-warning"></i> comment context out dated, click to update
 		</a>
 		<div wicket:id="comment" class="comment section"></div>
-		<div wicket:id="activities" class="reply section"></div>
+		<div wicket:id="replies" class="reply section"></div>
 		<div wicket:id="addReply" class="add-reply"></div>
 	</div>
 	<wicket:fragment wicket:id="viewFrag">
@@ -12,9 +12,9 @@
 		<div class="detail">
 			<div class="head clearfix">
 				<a wicket:id="userName" class="user-name pull-left"></a>
-				<span class="activity pull-right">
-					<span wicket:id="activityDescription" class="description"></span>
-					<span wicket:id="activityDate" class="date"></span>
+				<span class="reply pull-right">
+					<span wicket:id="action" class="action"></span>
+					<span wicket:id="date" class="date"></span>
 				</span>
 			</div>
 			<div class="body">
@@ -41,7 +41,7 @@
 			</div>
 		</form>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="activityEditFrag">
+	<wicket:fragment wicket:id="replyEditFrag">
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
 			<div wicket:id="content"></div>

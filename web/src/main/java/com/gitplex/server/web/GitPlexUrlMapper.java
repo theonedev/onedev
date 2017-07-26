@@ -27,12 +27,13 @@ import com.gitplex.server.web.page.project.NoBranchesPage;
 import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.branches.ProjectBranchesPage;
+import com.gitplex.server.web.page.project.comments.ProjectCodeCommentsPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.commit.ProjectCommitsPage;
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
 import com.gitplex.server.web.page.project.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
-import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.CodeCommentsPage;
+import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.page.project.pullrequest.requestlist.RequestListPage;
@@ -154,12 +155,13 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 
 		add(new GitPlexPageMapper("projects/${project}/branches", ProjectBranchesPage.class));
 		add(new GitPlexPageMapper("projects/${project}/tags", ProjectTagsPage.class));
+		add(new GitPlexPageMapper("projects/${project}/codecomments", ProjectCodeCommentsPage.class));
 
 		add(new GitPlexPageMapper("projects/${project}/pull", RequestListPage.class));
 		add(new GitPlexPageMapper("projects/${project}/pull/new", NewRequestPage.class));
 		add(new GitPlexPageMapper("projects/${project}/pull/${request}", RequestOverviewPage.class));
 		add(new GitPlexPageMapper("projects/${project}/pull/${request}/overview", RequestOverviewPage.class));
-		add(new GitPlexPageMapper("projects/${project}/pull/${request}/code-comments", CodeCommentsPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull/${request}/code-comments", RequestCodeCommentsPage.class));
 		add(new GitPlexPageMapper("projects/${project}/pull/${request}/changes", RequestChangesPage.class));
 		add(new GitPlexPageMapper("projects/${project}/pull/${request}/merge-preview", MergePreviewPage.class));
 

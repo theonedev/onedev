@@ -1,5 +1,7 @@
 package com.gitplex.server.web.component.diff.revision;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -7,7 +9,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.support.MarkPos;
 
-public interface CommentSupport extends MarkSupport {
+public interface CommentSupport extends Serializable {
+	
+	@Nullable MarkPos getMark();
+	
+	String getMarkUrl(MarkPos mark);
 	
 	void onMark(AjaxRequestTarget target, MarkPos mark);
 	

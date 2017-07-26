@@ -32,16 +32,19 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.PullRequestManager;
+import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.model.support.ProjectAndRevision;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.behavior.TooltipBehavior;
 import com.gitplex.server.web.component.commitlist.CommitListPanel;
-import com.gitplex.server.web.component.diff.revision.MarkSupport;
+import com.gitplex.server.web.component.diff.revision.CommentSupport;
 import com.gitplex.server.web.component.diff.revision.RevisionDiffPanel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.revisionpicker.AffinalRevisionPicker;
@@ -54,12 +57,13 @@ import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
+import com.gitplex.server.web.websocket.CodeCommentChangedRegion;
 import com.gitplex.server.web.websocket.CommitIndexedRegion;
 import com.gitplex.server.web.websocket.WebSocketManager;
 import com.gitplex.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
-public class RevisionComparePage extends ProjectPage implements MarkSupport {
+public class RevisionComparePage extends ProjectPage implements CommentSupport {
 
 	public enum TabPanel {
 		COMMITS, 
@@ -82,6 +86,8 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compare-with-merge-base";
 	
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
+	
+	private static final String PARAM_COMMENT = "comment";
 	
 	private static final String PARAM_MARK = "mark";
 	
@@ -108,22 +114,52 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 	private ObjectId rightCommitId;
 	
 	private Tabbable tabbable;
+
+	public static PageParameters paramsOf(CodeComment comment) {
+		return paramsOf(comment.getProject(), getState(comment));
+	}
 	
+	public static RevisionComparePage.State getState(CodeComment comment) {
+		RevisionComparePage.State state = new RevisionComparePage.State();
+		state.commentId = comment.getId();
+		state.mark = comment.getMarkPos();
+		state.compareWithMergeBase = false;
+		CompareContext compareContext = comment.getCompareContext();
+		Project project = comment.getProject();
+		if (compareContext.isLeftSide()) {
+			state.leftSide = new ProjectAndRevision(project, compareContext.getCompareCommit());
+			state.rightSide = new ProjectAndRevision(project, comment.getMarkPos().getCommit());
+		} else {
+			state.leftSide = new ProjectAndRevision(project, comment.getMarkPos().getCommit());
+			state.rightSide = new ProjectAndRevision(project, compareContext.getCompareCommit());
+		}
+		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+		state.whitespaceOption = compareContext.getWhitespaceOption();
+		state.pathFilter = compareContext.getPathFilter();
+		return state;
+	}
+	
+	public static void fillParams(PageParameters params, State state) {
+		params.add(PARAM_LEFT, state.leftSide.toString());
+		params.add(PARAM_RIGHT, state.rightSide.toString());
+		params.add(PARAM_COMPARE_WITH_MERGE_BASE, state.compareWithMergeBase);
+		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
+			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
+		if (state.pathFilter != null)
+			params.add(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.blameFile != null)
+			params.add(PARAM_BLAME_FILE, state.blameFile);
+		if (state.commentId != null)
+			params.add(PARAM_COMMENT, state.commentId);
+		if (state.mark != null)
+			params.add(PARAM_MARK, state.mark.toString());
+		if (state.tabPanel != null)
+			params.add(PARAM_TAB, state.tabPanel.name());
+	}
+
 	public static PageParameters paramsOf(Project project, State state) {
 		PageParameters params = paramsOf(project);
-		params.set(PARAM_LEFT, state.leftSide.toString());
-		params.set(PARAM_RIGHT, state.rightSide.toString());
-		params.set(PARAM_COMPARE_WITH_MERGE_BASE, state.compareWithMergeBase);
-		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
-			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
-		if (state.pathFilter != null)
-			params.set(PARAM_PATH_FILTER, state.pathFilter);
-		if (state.blameFile != null)
-			params.set(PARAM_BLAME_FILE, state.blameFile);
-		if (state.mark != null)
-			params.set(PARAM_MARK, state.mark.toString());
-		if (state.tabPanel != null)
-			params.set(PARAM_TAB, state.tabPanel.name());
+		fillParams(params, state);
 		return params;
 	}
 
@@ -166,6 +202,7 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
+		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
 		
 		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
@@ -250,6 +287,7 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
+				newState.commentId = state.commentId;
 				newState.mark = state.mark;
 				newState.tabPanel = state.tabPanel;
 
@@ -285,6 +323,7 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 				newState.rightSide = state.rightSide;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = !state.compareWithMergeBase;
+				newState.commentId = state.commentId;
 				newState.mark = state.mark;
 				newState.tabPanel = state.tabPanel;
 				
@@ -330,6 +369,7 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
+				newState.commentId = state.commentId;
 				newState.mark = state.mark;
 				newState.tabPanel = state.tabPanel;
 				
@@ -350,6 +390,7 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
+				newState.commentId = state.commentId;
 				newState.mark = state.mark;
 				
 				setResponsePage(RevisionComparePage.class,paramsOf(getProject(), newState));
@@ -637,6 +678,9 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 		public String blameFile;
 		
 		@Nullable
+		public Long commentId;
+		
+		@Nullable
 		public MarkPos mark;
 		
 		public State() {
@@ -649,6 +693,7 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 			whitespaceOption = state.whitespaceOption;
 			pathFilter = state.pathFilter;
 			blameFile = state.blameFile;
+			commentId = state.commentId;
 			mark = state.mark;
 			tabPanel = state.tabPanel;
 		}
@@ -660,6 +705,56 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 		return state.mark;
 	}
 	
+	@Override
+	public String getCommentUrl(CodeComment comment) {
+		State commentState = new State();
+		commentState.leftSide = new ProjectAndRevision(state.rightSide.getProject(), 
+				state.compareWithMergeBase?mergeBase.name():leftCommitId.name());
+		commentState.rightSide = new ProjectAndRevision(state.rightSide.getProject(), rightCommitId.name());
+		commentState.mark = comment.getMarkPos();
+		commentState.commentId = comment.getId();
+		commentState.tabPanel = TabPanel.CHANGES;
+		commentState.pathFilter = state.pathFilter;
+		commentState.whitespaceOption = state.whitespaceOption;
+		commentState.compareWithMergeBase = false;
+		return urlFor(RevisionComparePage.class, paramsOf(commentState.rightSide.getProject(), commentState)).toString();
+	}
+	
+	@Override
+	public CodeComment getOpenComment() {
+		if (state.commentId != null)
+			return GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
+		else
+			return null;
+	}
+
+	@Override
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+		if (comment != null) {
+			state.mark = comment.getMarkPos();
+			state.commentId = comment.getId();
+		} else {
+			state.commentId = null;
+			state.mark = null;
+		}
+		pushState(target);
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+	}
+
+	@Override
+	public void onMark(AjaxRequestTarget target, MarkPos mark) {
+		state.mark = mark;
+		pushState(target);
+	}
+
+	@Override
+	public void onAddComment(AjaxRequestTarget target, MarkPos mark) {
+		state.commentId = null;
+		state.mark = mark;
+		pushState(target);
+		GitPlex.getInstance(WebSocketManager.class).onRegionChange(this);
+	}
+
 	@Override
 	public String getMarkUrl(MarkPos mark) {
 		State markState = new State();
@@ -682,6 +777,8 @@ public class RevisionComparePage extends ProjectPage implements MarkSupport {
 		else
 			regions.add(new CommitIndexedRegion(state.leftSide.getCommit()));
 		regions.add(new CommitIndexedRegion(state.rightSide.getCommit()));
+		if (state.commentId != null)
+			regions.add(new CodeCommentChangedRegion(state.commentId));
 		return regions;
 	}
 

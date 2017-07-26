@@ -2,7 +2,9 @@ package com.gitplex.server.git.command;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -24,25 +26,36 @@ public class LogCommit implements Serializable {
 
     private final List<String> parentHashes;
     
-    private final List<String> changedFiles;
+    private final List<FileChange> fileChanges;
 
     public LogCommit(String hash, @Nullable PersonIdent committer, @Nullable PersonIdent author, 
-    		List<String> parentHashes, List<String> changedFiles) {
+    		List<String> parentHashes, List<FileChange> fileChanges) {
     	this.hash = hash;
     	this.committer = committer;
     	this.author = author;
-    	this.parentHashes = parentHashes;
-    	this.changedFiles = changedFiles;
+    	this.parentHashes = new ArrayList<>(parentHashes);
+    	this.fileChanges = new ArrayList<>(fileChanges);
     }
     
 	public List<String> getParentHashes() {
 		return parentHashes;
 	}
 	
-    public List<String> getChangedFiles() {
-		return changedFiles;
+    public List<FileChange> getFileChanges() {
+		return fileChanges;
 	}
 
+    public Collection<String> getChangedFiles() {
+    	Collection<String> changedFiles = new HashSet<>();
+    	for (FileChange change: getFileChanges()) {
+    		if (change.getNewPath() != null)
+    			changedFiles.add(change.getNewPath());
+    		if (change.getOldPath() != null)
+    			changedFiles.add(change.getOldPath());
+    	}
+    	return changedFiles;
+    }
+    
 	public String getHash() {
 		return hash;
 	}
@@ -75,7 +88,7 @@ public class LogCommit implements Serializable {
 		
     	public List<String> parentHashes = new ArrayList<>();
 		
-    	public List<String> changedFiles = new ArrayList<>();
+    	public List<FileChange> fileChanges = new ArrayList<>();
 		
 		public LogCommit build() {
 			PersonIdent committer;
@@ -94,7 +107,7 @@ public class LogCommit implements Serializable {
 				author = null;
 			}
 			
-			return new LogCommit(hash, committer, author, parentHashes, changedFiles);
+			return new LogCommit(hash, committer, author, parentHashes, fileChanges);
 		}
 	}
 	

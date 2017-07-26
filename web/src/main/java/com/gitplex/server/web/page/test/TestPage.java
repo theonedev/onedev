@@ -18,7 +18,6 @@ public class TestPage extends BasePage {
 			}
 			
 		});
-		
 	}
 
 }

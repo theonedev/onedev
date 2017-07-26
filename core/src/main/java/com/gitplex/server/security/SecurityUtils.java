@@ -13,6 +13,7 @@ import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.CodeComment;
+import com.gitplex.server.model.CodeCommentReply;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestComment;
@@ -20,7 +21,6 @@ import com.gitplex.server.model.PullRequestStatusChange;
 import com.gitplex.server.model.Review;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.BranchProtection;
-import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.security.permission.CreateProjects;
 import com.gitplex.server.security.permission.ProjectPermission;
@@ -98,16 +98,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (currentUser == null) {
 			return false;
 		} else {
-			return currentUser.equals(comment.getUser()) || canManage(comment.getRequest().getTargetProject());
+			return currentUser.equals(comment.getUser()) || canManage(comment.getProject());
 		}
 	}
 
-	public static boolean canModify(CodeCommentActivity activity) {
+	public static boolean canModify(CodeCommentReply reply) {
 		User currentUser = getUser();
 		if (currentUser == null) {
 			return false;
 		} else {
-			return currentUser.equals(activity.getUser()) || canManage(activity.getComment().getRequest().getTargetProject());
+			return currentUser.equals(reply.getUser()) || canManage(reply.getComment().getProject());
 		}
 	}
 	

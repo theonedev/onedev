@@ -19,11 +19,13 @@ import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityPersisted;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.FileUtils;
+import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.schedule.SchedulableTask;
 import com.gitplex.server.util.schedule.TaskScheduler;
 
@@ -50,7 +52,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	}
 	
 	@Override
-	public File getAttachmentDir(Project project, String attachmentDirUUID) {
+	public File getAttachmentDir(ProjectFacade project, String attachmentDirUUID) {
 		File attachmentDir = getPermanentAttachmentDir(project, attachmentDirUUID);
 		if (attachmentDir.exists())
 			return attachmentDir;
@@ -58,20 +60,20 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			return getTempAttachmentDir(project, attachmentDirUUID); 
 	}
 
-	private File getPermanentAttachmentDir(Project project, String attachmentDirUUID) {
+	private File getPermanentAttachmentDir(ProjectFacade project, String attachmentDirUUID) {
 		String category = attachmentDirUUID.substring(0, 2);
 		return new File(storageManager.getProjectAttachmentDir(project.getId()), "permanent/" + category + "/" + attachmentDirUUID);
 	}
 	
-	private File getTempAttachmentDir(Project project) {
+	private File getTempAttachmentDir(ProjectFacade project) {
 		return new File(storageManager.getProjectAttachmentDir(project.getId()), "temp");
 	}
 	
-	private File getTempAttachmentDir(Project project, String attachmentDirUUID) {
+	private File getTempAttachmentDir(ProjectFacade project, String attachmentDirUUID) {
 		return new File(getTempAttachmentDir(project), attachmentDirUUID);
 	}
 
-	private void makeAttachmentPermanent(Project project, String attachmentDirUUID) {
+	private void makeAttachmentPermanent(ProjectFacade project, String attachmentDirUUID) {
 		File tempAttachmentDir = getTempAttachmentDir(project, attachmentDirUUID);
 		File permanentAttachmentDir = getPermanentAttachmentDir(project, attachmentDirUUID);
 		if (tempAttachmentDir.exists() && !permanentAttachmentDir.exists()) {
@@ -93,11 +95,12 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		taskScheduler.unschedule(taskId);
 	}
 
+	@Sessional
 	@Override
 	public void execute() {
 		try {
 			for (Project project: dao.findAll(Project.class)) {
-				File tempDir = getTempAttachmentDir(project);
+				File tempDir = getTempAttachmentDir(project.getFacade());
 				if (tempDir.exists()) {
 					for (File file: tempDir.listFiles()) {
 						if (System.currentTimeMillis() - file.lastModified() > TEMP_PRESERVE_PERIOD) {
@@ -126,7 +129,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	
 					@Override
 					public void run() {
-						makeAttachmentPermanent(request.getTargetProject(), request.getUUID());
+						makeAttachmentPermanent(request.getTargetProject().getFacade(), request.getUUID());
 					}
 					
 				});
@@ -136,7 +139,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 					@Override
 					public void run() {
-						makeAttachmentPermanent(comment.getRequest().getTargetProject(), comment.getUUID());
+						makeAttachmentPermanent(comment.getProject().getFacade(), comment.getUUID());
 					}
 					
 				});
@@ -152,7 +155,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			FileUtils.deleteDir(storageManager.getProjectAttachmentDir(project.getId()));
 		} else if (event.getEntity() instanceof CodeComment) {
 			CodeComment comment = (CodeComment) event.getEntity();
-			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getRequest().getTargetProject(), comment.getUUID());
+			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getProject().getFacade(), comment.getUUID());
 			if (permanentAttachmentDir.exists())
 				FileUtils.deleteDir(permanentAttachmentDir);
 		}

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -12,6 +13,9 @@ import javax.inject.Singleton;
 
 import org.dom4j.Element;
 
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.manager.CodeCommentManager;
+import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.StringUtils;
 import com.google.common.base.Charsets;
@@ -344,6 +348,47 @@ public class DatabaseMigrator {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	private void migrate10(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("CodeComments.xml") || file.getName().startsWith("CodeCommentReplys.xml") 
+					|| file.getName().startsWith("CodeCommentStatusChanges.xml")) {
+				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+						Element exprElement = branchProtectionElement.element("reviewAppointmentExpr");
+						if (exprElement != null)
+							exprElement.setName("reviewRequirementSpec");
+						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) {
+							exprElement = fileProtectionElement.element("reviewAppointmentExpr");
+							if (exprElement != null)
+								exprElement.setName("reviewRequirementSpec");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		VersionedDocument dom = VersionedDocument.fromFile(new File(dataDir, "Configs.xml"));
+		for (Element element: dom.getRootElement().elements()) {
+			if (element.elementText("key").equals("SYSTEM")) {
+				String storagePath = element.element("setting").elementText("storagePath");
+				File codeCommentsFromWeiFeng = new File(storagePath, "CodeComments.xml");
+				if (codeCommentsFromWeiFeng.exists()) {
+					dom = VersionedDocument.fromFile(codeCommentsFromWeiFeng);
+					for (Element commentElement: dom.getRootElement().elements()) {
+						commentElement.setName("com.gitplex.server.model.CodeComment");
+						commentElement.element("depot").setName("project");
+						commentElement.element("resolved").detach();
+						commentElement.element("commentPos").setName("markPos");
+					}
+					dom.writeToFile(new File(dataDir, "CodeComments.xml"), false);
+				}
+			}
+		}		
 	}
 	
 }

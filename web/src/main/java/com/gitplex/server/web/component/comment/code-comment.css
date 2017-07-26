@@ -37,7 +37,7 @@
 .code-comment>.section>.detail>.head .user-name {
 	color: #666;
 }
-.code-comment>.section>.detail>.head .activity {
+.code-comment>.section>.detail>.head .reply {
 	font-size: 12px;
 	margin-top: 2px;
 	color: #999;

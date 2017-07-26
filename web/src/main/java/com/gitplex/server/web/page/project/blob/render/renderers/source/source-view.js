@@ -56,7 +56,7 @@ gitplex.server.sourceView = {
 			$(document).data("SourceViewShortcutsBinded", true);
 
 			document.addEventListener("keydown", function(e) {
-				if (e.altKey && e.shiftKey && e.keyCode === 79 && $(".modal:visible").length == 0) {
+				if (e.altKey && e.keyCode === 79 && $(".modal:visible").length == 0) {
 					e.preventDefault();
 					var $sourceView = $(".source-view");
 					if ($sourceView.length != 0)
@@ -326,7 +326,7 @@ gitplex.server.sourceView = {
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
 	},
-	openSelectionPopover: function(mark, markUrl, hasPullRequest, loggedIn) {
+	openSelectionPopover: function(mark, markUrl, loggedIn) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
 		var ch = (mark.beginChar + mark.endChar)/2;
 		var position = cm.charCoords({line:mark.beginLine, ch:ch});
@@ -343,7 +343,7 @@ gitplex.server.sourceView = {
 			gitplex.server.codemirror.clearSelection(cm);
 			clipboard.destroy();
 		});
-		if (hasPullRequest && loggedIn) {
+		if (loggedIn) {
 			$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
 			$content.children("a.comment").click(function() {
 				if ($(".source-view").find("form.dirty").length != 0 
@@ -353,7 +353,7 @@ gitplex.server.sourceView = {
 				var callback = $(".source-view").data("callback");
 				callback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 			});
-		} else if (!loggedIn) {
+		} else {
 			$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
 		}			
 		
@@ -557,10 +557,6 @@ gitplex.server.sourceView = {
 			gutters.splice(1, 1);
 			cm.setOption("gutters", gutters);
 		}
-	},
-	scrollToCommentBottom: function() {
-		var $body = $(".source-view>.comment>.content>.body");
-		$body.scrollTop($body[0].scrollHeight);
 	},
 	onLineWrapModeChange: function(lineWrapMode) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		

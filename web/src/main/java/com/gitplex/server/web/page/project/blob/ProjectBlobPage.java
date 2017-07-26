@@ -396,7 +396,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible((state.mode == Mode.VIEW || state.mode == Mode.BLAME) 
-						&& isOnBranch() && state.blobIdent.isTree() && SecurityUtils.canWrite(getProject()));
+						&& isOnBranch() && state.blobIdent.isTree() 
+						&& SecurityUtils.canWrite(getProject())
+						&& !GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(getLoginUser(), getProject(), state.blobIdent.revision, null));
 			}
 			
 		});
@@ -410,12 +412,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 					@Override
 					public String getShortcut() {
-						return "Alt+Shift+F";
+						return "Alt+Q";
 					}
 
 					@Override
 					public String getLabel() {
-						return "File and Symbol Search";
+						return "Quick Search";
 					}
 
 					@Override
@@ -441,12 +443,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 					@Override
 					public String getShortcut() {
-						return "Alt+Shift+T";
+						return "Alt+A";
 					}
 
 					@Override
 					public String getLabel() {
-						return "Text and Advanced Search";
+						return "Advanced Search";
 					}
 
 					@Override
@@ -687,37 +689,43 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		response.render(OnLoadHeaderItem.forScript("gitplex.server.projectBlob.onWindowLoad();"));
 	}
 
-	public static PageParameters paramsOf(CodeComment comment) {
-		BlobIdent blobIdent = new BlobIdent(comment.getCommentPos().getCommit(), comment.getCommentPos().getPath(), 
+	public static ProjectBlobPage.State getState(CodeComment comment) {
+		BlobIdent blobIdent = new BlobIdent(comment.getMarkPos().getCommit(), comment.getMarkPos().getPath(), 
 				FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-		state.requestId = comment.getRequest().getId();
 		state.commentId = comment.getId();
-		state.mark = comment.getCommentPos().getRange();
-		return paramsOf(comment.getRequest().getTargetProject(), state);
-	}
+		state.mark = comment.getMarkPos().getRange();
+		return state;
+	}	
+	
+	public static PageParameters paramsOf(CodeComment comment) {
+		return paramsOf(comment.getProject(), getState(comment));
+	}	
 	
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
 		return paramsOf(project, new State(blobIdent));
 	}
 	
+	public static void fillParams(PageParameters params, State state) {
+		if (state.blobIdent.revision != null)
+			params.add(PARAM_REVISION, state.blobIdent.revision);
+		if (state.blobIdent.path != null)
+			params.add(PARAM_PATH, state.blobIdent.path);
+		if (state.mark != null)
+			params.add(PARAM_MARK, state.mark.toString());
+		if (state.requestId != null)
+			params.add(PARAM_REQUEST, state.requestId);
+		if (state.commentId != null)
+			params.add(PARAM_COMMENT, state.commentId);
+		if (state.mode != Mode.VIEW)
+			params.add(PARAM_MODE, state.mode.name().toLowerCase());
+		if (state.query != null)
+			params.add(PARAM_QUERY, state.query);
+	}
+	
 	public static PageParameters paramsOf(Project project, State state) {
 		PageParameters params = paramsOf(project);
-		
-		if (state.blobIdent.revision != null)
-			params.set(PARAM_REVISION, state.blobIdent.revision);
-		if (state.blobIdent.path != null)
-			params.set(PARAM_PATH, state.blobIdent.path);
-		if (state.mark != null)
-			params.set(PARAM_MARK, state.mark.toString());
-		if (state.requestId != null)
-			params.set(PARAM_REQUEST, state.requestId);
-		if (state.commentId != null)
-			params.set(PARAM_COMMENT, state.commentId);
-		if (state.mode != Mode.VIEW)
-			params.set(PARAM_MODE, state.mode.name().toLowerCase());
-		if (state.query != null)
-			params.set(PARAM_QUERY, state.query);
+		fillParams(params, state);
 		return params;
 	}
 	
@@ -847,7 +855,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			state.commentId = comment.getId();
-			state.mark = comment.getCommentPos().getRange();
+			state.mark = Preconditions.checkNotNull(comment.mapRange(state.blobIdent));
 		} else {
 			state.commentId = null;
 			state.mark = null;

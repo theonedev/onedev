@@ -98,34 +98,28 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
-		
+		     
 		PullRequest request = getPullRequest();
 		if (state.commentId != null) {
 			CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
-			if (state.oldCommit == null && state.newCommit == null) {
-				String commentCommit = comment.getCommentPos().getCommit();
-				if (commentCommit.equals(request.getBaseCommitHash())) {
-					state.oldCommit = request.getBaseCommitHash();
-					state.newCommit = request.getHeadCommitHash();
-				} else if (comment.isCodeChanged()) {
-					state.oldCommit = commentCommit;
+			CodeComment.ComparingInfo commentComparingInfo = new CodeComment.ComparingInfo(
+					comment.getMarkPos().getCommit(), comment.getCompareContext());
+			PullRequest.ComparingInfo requestComparingInfo = 
+					getPullRequest().getRequestComparingInfo(commentComparingInfo);
+			if (requestComparingInfo != null && state.oldCommit == null && state.newCommit == null) {
+				if (comment.isContextChanged(request)) {
+					state.oldCommit = comment.getMarkPos().getCommit();
 					state.newCommit = request.getHeadCommitHash();
 				} else {
-					state.oldCommit = request.getBaseCommitHash();
-					state.newCommit = commentCommit;
+					state.oldCommit = requestComparingInfo.getOldCommit();
+					state.newCommit = requestComparingInfo.getNewCommit();
 				}
-			} else {
-				if (state.oldCommit == null) 
-					state.oldCommit = request.getBaseCommitHash();
-				if (state.newCommit == null)
-					state.newCommit = request.getHeadCommitHash();
-			}
-		} else {
-			if (state.oldCommit == null) 
-				state.oldCommit = request.getBaseCommitHash();
-			if (state.newCommit == null)
-				state.newCommit = request.getHeadCommitHash();
-		}
+			} 
+		} 
+		if (state.oldCommit == null) 
+			state.oldCommit = request.getBaseCommitHash();
+		if (state.newCommit == null)
+			state.newCommit = request.getHeadCommitHash();
 	}
 	
 	private int getCommitIndex(String commitHash) {
@@ -234,7 +228,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 					CodeComment comment = getOpenComment();
 					
 					// we will not move old commit if an opened comment points to it
-					if (comment == null || comment.getCommentPos().getCommit().equals(state.newCommit)) {
+					if (comment == null || comment.getMarkPos().getCommit().equals(state.newCommit)) {
 						state.oldCommit = state.newCommit;
 					}
 					index++;
@@ -364,33 +358,41 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		state.newCommit = newCommit;
 		return paramsOf(request, state);
 	}
-	
-	public static PageParameters paramsOf(CodeComment comment) {
+
+	public static State getState(CodeComment comment) {
 		RequestChangesPage.State state = new RequestChangesPage.State();
 		state.commentId = comment.getId();
-		state.mark = comment.getCommentPos();
-		state.pathFilter = comment.getCommentPos().getPath();
-		return paramsOf(comment.getRequest(), state);
+		state.mark = comment.getMarkPos();
+		state.pathFilter = comment.getCompareContext().getPathFilter();
+		state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
+		return state;
+	}
+	
+	public static PageParameters paramsOf(PullRequest request, CodeComment comment) {
+		return paramsOf(request, getState(comment));
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, State state) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
-
-		if (state.oldCommit != null)
-			params.set(PARAM_OLD_COMMIT, state.oldCommit);
-		if (state.newCommit != null)
-			params.set(PARAM_NEW_COMMIT, state.newCommit);
-		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
-			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
-		if (state.pathFilter != null)
-			params.set(PARAM_PATH_FILTER, state.pathFilter);
-		if (state.blameFile != null)
-			params.set(PARAM_BLAME_FILE, state.blameFile);
-		if (state.commentId != null)
-			params.set(PARAM_COMMENT, state.commentId);
-		if (state.mark != null)
-			params.set(PARAM_MARK, state.mark.toString());
+		fillParams(params, state);
 		return params;
+	}
+	
+	public static void fillParams(PageParameters params, State state) {
+		if (state.oldCommit != null)
+			params.add(PARAM_OLD_COMMIT, state.oldCommit);
+		if (state.newCommit != null)
+			params.add(PARAM_NEW_COMMIT, state.newCommit);
+		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
+			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
+		if (state.pathFilter != null)
+			params.add(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.blameFile != null)
+			params.add(PARAM_BLAME_FILE, state.blameFile);
+		if (state.commentId != null)
+			params.add(PARAM_COMMENT, state.commentId);
+		if (state.mark != null)
+			params.add(PARAM_MARK, state.mark.toString());
 	}
 	
 	@Override
@@ -501,7 +503,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	@Override
 	public String getCommentUrl(CodeComment comment) {
 		State commentState = new State();
-		commentState.mark = comment.getCommentPos();
+		commentState.mark = comment.getMarkPos();
 		commentState.commentId = comment.getId();
 		commentState.oldCommit = state.oldCommit;
 		commentState.newCommit = state.newCommit;
@@ -522,7 +524,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			state.commentId = comment.getId();
-			state.mark = comment.getCommentPos();
+			state.mark = comment.getMarkPos();
 		} else {
 			state.commentId = null;
 			state.mark = null;

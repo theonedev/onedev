@@ -1,4 +1,4 @@
-package com.gitplex.server.util.reviewappointment;
+package com.gitplex.server.util.reviewrequirement;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -13,58 +13,69 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.GroupManager;
-import com.gitplex.server.model.User;
-import com.gitplex.server.model.Project;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Group;
-import com.gitplex.server.util.reviewappointment.ReviewAppointmentParser.CountContext;
-import com.gitplex.server.util.reviewappointment.ReviewAppointmentParser.CriteriaContext;
-import com.gitplex.server.util.reviewappointment.ReviewAppointmentParser.ExprContext;
+import com.gitplex.server.model.User;
+import com.gitplex.server.util.reviewrequirement.ReviewRequirementSpecParser.CountContext;
+import com.gitplex.server.util.reviewrequirement.ReviewRequirementSpecParser.CriteriaContext;
+import com.gitplex.server.util.reviewrequirement.ReviewRequirementSpecParser.SpecContext;
 
-public class ReviewAppointment {
+public class ReviewRequirement {
 	
 	private final List<User> users = new ArrayList<>();
 	
 	private final Map<Group, Integer> groups = new LinkedHashMap<>();
 	
-	public ReviewAppointment(Project project, String expr) {
-		ExprContext exprContext = parse(expr);
+	public ReviewRequirement(String spec) {
+		SpecContext specContext = parse(spec);
 		
-		for (CriteriaContext criteriaContext: exprContext.criteria()) {
+		for (CriteriaContext criteriaContext: specContext.criteria()) {
 			if (criteriaContext.userCriteria() != null) {
 				String userName = getBracedValue(criteriaContext.userCriteria().Value());
 				User user = GitPlex.getInstance(UserManager.class).findByName(userName);
 				if (user != null) {
-					users.add(user);
+					if (!users.contains(user)) { 
+						users.add(user);
+					} else {
+						throw new MalformedSpecException("User '" + userName + "' is included multiple times");
+					}
+				} else {
+					throw new MalformedSpecException("Unable to find user '" + userName + "'");
 				}
 			} else if (criteriaContext.groupCriteria() != null) {
 				String groupName = getBracedValue(criteriaContext.groupCriteria().Value());
 				Group group = GitPlex.getInstance(GroupManager.class).find(groupName);
 				if (group != null) {
-					CountContext countContext = criteriaContext.groupCriteria().count();
-					if (countContext != null) {
-						if (countContext.DIGIT() != null)
-							groups.put(group, Integer.parseInt(countContext.DIGIT().getText()));
-						else
-							groups.put(group, 0);
+					if (!groups.containsKey(group)) {
+						CountContext countContext = criteriaContext.groupCriteria().count();
+						if (countContext != null) {
+							if (countContext.DIGIT() != null)
+								groups.put(group, Integer.parseInt(countContext.DIGIT().getText()));
+							else
+								groups.put(group, 0);
+						} else {
+							groups.put(group, 1);
+						}
 					} else {
-						groups.put(group, 1);
+						throw new MalformedSpecException("Group '" + groupName + "' is included multiple times");
 					}
+				} else {
+					throw new MalformedSpecException("Unable to find group '" + groupName + "'");
 				}
 			}
 		}
 	}
 
-	public static ExprContext parse(String expr) {
-		ANTLRInputStream is = new ANTLRInputStream(expr); 
-		ReviewAppointmentLexer lexer = new ReviewAppointmentLexer(is);
+	public static SpecContext parse(String spec) {
+		ANTLRInputStream is = new ANTLRInputStream(spec); 
+		ReviewRequirementSpecLexer lexer = new ReviewRequirementSpecLexer(is);
 		lexer.removeErrorListeners();
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		ReviewAppointmentParser parser = new ReviewAppointmentParser(tokens);
+		ReviewRequirementSpecParser parser = new ReviewRequirementSpecParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		return parser.expr();
+		return parser.spec();
 	}
 	
 	private String getBracedValue(TerminalNode terminal) {
@@ -98,7 +109,7 @@ public class ReviewAppointment {
 	}
 	
 	@Nullable
-	public String toExpr() {
+	public String toSpec() {
 		StringBuilder builder = new StringBuilder();
 		for (User user: users)
 			builder.append("user(").append(user.getName()).append(") ");
@@ -115,5 +126,4 @@ public class ReviewAppointment {
 		else
 			return null;
 	}
-	
 }

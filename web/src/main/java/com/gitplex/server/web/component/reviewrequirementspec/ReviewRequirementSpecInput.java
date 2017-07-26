@@ -1,4 +1,4 @@
-package com.gitplex.server.web.component.reviewappointment;
+package com.gitplex.server.web.component.reviewrequirementspec;
 
 import java.io.Serializable;
 
@@ -11,15 +11,15 @@ import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
 
 import com.gitplex.server.model.Project;
-import com.gitplex.server.util.reviewappointment.ReviewAppointment;
+import com.gitplex.server.util.reviewrequirement.ReviewRequirement;
 
 @SuppressWarnings("serial")
-public class ReviewAppointmentInput extends TextField<String> {
+public class ReviewRequirementSpecInput extends TextField<String> {
 
 	private final IModel<Project> projectModel;
 	
-	public ReviewAppointmentInput(String id, IModel<Project> projectModel, IModel<String> exprModel) {
-		super(id, exprModel);
+	public ReviewRequirementSpecInput(String id, IModel<Project> projectModel, IModel<String> specModel) {
+		super(id, specModel);
 		
 		this.projectModel = projectModel;
 	}
@@ -28,13 +28,13 @@ public class ReviewAppointmentInput extends TextField<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ReviewAppointmentAssistBehavior(projectModel));
+		add(new ReviewRequirementSpecAssistBehavior(projectModel));
 		add(new IValidator<String>() {
 
 			@Override
 			public void validate(IValidatable<String> validatable) {
 				try {
-					ReviewAppointment.parse(validatable.getValue()); 
+					ReviewRequirement.parse(validatable.getValue()); 
 				} catch (Exception e) {
 					validatable.error(new IValidationError() {
 

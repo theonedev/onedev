@@ -318,8 +318,8 @@ public class CommitOptionPanel extends Panel {
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
 				
-				if (GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(SecurityUtils.getUser(), context.getProject(), 
-						context.getBlobIdent().revision, context.getNewPath())) {
+				if (GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(SecurityUtils.getUser(), 
+						context.getProject(), context.getBlobIdent().revision, context.getNewPath())) {
 					CommitOptionPanel.this.error("Adding of file '" + context.getNewPath() + "' need to be reviewed/verified. "
 							+ "Please submit pull request instead");
 					target.add(feedback);

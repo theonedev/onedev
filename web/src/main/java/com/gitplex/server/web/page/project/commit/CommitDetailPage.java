@@ -500,7 +500,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	public String getCommentUrl(CodeComment comment) {
 		State commentState = new State();
 		String compareWith = getCompareWith().name();
-		commentState.mark = comment.getCommentPos();
+		commentState.mark = comment.getMarkPos();
 		commentState.commentId = comment.getId();
 		commentState.whitespaceOption = state.whitespaceOption;
 		commentState.compareWith = compareWith;
@@ -521,7 +521,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			state.commentId = comment.getId();
-			state.mark = comment.getCommentPos();
+			state.mark = comment.getMarkPos();
 		} else {
 			state.commentId = null;
 			state.mark = null;

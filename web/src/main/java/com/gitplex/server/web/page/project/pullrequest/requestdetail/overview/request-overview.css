@@ -260,53 +260,53 @@
 	margin-bottom: 8px;
 }
 
-#request-detail .info>div>div {
+#request-detail .side-info>div>div {
 	border-bottom: 1px dotted #BBB; 
 	margin-bottom: 20px; 
 	color: #666;
 }
-#request-detail .info>div>div:last-child {
+#request-detail .side-info>div>div:last-child {
 	border-bottom: none; 
 	margin-bottom: 0; 
 }
-#request-detail .info>div>.reviewers>div,
-#request-detail .info>div>.verifications>div,
-#request-detail .info>div>.merge-strategy, 
-#request-detail .info>div>.watch {
+#request-detail .side-info>div>.reviewers>div,
+#request-detail .side-info>div>.verifications>div,
+#request-detail .side-info>div>.merge-strategy, 
+#request-detail .side-info>div>.watch {
 	padding-bottom: 20px; 
 }
 
-#request-detail .info>div>.reviewers .no-reviewers, 
-#request-detail .info>div>.verifications .no-verifications {
+#request-detail .side-info>div>.reviewers .no-reviewers, 
+#request-detail .side-info>div>.verifications .no-verifications {
 	font-size: 14px;
 	padding-left: 0;
 }
 
-#request-detail .info .help-block {
+#request-detail .side-info .help-block {
 	margin-bottom: 0; 
 	color: #888;
 }
-#request-detail .info .fa.small {
+#request-detail .side-info .fa.small {
 	font-size: 14px; 
 	vertical-align: middle;
 }
-#request-detail .info label {
+#request-detail .side-info label {
 	margin: 0 4px 8px 0; 
 	font-size: 16px;
 }
-#request-detail .info .select2-container {
+#request-detail .side-info .select2-container {
 	width: 100%;
 }
-#request-detail .info .avatar {
+#request-detail .side-info .avatar {
 	width: 24px; 
 	height: 24px;
 }
-#request-detail .info .select2-container .avatar {
+#request-detail .side-info .select2-container .avatar {
 	width: 20px; 
 	height: 20px;
 }
 
-#request-detail .info .manage .help-block {
+#request-detail .side-info .manage .help-block {
 	margin-bottom: 12px;
 }
 

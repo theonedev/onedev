@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.pullrequest.PullRequestCodeCommentActivityEvent;
-import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
+import com.gitplex.server.event.codecomment.CodeCommentEvent;
+import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
@@ -18,7 +18,6 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
-import com.gitplex.server.model.support.CodeCommentActivity;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityRemoved;
@@ -69,7 +68,7 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 
 	@Override
 	public void visit(User user, CodeComment comment) {
-		Environment env = getEnv(comment.getRequest().getTargetProject().getId().toString());
+		Environment env = getEnv(comment.getProject().getId().toString());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
@@ -102,7 +101,7 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 
 	@Override
 	public Date getVisitDate(User user, CodeComment comment) {
-		Environment env = getEnv(comment.getRequest().getTargetProject().getId().toString());
+		Environment env = getEnv(comment.getProject().getId().toString());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Date>() {
 			
@@ -119,22 +118,19 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	}
 
 	@Listen
-	public void on(PullRequestCodeCommentActivityEvent event) {
-		CodeCommentActivity activity = event.getActivity();
-		if (activity.getUser() != null) {
-			visit(activity.getUser(), activity.getComment());
-		}
-	}
-
-	@Listen
-	public void on(PullRequestCodeCommentCreated event) {
-		if (event.getComment().getUser() != null) 
-			visit(event.getComment().getUser(), event.getComment());
+	public void on(CodeCommentEvent event) {
+		visit(event.getUser(), event.getComment());
 	}
 
 	@Listen
 	public void on(PullRequestCommentCreated event) {
 		visit(event.getComment().getUser(), event.getRequest());
+	}
+	
+	@Listen
+	public void on(PullRequestCodeCommentEvent event) {
+		if (!event.isPassive())
+			visit(event.getComment().getUser(), event.getRequest());
 	}
 	
 	@Listen

@@ -3,7 +3,6 @@ package com.gitplex.server.web.page.project.blob.render.renderers.source;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,7 +15,6 @@ import javax.servlet.http.Cookie;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -29,7 +27,6 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -71,7 +68,10 @@ import com.gitplex.server.git.command.BlameCommand;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.MarkPos;
+import com.gitplex.server.model.support.ProjectAndRevision;
 import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
@@ -82,10 +82,12 @@ import com.gitplex.server.web.component.comment.CodeCommentPanel;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.ProjectAttachmentSupport;
 import com.gitplex.server.web.component.floating.FloatingPanel;
+import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.component.menu.MenuItem;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
+import com.gitplex.server.web.component.revisionpicker.RevisionSelector;
 import com.gitplex.server.web.component.sourceformat.OptionChangeCallback;
 import com.gitplex.server.web.component.sourceformat.SourceFormatPanel;
 import com.gitplex.server.web.component.symboltooltip.SymbolTooltipPanel;
@@ -95,6 +97,7 @@ import com.gitplex.server.web.page.project.blob.render.view.BlobViewPanel;
 import com.gitplex.server.web.page.project.blob.render.view.Markable;
 import com.gitplex.server.web.page.project.blob.search.SearchMenuContributor;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
+import com.gitplex.server.web.page.project.compare.RevisionComparePage;
 import com.gitplex.server.web.util.DateUtils;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.websocket.PageDataChanged;
@@ -119,17 +122,13 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
-	private final IModel<Collection<CodeComment>> commentsModel = 
-			new LoadableDetachableModel<Collection<CodeComment>>() {
+	private final IModel<Map<CodeComment, TextRange>> commentsModel = 
+			new LoadableDetachableModel<Map<CodeComment, TextRange>>() {
 
 		@Override
-		protected Collection<CodeComment> load() {
-			if (context.getPullRequest() != null) {
-				return GitPlex.getInstance(CodeCommentManager.class).findAll(
-						context.getPullRequest(), context.getCommit(), context.getBlobIdent().path);
-			} else {
-				return new ArrayList<>();
-			}
+		protected Map<CodeComment, TextRange> load() {
+			return GitPlex.getInstance(CodeCommentManager.class).findHistory(
+					context.getProject(), context.getCommit(), context.getBlobIdent().path);
 		}
 		
 	};
@@ -269,6 +268,46 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
+		head.add(new DropdownLink("context") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(context.getPullRequest() == null && context.getOpenComment() != null);
+			}
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new RevisionSelector(id, new AbstractReadOnlyModel<Project>() {
+
+					@Override
+					public Project getObject() {
+						return context.getProject();
+					}
+					
+				}) {
+					
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String revision) {
+						RevisionComparePage.State state = new RevisionComparePage.State();
+						CodeComment comment = context.getOpenComment();
+						state.commentId = comment.getId();
+						state.mark = comment.getMarkPos();
+						state.compareWithMergeBase = false;
+						state.leftSide = new ProjectAndRevision(comment.getProject(), 
+								comment.getMarkPos().getCommit());
+						state.rightSide = new ProjectAndRevision(comment.getProject(), revision);
+						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+						state.whitespaceOption = context.getOpenComment().getCompareContext().getWhitespaceOption();
+						PageParameters params = RevisionComparePage.paramsOf(comment.getProject(), state);
+						setResponsePage(RevisionComparePage.class, params);
+					}
+					
+				};
+			}
+			
+		});
+		
 		head.add(new AjaxLink<Void>("locate") {
 
 			@Override
@@ -276,7 +315,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				CodeComment comment = context.getOpenComment();
 				TextRange mark;
 				if (comment != null) {
-					mark = comment.getCommentPos().getRange();
+					mark = comment.getMarkPos().getRange();
 				} else {
 					mark = (TextRange) commentContainer.getDefaultModelObject();
 				}
@@ -311,51 +350,9 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			
 		});
 		
-		head.add(new AjaxLink<Void>("toggleResolve") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(commentContainer));
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(context.getOpenComment() != null);
-			}
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				CodeComment comment = context.getOpenComment();
-				if (comment != null) {
-					if (comment.isResolved()) {
-						tag.put("title", "Comment is currently resolved, click to unresolve");
-						tag.put("class", "pull-right resolve resolved");
-					} else {
-						tag.put("title", "Comment is currently unresolved, click to resolve");
-						tag.put("class", "pull-right resolve unresolved");
-					}
-				} 
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				if (SecurityUtils.getUser() != null) {
-					((CodeCommentPanel)commentContainer.get("body")).onChangeStatus(target);
-					target.appendJavaScript("gitplex.server.sourceView.scrollToCommentBottom();");
-				} else {
-					Session.get().warn("Please login to resolve/unresolve comment");
-				}
-			}
-			
-		});
-		
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
-		if (context.getOpenComment() != null 
-				&& context.getOpenComment().getCommentPos().getCommit().equals(context.getCommit().name())) {
+		if (context.getOpenComment() != null) {
 			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, context.getOpenComment().getId()) {
 
 				@Override
@@ -366,6 +363,16 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				@Override
 				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 					target.add(commentContainer.get("head"));
+				}
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return context.getPullRequest();
+				}
+
+				@Override
+				protected CompareContext getCompareContext() {
+					return SourceViewPanel.this.getCompareContext();
 				}
 
 			};
@@ -385,9 +392,8 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				switch(params.getParameterValue("action").toString()) {
 				case "openSelectionPopover": 
 					TextRange mark = getMark(params, "param1", "param2", "param3", "param4");
-					String script = String.format("gitplex.server.sourceView.openSelectionPopover(%s, '%s', %s, %s);", 
-							getJson(mark), context.getMarkUrl(mark), context.getPullRequest()!=null,
-							SecurityUtils.getUser()!=null);
+					String script = String.format("gitplex.server.sourceView.openSelectionPopover(%s, '%s', %s);", 
+							getJson(mark), context.getMarkUrl(mark), SecurityUtils.getUser()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "addComment": 
@@ -462,15 +468,16 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 							
 							CodeComment comment = new CodeComment();
 							comment.setUUID(uuid);
-							comment.setCommentPos(new MarkPos());
-							comment.getCommentPos().setCommit(context.getCommit().name());
-							comment.getCommentPos().setPath(context.getBlobIdent().path);
+							comment.setMarkPos(new MarkPos());
+							comment.getMarkPos().setCommit(context.getCommit().name());
+							comment.getMarkPos().setPath(context.getBlobIdent().path);
 							comment.setContent(contentInput.getModelObject());
-							comment.setRequest(context.getPullRequest());
 							comment.setUser(SecurityUtils.getUser());
-							comment.getCommentPos().setRange(mark);
+							comment.getMarkPos().setRange(mark);
+							comment.setProject(context.getProject());
+							comment.setCompareContext(getCompareContext());
 							
-							GitPlex.getInstance(CodeCommentManager.class).save(comment);
+							GitPlex.getInstance(CodeCommentManager.class).save(comment, context.getPullRequest());
 							
 							CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
@@ -482,6 +489,16 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 								@Override
 								protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 									target.add(commentContainer.get("head"));
+								}
+
+								@Override
+								protected PullRequest getPullRequest() {
+									return context.getPullRequest();
+								}
+
+								@Override
+								protected CompareContext getCompareContext() {
+									return SourceViewPanel.this.getCompareContext();
 								}
 
 							};
@@ -518,6 +535,16 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 						@Override
 						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 							target.add(commentContainer.get("head"));
+						}
+
+						@Override
+						protected PullRequest getPullRequest() {
+							return context.getPullRequest();
+						}
+
+						@Override
+						protected CompareContext getCompareContext() {
+							return SourceViewPanel.this.getCompareContext();
 						}
 
 					};
@@ -691,6 +718,13 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		return (fromLine < line || fromLine == line && fromCh<=ch) && (toLine > line || toLine == line && toCh >= ch);
 	}
 	
+	private CompareContext getCompareContext() {
+		CompareContext compareContext = new CompareContext();
+		compareContext.setCompareCommit(context.getCommit().name());
+		compareContext.setPathFilter(context.getBlobIdent().path);
+		return compareContext;
+	}
+	
 	private TextRange getMark(IRequestParameters params, String beginLineParam, String beginCharParam, 
 			String endLineParam, String endCharParam) {
 		int beginLine = params.getParameterValue(beginLineParam).toInt();
@@ -708,7 +742,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	private String getJsonOfComment(CodeComment comment) {
 		CommentInfo commentInfo = new CommentInfo();
 		commentInfo.id = comment.getId();
-		commentInfo.mark = comment.getCommentPos().getRange();
+		commentInfo.mark = Preconditions.checkNotNull(comment.mapRange(context.getBlobIdent()));
 
 		String jsonOfCommentInfo;
 		try {
@@ -786,19 +820,19 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		
 		String jsonOfBlameInfos = getJsonOfBlameInfos(context.getMode() == Mode.BLAME);
 		Map<Integer, List<CommentInfo>> commentInfos = new HashMap<>(); 
-		for (CodeComment comment: commentsModel.getObject()) {
-			if (comment.getCommentPos().getRange() != null) {
-				int line = comment.getCommentPos().getRange().getBeginLine();
-				List<CommentInfo> commentInfosAtLine = commentInfos.get(line);
-				if (commentInfosAtLine == null) {
-					commentInfosAtLine = new ArrayList<>();
-					commentInfos.put(line, commentInfosAtLine);
-				}
-				CommentInfo commentInfo = new CommentInfo();
-				commentInfo.id = comment.getId();
-				commentInfo.mark = comment.getCommentPos().getRange();
-				commentInfosAtLine.add(commentInfo);
+		for (Map.Entry<CodeComment, TextRange> entry: commentsModel.getObject().entrySet()) {
+			CodeComment comment = entry.getKey();
+			TextRange textRange = entry.getValue();
+			int line = textRange.getBeginLine();
+			List<CommentInfo> commentInfosAtLine = commentInfos.get(line);
+			if (commentInfosAtLine == null) {
+				commentInfosAtLine = new ArrayList<>();
+				commentInfos.put(line, commentInfosAtLine);
 			}
+			CommentInfo commentInfo = new CommentInfo();
+			commentInfo.id = comment.getId();
+			commentInfo.mark = textRange;
+			commentInfosAtLine.add(commentInfo);
 		}
 		for (List<CommentInfo> value: commentInfos.values()) {
 			value.sort((o1, o2)->(int)(o1.id-o2.id));
@@ -1065,7 +1099,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 
 				@Override
 				public String getShortcut() {
-					return "Alt+Shift+O";
+					return "Alt+O";
 				}
 
 				@Override

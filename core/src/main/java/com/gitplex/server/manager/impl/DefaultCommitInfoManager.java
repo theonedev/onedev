@@ -41,6 +41,7 @@ import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.NameAndEmail;
+import com.gitplex.server.git.command.FileChange;
 import com.gitplex.server.git.command.LogCommand;
 import com.gitplex.server.git.command.LogCommit;
 import com.gitplex.server.git.command.RevListCommand;
@@ -79,13 +80,15 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final int INFO_VERSION = 1;
+	private static final int INFO_VERSION = 2;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
 	
 	private static final int COLLECT_BATCH_SIZE = 50000;
 	
 	private static final int MAX_COLLECTING_FILES = 50000;
+	
+	private static final int MAX_HISTORY_PATHS = 100;
 	
 	private static final String INFO_DIR = "commit";
 	
@@ -94,7 +97,9 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	private static final String COMMITS_STORE = "commits";
 	
 	private static final String CONTRIBUTIONS_STORE = "contributions";
-	
+
+	private static final String RENAMES_STORE = "renames";
+
 	private static final ByteIterable LAST_COMMIT_KEY = new StringByteIterable("lastCommit");
 	
 	private static final ByteIterable AUTHORS_KEY = new StringByteIterable("authors");
@@ -180,6 +185,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		} else {
 			Store commitsStore = getStore(env, COMMITS_STORE);
 			Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE); 
+			Store renamesStore = getStore(env, RENAMES_STORE);
 			
 			env.executeInTransaction(new TransactionalExecutable() {
 				
@@ -319,15 +325,37 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 								if (commit.getAuthor() != null) {
 									authors.add(new NameAndEmail(commit.getAuthor()));
-									for (String path: commit.getChangedFiles()) {
-										updateContribution(txn, contributionsStore, commit.getAuthor().getEmailAddress(), path);
-										while (path.contains("/")) {
-											path = StringUtils.substringBeforeLast(path, "/");
+									for (String changedFile: commit.getChangedFiles()) {
+										updateContribution(txn, contributionsStore, 
+												commit.getAuthor().getEmailAddress(), changedFile);
+										while (changedFile.contains("/")) {
+											changedFile = StringUtils.substringBeforeLast(changedFile, "/");
 											updateContribution(txn, contributionsStore, 
-													commit.getAuthor().getEmailAddress(), path);
+													commit.getAuthor().getEmailAddress(), changedFile);
 										}
 										updateContribution(txn, contributionsStore, 
 												commit.getAuthor().getEmailAddress(), "");
+									}
+									for (FileChange change: commit.getFileChanges()) {
+										if (change.getAction() == FileChange.Action.COPY 
+												|| change.getAction() == FileChange.Action.RENAME) {
+											ByteIterable renameKey = new StringByteIterable(change.getNewPath());
+											List<String> renamedFroms;
+											valueBytes = getBytes(renamesStore.get(txn, renameKey));
+											if (valueBytes != null) {
+												renamedFroms = (List<String>) SerializationUtils.deserialize(valueBytes);
+											} else {
+												renamedFroms = new ArrayList<>();
+											}
+											if (!renamedFroms.contains(change.getOldPath())) {
+												renamedFroms.add(0, change.getOldPath());
+												if (renamedFroms.size() > MAX_HISTORY_PATHS)
+													renamedFroms.remove(renamedFroms.size()-1);
+											}
+											
+											valueBytes = SerializationUtils.serialize((Serializable) renamedFroms);
+											renamesStore.put(txn, renameKey, new ArrayByteIterable(valueBytes));
+										}
 									}
 								}
 							}		
@@ -818,6 +846,40 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		return infoDir;
 	}
 
+	@Override
+	public Collection<String> getPossibleHistoryPaths(Project project, String path) {
+		Environment env = getEnv(project.getId().toString());
+		Store store = getStore(env, RENAMES_STORE);
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Collection<String>>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Collection<String> compute(Transaction tx) {
+				Collection<String> renamedFroms = new HashSet<>();
+				renamedFroms.add(path);
+				while (true) {
+					Collection<String> newRenamedFroms = new HashSet<>(renamedFroms);
+					for (String renamedFrom: renamedFroms) {
+						byte[] bytes = getBytes(store.get(tx, 
+								new ArrayByteIterable(renamedFrom.getBytes(Charsets.UTF_8))));
+						if (bytes != null) {
+							for (String each: (List<String>) SerializationUtils.deserialize(bytes)) {
+								newRenamedFroms.add(each);
+								if (newRenamedFroms.size() == MAX_HISTORY_PATHS)
+									return newRenamedFroms;
+							}
+						}
+					}
+					if (renamedFroms.equals(newRenamedFroms))
+						break;
+					else
+						renamedFroms = newRenamedFroms;
+				}
+				return renamedFroms;
+			}
+		});
+	}
+	
 	@Override
 	protected long getLogFileSize() {
 		return LOG_FILE_SIZE;
