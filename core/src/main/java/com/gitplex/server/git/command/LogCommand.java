@@ -79,14 +79,14 @@ public abstract class LogCommand extends GitCommand<Void> {
             			action = FileChange.Action.TYPE;
             		
             		if (action != null) {
-            			String path = QuotedString.GIT_PATH.dequote(StringUtils.substringAfter(line, "\t")).trim();
+            			String path = StringUtils.substringAfter(line, "\t");
             			String path1;
             			String path2;
             			if (path.indexOf('\t') != -1) {
-            				path1 = StringUtils.substringBefore(path, "\t").trim();
-            				path2 = StringUtils.substringAfter(path, "\t").trim();
+            				path1 = QuotedString.GIT_PATH.dequote(StringUtils.substringBefore(path, "\t"));
+            				path2 = QuotedString.GIT_PATH.dequote(StringUtils.substringAfter(path, "\t"));
             			} else {
-            				path1 = path2 = path;
+            				path1 = path2 = QuotedString.GIT_PATH.dequote(path);
             			}
             			FileChange fileChange = new FileChange(action, path1, path2);
         				commitBuilderRef.get().fileChanges.add(fileChange);
