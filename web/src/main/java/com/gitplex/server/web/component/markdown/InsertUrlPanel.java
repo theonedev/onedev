@@ -35,6 +35,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.BlobIdentFilter;
@@ -150,6 +151,13 @@ class InsertUrlPanel extends Panel {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
+						ObjectId commitId;
+						try {
+							commitId = blobReferenceSupport.getProject().getRepository()
+									.resolve(blobReferenceSupport.getRevision());
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
 						return new ProjectFilePicker(id, new AbstractReadOnlyModel<Project>() {
 
 							@Override
@@ -157,15 +165,22 @@ class InsertUrlPanel extends Panel {
 								return blobReferenceSupport.getProject();
 							}
 							
-						}, blobReferenceSupport.getRevision()) {
+						}, blobReferenceSupport.getRevision(), commitId) {
 
 							@Override
 							protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
 								String baseUrl = markdownEditor.getBaseUrl();
 								String referenceUrl = urlFor(ProjectBlobPage.class, 
 										ProjectBlobPage.paramsOf(blobReferenceSupport.getProject(), blobIdent)).toString();
-								String relativized = PathUtils.relativize(baseUrl, referenceUrl);							
-								String relativePath = relativized.toString().substring("../".length());
+								String relativized = PathUtils.relativize(baseUrl, referenceUrl);		
+								String relativePath;
+								if (relativized.length() != 0) {
+									relativePath = relativized.toString().substring("../".length());
+								} else if (baseUrl.contains("/")) {
+									relativePath = StringUtils.substringAfterLast(baseUrl, "/");
+								} else {
+									relativePath = baseUrl;
+								}
 								markdownEditor.insertUrl(target, isImage, relativePath, blobIdent.getName(), null);
 								markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
 								dropdown.close();

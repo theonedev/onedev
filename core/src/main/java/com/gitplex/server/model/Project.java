@@ -781,9 +781,13 @@ public class Project extends AbstractEntity {
 	}
 	
 	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter) {
+		return getChildren(blobIdent, blobIdentFilter, getObjectId(blobIdent.revision));
+	}
+	
+	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter, ObjectId commitId) {
 		Repository repository = getRepository();
 		try (RevWalk revWalk = new RevWalk(repository)) {
-			RevTree revTree = revWalk.parseCommit(getObjectId(blobIdent.revision)).getTree();
+			RevTree revTree = revWalk.parseCommit(commitId).getTree();
 			
 			TreeWalk treeWalk;
 			if (blobIdent.path != null) {

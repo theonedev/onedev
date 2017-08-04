@@ -17,6 +17,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.BlobIdentFilter;
@@ -29,11 +30,18 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 
 	private final String revision;
 	
+	private final ObjectId commitId;
+	
 	public ProjectFilePicker(String id, IModel<Project> projectModel, String revision) {
-		super(id, projectModel);
-		this.revision = revision;
+		this(id, projectModel, revision, projectModel.getObject().getObjectId(revision));
 	}
 
+	public ProjectFilePicker(String id, IModel<Project> projectModel, String revision, ObjectId commitId) {
+		super(id, projectModel);
+		this.revision = revision;
+		this.commitId = commitId;
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -56,7 +64,7 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 
 			@Override
 			public Iterator<? extends BlobIdent> getChildren(BlobIdent node) {
-				return getModelObject().getChildren(node, getBlobIdentFilter()).iterator();
+				return getModelObject().getChildren(node, getBlobIdentFilter(), commitId).iterator();
 			}
 
 			@Override
@@ -76,7 +84,8 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 			public void expand(BlobIdent blobIdent) {
 				super.expand(blobIdent);
 				
-				List<BlobIdent> children = ProjectFilePicker.this.getModelObject().getChildren(blobIdent, getBlobIdentFilter());
+				List<BlobIdent> children = ProjectFilePicker.this.getModelObject().getChildren(blobIdent, 
+						getBlobIdentFilter(), commitId);
 				if (children.size() == 1 && children.get(0).isTree()) 
 					expand(children.get(0));
 			}
