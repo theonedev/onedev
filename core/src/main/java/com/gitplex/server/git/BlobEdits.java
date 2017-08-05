@@ -3,13 +3,15 @@ package com.gitplex.server.git;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.Constants;
@@ -29,7 +31,7 @@ import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObjectNotFoundException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
 
 public class BlobEdits implements Serializable {
 	
@@ -48,7 +50,7 @@ public class BlobEdits implements Serializable {
 			else
 				throw new IllegalArgumentException("Invalid old path: " + oldPath);
 		}
-		this.newBlobs = new HashMap<>();
+		this.newBlobs = new LinkedHashMap<>();
 		for (Map.Entry<String, BlobContent> entry: newBlobs.entrySet()) { 
 			String normalizedPath = GitUtils.normalizePath(entry.getKey());
 			if (normalizedPath != null)
@@ -91,7 +93,7 @@ public class BlobEdits implements Serializable {
 							it.remove();
 						}
 					}
-					Map<String, BlobContent> childNewBlobs = new HashMap<>();
+					Map<String, BlobContent> childNewBlobs = new LinkedHashMap<>();
 					for (Iterator<Map.Entry<String, BlobContent>> it = currentNewBlobs.entrySet().iterator(); 
 							it.hasNext();) {
 						Map.Entry<String, BlobContent> entry = it.next();
@@ -127,29 +129,41 @@ public class BlobEdits implements Serializable {
     		}
     		
 			if (!currentNewBlobs.isEmpty()) {
+				Set<String> files = new HashSet<>();
 				for (Map.Entry<String, BlobContent> entry: currentNewBlobs.entrySet()) {
-					List<String> splitted = Splitter.on('/').splitToList(entry.getKey());
-					
-					ObjectId childId = null;
-					FileMode childMode = null;
-					String childName = null;
-					
-					for (int i=splitted.size()-1; i>=0; i--) {
-						if (childId == null) {
-							childName = splitted.get(i);
-							childId = inserter.insert(Constants.OBJ_BLOB, entry.getValue().getBytes());
-							childMode = entry.getValue().getMode();
+					String path = entry.getKey();
+					if (!path.contains("/")) {
+						files.add(path);
+						entries.add(new TreeFormatterEntry(path, entry.getValue().getMode(), 
+								inserter.insert(Constants.OBJ_BLOB, entry.getValue().getBytes())));
+						files.add(path);
+					}
+				}				
+				Set<String> topLevelPathSegments = new LinkedHashSet<>();
+				for (String path: currentNewBlobs.keySet()) {
+					if (path.contains("/")) {
+						String topLevelPathSegment = StringUtils.substringBefore(path, "/");
+						if (files.contains(topLevelPathSegment)) {
+							String blobPath = topLevelPathSegment;
+							if (parentPath != null)
+								blobPath = parentPath + "/" + path;
+							throw new ObjectAlreadyExistsException("Blob path already exists: " + blobPath);
 						} else {
-							TreeFormatter childFormatter = new TreeFormatter();
-							childFormatter.append(childName, childMode, childId);
-							childName = splitted.get(i);
-							childId = inserter.insert(childFormatter);
-							childMode = FileMode.TREE;
+							topLevelPathSegments.add(topLevelPathSegment);
 						}
 					}
-
-					Preconditions.checkState(childId!=null && childMode != null && childName != null);
-					entries.add(new TreeFormatterEntry(childName, childMode, childId));
+				}
+				for (String topLevelPathSegment: topLevelPathSegments) {
+					Map<String, BlobContent> childNewBlobs = new LinkedHashMap<>();
+					for (Map.Entry<String, BlobContent> entry: currentNewBlobs.entrySet()) {
+						String path = entry.getKey();
+						if (path.startsWith(topLevelPathSegment + "/"))
+							childNewBlobs.put(path.substring(topLevelPathSegment.length()+1), entry.getValue());
+					}					
+					ObjectId childTreeId = insertTree(revTree, treeWalk, inserter, treeWalk.getPathString(), 
+							Sets.newHashSet(), childNewBlobs);
+					if (childTreeId != null) 
+						entries.add(new TreeFormatterEntry(topLevelPathSegment, FileMode.TREE, childTreeId));
 				}
 			}
 			if (!entries.isEmpty()) {
@@ -210,7 +224,7 @@ public class BlobEdits implements Serializable {
 			treeWalk.addTree(revTree);
 
 			ObjectId treeId = insertTree(revTree, treeWalk, inserter, null, new HashSet<>(oldPaths), 
-					new HashMap<>(newBlobs));
+					new LinkedHashMap<>(newBlobs));
 	        
 	        if (treeId != null)
 	        	commit.setTreeId(treeId);

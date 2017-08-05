@@ -2,7 +2,7 @@ package com.gitplex.server.web.page.project.blob;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +43,8 @@ abstract class BlobUploadPanel extends Panel {
 	private static final int MAX_FILE_SIZE = 10; // In meta bytes
 	
 	private final BlobRenderContext context;
+	
+	private String subDirectory;
 	
 	private String summaryCommitMessage;
 	
@@ -86,11 +88,25 @@ abstract class BlobUploadPanel extends Panel {
 				super.onSubmit(target, form);
 
 				ProjectManager projectManager = GitPlex.getInstance(ProjectManager.class);
-				Map<String, BlobContent> newBlobs = new HashMap<>();
+				Map<String, BlobContent> newBlobs = new LinkedHashMap<>();
+				
+				String directory;
+				if (context.getBlobIdent().path != null) {
+					if (subDirectory != null) 
+						directory = context.getBlobIdent().path + "/" + subDirectory;
+					else
+						directory = context.getBlobIdent().path;
+				} else {
+					if (subDirectory != null) 
+						directory = subDirectory;
+					else
+						directory = null;
+				}
+				
 				for (FileUpload upload: uploads) {
 					String blobPath = upload.getClientFileName();
-					if (context.getBlobIdent().path != null)
-						blobPath = context.getBlobIdent().path + "/" + blobPath;
+					if (directory != null)
+						blobPath = directory + "/" + blobPath;
 					
 					if (projectManager.isModificationNeedsQualityCheck(SecurityUtils.getUser(), context.getProject(), 
 							context.getBlobIdent().revision, blobPath)) {
@@ -146,6 +162,7 @@ abstract class BlobUploadPanel extends Panel {
 			
 		});
 		
+		form.add(new TextField<String>("subDirectory", new PropertyModel<String>(this, "subDirectory")));
 		form.add(new TextField<String>("summaryCommitMessage", 
 				new PropertyModel<String>(this, "summaryCommitMessage")));
 		form.add(new TextArea<String>("detailCommitMessage", new PropertyModel<String>(this, "detailCommitMessage")));

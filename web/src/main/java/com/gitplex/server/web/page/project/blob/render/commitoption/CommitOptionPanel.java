@@ -2,8 +2,8 @@ package com.gitplex.server.web.page.project.blob.render.commitoption;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -315,7 +315,7 @@ public class CommitOptionPanel extends Panel {
 			Repository repository = context.getProject().getRepository();
 			ObjectId newCommitId = null;
 
-			Map<String, BlobContent> newBlobs = new HashMap<>();
+			Map<String, BlobContent> newBlobs = new LinkedHashMap<>();
 			if (newContentProvider != null) {
 				
 				if (GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(SecurityUtils.getUser(), 
