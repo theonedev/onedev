@@ -51,7 +51,7 @@ import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-class InsertUrlPanel extends Panel {
+abstract class InsertUrlPanel extends Panel {
 
 	private static final MimetypesFileTypeMap MIME_TYPES = new MimetypesFileTypeMap();
 	
@@ -75,7 +75,7 @@ class InsertUrlPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				markdownEditor.closeUrlInserter(target, this);
+				onClose(target);
 			}
 			
 		});
@@ -119,7 +119,7 @@ class InsertUrlPanel extends Panel {
 					target.add(InsertUrlPanel.this);
 				} else {
 					markdownEditor.insertUrl(target, isImage, url, null, null);
-					markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
+					onClose(target);
 				}
 			}
 			
@@ -197,7 +197,7 @@ class InsertUrlPanel extends Panel {
 									relativePath = baseUrl;
 								}
 								markdownEditor.insertUrl(target, isImage, relativePath, blobIdent.getName(), null);
-								markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
+								onClose(target);
 								dropdown.close();
 							}
 
@@ -243,7 +243,7 @@ class InsertUrlPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						markdownEditor.insertUrl(target, isImage, attachmentUrl, attachmentName, null);
-						markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
+						onClose(target);
 					}
 
 					@Override
@@ -315,7 +315,7 @@ class InsertUrlPanel extends Panel {
 					}
 					markdownEditor.insertUrl(target, isImage, 
 							attachmentSupport.getAttachmentUrl(attachmentName), attachmentName, null);
-					markdownEditor.closeUrlInserter(target, InsertUrlPanel.this);
+					onClose(target);
 				} else {
 					error("Please select a non-empty file");
 					target.add(InsertUrlPanel.this);						
@@ -340,4 +340,5 @@ class InsertUrlPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
+	protected abstract void onClose(AjaxRequestTarget target);
 }

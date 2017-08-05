@@ -304,33 +304,6 @@ gitplex.server.markdown = {
 			gitplex.server.markdown.autofit(containerId, width, height);
 		});
 
-		function onSelectUrl(isImage) {
-			var $modal = $("" +
-					"<div class='modal'>" +
-	       	   		"<div class='modal-dialog'>" +
-	       	   		"<div class='modal-content'>" +
-	       	   		"<div id='" + containerId + "-urlselector'></div>" +
-	       	   		"</div>" +
-	       	   		"</div>" +
-	       	   		"</div>");
-			// Make sure to append to body to avoid z-index issues causing modal to sit in background
-	       	$("body").append($modal);
-	       	$modal.modal({show: true, backdrop: "static", keyboard: false});
-	       	$modal.on('hidden.bs.modal', function (e) {
-	       		$modal.remove();
-	       		$input.focus();
-	       	});
-	       	$modal.keyup(function(e) {
-	       		if (e.keyCode == 27) {
-	       			$modal.modal("hide");
-	       		}
-	       	});
-	       	if (isImage)
-	       		callback("selectImage");
-	       	else
-	       		callback("selectLink");
-		}
-		
 		$head.find(".do-bold").click(function() {
 			var selected = $input.range();
 			if (selected.length != 0) {
@@ -524,7 +497,10 @@ gitplex.server.markdown = {
 		});
 		
 		$head.find(".do-image, .do-link").click(function() {
-			onSelectUrl($(this).hasClass("do-image"));
+	       	if ($(this).hasClass("do-image"))
+	       		callback("selectImage");
+	       	else
+	       		callback("selectLink");
 		});
 
 		$input[0].cachedEmojis = [];

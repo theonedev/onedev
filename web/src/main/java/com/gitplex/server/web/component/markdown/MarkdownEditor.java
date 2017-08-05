@@ -51,11 +51,12 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.component.markdown.emoji.EmojiOnes;
-import com.gitplex.server.web.page.base.BasePage;
+import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.util.avatar.AvatarManager;
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public class MarkdownEditor extends FormComponentPanel<String> {
@@ -317,13 +318,29 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					break;
 				case "selectImage":
 				case "selectLink":
-					BasePage page = (BasePage) getPage();
-					InsertUrlPanel urlSelector = new InsertUrlPanel(
-							page.getRootComponents().newChildId(), MarkdownEditor.this, action.equals("selectImage"));
-					urlSelector.setOutputMarkupId(true);
-					page.getRootComponents().add(urlSelector);
-					urlSelector.setMarkupId(container.getMarkupId() + "-urlselector");
-					target.add(urlSelector);
+					new ModalPanel(target) {
+						
+						@Override
+						protected Component newContent(String id) {
+							return new InsertUrlPanel(id, MarkdownEditor.this, action.equals("selectImage")) {
+
+								@Override
+								protected void onClose(AjaxRequestTarget target) {
+									close();
+								}
+								
+							};
+						}
+
+						@Override
+						protected void onClosed() {
+							super.onClosed();
+							AjaxRequestTarget target = 
+									Preconditions.checkNotNull(RequestCycle.get().find(AjaxRequestTarget.class));
+							target.appendJavaScript(String.format("$('#%s textarea').focus();", container.getMarkupId()));
+						}
+						
+					};
 					break;
 				case "insertUrl":
 					String name;
@@ -398,13 +415,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				container.getMarkupId(), isImage, StringEscapeUtils.escapeEcmaScript(url), 
 				name!=null?"'"+StringEscapeUtils.escapeEcmaScript(name)+"'":"undefined", 
 				replaceMessage!=null?"'"+replaceMessage+"'":"undefined");
-		target.appendJavaScript(script);
-	}
-	
-	public void closeUrlInserter(AjaxRequestTarget target, Component urlInserter) {
-		BasePage page = (BasePage) urlInserter.getPage();
-		page.getRootComponents().remove(urlInserter);
-		String script = String.format("$('#%s-urlselector').closest('.modal').modal('hide');", container.getMarkupId());
 		target.appendJavaScript(script);
 	}
 	
