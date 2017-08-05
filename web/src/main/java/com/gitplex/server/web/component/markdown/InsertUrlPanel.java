@@ -46,6 +46,7 @@ import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.projectfilepicker.ProjectFilePicker;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -124,8 +125,8 @@ class InsertUrlPanel extends Panel {
 			
 		});
 
-		BlobReferenceSupport blobReferenceSupport = markdownEditor.getBlobReferenceSupport();
-		if (blobReferenceSupport != null) {
+		BlobRenderContext blobRenderContext = markdownEditor.getBlobRenderContext();
+		if (blobRenderContext != null) {
 			BlobIdentFilter blobIdentFilter = new BlobIdentFilter() {
 
 				@Override
@@ -144,34 +145,48 @@ class InsertUrlPanel extends Panel {
 				
 			};
 			
-			BlobIdent rootBlobIdent = new BlobIdent(blobReferenceSupport.getRevision(), null, 
+			BlobIdent rootBlobIdent = new BlobIdent(blobRenderContext.getBlobIdent().revision, null, 
 					FileMode.TYPE_TREE);
-			if (!blobReferenceSupport.getProject().getChildren(rootBlobIdent, blobIdentFilter).isEmpty()) {
+			if (!blobRenderContext.getProject().getChildren(rootBlobIdent, blobIdentFilter).isEmpty()) {
 				add(new DropdownLink("blobPicker") {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
+						/*
+						 * We resolve revision to get latest commit id so that we can select to insert newly 
+						 * added/uploaded files while editing a markdown file
+						 */
 						ObjectId commitId;
 						try {
-							commitId = blobReferenceSupport.getProject().getRepository()
-									.resolve(blobReferenceSupport.getRevision());
+							commitId = blobRenderContext.getProject().getRepository()
+									.resolve(blobRenderContext.getBlobIdent().revision);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
+				
+						BlobIdent blobIdent = blobRenderContext.getBlobIdent();
+						String openDirectory;
+						if (blobIdent.isTree())
+							openDirectory = blobIdent.path;
+						else if (blobIdent.path.contains("/"))
+							openDirectory = StringUtils.substringBeforeLast(blobIdent.path, "/");
+						else
+							openDirectory = null;
+						
 						return new ProjectFilePicker(id, new AbstractReadOnlyModel<Project>() {
 
 							@Override
 							public Project getObject() {
-								return blobReferenceSupport.getProject();
+								return blobRenderContext.getProject();
 							}
 							
-						}, blobReferenceSupport.getRevision(), commitId) {
+						}, blobRenderContext.getBlobIdent().revision, commitId, openDirectory) {
 
 							@Override
 							protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
 								String baseUrl = markdownEditor.getBaseUrl();
 								String referenceUrl = urlFor(ProjectBlobPage.class, 
-										ProjectBlobPage.paramsOf(blobReferenceSupport.getProject(), blobIdent)).toString();
+										ProjectBlobPage.paramsOf(blobRenderContext.getProject(), blobIdent)).toString();
 								String relativized = PathUtils.relativize(baseUrl, referenceUrl);		
 								String relativePath;
 								if (relativized.length() != 0) {

@@ -39,7 +39,7 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		Method getter = getPropertyDescriptor().getPropertyGetter();
 		if (getter.getAnnotation(Markdown.class) != null) {
 			Fragment fragment = new Fragment("content", "markdownFrag", this);
-			fragment.add(input = new MarkdownEditor("input", Model.of(getModelObject()), false));
+			fragment.add(input = new MarkdownEditor("input", Model.of(getModelObject()), false, null));
 			add(fragment);
 		} else if (getter.getAnnotation(Multiline.class) != null) {
 			Fragment fragment = new Fragment("content", "multiLineFrag", this);

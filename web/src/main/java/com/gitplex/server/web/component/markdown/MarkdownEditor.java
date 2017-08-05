@@ -38,18 +38,22 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.crypt.Base64;
+import org.eclipse.jgit.lib.FileMode;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
+import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.manager.MarkdownManager;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.User;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.component.markdown.emoji.EmojiOnes;
 import com.gitplex.server.web.page.base.BasePage;
+import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.util.avatar.AvatarManager;
 import com.google.common.base.Charsets;
 
@@ -61,6 +65,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	private final boolean compactMode;
 	
 	private final boolean initialSplit;
+	
+	private final BlobRenderContext blobRenderContext;
 	
 	private WebMarkupContainer container;
 	
@@ -77,7 +83,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	 * 			editor in compact mode occupies horizontal space and is suitable 
 	 * 			to be used in places such as comment aside the code
 	 */
-	public MarkdownEditor(String id, IModel<String> model, boolean compactMode) {
+	public MarkdownEditor(String id, IModel<String> model, boolean compactMode, 
+			@Nullable BlobRenderContext blobRenderContext) {
 		super(id, model);
 		this.compactMode = compactMode;
 		
@@ -94,6 +101,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		} else {
 			initialSplit = !compactMode;
 		}
+		
+		this.blobRenderContext = blobRenderContext;
 	}
 	
 	@Override
@@ -102,6 +111,18 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		input.setModelObject(getModelObject());
 	}
 
+	@Nullable
+	public String getBaseUrl() {
+		if (blobRenderContext != null) {
+			BlobIdent blobIdent = new BlobIdent(blobRenderContext.getBlobIdent().revision, blobRenderContext.getNewPath(), 
+					FileMode.REGULAR_FILE.getBits());
+			ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
+			return urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(blobRenderContext.getProject(), state)).toString();
+		} else {
+			return null;
+		}
+	}
+	
 	private String render(String markdown) {
 		if (StringUtils.isNotBlank(markdown)) {
 			MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
@@ -412,17 +433,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		return new ArrayList<>();
 	}
 	
-	protected BlobReferenceSupport getBlobReferenceSupport() {
-		return null;
-	}
-	
 	@Nullable
 	protected String getAutosaveKey() {
 		return null;
 	}
-	
-	protected String getBaseUrl() {
-		return null;
-	};
+
+	@Nullable
+	public BlobRenderContext getBlobRenderContext() {
+		return blobRenderContext;
+	}
 	
 }

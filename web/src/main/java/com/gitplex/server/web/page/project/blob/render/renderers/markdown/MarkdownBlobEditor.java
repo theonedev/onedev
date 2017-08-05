@@ -9,22 +9,24 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.util.ContentDetector;
-import com.gitplex.server.web.component.markdown.BlobReferenceSupport;
 import com.gitplex.server.web.component.markdown.MarkdownEditor;
+import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
+import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
 @SuppressWarnings("serial")
 abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
-	private final boolean autoFocus;
+	private final BlobRenderContext context;
 	
 	private final String charset;
 
 	private MarkdownEditor input;
 	
-	public MarkdownBlobEditor(String id, byte[] initialContent, boolean autoFocus) {
+	public MarkdownBlobEditor(String id, BlobRenderContext context, byte[] initialContent) {
 		super(id, Model.of(initialContent));
-		this.autoFocus = autoFocus;
 
+		this.context = context;
+		
 		Charset detectedCharset = ContentDetector.detectCharset(getModelObject());
 		charset = (detectedCharset!=null?detectedCharset:Charset.defaultCharset()).name();
 	}
@@ -34,25 +36,15 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 		super.onInitialize();
 		
 		add(input = new MarkdownEditor("input", Model.of(new String(getModelObject(), Charset.forName(charset))), 
-				false) {
-
-			@Override
-			protected BlobReferenceSupport getBlobReferenceSupport() {
-				return MarkdownBlobEditor.this.getBlobReferenceSupport();
-			}
+				false, context) {
 
 			@Override
 			protected String getAutosaveKey() {
 				return MarkdownBlobEditor.this.getAutosaveKey();
 			}
 
-			@Override
-			protected String getBaseUrl() {
-				return MarkdownBlobEditor.this.getBaseUrl();
-			}
-			
 		});
-		if (!autoFocus) {
+		if (context.getMode() != Mode.EDIT) {
 			input.add(AttributeAppender.append("class", "no-autofocus"));
 		}
 		input.setOutputMarkupId(true);
@@ -70,15 +62,12 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		if (autoFocus) {
+		if (context.getMode() == Mode.EDIT) {
 			String script = String.format("$('#%s textarea').focus();", input.getMarkupId());
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		}
 	}
 
-	protected abstract BlobReferenceSupport getBlobReferenceSupport();
-	
 	protected abstract String getAutosaveKey();
 	
-	protected abstract String getBaseUrl();
 }

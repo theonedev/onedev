@@ -3,6 +3,9 @@ package com.gitplex.server.web.component.projectfilepicker;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -32,14 +35,18 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 	
 	private final ObjectId commitId;
 	
+	private final String initialDirectoryToOpen;
+	
 	public ProjectFilePicker(String id, IModel<Project> projectModel, String revision) {
-		this(id, projectModel, revision, projectModel.getObject().getObjectId(revision));
+		this(id, projectModel, revision, projectModel.getObject().getObjectId(revision), null);
 	}
 
-	public ProjectFilePicker(String id, IModel<Project> projectModel, String revision, ObjectId commitId) {
+	public ProjectFilePicker(String id, IModel<Project> projectModel, String revision, ObjectId commitId, 
+			@Nullable String initialDirectoryToOpen) {
 		super(id, projectModel);
 		this.revision = revision;
 		this.commitId = commitId;
+		this.initialDirectoryToOpen = initialDirectoryToOpen;
 	}
 	
 	@Override
@@ -77,7 +84,18 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new HumanTheme());				
+				add(new HumanTheme());	
+				
+				if (initialDirectoryToOpen != null) {
+					reveal(initialDirectoryToOpen);
+				}
+			}
+			
+			private void reveal(String directory) {
+				expand(new BlobIdent(revision, directory, FileMode.TREE.getBits()));
+				if (directory.contains("/")) {
+					reveal(StringUtils.substringBeforeLast(directory, "/"));
+				}
 			}
 			
 			@Override
