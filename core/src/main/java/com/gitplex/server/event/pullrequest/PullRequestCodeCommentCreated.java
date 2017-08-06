@@ -8,7 +8,7 @@ import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.editable.annotation.Editable;
 
-@Editable(name="commented code")
+@Editable(name="added code comment")
 public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent implements MarkdownAware {
 
 	public PullRequestCodeCommentCreated(PullRequest request, CodeComment comment, boolean passive) {

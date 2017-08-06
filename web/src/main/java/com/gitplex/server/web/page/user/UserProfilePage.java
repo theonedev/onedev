@@ -2,6 +2,7 @@ package com.gitplex.server.web.page.user;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -77,6 +78,7 @@ public class UserProfilePage extends UserPage {
 					} 
 					if (!editor.hasErrors(true)) {
 						userManager.save(user, oldName);
+						Session.get().success("Profile updated");
 						setResponsePage(UserProfilePage.class, UserProfilePage.paramsOf(user));
 					}
 				}

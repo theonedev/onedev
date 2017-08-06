@@ -2,6 +2,7 @@ package com.gitplex.server.web.page.group;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -86,6 +87,7 @@ public class GroupProfilePage extends GroupPage {
 					if (!editor.hasErrors(true)) {
 						groupManager.save(group, oldName);
 						setResponsePage(GroupProfilePage.class, GroupProfilePage.paramsOf(group));
+						Session.get().success("Profile updated");
 					}
 				}
 				

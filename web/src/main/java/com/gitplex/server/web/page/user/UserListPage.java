@@ -143,7 +143,8 @@ public class UserListPage extends LayoutPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.isAdministrator());
+						User user = rowModel.getObject();
+						setVisible(SecurityUtils.isAdministrator() && !user.isRoot() && !user.equals(getLoginUser()));
 					}
 
 				}.add(new ConfirmOnClick("Do you really want to delete user '" + user.getDisplayName() + "'?")));

@@ -16,5 +16,4 @@ public class DefaultPullRequestTaskManager extends AbstractEntityManager<PullReq
 		super(dao);
 	}
 
-
 }

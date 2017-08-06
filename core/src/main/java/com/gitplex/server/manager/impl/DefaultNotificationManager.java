@@ -129,10 +129,8 @@ public class DefaultNotificationManager implements NotificationManager {
 		// Update pull request tasks
 		if (event instanceof PullRequestOpened) {
 			for (ReviewInvitation invitation: request.getReviewInvitations()) {
-				if (invitation.getType() != ReviewInvitation.Type.EXCLUDE) {
-					requestReview(invitation);
+				if (invitation.getType() != ReviewInvitation.Type.EXCLUDE) 
 					notifiedUsers.add(invitation.getUser());
-				}
 			}
 		} else if (event instanceof PullRequestUpdated) {
 			EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
@@ -411,26 +409,24 @@ public class DefaultNotificationManager implements NotificationManager {
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof ReviewInvitation) {
 			ReviewInvitation invitation = (ReviewInvitation) event.getEntity();
-			if (!event.isNew()) {
-				PullRequest request = invitation.getRequest();
-				User user = invitation.getUser();
-				if (invitation.getType() == ReviewInvitation.Type.EXCLUDE) {
-					EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-					criteria.add(Restrictions.eq("request", request)).add(Restrictions.eq("user", user)).add(Restrictions.eq("type", REVIEW));
-					for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) {
-						pullRequestTaskManager.delete(task);
-					}
-				} else {
-					EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-					criteria.add(Restrictions.eq("request", request))
-							.add(Restrictions.eq("user", user))
-							.add(Restrictions.eq("type", PullRequestTask.Type.REVIEW));
-					if (pullRequestTaskManager.find(criteria) == null)
-						requestReview(invitation);
-					watch(invitation.getRequest(), invitation.getUser(), 
-							"You are set to watch this pull request as you are reviewer.");
-				} 
-			}
+			PullRequest request = invitation.getRequest();
+			User user = invitation.getUser();
+			if (invitation.getType() == ReviewInvitation.Type.EXCLUDE) {
+				EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
+				criteria.add(Restrictions.eq("request", request)).add(Restrictions.eq("user", user)).add(Restrictions.eq("type", REVIEW));
+				for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) {
+					pullRequestTaskManager.delete(task);
+				}
+			} else {
+				EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
+				criteria.add(Restrictions.eq("request", request))
+						.add(Restrictions.eq("user", user))
+						.add(Restrictions.eq("type", PullRequestTask.Type.REVIEW));
+				if (pullRequestTaskManager.find(criteria) == null)
+					requestReview(invitation);
+				watch(invitation.getRequest(), invitation.getUser(), 
+						"You are set to watch this pull request as you are invited as a reviewer.");
+			} 
 		}
 	}
 

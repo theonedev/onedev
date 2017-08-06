@@ -234,19 +234,21 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 					IPageManager pageManager = session.getPageManager();
 					Page page = getPage(pageManager);
 
-					WebSocketRequestHandler requestHandler = webSocketSettings.newWebSocketRequestHandler(page, connection);
+					if (page != null) {
+						WebSocketRequestHandler requestHandler = webSocketSettings.newWebSocketRequestHandler(page, connection);
 
-					@SuppressWarnings("rawtypes")
-					WebSocketPayload payload = createEventPayload(message, requestHandler);
+						@SuppressWarnings("rawtypes")
+						WebSocketPayload payload = createEventPayload(message, requestHandler);
 
-					if (!(message instanceof ConnectedMessage || message instanceof ClosedMessage))
-					{
-						requestCycle.scheduleRequestHandlerAfterCurrent(requestHandler);
+						if (!(message instanceof ConnectedMessage || message instanceof ClosedMessage))
+						{
+							requestCycle.scheduleRequestHandlerAfterCurrent(requestHandler);
+						}
+
+						IRequestHandler broadcastingHandler = new WebSocketMessageBroadcastHandler(pageId, resourceName, payload);
+						requestMapper.setHandler(broadcastingHandler);
+						requestCycle.processRequestAndDetach();
 					}
-
-					IRequestHandler broadcastingHandler = new WebSocketMessageBroadcastHandler(pageId, resourceName, payload);
-					requestMapper.setHandler(broadcastingHandler);
-					requestCycle.processRequestAndDetach();
 				}
 			}
 			catch (Exception x)

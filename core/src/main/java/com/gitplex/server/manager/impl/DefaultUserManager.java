@@ -9,6 +9,7 @@ import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
 
 import com.gitplex.launcher.loader.Listen;
+import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.UserManager;
@@ -20,6 +21,7 @@ import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
+import com.gitplex.server.persistence.dao.EntityPersisted;
 import com.gitplex.server.util.StringUtils;
 
 @Singleton
@@ -29,12 +31,15 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
     private final CacheManager cacheManager;
     
+    private final ListenerRegistry listenerRegistry;
+    
 	@Inject
-    public DefaultUserManager(Dao dao, CacheManager cacheManager, PasswordService passwordService) {
+    public DefaultUserManager(Dao dao, CacheManager cacheManager, PasswordService passwordService, ListenerRegistry listenerRegistry) {
         super(dao);
         
         this.passwordService = passwordService;
         this.cacheManager = cacheManager;
+        this.listenerRegistry = listenerRegistry;
     }
 
     @Transactional
@@ -42,6 +47,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 	public void save(User user, String oldName) {
     	if (user.isRoot()) {
     		getSession().replicate(user, ReplicationMode.OVERWRITE);
+    		listenerRegistry.post(new EntityPersisted(user, false));
     	} else {
     		dao.persist(user);
     	}
@@ -115,11 +121,6 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update CodeCommentReply set user=null, userName=:userName where user=:user");
-    	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
-    	query.executeUpdate();
-    	
-    	query = getSession().createQuery("update CodeCommentStatusChange set user=null, userName=:userName where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();

@@ -290,7 +290,7 @@ public class RequestListPage extends ProjectPage {
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (request.getLastEvent() != null) {
 					String description = request.getLastEvent().getType();
-					if (description.contains(" ")) {
+					if (description.startsWith("there are")) {
 						lastEventContainer.add(new WebMarkupContainer("user").setVisible(false));
 					} else {
 						User userForDisplay = User.getForDisplay(request.getLastEvent().getUser(), 

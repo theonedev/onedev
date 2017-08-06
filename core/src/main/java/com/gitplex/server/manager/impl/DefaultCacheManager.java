@@ -250,7 +250,7 @@ public class DefaultCacheManager implements CacheManager {
 					membershipsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, MembershipFacade>> it = memberships.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getUserId().equals(event.getEntity().getId()))
+							if (it.next().getValue().getGroupId().equals(event.getEntity().getId()))
 								it.remove();
 						}
 					} finally {

@@ -70,9 +70,9 @@ public abstract class UserPage extends LayoutPage {
 				tabs.add(new UserTab("Change Password", "fa fa-fw fa-key", PasswordEditPage.class));
 			tabs.add(new UserTab("Access Token", "fa fa-fw fa-key", TokenGeneratePage.class));
 		}
-		tabs.add(new UserTab("Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
+		tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
 		if (SecurityUtils.isAdministrator()) 
-			tabs.add(new UserTab("Authorizations", "fa fa-fw fa-lock", UserAuthorizationsPage.class));
+			tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-lock", UserAuthorizationsPage.class));
 		if (SecurityUtils.canManage(getUser()))
 			tabs.add(new UserTab("Tasks", "fa fa-fw fa-bell-o", TaskListPage.class));
 		

@@ -124,13 +124,13 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 
 	@Listen
 	public void on(PullRequestCommentCreated event) {
-		visit(event.getComment().getUser(), event.getRequest());
+		visit(event.getUser(), event.getRequest());
 	}
 	
 	@Listen
 	public void on(PullRequestCodeCommentEvent event) {
 		if (!event.isPassive())
-			visit(event.getComment().getUser(), event.getRequest());
+			visit(event.getUser(), event.getRequest());
 	}
 	
 	@Listen
