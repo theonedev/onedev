@@ -340,7 +340,6 @@ gitplex.server.sourceView = {
 		    }
 		});		
 		clipboard.on("success", function(e) {
-			gitplex.server.codemirror.clearSelection(cm);
 			clipboard.destroy();
 		});
 		if (loggedIn) {
