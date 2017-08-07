@@ -1,6 +1,8 @@
 package com.gitplex.server.web.component.comment;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -44,6 +47,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.web.assets.js.caret.CaretResourceReference;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
@@ -602,6 +606,7 @@ public abstract class CodeCommentPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(new CaretResourceReference()));
 		response.render(CssHeaderItem.forReference(new CodeCommentResourceReference()));
 	}
 
@@ -611,7 +616,33 @@ public abstract class CodeCommentPanel extends Panel {
 
 		String autosaveKey = "autosave:addCodeCommentReply:" + commentId;
 		
-		CommentInput contentInput = new CommentInput("content", Model.of(""), true) {
+		String initialContent = "";
+		
+		if (getComment().getRelations().isEmpty()) {
+			// automatically adds mentioning if the code comment is not associated with any pull requests, 
+			// as otherwise no one will be aware of our comment
+			List<CodeCommentReply> replies = new ArrayList<>(getComment().getReplies());
+			Collections.sort(replies, new Comparator<CodeCommentReply>() {
+
+				@Override
+				public int compare(CodeCommentReply o1, CodeCommentReply o2) {
+					return o2.getDate().compareTo(o1.getDate());
+				}
+				
+			});
+			for (CodeCommentReply reply: replies) {
+				if (reply.getUser() != null && !reply.getUser().equals(SecurityUtils.getUser())) {
+					initialContent = "@" + reply.getUser().getName() + " ";
+					break;
+				}
+			}
+			if (initialContent.length() == 0 
+					&& getComment().getUser() != null 
+					&& !getComment().getUser().equals(SecurityUtils.getUser())) {
+				initialContent = "@" + getComment().getUser().getName() + " ";
+			}
+		}
+		CommentInput contentInput = new CommentInput("content", Model.of(initialContent), true) {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
@@ -698,7 +729,11 @@ public abstract class CodeCommentPanel extends Panel {
 		fragment.add(form);
 		fragment.setOutputMarkupId(true);
 		get("addReply").replaceWith(fragment);
-		target.add(fragment);				
+		target.add(fragment);	
+		
+		String script = String.format("$('#%s textarea').caret(%d);", 
+				form.getMarkupId(), initialContent.length());
+		target.appendJavaScript(script);
 	}
 	
 	@Nullable
