@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.loader.Listen;
-import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
+import com.gitplex.server.event.codecomment.CodeCommentEvent;
 import com.gitplex.server.web.util.WicketUtils;
 
 @Singleton
@@ -18,7 +18,7 @@ public class CodeCommentChangeBroadcaster {
 	}
 	
 	@Listen
-	public void on(PullRequestCodeCommentEvent event) {
+	public void on(CodeCommentEvent event) {
 		CodeCommentChangedRegion region = new CodeCommentChangedRegion(event.getComment().getId());
 		PageKey sourcePageKey = WicketUtils.getPageKey();
 		webSocketManager.render(region, sourcePageKey);
