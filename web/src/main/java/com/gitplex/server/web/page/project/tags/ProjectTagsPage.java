@@ -50,7 +50,7 @@ import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
 import com.gitplex.server.web.component.verification.VerificationStatusPanel;
-import com.gitplex.server.web.page.project.NoBranchesPage;
+import com.gitplex.server.web.page.project.NoCommitsPage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
@@ -72,7 +72,7 @@ public class ProjectTagsPage extends ProjectPage {
 		super(params);
 		
 		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getProject()));
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
 	}
 	
 	@Override

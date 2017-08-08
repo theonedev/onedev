@@ -158,7 +158,7 @@ public class DefaultIndexManager implements IndexManager {
 					String lastCommitAnalyzersVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
 					if (lastCommitAnalyzersVersion.equals(SymbolExtractorRegistry.getVersion())) {
 						String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
-						ObjectId lastCommitId = repository.resolve(lastCommitHash);
+						ObjectId lastCommitId = ObjectId.fromString(lastCommitHash);
 						if (repository.hasObject(lastCommitId)) { 
 							treeWalk.addTree(revWalk.parseCommit(lastCommitId).getTree());
 							treeWalk.setFilter(TreeFilter.ANY_DIFF);

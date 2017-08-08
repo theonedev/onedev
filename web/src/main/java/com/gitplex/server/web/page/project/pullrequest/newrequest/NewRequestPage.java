@@ -70,7 +70,7 @@ import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.component.verification.RequiredVerificationsPanel;
 import com.gitplex.server.web.page.base.BasePage;
-import com.gitplex.server.web.page.project.NoBranchesPage;
+import com.gitplex.server.web.page.project.NoCommitsPage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
@@ -119,7 +119,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 		super(params);
 		
 		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getProject()));
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
 
 		User currentUser = getLoginUser();
 		if (currentUser == null)

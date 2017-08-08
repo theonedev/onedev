@@ -7,9 +7,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 
 @SuppressWarnings("serial")
-public class NoBranchesPage extends ProjectPage {
+public class NoCommitsPage extends ProjectPage {
 
-	public NoBranchesPage(PageParameters params) {
+	public NoCommitsPage(PageParameters params) {
 		super(params);
 		
 		if (getProject().getDefaultBranch() != null)

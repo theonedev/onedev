@@ -28,6 +28,7 @@ import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.FetchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -37,9 +38,9 @@ import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentRelationManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.CodeCommentRelation;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
-import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
@@ -111,17 +112,23 @@ public abstract class CodeCommentListPanel extends Panel {
 		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Code Comment")) {
 
 			private void openComment(CodeComment comment) {
-				PullRequest request = getPullRequest();
-				if (request != null) {
-					setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, comment));
+				if (!comment.isValid()) {
+					CodeCommentListPanel.this.replaceWith(new InvalidCodeCommentPanel(CodeCommentListPanel.this, 
+							comment.getId()));
 				} else {
-					CompareContext compareContext = comment.getCompareContext();
-					if (!compareContext.getCompareCommit().equals(comment.getMarkPos().getCommit())) {
-						setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(comment));
+					PullRequest request = getPullRequest();
+					if (request != null) {
+						setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, comment));
 					} else {
-						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(comment));
-					}
-				}				
+						String compareCommit = comment.getCompareContext().getCompareCommit();
+						if (!compareCommit.equals(comment.getMarkPos().getCommit())
+								&& getProject().getRepository().hasObject(ObjectId.fromString(compareCommit))) {
+							setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(comment));
+						} else {
+							setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(comment));
+						}
+					}				
+				}
 			}
 			
 			@Override
@@ -192,8 +199,6 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
-				ProjectPage page = (ProjectPage) getPage();
-
 				if (getPullRequest() != null) {
 					EntityCriteria<CodeCommentRelation> criteria = EntityCriteria.of(CodeCommentRelation.class);
 					criteria.setFetchMode("comment", FetchMode.JOIN);
@@ -207,7 +212,7 @@ public abstract class CodeCommentListPanel extends Panel {
 							.iterator();
 				} else {
 					EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
-					criteria.add(Restrictions.eq("project", page.getProject()));
+					criteria.add(Restrictions.eq("project", getProject()));
 					filterOptionModel.getObject().fillCriteria(criteria);
 					criteria.addOrder(Order.desc("id"));
 					return GitPlex.getInstance(Dao.class).findRange(criteria, (int)first, (int)count).iterator();
@@ -259,6 +264,10 @@ public abstract class CodeCommentListPanel extends Panel {
 		add(dataTable);		
 	}
 
+	private Project getProject() {
+		return ((ProjectPage) getPage()).getProject();
+	}
+	
 	@Override
 	protected void onDetach() {
 		filterOptionModel.detach();
@@ -268,7 +277,7 @@ public abstract class CodeCommentListPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CodeCommentListResourceReference()));
+		response.render(CssHeaderItem.forReference(new CodeCommentResourceReference()));
 	}
 
 	@Nullable

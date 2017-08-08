@@ -75,7 +75,7 @@ import com.gitplex.server.web.component.menu.MenuLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
 import com.gitplex.server.web.component.revisionpicker.RevisionPicker;
-import com.gitplex.server.web.page.project.NoBranchesPage;
+import com.gitplex.server.web.page.project.NoCommitsPage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.navigator.BlobNavigator;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
@@ -133,7 +133,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		super(params);
 		
 		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getProject()));
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
 		
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		String segment = params.get(PARAM_REVISION).toString();

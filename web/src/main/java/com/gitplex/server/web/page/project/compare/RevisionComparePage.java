@@ -51,7 +51,7 @@ import com.gitplex.server.web.component.revisionpicker.AffinalRevisionPicker;
 import com.gitplex.server.web.component.tabbable.AjaxActionTab;
 import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
-import com.gitplex.server.web.page.project.NoBranchesPage;
+import com.gitplex.server.web.page.project.NoCommitsPage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.pullrequest.newrequest.NewRequestPage;
@@ -125,13 +125,14 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		state.mark = comment.getMarkPos();
 		state.compareWithMergeBase = false;
 		CompareContext compareContext = comment.getCompareContext();
+		String compareCommit = compareContext.getCompareCommit();
 		Project project = comment.getProject();
 		if (compareContext.isLeftSide()) {
-			state.leftSide = new ProjectAndRevision(project, compareContext.getCompareCommit());
+			state.leftSide = new ProjectAndRevision(project, compareCommit);
 			state.rightSide = new ProjectAndRevision(project, comment.getMarkPos().getCommit());
 		} else {
 			state.leftSide = new ProjectAndRevision(project, comment.getMarkPos().getCommit());
-			state.rightSide = new ProjectAndRevision(project, compareContext.getCompareCommit());
+			state.rightSide = new ProjectAndRevision(project, compareCommit);
 		}
 		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 		state.whitespaceOption = compareContext.getWhitespaceOption();
@@ -167,7 +168,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		super(params);
 		
 		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getProject()));
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
 
 		String str = params.get(PARAM_LEFT).toString();
 		if (str != null) {

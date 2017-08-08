@@ -216,6 +216,10 @@ public class CodeComment extends AbstractEntity {
 		return new ComparingInfo(markPos.getCommit(), compareContext);
 	}
 	
+	public boolean isValid() {
+		return project.getRepository().hasObject(ObjectId.fromString(markPos.getCommit()));
+	}
+	
 	@Nullable
 	public TextRange mapRange(BlobIdent blobIdent) {
 		RevCommit commit = project.getRevCommit(blobIdent.revision);

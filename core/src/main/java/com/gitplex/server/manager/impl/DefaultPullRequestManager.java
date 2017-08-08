@@ -411,7 +411,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void check(PullRequest request) {
-		if (request.isOpen()) {
+		if (request.isOpen() && request.isValid()) {
 			if (request.getSourceProject() == null) {
 				discard(request, "Source project no longer exists");
 			} else if (request.getSource().getObjectId(false) == null) {

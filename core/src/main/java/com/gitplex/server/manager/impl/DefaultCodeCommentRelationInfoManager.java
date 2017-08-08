@@ -118,6 +118,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 			public void doWorks(Collection<Prioritized> works) {
 				boolean hasMore;
 				do {
+					// do the work batch by batch to avoid consuming too much memory
 					hasMore = unitOfWork.call(new Callable<Boolean>() {
 
 						@Override
@@ -174,39 +175,41 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 				@Override
 				public void execute(Transaction txn) {
 					PullRequest request = update.getRequest();
-					for (ObjectId commit: update.getCommits()) {
-						byte[] keyBytes = new byte[20];
-						commit.copyRawTo(keyBytes, 0);
-						ByteIterable commitKey = new ArrayByteIterable(keyBytes);
-						
-						Set<String> pullRequestUUIDs = getPullRequests(pullRequestStore, txn, commitKey);
-						pullRequestUUIDs.add(update.getRequest().getUUID());
-						
-						pullRequestStore.put(txn, commitKey, 
-								new ArrayByteIterable(SerializationUtils.serialize((Serializable) pullRequestUUIDs)));
-						
-						Map<String, ComparingInfo> comments = getCodeComments(codeCommentStore, txn, commitKey);
-						Set<String> uuidsToRemove = new HashSet<>();
-						for (Map.Entry<String, ComparingInfo> entry: comments.entrySet()) {
-							if (request.getRequestComparingInfo(entry.getValue()) != null) {
-								String uuid = entry.getKey();
-								CodeComment comment = codeCommentManager.find(uuid);
-								if (comment != null) {
-									if (codeCommentRelationManager.find(request, comment) == null) {
-										CodeCommentRelation relation = new CodeCommentRelation();
-										relation.setComment(comment);
-										relation.setRequest(request);
-										codeCommentRelationManager.save(relation);
+					if (request.isValid()) {
+						for (ObjectId commit: update.getCommits()) {
+							byte[] keyBytes = new byte[20];
+							commit.copyRawTo(keyBytes, 0);
+							ByteIterable commitKey = new ArrayByteIterable(keyBytes);
+							
+							Set<String> pullRequestUUIDs = getPullRequests(pullRequestStore, txn, commitKey);
+							pullRequestUUIDs.add(update.getRequest().getUUID());
+							
+							pullRequestStore.put(txn, commitKey, 
+									new ArrayByteIterable(SerializationUtils.serialize((Serializable) pullRequestUUIDs)));
+							
+							Map<String, ComparingInfo> comments = getCodeComments(codeCommentStore, txn, commitKey);
+							Set<String> uuidsToRemove = new HashSet<>();
+							for (Map.Entry<String, ComparingInfo> entry: comments.entrySet()) {
+								if (request.getRequestComparingInfo(entry.getValue()) != null) {
+									String uuid = entry.getKey();
+									CodeComment comment = codeCommentManager.find(uuid);
+									if (comment != null) {
+										if (codeCommentRelationManager.find(request, comment) == null) {
+											CodeCommentRelation relation = new CodeCommentRelation();
+											relation.setComment(comment);
+											relation.setRequest(request);
+											codeCommentRelationManager.save(relation);
+										}
+									} else {
+										uuidsToRemove.add(uuid);
 									}
-								} else {
-									uuidsToRemove.add(uuid);
 								}
 							}
-						}
-						if (!uuidsToRemove.isEmpty()) {
-							comments.keySet().removeAll(uuidsToRemove);
-							codeCommentStore.put(txn, commitKey, 
-									new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
+							if (!uuidsToRemove.isEmpty()) {
+								comments.keySet().removeAll(uuidsToRemove);
+								codeCommentStore.put(txn, commitKey, 
+										new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
+							}
 						}
 					}
 					defaultStore.put(txn, LAST_PULL_REQUEST_UPDATE_KEY, new StringByteIterable(update.getUUID()));
@@ -228,52 +231,56 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 		List<CodeComment> unprocessedCodeComments = codeCommentManager.findAllAfter(project, 
 				lastCodeCommentUUID, BATCH_SIZE);
 		for (CodeComment comment: unprocessedCodeComments) {
-			env.executeInTransaction(new TransactionalExecutable() {
+			if (comment.isValid()) {
+				env.executeInTransaction(new TransactionalExecutable() {
 
-				private void associateCommentWithCommit(Transaction txn, String commit) {
-					ObjectId commitId = ObjectId.fromString(commit);
-					byte[] keyBytes = new byte[20];
-					commitId.copyRawTo(keyBytes, 0);
-					ByteIterable commitKey = new ArrayByteIterable(keyBytes);
-					
-					Map<String, ComparingInfo> comments = getCodeComments(codeCommentStore, txn, commitKey);
-					comments.put(comment.getUUID(), comment.getComparingInfo());
-					codeCommentStore.put(txn, commitKey, 
-							new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
+					private void associateCommentWithCommit(Transaction txn, String commit) {
+						ObjectId commitId = ObjectId.fromString(commit);
+						byte[] keyBytes = new byte[20];
+						commitId.copyRawTo(keyBytes, 0);
+						ByteIterable commitKey = new ArrayByteIterable(keyBytes);
+						
+						Map<String, ComparingInfo> comments = getCodeComments(codeCommentStore, txn, commitKey);
+						comments.put(comment.getUUID(), comment.getComparingInfo());
+						codeCommentStore.put(txn, commitKey, 
+								new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
 
-					Set<String> pullRequestUUIDs = getPullRequests(pullRequestStore, txn, commitKey);
-					
-					Set<String> uuidsToRemove = new HashSet<>();
-					for (String uuid: pullRequestUUIDs) {
-						PullRequest request = pullRequestManager.find(uuid);
-						if (request != null) {
-							if (request.getRequestComparingInfo(comment.getComparingInfo()) != null 
-									&& codeCommentRelationManager.find(request, comment) == null) {
-								CodeCommentRelation relation = new CodeCommentRelation();
-								relation.setComment(comment);
-								relation.setRequest(request);
-								codeCommentRelationManager.save(relation);
+						Set<String> pullRequestUUIDs = getPullRequests(pullRequestStore, txn, commitKey);
+						
+						Set<String> uuidsToRemove = new HashSet<>();
+						for (String uuid: pullRequestUUIDs) {
+							PullRequest request = pullRequestManager.find(uuid);
+							if (request != null && request.isValid()) {
+								if (request.getRequestComparingInfo(comment.getComparingInfo()) != null 
+										&& codeCommentRelationManager.find(request, comment) == null) {
+									CodeCommentRelation relation = new CodeCommentRelation();
+									relation.setComment(comment);
+									relation.setRequest(request);
+									codeCommentRelationManager.save(relation);
+								}
+							} else {
+								uuidsToRemove.add(uuid);
 							}
-						} else {
-							uuidsToRemove.add(uuid);
+						}
+						if (!uuidsToRemove.isEmpty()) {
+							pullRequestUUIDs.removeAll(uuidsToRemove);
+							pullRequestStore.put(txn, commitKey, 
+									new ArrayByteIterable(SerializationUtils.serialize((Serializable) pullRequestUUIDs)));
 						}
 					}
-					if (!uuidsToRemove.isEmpty()) {
-						pullRequestUUIDs.removeAll(uuidsToRemove);
-						pullRequestStore.put(txn, commitKey, 
-								new ArrayByteIterable(SerializationUtils.serialize((Serializable) pullRequestUUIDs)));
+					
+					@Override
+					public void execute(Transaction txn) {
+						associateCommentWithCommit(txn, comment.getMarkPos().getCommit());
+						String compareCommit = comment.getCompareContext().getCompareCommit();
+						if (!comment.getMarkPos().getCommit().equals(compareCommit)
+								&& project.getRepository().hasObject(ObjectId.fromString(compareCommit)))
+							associateCommentWithCommit(txn, comment.getCompareContext().getCompareCommit());
+						defaultStore.put(txn, LAST_CODE_COMMENT_KEY, new StringByteIterable(comment.getUUID()));
 					}
-				}
-				
-				@Override
-				public void execute(Transaction txn) {
-					associateCommentWithCommit(txn, comment.getMarkPos().getCommit());
-					if (!comment.getMarkPos().getCommit().equals(comment.getCompareContext().getCompareCommit()))
-						associateCommentWithCommit(txn, comment.getCompareContext().getCompareCommit());
-					defaultStore.put(txn, LAST_CODE_COMMENT_KEY, new StringByteIterable(comment.getUUID()));
-				}
-				
-			});
+					
+				});
+			}
 		}
 		
 		return unprocessedPullRequestUpdates.size() == BATCH_SIZE || unprocessedCodeComments.size() == BATCH_SIZE;

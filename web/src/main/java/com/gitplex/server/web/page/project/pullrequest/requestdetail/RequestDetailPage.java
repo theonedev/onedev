@@ -58,22 +58,22 @@ import com.gitplex.server.manager.PullRequestManager;
 import com.gitplex.server.manager.PullRequestUpdateManager;
 import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.manager.VisitManager;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestUpdate;
-import com.gitplex.server.model.support.ProjectAndBranch;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.MergePreview;
 import com.gitplex.server.model.support.MergeStrategy;
+import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.component.comment.CommentInput;
 import com.gitplex.server.web.component.comment.ProjectAttachmentSupport;
 import com.gitplex.server.web.component.floating.FloatingPanel;
-import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.DropdownLink;
+import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.component.tabbable.PageTab;
@@ -82,8 +82,9 @@ import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.component.verification.VerificationStatusPanel;
 import com.gitplex.server.web.page.base.BasePage;
+import com.gitplex.server.web.page.project.NoCommitsPage;
 import com.gitplex.server.web.page.project.ProjectPage;
-import com.gitplex.server.web.page.project.NoBranchesPage;
+import com.gitplex.server.web.page.project.pullrequest.InvalidRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.mergepreview.MergePreviewPage;
@@ -117,7 +118,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 		super(params);
 		
 		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getProject()));
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
 
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -131,6 +132,10 @@ public abstract class RequestDetailPage extends ProjectPage {
 			}
 
 		};
+		
+		if (!getPullRequest().isValid())
+			throw new RestartResponseException(InvalidRequestPage.class, InvalidRequestPage.paramsOf(getPullRequest()));
+			
 
 		reviewUpdateId = requestModel.getObject().getLatestUpdate().getId();
 	}
@@ -904,7 +909,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 	public static PageParameters paramsOf(PullRequest request) {
 		PageParameters params = ProjectPage.paramsOf(request.getTarget().getProject());
-		params.set("request", request.getNumber());
+		params.set(PARAM_REQUEST, request.getNumber());
 		return params;
 	}
 

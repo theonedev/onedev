@@ -29,6 +29,7 @@ import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.DynamicUpdate;
@@ -189,6 +190,8 @@ public class PullRequest extends AbstractEntity {
 	private transient Collection<RevCommit> mergedCommits;
 	
 	private transient Optional<MergePreview> mergePreviewOpt;
+	
+	private transient Boolean valid;
 	
 	/**
 	 * Get title of this merge request.
@@ -796,6 +799,27 @@ public class PullRequest extends AbstractEntity {
 				}
 			}
 		} 
+	}
+	
+	public boolean isValid() {
+		if (valid == null) {
+			Repository repository = targetProject.getRepository();
+			if (!repository.hasObject(ObjectId.fromString(baseCommitHash))
+					|| !repository.hasObject(ObjectId.fromString(headCommitHash))) {
+				valid = false;
+			} else {
+				for (PullRequestUpdate update: updates) {
+					if (!repository.hasObject(ObjectId.fromString(update.getMergeBaseCommitHash()))
+							|| !repository.hasObject(ObjectId.fromString(update.getHeadCommitHash()))) {
+						valid = false;
+						break;
+					}
+				}
+				if (valid == null)
+					valid = true;
+			}
+		} 
+		return valid;
 	}
 	
 	public static class ComparingInfo implements Serializable {

@@ -23,7 +23,7 @@ import com.gitplex.server.web.page.group.GroupProfilePage;
 import com.gitplex.server.web.page.group.NewGroupPage;
 import com.gitplex.server.web.page.init.ServerInitPage;
 import com.gitplex.server.web.page.project.NewProjectPage;
-import com.gitplex.server.web.page.project.NoBranchesPage;
+import com.gitplex.server.web.page.project.NoCommitsPage;
 import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.branches.ProjectBranchesPage;
@@ -31,6 +31,7 @@ import com.gitplex.server.web.page.project.comments.ProjectCodeCommentsPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.commit.ProjectCommitsPage;
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
+import com.gitplex.server.web.page.project.pullrequest.InvalidRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.codecomments.RequestCodeCommentsPage;
@@ -164,6 +165,7 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		add(new GitPlexPageMapper("projects/${project}/pull/${request}/code-comments", RequestCodeCommentsPage.class));
 		add(new GitPlexPageMapper("projects/${project}/pull/${request}/changes", RequestChangesPage.class));
 		add(new GitPlexPageMapper("projects/${project}/pull/${request}/merge-preview", MergePreviewPage.class));
+		add(new GitPlexPageMapper("projects/${project}/pull/${request}/invalid", InvalidRequestPage.class));
 
 		add(new GitPlexPageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
 		add(new GitPlexPageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));
@@ -171,7 +173,7 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		add(new GitPlexPageMapper("projects/${project}/settings/tag-protection", TagProtectionPage.class));
 		add(new GitPlexPageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));
 		
-		add(new GitPlexPageMapper("projects/${project}/no-branches", NoBranchesPage.class));
+		add(new GitPlexPageMapper("projects/${project}/no-commits", NoCommitsPage.class));
 	}
 
 }

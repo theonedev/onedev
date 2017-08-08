@@ -162,10 +162,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				
 			});
 			if (lastCommitId != null) {
-				try (RevWalk revWalk = new RevWalk(repository)) {
-					if (GitUtils.parseCommit(revWalk, lastCommitId) != null)
-						revisions.add("^" + lastCommitId.name());
-				} 
+				if (repository.hasObject(lastCommitId))
+					revisions.add("^" + lastCommitId.name());
 			}
 			
 			int count = 0;
@@ -196,10 +194,15 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
 						
 						ObjectId lastCommitId;
-						if (bytes != null)
-							lastCommitId = ObjectId.fromRaw(bytes);
-						else
+						if (bytes != null) {
+							ObjectId commitId = ObjectId.fromRaw(bytes);
+							if (repository.hasObject(commitId))
+								lastCommitId = commitId;
+							else
+								lastCommitId = null;
+						} else {
 							lastCommitId = null;
+						}
 						
 						bytes = getBytes(defaultStore.get(txn, COMMIT_COUNT_KEY));
 						int prevCommitCount;

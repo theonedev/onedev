@@ -47,6 +47,7 @@ import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.commit.ProjectCommitsPage;
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
 import com.gitplex.server.web.page.project.moreinfo.MoreInfoPanel;
+import com.gitplex.server.web.page.project.pullrequest.InvalidRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.newrequest.NewRequestPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.RequestDetailPage;
 import com.gitplex.server.web.page.project.pullrequest.requestlist.RequestListPage;
@@ -105,10 +106,10 @@ public abstract class ProjectPage extends LayoutPage {
 		// we do not need to reload the project this time as we already have that object on hand
 		projectModel.setObject(project);
 		
-		if (!(this instanceof NoBranchesPage) 
+		if (!(this instanceof NoCommitsPage) 
 				&& !(this instanceof ProjectSettingPage) 
 				&& getProject().getDefaultBranch() == null) { 
-			throw new RestartResponseException(NoBranchesPage.class, paramsOf(getProject()));
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
 		}
 	}
 	
@@ -137,7 +138,7 @@ public abstract class ProjectPage extends LayoutPage {
 				0, ProjectTagsPage.class));
 		
 		tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-				0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class));
+				0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class));
 		
 		tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
 				0, ProjectCodeCommentsPage.class));

@@ -1,0 +1,20 @@
+<wicket:panel>
+	<div class="invalid-code-comment">
+		<div class="head">
+			Unable to show code comment as associated commit no longer exists in the underlying git repository
+		</div>
+		<div class="body">
+			This might happen for two reasons:
+			<ul>
+				<li> The project points to a wrong git repository. In this case, you will need to copy over the correct repository, 
+				or make sure that the correct global storage directory is specified.</li>
+				<li> The commit is no longer needed and has been garbage collected. 
+				<wicket:enclosure child="delete">
+				In this case, you may also <a wicket:id="delete">delete the code comment</a>
+				</wicket:enclosure>
+				</li>
+			</ul>		
+			<a wicket:id="backToList">Go back to code comment list</a>		
+		</div>
+	</div>
+</wicket:panel>

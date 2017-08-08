@@ -102,8 +102,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		PullRequest request = getPullRequest();
 		if (state.commentId != null) {
 			CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
-			CodeComment.ComparingInfo commentComparingInfo = new CodeComment.ComparingInfo(
-					comment.getMarkPos().getCommit(), comment.getCompareContext());
+			CodeComment.ComparingInfo commentComparingInfo = comment.getComparingInfo();
 			PullRequest.ComparingInfo requestComparingInfo = 
 					getPullRequest().getRequestComparingInfo(commentComparingInfo);
 			if (requestComparingInfo != null && state.oldCommit == null && state.newCommit == null) {
