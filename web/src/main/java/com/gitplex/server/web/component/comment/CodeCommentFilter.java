@@ -26,6 +26,8 @@ public class CodeCommentFilter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String PARAM_CONTENT = "content";
+	
 	private static final String PARAM_USER = "user";
 	
 	private static final String PARAM_PATH = "path";
@@ -33,6 +35,8 @@ public class CodeCommentFilter implements Serializable {
 	private static final String PARAM_BEFORE = "before";
 	
 	private static final String PARAM_AFTER = "after";
+	
+	private String content;
 	
 	private String userName;
 	
@@ -42,6 +46,15 @@ public class CodeCommentFilter implements Serializable {
 	
 	private Date after;
 	
+	@Editable(order=50, name="Content Containing")
+	public String getContent() {
+		return content;
+	}
+	
+	public void setContent(String content) {
+		this.content = content;
+	}
+
 	@Editable(order=100, name="Created by", description="Choose the user who created the comment")
 	@UserChoice
 	public String getUserName() {
@@ -84,6 +97,7 @@ public class CodeCommentFilter implements Serializable {
 	}
 	
 	public CodeCommentFilter(PageParameters params) {
+		content = params.get(PARAM_CONTENT).toString();
 		userName = params.get(PARAM_USER).toString();
 		path = params.get(PARAM_PATH).toString();
 		
@@ -97,13 +111,15 @@ public class CodeCommentFilter implements Serializable {
 	}
 
 	public void fillCriteria(EntityCriteria<CodeComment> criteria) {
+		if (content != null)
+			criteria.add(Restrictions.ilike("content", "%" + content + "%"));
 		if (userName != null)
 			criteria.createCriteria("user").add(Restrictions.eq("name", userName));
 		if (path != null) {
 			String pathQuery = path.replace('*', '%');
 			if (pathQuery.endsWith("/"))
 				pathQuery += "%";
-			criteria.add(Restrictions.ilike("commentPos.path", pathQuery));
+			criteria.add(Restrictions.ilike("markPos.path", pathQuery));
 		}
 			
 		if (before != null)
@@ -114,13 +130,15 @@ public class CodeCommentFilter implements Serializable {
 	
 	public void fillRelationCriteria(EntityCriteria<CodeCommentRelation> criteria) {
 		Criteria commentCriteria = criteria.createCriteria("comment");
+		if (content != null)
+			commentCriteria.add(Restrictions.ilike("content", "%" + content + "%"));
 		if (userName != null)
 			commentCriteria.createCriteria("user").add(Restrictions.eq("name", userName));
 		if (path != null) {
 			String pathQuery = path.replace('*', '%');
 			if (pathQuery.endsWith("/"))
 				pathQuery += "%";
-			commentCriteria.add(Restrictions.ilike("commentPos.path", pathQuery));
+			commentCriteria.add(Restrictions.ilike("markPos.path", pathQuery));
 		}
 			
 		if (before != null)
@@ -130,6 +148,8 @@ public class CodeCommentFilter implements Serializable {
 	}
 	
 	public void fillPageParams(PageParameters params) {
+		if (content != null)
+			params.add(PARAM_CONTENT, content);
 		if (userName != null)
 			params.add(PARAM_USER, userName);
 		if (path != null)

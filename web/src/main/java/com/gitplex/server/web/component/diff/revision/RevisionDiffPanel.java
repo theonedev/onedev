@@ -1144,7 +1144,7 @@ public class RevisionDiffPanel extends Panel {
 
 					@Override
 					public String getObject() {
-						MarkPos markPos = getCommentPos();
+						MarkPos markPos = getMarkPos();
 						if (markPos.getRange() != null) 
 							return "Locate the text this comment applied to";
 						else
@@ -1155,7 +1155,7 @@ public class RevisionDiffPanel extends Panel {
 				setOutputMarkupId(true);
 			}
 			
-			private MarkPos getCommentPos() {
+			private MarkPos getMarkPos() {
 				CodeComment comment = getOpenComment();
 				if (comment != null) {
 					return comment.getMarkPos();
@@ -1166,7 +1166,7 @@ public class RevisionDiffPanel extends Panel {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				MarkPos markPos = getCommentPos();
+				MarkPos markPos = getMarkPos();
 				SourceAware sourceAware = getSourceAware(markPos.getPath());
 				if (sourceAware != null)
 					sourceAware.mark(target, markPos);
