@@ -17,7 +17,6 @@ import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanDescriptor;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
-import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
 import com.google.common.collect.Sets;
 
@@ -98,7 +97,7 @@ public class UserProfilePage extends UserPage {
 				@Override
 				public void onClick() {
 					GitPlex.getInstance(UserManager.class).delete(getUser());
-					setResponsePage(ProjectListPage.class);
+					setResponsePage(UserListPage.class);
 				}
 				
 			}.add(new ConfirmOnClick("Do you really want to delete user '" + getUser().getDisplayName() + "'?")));

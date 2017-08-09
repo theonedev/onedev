@@ -21,7 +21,6 @@ import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanDescriptor;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.PathSegment;
-import com.gitplex.server.web.page.project.ProjectListPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
 import com.google.common.collect.Sets;
 
@@ -131,7 +130,7 @@ public class GroupProfilePage extends GroupPage {
 				@Override
 				public void onClick() {
 					GitPlex.getInstance(GroupManager.class).delete(getGroup());
-					setResponsePage(ProjectListPage.class);
+					setResponsePage(GroupListPage.class);
 				}
 				
 			}.add(new ConfirmOnClick("Do you really want to delete group '" + getGroup().getName() + "'?")));
