@@ -60,6 +60,11 @@ public class UserListPage extends LayoutPage {
 	}
 	
 	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.isAdministrator();
+	}
+	
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

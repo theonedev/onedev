@@ -219,6 +219,11 @@ public class GroupListPage extends LayoutPage {
 	}
 
 	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.isAdministrator();
+	}
+	
+	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new GroupResourceReference()));

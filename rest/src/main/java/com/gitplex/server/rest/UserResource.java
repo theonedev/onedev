@@ -42,8 +42,9 @@ public class UserResource {
 	@GET
 	public Response query(@QueryParam("name") String name, @Email @QueryParam("email") String email, 
 			@QueryParam("per_page") Integer perPage, @QueryParam("page") Integer page, @Context UriInfo uriInfo) {
-    	if (!SecurityUtils.canAccessPublic())
+    	if (!SecurityUtils.isAdministrator())
     		throw new UnauthorizedException("Unauthorized access to user profiles");
+    	
     	EntityCriteria<User> criteria = EntityCriteria.of(User.class);
     	if (name != null)
     		criteria.add(Restrictions.eq("name", name));
@@ -69,8 +70,6 @@ public class UserResource {
     @GET
     @Path("/{userId}")
     public User get(@PathParam("userId") Long userId) {
-    	if (!SecurityUtils.canAccessPublic())
-    		throw new UnauthorizedException("Unauthorized access to user profile");
     	return userManager.load(userId);
     }
     

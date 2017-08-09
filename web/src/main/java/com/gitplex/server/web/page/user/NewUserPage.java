@@ -106,21 +106,23 @@ public class NewUserPage extends LayoutPage {
 	protected List<ComponentRenderer> getBreadcrumbs() {
 		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
 		
-		breadcrumbs.add(new ComponentRenderer() {
-
-			@Override
-			public Component render(String componentId) {
-				return new ViewStateAwarePageLink<Void>(componentId, UserListPage.class) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of("Users");
-					}
-					
-				};
-			}
-			
-		});
+		if (SecurityUtils.isAdministrator()) {
+			breadcrumbs.add(new ComponentRenderer() {
+	
+				@Override
+				public Component render(String componentId) {
+					return new ViewStateAwarePageLink<Void>(componentId, UserListPage.class) {
+	
+						@Override
+						public IModel<?> getBody() {
+							return Model.of("Users");
+						}
+						
+					};
+				}
+				
+			});
+		}
 
 		breadcrumbs.add(new ComponentRenderer() {
 			

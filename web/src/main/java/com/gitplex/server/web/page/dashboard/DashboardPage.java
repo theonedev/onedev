@@ -47,7 +47,15 @@ public class DashboardPage extends LayoutPage {
 			
 		});
 		
-		link = new BookmarkablePageLink<Void>("users", UserListPage.class);
+		link = new BookmarkablePageLink<Void>("users", UserListPage.class) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator());
+			}
+			
+		};
 		link.add(new Label("count", GitPlex.getInstance(UserManager.class).findAll().size()));
 		add(link);
 		
@@ -61,7 +69,15 @@ public class DashboardPage extends LayoutPage {
 			
 		});
 		
-		link = new BookmarkablePageLink<Void>("groups", GroupListPage.class);
+		link = new BookmarkablePageLink<Void>("groups", GroupListPage.class) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator());
+			}
+			
+		};
 		link.add(new Label("count", GitPlex.getInstance(GroupManager.class).findAll().size()));
 		add(link);
 		

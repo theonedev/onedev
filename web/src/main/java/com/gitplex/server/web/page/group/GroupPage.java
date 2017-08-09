@@ -76,9 +76,14 @@ public abstract class GroupPage extends LayoutPage {
 	}
 
 	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.isAdministrator();
+	}
+	
+	@Override
 	protected List<ComponentRenderer> getBreadcrumbs() {
 		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
-		
+
 		breadcrumbs.add(new ComponentRenderer() {
 
 			@Override
