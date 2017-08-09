@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 
 import javax.persistence.EntityNotFoundException;
@@ -23,7 +21,6 @@ import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.facade.ProjectFacade;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
 public class AttachmentResource extends AbstractResource {
@@ -73,11 +70,8 @@ public class AttachmentResource extends AbstractResource {
 			throw new RuntimeException(e);
 		}
 
-		try {
-			response.setFileName(URLEncoder.encode(attachment, Charsets.UTF_8.name()));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		response.setFileName(attachment);
+		
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override
