@@ -161,8 +161,9 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		projectsTable.addBottomToolbar(new NoRecordsToolbar(projectsTable, Model.of("No Projects Found")));
-		projectsTable.setOutputMarkupId(true);
 		add(projectsTable);
+		
+		setOutputMarkupId(true);
 	}
 
 	@Override
