@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.gitplex</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0-EAP-build65</version> 
+        <version>1.0-EAP-build66</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -26,7 +26,7 @@
         <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0-EAP-build65</version> 
+            <version>1.0-EAP-build66</version> 
         </dependency>  
         <dependency> 
             <artifactId>lucene-core</artifactId>  
