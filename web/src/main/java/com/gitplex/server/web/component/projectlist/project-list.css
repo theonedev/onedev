@@ -1,0 +1,17 @@
+table.project-list {
+	font-size: 13px;
+}
+table.project-list td.project {
+	font-size: 14px;
+}
+
+table.project-list a {
+	color: #444;
+}
+table.project-list td.author img.avatar {
+	width: 20px;
+	height: 20px;
+}
+table.project-list td.author span, table.project-list td.commit-date {
+	color: #888;
+}

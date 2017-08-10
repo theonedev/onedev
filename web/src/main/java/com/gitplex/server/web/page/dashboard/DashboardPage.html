@@ -2,13 +2,20 @@
 	<div id="dashboard">
 		<div class="summary">
 			<a wicket:id="projects"><i class="fa fa-ext fa-fw fa-repo"></i> <span wicket:id="count"></span> projects</a> <a wicket:id="addProject"><i class="fa fa-plus"></i> add new</a>
-			<div class="help-block">A project in GitPlex represents a git repository. Only those visible to current user will be counted and listed.</div>
+			<div class="help-block">A project in GitPlex represents a git repository. Only those visible to current user will be counted.</div>
+			<wicket:enclosure child="recentVisitedProjects">
+				<div class="title">Recent Visited</div>
+				<div wicket:id="recentVisitedProjects"></div>
+			</wicket:enclosure>
+			<wicket:enclosure child="recentAddedProjects">
+				<div class="title">Recent Added</div>
+				<div wicket:id="recentAddedProjects"></div>
+			</wicket:enclosure>
 		</div>
 		<wicket:enclosure child="users">
 		<div class="summary">
 			<a wicket:id="users"><i class="fa fa-user fa-fw"></i> <span wicket:id="count"></span> users</a> <a wicket:id="addUser"><i class="fa fa-plus"></i> add new</a>
-			<div class="help-block">User profiles in GitPlex are publicly accessible for better collaboration. Users can be granted with project permissions 
-			separately, or they can be added to groups to gain access to projects authorized to the groups</div>
+			<div class="help-block">Users can be granted with project permissions separately, or they can be added to groups to gain access to projects authorized to the groups</div>
 		</div>
 		</wicket:enclosure>
 		<wicket:enclosure child="groups">

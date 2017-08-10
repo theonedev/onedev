@@ -15,16 +15,7 @@
 			<div wicket:id="orphanProjectsNote" class="alert alert-warning">Orphan projects are those without explicit administrators. For instance, 
 			project forked/created by some user will become orphan if that user account is deleted. You may delete orphan projects 
 			to save resource or assign someone else as explicit project administrator if it is still useful.</div>
-			<table wicket:id="projects" class="table"></table>
+			<div wicket:id="projects"></div>
 		</div>		
 	</div>
-	<wicket:fragment wicket:id="projectFrag">
-		<i class="fa fa-ext fa-repo"></i> <a wicket:id="link"><span wicket:id="name"></span></a> 
-	</wicket:fragment>
-	<wicket:fragment wicket:id="authorFrag">
-		<a wicket:id="avatar"></a> <a wicket:id="name"></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="commitMessageFrag">
-		<a wicket:id="link"><span wicket:id="message"></span></a> 
-	</wicket:fragment>
 </wicket:extend>

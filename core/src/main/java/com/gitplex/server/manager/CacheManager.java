@@ -49,6 +49,8 @@ public interface CacheManager {
 	@Nullable
 	Long getUserIdByEmail(String email);
 	
+	Map<String, Long> getProjectIds();
+	
 	@Nullable
 	Long getProjectIdByName(String name);
 	

@@ -51,23 +51,6 @@
 .project.list, .new-project {
 	padding: 20px;
 }
-.project.list table {
-	font-size: 13px;
-}
-.project.list table td.project {
-	font-size: 14px;
-}
-
-.project.list table a {
-	color: #444;
-}
-.project.list table td.author img.avatar {
-	width: 20px;
-	height: 20px;
-}
-.project.list table td.author span, .project.list table td.commit-date {
-	color: #888;
-}
 
 .no-commits>.head {
 	font-size: 20px;

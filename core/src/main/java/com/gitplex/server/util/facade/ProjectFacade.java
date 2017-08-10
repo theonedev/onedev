@@ -66,5 +66,5 @@ public class ProjectFacade extends EntityFacade {
 			return project1.compareTo(project2);
 		}
 	}
-
+	
 }

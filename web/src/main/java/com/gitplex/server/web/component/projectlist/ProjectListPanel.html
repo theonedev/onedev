@@ -1,0 +1,12 @@
+<wicket:panel>
+	<table wicket:id="projects" class="table project-list"></table>
+	<wicket:fragment wicket:id="projectFrag">
+		<i class="fa fa-ext fa-repo"></i> <a wicket:id="link"><span wicket:id="name"></span></a> 
+	</wicket:fragment>
+	<wicket:fragment wicket:id="authorFrag">
+		<a wicket:id="avatar"></a> <a wicket:id="name"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="commitMessageFrag">
+		<a wicket:id="link"><span wicket:id="message"></span></a> 
+	</wicket:fragment>
+</wicket:panel>

@@ -394,6 +394,16 @@ public class DefaultCacheManager implements CacheManager {
 	}
 	
 	@Override
+	public Map<String, Long> getProjectIds() {
+		projectsLock.readLock().lock();
+		try {
+			return new HashMap<>(projectIdsByName);
+		} finally {
+			projectsLock.readLock().unlock();
+		}
+	}
+	
+	@Override
 	public Long getGroupIdByName(String name) {
 		groupsLock.readLock().lock();
 		try {
