@@ -6,3 +6,7 @@
 	font-size: 20px;
 	color: #444;
 }
+
+.dropzone .dz-preview .dz-error-message {
+    top: 150px !important;
+}

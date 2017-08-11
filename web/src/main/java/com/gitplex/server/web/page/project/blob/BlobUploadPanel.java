@@ -2,7 +2,7 @@ package com.gitplex.server.web.page.project.blob;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -88,7 +88,7 @@ abstract class BlobUploadPanel extends Panel {
 				super.onSubmit(target, form);
 
 				ProjectManager projectManager = GitPlex.getInstance(ProjectManager.class);
-				Map<String, BlobContent> newBlobs = new LinkedHashMap<>();
+				Map<String, BlobContent> newBlobs = new HashMap<>();
 				
 				String directory;
 				if (context.getBlobIdent().path != null) {

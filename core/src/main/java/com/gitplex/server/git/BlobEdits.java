@@ -3,9 +3,10 @@ package com.gitplex.server.git;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import com.gitplex.server.git.exception.NotTreeException;
 import com.gitplex.server.git.exception.ObjectAlreadyExistsException;
 import com.gitplex.server.git.exception.ObjectNotFoundException;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
@@ -50,7 +52,7 @@ public class BlobEdits implements Serializable {
 			else
 				throw new IllegalArgumentException("Invalid old path: " + oldPath);
 		}
-		this.newBlobs = new LinkedHashMap<>();
+		this.newBlobs = new HashMap<>();
 		for (Map.Entry<String, BlobContent> entry: newBlobs.entrySet()) { 
 			String normalizedPath = GitUtils.normalizePath(entry.getKey());
 			if (normalizedPath != null)
@@ -93,7 +95,7 @@ public class BlobEdits implements Serializable {
 							it.remove();
 						}
 					}
-					Map<String, BlobContent> childNewBlobs = new LinkedHashMap<>();
+					Map<String, BlobContent> childNewBlobs = new HashMap<>();
 					for (Iterator<Map.Entry<String, BlobContent>> it = currentNewBlobs.entrySet().iterator(); 
 							it.hasNext();) {
 						Map.Entry<String, BlobContent> entry = it.next();
@@ -154,7 +156,7 @@ public class BlobEdits implements Serializable {
 					}
 				}
 				for (String topLevelPathSegment: topLevelPathSegments) {
-					Map<String, BlobContent> childNewBlobs = new LinkedHashMap<>();
+					Map<String, BlobContent> childNewBlobs = new HashMap<>();
 					for (Map.Entry<String, BlobContent> entry: currentNewBlobs.entrySet()) {
 						String path = entry.getKey();
 						if (path.startsWith(topLevelPathSegment + "/"))
@@ -168,6 +170,7 @@ public class BlobEdits implements Serializable {
 			}
 			if (!entries.isEmpty()) {
 				TreeFormatter formatter = new TreeFormatter();
+				Collections.sort(entries);
 				for (TreeFormatterEntry entry: entries)
 					formatter.append(entry.name, entry.mode, entry.id);
 				return inserter.insert(formatter);
@@ -224,7 +227,7 @@ public class BlobEdits implements Serializable {
 			treeWalk.addTree(revTree);
 
 			ObjectId treeId = insertTree(revTree, treeWalk, inserter, null, new HashSet<>(oldPaths), 
-					new LinkedHashMap<>(newBlobs));
+					new HashMap<>(newBlobs));
 	        
 	        if (treeId != null)
 	        	commit.setTreeId(treeId);
@@ -245,18 +248,34 @@ public class BlobEdits implements Serializable {
 		}
 	}
 	
-	public static class TreeFormatterEntry {
+	public static class TreeFormatterEntry implements Comparable<TreeFormatterEntry> {
 
-		String name;
+		final String name;
 		
-		FileMode mode;
+		final FileMode mode;
 		
-		ObjectId id;
+		final ObjectId id;
+		
+		final byte[] nameBytes;
 		
 		public TreeFormatterEntry(String name, FileMode mode, ObjectId id) {
 			this.name = name;
 			this.mode = mode;
 			this.id = id;
+			if (mode.equals(FileMode.TYPE_TREE))
+				nameBytes = (name + "/").getBytes(Charsets.UTF_8);
+			else
+				nameBytes = name.getBytes(Charsets.UTF_8);
+		}
+
+		@Override
+		public int compareTo(TreeFormatterEntry o) {
+			for (int i = 0; i<nameBytes.length && i<o.nameBytes.length; i++) {
+				final int cmp = (nameBytes[i] & 0xff) - (o.nameBytes[i] & 0xff);
+				if (cmp != 0)
+					return cmp;
+			}
+			return nameBytes.length - o.nameBytes.length;
 		}
 
 	}
