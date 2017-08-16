@@ -704,7 +704,17 @@ public class PullRequest extends AbstractEntity {
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = GitPlex.getInstance(VisitManager.class).getVisitDate(user, this);
+			Date visitDate = GitPlex.getInstance(VisitManager.class).getPullRequestVisitDate(user, this);
+			return visitDate != null && visitDate.getTime()>date.getTime();
+		} else {
+			return true;
+		}
+	}
+	
+	public boolean isCodeCommentsVisitedAfter(Date date) {
+		User user = SecurityUtils.getUser();
+		if (user != null) {
+			Date visitDate = GitPlex.getInstance(VisitManager.class).getPullRequestCodeCommentsVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;

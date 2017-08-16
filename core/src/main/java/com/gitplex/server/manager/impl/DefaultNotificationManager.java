@@ -316,7 +316,7 @@ public class DefaultNotificationManager implements NotificationManager {
 					if (request.getLastEvent() == null) {
 						usersToNotify.add(watch.getUser());
 					} else {
-						Date visitDate = visitInfoManager.getVisitDate(watch.getUser(), request);
+						Date visitDate = visitInfoManager.getPullRequestVisitDate(watch.getUser(), request);
 						if (visitDate == null || visitDate.getTime()<request.getLastEvent().getDate().getTime()) {
 							if (!request.getLastEvent().getType().equals(eventType)) { 
 								usersToNotify.add(watch.getUser());

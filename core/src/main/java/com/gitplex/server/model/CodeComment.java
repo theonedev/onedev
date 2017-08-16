@@ -205,7 +205,7 @@ public class CodeComment extends AbstractEntity {
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = GitPlex.getInstance(VisitManager.class).getVisitDate(user, this);
+			Date visitDate = GitPlex.getInstance(VisitManager.class).getCodeCommentVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;

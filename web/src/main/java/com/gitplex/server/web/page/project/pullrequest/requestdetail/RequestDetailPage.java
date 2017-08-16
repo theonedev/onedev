@@ -324,60 +324,50 @@ public abstract class RequestDetailPage extends ProjectPage {
 			tabs.add(new RequestTab("Merge Preview", MergePreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
-	}
-	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		if (event.getPayload() instanceof PageDataChanged) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			if (pageDataChanged.isOnConnect()) {
-				RequestCycle.get().getListeners().add(new IRequestCycleListener() {
-					
-					@Override
-					public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
-					}
-					
-					@Override
-					public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
-					}
-					
-					@Override
-					public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
-					}
-					
-					@Override
-					public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
-					}
-					
-					@Override
-					public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
-					}
-					
-					@Override
-					public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-						return null;
-					}
-					
-					@Override
-					public void onEndRequest(RequestCycle cycle) {
-						if (SecurityUtils.getUser() != null) { 
-							GitPlex.getInstance(VisitManager.class).visit(SecurityUtils.getUser(), 
-									getPullRequest());
-						}
-					}
-					
-					@Override
-					public void onDetach(RequestCycle cycle) {
-					}
-					
-					@Override
-					public void onBeginRequest(RequestCycle cycle) {
-					}
-					
-				});
+		
+		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
+			
+			@Override
+			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
 			}
-		}
+			
+			@Override
+			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
+			}
+			
+			@Override
+			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+				return null;
+			}
+			
+			@Override
+			public void onEndRequest(RequestCycle cycle) {
+				if (SecurityUtils.getUser() != null) { 
+					GitPlex.getInstance(VisitManager.class).visitPullRequest(SecurityUtils.getUser(), getPullRequest());
+				}
+			}
+			
+			@Override
+			public void onDetach(RequestCycle cycle) {
+			}
+			
+			@Override
+			public void onBeginRequest(RequestCycle cycle) {
+			}
+			
+		});
 	}
 	
 	private WebMarkupContainer newStatusAndBranchesContainer() {
@@ -957,10 +947,12 @@ public abstract class RequestDetailPage extends ProjectPage {
 					@Override
 					protected String load() {
 						PullRequest request = getPullRequest();
-						if (request.getLastCodeCommentEventDate() != null && !request.isVisitedAfter(request.getLastCodeCommentEventDate()))
+						if (request.getLastCodeCommentEventDate() != null 
+								&& !request.isCodeCommentsVisitedAfter(request.getLastCodeCommentEventDate())) {
 							return "new";
-						else
+						} else {
 							return "";
+						}
 					}
 					
 				}));

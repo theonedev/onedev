@@ -10,14 +10,19 @@ import com.gitplex.server.model.User;
 
 public interface VisitManager {
 	
-	void visit(User user, PullRequest request);
+	void visitPullRequest(User user, PullRequest request);
 	
-	void visit(User user, CodeComment comment);
+	void visitPullRequestCodeComments(User user, PullRequest request);
+	
+	void visitCodeComment(User user, CodeComment comment);
 	
 	@Nullable
-	Date getVisitDate(User user, PullRequest request);
+	Date getPullRequestVisitDate(User user, PullRequest request);
 	
 	@Nullable
-	Date getVisitDate(User user, CodeComment comment);
+	Date getPullRequestCodeCommentsVisitDate(User user, PullRequest request);
+	
+	@Nullable
+	Date getCodeCommentVisitDate(User user, CodeComment comment);
 	
 }

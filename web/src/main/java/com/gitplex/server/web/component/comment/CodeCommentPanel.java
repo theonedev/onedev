@@ -510,6 +510,49 @@ public abstract class CodeCommentPanel extends Panel {
 		add(repliesView);
 		add(newAddReplyContainer());
 		
+		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
+			
+			@Override
+			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
+			}
+			
+			@Override
+			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
+			}
+			
+			@Override
+			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+				return null;
+			}
+			
+			@Override
+			public void onEndRequest(RequestCycle cycle) {
+				if (SecurityUtils.getUser() != null) {
+					GitPlex.getInstance(VisitManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
+				}
+			}
+			
+			@Override
+			public void onDetach(RequestCycle cycle) {
+			}
+			
+			@Override
+			public void onBeginRequest(RequestCycle cycle) {
+			}
+		});
+		
 		setOutputMarkupId(true);
 	}
 
@@ -555,51 +598,6 @@ public abstract class CodeCommentPanel extends Panel {
 				prevReplyMarkupId = newReplyContainer.getMarkupId();
 			}
 			
-			if (pageDataChanged.isOnConnect()) {
-				RequestCycle.get().getListeners().add(new IRequestCycleListener() {
-					
-					@Override
-					public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
-					}
-					
-					@Override
-					public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
-					}
-					
-					@Override
-					public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
-					}
-					
-					@Override
-					public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
-					}
-					
-					@Override
-					public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
-					}
-					
-					@Override
-					public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-						return null;
-					}
-					
-					@Override
-					public void onEndRequest(RequestCycle cycle) {
-						if (SecurityUtils.getUser() != null) {
-							GitPlex.getInstance(VisitManager.class).visit(SecurityUtils.getUser(), getComment());
-						}
-					}
-					
-					@Override
-					public void onDetach(RequestCycle cycle) {
-					}
-					
-					@Override
-					public void onBeginRequest(RequestCycle cycle) {
-					}
-				});
-				
-			}
 		}
 	}
 	

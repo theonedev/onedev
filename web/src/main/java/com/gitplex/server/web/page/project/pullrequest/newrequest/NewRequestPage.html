@@ -93,10 +93,12 @@
 						<td class="name">Required Reviewers</td>
 						<td class="value"><div wicket:id="reviewers"></div></td>
 					</tr>
+					<wicket:enclosure child="verifications">
 					<tr class="verifications">
 						<td class="name">Required Verifications</td>
 						<td class="value"><div wicket:id="verifications"></div></td>
 					</tr>
+					</wicket:enclosure>
 				</table>
 				<div class="clearfix">
 					<input wicket:id="send" type="submit" class="btn btn-primary pull-left" value="Create Pull Request"></input>
