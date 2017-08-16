@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.AppLoader;
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.persistence.UnitOfWork;
 
 /**
@@ -74,16 +75,18 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	}
 	
 	private void run(Runnable runnable) {
-		UnitOfWork unitOfWork = AppLoader.getInstance(UnitOfWork.class);
-		unitOfWork.begin();
-		try {
-			Subject subject = (Subject) request.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
-	        ThreadContext.bind(subject);
+		if (GitPlex.getInstance().isReady()) {
+			UnitOfWork unitOfWork = AppLoader.getInstance(UnitOfWork.class);
+			unitOfWork.begin();
+			try {
+				Subject subject = (Subject) request.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
+		        ThreadContext.bind(subject);
 
-	        runnable.run();
-		} finally {
-			ThreadContext.unbindSubject();
-			unitOfWork.end();
+		        runnable.run();
+			} finally {
+				ThreadContext.unbindSubject();
+				unitOfWork.end();
+			}
 		}
 	}
 	

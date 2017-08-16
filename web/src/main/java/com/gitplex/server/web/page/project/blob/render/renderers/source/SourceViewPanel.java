@@ -13,7 +13,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -76,6 +75,7 @@ import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.blamemessage.BlameMessageBehavior;
 import com.gitplex.server.web.component.comment.CodeCommentPanel;
@@ -159,9 +159,8 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 						blob.getIdent().path);
 				if (cachedSymbols != null)
 					symbols.addAll(cachedSymbols);
-				else {
-					symbols.addAll(extractor.extract(null, blob.getText().getContent()));
-				}
+				else 
+					symbols.addAll(extractor.extract(null, StringUtils.removeBOM(blob.getText().getContent())));
 			} catch (ExtractException e) {
 				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
 			}

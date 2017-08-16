@@ -29,7 +29,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StoredField;
@@ -79,6 +78,7 @@ import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.ContentDetector;
 import com.gitplex.server.util.IndexResult;
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.concurrent.Prioritized;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -269,7 +269,7 @@ public class DefaultIndexManager implements IndexManager {
 				
 				if (extractor != null) {
 					try {
-						List<Symbol> symbols = extractor.extract(blobName, content);
+						List<Symbol> symbols = extractor.extract(blobName, StringUtils.removeBOM(content));
 						for (Symbol symbol: symbols) {
 							String fieldValue = symbol.getName();
 							if (fieldValue != null && symbol.isSearchable()) {

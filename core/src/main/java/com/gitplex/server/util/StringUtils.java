@@ -25,6 +25,14 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 	}
 	
 	/**
+	 * Remove UTF BOM marker which might exists in some source code. UTF standard does not allow this marker and we 
+	 * should remove it before doing something such as parsing source with ANTLR
+	 */
+	public static String removeBOM(String str) {
+		return str.replace("\uFEFF", "");		
+	}
+	
+	/**
 	 * Parse specified string into tokens. Content surrounded with &quot; character
 	 * is considered as a single token. For example: echo "hello world" will be parsed 
 	 * into two tokens, respectively [echo], and [hello world]. The quote character 
