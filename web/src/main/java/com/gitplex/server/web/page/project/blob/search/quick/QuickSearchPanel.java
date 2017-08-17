@@ -210,8 +210,16 @@ public abstract class QuickSearchPanel extends Panel {
 	}
 	
 	private void newSearchResult(@Nullable AjaxRequestTarget target) {
-		WebMarkupContainer result = new WebMarkupContainer("result");
-		result.setOutputMarkupId(true);
+		WebMarkupContainer result = new WebMarkupContainer("result") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!StringUtils.isBlank(searchInput));			
+			}
+			
+		};
+		result.setOutputMarkupPlaceholderTag(true);
 		
 		result.add(new ListView<QueryHit>("symbolHits", new AbstractReadOnlyModel<List<QueryHit>>() {
 
@@ -302,16 +310,6 @@ public abstract class QuickSearchPanel extends Panel {
 			
 		});
 
-		result.add(new WebMarkupContainer("help") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(StringUtils.isBlank(searchInput) && symbolHits.isEmpty());
-			}
-			
-		});
-		
 		if (target != null) {
 			replace(result);
 			target.add(result);
