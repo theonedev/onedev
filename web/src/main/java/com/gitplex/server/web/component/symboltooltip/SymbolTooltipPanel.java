@@ -40,7 +40,6 @@ import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.search.hit.SymbolHit;
 import com.gitplex.server.search.query.BlobQuery;
-import com.gitplex.server.search.query.PathQuery;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
@@ -197,11 +196,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 					symbolName = symbolName.substring("#include".length()).trim();
 				}
 
-				boolean canBePath = symbolName.indexOf('\'') != -1 || symbolName.indexOf('"') != -1;
-				// normalize the symbol
 				String charsToStrip = "@'\"./\\";
 				symbolName = StringUtils.stripEnd(StringUtils.stripStart(symbolName, charsToStrip), charsToStrip);
 				symbolName = StringUtils.replace(symbolName, "\\", "/");
+				if (symbolName.contains("/"))
+					symbolName = StringUtils.substringAfterLast(symbolName, "/");
 				
 				symbolHits.clear();
 				
@@ -258,10 +257,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.caseSensitive(true)
 										.count(QUERY_ENTRIES - symbolHits.size())
 										.build();
-								symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
-							}
-							if (canBePath && symbolHits.size() < QUERY_ENTRIES) {
-								query = new PathQuery(null, symbolName, QUERY_ENTRIES - symbolHits.size());
 								symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
 							}
 						} catch (InterruptedException e) {
