@@ -196,7 +196,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					symbolName = symbolName.substring("#include".length()).trim();
 				}
 
-				String charsToStrip = "@'\"./\\";
+				String charsToStrip = "@#'\"./\\";
 				symbolName = StringUtils.stripEnd(StringUtils.stripStart(symbolName, charsToStrip), charsToStrip);
 				symbolName = StringUtils.replace(symbolName, "\\", "/");
 				if (symbolName.contains("/"))

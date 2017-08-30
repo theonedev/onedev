@@ -769,7 +769,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	private List<Symbol> getChildSymbols(List<Symbol> symbols, @Nullable Symbol parentSymbol) {
 		List<Symbol> children = new ArrayList<>();
 		for (Symbol symbol: symbols) {
-			if (symbol.getOutlineParent() == parentSymbol)
+			if (symbol.isDisplayInOutline() && symbol.getOutlineParent() == parentSymbol)
 				children.add(symbol);
 		}
 		return children;
