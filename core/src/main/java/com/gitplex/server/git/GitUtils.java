@@ -42,7 +42,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
-import com.gitplex.server.git.command.CalcMergeBaseCommand;
 import com.gitplex.server.git.command.FetchCommand;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.git.exception.RefUpdateException;
@@ -327,15 +326,10 @@ public class GitUtils {
     @Nullable
 	public static ObjectId getMergeBase(Repository repository1, ObjectId commit1, 
 			Repository repository2, ObjectId commit2, @Nullable String fetchRef) {
-		if (repository1.getDirectory()!=null && repository1.getDirectory().equals(repository2.getDirectory())) {
-			return GitUtils.getMergeBase(repository1, commit1, commit2);
-		} else {
+		if (repository1.getDirectory() == null || !repository1.getDirectory().equals(repository2.getDirectory())) {
 			fetch(repository2, commit2, repository1, fetchRef);
-			return ObjectId.fromString(new CalcMergeBaseCommand(repository1.getDirectory())
-					.rev1(commit1.name())
-					.rev2(commit2.name())
-					.call());
 		}
+		return GitUtils.getMergeBase(repository1, commit1, commit2);
 	}
 	
 	public static void fetch(Repository fromRepository, ObjectId fromCommit, Repository toRepository, 
