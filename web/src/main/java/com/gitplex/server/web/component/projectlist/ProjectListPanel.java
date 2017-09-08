@@ -5,11 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.ajax.markup.html.repeater.data.table.AjaxNavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -37,7 +37,7 @@ import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.util.DateUtils;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
@@ -152,11 +152,11 @@ public class ProjectListPanel extends Panel {
 		
 		DataTable<ProjectFacade, Void> projectsTable = 
 				new DataTable<ProjectFacade, Void>("projects", columns, dataProvider, WebConstants.PAGE_SIZE);		
-		projectsTable.addBottomToolbar(new AjaxNavigationToolbar(projectsTable) {
+		projectsTable.addBottomToolbar(new NavigationToolbar(projectsTable) {
 
 			@Override
 			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new BootstrapAjaxPagingNavigator(navigatorId, table);
+				return new BootstrapPagingNavigator(navigatorId, table);
 			}
 			
 		});
