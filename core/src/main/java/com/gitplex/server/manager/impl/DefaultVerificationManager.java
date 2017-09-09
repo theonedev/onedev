@@ -28,7 +28,6 @@ import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.annotation.Transactional;
-import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.Verification;
@@ -63,12 +62,9 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final Dao dao;
-	
 	@Inject
-	public DefaultVerificationManager(Dao dao, StorageManager storageManager, PullRequestManager pullRequestManager, 
+	public DefaultVerificationManager(StorageManager storageManager, PullRequestManager pullRequestManager, 
 			ListenerRegistry listenerRegistry) {
-		this.dao = dao;
 		this.storageManager = storageManager;
 		this.pullRequestManager = pullRequestManager;
 		this.listenerRegistry = listenerRegistry;
@@ -161,16 +157,8 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Project) {
-			dao.doAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					removeEnv(event.getEntity().getId().toString());
-				}
-				
-			});
-		}
+		if (event.getEntity() instanceof Project)
+			removeEnv(event.getEntity().getId().toString());
 	}
 	
 	@Override

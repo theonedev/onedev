@@ -5,8 +5,8 @@ import javax.inject.Singleton;
 
 import org.apache.shiro.authc.credential.PasswordService;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
+import org.hibernate.query.Query;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ListenerRegistry;
@@ -76,7 +76,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     @Transactional
     @Override
 	public void delete(User user) {
-    	Query query = getSession().createQuery("update PullRequest set submitter=null, submitterName=:submitterName "
+    	Query<?> query = getSession().createQuery("update PullRequest set submitter=null, submitterName=:submitterName "
     			+ "where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.setParameter("submitterName", user.getDisplayName());

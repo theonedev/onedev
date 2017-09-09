@@ -3,7 +3,6 @@ package com.gitplex.server.persistence.dao;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,6 +19,7 @@ import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
+import com.gitplex.server.util.ClassUtils;
 
 @Singleton
 @SuppressWarnings("unchecked")
@@ -29,26 +29,22 @@ public class DefaultDao implements Dao, Serializable {
 	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final ExecutorService executorService;
-	
 	@Inject
-	public DefaultDao(UnitOfWork unitOfWork, ListenerRegistry listenerRegistry, 
-			ExecutorService executorService) {
+	public DefaultDao(UnitOfWork unitOfWork, ListenerRegistry listenerRegistry) {
 		this.unitOfWork = unitOfWork;
 		this.listenerRegistry = listenerRegistry;
-		this.executorService = executorService;
 	}
 	
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T get(Class<T> entityClass, Long entityId) {
-		return (T) getSession().get(unproxy(getSession(), entityClass), entityId);
+		return (T) getSession().get(ClassUtils.unproxy(entityClass), entityId);
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T load(Class<T> entityClass, Long entityId) {
-		return (T) getSession().load(unproxy(getSession(), entityClass), entityId);
+		return (T) getSession().load(ClassUtils.unproxy(entityClass), entityId);
 	}
 
 	@Transactional
@@ -71,20 +67,6 @@ public class DefaultDao implements Dao, Serializable {
 		return unitOfWork.getSession();
 	}
 
-	protected <T extends AbstractEntity> Class<T> unproxy(Session session, Class<T> entityClass) {
-		//class meta data will be null if entityClass is not registered with Hibernate or when
-		//it is a Hibernate proxy class (e.x. test.googlecode.genericdao.model.Person_$$_javassist_5).
-		//So if a class is not recognized, we will look at superclasses to see if
-		//it is a proxy.
-		while (session.getSessionFactory().getClassMetadata(entityClass) == null) {
-			entityClass = (Class<T>) entityClass.getSuperclass();
-			if (Object.class.equals(entityClass))
-				return null;
-		}
-		
-		return entityClass;
-	}
-
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> List<T> findRange(EntityCriteria<T> entityCriteria, int firstResult, int maxResults) {
@@ -97,7 +79,7 @@ public class DefaultDao implements Dao, Serializable {
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> List<T> findAll(EntityCriteria<T> entityCriteria) {
-		return findRange(entityCriteria, 0, 0);
+		return findRange(entityCriteria, 0, Integer.MAX_VALUE);
 	}
 
 	@Sessional
@@ -128,31 +110,24 @@ public class DefaultDao implements Dao, Serializable {
 
 	@Override
 	public void doAfterCommit(Runnable runnable) {
-		getSession().getTransaction().registerSynchronization(new Synchronization() {
-			
-			@Override
-			public void beforeCompletion() {
-			}
-			
-			@Override
-			public void afterCompletion(int status) {
-				if (status == Status.STATUS_COMMITTED)
-					runnable.run();
-			}
-		});
-	}
-
-	@Override
-	public void doAsyncAfterCommit(Runnable runnable) {
-		doAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				executorService.submit(runnable);
-			}
-			
-		});
-	}
+		if (getSession().getTransaction().isActive()) {
+			getSession().getTransaction().registerSynchronization(new Synchronization() {
+				
+				@Override
+				public void beforeCompletion() {
+				}
+				
+				@Override
+				public void afterCompletion(int status) {
+					if (status == Status.STATUS_COMMITTED)
+						runnable.run();
+				}
+				
+			});
+		} else {
+			runnable.run();
+		}
+	}	
 	
 	@Override
 	public void doUnitOfWorkAsyncAfterCommit(Runnable runnable) {

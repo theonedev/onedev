@@ -19,7 +19,6 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.annotation.Transactional;
-import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.FileUtils;
 
@@ -45,11 +44,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 
 	private final StorageManager storageManager;
 	
-	private final Dao dao;
-	
 	@Inject
-	public DefaultVisitManager(Dao dao, StorageManager storageManager) {
-		this.dao = dao;
+	public DefaultVisitManager(StorageManager storageManager) {
 		this.storageManager = storageManager;
 	}
 	
@@ -183,16 +179,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Project) {
-			dao.doAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					removeEnv(event.getEntity().getId().toString());
-				}
-				
-			});
-		}
+		if (event.getEntity() instanceof Project)
+			removeEnv(event.getEntity().getId().toString());
 	}
 	
 	@Override

@@ -81,17 +81,11 @@
             <groupId>org.hibernate</groupId>  
             <artifactId>hibernate-hikaricp</artifactId>  
             <version>${hibernate.version}</version>  
-            <exclusions> 
-                <exclusion> 
-                    <groupId>com.zaxxer</groupId>  
-                    <artifactId>HikariCP-java6</artifactId> 
-                </exclusion> 
-            </exclusions> 
         </dependency>  
         <dependency> 
             <groupId>com.zaxxer</groupId>  
             <artifactId>HikariCP</artifactId>  
-            <version>2.6.2</version> 
+            <version>2.7.1</version> 
         </dependency>  
         <dependency> 
             <groupId>org.glassfish</groupId>  
@@ -291,7 +285,7 @@
 	</dependencies>  
     <properties> 
         <moduleClass>com.gitplex.server.CoreModule</moduleClass> 
-        <hibernate.version>5.1.0.Final</hibernate.version> 
+        <hibernate.version>5.2.10.Final</hibernate.version> 
         <shiro.version>1.2.2</shiro.version> 
         <jgit.version>4.7.0.201704051617-r</jgit.version>  
         <flexmark.version>0.18.3</flexmark.version>

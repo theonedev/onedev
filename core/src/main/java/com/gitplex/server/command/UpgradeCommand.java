@@ -417,6 +417,16 @@ public class UpgradeCommand extends DefaultPersistManager {
 					"com.gitplex.launcher.bootstrap.Bootstrap");
 			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, Charsets.UTF_8);
 			
+			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
+			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, Charsets.UTF_8);
+			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
+					"hibernate.hikari.autoCommit=true");
+			hibernateProps = StringUtils.replace(hibernateProps, 
+					"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider", 
+					"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider\r\n"
+					+ "hibernate.connection.autocommit=true");
+			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, Charsets.UTF_8);
+			
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
 					new File(upgradeDir, "conf/wrapper-license.conf"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "readme.txt"), new File(upgradeDir, "readme.txt"));

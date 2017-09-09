@@ -90,8 +90,6 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final Dao dao;
-	
 	private final CodeCommentManager codeCommentManager;
 	
 	@Inject
@@ -99,7 +97,6 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 			PullRequestUpdateManager pullRequestUpdateManager, CodeCommentManager codeCommentManager, 
 			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, PullRequestManager pullRequestManager, 
 			CodeCommentRelationManager codeCommentRelationManager) {
-		this.dao = dao;
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -137,15 +134,8 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
-			dao.doAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					Long projectId = event.getEntity().getId();
-					removeEnv(projectId.toString());
-				}
-				
-			});
+			Long projectId = event.getEntity().getId();
+			removeEnv(projectId.toString());
 		}
 	}
 	
@@ -312,24 +302,10 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 		if (event.isNew()) {
 			if (event.getEntity() instanceof PullRequestUpdate) {
 				Project project = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject();
-				dao.doAfterCommit(new Runnable() {
-					
-					@Override
-					public void run() {
-						batchWorkManager.submit(getBatchWorker(project), new Prioritized(PRIORITY));
-					}
-					
-				});
+				batchWorkManager.submit(getBatchWorker(project), new Prioritized(PRIORITY));
 			} else if (event.getEntity() instanceof CodeComment) {
 				Project project = ((CodeComment)event.getEntity()).getProject();
-				dao.doAfterCommit(new Runnable() {
-					
-					@Override
-					public void run() {
-						batchWorkManager.submit(getBatchWorker(project), new Prioritized(PRIORITY));
-					}
-					
-				});
+				batchWorkManager.submit(getBatchWorker(project), new Prioritized(PRIORITY));
 			} 
 		}
 	}

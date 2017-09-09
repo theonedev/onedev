@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import javax.inject.Singleton;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -25,6 +27,8 @@ import org.apache.shiro.web.servlet.ShiroFilter;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.type.Type;
@@ -122,7 +126,9 @@ import com.gitplex.server.persistence.IdManager;
 import com.gitplex.server.persistence.PersistListener;
 import com.gitplex.server.persistence.PersistManager;
 import com.gitplex.server.persistence.PrefixedNamingStrategy;
+import com.gitplex.server.persistence.SessionFactoryProvider;
 import com.gitplex.server.persistence.SessionInterceptor;
+import com.gitplex.server.persistence.SessionProvider;
 import com.gitplex.server.persistence.TransactionInterceptor;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Sessional;
@@ -231,6 +237,10 @@ public class CoreModule extends AbstractPluginModule {
 		bind(NotificationManager.class).to(DefaultNotificationManager.class);
 		bind(CacheManager.class).to(DefaultCacheManager.class);
 		bind(VerificationManager.class).to(DefaultVerificationManager.class);
+		bind(Session.class).toProvider(SessionProvider.class);
+		bind(EntityManager.class).toProvider(SessionProvider.class);
+		bind(SessionFactory.class).toProvider(SessionFactoryProvider.class);
+		bind(EntityManagerFactory.class).toProvider(SessionFactoryProvider.class);
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);

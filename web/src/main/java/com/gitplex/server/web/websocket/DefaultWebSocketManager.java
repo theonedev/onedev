@@ -19,7 +19,6 @@ import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.Dao;
@@ -67,33 +66,25 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	@Sessional
 	@Override
 	public void render(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
-		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-			dao.doAfterCommit(new Runnable() {
+		dao.doAfterCommit(new Runnable() {
 
-				@Override
-				public void run() {
-					doRender(region, sourcePageKey);
-				}
-				
-			});
-		} else {
-			doRender(region, sourcePageKey);
-		}
-	}
-	
-	private void doRender(WebSocketRegion region, @Nullable PageKey sourcePageKey) {
-		for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
-			PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
-			if (connection.isOpen() 
-					&& (sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
-					&& containsRegion(connection, region)) {
-				try {
-					connection.sendMessage(RENDER_CALLBACK);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+			@Override
+			public void run() {
+				for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
+					PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
+					if (connection.isOpen() 
+							&& (sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
+							&& containsRegion(connection, region)) {
+						try {
+							connection.sendMessage(RENDER_CALLBACK);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
 				}
 			}
-		}
+			
+		});
 	}
 	
 	private boolean containsRegion(IWebSocketConnection connection, WebSocketRegion region) {

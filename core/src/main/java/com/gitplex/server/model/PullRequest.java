@@ -670,7 +670,8 @@ public class PullRequest extends AbstractEntity {
 		return commits;
 	}
 	
-	public String getCommitMessage(MergeStrategy mergeStrategy) {
+	@Nullable
+	public String getCommitMessage() {
 		if (mergeStrategy == MergeStrategy.SQUASH_MERGE) {
 			String commitMessage = getTitle() + "\n\n";
 			if (getDescription() != null)

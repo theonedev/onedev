@@ -11,7 +11,6 @@ import javax.inject.Singleton;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +42,14 @@ public class DefaultMailManager implements MailManager {
 	@Sessional
 	@Override
 	public void sendMailAsync(Collection<String> toList, String subject, String body) {
-		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-			dao.doAsyncAfterCommit(newSendMailRunnable(toList, subject, body));
-		} else {
-			executorService.execute(newSendMailRunnable(toList, subject, body));
-		}
+		dao.doAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				executorService.execute(newSendMailRunnable(toList, subject, body));
+			}
+			
+		});
 	}
 	
 	private Runnable newSendMailRunnable(Collection<String> toList, String subject, String body) {

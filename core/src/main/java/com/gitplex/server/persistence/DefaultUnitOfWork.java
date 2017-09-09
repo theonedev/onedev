@@ -31,9 +31,13 @@ public class DefaultUnitOfWork implements UnitOfWork {
 				@Override
 				protected Session openObject() {
 					Session session = persistManager.getSessionFactory().openSession();
-					
-					// Session is supposed to be able to write only in transactional methods
-					session.setFlushMode(FlushMode.MANUAL);
+					try {
+						// Session is supposed to be able to write only in transactional methods
+						session.setHibernateFlushMode(FlushMode.MANUAL);
+					} catch (Exception e) {
+						session.close();
+						throw Throwables.propagate(e);
+					}
 					
 					return session;
 				}

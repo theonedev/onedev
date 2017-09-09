@@ -19,7 +19,7 @@ import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.model.User;
-import com.gitplex.server.persistence.annotation.Transactional;
+import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.LockUtils;
 import com.gitplex.server.util.StringUtils;
@@ -42,7 +42,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		this.configManager = configManager;
 	}
 	
-	@Transactional
+	@Sessional
 	@Override
 	public String getAvatarUrl(@Nullable UserFacade user) {
 		if (user == null) {
@@ -119,7 +119,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/" + user.getId());
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public void useAvatar(User user, FileUpload upload) {
 		Lock avatarLock = LockUtils.getLock("uploaded-avatar:" + user.getId());

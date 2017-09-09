@@ -108,59 +108,78 @@ public class DefaultCacheManager implements CacheManager {
 	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {
+		Object facade;
+		
+		if (event.getEntity() instanceof Project) {
+			facade = ((Project) event.getEntity()).getFacade();
+		} else if (event.getEntity() instanceof User) {
+			facade = ((User) event.getEntity()).getFacade();
+		} else if (event.getEntity() instanceof Group) {
+			facade = ((Group) event.getEntity()).getFacade();
+		} else if (event.getEntity() instanceof Membership) {
+			facade = ((Membership) event.getEntity()).getFacade();
+		} else if (event.getEntity() instanceof UserAuthorization) {
+			facade = ((UserAuthorization) event.getEntity()).getFacade();
+		} else if (event.getEntity() instanceof GroupAuthorization) {
+			facade = ((GroupAuthorization) event.getEntity()).getFacade();
+		} else {
+			facade = null;
+		}
+		
 		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				if (event.getEntity() instanceof Project) {
+				if (facade instanceof ProjectFacade) {
+					ProjectFacade project = (ProjectFacade) facade;
 					projectsLock.writeLock().lock();
 					try {
-						ProjectFacade project = ((Project) event.getEntity()).getFacade();
-						projects.put(event.getEntity().getId(), project);
+						projects.put(project.getId(), project);
 						projectIdsByName.inverse().put(project.getId(), project.getName());
 					} finally {
 						projectsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof User) {
+				} else if (facade instanceof UserFacade) {
+					UserFacade user = (UserFacade) facade;
 					usersLock.writeLock().lock();
 					try {
-						UserFacade user = ((User) event.getEntity()).getFacade();
-						users.put(event.getEntity().getId(), user);
+						users.put(user.getId(), user);
 						userIdsByName.inverse().put(user.getId(), user.getName());
 						if (user.getEmail() != null)
 							userIdsByEmail.inverse().put(user.getId(), user.getEmail());
 					} finally {
 						usersLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof Group) {
+				} else if (facade instanceof GroupFacade) {
+					GroupFacade group = (GroupFacade) facade;
 					groupsLock.writeLock().lock();
 					try {
-						GroupFacade group = ((Group) event.getEntity()).getFacade();
-						groups.put(event.getEntity().getId(), group);
+						groups.put(group.getId(), group);
 						groupIdsByName.inverse().put(group.getId(), group.getName());
 					} finally {
 						groupsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof Membership) {
+				} else if (facade instanceof MembershipFacade) {
+					MembershipFacade membership = (MembershipFacade) facade;
 					membershipsLock.writeLock().lock();
 					try {
-						memberships.put(event.getEntity().getId(), ((Membership) event.getEntity()).getFacade());
+						memberships.put(membership.getId(), membership);
 					} finally {
 						membershipsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof UserAuthorization) {
+				} else if (facade instanceof UserAuthorizationFacade) {
+					UserAuthorizationFacade userAuthorization = (UserAuthorizationFacade) facade;
 					userAuthorizationsLock.writeLock().lock();
 					try {
-						userAuthorizations.put(event.getEntity().getId(), 
-								((UserAuthorization) event.getEntity()).getFacade());
+						userAuthorizations.put(userAuthorization.getId(), userAuthorization);
 					} finally {
 						userAuthorizationsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof GroupAuthorization) {
+				} else if (facade instanceof GroupAuthorizationFacade) {
+					GroupAuthorizationFacade groupAuthorization = (GroupAuthorizationFacade) facade;
 					groupAuthorizationsLock.writeLock().lock();
 					try {
-						groupAuthorizations.put(event.getEntity().getId(), 
-								((GroupAuthorization) event.getEntity()).getFacade());
+						groupAuthorizations.put(groupAuthorization.getId(), groupAuthorization);
 					} finally {
 						groupAuthorizationsLock.writeLock().unlock();
 					}
@@ -168,27 +187,31 @@ public class DefaultCacheManager implements CacheManager {
 			}
 			
 		});
+		
 	}
 	
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
+		Long id = event.getEntity().getId();
+		Class<?> clazz = event.getEntity().getClass();
+		
 		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				if (event.getEntity() instanceof Project) {
+				if (Project.class.isAssignableFrom(clazz)) {
 					projectsLock.writeLock().lock();
 					try {
-						projects.remove(event.getEntity().getId());
-						projectIdsByName.inverse().remove(event.getEntity().getId());
+						projects.remove(id);
+						projectIdsByName.inverse().remove(id);
 					} finally {
 						projectsLock.writeLock().unlock();
 					}
 					userAuthorizationsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, UserAuthorizationFacade>> it = userAuthorizations.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getProjectId().equals(event.getEntity().getId()))
+							if (it.next().getValue().getProjectId().equals(id))
 								it.remove();
 						}
 					} finally {
@@ -197,25 +220,25 @@ public class DefaultCacheManager implements CacheManager {
 					groupAuthorizationsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, GroupAuthorizationFacade>> it = groupAuthorizations.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getProjectId().equals(event.getEntity().getId()))
+							if (it.next().getValue().getProjectId().equals(id))
 								it.remove();
 						}
 					} finally {
 						groupAuthorizationsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof User) {
+				} else if (User.class.isAssignableFrom(clazz)) {
 					usersLock.writeLock().lock();
 					try {
-						users.remove(event.getEntity().getId());
-						userIdsByName.inverse().remove(event.getEntity().getId());
-						userIdsByEmail.inverse().remove(event.getEntity().getId());
+						users.remove(id);
+						userIdsByName.inverse().remove(id);
+						userIdsByEmail.inverse().remove(id);
 					} finally {
 						usersLock.writeLock().unlock();
 					}
 					userAuthorizationsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, UserAuthorizationFacade>> it = userAuthorizations.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getUserId().equals(event.getEntity().getId()))
+							if (it.next().getValue().getUserId().equals(id))
 								it.remove();
 						}
 					} finally {
@@ -224,24 +247,24 @@ public class DefaultCacheManager implements CacheManager {
 					membershipsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, MembershipFacade>> it = memberships.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getUserId().equals(event.getEntity().getId()))
+							if (it.next().getValue().getUserId().equals(id))
 								it.remove();
 						}
 					} finally {
 						membershipsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof Group) {
+				} else if (Group.class.isAssignableFrom(clazz)) {
 					groupsLock.writeLock().lock();
 					try {
-						groups.remove(event.getEntity().getId());
-						groupIdsByName.inverse().remove(event.getEntity().getId());
+						groups.remove(id);
+						groupIdsByName.inverse().remove(id);
 					} finally {
 						groupsLock.writeLock().unlock();
 					}
 					groupAuthorizationsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, GroupAuthorizationFacade>> it = groupAuthorizations.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getGroupId().equals(event.getEntity().getId()))
+							if (it.next().getValue().getGroupId().equals(id))
 								it.remove();
 						}
 					} finally {
@@ -250,34 +273,34 @@ public class DefaultCacheManager implements CacheManager {
 					membershipsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, MembershipFacade>> it = memberships.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getGroupId().equals(event.getEntity().getId()))
+							if (it.next().getValue().getGroupId().equals(id))
 								it.remove();
 						}
 					} finally {
 						membershipsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof Membership) {
+				} else if (Membership.class.isAssignableFrom(clazz)) {
 					membershipsLock.writeLock().lock();
 					try {
-						memberships.remove(event.getEntity().getId());
+						memberships.remove(id);
 					} finally {
 						membershipsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof UserAuthorization) {
+				} else if (UserAuthorization.class.isAssignableFrom(clazz)) {
 					userAuthorizationsLock.writeLock().lock();
 					try {
-						userAuthorizations.remove(event.getEntity().getId());
+						userAuthorizations.remove(id);
 					} finally {
 						userAuthorizationsLock.writeLock().unlock();
 					}
-				} else if (event.getEntity() instanceof GroupAuthorization) {
+				} else if (GroupAuthorization.class.isAssignableFrom(clazz)) {
 					groupAuthorizationsLock.writeLock().lock();
 					try {
-						groupAuthorizations.remove(event.getEntity().getId());
+						groupAuthorizations.remove(id);
 					} finally {
 						groupAuthorizationsLock.writeLock().unlock();
 					}
-				}
+				}					
 			}
 			
 		});

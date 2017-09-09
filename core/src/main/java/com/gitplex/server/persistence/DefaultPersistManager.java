@@ -12,16 +12,18 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.ManyToOne;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
 
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.hibernate.Criteria;
 import org.hibernate.Interceptor;
-import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -32,9 +34,8 @@ import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
+import org.hibernate.query.Query;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
 import org.slf4j.Logger;
@@ -325,13 +326,8 @@ public class DefaultPersistManager implements PersistManager {
 	 */
 	private List<Class<?>> getEntityTypes(SessionFactory sessionFactory) {
 		List<Class<?>> entityTypes = new ArrayList<>();
-		for (Iterator<String> it = sessionFactory.getAllClassMetadata().keySet().iterator(); it.hasNext();) {
-			String entityTypeName = (String) it.next();
-			try {
-				entityTypes.add(Class.forName(entityTypeName));
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
+		for (EntityType<?> entityType: ((EntityManagerFactory)sessionFactory).getMetamodel().getEntities()) {
+			entityTypes.add(entityType.getJavaType());
 		}
 		
 		/* Collections.sort does not work here */
@@ -377,10 +373,13 @@ public class DefaultPersistManager implements PersistManager {
 			
 			logger.info("Querying table ids...");
 			
-			Criteria criteria = session.createCriteria(entityType, "entity")
-					.setProjection(Projections.property("entity.id")).addOrder(Order.asc("id"));
-			@SuppressWarnings("unchecked")
-			List<Long> ids = criteria.list();
+			CriteriaBuilder builder = sessionFactory.getCriteriaBuilder();
+			CriteriaQuery<Number> query = builder.createQuery(Number.class);
+			Root<?> root = query.from(entityType);
+			query.select(root.get("id")).orderBy(builder.asc(root.get("id")));
+			
+			List<Number> ids = session.createQuery(query).list();
+			
 			int count = ids.size();
 			
 			for (int i=0; i<count/batchSize; i++) {
@@ -396,10 +395,10 @@ public class DefaultPersistManager implements PersistManager {
 		}
 	}
 
-	private void exportEntity(Session session, Class<?> entityType, List<Long> ids, int start, int count, int batchSize, File exportDir) {
+	private void exportEntity(Session session, Class<?> entityType, List<Number> ids, int start, int count, int batchSize, File exportDir) {
 		logger.info("Loading table rows ({}->{}) from database...", String.valueOf(start+1), (start + count));
 		
-		Query query = session.createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId");
+		Query<?> query = session.createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId");
 		query.setParameter("fromId", ids.get(start));
 		query.setParameter("toId", ids.get(start+count-1));
 		
@@ -439,9 +438,9 @@ public class DefaultPersistManager implements PersistManager {
 				
 			});
 			for (File file: dataFiles) {
+				Transaction transaction = session.beginTransaction();
 				try {
 					logger.info("Importing from data file '" + file.getName() + "'...");
-					session.beginTransaction();
 					VersionedDocument dom = VersionedDocument.fromFile(file);
 					
 					for (Element element: dom.getRootElement().elements()) {
@@ -451,9 +450,9 @@ public class DefaultPersistManager implements PersistManager {
 					}
 					session.flush();
 					session.clear();
-					session.getTransaction().commit();
+					transaction.commit();
 				} catch (Throwable e) {
-					session.getTransaction().rollback();
+					transaction.rollback();
 					throw Throwables.propagate(e);
 				}
 			}

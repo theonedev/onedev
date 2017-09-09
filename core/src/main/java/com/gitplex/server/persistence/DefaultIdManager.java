@@ -6,10 +6,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Projections;
-import org.hibernate.metadata.ClassMetadata;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
 
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.Dao;
@@ -30,19 +31,19 @@ public class DefaultIdManager implements IdManager {
 	}
 
 	private long getMaxId(Class<?> entityClass) {
-		Criteria criteria = dao.getSession().createCriteria(entityClass);
-		criteria.setProjection(Projections.max("id"));
-		Long maxId = (Long) criteria.uniqueResult();
-		if (maxId == null)
-			maxId = 0L;
-		return maxId;
+		CriteriaBuilder builder = persistManager.getSessionFactory().getCriteriaBuilder();
+		CriteriaQuery<Number> query = builder.createQuery(Number.class);
+		Root<?> root = query.from(entityClass);
+		query.select(builder.max(root.get("id")));
+		Number result = dao.getSession().createQuery(query).getSingleResult();
+		return result!=null?result.longValue():0;
 	}
 	
 	@Sessional
 	@Override
 	public void init() {
-		for (ClassMetadata metadata: persistManager.getSessionFactory().getAllClassMetadata().values()) {
-			Class<?> entityClass = metadata.getMappedClass();
+		for (EntityType<?> entityType: ((EntityManagerFactory)persistManager.getSessionFactory()).getMetamodel().getEntities()) {
+			Class<?> entityClass = entityType.getJavaType();
 			nextIds.put(entityClass, new AtomicLong(getMaxId(entityClass)+1));
 		}
 	}

@@ -26,7 +26,7 @@ import com.gitplex.server.model.PullRequestUpdate;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.TagProtection;
-import com.gitplex.server.persistence.annotation.Transactional;
+import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.util.StringUtils;
@@ -62,7 +62,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 		output.writeLine();
 	}
 	
-	@Transactional
+	@Sessional
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String clientIp = request.getHeader("X-Forwarded-For");

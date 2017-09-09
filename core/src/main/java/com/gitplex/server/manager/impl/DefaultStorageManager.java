@@ -102,16 +102,29 @@ public class DefaultStorageManager implements StorageManager {
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
+		Long id = event.getEntity().getId();
+		
+		File projectDir;
+		if (event.getEntity() instanceof Project)
+			projectDir = getProjectDir(id);
+		else
+			projectDir = null;
+		
+		File userDir;
+		if (event.getEntity() instanceof User)
+			userDir = getUserInfoDir(id);
+		else
+			userDir = null;
+		
 		dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					if (event.getEntity() instanceof Project) {
-						new File(getProjectDir(event.getEntity().getId()), DELETE_MARK).createNewFile();
-					} else if (event.getEntity() instanceof User) {
-						new File(getUserInfoDir(event.getEntity().getId()), DELETE_MARK).createNewFile();
-					}
+					if (projectDir != null) 
+						new File(projectDir, DELETE_MARK).createNewFile();
+					if (userDir != null)
+						new File(userDir, DELETE_MARK).createNewFile();
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

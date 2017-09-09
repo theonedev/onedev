@@ -53,29 +53,30 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	
 	@Override
 	public File getAttachmentDir(ProjectFacade project, String attachmentDirUUID) {
-		File attachmentDir = getPermanentAttachmentDir(project, attachmentDirUUID);
+		File projectAttachmentDir = storageManager.getProjectAttachmentDir(project.getId());
+		File attachmentDir = getPermanentAttachmentDir(projectAttachmentDir, attachmentDirUUID);
 		if (attachmentDir.exists())
 			return attachmentDir;
 		else
-			return getTempAttachmentDir(project, attachmentDirUUID); 
+			return getTempAttachmentDir(projectAttachmentDir, attachmentDirUUID); 
 	}
 
-	private File getPermanentAttachmentDir(ProjectFacade project, String attachmentDirUUID) {
+	private File getPermanentAttachmentDir(File projectAttachmentDir, String attachmentDirUUID) {
 		String category = attachmentDirUUID.substring(0, 2);
-		return new File(storageManager.getProjectAttachmentDir(project.getId()), "permanent/" + category + "/" + attachmentDirUUID);
+		return new File(projectAttachmentDir, "permanent/" + category + "/" + attachmentDirUUID);
 	}
 	
-	private File getTempAttachmentDir(ProjectFacade project) {
-		return new File(storageManager.getProjectAttachmentDir(project.getId()), "temp");
+	private File getTempAttachmentDir(File projectAttachmentDir) {
+		return new File(projectAttachmentDir, "temp");
 	}
 	
-	private File getTempAttachmentDir(ProjectFacade project, String attachmentDirUUID) {
-		return new File(getTempAttachmentDir(project), attachmentDirUUID);
+	private File getTempAttachmentDir(File projectAttachmentDir, String attachmentDirUUID) {
+		return new File(getTempAttachmentDir(projectAttachmentDir), attachmentDirUUID);
 	}
 
-	private void makeAttachmentPermanent(ProjectFacade project, String attachmentDirUUID) {
-		File tempAttachmentDir = getTempAttachmentDir(project, attachmentDirUUID);
-		File permanentAttachmentDir = getPermanentAttachmentDir(project, attachmentDirUUID);
+	private void makeAttachmentPermanent(File projectAttachmentDir, String attachmentDirUUID) {
+		File tempAttachmentDir = getTempAttachmentDir(projectAttachmentDir, attachmentDirUUID);
+		File permanentAttachmentDir = getPermanentAttachmentDir(projectAttachmentDir, attachmentDirUUID);
 		if (tempAttachmentDir.exists() && !permanentAttachmentDir.exists()) {
 			try {
 				FileUtils.moveDirectory(tempAttachmentDir, permanentAttachmentDir);
@@ -100,7 +101,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	public void execute() {
 		try {
 			for (Project project: dao.findAll(Project.class)) {
-				File tempDir = getTempAttachmentDir(project.getFacade());
+				File tempDir = getTempAttachmentDir(storageManager.getProjectAttachmentDir(project.getId()));
 				if (tempDir.exists()) {
 					for (File file: tempDir.listFiles()) {
 						if (System.currentTimeMillis() - file.lastModified() > TEMP_PRESERVE_PERIOD) {
@@ -123,23 +124,26 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Listen
 	public void on(EntityPersisted event) {
 		if (event.isNew()) {
+			File projectAttachmentDir;
+			String attachmentUUID;
 			if (event.getEntity() instanceof PullRequest) {
 				PullRequest request = (PullRequest) event.getEntity();
-				dao.doAfterCommit(new Runnable() {
-	
-					@Override
-					public void run() {
-						makeAttachmentPermanent(request.getTargetProject().getFacade(), request.getUUID());
-					}
-					
-				});
+				projectAttachmentDir = storageManager.getProjectAttachmentDir(request.getTargetProject().getId());
+				attachmentUUID = request.getUUID();
 			} else if (event.getEntity() instanceof CodeComment) {
 				CodeComment comment = (CodeComment) event.getEntity();
+				projectAttachmentDir = storageManager.getProjectAttachmentDir(comment.getProject().getId());
+				attachmentUUID = comment.getUUID();
+			} else {
+				projectAttachmentDir = null;
+				attachmentUUID = null;
+			}
+			if (projectAttachmentDir != null && attachmentUUID != null) {
 				dao.doAfterCommit(new Runnable() {
 
 					@Override
 					public void run() {
-						makeAttachmentPermanent(comment.getProject().getFacade(), comment.getUUID());
+						makeAttachmentPermanent(projectAttachmentDir, attachmentUUID);
 					}
 					
 				});
@@ -150,14 +154,27 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
+		File dirToDelete;
 		if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
-			FileUtils.deleteDir(storageManager.getProjectAttachmentDir(project.getId()));
+			dirToDelete = storageManager.getProjectAttachmentDir(project.getId());
 		} else if (event.getEntity() instanceof CodeComment) {
 			CodeComment comment = (CodeComment) event.getEntity();
-			File permanentAttachmentDir = getPermanentAttachmentDir(comment.getProject().getFacade(), comment.getUUID());
-			if (permanentAttachmentDir.exists())
-				FileUtils.deleteDir(permanentAttachmentDir);
+			dirToDelete = getPermanentAttachmentDir(
+					storageManager.getProjectAttachmentDir(comment.getProject().getId()), comment.getUUID());
+		} else {
+			dirToDelete = null;
+		}
+		if (dirToDelete != null) {
+			dao.doAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					if (dirToDelete.exists())
+						FileUtils.deleteDir(dirToDelete);
+				}
+				
+			});
 		}
 	}
 

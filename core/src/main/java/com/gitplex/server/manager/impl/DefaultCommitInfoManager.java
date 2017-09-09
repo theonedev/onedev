@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -122,8 +121,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final Dao dao;
-	
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
 	private final Map<Long, Integer> commitCountCache = new ConcurrentHashMap<>();
@@ -139,14 +136,14 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
-		this.dao = dao;
 		this.executorService = executorService;
 	}
 	
-	private void doCollect(Long projectId, Repository repository, ObjectId commitId, boolean divide) {
-		Environment env = getEnv(projectId.toString());
+	private void doCollect(Project project, ObjectId commitId, boolean divide) {
+		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 
+		Repository repository = project.getRepository();
 		if (divide) {
 			List<ObjectId> intermediateCommitIds = new ArrayList<>();
 			List<String> revisions = new ArrayList<>();
@@ -176,10 +173,10 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			}
 			
 			for (int i=intermediateCommitIds.size()-1; i>=0; i--) {
-				doCollect(projectId, repository, intermediateCommitIds.get(i), false);
+				doCollect(project, intermediateCommitIds.get(i), false);
 			}
 			
-			doCollect(projectId, repository, commitId, false);
+			doCollect(project, commitId, false);
 		} else {
 			Store commitsStore = getStore(env, COMMITS_STORE);
 			Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE); 
@@ -370,19 +367,19 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						if (newCommitCount != prevCommitCount) {
 							bytes = SerializationUtils.serialize(newCommitCount);
 							defaultStore.put(txn, COMMIT_COUNT_KEY, new ArrayByteIterable(bytes));
-							commitCountCache.put(projectId, newCommitCount);
+							commitCountCache.put(project.getId(), newCommitCount);
 						}
 						
 						if (!authors.equals(prevAuthors)) {
 							bytes = SerializationUtils.serialize((Serializable) authors);
 							defaultStore.put(txn, AUTHORS_KEY, new ArrayByteIterable(bytes));
-							authorsCache.remove(projectId);
+							authorsCache.remove(project.getId());
 						} 
 						
 						if (!committers.equals(prevCommitters)) {
 							bytes = SerializationUtils.serialize((Serializable) committers);
 							defaultStore.put(txn, COMMITTERS_KEY, new ArrayByteIterable(bytes));
-							committersCache.remove(projectId);
+							committersCache.remove(project.getId());
 						}
 						
 						if (files.size() > MAX_COLLECTING_FILES) {
@@ -393,7 +390,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						}
 						bytes = SerializationUtils.serialize((Serializable) files);
 						defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
-						filesCache.remove(projectId);
+						filesCache.remove(project.getId());
 						
 						bytes = new byte[20];
 						commitId.copyRawTo(bytes, 0);
@@ -634,54 +631,37 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
-			dao.doAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					Long projectId = event.getEntity().getId();
-					removeEnv(projectId.toString());
-					filesCache.remove(projectId);
-					commitCountCache.remove(projectId);
-					authorsCache.remove(projectId);
-				}
-				
-			});
+			Long projectId = event.getEntity().getId();
+			removeEnv(projectId.toString());
+			filesCache.remove(projectId);
+			commitCountCache.remove(projectId);
+			authorsCache.remove(projectId);
 		}
 	}
 	
-	private BatchWorker getBatchWorker(Project project) {
-		Long projectId = project.getId();
+	private BatchWorker getBatchWorker(Long projectId) {
 		return new BatchWorker("project-" + projectId + "-collectCommitInfo") {
 
 			@Override
 			public void doWorks(Collection<Prioritized> works) {
-				AtomicReference<List<CollectingWork>> collectingWorksRef = new AtomicReference<>(null);
-				AtomicReference<String> projectNameRef = new AtomicReference<>(null);
-				AtomicReference<Repository> repositoryRef = new AtomicReference<>(null);
-				
-				unitOfWork.call(new Callable<Void>() {
+				unitOfWork.run(new Runnable() {
 
 					@Override
-					public Void call() throws Exception {
+					public void run() {
 						Project project = projectManager.load(projectId);
-						projectNameRef.set(project.getName());
-						repositoryRef.set(project.getRepository());
-						
 						List<CollectingWork> collectingWorks = new ArrayList<>();
 						for (Object work: works)
 							collectingWorks.add((CollectingWork)work);
 						Collections.sort(collectingWorks, new CommitTimeComparator());
-						collectingWorksRef.set(collectingWorks);
-						return null;
+						
+						for (CollectingWork work: collectingWorks) {
+							logger.debug("Collecting commit information up to ref '{}' in project '{}'...", 
+									work.getRefName(), project.getName());
+							doCollect(project, work.getCommit().copy(), true);
+						}
 					}
 					
 				});
-
-				for (CollectingWork work: collectingWorksRef.get()) {
-					logger.debug("Collecting commit information up to ref '{}' in project '{}'...", 
-							work.getRefName(), projectNameRef.get());
-					doCollect(projectId, repositoryRef.get(), work.getCommit().copy(), true);
-				}
 			}
 			
 		};		
@@ -723,7 +703,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		Collections.sort(works, new CommitTimeComparator());
 		
 		for (CollectingWork work: works)
-			batchWorkManager.submit(getBatchWorker(project), work);
+			batchWorkManager.submit(getBatchWorker(project.getId()), work);
 	}
 
 	@Sessional
@@ -735,6 +715,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		}
 	}
 	
+	@Sessional
 	@Listen
 	public void on(RefUpdated event) {
 		if (!event.getNewObjectId().equals(ObjectId.zeroId()) 
@@ -744,12 +725,13 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				RevCommit commit = GitUtils.parseCommit(revWalk, event.getNewObjectId());
 				if (commit != null) {
 					CollectingWork work = new CollectingWork(PRIORITY, commit, event.getRefName());
-					batchWorkManager.submit(getBatchWorker(event.getProject()), work);
+					batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
 				}
 			}
 		}
 	}
 
+	@Sessional
 	@Override
 	public int getCommitCount(Project project) {
 		Integer commitCount = commitCountCache.get(project.getId());
@@ -805,6 +787,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		
 	}
 
+	@Sessional
 	@Override
 	public void cloneInfo(Project source, Project target) {
 		BackupStrategy backupStrategy = getEnv(source.getId().toString()).getBackupStrategy();
@@ -824,6 +807,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		}
 	}
 
+	@Sessional
 	@Nullable
 	@Override
 	public ObjectId getLastCommit(Project project) {
@@ -849,6 +833,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		return infoDir;
 	}
 
+	@Sessional
 	@Override
 	public Collection<String> getPossibleHistoryPaths(Project project, String path) {
 		Environment env = getEnv(project.getId().toString());

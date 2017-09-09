@@ -94,9 +94,13 @@ public interface Dao {
 	 */
 	<T extends AbstractEntity> int count(EntityCriteria<T> detachedCriteria);
 
+	/**
+	 * Do some work after commit if there is an active transaction, or do the work immediately if there is no active 
+	 * transaction. Note that the work should not involve any other database operations in current thread 
+	 *  
+	 * @param runnable
+	 */
 	void doAfterCommit(Runnable runnable);
-	
-	void doAsyncAfterCommit(Runnable runnable);
 	
 	void doUnitOfWorkAsyncAfterCommit(Runnable runnable);
 	

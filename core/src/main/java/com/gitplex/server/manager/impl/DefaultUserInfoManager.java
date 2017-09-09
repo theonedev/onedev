@@ -12,7 +12,6 @@ import com.gitplex.server.manager.UserInfoManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.annotation.Transactional;
-import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
@@ -40,11 +39,8 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 	
 	private final StorageManager storageManager;
 	
-	private final Dao dao;
-	
 	@Inject
-	public DefaultUserInfoManager(Dao dao, StorageManager storageManager) {
-		this.dao = dao;
+	public DefaultUserInfoManager(StorageManager storageManager) {
 		this.storageManager = storageManager;
 	}
 	
@@ -84,16 +80,8 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof User) {
-			dao.doAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					removeEnv(event.getEntity().getId().toString());
-				}
-				
-			});
-		}
+		if (event.getEntity() instanceof User)
+			removeEnv(event.getEntity().getId().toString());
 	}
 
 	@Override

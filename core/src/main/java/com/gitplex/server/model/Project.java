@@ -128,6 +128,9 @@ public class Project extends AbstractEntity {
 	@Version
 	private long version;
 	
+    @OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+    private Collection<BranchWatch> branchWatches = new ArrayList<>();
+    
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<BranchProtection> branchProtections = new ArrayList<>();

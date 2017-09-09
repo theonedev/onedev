@@ -15,9 +15,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,10 +31,10 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,13 +245,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		MergeStrategy strategy = request.getMergeStrategy();
 		if ((strategy == ALWAYS_MERGE || strategy == MERGE_IF_NECESSARY || strategy == SQUASH_MERGE) 
 				&& !preview.getMerged().equals(preview.getRequestHead()) 
-				&& !mergedCommit.getFullMessage().equals(request.getCommitMessage(strategy))) {
+				&& !mergedCommit.getFullMessage().equals(request.getCommitMessage())) {
 			try (	RevWalk revWalk = new RevWalk(targetProject.getRepository());
 					ObjectInserter inserter = targetProject.getRepository().newObjectInserter()) {
 		        CommitBuilder newCommit = new CommitBuilder();
 		        newCommit.setAuthor(mergedCommit.getAuthorIdent());
 		        newCommit.setCommitter(committer);
-		        newCommit.setMessage(request.getCommitMessage(strategy));
+		        newCommit.setMessage(request.getCommitMessage());
 		        newCommit.setTreeId(mergedCommit.getTree());
 		        newCommit.setParentIds(mergedCommit.getParents());
 		        mergedId = inserter.insert(newCommit);
@@ -286,7 +284,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
 		ObjectId newTargetHeadId = mergedId;
-		doUnitOfWorkAsyncAfterCommit(new Runnable() {
+		dao.doUnitOfWorkAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -311,7 +309,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 		if (nextNumber == null) {
 			long maxNumber;
-			Query query = getSession().createQuery("select max(number) from PullRequest where targetProject=:project");
+			Query<?> query = getSession().createQuery("select max(number) from PullRequest where targetProject=:project");
 			query.setParameter("project", project);
 			Object result = query.uniqueResult();
 			if (result != null) {
@@ -465,18 +463,15 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			if (request.isOpen() && !request.isMergeIntoTarget() 
 					&& (lastPreview == null || lastPreview.isObsolete(request))) {
 				int priority = RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY;			
-				if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-					doAfterCommit(new Runnable() {
-	
-						@Override
-						public void run() {
-							batchWorkManager.submit(getMergePreviewer(request), new Prioritized(priority));
-						}
-						
-					});
-				} else {
-					batchWorkManager.submit(getMergePreviewer(request), new Prioritized(priority));
-				}
+				Long requestId = request.getId();
+				dao.doAfterCommit(new Runnable() {
+
+					@Override
+					public void run() {
+						batchWorkManager.submit(getMergePreviewer(requestId), new Prioritized(priority));
+					}
+					
+				});
 				return null;
 			} else {
 				return lastPreview;
@@ -486,95 +481,67 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 	}
 	
-	private BatchWorker getMergePreviewer(PullRequest request) {
-		Long requestId = request.getId();
-		
+	private BatchWorker getMergePreviewer(Long requestId) {
 		return new BatchWorker("request-" + requestId + "-previewMerge", 1) {
 
 			@Override
 			public void doWorks(Collection<Prioritized> works) {
-				try {
-					Preconditions.checkState(works.size() == 1);
-					
-					AtomicReference<String> projectNameRef = new AtomicReference<>(null);
-					AtomicReference<Long> requestNumberRef = new AtomicReference<>(null);
-					AtomicReference<Repository> repositoryRef = new AtomicReference<>(null);
-					AtomicReference<String> mergeRefRef = new AtomicReference<>(null);
-					
-					MergePreview mergePreview = unitOfWork.call(new Callable<MergePreview>() {
+				unitOfWork.run(new Runnable() {
 
-						@Override
-						public MergePreview call() throws Exception {
-							PullRequest request = load(requestId);
-							Project targetProject = request.getTargetProject();
-							requestNumberRef.set(request.getNumber());
-							projectNameRef.set(targetProject.getName());	
-							repositoryRef.set(targetProject.getRepository());
-							mergeRefRef.set(request.getMergeRef());
-							
-							MergePreview mergePreview = request.getLastMergePreview();
-							if (request.isOpen() 
-									&& !request.isMergeIntoTarget() 
-									&& (mergePreview == null || mergePreview.isObsolete(request))) {
-								return new MergePreview(request.getTarget().getObjectName(), 
-										request.getHeadCommitHash(), request.getMergeStrategy(), null);
-							} else {
-								return null;
-							}
-						}
-					});
-					
-					if (mergePreview != null) {
-						logger.debug("Calculating merge preview of pull request #{} in project '{}'...", 
-								requestNumberRef.get(), projectNameRef.get());
-						ObjectId targetHeadId = ObjectId.fromString(mergePreview.getTargetHead());
-						ObjectId requestHeadId = ObjectId.fromString(mergePreview.getRequestHead());
+					@Override
+					public void run() {
+						Preconditions.checkState(works.size() == 1);
+
+						PullRequest request = load(requestId);
 						
-						if ((mergePreview.getMergeStrategy() == MERGE_IF_NECESSARY) 
-								&& GitUtils.isMergedInto(repositoryRef.get(), targetHeadId, requestHeadId)) {
-							mergePreview.setMerged(mergePreview.getRequestHead());
-							RefUpdate refUpdate = GitUtils.getRefUpdate(repositoryRef.get(), mergeRefRef.get());
-							refUpdate.setNewObjectId(requestHeadId);
-							GitUtils.updateRef(refUpdate);
-						} else {
-							PersonIdent user = new PersonIdent(GitPlex.NAME, "");
-							ObjectId merged;
-							if (mergePreview.getMergeStrategy() == REBASE_MERGE) {
-								merged = GitUtils.rebase(repositoryRef.get(), requestHeadId, targetHeadId, user);
-							} else if (mergePreview.getMergeStrategy() == SQUASH_MERGE) {
-								merged = GitUtils.merge(repositoryRef.get(), requestHeadId, targetHeadId, true, user, 
-										request.getCommitMessage(mergePreview.getMergeStrategy()));
-							} else {
-								merged = GitUtils.merge(repositoryRef.get(), requestHeadId, targetHeadId, false, user, 
-										request.getCommitMessage(mergePreview.getMergeStrategy()));
-							} 
-							
-							RefUpdate refUpdate = GitUtils.getRefUpdate(repositoryRef.get(), mergeRefRef.get());
-							if (merged != null) {
-								mergePreview.setMerged(merged.name());
-								refUpdate.setNewObjectId(merged);
+						Project targetProject = request.getTargetProject();
+						MergePreview mergePreview = request.getLastMergePreview();
+						if (request.isOpen() 
+								&& !request.isMergeIntoTarget() 
+								&& (mergePreview == null || mergePreview.isObsolete(request))) {
+							mergePreview = new MergePreview(request.getTarget().getObjectName(), 
+									request.getHeadCommitHash(), request.getMergeStrategy(), null);
+							logger.debug("Calculating merge preview of pull request #{} in project '{}'...", 
+									request.getNumber(), targetProject.getName());
+							ObjectId targetHeadId = ObjectId.fromString(mergePreview.getTargetHead());
+							ObjectId requestHeadId = ObjectId.fromString(mergePreview.getRequestHead());
+							Repository repository = targetProject.getRepository();
+							if ((mergePreview.getMergeStrategy() == MERGE_IF_NECESSARY) 
+									&& GitUtils.isMergedInto(repository, targetHeadId, requestHeadId)) {
+								mergePreview.setMerged(mergePreview.getRequestHead());
+								RefUpdate refUpdate = GitUtils.getRefUpdate(repository, request.getMergeRef());
+								refUpdate.setNewObjectId(requestHeadId);
 								GitUtils.updateRef(refUpdate);
 							} else {
-								GitUtils.deleteRef(refUpdate);
+								PersonIdent user = new PersonIdent(GitPlex.NAME, "");
+								ObjectId merged;
+								if (mergePreview.getMergeStrategy() == REBASE_MERGE) {
+									merged = GitUtils.rebase(repository, requestHeadId, targetHeadId, user);
+								} else if (mergePreview.getMergeStrategy() == SQUASH_MERGE) {
+									merged = GitUtils.merge(repository, requestHeadId, targetHeadId, true, user, 
+											request.getCommitMessage());
+								} else {
+									merged = GitUtils.merge(repository, requestHeadId, targetHeadId, false, user, 
+											request.getCommitMessage());
+								} 
+								
+								RefUpdate refUpdate = GitUtils.getRefUpdate(repository, request.getMergeRef());
+								if (merged != null) {
+									mergePreview.setMerged(merged.name());
+									refUpdate.setNewObjectId(merged);
+									GitUtils.updateRef(refUpdate);
+								} else {
+									GitUtils.deleteRef(refUpdate);
+								}
 							}
-						}
-						
-						unitOfWork.call(new Callable<Void>() {
 							
-							@Override
-							public Void call() throws Exception {
-								PullRequest request = load(requestId);
-								request.setLastMergePreview(mergePreview);
-								dao.persist(request);
-								listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
-								return null;
-							}
-						
-						});
+							request.setLastMergePreview(mergePreview);
+							dao.persist(request);
+							listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
+						} 
 					}
-				} catch (Exception e) {
-					logger.error("Error calculating pull request merge preview", e);
-				}
+					
+				});
 			}
 			
 		};
@@ -590,7 +557,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	        		discard(request, "Source project is deleted.");
 	    	}
 	    	
-	    	Query query = getSession().createQuery("update PullRequest set sourceProject=null where "
+	    	Query<?> query = getSession().createQuery("update PullRequest set sourceProject=null where "
 	    			+ "sourceProject=:project");
 	    	query.setParameter("project", project);
 	    	query.executeUpdate();
@@ -723,7 +690,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
 		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-			doUnitOfWorkAsyncAfterCommit(newCheckStatusRunnable(requestId, subject));
+			dao.doUnitOfWorkAsyncAfterCommit(newCheckStatusRunnable(requestId, subject));
 		} else {
 			unitOfWork.doAsync(newCheckStatusRunnable(requestId, subject));
 		}

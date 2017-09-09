@@ -35,12 +35,11 @@ import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.manager.WorkExecutor;
+import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.model.Project;
 import com.gitplex.server.util.concurrent.PrioritizedRunnable;
-import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.serverconfig.ServerConfig;
 
 @Singleton
@@ -80,8 +79,7 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	@Sessional
-	protected ProjectFacade getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
+	private Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
 			throws IOException {
 		projectInfo = StringUtils.stripStart(StringUtils.stripEnd(projectInfo, "/"), "/");
 
@@ -101,7 +99,7 @@ public class GitFilter implements Filter {
 			throw new GitException(String.format("Unable to find project %s", projectName));
 		}
 		
-		return project.getFacade();
+		return project;
 	}
 	
 	private void doNotCache(HttpServletResponse response) {
@@ -110,14 +108,14 @@ public class GitFilter implements Filter {
 		response.setHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
 	}
 	
-	protected void processPacks(final HttpServletRequest request, final HttpServletResponse response) 
+	private void processPacks(final HttpServletRequest request, final HttpServletResponse response) 
 			throws ServletException, IOException, InterruptedException, ExecutionException {
 		String pathInfo = getPathInfo(request);
 		
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		ProjectFacade project = getProject(request, response, projectInfo);
+		Project project = getProject(request, response, projectInfo);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
@@ -185,12 +183,12 @@ public class GitFilter implements Filter {
 		pack.end();
 	}
 	
-	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
 		String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		ProjectFacade project = getProject(request, response, projectInfo);
+		Project project = getProject(request, response, projectInfo);
 		String service = request.getParameter("service");
 		
 		File gitDir = storageManager.getProjectGitDir(project.getId());
@@ -213,6 +211,7 @@ public class GitFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
 
+	@Sessional
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {

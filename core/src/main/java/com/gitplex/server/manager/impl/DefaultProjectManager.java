@@ -24,7 +24,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,11 +147,13 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     		listenerRegistry.post(new ProjectRenamed(project, oldName));
     	}
     	
+    	File gitDir = project.getGitDir();
+    	
     	dao.doAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				checkGit(project);
+				checkGit(gitDir);
 			}
     		
     	});
@@ -160,25 +162,17 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     @Transactional
     @Override
     public void delete(Project project) {
-    	Query query = getSession().createQuery("update Project set forkedFrom=null where forkedFrom=:forkedFrom");
+    	Query<?> query = getSession().createQuery("update Project set forkedFrom=null where forkedFrom=:forkedFrom");
     	query.setParameter("forkedFrom", project);
     	query.executeUpdate();
 
     	dao.remove(project);
 
-    	dao.doAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				synchronized (repositoryCache) {
-	    			Repository repository = repositoryCache.remove(project.getId());
-	    			if (repository != null) 
-	    				repository.close();
-	    		}
-				
-			}
-			
-		});
+    	synchronized (repositoryCache) {
+			Repository repository = repositoryCache.remove(project.getId());
+			if (repository != null) 
+				repository.close();
+		}
     }
     
     @Override
@@ -196,15 +190,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	save(to);
         FileUtils.cleanDir(to.getGitDir());
         new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
-        
-        doAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-		        commitInfoManager.cloneInfo(from, to);
-			}
-        	
-        });
+        commitInfoManager.cloneInfo(from, to);
 	}
 
 	private boolean isGitHookValid(File gitDir, String hookName) {
@@ -226,8 +212,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         return true;
 	}
 	
-	private void checkGit(Project project) {
-		File gitDir = project.getGitDir();
+	private void checkGit(File gitDir) {
 		if (gitDir.listFiles().length == 0) {
         	logger.info("Initializing git repository in '" + gitDir + "'...");
             try {
@@ -270,7 +255,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	@Listen
 	public void on(SystemStarted event) {
 		for (Project project: findAll())
-			checkGit(project);
+			checkGit(project.getGitDir());
 	}
 
 	@Transactional
