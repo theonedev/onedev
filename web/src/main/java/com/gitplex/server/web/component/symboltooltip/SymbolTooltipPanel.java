@@ -191,6 +191,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 				revision = params.getParameterValue("revision").toString();
 				symbolName = params.getParameterValue("symbol").toString();
 
+				if (symbolName.startsWith("#include")) { 
+					// handle c/c++ include directive as CodeMirror return the whole line as a meta  
+					symbolName = symbolName.substring("#include".length()).trim();
+				}
+
 				String charsToStrip = "@#'\"./\\";
 				symbolName = StringUtils.stripEnd(StringUtils.stripStart(symbolName, charsToStrip), charsToStrip);
 				symbolName = StringUtils.replace(symbolName, "\\", "/");
