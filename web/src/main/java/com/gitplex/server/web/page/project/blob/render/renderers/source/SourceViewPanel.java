@@ -52,7 +52,6 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitplex.jsymbol.ExtractException;
 import com.gitplex.jsymbol.Range;
 import com.gitplex.jsymbol.Symbol;
 import com.gitplex.jsymbol.SymbolExtractor;
@@ -161,8 +160,8 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 					symbols.addAll(cachedSymbols);
 				else 
 					symbols.addAll(extractor.extract(null, StringUtils.removeBOM(blob.getText().getContent())));
-			} catch (ExtractException e) {
-				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
+			} catch (Throwable e) {
+				logger.warn("Error extracting symbols from blob: " + context.getBlobIdent(), e);
 			}
 		}
 		

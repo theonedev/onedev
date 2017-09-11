@@ -61,7 +61,6 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.jsymbol.ExtractException;
 import com.gitplex.jsymbol.Symbol;
 import com.gitplex.jsymbol.SymbolExtractor;
 import com.gitplex.jsymbol.SymbolExtractorRegistry;
@@ -285,8 +284,8 @@ public class DefaultIndexManager implements IndexManager {
 						}
 						byte[] bytesOfSymbols = SerializationUtils.serialize((Serializable) symbols);
 						document.add(new StoredField(BLOB_SYMBOL_LIST.name(), bytesOfSymbols));
-					} catch (ExtractException e) {
-						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
+					} catch (Throwable e) {
+						logger.warn("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 				} 
 			} else {
