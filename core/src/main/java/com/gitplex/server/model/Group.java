@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +13,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.facade.GroupFacade;
 
@@ -95,10 +93,6 @@ public class Group extends AbstractEntity {
 		this.memberships = memberships;
 	}
 
-	public boolean matchesQuery(@Nullable String queryTerm) {
-		return StringUtils.matchesQuery(name, queryTerm);
-	}
-	
 	public Collection<User> getMembers() {
 		if (members == null) {
 			members = new HashSet<>();

@@ -1,6 +1,5 @@
 package com.gitplex.server.web.component.projectselector;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,6 +28,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;
 import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
@@ -118,13 +119,16 @@ public abstract class ProjectSelector extends Panel {
 
 			@Override
 			protected List<Project> load() {
-				List<Project> projects = new ArrayList<>();
-				for (Project project: projectsModel.getObject()) {
-					if (project.matchesQuery(searchInput)) {
-						projects.add(project);
+				MatchScoreProvider<Project> matchScoreProvider = new MatchScoreProvider<Project>() {
+
+					@Override
+					public double getMatchScore(Project object) {
+						return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
 					}
-				}
-				return projects;
+					
+				};
+				
+				return MatchScoreUtils.filterAndSort(projectsModel.getObject(), matchScoreProvider);
 			}
 			
 		}) {

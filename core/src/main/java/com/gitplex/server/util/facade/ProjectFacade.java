@@ -2,14 +2,11 @@ package com.gitplex.server.util.facade;
 
 import java.util.Date;
 
-import javax.annotation.Nullable;
-
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserInfoManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.StringUtils;
 
 public class ProjectFacade extends EntityFacade {
 	
@@ -38,10 +35,6 @@ public class ProjectFacade extends EntityFacade {
 
 	public String getUUID() {
 		return uuid;
-	}
-
-	public boolean matchesQuery(@Nullable String queryTerm) {
-		return StringUtils.matchesQuery(name, queryTerm);
 	}
 
 	public static int compareLastVisit(ProjectFacade project1, ProjectFacade project2) {

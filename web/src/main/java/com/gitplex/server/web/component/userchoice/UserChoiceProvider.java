@@ -2,7 +2,6 @@ package com.gitplex.server.web.component.userchoice;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import com.gitplex.server.GitPlex;
@@ -12,6 +11,8 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.editable.annotation.UserChoice;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
@@ -44,12 +45,16 @@ public class UserChoiceProvider extends AbstractUserChoiceProvider {
 			choices = new ArrayList<UserFacade>(GitPlex.getInstance(CacheManager.class).getUsers().values());
 		}
 			
-		for (Iterator<UserFacade> it = choices.iterator(); it.hasNext();) {
-			UserFacade user = it.next();
-			if (!user.matchesQuery(term))
-				it.remove();
-		}
-		choices.sort(Comparator.comparing(UserFacade::getName));
+		choices.sort(Comparator.comparing(UserFacade::getDisplayName));
+		
+		choices = MatchScoreUtils.filterAndSort(choices, new MatchScoreProvider<UserFacade>() {
+
+			@Override
+			public double getMatchScore(UserFacade object) {
+				return object.getMatchScore(term);
+			}
+			
+		});
 		
 		new ResponseFiller<UserFacade>(response).fill(choices, page, WebConstants.PAGE_SIZE);
 	}

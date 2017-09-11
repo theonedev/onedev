@@ -88,7 +88,7 @@ public abstract class QuickSearchPanel extends Panel {
 			
 			// now do wildcard search but exclude the exact match returned above 
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery.Builder().term(searchInput+"*")
+				query = new SymbolQuery.Builder().term("*"+searchInput+"*")
 						.excludeTerm(searchInput)
 						.primary(true)
 						.count(count-symbolHits.size())
@@ -106,7 +106,7 @@ public abstract class QuickSearchPanel extends Panel {
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new FileQuery.Builder().fileNames(searchInput+"*")
+				query = new FileQuery.Builder().fileNames("*"+searchInput+"*")
 						.excludeFileName(searchInput)
 						.count(count-symbolHits.size())
 						.build();
@@ -124,7 +124,7 @@ public abstract class QuickSearchPanel extends Panel {
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery.Builder().term(searchInput+"*")
+				query = new SymbolQuery.Builder().term("*"+searchInput+"*")
 						.excludeTerm(searchInput)
 						.primary(false)
 						.count(count-symbolHits.size())

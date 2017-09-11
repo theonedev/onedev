@@ -49,6 +49,8 @@ import com.gitplex.server.util.facade.GroupFacade;
 import com.gitplex.server.util.facade.MembershipFacade;
 import com.gitplex.server.util.facade.UserAuthorizationFacade;
 import com.gitplex.server.util.facade.UserFacade;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
@@ -227,11 +229,20 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 				List<UserFacade> notAuthorized = new ArrayList<>();
 				
 				for (UserFacade user: GitPlex.getInstance(CacheManager.class).getUsers().values()) {
-					if (user.matchesQuery(term) && !getUserAuthorizations().containsKey(user.getId()))
+					if (!getUserAuthorizations().containsKey(user.getId()))
 						notAuthorized.add(user);
 				}
 				Collections.sort(notAuthorized);
 				Collections.reverse(notAuthorized);
+				
+				notAuthorized = MatchScoreUtils.filterAndSort(notAuthorized, new MatchScoreProvider<UserFacade>() {
+
+					@Override
+					public double getMatchScore(UserFacade object) {
+						return object.getMatchScore(term);
+					}
+					
+				});
 				new ResponseFiller<UserFacade>(response).fill(notAuthorized, page, WebConstants.PAGE_SIZE);
 			}
 
@@ -433,13 +444,16 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 		SortableDataProvider<Long, Void> dataProvider = new SortableDataProvider<Long, Void>() {
 
 			private List<Long> getUserIds() {
-				List<Long> userIds = new ArrayList<>();
+				List<Long> userIds = new ArrayList<>(getUserAuthorizations().keySet());
 				CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
-				for (Long userId: getUserAuthorizations().keySet()) {
-					if (cacheManager.getUser(userId).matchesQuery(searchInput))
-						userIds.add(userId);
-				}
-				return userIds;
+				return MatchScoreUtils.filterAndSort(userIds, new MatchScoreProvider<Long>() {
+
+					@Override
+					public double getMatchScore(Long object) {
+						return cacheManager.getUser(object).getMatchScore(searchInput);
+					}
+					
+				});
 			}
 			
 			@Override

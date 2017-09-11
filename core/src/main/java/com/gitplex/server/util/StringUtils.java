@@ -307,16 +307,4 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     	return TokenUtils.escapeHtml(text);
     }
 
-    public static boolean matchesQuery(@Nullable String name, @Nullable String queryTerm) {
-		if (queryTerm == null)
-			queryTerm = "";
-		else
-			queryTerm = queryTerm.toLowerCase().trim();
-		if (name == null)
-			name = "";
-		else
-			name = name.toLowerCase().trim();
-		return name.contains(queryTerm);
-    }
-    
 }

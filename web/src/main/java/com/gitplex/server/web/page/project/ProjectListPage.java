@@ -3,7 +3,6 @@ package com.gitplex.server.web.page.project;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +28,8 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserAuthorizationFacade;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -58,13 +59,20 @@ public class ProjectListPage extends LayoutPage {
 			}
 			
 			for (ProjectFacade project: cacheManager.getProjects().values()) {
-				if (!projectIdsWithExplicitAdministrators.contains(project.getId()) 
-						&& project.matchesQuery(searchInput)) {
+				if (!projectIdsWithExplicitAdministrators.contains(project.getId())) {
 					projects.add(project);
 				}
 			}
 			projects.sort(Comparator.comparing(ProjectFacade::getName));
-			return projects;
+			
+			return MatchScoreUtils.filterAndSort(projects, new MatchScoreProvider<ProjectFacade>() {
+
+				@Override
+				public double getMatchScore(ProjectFacade object) {
+					return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+				}
+				
+			});
 		}
 		
 	};
@@ -75,12 +83,16 @@ public class ProjectListPage extends LayoutPage {
 		protected List<ProjectFacade> load() {
 			List<ProjectFacade> projects = new ArrayList<>(GitPlex.getInstance(ProjectManager.class)
 					.getAccessibleProjects(getLoginUser()));
-			for (Iterator<ProjectFacade> it = projects.iterator(); it.hasNext();) {
-				if (!it.next().matchesQuery(searchInput))
-					it.remove();
-			}
 			projects.sort(Comparator.comparing(ProjectFacade::getName));
-			return projects;
+			
+			return MatchScoreUtils.filterAndSort(projects, new MatchScoreProvider<ProjectFacade>() {
+
+				@Override
+				public double getMatchScore(ProjectFacade object) {
+					return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+				}
+				
+			});
 		}
 		
 	};

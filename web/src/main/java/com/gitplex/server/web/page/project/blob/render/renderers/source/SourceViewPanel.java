@@ -75,6 +75,8 @@ import com.gitplex.server.search.SearchManager;
 import com.gitplex.server.search.hit.QueryHit;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.blamemessage.BlameMessageBehavior;
 import com.gitplex.server.web.component.comment.CodeCommentPanel;
@@ -954,13 +956,6 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		};		
 	}
 	
-	private boolean matches(Symbol symbol, @Nullable String searchInput) {
-		if (searchInput != null)
-			return symbol.getName().toLowerCase().startsWith(searchInput.trim().toLowerCase());
-		else
-			return true;
-	}
-	
 	private NestedTree<Symbol> newOutlineSearchSymbolTree(ModalPanel modal, List<Symbol> symbols, 
 			@Nullable String searchInput) {
 		IModel<HashSet<Symbol>> state;
@@ -971,8 +966,6 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		}
 		NestedTree<Symbol> tree = new NestedTree<Symbol>("result", newSymbolTreeProvider(symbols), state) {
 
-			private boolean matchFound;
-			
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
@@ -1001,9 +994,8 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				
 				fragment.add(link);
 				
-				if (!matchFound && matches(symbol, searchInput)) {
+				if (symbol == symbols.get(0)) {
 					link.add(AttributeAppender.append("class", "active"));
-					matchFound = true;
 				}
 				
 				return fragment;
@@ -1048,17 +1040,28 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 
 				if (key.equals("input")) {
 					String searchInput = params.getParameterValue("param").toString();
+					
+					MatchScoreProvider<Symbol> matchScoreProvider = new MatchScoreProvider<Symbol>() {
+
+						@Override
+						public double getMatchScore(Symbol object) {
+							return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+						}
+						
+					};
+					
+					List<Symbol> matchSymbols = MatchScoreUtils.filterAndSort(symbols, matchScoreProvider);
+					
 					filteredSymbols = new ArrayList<>();
-					for (Symbol symbol: symbols) {
-						if (matches(symbol, searchInput)) {
-							Symbol current = symbol;
-							do {
-								if (!filteredSymbols.contains(current))
-									filteredSymbols.add(current);
-								current = current.getOutlineParent();
-							} while (current != null);
+					for (Symbol symbol: matchSymbols) {
+						Symbol current = symbol;
+						while (current != null) {
+							if (!filteredSymbols.contains(current))
+								filteredSymbols.add(current);
+							current = current.getOutlineParent();
 						}
 					}
+					
 					NestedTree<Symbol> tree = newOutlineSearchSymbolTree(modal, filteredSymbols, searchInput);
 					fragment.replace(tree);
 					target.add(tree);

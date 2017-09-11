@@ -2,12 +2,13 @@ package com.gitplex.server.web.component.groupchoice;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.util.facade.GroupFacade;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
@@ -21,12 +22,16 @@ public class GroupChoiceProvider extends AbstractGroupChoiceProvider {
 		CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
 		List<GroupFacade> choices = new ArrayList<GroupFacade>(cacheManager.getGroups().values());
 			
-		for (Iterator<GroupFacade> it = choices.iterator(); it.hasNext();) {
-			GroupFacade group = it.next();
-			if (!group.matchesQuery(term))
-				it.remove();
-		}
 		choices.sort(Comparator.comparing(GroupFacade::getName));
+		
+		choices = MatchScoreUtils.filterAndSort(choices, new MatchScoreProvider<GroupFacade>() {
+
+			@Override
+			public double getMatchScore(GroupFacade object) {
+				return MatchScoreUtils.getMatchScore(object.getName(), term);
+			}
+			
+		});
 		
 		new ResponseFiller<GroupFacade>(response).fill(choices, page, WebConstants.PAGE_SIZE);
 	}

@@ -779,10 +779,6 @@ public class Project extends AbstractEntity {
 		return version;
 	}
 
-	public boolean matchesQuery(@Nullable String queryTerm) {
-		return StringUtils.matchesQuery(name, queryTerm);
-	}
-	
 	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter) {
 		return getChildren(blobIdent, blobIdentFilter, getObjectId(blobIdent.revision));
 	}

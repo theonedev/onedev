@@ -39,6 +39,8 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.facade.MembershipFacade;
 import com.gitplex.server.util.facade.UserFacade;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
@@ -101,11 +103,21 @@ public class GroupMembershipsPage extends GroupPage {
 						memberIds.add(membership.getUserId());
 				}
 				for (UserFacade user: cacheManager.getUsers().values()) {
-					if (user.matchesQuery(term) && !memberIds.contains(user.getId()))
+					if (!memberIds.contains(user.getId()))
 						nonMembers.add(user);
 				}
 				Collections.sort(nonMembers);
 				Collections.reverse(nonMembers);
+				
+				nonMembers = MatchScoreUtils.filterAndSort(nonMembers, new MatchScoreProvider<UserFacade>() {
+
+					@Override
+					public double getMatchScore(UserFacade object) {
+						return object.getMatchScore(term);
+					}
+					
+				});
+				
 				new ResponseFiller<>(response).fill(nonMembers, page, WebConstants.PAGE_SIZE);
 			}
 

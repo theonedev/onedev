@@ -3,7 +3,7 @@ package com.gitplex.server.util.facade;
 import javax.annotation.Nullable;
 
 import com.gitplex.server.model.User;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 
 public class UserFacade extends EntityFacade {
 
@@ -53,8 +53,10 @@ public class UserFacade extends EntityFacade {
 			return getName();
 	}
 	
-	public boolean matchesQuery(@Nullable String queryTerm) {
-		return StringUtils.matchesQuery(name, queryTerm) || StringUtils.matchesQuery(fullName, queryTerm); 
+	public double getMatchScore(@Nullable String queryTerm) {
+		double scoreOfName = MatchScoreUtils.getMatchScore(name, queryTerm);
+		double scoreOfFullName = MatchScoreUtils.getMatchScore(fullName, queryTerm);
+		return Math.max(scoreOfName, scoreOfFullName);
 	}
 	
 }

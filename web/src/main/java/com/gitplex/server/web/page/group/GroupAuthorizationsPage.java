@@ -42,6 +42,8 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.ProjectFacade;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.datatable.DefaultDataTable;
@@ -106,11 +108,22 @@ public class GroupAuthorizationsPage extends GroupPage {
 						authorizedProjectIds.add(authorization.getProjectId());
 				}
 				for (ProjectFacade project: cacheManager.getProjects().values()) {
-					if (project.matchesQuery(term) && !authorizedProjectIds.contains(project.getId()))
+					if (!authorizedProjectIds.contains(project.getId()))
 						notAuthorizedProjects.add(project);
 				}
 				Collections.sort(notAuthorizedProjects);
 				Collections.reverse(notAuthorizedProjects);
+				
+				MatchScoreProvider<ProjectFacade> matchScoreProvider = new MatchScoreProvider<ProjectFacade>() {
+
+					@Override
+					public double getMatchScore(ProjectFacade object) {
+						return MatchScoreUtils.getMatchScore(object.getName(), term);
+					}
+					
+				};
+				notAuthorizedProjects = MatchScoreUtils.filterAndSort(notAuthorizedProjects, matchScoreProvider);
+				
 				new ResponseFiller<ProjectFacade>(response).fill(notAuthorizedProjects, page, WebConstants.PAGE_SIZE);
 			}
 

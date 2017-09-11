@@ -3,7 +3,6 @@ package com.gitplex.server.web.component.requestreviewer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
@@ -14,6 +13,8 @@ import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.facade.UserFacade;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.userchoice.AbstractUserChoiceProvider;
@@ -42,12 +43,16 @@ public class ReviewerProvider extends AbstractUserChoiceProvider {
 		
 		List<UserFacade> reviewers = new ArrayList<>(users);
 
-		for (Iterator<UserFacade> it = reviewers.iterator(); it.hasNext();) {
-			UserFacade user = it.next();
-			if (!user.matchesQuery(term))
-				it.remove();
-		}
 		reviewers.sort(Comparator.comparing(UserFacade::getDisplayName));
+		
+		reviewers = MatchScoreUtils.filterAndSort(reviewers, new MatchScoreProvider<UserFacade>() {
+
+			@Override
+			public double getMatchScore(UserFacade object) {
+				return object.getMatchScore(term);
+			}
+			
+		});
 
 		int first = page * WebConstants.PAGE_SIZE;
 		int last = first + WebConstants.PAGE_SIZE;

@@ -1,9 +1,6 @@
 package com.gitplex.server.util.facade;
 
-import javax.annotation.Nullable;
-
 import com.gitplex.server.model.Group;
-import com.gitplex.server.util.StringUtils;
 
 public class GroupFacade extends EntityFacade {
 
@@ -32,10 +29,6 @@ public class GroupFacade extends EntityFacade {
 
 	public boolean isCanCreateProjects() {
 		return canCreateProjects;
-	}
-	
-	public boolean matchesQuery(@Nullable String queryTerm) {
-		return StringUtils.matchesQuery(name, queryTerm); 
 	}
 	
 }

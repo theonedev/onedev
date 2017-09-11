@@ -47,6 +47,8 @@ import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.MembershipFacade;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserAuthorizationFacade;
+import com.gitplex.server.util.matchscore.MatchScoreProvider;
+import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.datatable.DefaultDataTable;
@@ -209,11 +211,23 @@ public class UserAuthorizationsPage extends UserPage {
 				List<ProjectFacade> notAuthorizedProjects = new ArrayList<>();
 				
 				for (ProjectFacade project: GitPlex.getInstance(CacheManager.class).getProjects().values()) {
-					if (project.matchesQuery(term) && !getProjectAuthorizations().containsKey(project.getId()))
+					if (!getProjectAuthorizations().containsKey(project.getId()))
 						notAuthorizedProjects.add(project);
 				}
 				Collections.sort(notAuthorizedProjects);
 				Collections.reverse(notAuthorizedProjects);
+				
+				MatchScoreProvider<ProjectFacade> matchScoreProvider = new MatchScoreProvider<ProjectFacade>() {
+
+					@Override
+					public double getMatchScore(ProjectFacade object) {
+						return MatchScoreUtils.getMatchScore(object.getName(), term);
+					}
+					
+				};
+
+				notAuthorizedProjects = MatchScoreUtils.filterAndSort(notAuthorizedProjects, matchScoreProvider);
+				
 				new ResponseFiller<ProjectFacade>(response).fill(notAuthorizedProjects, page, WebConstants.PAGE_SIZE);
 			}
 
@@ -416,13 +430,17 @@ public class UserAuthorizationsPage extends UserPage {
 		SortableDataProvider<Long, Void> dataProvider = new SortableDataProvider<Long, Void>() {
 
 			private List<Long> getProjectIds() {
-				List<Long> projectIds = new ArrayList<>();
+				List<Long> projectIds = new ArrayList<>(getProjectAuthorizations().keySet());
 				CacheManager cacheManager = GitPlex.getInstance(CacheManager.class);
-				for (Long projectId: getProjectAuthorizations().keySet()) {
-					if (cacheManager.getProject(projectId).matchesQuery(searchInput))
-						projectIds.add(projectId);
-				}
-				return projectIds;
+				
+				return MatchScoreUtils.filterAndSort(projectIds, new MatchScoreProvider<Long>() {
+
+					@Override
+					public double getMatchScore(Long object) {
+						return MatchScoreUtils.getMatchScore(cacheManager.getProject(object).getName(), searchInput);
+					}
+					
+				});
 			}
 			
 			@Override

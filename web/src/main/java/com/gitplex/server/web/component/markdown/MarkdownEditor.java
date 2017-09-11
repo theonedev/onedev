@@ -48,7 +48,7 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.model.User;
+import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.component.markdown.emoji.EmojiOnes;
 import com.gitplex.server.web.component.modal.ModalPanel;
@@ -271,7 +271,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 
 					AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 					List<Map<String, String>> userList = new ArrayList<>();
-					for (User user: getUserMentionSupport().findUsers(userQuery, ATWHO_LIMIT)) {
+					for (UserFacade user: getUserMentionSupport().findUsers(userQuery, ATWHO_LIMIT)) {
 						Map<String, String> userMap = new HashMap<>();
 						userMap.put("name", user.getName());
 						if (user.getFullName() != null)
@@ -283,7 +283,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						} else {
 							userMap.put("searchKey", noSpaceName);
 						}
-						String avatarUrl = avatarManager.getAvatarUrl(user.getFacade());
+						String avatarUrl = avatarManager.getAvatarUrl(user);
 						userMap.put("avatarUrl", avatarUrl);
 						userList.add(userMap);
 					}
