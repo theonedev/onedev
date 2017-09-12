@@ -91,9 +91,6 @@ public class GitFilter implements Filter {
 		
 		String projectName = StringUtils.substringAfter(projectInfo, "/");
 		
-		if (projectName.endsWith(".git"))
-			projectName = projectName.substring(0, projectName.length()-".git".length());
-		
 		Project project = projectManager.find(projectName);
 		if (project == null) {
 			throw new GitException(String.format("Unable to find project %s", projectName));

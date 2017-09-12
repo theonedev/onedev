@@ -35,6 +35,7 @@
 	<logger name="org.apache.shiro.realm.AuthorizingRealm" level="WARN"/>
 	<logger name="jetbrains.exodus" level="WARN"/>
 	<logger name="jetbrains.exodus.io.FileDataWriter" level="ERROR"/>
+	<logger name="com.zaxxer.hikari.HikariDataSource" level="ERROR"/>
 	<logger name="com.gitplex" level="INFO"/>	
 	
 	<root level="WARN">

@@ -25,7 +25,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.GitPlex;
@@ -74,9 +73,6 @@ public abstract class ProjectPage extends LayoutPage {
 		
 		String projectName = params.get(PARAM_PROJECT).toString();
 		Preconditions.checkNotNull(projectName);
-		
-		if (projectName.endsWith(Constants.DOT_GIT_EXT))
-			projectName = projectName.substring(0, projectName.length() - Constants.DOT_GIT_EXT.length());
 		
 		Project project = GitPlex.getInstance(ProjectManager.class).find(projectName);
 		
