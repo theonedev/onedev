@@ -10,3 +10,10 @@ pre.highlight>code>.CodeMirror {
 pre.highlight>code>.CodeMirror .CodeMirror-cursor {
 	border-left: none;
 }
+
+pre.highlight>code>.CodeMirror .CodeMirror-simplescroll-horizontal {
+	height: 6px;
+}
+pre.highlight>code>.CodeMirror .CodeMirror-simplescroll-vertical {
+	width: 6px;
+}

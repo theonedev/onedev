@@ -801,6 +801,12 @@ gitplex.server.markdown = {
 		$rendered.find("a").click(function() {
 			gitplex.server.viewState.getFromViewAndSetToHistory();
 		});
+		
+		$(window).resize(function() {
+			$rendered.find(".CodeMirror").each(function() {
+				$(this)[0].CodeMirror.refresh();
+			});
+		});
 	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute) {
 		var $container = $("#" + containerId);

@@ -9,6 +9,7 @@ gitplex.server.highlight = function($container) {
 			value: text, 
 			highlightIdentifiers: {delay: 500},
 			theme: "eclipse",
+			scrollbarStyle: "simple",
 			matchBrackets: true
 		});
 		var modeHint = $this.attr("class");
