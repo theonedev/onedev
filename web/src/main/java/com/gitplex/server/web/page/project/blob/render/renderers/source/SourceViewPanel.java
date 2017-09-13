@@ -396,7 +396,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 					String unableCommentMessage = null;
 					PullRequest request = context.getPullRequest();
 					String commitHash = context.getCommit().name();
-					if (request != null && !commitHash.equals(request.getBaseCommitHash())) {
+					if (request != null) {
 						boolean found = false;
 						for (RevCommit commit: context.getPullRequest().getCommits()) {
 							if (commit.name().equals(commitHash)) {

@@ -362,12 +362,17 @@ public class RevisionDiffPanel extends Panel {
 
 		@Override
 		protected Collection<CodeComment> load() {
+			Collection<CodeComment> comments = new ArrayList<>();
 			if (commentSupport != null) {
-				return GitPlex.getInstance(CodeCommentManager.class)
-						.findAll(projectModel.getObject(), getOldCommitId(), getNewCommitId());
-			} else {
-				return new ArrayList<>();
-			}
+				CodeCommentManager codeCommentManager = GitPlex.getInstance(CodeCommentManager.class);
+				PullRequest request = requestModel.getObject();
+				for(CodeComment comment: 
+						codeCommentManager.findAll(projectModel.getObject(), getOldCommitId(), getNewCommitId())) {
+					if (request == null || request.getRequestComparingInfo(comment.getComparingInfo()) != null)
+						comments.add(comment);
+				}
+			} 
+			return comments;
 		}
 		
 	};
