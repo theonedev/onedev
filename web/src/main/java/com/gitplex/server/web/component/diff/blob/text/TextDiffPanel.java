@@ -98,6 +98,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private final BlobCommentSupport commentSupport;
 	
+	private final List<MarkPos> initialMarks;
+	
 	private Component symbolTooltip;
 	
 	private AbstractPostAjaxBehavior callbackBehavior;
@@ -123,6 +125,17 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		if (blameModel != null && blameModel.getObject()) {
 			blameInfo = getBlameInfo();
 		}
+		
+		initialMarks = new ArrayList<>();
+		MarkPos mark = commentSupport.getMark();
+		if (mark != null) {
+			initialMarks.add(mark);
+		}
+		for (CodeComment comment: commentSupport.getComments()) {
+			mark = comment.getMarkPos();
+			initialMarks.add(mark);
+		}
+		
 	}
 
 	private String getJson(MarkPos mark) {
@@ -1050,17 +1063,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			List<Range> oldRanges = new ArrayList<>();
 			List<Range> newRanges = new ArrayList<>();
 			if (commentSupport != null) {
-				List<MarkPos> marks = new ArrayList<>();
-				MarkPos mark = commentSupport.getMark();
-				if (mark != null) {
-					marks.add(mark);
-				}
 				String oldCommitHash = getOldCommit().name();
-				for (CodeComment comment: commentSupport.getComments()) {
-					mark = comment.getMarkPos();
-					marks.add(mark);
-				}
-				for (MarkPos each: marks) {
+				for (MarkPos each: initialMarks) {
 					Range range = new Range(each.getRange().beginLine, each.getRange().endLine+1);
 					if (each.getCommit().equals(oldCommitHash)) {
 						oldRanges.add(range);
