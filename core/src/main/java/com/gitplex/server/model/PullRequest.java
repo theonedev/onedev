@@ -783,7 +783,7 @@ public class PullRequest extends AbstractEntity {
 		CompareContext compareContext = commentComparingInfo.getCompareContext();
 		if (commit.equals(compareContext.getCompareCommit())) {
 			int index = commits.indexOf(commit);
-			if (index == 0) {
+			if (index == -1) {
 				return null;
 			} else {
 				return new ComparingInfo(commits.get(index-1), commit, 

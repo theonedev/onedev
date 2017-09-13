@@ -194,7 +194,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		Project project = projectModel.getObject();
 		PullRequest request = requestModel.getObject();
 		ProjectBlobPage.State viewState = new ProjectBlobPage.State(change.getBlobIdent());
-	
+
 		viewState.requestId = PullRequest.idOf(request);
 		PageParameters params = ProjectBlobPage.paramsOf(project, viewState);
 		actions.add(new ViewStateAwarePageLink<Void>("viewFile", ProjectBlobPage.class, params));
@@ -548,11 +548,18 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
-		String script = String.format("gitplex.server.textDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s, %s, "
+		
+		String unableCommentMessage;
+		if (getPage() instanceof MergePreviewPage) {
+			unableCommentMessage = "Unable to comment on merge preview";
+		} else {
+			unableCommentMessage = "Unable to comment at this place";
+		}
+		String script = String.format("gitplex.server.textDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s, '%s', %s,"
 				+ "%s, %s, %s, %s, '%s');", getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
 				callback, blameMessageBehavior.getCallback(),
-				commentSupport!=null, jsonOfMark, jsonOfCommentInfo, 
+				commentSupport!=null, unableCommentMessage, jsonOfMark, jsonOfCommentInfo, 
 				jsonOfOldCommentInfos, jsonOfNewCommentInfos, dirtyContainerId, 
 				GitPlex.getInstance().getDocLink());
 		

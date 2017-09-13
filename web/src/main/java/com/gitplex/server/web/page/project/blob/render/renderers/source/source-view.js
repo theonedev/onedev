@@ -327,35 +327,40 @@ gitplex.server.sourceView = {
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
 	},
-	openSelectionPopover: function(mark, markUrl, loggedIn) {
+	openSelectionPopover: function(mark, markUrl, loggedIn, unableCommentMessage) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
 		var ch = (mark.beginChar + mark.endChar)/2;
 		var position = cm.charCoords({line:mark.beginLine, ch:ch});
 		
-		var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
-		$content.children("a.permanent").attr("href", markUrl);
-		$content.append("<a class='copy-marked'><i class='fa fa-clipboard'></i> Copy selected text to clipboard</a>");
-		var clipboard = new Clipboard(".copy-marked", {
-		    text: function(trigger) {
-		        return cm.getSelection("\n");
-		    }
-		});		
-		clipboard.on("success", function(e) {
-			clipboard.destroy();
-		});
-		if (loggedIn) {
-			$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
-			$content.children("a.comment").click(function() {
-				if ($(".source-view").find("form.dirty").length != 0 
-						&& !confirm("There are unsaved changes, discard and continue?")) {
-					return;
-				}
-				var callback = $(".source-view").data("callback");
-				callback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
-			});
+		var $content;
+		if (unableCommentMessage) {
+			$content = $("<div><span class='invalid'><i class='fa fa-warning'></i> " + unableCommentMessage + "</a>");
 		} else {
-			$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
-		}			
+			$content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
+			$content.children("a.permanent").attr("href", markUrl);
+			$content.append("<a class='copy-marked'><i class='fa fa-clipboard'></i> Copy selected text to clipboard</a>");
+			var clipboard = new Clipboard(".copy-marked", {
+			    text: function(trigger) {
+			        return cm.getSelection("\n");
+			    }
+			});		
+			clipboard.on("success", function(e) {
+				clipboard.destroy();
+			});
+			if (loggedIn) {
+				$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
+				$content.children("a.comment").click(function() {
+					if ($(".source-view").find("form.dirty").length != 0 
+							&& !confirm("There are unsaved changes, discard and continue?")) {
+						return;
+					}
+					var callback = $(".source-view").data("callback");
+					callback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+				});
+			} else {
+				$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
+			}			
+		}
 		
 		$(".source-view>.code").selectionPopover("open", {
 			position: position,

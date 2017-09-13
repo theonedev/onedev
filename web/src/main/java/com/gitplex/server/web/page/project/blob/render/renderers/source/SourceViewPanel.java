@@ -45,6 +45,7 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -392,8 +393,32 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				switch(params.getParameterValue("action").toString()) {
 				case "openSelectionPopover": 
 					TextRange mark = getMark(params, "param1", "param2", "param3", "param4");
-					String script = String.format("gitplex.server.sourceView.openSelectionPopover(%s, '%s', %s);", 
-							getJson(mark), context.getMarkUrl(mark), SecurityUtils.getUser()!=null);
+					String unableCommentMessage = null;
+					PullRequest request = context.getPullRequest();
+					String commitHash = context.getCommit().name();
+					if (request != null && !commitHash.equals(request.getBaseCommitHash())) {
+						boolean found = false;
+						for (RevCommit commit: context.getPullRequest().getCommits()) {
+							if (commit.name().equals(commitHash)) {
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found) { 
+							if (request.getMergePreview() != null 
+									&& request.getMergePreview().getMerged() != null 
+									&& request.getMergePreview().getMerged().equals(commitHash)) {
+								unableCommentMessage = "Unable to comment on pull request merge preview";
+							} else {
+								unableCommentMessage = "Unable to comment on commits not belonging to pull request";
+							}
+						}
+					}
+							
+					String script = String.format("gitplex.server.sourceView.openSelectionPopover(%s, '%s', %s, %s);", 
+							getJson(mark), context.getMarkUrl(mark), SecurityUtils.getUser()!=null, 
+							unableCommentMessage!=null?"'" + unableCommentMessage + "'":"undefined");
 					target.appendJavaScript(script);
 					break;
 				case "addComment": 
@@ -850,6 +875,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		CharSequence callback = ajaxBehavior.getCallbackFunction(
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"));
+		
 		String script = String.format("gitplex.server.sourceView.onDomReady('%s', '%s', %s, %s, '%s', '%s', "
 				+ "%s, %s, %s, %s, %s, '%s');", 
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
