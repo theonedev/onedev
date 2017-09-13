@@ -343,10 +343,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				clearComment(target);
-				if (context.getOpenComment() != null) 
-					context.onCommentOpened(target, null);
-				target.appendJavaScript("gitplex.server.sourceView.onCloseComment();");
+				closeComment(target);
 			}
 			
 		});
@@ -548,38 +545,42 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 					context.onAddComment(target, mark);
 					target.appendJavaScript(String.format("gitplex.server.sourceView.onAddComment(%s);", getJson(mark)));
 					break;
-				case "openComment":
+				case "toggleComment":
 					Long commentId = params.getParameterValue("param1").toLong();
-					CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentId) {
-
-						@Override
-						protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-							SourceViewPanel.this.onCommentDeleted(target, comment);
-						}
-
-						@Override
-						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-							target.add(commentContainer.get("head"));
-						}
-
-						@Override
-						protected PullRequest getPullRequest() {
-							return context.getPullRequest();
-						}
-
-						@Override
-						protected CompareContext getCompareContext() {
-							return SourceViewPanel.this.getCompareContext();
-						}
-
-					};
-					commentContainer.replace(commentPanel);
-					commentContainer.setVisible(true);
-					target.add(commentContainer);
 					CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-					script = String.format("gitplex.server.sourceView.onOpenComment(%s);", getJsonOfComment(comment));
-					target.appendJavaScript(script);
-					context.onCommentOpened(target, comment);
+					if (!comment.equals(context.getOpenComment())) {
+						CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentId) {
+
+							@Override
+							protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
+								SourceViewPanel.this.onCommentDeleted(target, comment);
+							}
+
+							@Override
+							protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+								target.add(commentContainer.get("head"));
+							}
+
+							@Override
+							protected PullRequest getPullRequest() {
+								return context.getPullRequest();
+							}
+
+							@Override
+							protected CompareContext getCompareContext() {
+								return SourceViewPanel.this.getCompareContext();
+							}
+
+						};
+						commentContainer.replace(commentPanel);
+						commentContainer.setVisible(true);
+						target.add(commentContainer);
+						script = String.format("gitplex.server.sourceView.onOpenComment(%s);", getJsonOfComment(comment));
+						target.appendJavaScript(script);
+						context.onCommentOpened(target, comment);
+					} else {
+						closeComment(target);
+					}
 					break;
 				case "outlineSearch":
 					new ModalPanel(target) {
@@ -1032,6 +1033,13 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		tree.setOutputMarkupId(true);
 		
 		return tree;
+	}
+	
+	private void closeComment(AjaxRequestTarget target) {
+		clearComment(target);
+		if (context.getOpenComment() != null) 
+			context.onCommentOpened(target, null);
+		target.appendJavaScript("gitplex.server.sourceView.onCloseComment();");
 	}
 	
 	private Component newOutlineSearchPanel(String id, ModalPanel modal) {

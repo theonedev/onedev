@@ -354,13 +354,18 @@ public class TextDiffPanel extends Panel implements SourceAware {
 							getMarkupId(), getJson(mark));
 					target.appendJavaScript(script);
 					break;
-				case "openComment": 
+				case "toggleComment": 
 					Long commentId = params.getParameterValue("param1").toLong();
 					CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(commentId);
-					commentSupport.onOpenComment(target, comment);
-					script = String.format("gitplex.server.textDiff.onOpenComment($('#%s'), %s);", 
-							getMarkupId(), getJsonOfComment(comment));
-					target.appendJavaScript(script);
+					CodeComment prevComment = commentSupport.getOpenComment();
+					commentSupport.onToggleComment(target, comment);
+					if (!comment.equals(prevComment)) {
+						script = String.format("gitplex.server.textDiff.onOpenComment($('#%s'), %s);", 
+								getMarkupId(), getJsonOfComment(comment));
+						target.appendJavaScript(script);
+					} else {
+						onCommentClosed(target, comment);
+					}
 					break;
 				}
 			}

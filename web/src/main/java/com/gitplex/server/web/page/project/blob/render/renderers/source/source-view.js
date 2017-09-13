@@ -302,7 +302,7 @@ gitplex.server.sourceView = {
     						return;
     					}
 						var comment = comments[$(this).index()];			        						
-						callback("openComment", comment.id);
+						callback("toggleComment", comment.id);
 					});
 				});
 				gitplex.server.sourceView.highlightCommentTrigger();				
@@ -322,7 +322,7 @@ gitplex.server.sourceView = {
 						&& !confirm("There are unsaved changes, discard and continue?")) {
 					return;
 				}
-				callback("openComment", comment.id);
+				callback("toggleComment", comment.id);
 			});
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		

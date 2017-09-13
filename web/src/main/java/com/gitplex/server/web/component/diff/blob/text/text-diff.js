@@ -800,7 +800,7 @@ gitplex.server.textDiff = {
     						return;
     					}
 						var comment = comments[$(this).index()];			        						
-						callback("openComment", comment.id);
+						callback("toggleComment", comment.id);
 					});
 				});
 				gitplex.server.textDiff.highlightCommentTrigger($container);				
@@ -820,7 +820,7 @@ gitplex.server.textDiff = {
 						&& !confirm("There are unsaved changes, discard and continue?")) {
 					return;
 				}
-				callback("openComment", comment.id);
+				callback("toggleComment", comment.id);
 			});
 		}
 		$lineNumTd.children(".comment-indicator").remove();
