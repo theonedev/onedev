@@ -119,8 +119,8 @@ gitplex.server.markdown = {
 				 * in case an ajax call is ongoing we postpone the render 
 				 * as it the ongoing call may alter the component layout
 				 */
-				if (gitplex.server.ajaxCalls != 0) {  
-					setTimeout(render, previewTimeout);
+				if (gitplex.server.ajaxRequests.count != 0) {  
+					setTimeout(render, 10);
 				} else if ($preview.is(":visible")) {
 					callback("render", $input.val());
 				}

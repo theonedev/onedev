@@ -243,14 +243,28 @@ gitplex.server = {
 			doAutosize($textarea);
 		});
 	},	
+
+	ajaxRequests: {
+		count: 0,
+		
+		track: function() {
+			Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
+				gitplex.server.ajaxRequests.count++;
+			});
+			Wicket.Event.subscribe('/ajax/call/done', function() {
+				gitplex.server.ajaxRequests.count--;
+			});
+		}
+	},
+	
 	setupAjaxLoadingIndicator: function() {
 		$("#ajax-loading-overlay").click(function(e) {
 			e.stopPropagation();
 		});
 
-		var ajaxCalls = 0;
+		var ongoingAjaxRequests = 0;
 		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
-			if (ajaxCalls == 0) {
+			if (ongoingAjaxRequests == 0) {
 				var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
 				if ($ajaxLoadingIndicator[0].timer)
 					clearTimeout($ajaxLoadingIndicator[0].timer);
@@ -259,12 +273,12 @@ gitplex.server = {
 						$ajaxLoadingIndicator.show();
 				}, 2000);		
 			}
-			ajaxCalls++;
+			ongoingAjaxRequests++;
 		});
 		
 		Wicket.Event.subscribe('/ajax/call/done', function() {
-			ajaxCalls--;
-			if (ajaxCalls == 0) {
+			ongoingAjaxRequests--;
+			if (ongoingAjaxRequests == 0) {
 				var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
 				if ($ajaxLoadingIndicator[0].timer) {
 					clearTimeout($ajaxLoadingIndicator[0].timer);
@@ -273,8 +287,8 @@ gitplex.server = {
 				$ajaxLoadingIndicator.hide();
 			}
 		});
-	}, 
-		
+	}, 		
+	
 	focus: {
 		$components: null,
 		
@@ -367,19 +381,12 @@ gitplex.server = {
 			return m;
 		}
 	},	
-	
+
 	setupWebsocketCallback: function() {
-		var ajaxCalls = 0;
-		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
-			ajaxCalls++;
-		});
-		Wicket.Event.subscribe('/ajax/call/done', function() {
-			ajaxCalls--;
-		});
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message == "RenderCallback") { 
 				function requestToRender() {
-					if (ajaxCalls != 0) {
+					if (gitplex.server.ajaxRequests.count != 0) {
 						setTimeout(function() {
 							requestToRender();
 						}, 10);
@@ -577,6 +584,7 @@ gitplex.server = {
 		gitplex.server.focus.setupAutoFocus();
 		gitplex.server.setupWebsocketCallback();
 		gitplex.server.mouseState.track();
+		gitplex.server.ajaxRequests.track();
 		
 		if (autosaveKeyToClear)
 			localStorage.removeItem(autosaveKeyToClear);
