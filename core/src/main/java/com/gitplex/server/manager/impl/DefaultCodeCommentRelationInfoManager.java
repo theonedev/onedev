@@ -107,8 +107,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 		this.codeCommentRelationManager = codeCommentRelationManager;
 	}
 	
-	private BatchWorker getBatchWorker(Project project) {
-		Long projectId = project.getId();
+	private BatchWorker getBatchWorker(Long projectId) {
 		return new BatchWorker("project-" + projectId + "-collectCodeCommentRelationInfo") {
 
 			@Override
@@ -171,13 +170,13 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 							commit.copyRawTo(keyBytes, 0);
 							ByteIterable commitKey = new ArrayByteIterable(keyBytes);
 							
-							Set<String> pullRequestUUIDs = getPullRequests(pullRequestStore, txn, commitKey);
+							Set<String> pullRequestUUIDs = getPullRequestUUIDs(pullRequestStore, txn, commitKey);
 							pullRequestUUIDs.add(update.getRequest().getUUID());
 							
 							pullRequestStore.put(txn, commitKey, 
 									new ArrayByteIterable(SerializationUtils.serialize((Serializable) pullRequestUUIDs)));
 							
-							Map<String, ComparingInfo> comments = getCodeComments(codeCommentStore, txn, commitKey);
+							Map<String, ComparingInfo> comments = getCodeCommentComparingInfos(codeCommentStore, txn, commitKey);
 							Set<String> uuidsToRemove = new HashSet<>();
 							for (Map.Entry<String, ComparingInfo> entry: comments.entrySet()) {
 								if (request.getRequestComparingInfo(entry.getValue()) != null) {
@@ -230,12 +229,12 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 						commitId.copyRawTo(keyBytes, 0);
 						ByteIterable commitKey = new ArrayByteIterable(keyBytes);
 						
-						Map<String, ComparingInfo> comments = getCodeComments(codeCommentStore, txn, commitKey);
+						Map<String, ComparingInfo> comments = getCodeCommentComparingInfos(codeCommentStore, txn, commitKey);
 						comments.put(comment.getUUID(), comment.getComparingInfo());
 						codeCommentStore.put(txn, commitKey, 
 								new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
 
-						Set<String> pullRequestUUIDs = getPullRequests(pullRequestStore, txn, commitKey);
+						Set<String> pullRequestUUIDs = getPullRequestUUIDs(pullRequestStore, txn, commitKey);
 						
 						Set<String> uuidsToRemove = new HashSet<>();
 						for (String uuid: pullRequestUUIDs) {
@@ -277,7 +276,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Set<String> getPullRequests(Store store, Transaction txn, ByteIterable commitKey) {
+	private Set<String> getPullRequestUUIDs(Store store, Transaction txn, ByteIterable commitKey) {
 		byte[] valueBytes = getBytes(store.get(txn, commitKey));
 		if (valueBytes != null) {
 			return (Set<String>) SerializationUtils.deserialize(valueBytes);
@@ -287,7 +286,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Map<String, ComparingInfo> getCodeComments(Store store, Transaction txn, ByteIterable commitKey) {
+	private Map<String, ComparingInfo> getCodeCommentComparingInfos(Store store, Transaction txn, ByteIterable commitKey) {
 		byte[] valueBytes = getBytes(store.get(txn, commitKey));
 		if (valueBytes != null) {
 			return (Map<String, ComparingInfo>) SerializationUtils.deserialize(valueBytes);
@@ -302,10 +301,10 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 		if (event.isNew()) {
 			if (event.getEntity() instanceof PullRequestUpdate) {
 				Project project = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject();
-				batchWorkManager.submit(getBatchWorker(project), new Prioritized(PRIORITY));
+				batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
 			} else if (event.getEntity() instanceof CodeComment) {
 				Project project = ((CodeComment)event.getEntity()).getProject();
-				batchWorkManager.submit(getBatchWorker(project), new Prioritized(PRIORITY));
+				batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
 			} 
 		}
 	}
@@ -315,7 +314,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	public void on(SystemStarted event) {
 		for (Project project: projectManager.findAll()) {
 			checkVersion(project.getId().toString());
-			batchWorkManager.submit(getBatchWorker(project), new Prioritized(PRIORITY));
+			batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
 		}
 	}
 	
