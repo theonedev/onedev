@@ -92,6 +92,8 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	
 	private final CodeCommentManager codeCommentManager;
 	
+	private final Dao dao;
+	
 	@Inject
 	public DefaultCodeCommentRelationInfoManager(Dao dao, ProjectManager projectManager, StorageManager storageManager, 
 			PullRequestUpdateManager pullRequestUpdateManager, CodeCommentManager codeCommentManager, 
@@ -105,6 +107,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 		this.unitOfWork = unitOfWork;
 		this.pullRequestManager = pullRequestManager;
 		this.codeCommentRelationManager = codeCommentRelationManager;
+		this.dao = dao;
 	}
 	
 	private BatchWorker getBatchWorker(Long projectId) {
@@ -300,11 +303,25 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	public void on(EntityPersisted event) {
 		if (event.isNew()) {
 			if (event.getEntity() instanceof PullRequestUpdate) {
-				Project project = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject();
-				batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
+				Long projectId = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject().getId();
+				dao.doAfterCommit(new Runnable() {
+
+					@Override
+					public void run() {
+						batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+					}
+					
+				});
 			} else if (event.getEntity() instanceof CodeComment) {
-				Project project = ((CodeComment)event.getEntity()).getProject();
-				batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
+				Long projectId = ((CodeComment)event.getEntity()).getProject().getId();
+				dao.doAfterCommit(new Runnable() {
+
+					@Override
+					public void run() {
+						batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+					}
+					
+				});
 			} 
 		}
 	}

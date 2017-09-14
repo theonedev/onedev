@@ -35,7 +35,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -689,11 +688,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	protected void checkAsync(PullRequest request) {
 		Long requestId = request.getId();
 		Subject subject = SecurityUtils.getSubject();
-		if (dao.getSession().getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-			dao.doUnitOfWorkAsyncAfterCommit(newCheckStatusRunnable(requestId, subject));
-		} else {
-			unitOfWork.doAsync(newCheckStatusRunnable(requestId, subject));
-		}
+		dao.doUnitOfWorkAsyncAfterCommit(newCheckStatusRunnable(requestId, subject));
 	}
 
 	@Transactional
