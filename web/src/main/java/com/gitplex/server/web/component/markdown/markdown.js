@@ -111,17 +111,29 @@ gitplex.server.markdown = {
 				$preview.outerHeight($edit.outerHeight());
 			}
 		}
-		
+
+		var previewTimeout = 500;
 		$input.doneEvents("input inserted.atwho", function() {
-			if ($preview.is(":visible")) {
-				callback("render", $input.val());
+			function render() {
+				/* 
+				 * in case an ajax call is ongoing we postpone the render 
+				 * as it the ongoing call may alter the component layout
+				 */
+				if (gitplex.server.ajaxCalls != 0) {  
+					setTimeout(render, previewTimeout);
+				} else if ($preview.is(":visible")) {
+					callback("render", $input.val());
+				}
 			}
+
+			render();
+
 			if (autosaveKey) {
 				var content = $input.val();
 				if (content.trim().length != 0)
 					localStorage.setItem(autosaveKey, content);
 			}
-		}, 500);
+		}, previewTimeout);
 		
 		$input.doneEvents("keydown", function(e) {
 			if (e.keyCode>=33 && e.keyCode<=40 && $preview.is(":visible")) {
