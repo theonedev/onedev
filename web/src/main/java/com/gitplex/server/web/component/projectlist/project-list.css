@@ -8,6 +8,9 @@ table.project-list td.project {
 table.project-list a {
 	color: #444;
 }
+table.project-list td.project, table.project-list td.author {
+	white-space: nowrap;
+} 
 table.project-list td.author img.avatar {
 	width: 20px;
 	height: 20px;
