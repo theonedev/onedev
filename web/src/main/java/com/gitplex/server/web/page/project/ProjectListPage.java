@@ -8,17 +8,18 @@ import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CacheManager;
@@ -35,10 +36,15 @@ import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.projectlist.ProjectListPanel;
 import com.gitplex.server.web.page.layout.LayoutPage;
+import com.gitplex.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class ProjectListPage extends LayoutPage {
 
+	private static final String PARAM_PAGE = "page";
+	
+	private static final String PARAM_ORPHAN = "orphan";
+	
 	private boolean showOrphanProjects;
 	
 	private final IModel<List<ProjectFacade>> orphanProjectsModel = new LoadableDetachableModel<List<ProjectFacade>>() {
@@ -76,6 +82,11 @@ public class ProjectListPage extends LayoutPage {
 		}
 		
 	};
+	
+	public ProjectListPage(PageParameters params) {
+		super(params);
+		showOrphanProjects = params.get(PARAM_ORPHAN).toBoolean(false);
+	}
 	
 	private final IModel<List<ProjectFacade>> projectsModel = new LoadableDetachableModel<List<ProjectFacade>>() {
 
@@ -138,7 +149,7 @@ public class ProjectListPage extends LayoutPage {
 		orphanProjectsNote.setOutputMarkupPlaceholderTag(true);
 		add(orphanProjectsNote);
 		
-		add(new AjaxLink<Void>("showOrphanProjects") {
+		add(new Link<Void>("showOrphanProjects") {
 
 			@Override
 			protected void onInitialize() {
@@ -156,11 +167,11 @@ public class ProjectListPage extends LayoutPage {
 			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
+			public void onClick() {
 				showOrphanProjects = !showOrphanProjects;
-				target.add(this);
-				target.add(projectList);
-				target.add(orphanProjectsNote);
+				PageParameters params = new PageParameters();
+				params.add(PARAM_ORPHAN, showOrphanProjects);
+				setResponsePage(ProjectListPage.class, params);
 			}
 
 			@Override
@@ -179,6 +190,22 @@ public class ProjectListPage extends LayoutPage {
 					return orphanProjectsModel.getObject();
 				else
 					return projectsModel.getObject();
+			}
+			
+		}, new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = new PageParameters();
+				params.add(PARAM_PAGE, currentPage+1);
+				if (showOrphanProjects)
+					params.add(PARAM_ORPHAN, showOrphanProjects);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
 			}
 			
 		}));

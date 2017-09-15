@@ -26,17 +26,20 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.WebConstants;
-import com.gitplex.server.web.component.datatable.DefaultDataTable;
+import com.gitplex.server.web.component.datatable.HistoryAwareDataTable;
 import com.gitplex.server.web.component.datatable.EntityDataProvider;
 import com.gitplex.server.web.component.datatable.SelectionColumn;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.gitplex.server.web.util.DateUtils;
+import com.gitplex.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class TaskListPage extends UserPage {
 
+	private static final String PARAM_PAGE = "page";
+	
 	public TaskListPage(PageParameters params) {
 		super(params);
 	}
@@ -136,8 +139,24 @@ public class TaskListPage extends UserPage {
 			
 		});
 		
-		DataTable<PullRequestTask, String> dataTable = 
-				new DefaultDataTable<PullRequestTask, String>("tasks", columns, dataProvider, WebConstants.PAGE_SIZE);
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = new PageParameters();
+				params.add(PARAM_PAGE, currentPage+1);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+			}
+			
+		};
+		
+		DataTable<PullRequestTask, String> dataTable = new HistoryAwareDataTable<PullRequestTask, String>("tasks", columns, 
+				dataProvider, WebConstants.PAGE_SIZE, pagingHistorySupport);
 		dataTable.setVisible(dataTable.getRowCount() != 0);
 		add(dataTable);
 		

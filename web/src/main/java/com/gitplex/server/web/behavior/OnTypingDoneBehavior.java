@@ -30,9 +30,12 @@ public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBeha
 
 		response.render(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
 		String script = String.format(""
-				+ "$('#%s').doneEvents('input', function() {"
-				+ "  $(this).trigger('donetyping');"
-				+ "}, %s);",
+				+ "var $input = $('#%s');"
+				+ "$input.doneEvents('input', function() {"
+				+ "  $input.trigger('donetyping');"
+				+ "}, %s);"
+				+ "if ($input.val() != '')"
+				+ "  $input.trigger('donetyping');",
 				component.getMarkupId(true), timeout);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

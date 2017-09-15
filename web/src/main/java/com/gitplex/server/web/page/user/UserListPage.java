@@ -36,15 +36,18 @@ import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
-import com.gitplex.server.web.component.datatable.DefaultDataTable;
+import com.gitplex.server.web.component.datatable.HistoryAwareDataTable;
 import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.layout.LayoutPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
+import com.gitplex.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class UserListPage extends LayoutPage {
 
+	private static final String PARAM_PAGE = "page";
+	
 	private DataTable<User, Void> usersTable;
 	
 	private String searchInput;
@@ -186,8 +189,24 @@ public class UserListPage extends LayoutPage {
 			}
 		};
 		
-		add(usersTable = new DefaultDataTable<User, Void>("users", columns, dataProvider, 
-				WebConstants.PAGE_SIZE));
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = new PageParameters();
+				params.add(PARAM_PAGE, currentPage+1);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+			}
+			
+		};
+		
+		add(usersTable = new HistoryAwareDataTable<User, Void>("users", columns, dataProvider, 
+				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 
 	@Override

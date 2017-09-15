@@ -45,7 +45,7 @@ import com.gitplex.server.util.matchscore.MatchScoreProvider;
 import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.component.datatable.DefaultDataTable;
+import com.gitplex.server.web.component.datatable.HistoryAwareDataTable;
 import com.gitplex.server.web.component.datatable.SelectionColumn;
 import com.gitplex.server.web.component.groupchoice.AbstractGroupChoiceProvider;
 import com.gitplex.server.web.component.groupchoice.GroupChoiceResourceReference;
@@ -53,10 +53,13 @@ import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
 import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.page.group.GroupProfilePage;
+import com.gitplex.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class UserMembershipsPage extends UserPage {
 
+	private static final String PARAM_PAGE = "page";
+	
 	private String searchInput;
 	
 	private DataTable<Membership, Void> membershipsTable;
@@ -255,8 +258,24 @@ public class UserMembershipsPage extends UserPage {
 			}
 		};
 		
-		add(membershipsTable = new DefaultDataTable<Membership, Void>("memberships", columns, dataProvider, 
-				WebConstants.PAGE_SIZE));
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = new PageParameters();
+				params.add(PARAM_PAGE, currentPage+1);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+			}
+			
+		};
+		
+		add(membershipsTable = new HistoryAwareDataTable<Membership, Void>("memberships", columns, dataProvider, 
+				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 	
 }

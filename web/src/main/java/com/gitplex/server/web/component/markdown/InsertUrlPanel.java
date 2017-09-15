@@ -145,24 +145,24 @@ abstract class InsertUrlPanel extends Panel {
 				
 			};
 			
-			BlobIdent rootBlobIdent = new BlobIdent(blobRenderContext.getBlobIdent().revision, null, 
-					FileMode.TYPE_TREE);
+			/*
+			 * We resolve revision to get latest commit id so that we can select to insert newly 
+			 * added/uploaded files while editing a markdown file
+			 */
+			ObjectId commitId;
+			try {
+				commitId = blobRenderContext.getProject().getRepository()
+						.resolve(blobRenderContext.getBlobIdent().revision);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			
+			BlobIdent rootBlobIdent = new BlobIdent(commitId.name(), null, FileMode.TYPE_TREE);
 			if (!blobRenderContext.getProject().getChildren(rootBlobIdent, blobIdentFilter).isEmpty()) {
 				add(new DropdownLink("blobPicker") {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						/*
-						 * We resolve revision to get latest commit id so that we can select to insert newly 
-						 * added/uploaded files while editing a markdown file
-						 */
-						ObjectId commitId;
-						try {
-							commitId = blobRenderContext.getProject().getRepository()
-									.resolve(blobRenderContext.getBlobIdent().revision);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
 				
 						BlobIdent blobIdent = blobRenderContext.getBlobIdent();
 						String openDirectory;

@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -17,7 +18,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -32,21 +32,25 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.datatable.HistoryAwareNavToolbar;
 import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.util.DateUtils;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+import com.gitplex.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
 
 	private final IModel<List<ProjectFacade>> projectsModel;
 	
-	public ProjectListPanel(String id, IModel<List<ProjectFacade>> projectsModel) {
+	private final PagingHistorySupport pagingHistorySupport;
+	
+	public ProjectListPanel(String id, IModel<List<ProjectFacade>> projectsModel, 
+			@Nullable PagingHistorySupport pagingHistorySupport) {
 		super(id);
 		this.projectsModel = projectsModel;
+		this.pagingHistorySupport = pagingHistorySupport;
 	}
 
 	@Override
@@ -152,20 +156,17 @@ public class ProjectListPanel extends Panel {
 		
 		DataTable<ProjectFacade, Void> projectsTable = 
 				new DataTable<ProjectFacade, Void>("projects", columns, dataProvider, WebConstants.PAGE_SIZE);		
-		projectsTable.addBottomToolbar(new NavigationToolbar(projectsTable) {
-
-			@Override
-			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new BootstrapPagingNavigator(navigatorId, table);
-			}
-			
-		});
+		
+		if (pagingHistorySupport != null)
+			projectsTable.setCurrentPage(pagingHistorySupport.getCurrentPage());
+		
+		projectsTable.addBottomToolbar(new HistoryAwareNavToolbar(projectsTable, pagingHistorySupport));
 		projectsTable.addBottomToolbar(new NoRecordsToolbar(projectsTable, Model.of("No Projects Found")));
 		add(projectsTable);
 		
 		setOutputMarkupId(true);
 	}
-
+	
 	@Override
 	protected void onDetach() {
 		projectsModel.detach();

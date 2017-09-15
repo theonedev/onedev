@@ -102,6 +102,9 @@ a.wicket_orderUp:AFTER {
 a.wicket_orderDown:AFTER { 
 	content: "\f063"; 
 }
+.pagination a.first, .pagination a.prev, .pagination a.next, .pagination a.last {
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
 
 /* TREE */
 .tree-theme-windows .tree-node span.tree-content a {
@@ -493,3 +496,4 @@ input.search {
 .modal-header .close {
 	font-family: sans-serif;
 }
+

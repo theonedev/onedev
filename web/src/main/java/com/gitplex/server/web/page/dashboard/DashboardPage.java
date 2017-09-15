@@ -72,7 +72,7 @@ public class DashboardPage extends LayoutPage {
 			
 		};
 		
-		add(new ProjectListPanel("recentVisitedProjects", recentVisitedProjectsModel) {
+		add(new ProjectListPanel("recentVisitedProjects", recentVisitedProjectsModel, null) {
 
 			@Override
 			protected void onConfigure() {
@@ -111,7 +111,7 @@ public class DashboardPage extends LayoutPage {
 			
 		};
 		
-		add(new ProjectListPanel("recentAddedProjects", recentAddedProjectsModel) {
+		add(new ProjectListPanel("recentAddedProjects", recentAddedProjectsModel, null) {
 
 			@Override
 			protected void onConfigure() {

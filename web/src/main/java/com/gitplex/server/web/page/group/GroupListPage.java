@@ -22,6 +22,7 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -34,15 +35,18 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.component.datatable.DefaultDataTable;
+import com.gitplex.server.web.component.datatable.HistoryAwareDataTable;
 import com.gitplex.server.web.component.link.LabelLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.layout.LayoutPage;
 import com.gitplex.server.web.util.ConfirmOnClick;
+import com.gitplex.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class GroupListPage extends LayoutPage {
 
+	private static final String PARAM_PAGE = "page";
+	
 	private DataTable<Group, Void> groupsTable;
 	
 	private String searchInput;
@@ -190,9 +194,25 @@ public class GroupListPage extends LayoutPage {
 				};
 			}
 		};
+
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = new PageParameters();
+				params.add(PARAM_PAGE, currentPage+1);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+			}
+			
+		};
 		
-		add(groupsTable = new DefaultDataTable<Group, Void>("groups", columns, dataProvider, 
-				WebConstants.PAGE_SIZE));
+		add(groupsTable = new HistoryAwareDataTable<Group, Void>("groups", columns, dataProvider, 
+				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 
 	@Override
