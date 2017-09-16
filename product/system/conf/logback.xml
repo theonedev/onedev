@@ -17,7 +17,7 @@
 			<FileNamePattern>${logback.logFile}.%i</FileNamePattern>
 		</rollingPolicy>
 		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-			<maxFileSize>5MB</maxFileSize>
+			<maxFileSize>1MB</maxFileSize>
 		</triggeringPolicy>
 	</appender>
 	

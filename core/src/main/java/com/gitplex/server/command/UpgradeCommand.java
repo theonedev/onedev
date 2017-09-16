@@ -426,6 +426,12 @@ public class UpgradeCommand extends DefaultPersistManager {
 					"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider\r\n"
 					+ "hibernate.connection.autocommit=true");
 			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, Charsets.UTF_8);
+
+			File logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
+			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, Charsets.UTF_8);
+			logbackConfig = StringUtils.replace(logbackConfig, "<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
+					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"><maxFileSize>1MB</maxFileSize></triggeringPolicy>");
+			FileUtils.writeStringToFile(logbackConfigFile, logbackConfig, Charsets.UTF_8);
 			
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
 					new File(upgradeDir, "conf/wrapper-license.conf"));
