@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -212,16 +213,12 @@ public class DefaultIndexManager implements IndexManager {
 					String currentBlobIndexVersion = getCurrentBlobIndexVersion(extractor);
 					String blobIndexVersion = blobIndexVersionRef.get();
 					if (blobIndexVersion != null) {
-						if (currentBlobIndexVersion != null) {
-							if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
-								writer.deleteDocuments(query);
-								indexBlob(writer, repository, extractor, blobId, blobPath);
-								indexed++;
-							}
-						} else {
+						if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
 							writer.deleteDocuments(query);
+							indexBlob(writer, repository, extractor, blobId, blobPath);
+							indexed++;
 						}
-					} else if (currentBlobIndexVersion != null) {
+					} else {
 						indexBlob(writer, repository, extractor, blobId, blobPath);
 						indexed++;
 					}
@@ -374,14 +371,16 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	private String getCurrentCommitIndexVersion() {
-		return INDEX_VERSION + ";" + SymbolExtractorRegistry.getVersion();
+		return DigestUtils.md5Hex(INDEX_VERSION + ";" + SymbolExtractorRegistry.getVersion());
 	}
 	
 	private String getCurrentBlobIndexVersion(SymbolExtractor<Symbol> extractor) {
+		String version;
 		if (extractor != null)
-			return INDEX_VERSION + ";" + extractor.getVersion();
+			version = INDEX_VERSION + ";" + extractor.getClass().getName() + ":" + extractor.getVersion();
 		else
-			return String.valueOf(INDEX_VERSION);
+			version = String.valueOf(INDEX_VERSION);
+		return DigestUtils.md5Hex(version);
 	}
 
 	@Override
