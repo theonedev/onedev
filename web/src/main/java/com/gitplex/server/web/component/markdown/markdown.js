@@ -380,18 +380,12 @@ gitplex.server.markdown = {
 		});
 
 		$head.find(".do-code").click(function() {
+			var langHint = "programming language";
 			var selected = $input.range();
 			if (selected.length != 0) {
-				var value = $input.val();
-				if (selected.start-1>=0 && selected.end<=value.length-1 
-						&& value.charAt(selected.start-1) === '`' 
-						&& value.charAt(selected.end) === '`') {
-					$input.range(selected.start-1, selected.end+1).range(selected.text);
-				} else {
-					$input.range('`' + selected.text + '`').range(selected.start+1, selected.end+1);
-				}
+				$input.range("\n```" + langHint + "\n" + selected.text + "\n```\n").range(selected.start+4, selected.start+4+langHint.length);
 			} else {
-				$input.range("`code text here`").range(selected.start+1, selected.end+1+"code text here".length);
+				$input.range("\n```" + langHint + "\ncode text here\n```\n").range(selected.start+4, selected.start+4+langHint.length);
 			}
 			$input.focus();
 			gitplex.server.markdown.fireInputEvent($input);
