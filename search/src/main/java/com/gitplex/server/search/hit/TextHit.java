@@ -28,8 +28,12 @@ public class TextHit extends QueryHit {
 	
 	@Override
 	public Component render(String componentId) {
-		return new HighlightableLabel(componentId, lineContent, 
-				new Range(getTokenPos().getFromCh(), getTokenPos().getToCh()));
+		if (getTokenPos() != null) {
+			return new HighlightableLabel(componentId, lineContent, 
+					new Range(getTokenPos().getFromCh(), getTokenPos().getToCh()));
+		} else {
+			return new HighlightableLabel(componentId, lineContent, null);
+		}
 	}
 
 	@Override

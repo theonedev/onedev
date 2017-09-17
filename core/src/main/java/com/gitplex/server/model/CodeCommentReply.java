@@ -40,6 +40,10 @@ public class CodeCommentReply extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date;
 	
+	@Lob
+	@Column(nullable=false, length=65535)
+	private String content;
+	
 	@Version
 	private long version;
 	
@@ -88,10 +92,6 @@ public class CodeCommentReply extends AbstractEntity {
 	public String getAnchor() {
 		return getClass().getSimpleName() + "-" + getId();
 	}
-	
-	@Lob
-	@Column(nullable=false, length=65535)
-	private String content;
 	
 	public String getContent() {
 		return content;

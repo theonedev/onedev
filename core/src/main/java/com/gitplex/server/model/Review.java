@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -38,6 +39,8 @@ public class Review extends AbstractEntity {
 	
 	private transient Optional<PullRequestUpdate> updateOpt;
 	
+	@Lob
+	@Column(length=65535)
 	private String note;
 	
 	public String getCommit() {

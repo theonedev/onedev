@@ -1,6 +1,8 @@
 package com.gitplex.server.web.page.project.blob.search.result;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +95,24 @@ public abstract class SearchResultPanel extends Panel {
 		
 		blobs = new ArrayList<>(hitsByBlob.values());
 		for (MatchedBlob blob: blobs) {
-			blob.getHits().sort((hit1, hit2) -> hit1.getTokenPos().getFromLine() - hit2.getTokenPos().getFromLine());
+			Collections.sort(blob.getHits(), new Comparator<QueryHit>() {
+
+				@Override
+				public int compare(QueryHit o1, QueryHit o2) {
+					if (o1.getTokenPos() != null) {
+						if (o2.getTokenPos() != null) 
+							return o1.getTokenPos().getFromLine() - o2.getTokenPos().getFromLine();
+						else
+							return -1;
+					} else {
+						if (o2.getTokenPos() != null) 
+							return 1;
+						else
+							return 0;
+					}
+				}
+				
+			});
 		}
 	}
 
@@ -448,7 +467,10 @@ public abstract class SearchResultPanel extends Panel {
 								super.onInitialize();
 								
 								add(hit.renderIcon("icon"));
-								add(new Label("lineNo", String.valueOf(hit.getTokenPos().getFromLine()+1) + ":"));
+								if (hit.getTokenPos() != null)
+									add(new Label("lineNo", String.valueOf(hit.getTokenPos().getFromLine()+1) + ":"));
+								else
+									add(new Label("lineNo").setVisible(false));
 								add(hit.render("label"));
 								add(new Label("scope", hit.getNamespace())
 										.setVisible(!(hit instanceof TextHit) && hit.getNamespace()!=null));
