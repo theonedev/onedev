@@ -6,6 +6,7 @@ import java.util.Set;
 import com.gitplex.server.util.PathUtils;
 import com.vladsch.flexmark.ast.Image;
 import com.vladsch.flexmark.ast.Link;
+import com.vladsch.flexmark.ast.util.TextCollectingVisitor;
 import com.vladsch.flexmark.html.CustomNodeRenderer;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.html.HtmlWriter;
@@ -15,6 +16,7 @@ import com.vladsch.flexmark.html.renderer.NodeRendererContext;
 import com.vladsch.flexmark.html.renderer.NodeRendererFactory;
 import com.vladsch.flexmark.html.renderer.NodeRenderingHandler;
 import com.vladsch.flexmark.html.renderer.ResolvedLink;
+import com.vladsch.flexmark.util.html.Escaping;
 import com.vladsch.flexmark.util.options.DataHolder;
 import com.vladsch.flexmark.util.options.DataKey;
 import com.vladsch.flexmark.util.options.MutableDataHolder;
@@ -43,12 +45,25 @@ public class UrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
 					        	
 					            @Override
 					            public void render(Image image, NodeRendererContext context, HtmlWriter html) {
-					            	String url = image.getUrl().toString();
-					                ResolvedLink resolvedLink = context.resolveLink(LinkType.IMAGE, url, null);
-					                html.attr("src", resolveUrl(baseUrl, url));
-					                html.attr("alt", image.getText());
-					                html.withAttr(resolvedLink);
-					                html.tagVoid("img");
+					                if (!context.isDoNotRenderLinks()) {
+					                    String altText = new TextCollectingVisitor().collectAndGetText(image);
+
+					                    ResolvedLink resolvedLink = context.resolveLink(LinkType.IMAGE, image.getUrl().unescape(), null);
+					                    String url = resolvedLink.getUrl();
+
+					                    if (!image.getUrlContent().isEmpty()) {
+					                        // reverse URL encoding of =, &
+					                        String content = Escaping.percentEncodeUrl(image.getUrlContent()).replace("+", "%2B").replace("%3D", "=").replace("%26", "&amp;");
+					                        url += content;
+					                    }
+
+						                html.attr("src", resolveUrl(baseUrl, url));
+					                    html.attr("alt", altText);
+					                    if (image.getTitle().isNotNull()) {
+					                        html.attr("title", image.getTitle().unescape());
+					                    }
+					                    html.srcPos(image.getChars()).withAttr(resolvedLink).tagVoid("img");
+					                }
 					            }
 					            
 					        }));
@@ -56,11 +71,20 @@ public class UrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
 					        	
 					            @Override
 					            public void render(Link link, NodeRendererContext context, HtmlWriter html) {
-					            	String url = link.getUrl().toString();
-					                ResolvedLink resolvedLink = context.resolveLink(LinkType.LINK, url, null);
-					                html.attr("href", resolveUrl(baseUrl, url));
-					                html.withAttr(resolvedLink);
-					                html.tag("a").text(link.getText()).closeTag("a");
+					                if (context.isDoNotRenderLinks()) {
+					                    context.renderChildren(link);
+					                } else {
+					                    ResolvedLink resolvedLink = 
+					                    		context.resolveLink(LinkType.LINK, link.getUrl().unescape(), null);
+
+					                    html.attr("href", resolveUrl(baseUrl, resolvedLink.getUrl()));
+					                    if (link.getTitle().isNotNull()) {
+					                        html.attr("title", link.getTitle().unescape());
+					                    }
+					                    html.srcPos(link.getChars()).withAttr(resolvedLink).tag("a");
+					                    context.renderChildren(link);
+					                    html.tag("/a");
+					                }
 					            }
 					            
 					        }));
