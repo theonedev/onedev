@@ -7,8 +7,11 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.gitplex.launcher.loader.ExtensionPoint;
 import com.gitplex.server.git.BlobChange;
+import com.gitplex.server.web.component.diff.revision.DiffViewMode;
 
 @ExtensionPoint
 public interface DiffRenderer {
-	@Nullable Panel render(String panelId, MediaType mediaType, BlobChange change);
+	
+	@Nullable Panel render(String panelId, MediaType mediaType, BlobChange change, DiffViewMode viewMode);
+	
 }

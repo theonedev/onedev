@@ -17,7 +17,6 @@ gitplex.server.revisionDiff = {
 			gitplex.server.revisionDiff.reposition();
 		});
 		gitplex.server.revisionDiff.reposition();
-		console.log(window.location.hash);
 		if (window.location.hash) {
 			var $anchor = $(window.location.hash);
 			if ($anchor.length != 0) {

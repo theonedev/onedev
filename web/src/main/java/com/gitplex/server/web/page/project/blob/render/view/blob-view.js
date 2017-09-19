@@ -27,6 +27,10 @@ gitplex.server.blobView = {
 			$body.outerWidth(width).outerHeight(height);
 			$body.find(".autofit:visible").first().triggerHandler("autofit", [$body.width(), $body.height()]);
 		});
-	} 	
+	}, 
+	
+	onWindowLoad: function() {
+		
+	}
 
 };

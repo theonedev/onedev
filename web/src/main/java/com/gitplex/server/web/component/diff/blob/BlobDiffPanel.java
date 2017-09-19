@@ -89,7 +89,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 		} else {
 			Panel diffPanel = null;
 			for (DiffRenderer renderer: GitPlex.getExtensions(DiffRenderer.class)) {
-				diffPanel = renderer.render(CONTENT_ID, blob.getMediaType(), change);
+				diffPanel = renderer.render(CONTENT_ID, blob.getMediaType(), change, diffMode);
 				if (diffPanel != null)
 					break;
 			}
@@ -125,7 +125,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 			} else if (change.getOldBlob().getMediaType().equals(change.getNewBlob().getMediaType())) {
 				Panel diffPanel = null;
 				for (DiffRenderer renderer: GitPlex.getExtensions(DiffRenderer.class)) {
-					diffPanel = renderer.render(CONTENT_ID, change.getNewBlob().getMediaType(), change);
+					diffPanel = renderer.render(CONTENT_ID, change.getNewBlob().getMediaType(), change, diffMode);
 					if (diffPanel != null)
 						break;
 				}
