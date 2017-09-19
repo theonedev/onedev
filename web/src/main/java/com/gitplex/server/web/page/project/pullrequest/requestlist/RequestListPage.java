@@ -38,6 +38,7 @@ import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.UserLink;
@@ -265,8 +266,10 @@ public class RequestListPage extends ProjectPage {
 					String componentId, final IModel<PullRequest> rowModel) {
 				PullRequest request = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "requestFrag", RequestListPage.this);
+				User userForDisplay = User.getForDisplay(request.getSubmitter(), request.getSubmitterName());
+				fragment.add(new AvatarLink("submitter", userForDisplay));
 				fragment.add(new Label("number", "#" + request.getNumber()));
-				fragment.add(new ViewStateAwarePageLink<Void>("title", RequestOverviewPage.class, 
+				fragment.add(new ViewStateAwarePageLink<Void>("text", RequestOverviewPage.class, 
 						RequestOverviewPage.paramsOf(request)) {
 
 					@Override
@@ -277,33 +280,29 @@ public class RequestListPage extends ProjectPage {
 				});
 				
 				fragment.add(new RequestStatusPanel("status", rowModel));
-				fragment.add(new UserLink("submitter", User.getForDisplay(request.getSubmitter(), 
-						request.getSubmitterName())));
 				fragment.add(new BranchLink("target", request.getTarget(), null));
 				if (request.getSource() != null) 
 					fragment.add(new BranchLink("source", request.getSource(), request));
 				else
 					fragment.add(new Label("source").setVisible(false));
 					
-				fragment.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
-				
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (request.getLastEvent() != null) {
 					String description = request.getLastEvent().getType();
 					if (description.startsWith("there are")) {
 						lastEventContainer.add(new WebMarkupContainer("user").setVisible(false));
 					} else {
-						User userForDisplay = User.getForDisplay(request.getLastEvent().getUser(), 
+						userForDisplay = User.getForDisplay(request.getLastEvent().getUser(), 
 								request.getLastEvent().getUserName());
 						lastEventContainer.add(new UserLink("user", userForDisplay));
 					}
 					lastEventContainer.add(new Label("description", description));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getLastEvent().getDate())));
 				} else {
-					lastEventContainer.add(new WebMarkupContainer("user"));
-					lastEventContainer.add(new WebMarkupContainer("description"));
-					lastEventContainer.add(new WebMarkupContainer("date"));
-					lastEventContainer.setVisible(false);
+					lastEventContainer.add(new UserLink("user", User.getForDisplay(request.getSubmitter(), 
+							request.getSubmitterName())));
+					lastEventContainer.add(new Label("description", "submitted"));
+					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 				}
 				fragment.add(lastEventContainer);
 				

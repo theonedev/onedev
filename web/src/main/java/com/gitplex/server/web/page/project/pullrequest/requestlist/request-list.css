@@ -28,49 +28,51 @@
 }
 #request-list td.request {
 	color: #888;
-	padding: 8px 8px 0 8px;
+	padding: 12px 12px 0 12px;
 	border-left: 4px solid white;
-}
-#request-list td.request img.avatar {
-	width: 20px;
-	height: 20px;
-	vertical-align: text-top;
 }
 
 #request-list td.request.new {
 	border-left: 4px solid #4667EE;
 }
 #request-list td.request>div {
-	padding-bottom: 8px;
-	border-bottom: 1px dotted #BBB;
+	padding-bottom: 12px;
+	border-bottom: 2px dotted #BBB;
 }
 #request-list td.result tr:last-child td.request>div {
 	border-bottom: none;
 }
-#request-list td.request a.title {
-	font-weight: bold;
+
+#request-list td.request .title {
+	margin-right: 4px;
 	font-size: 16px;
-	color: #444;
+}
+#request-list td.request .title a {
+	color: #333;
+}
+
+#request-list td.request .title>* {
 	margin-right: 8px;
 }
-#request-list td.request .number {
-	font-size: 16px;
-	margin-right: 8px;	
+#request-list td.request .title>.status {
+	margin-right: 0;
 }
+
 #request-list td.request .branches {
-	margin-left: 12px;
 	white-space: nowrap;
 }
-#request-list td.request a.branch {
-	color: #444;
-	font-size: 16px;
+#request-list td.request .additional-info {
+	margin-top: 4px;
+	margin-left: 20px;
 }
-#request-list td.request .second-line {
-	margin-top: 2px;
-}
-#request-list td.request .second-line a {
+#request-list td.request .additional-info a {
 	color: #444;
 }
+#request-list td.request .additional-info .middot {
+	margin-left: 8px; 
+	margin-right: 8px;
+}
+
 #request-list td.result .norecords-td {
 	padding: 20px;
 	font-size: 20px;

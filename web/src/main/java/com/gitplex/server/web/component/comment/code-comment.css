@@ -21,33 +21,42 @@
 	border: 1px solid #DDD;
 }
 .code-comments td.comment {
-	color: #888;
-	padding: 8px 8px 0 8px;
+	padding: 20px 20px 0 20px;
 	border-left: 4px solid white;
 }
 .code-comments td.comment.new {
 	border-left: 4px solid #4667EE;
 }
 .code-comments td.comment>div {
-	padding-bottom: 8px;
-	border-bottom: 1px dotted #BBB;
+	padding-bottom: 20px;
+	border-bottom: 2px dotted #BBB;
 }
 .code-comments td.result tr:last-child td.comment>div {
 	border-bottom: none;
 }
 
-.code-comments td.comment a.title {
-	font-weight: bold;
+.code-comments td.comment>div>.title {
+	color: #888;
 	font-size: 16px;
+	margin-bottom: 8px;
+}
+.code-comments td.comment>div>.content {
+	margin-left: 20px;
+	color: #666;
+	font-size: 13px;
+}
+.code-comments td.comment>div>.last-event {
+	color: #888;
+	margin-left: 20px;
+}
+.code-comments td.comment>div>.title a, .code-comments td.comment>div>.last-event a {
 	color: #444;
-	margin-right: 4px;
 }
-.code-comments td.comment .user, .code-comments td.comment .file {
-	color: #444;
+
+.code-comments td.comment>div>.title>.file {
+	font-weight: bold;
 }
-.code-comments td.comment .second-line, .code-comments td.comment .third-line {
-	margin-top: 2px;
-}
+
 .code-comments td.result .norecords-td {
 	padding: 20px;
 	font-size: 20px;

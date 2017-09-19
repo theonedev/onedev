@@ -36,6 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentRelationManager;
+import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.CodeCommentRelation;
 import com.gitplex.server.model.Project;
@@ -44,8 +45,8 @@ import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.WebConstants;
+import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.project.ProjectPage;
@@ -59,8 +60,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
-	private static final int TITLE_LEN = 100;
-	
 	private final IModel<CodeCommentFilter> filterOptionModel;
 	
 	public CodeCommentListPanel(String id, IModel<CodeCommentFilter> filterOptionModel) {
@@ -136,17 +135,9 @@ public abstract class CodeCommentListPanel extends Panel {
 					String componentId, IModel<CodeComment> rowModel) {
 				CodeComment comment = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "commentFrag", CodeCommentListPanel.this);
-				Link<Void> titleLink = new Link<Void>("title") {
-
-					@Override
-					public void onClick() {
-						openComment(rowModel.getObject());
-					}
-					
-				};
-				titleLink.add(new Label("label", StringUtils.abbreviate(comment.getContent(), TITLE_LEN)));
-				fragment.add(titleLink);
-				fragment.add(new UserLink("user", User.getForDisplay(comment.getUser(), comment.getUserName())));
+				User userForDisplay = User.getForDisplay(comment.getUser(), comment.getUserName());
+				fragment.add(new AvatarLink("avatar", userForDisplay));
+				fragment.add(new UserLink("user", userForDisplay));
 				
 				Link<Void> fileLink = new Link<Void>("file") {
 
@@ -161,12 +152,15 @@ public abstract class CodeCommentListPanel extends Panel {
 				
 				fragment.add(new Label("date", DateUtils.formatAge(comment.getDate())));
 				
+				MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
+				fragment.add(new Label("content", markdownManager.render(comment.getContent(), null, true)).setEscapeModelStrings(false));
+				
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (comment.getLastEvent() != null) {
 					String description = comment.getLastEvent().getType();
 					lastEventContainer.add(new Label("description", description));
 					
-					User userForDisplay = User.getForDisplay(comment.getLastEvent().getUser(), 
+					userForDisplay = User.getForDisplay(comment.getLastEvent().getUser(), 
 							comment.getLastEvent().getUserName());
 					lastEventContainer.add(new UserLink("user", userForDisplay));
 					lastEventContainer.add(new Label("date", DateUtils.formatAge(comment.getLastEvent().getDate())));

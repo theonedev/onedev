@@ -21,17 +21,15 @@
 		</tr>
 	</table>
 	<wicket:fragment wicket:id="commentFrag">
-		<div class="first-line">
-			<a wicket:id="title" class="title"><span wicket:id="label"></span></a> 
-		</div>
-		<div class="second-line">
-			commented by 
+		<div class="title">
+			<a wicket:id="avatar" class="avatar"></a>
 			<a wicket:id="user" class="user"></a>
-			on 
+			commented on
 			<a wicket:id="file" class="file"><span wicket:id="label"></span></a>
 			<span wicket:id="date"></span>
 		</div>
-		<div wicket:id="lastEvent" class="third-line">
+		<div wicket:id="content" class="content"></div>
+		<div wicket:id="lastEvent" class="last-event">
 			<a wicket:id="user" class="user"></a>	
 			<span wicket:id="description"></span>
 			<span wicket:id="date"></span>
