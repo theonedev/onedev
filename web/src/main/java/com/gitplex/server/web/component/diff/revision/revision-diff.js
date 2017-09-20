@@ -1,5 +1,5 @@
 gitplex.server.revisionDiff = {
-	init: function() {
+	onDomReady: function() {
 		var cookieName = "revisionDiff.showDiffStats";
 		var $body = $(".revision-diff>.body");
 		var $diffStats = $body.children(".diff-stats");
@@ -16,6 +16,20 @@ gitplex.server.revisionDiff = {
 			}
 			gitplex.server.revisionDiff.reposition();
 		});
+		
+		var $image = $body.find("img");
+		if ($image.length == 0) {
+			gitplex.server.revisionDiff.reposition();
+		} else {
+			var loadedImages = 0;
+			$image.on("load", function() {
+				loadedImages++;
+				if (loadedImages == $image.length) {
+					gitplex.server.revisionDiff.reposition();
+				}
+			});
+		}
+		
 		gitplex.server.revisionDiff.reposition();
 		if (window.location.hash) {
 			var $anchor = $(window.location.hash);

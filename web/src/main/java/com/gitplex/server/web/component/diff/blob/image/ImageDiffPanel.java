@@ -1,12 +1,5 @@
 package com.gitplex.server.web.component.diff.blob.image;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -75,18 +68,8 @@ public class ImageDiffPanel extends Panel {
 					return blobProvider.get().getBytes();
 				}
 			}));
-			BufferedImage bufferedImage;
-			try {
-				bufferedImage = ImageIO.read(new ByteArrayInputStream(blobProvider.get().getBytes()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			image.add(AttributeAppender.append("width", bufferedImage.getWidth()));
-			image.add(AttributeAppender.append("height", bufferedImage.getHeight()));
 		} else {
 			add(image = new Image(id, new PackageResourceReference(ImageDiffPanel.class, "blank.png")));
-			image.add(AttributeAppender.append("width", "64px"));
-			image.add(AttributeAppender.append("height", "64px"));
 		}
 		return image;
 	}

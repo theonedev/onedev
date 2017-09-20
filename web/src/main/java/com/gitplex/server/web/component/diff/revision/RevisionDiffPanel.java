@@ -497,7 +497,7 @@ public class RevisionDiffPanel extends Panel {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				response.render(OnDomReadyHeaderItem.forScript("gitplex.server.revisionDiff.init();"));
+				response.render(OnDomReadyHeaderItem.forScript("gitplex.server.revisionDiff.onDomReady();"));
 			}
 			
 		};
