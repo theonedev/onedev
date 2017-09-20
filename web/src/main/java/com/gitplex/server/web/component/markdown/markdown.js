@@ -804,6 +804,12 @@ gitplex.server.markdown = {
 	initRendered: function($rendered) {
 		gitplex.server.highlight($rendered);
 
+		$rendered.find(".header-anchor").each(function() {
+			var $headerAnchor = $(this).parent();
+			$headerAnchor.addClass("header-anchor");
+			$headerAnchor.closest("h1, h2, h3, h4, h5, h6").append($headerAnchor);
+		});
+		
 		$rendered.find("a").click(function() {
 			gitplex.server.viewState.getFromViewAndSetToHistory();
 		});

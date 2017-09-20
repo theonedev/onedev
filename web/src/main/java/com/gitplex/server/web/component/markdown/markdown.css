@@ -260,11 +260,6 @@ body.fullscreen {
 .markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
 	font-weight: bold;
 }
-.markdown-rendered h1 a, .markdown-rendered h2 a, .markdown-rendered h3 a, 
-.markdown-rendered h4 a, .markdown-rendered h5 a, .markdown-rendered h6 a {
-	color: #333;
-	text-decoration: none;
-}
 .markdown-rendered blockquote {
 	font-size: 15px; 
 	border-left: 4px solid #ddd; 
@@ -285,34 +280,44 @@ body.fullscreen {
 .markdown-rendered .task-list-item input {
 	margin-right: 8px;
 }
-.markdown-rendered .header-anchor>i {
+.markdown-rendered .header-anchor {
 	display: none;
+	position: relative;
 }
-.markdown-rendered .header-anchor:hover>i {
+.markdown-rendered h1:hover .header-anchor, 
+.markdown-rendered h2:hover .header-anchor,
+.markdown-rendered h3:hover .header-anchor,
+.markdown-rendered h4:hover .header-anchor, 
+.markdown-rendered h5:hover .header-anchor,
+.markdown-rendered h6:hover .header-anchor {
 	display: inline;
 }
-.markdown-rendered h1 .header-anchor>i {
+.markdown-rendered h1 .header-anchor {
 	margin-left: 12px;
-	font-size: 24px;
+	font-size: 22px;
 }
-.markdown-rendered h2 .header-anchor>i {
+.markdown-rendered h2 .header-anchor {
 	margin-left: 10px;
 	font-size: 20px;
 }
-.markdown-rendered h3 .header-anchor>i {
-	margin-left: 8px;
-	font-size: 16px;
+.markdown-rendered h3 .header-anchor {
+	margin-left: 10px;
+	font-size: 20px;
 }
-.markdown-rendered h4 .header-anchor>i {
-	margin-left: 6px;
+.markdown-rendered h4 .header-anchor {
+	margin-left: 10px;
 	font-size: 14px;
 }
-.markdown-rendered h5 .header-anchor>i {
+.markdown-rendered h5 .header-anchor {
 	margin-left: 4px;
 	font-size: 12px;
 }
-.markdown-rendered h6 .header-anchor>i {
-	margin-left: 2px;
-	font-size: 10px;
+.markdown-rendered h6 .header-anchor {
+	margin-left: 4px;
+	font-size: 12px;
+}
+.markdown-rendered a.header-anchor {
+	color: #333;
+	text-decoration: none;
 }
 

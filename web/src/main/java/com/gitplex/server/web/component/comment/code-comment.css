@@ -47,8 +47,6 @@
 }
 .code-comments td.comment>div>.content {
 	margin-left: 30px;
-	color: #666;
-	font-size: 13px;
 }
 .code-comments td.comment>div>.last-event {
 	color: #888;
