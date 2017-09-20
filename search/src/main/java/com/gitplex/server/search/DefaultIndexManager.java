@@ -155,8 +155,8 @@ public class DefaultIndexManager implements IndexManager {
 				TopDocs topDocs = searcher.search(META.query(LAST_COMMIT.name()), 1);
 				if (topDocs.scoreDocs.length != 0) {
 					Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
-					String lastCommitAnalyzersVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
-					if (lastCommitAnalyzersVersion.equals(SymbolExtractorRegistry.getVersion())) {
+					String lastCommitIndexVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
+					if (lastCommitIndexVersion.equals(getCurrentCommitIndexVersion())) {
 						String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
 						ObjectId lastCommitId = ObjectId.fromString(lastCommitHash);
 						if (repository.hasObject(lastCommitId)) { 
@@ -234,7 +234,7 @@ public class DefaultIndexManager implements IndexManager {
 			// record last commit so that we only need to indexing changed files for subsequent commits
 			document = new Document();
 			document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.NO));
-			document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), SymbolExtractorRegistry.getVersion()));
+			document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), getCurrentCommitIndexVersion()));
 			document.add(new StoredField(LAST_COMMIT_HASH.name(), commitId.getName()));
 			writer.updateDocument(META.term(LAST_COMMIT.name()), document);
 			

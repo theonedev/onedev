@@ -28,7 +28,14 @@ class SourceFormComponent extends FormComponentPanel<byte[]> {
 		super.onInitialize();
 		
 		String source = new String(getModelObject(), Charset.forName(charset));
-		add(input = new TextArea<String>("input", Model.of(source)));
+		add(input = new TextArea<String>("input", Model.of(source)) {
+
+			@Override
+			protected boolean shouldTrimInput() {
+				return false;
+			}
+			
+		});
 		setOutputMarkupId(true);
 	}
 
