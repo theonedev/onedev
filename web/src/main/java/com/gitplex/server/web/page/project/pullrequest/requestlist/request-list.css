@@ -60,17 +60,21 @@
 
 #request-list td.request .branches {
 	white-space: nowrap;
+	font-size: 15px;
 }
 #request-list td.request .additional-info {
 	margin-top: 4px;
-	margin-left: 20px;
+	margin-left: 32px;
 }
 #request-list td.request .additional-info a {
 	color: #444;
 }
-#request-list td.request .additional-info .middot {
+#request-list td.request .additional-info .middot:before {
 	margin-left: 8px; 
 	margin-right: 8px;
+	font-size: 20px;
+	line-height: 9px;
+	
 }
 
 #request-list td.result .norecords-td {

@@ -36,7 +36,6 @@ import org.hibernate.criterion.Restrictions;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.manager.CodeCommentRelationManager;
-import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.CodeCommentRelation;
 import com.gitplex.server.model.Project;
@@ -48,6 +47,8 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.link.UserLink;
+import com.gitplex.server.web.component.markdown.ContentVersionSupport;
+import com.gitplex.server.web.component.markdown.MarkdownViewer;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
@@ -152,8 +153,47 @@ public abstract class CodeCommentListPanel extends Panel {
 				
 				fragment.add(new Label("date", DateUtils.formatAge(comment.getDate())));
 				
-				MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
-				fragment.add(new Label("content", markdownManager.render(comment.getContent(), null, true)).setEscapeModelStrings(false));
+				fragment.add(new Link<Void>("detail") {
+
+					@Override
+					public void onClick() {
+						openComment(rowModel.getObject());
+					}
+					
+				});
+				
+				ContentVersionSupport contentVersionSupport;
+				if (SecurityUtils.canModify(comment)) {
+					contentVersionSupport = new ContentVersionSupport() {
+
+						@Override
+						public long getVersion() {
+							return rowModel.getObject().getVersion();
+						}
+						
+					};
+				} else {
+					contentVersionSupport = null;
+				}
+				fragment.add(new MarkdownViewer("content", new IModel<String>() {
+
+					@Override
+					public String getObject() {
+						return rowModel.getObject().getContent();
+					}
+
+					@Override
+					public void detach() {
+					}
+
+					@Override
+					public void setObject(String object) {
+						CodeComment comment = rowModel.getObject();
+						comment.setContent(object);
+						GitPlex.getInstance(CodeCommentManager.class).save(comment, getPullRequest());				
+					}
+					
+				}, contentVersionSupport));
 				
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (comment.getLastEvent() != null) {

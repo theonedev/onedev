@@ -14,6 +14,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -281,10 +282,19 @@ public class RequestListPage extends ProjectPage {
 				
 				fragment.add(new RequestStatusPanel("status", rowModel));
 				fragment.add(new BranchLink("target", request.getTarget(), null));
-				if (request.getSource() != null) 
+				if (request.getSource() != null) { 
 					fragment.add(new BranchLink("source", request.getSource(), request));
-				else
-					fragment.add(new Label("source").setVisible(false));
+				} else {
+					fragment.add(new Label("source", "(deleted)") {
+
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							tag.setName("span");
+						}
+						
+					});
+				}
 					
 				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
 				if (request.getLastEvent() != null) {
