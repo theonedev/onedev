@@ -676,7 +676,7 @@ public class PullRequest extends AbstractEntity {
 			String commitMessage = getTitle() + "\n\n";
 			if (getDescription() != null)
 				commitMessage += getDescription() + "\n\n";
-			commitMessage += String.format("Squashed commit of pull request #%d of project '%s'", 
+			commitMessage += String.format("Squash pull request #%d of project '%s'", 
 					getNumber(), getTargetProject().getName());
 			return commitMessage;
 		} else if (mergeStrategy == MergeStrategy.ALWAYS_MERGE || mergeStrategy == MergeStrategy.MERGE_IF_NECESSARY) {
