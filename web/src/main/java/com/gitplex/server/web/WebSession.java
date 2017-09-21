@@ -25,7 +25,7 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	public void login(String userName, String password, boolean rememberMe) {
 		Subject subject = SecurityUtils.getSubject();
 
-		// Force a new session to prevent fixation attack.
+		// Force a new session to prevent session fixation attack.
 		// We have to invalidate via both Shiro and Wicket; otherwise it doesn't
 		// work.
 		subject.getSession().stop();

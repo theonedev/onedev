@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
@@ -36,6 +37,7 @@ public class DefaultWicketServlet extends WicketServlet {
 	@Sessional
 	@Override
 	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+		((HttpServletResponse)res).setHeader("X-FRAME-OPTIONS", "SAMEORIGION");
 		super.service(req, res);
 	}
 
