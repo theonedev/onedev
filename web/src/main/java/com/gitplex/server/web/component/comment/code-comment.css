@@ -153,6 +153,10 @@
 	font-size: inherit;
 	line-height: inherit;
 }
+.code-comments .markdown-rendered {
+	font-size: inherit;
+	line-height: inherit;
+}
 
 .invalid-code-comment>.head {
 	font-size: 20px;
