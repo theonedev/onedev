@@ -12,7 +12,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -20,7 +19,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -46,6 +44,7 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.avatar.AvatarLink;
+import com.gitplex.server.web.component.datatable.HistoryAwareNavToolbar;
 import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.component.markdown.ContentVersionSupport;
 import com.gitplex.server.web.component.markdown.MarkdownViewer;
@@ -55,18 +54,21 @@ import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.util.DateUtils;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+import com.gitplex.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
 	private final IModel<CodeCommentFilter> filterOptionModel;
 	
-	public CodeCommentListPanel(String id, IModel<CodeCommentFilter> filterOptionModel) {
+	private final PagingHistorySupport pagingHistorySupport;
+	
+	public CodeCommentListPanel(String id, IModel<CodeCommentFilter> filterOptionModel, 
+			PagingHistorySupport pagingHistorySupport) {
 		super(id);
 		
 		this.filterOptionModel = filterOptionModel;
+		this.pagingHistorySupport = pagingHistorySupport;
 	}
 
 	@Override
@@ -286,15 +288,9 @@ public abstract class CodeCommentListPanel extends Panel {
 		};
 		DataTable<CodeComment, Void> dataTable = new DataTable<>("comments", columns, 
 				dataProvider, WebConstants.PAGE_SIZE);
+		dataTable.setCurrentPage(pagingHistorySupport.getCurrentPage());
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
-		dataTable.addBottomToolbar(new NavigationToolbar(dataTable) {
-
-			@Override
-			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new BootstrapPagingNavigator(navigatorId, dataTable);
-			}
-			
-		});
+		dataTable.addBottomToolbar(new HistoryAwareNavToolbar(dataTable, pagingHistorySupport));
 		add(dataTable);		
 	}
 

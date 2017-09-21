@@ -280,43 +280,51 @@ body.fullscreen {
 .markdown-rendered .task-list-item input {
 	margin-right: 8px;
 }
-.markdown-rendered .header-anchor {
+
+.markdown-rendered .header-link {
 	display: none;
-	position: relative;
+	position: absolute;
+	font-size: 24px;
+	margin-left: -24px;
 }
-.markdown-rendered h1:hover .header-anchor, 
-.markdown-rendered h2:hover .header-anchor,
-.markdown-rendered h3:hover .header-anchor,
-.markdown-rendered h4:hover .header-anchor, 
-.markdown-rendered h5:hover .header-anchor,
-.markdown-rendered h6:hover .header-anchor {
+.markdown-rendered h1:hover .header-link, 
+.markdown-rendered h2:hover .header-link,
+.markdown-rendered h3:hover .header-link,
+.markdown-rendered h4:hover .header-link, 
+.markdown-rendered h5:hover .header-link,
+.markdown-rendered h6:hover .header-link {
 	display: inline;
 }
-.markdown-rendered h1 .header-anchor {
-	margin-left: 12px;
-	font-size: 22px;
+
+.markdown-rendered h1,
+.markdown-rendered h2,
+.markdown-rendered h3,
+.markdown-rendered h4,
+.markdown-rendered h5,
+.markdown-rendered h6 {
+	margin-left: -24px;
+	padding-left: 24px;
+	position: relative;
 }
-.markdown-rendered h2 .header-anchor {
-	margin-left: 10px;
-	font-size: 20px;
+.markdown-rendered h1 .header-link {
+	margin-top: 10px;
 }
-.markdown-rendered h3 .header-anchor {
-	margin-left: 10px;
-	font-size: 20px;
+.markdown-rendered h2 .header-link {
+	margin-top: 6px;
 }
-.markdown-rendered h4 .header-anchor {
-	margin-left: 10px;
-	font-size: 14px;
+.markdown-rendered h3 .header-link {
+	margin-top: 2px;
 }
-.markdown-rendered h5 .header-anchor {
-	margin-left: 4px;
-	font-size: 12px;
+.markdown-rendered h4 .header-link {
+	margin-top: -2px;
 }
-.markdown-rendered h6 .header-anchor {
-	margin-left: 4px;
-	font-size: 12px;
+.markdown-rendered h5 .header-link {
+	margin-top: -4px;
 }
-.markdown-rendered a.header-anchor {
+.markdown-rendered h6 .header-link {
+	margin-top: -6px;
+}
+.markdown-rendered a.header-link {
 	color: #333;
 	text-decoration: none;
 }

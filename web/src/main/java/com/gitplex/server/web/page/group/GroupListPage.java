@@ -211,7 +211,7 @@ public class GroupListPage extends LayoutPage {
 			
 		};
 		
-		add(groupsTable = new HistoryAwareDataTable<Group, Void>("groups", columns, dataProvider, 
+		add(groupsTable = new HistoryAwareDataTable<>("groups", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 

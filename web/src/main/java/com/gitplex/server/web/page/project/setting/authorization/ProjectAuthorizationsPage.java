@@ -483,7 +483,7 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = new PageParameters();
+				PageParameters params = paramsOf(getProject());
 				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}

@@ -143,7 +143,7 @@ public class TaskListPage extends UserPage {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = new PageParameters();
+				PageParameters params = paramsOf(getUser());
 				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}

@@ -253,7 +253,7 @@ public class GroupMembershipsPage extends GroupPage {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = new PageParameters();
+				PageParameters params = paramsOf(getGroup());
 				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}

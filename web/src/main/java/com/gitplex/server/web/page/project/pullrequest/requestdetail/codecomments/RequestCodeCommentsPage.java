@@ -14,10 +14,13 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.comment.CodeCommentFilter;
 import com.gitplex.server.web.component.comment.CodeCommentListPanel;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.RequestDetailPage;
+import com.gitplex.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class RequestCodeCommentsPage extends RequestDetailPage {
 
+	private static final String PARAM_PAGE = "page";
+	
 	private final CodeCommentFilter filterOption;
 	
 	public RequestCodeCommentsPage(PageParameters params) {
@@ -46,6 +49,21 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 				PageParameters params = paramsOf(getPullRequest());
 				object.fillPageParams(params);
 				setResponsePage(RequestCodeCommentsPage.class, params);
+			}
+			
+		}, new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = paramsOf(getPullRequest());
+				filterOption.fillPageParams(params);
+				params.add(PARAM_PAGE, currentPage+1);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
 			}
 			
 		}) {

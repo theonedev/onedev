@@ -108,7 +108,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 				.set(HtmlRenderer.GENERATE_HEADER_ID, true)
 				.set(AnchorLinkExtension.ANCHORLINKS_SET_NAME, true)
 				.set(AnchorLinkExtension.ANCHORLINKS_WRAP_TEXT, false)
-				.set(AnchorLinkExtension.ANCHORLINKS_TEXT_SUFFIX, "<i class='header-anchor fa fa-link'></i>")
+				.set(AnchorLinkExtension.ANCHORLINKS_TEXT_PREFIX, "<span class='header-anchor'></span>")
 				.set(Parser.SPACE_IN_LINK_URLS, true)
 				.setFrom(ParserEmulationProfile.GITHUB_DOC)
 				.set(TablesExtension.COLUMN_SPANS, false)
