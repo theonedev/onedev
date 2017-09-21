@@ -41,7 +41,7 @@ import com.gitplex.server.web.util.PagingHistorySupport;
 @SuppressWarnings("serial")
 public class ProjectListPage extends LayoutPage {
 
-	private static final String PARAM_PAGE = "page";
+	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
 	private static final String PARAM_ORPHAN = "orphan";
 	
@@ -197,7 +197,7 @@ public class ProjectListPage extends LayoutPage {
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = new PageParameters();
-				params.add(PARAM_PAGE, currentPage+1);
+				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				if (showOrphanProjects)
 					params.add(PARAM_ORPHAN, showOrphanProjects);
 				return params;
@@ -205,7 +205,7 @@ public class ProjectListPage extends LayoutPage {
 			
 			@Override
 			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
 			}
 			
 		}));

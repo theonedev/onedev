@@ -58,7 +58,7 @@ import com.gitplex.server.web.util.PagingHistorySupport;
 @SuppressWarnings("serial")
 public class UserMembershipsPage extends UserPage {
 
-	private static final String PARAM_PAGE = "page";
+	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
 	private String searchInput;
 	
@@ -263,13 +263,13 @@ public class UserMembershipsPage extends UserPage {
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = paramsOf(getUser());
-				params.add(PARAM_PAGE, currentPage+1);
+				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
 			
 			@Override
 			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
 			}
 			
 		};

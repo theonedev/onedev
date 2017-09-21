@@ -92,9 +92,9 @@ public class ProjectCommitsPage extends ProjectPage {
 	
 	private static final String PARAM_COMPARE_WITH = "compareWith";
 	
-	private static final String PARAM_QUERY = "query";
+	private static final String PARAM_COMMIT_QUERY = "commitQuery";
 	
-	private static final String PARAM_PAGE = "page";
+	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
 	private State state = new State();
 	
@@ -217,8 +217,8 @@ public class ProjectCommitsPage extends ProjectPage {
 		super(params);
 		
 		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();
-		state.query = params.get(PARAM_QUERY).toString();
-		Integer page = params.get(PARAM_PAGE).toOptionalInteger();
+		state.query = params.get(PARAM_COMMIT_QUERY).toString();
+		Integer page = params.get(PARAM_CURRENT_PAGE).toOptionalInteger();
 		if (page != null)
 			state.page = page.intValue();		
 	}
@@ -531,9 +531,9 @@ public class ProjectCommitsPage extends ProjectPage {
 		if (state.compareWith != null)
 			params.set(PARAM_COMPARE_WITH, state.compareWith);
 		if (state.query != null)
-			params.set(PARAM_QUERY, state.query);
+			params.set(PARAM_COMMIT_QUERY, state.query);
 		if (state.page != 1)
-			params.set(PARAM_PAGE, state.page);
+			params.set(PARAM_CURRENT_PAGE, state.page);
 		return params;
 	}
 	
