@@ -814,6 +814,39 @@ gitplex.server.markdown = {
 			gitplex.server.viewState.getFromViewAndSetToHistory();
 		});
 		
+		$rendered.find("img").each(function() {
+			var $image = $(this);
+			if ($image.closest("a").length == 0) {
+		    	$image.click(function() {
+		    		var $image = $(this);
+		    	    var actualImage = new Image();
+		    	    actualImage.onload = function() {
+
+		        		var $modal = $("" +
+		        				"<div class='modal fade' role='dialog' tabindex='-1'>" +
+		        				"  <div class='modal-dialog' style='width: " + actualImage.width + "px; max-width: 90%;'>" +
+		        				"    <div class='modal-content' style='border-radius: 0;'>" +
+		        				"      <div class='modal-body' style='padding: 0;'>" +
+		        				"        <img src='" + actualImage.src + "' style='width: 100%;'></img>" +
+		        				"      </div>" +
+		        				"    </div>" +
+		        				"  </div>" +
+		        				"</div>");
+		        		$("body").append($modal);
+		        		$modal.find("img").click(function() {
+		        			$modal.modal("hide");
+		        		});
+		    			$modal.modal('show').on('show.bs.modal', function() {
+		    			}).on('hidden.bs.modal', function () {
+		    		        $modal.remove();
+		    		    });			
+		    	    }
+		    	    actualImage.src = $image.attr("src");    		
+				});
+		    	$image.css("cursor", "pointer");
+			}
+		});
+		
 		$(window).resize(function() {
 			$rendered.find(".CodeMirror").each(function() {
 				$(this)[0].CodeMirror.refresh();

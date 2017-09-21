@@ -10,9 +10,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-/*
- * Do not include jquery ui css here as otherwise the search result resizing does not work
- */
 public class JQueryUIResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
