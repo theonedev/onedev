@@ -824,7 +824,7 @@ gitplex.server.markdown = {
 
 		        		var $modal = $("" +
 		        				"<div class='modal fade' role='dialog' tabindex='-1'>" +
-		        				"  <div class='modal-dialog' style='width: " + actualImage.width + "px; max-width: 90%;'>" +
+		        				"  <div class='modal-dialog' style='width: " + (actualImage.width+2) + "px; max-width: 90%;'>" +
 		        				"    <div class='modal-content' style='border-radius: 0;'>" +
 		        				"      <div class='modal-body' style='padding: 0;'>" +
 		        				"        <img src='" + actualImage.src + "' style='width: 100%;'></img>" +
