@@ -195,7 +195,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	@Override
 	public WebMarkupContainer newAdditionalActions(String id) {
 		WebMarkupContainer actions = new Fragment(id, "actionsFrag", this);
-		if (!symbols.isEmpty()) {
+		if (hasOutline()) {
 			actions.add(new CheckBox("outline", Model.of(isOutlineVisibleInitially())).add(new OnChangeAjaxBehavior() {
 
 				@Override
@@ -727,7 +727,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	}
 
 	private boolean isOutlineVisibleInitially() {
-		if (!symbols.isEmpty()) {
+		if (hasOutline()) {
 			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 			Cookie cookie = request.getCookie(COOKIE_OUTLINE);
 			return cookie==null || !cookie.getValue().equals("no");
@@ -791,6 +791,14 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				getJsonOfComment(comment));
 		target.appendJavaScript(script);
 		context.onCommentOpened(target, null);
+	}
+	
+	private boolean hasOutline() {
+		for (Symbol symbol: symbols) {
+			if (symbol.isDisplayInOutline())
+				return true;
+		}
+		return false;
 	}
 	
 	private List<Symbol> getChildSymbols(List<Symbol> symbols, @Nullable Symbol parentSymbol) {
@@ -1129,7 +1137,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	@Override
 	public List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 		List<MenuItem> menuItems = new ArrayList<>();
-		if (!symbols.isEmpty()) {
+		if (hasOutline()) {
 			menuItems.add(new MenuItem() {
 
 				@Override
