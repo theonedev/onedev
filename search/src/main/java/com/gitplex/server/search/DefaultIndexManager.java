@@ -92,7 +92,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private static final int BACKEND_INDEXING_PRIORITY = 50;
 	
-	private static final int INDEX_VERSION = 1;
+	private static final int DATA_VERSION = 1;
 	
 	private final StorageManager storageManager;
 	
@@ -156,7 +156,7 @@ public class DefaultIndexManager implements IndexManager {
 				if (topDocs.scoreDocs.length != 0) {
 					Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
 					String lastCommitIndexVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
-					if (lastCommitIndexVersion.equals(getCurrentCommitIndexVersion())) {
+					if (lastCommitIndexVersion.equals(getIndexVersion())) {
 						String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
 						ObjectId lastCommitId = ObjectId.fromString(lastCommitHash);
 						if (repository.hasObject(lastCommitId)) { 
@@ -210,7 +210,7 @@ public class DefaultIndexManager implements IndexManager {
 					}
 	
 					SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
-					String currentBlobIndexVersion = getCurrentBlobIndexVersion(extractor);
+					String currentBlobIndexVersion = getIndexVersion(extractor);
 					String blobIndexVersion = blobIndexVersionRef.get();
 					if (blobIndexVersion != null) {
 						if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
@@ -228,13 +228,13 @@ public class DefaultIndexManager implements IndexManager {
 			// record current commit so that we know which commit has been indexed
 			Document document = new Document();
 			document.add(new StringField(COMMIT_HASH.name(), commitId.getName(), Store.NO));
-			document.add(new StoredField(COMMIT_INDEX_VERSION.name(), getCurrentCommitIndexVersion()));
+			document.add(new StoredField(COMMIT_INDEX_VERSION.name(), getIndexVersion()));
 			writer.updateDocument(COMMIT_HASH.term(commitId.getName()), document);
 			
 			// record last commit so that we only need to indexing changed files for subsequent commits
 			document = new Document();
 			document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.NO));
-			document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), getCurrentCommitIndexVersion()));
+			document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), getIndexVersion()));
 			document.add(new StoredField(LAST_COMMIT_HASH.name(), commitId.getName()));
 			writer.updateDocument(META.term(LAST_COMMIT.name()), document);
 			
@@ -246,7 +246,7 @@ public class DefaultIndexManager implements IndexManager {
 			SymbolExtractor<Symbol> extractor, ObjectId blobId, String blobPath) throws IOException {
 		Document document = new Document();
 		
-		document.add(new StoredField(BLOB_INDEX_VERSION.name(), getCurrentBlobIndexVersion(extractor)));
+		document.add(new StoredField(BLOB_INDEX_VERSION.name(), getIndexVersion(extractor)));
 		document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.NO));
 		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.YES));
 		
@@ -336,7 +336,7 @@ public class DefaultIndexManager implements IndexManager {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
-					if (getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commit))) {
+					if (getIndexVersion().equals(getCommitIndexVersion(searcher, commit))) {
 						return new IndexResult(0, 0);
 					} else {
 						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
@@ -370,16 +370,18 @@ public class DefaultIndexManager implements IndexManager {
 		return indexResult;
 	}
 
-	private String getCurrentCommitIndexVersion() {
-		return DigestUtils.md5Hex(INDEX_VERSION + ";" + SymbolExtractorRegistry.getVersion());
+	@Override
+	public String getIndexVersion() {
+		return DigestUtils.md5Hex(DATA_VERSION + ";" + SymbolExtractorRegistry.getVersion());
 	}
 	
-	private String getCurrentBlobIndexVersion(SymbolExtractor<Symbol> extractor) {
+	@Override
+	public String getIndexVersion(SymbolExtractor<Symbol> extractor) {
 		String version;
 		if (extractor != null)
-			version = INDEX_VERSION + ";" + extractor.getClass().getName() + ":" + extractor.getVersion();
+			version = DATA_VERSION + ";" + extractor.getClass().getName() + ":" + extractor.getVersion();
 		else
-			version = String.valueOf(INDEX_VERSION);
+			version = String.valueOf(DATA_VERSION);
 		return DigestUtils.md5Hex(version);
 	}
 
@@ -390,7 +392,7 @@ public class DefaultIndexManager implements IndexManager {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
-					return getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commit));
+					return getIndexVersion().equals(getCommitIndexVersion(searcher, commit));
 				}
 			} else {
 				return false;

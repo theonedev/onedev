@@ -1,6 +1,7 @@
 package com.gitplex.server.search;
 
 import static com.gitplex.server.search.FieldConstants.BLOB_HASH;
+import static com.gitplex.server.search.FieldConstants.BLOB_INDEX_VERSION;
 import static com.gitplex.server.search.FieldConstants.BLOB_PATH;
 import static com.gitplex.server.search.FieldConstants.BLOB_SYMBOL_LIST;
 
@@ -19,6 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DirectoryReader;
@@ -40,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.jsymbol.Symbol;
+import com.gitplex.jsymbol.SymbolExtractorRegistry;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.manager.StorageManager;
@@ -59,9 +62,12 @@ public class DefaultSearchManager implements SearchManager {
 	
 	private final Map<Long, SearcherManager> searcherManagers = new ConcurrentHashMap<>();
 	
+	private final IndexManager indexManager;
+	
 	@Inject
-	public DefaultSearchManager(StorageManager storageManager) {
+	public DefaultSearchManager(StorageManager storageManager, IndexManager indexManager) {
 		this.storageManager = storageManager;
+		this.indexManager = indexManager;
 	}
 	
 	@Nullable
@@ -183,7 +189,8 @@ public class DefaultSearchManager implements SearchManager {
 		query.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
 		query.add(BLOB_PATH.query(blobPath), Occur.MUST);
 		
-		final AtomicReference<List<Symbol>> symbolsRef = new AtomicReference<>(null);
+		String indexVersion = indexManager.getIndexVersion(SymbolExtractorRegistry.getExtractor(blobPath));
+		AtomicReference<List<Symbol>> symbolsRef = new AtomicReference<>(null);
 		if (searcher != null) {
 			try {
 				searcher.search(query, new Collector() {
@@ -197,12 +204,15 @@ public class DefaultSearchManager implements SearchManager {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void collect(int doc) throws IOException {
-						BytesRef bytesRef = searcher.doc(context.docBase+doc).getBinaryValue(BLOB_SYMBOL_LIST.name());
-						if (bytesRef != null) {
-							try {
-								symbolsRef.set((List<Symbol>) SerializationUtils.deserialize(bytesRef.bytes));
-							} catch (Exception e) {
-								logger.error("Error deserializing symbols", e);
+						Document document = searcher.doc(context.docBase+doc);
+						if (indexVersion.equals(document.get(BLOB_INDEX_VERSION.name()))) {
+							BytesRef bytesRef = document.getBinaryValue(BLOB_SYMBOL_LIST.name());
+							if (bytesRef != null) {
+								try {
+									symbolsRef.set((List<Symbol>) SerializationUtils.deserialize(bytesRef.bytes));
+								} catch (Exception e) {
+									logger.error("Error deserializing symbols", e);
+								}
 							}
 						}
 					}
