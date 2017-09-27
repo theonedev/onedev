@@ -159,7 +159,6 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 				List<Symbol> cachedSymbols = searchManager.getSymbols(context.getProject(), blob.getBlobId(), 
 						blob.getIdent().path);
-				System.out.println(cachedSymbols);
 				if (cachedSymbols != null)
 					symbols.addAll(cachedSymbols);
 				else 
