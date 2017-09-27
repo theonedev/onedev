@@ -1,6 +1,6 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<div id="repo-branches">
+	<div id="project-branches">
 		<div class="list">
 			<div class="head clearfix">
 				<div class="input-group pull-left base">
@@ -14,23 +14,26 @@
 					<a wicket:id="createBranch" class="btn btn-default"><i class="fa fa-plus"></i> Create Branch</a>
 				</div>
 			</div>
-			<table wicket:id="branches" class="table table-hover table-condensed">
+			<table wicket:id="branches" class="table table-hover">
 				<tr wicket:id="branches">
 					<td class="detail">
-						<div class="branch">
+						<div class="title">
 							<a wicket:id="branchLink" class="name"><span wicket:id="name"></span></a>
 							<span wicket:id="verificationStatus" class="verification-status"></span>
 							<span class="label label-default" wicket:id="default">default</span>
-							<span class="btn-group">
-								<a wicket:id="makeDefault" class="make-default btn btn-xs btn-default"><i class="fa fa-check"></i> make default</a>
-							</span>
+							<a wicket:id="makeDefault" class="make-default btn btn-xs btn-default"><i class="fa fa-check"></i> make default</a>
 						</div>
-						<div class="commit">
-							<span class="btn-group">
-								<a wicket:id="hashLink" class="hash btn btn-default btn-xs"><span wicket:id="hash"></span></a>
-								<a wicket:id="copyHash" class="btn btn-default btn-xs"><i class="fa fa-clipboard"></i></a>
-							</span>
-							<a wicket:id="messageLink" class="message"><span wicket:id="message"></span></a>
+						<div class="commit-message">
+							<a wicket:id="messageLink"><span wicket:id="message"></span></a>
+						</div>
+						<div class="commit-contributor">
+							<span wicket:id="contributor" class="contributor"></span>
+						</div>
+						<div wicket:id="actions" class="actions">
+							<a wicket:id="effectiveRequest"><i class="fa fa-ext fa-branch-compare"></i> <span wicket:id="label"></span></a>
+							<a wicket:id="unwatchRequests" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye"></i> Unwatch</a>
+							<a wicket:id="watchRequests" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> Watch</a>
+							<a wicket:id="delete" title="Delete this branch"><i class="fa fa-trash"></i> Delete</a>
 						</div>
 					</td>
 					<td class="behind behind-ahead">
@@ -48,14 +51,6 @@
 							</div>
 							<div class="bar" wicket:id="aheadBar"></div>
 						</div>
-					</td>
-					<td wicket:id="actions" class="actions">
-						<a wicket:id="effectiveRequest" class="btn"><i class="fa fa-ext fa-branch-compare"></i> <span wicket:id="label"></span></a>
-						<span class="btn-group">
-							<a wicket:id="unwatchRequests" class="btn btn-default" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye"></i> Unwatch</a>
-							<a wicket:id="watchRequests" class="btn btn-default" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> Watch</a>
-							<a wicket:id="delete" class="btn btn-default" title="Delete this branch"><i class="fa fa-trash"></i> Delete</a>
-						</span>
 					</td>
 				</tr>
 			</table>		

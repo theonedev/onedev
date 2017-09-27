@@ -1,47 +1,42 @@
-#repo-tags {
+#project-tags {
 	padding: 20px;
 }
 
-#repo-tags>.list>table td {
-	white-space: nowrap;
+#project-tags .tag {
+	border-top: 1px solid #DDD;
+	margin: 16px 0;
 }
-#repo-tags .tag a.name {
+
+#project-tags .tag>.title>a.name {
 	color: #444;
 	font-weight: bold;
 	font-size: 16px;
 }
-#repo-tags .annotated {
+#project-tags .annotated {
 	color: #999;
 	font-size: 12px;
 	margin-left: 8px;
 }
-#repo-tags .annotated a {
+#project-tags .annotated a {
 	color: #666;
 }
-#repo-tags .annotated .ellipsis-expander {
+#project-tags .annotated .ellipsis-expander {
 	margin-left: 4px;
 }
-#repo-tags .annotated .message {
+#project-tags .annotated .message {
 	display: none;
 	border: none;
 	font-size: 12px;
 	background: none;
-	margin: 0 0 -4px 0;
 }
-#repo-tags>.list>table td.actions {
-	text-align: right;
-}
-#repo-tags>.list>table td.detail>div, 
-#repo-tags>.list>table td.detail>div .name a {
-	font-size: 13px; 
-	color: #666;
-}
-#repo-tags>.list>table td.detail .commit {
+
+#project-tags .tag>div {
 	margin: 8px 0;
 }
-#repo-tags>.list>table td.detail .commit>* {
-	margin-right: 4px;
-}
-#repo-tags>.list>table td.detail .commit>.message {
+
+#project-tags .tag>.commit-message>a {
 	color: #666;
+}
+#project-tags .tag>.actions>a {
+	color: #444;
 }

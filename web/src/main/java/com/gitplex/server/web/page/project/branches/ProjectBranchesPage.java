@@ -5,10 +5,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -46,6 +48,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
@@ -62,9 +65,10 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
 import com.gitplex.server.web.component.branchchoice.BranchChoiceProvider;
 import com.gitplex.server.web.component.branchchoice.BranchSingleChoice;
+import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
+import com.gitplex.server.web.component.datatable.HistoryAwarePagingNavigator;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.modal.ModalLink;
 import com.gitplex.server.web.component.modal.ModalPanel;
@@ -80,14 +84,16 @@ import com.gitplex.server.web.page.project.pullrequest.requestlist.RequestListPa
 import com.gitplex.server.web.page.project.pullrequest.requestlist.SearchOption;
 import com.gitplex.server.web.page.project.pullrequest.requestlist.SearchOption.Status;
 import com.gitplex.server.web.page.project.pullrequest.requestlist.SortOption;
+import com.gitplex.server.web.util.PagingHistorySupport;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class ProjectBranchesPage extends ProjectPage {
 
+	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	
 	private static final String PARAM_BASE = "base";
 	
 	// use a small page size to load page quickly
@@ -144,29 +150,75 @@ public class ProjectBranchesPage extends ProjectPage {
 			Ref baseRef = getProject().getRefs(Constants.R_HEADS).get(baseBranch);
 			Preconditions.checkNotNull(baseRef);
 			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
+			
 			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
 				RevCommit baseCommit = revWalk.lookupCommit(baseRef.getObjectId());
+				revWalk.markStart(baseCommit);
+				Map<ObjectId, RevCommit> compareCommits = new HashMap<>();
 				for (ObjectId compareId: compareIds) {
 					RevCommit compareCommit = revWalk.lookupCommit(compareId);
-					revWalk.markUninteresting(baseCommit);
+					compareCommits.put(compareId, compareCommit);
 					revWalk.markStart(compareCommit);
-					int ahead = 0;
-					for (RevCommit commit: revWalk)
-						ahead++;
-					revWalk.reset();
-					
-					revWalk.markUninteresting(compareCommit);
+				}
+				revWalk.setRevFilter(RevFilter.MERGE_BASE);
+				RevCommit mergeBase = revWalk.next();
+				
+				revWalk.reset();
+				revWalk.setRevFilter(RevFilter.ALL);
+
+				if (mergeBase != null) {
 					revWalk.markStart(baseCommit);
-					int behind = 0;
-					for (RevCommit commit: revWalk)
-						behind++;
+					revWalk.markUninteresting(mergeBase);
+					Set<ObjectId> baseSet = new HashSet<>();
+					for (RevCommit commit: revWalk) 
+						baseSet.add(commit.copy());
 					revWalk.reset();
 					
-					aheadBehinds.put(compareId, new AheadBehind(ahead, behind));
+					for (ObjectId compareId: compareIds) {
+						RevCommit compareCommit = Preconditions.checkNotNull(compareCommits.get(compareId));
+						revWalk.markStart(compareCommit);
+						revWalk.markUninteresting(mergeBase);
+						Set<ObjectId> compareSet = new HashSet<>();
+						for (RevCommit commit: revWalk) 
+							compareSet.add(commit.copy());
+						revWalk.reset();
+						
+						int ahead = 0;
+						for (ObjectId each: compareSet) {
+							if (!baseSet.contains(each))
+								ahead++;
+						}
+						int behind = 0;
+						for (ObjectId each: baseSet) {
+							if (!compareSet.contains(each))
+								behind++;
+						}
+						aheadBehinds.put(compareId, new AheadBehind(ahead, behind));
+					}					
+				} else {
+					for (ObjectId compareId: compareIds) {
+						RevCommit compareCommit = Preconditions.checkNotNull(compareCommits.get(compareId));
+						revWalk.markUninteresting(baseCommit);
+						revWalk.markStart(compareCommit);
+						int ahead = 0;
+						for (RevCommit commit: revWalk)
+							ahead++;
+						revWalk.reset();
+						
+						revWalk.markUninteresting(compareCommit);
+						revWalk.markStart(baseCommit);
+						int behind = 0;
+						for (RevCommit commit: revWalk)
+							behind++;
+						revWalk.reset();
+						
+						aheadBehinds.put(compareId, new AheadBehind(ahead, behind));
+					}					
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			
 			return aheadBehinds;
 		}
 	};
@@ -437,13 +489,10 @@ public class ProjectBranchesPage extends ProjectPage {
 					
 				});
 				
-				PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name());
-
-				link = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
-				link.add(new Label("hash", GitUtils.abbreviateSHA(lastCommit.name())));
-				item.add(link);
-				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(lastCommit.name()))));
+				item.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), 
+						lastCommit.getCommitterIdent(), true));
 				
+				PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name());
 				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
 				link.add(new Label("message", lastCommit.getShortMessage()));
 				item.add(link);
@@ -552,12 +601,10 @@ public class ProjectBranchesPage extends ProjectPage {
 					if (effectiveRequest.isOpen()) {
 						requestLink.add(new Label("label", "Open"));
 						requestLink.add(AttributeAppender.append("title", "A pull request is open for this change"));
-						requestLink.add(AttributeAppender.append("class", "btn-warning"));
 					} else {
 						requestLink.add(new Label("label", "Merged"));
 						requestLink.add(AttributeAppender.append("title", 
 								"This change is squashed/rebased onto base branch via a pull request"));
-						requestLink.add(AttributeAppender.append("class", "btn-success"));
 					}
 				} else {
 					requestLink = new WebMarkupContainer("effectiveRequest");
@@ -676,7 +723,25 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapAjaxPagingNavigator("branchesPageNav", branchesView) {
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = paramsOf(getProject(), baseBranch);
+				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+			}
+			
+		};
+		
+		branchesView.setCurrentPage(pagingHistorySupport.getCurrentPage());
+		
+		add(pagingNavigator = new HistoryAwarePagingNavigator("branchesPageNav", branchesView, pagingHistorySupport) {
 
 			@Override
 			protected void onConfigure() {

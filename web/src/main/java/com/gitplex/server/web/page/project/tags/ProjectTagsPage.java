@@ -42,7 +42,8 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
-import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
+import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
+import com.gitplex.server.web.component.datatable.HistoryAwarePagingNavigator;
 import com.gitplex.server.web.component.link.ArchiveMenuLink;
 import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -54,14 +55,16 @@ import com.gitplex.server.web.page.project.NoCommitsPage;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
+import com.gitplex.server.web.util.PagingHistorySupport;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class ProjectTagsPage extends ProjectPage {
 
+	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	
 	private WebMarkupContainer tagsContainer;
 	
 	private PagingNavigator pagingNavigator;
@@ -293,14 +296,11 @@ public class ProjectTagsPage extends ProjectPage {
 				RevCommit commit = (RevCommit) ref.getPeeledObj();
 				PageParameters params = CommitDetailPage.paramsOf(getProject(), commit.name());
 				
-				link = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
-				link.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
-				item.add(link);
-				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
-				
 				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
 				link.add(new Label("message", commit.getShortMessage()));
 				item.add(link);
+				
+				item.add(new ContributorPanel("contributor", commit.getAuthorIdent(), commit.getCommitterIdent(), true));
 				
 				item.add(new ArchiveMenuLink("download", projectModel) {
 
@@ -316,7 +316,7 @@ public class ProjectTagsPage extends ProjectPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this tag?"));
+						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete tag " + tagName + "?"));
 					}
 
 					@Override
@@ -339,7 +339,25 @@ public class ProjectTagsPage extends ProjectPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapAjaxPagingNavigator("tagsPageNav", tagsView) {
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = paramsOf(getProject());
+				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+			}
+			
+		};
+		
+		tagsView.setCurrentPage(pagingHistorySupport.getCurrentPage());
+		
+		add(pagingNavigator = new HistoryAwarePagingNavigator("tagsPageNav", tagsView, pagingHistorySupport) {
 
 			@Override
 			protected void onConfigure() {

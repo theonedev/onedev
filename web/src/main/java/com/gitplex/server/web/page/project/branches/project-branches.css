@@ -1,73 +1,71 @@
-#repo-branches {
+#project-branches {
 	padding: 20px;
 }
 
-#repo-branches>.list>.head>.base {
+#project-branches>.list>.head>.base {
 	width: 240px;
 }
-#repo-branches>.list>table .branch .make-default {
+#project-branches>.list>table td.detail>div {
+	margin: 8px 0;
+}
+#project-branches>.list>table td.detail>.commit-message>a {
+	color: #666;
+}
+#project-branches>.list>table td.detail>.actions>a {
+	color: #444;
+}
+
+#project-branches>.list>table .detail .make-default {
 	display: none;
 }
-#repo-branches>.list>table>tbody>tr:hover .branch .make-default {
+#project-branches>.list>table>tbody>tr:hover .detail .make-default {
 	display: inline;
 }
-#repo-branches>.list>table td.detail>.branch {
+#project-branches>.list>table td.detail>.title {
 	height: 24px;
 }
-#repo-branches>.list>table td.detail>.branch>.name {
+#project-branches>.list>table td.detail>.title>.name {
 	font-weight: bold;
 	font-size: 16px;
 	color: #555;
-	margin-right: 8px;
 }
-#repo-branches>.list>table td.detail>.branch>.verification-status {
-	margin-right: 8px;
+#project-branches>.list>table td.detail>.title>.label, 
+#project-branches>.list>table td.detail>.title>.btn {
+	margin-left: 8px;
 }
-#repo-branches>.list>table td.detail>.commit {
-	margin: 8px 0;
-}
-#repo-branches>.list>table td.detail>.commit>* {
-	margin-right: 4px;
-}
-#repo-branches>.list>table td.detail>.commit>.message {
-	color: #666;
-}
-#repo-branches>.list>table td.behind {
+
+#project-branches>.list>table td.behind {
 	padding-right: 0;
 }
-#repo-branches>.list>table td.ahead {
+#project-branches>.list>table td.ahead {
 	padding-left: 0;
 }
-#repo-branches>.list>table td.behind>div {
+#project-branches>.list>table td.behind>div {
 	border-right: 2px solid #BBB;
 }
-#repo-branches>.list>table td.behind-ahead div.text {
+#project-branches>.list>table td.behind-ahead div.text {
 	margin: 0 8px;
 }
-#repo-branches>.list>table td.behind-ahead {
+#project-branches>.list>table td.behind-ahead {
 	font-size: 13px;
 	padding-top: 12px;
 	width: 20%;
 }
-#repo-branches>.list>table td.behind-ahead a {
+#project-branches>.list>table td.behind-ahead a {
 	color: #555;
 }
-#repo-branches>.list>table .bar {
+#project-branches>.list>table .bar {
 	height: 6px;
 }
-#repo-branches>.list>table .ahead .bar {
+#project-branches>.list>table .ahead .bar {
 	background: #ccc;
 	border-radius: 0 2px 2px 0;
 }
-#repo-branches>.list>table .behind .bar {
+#project-branches>.list>table .behind .bar {
 	background: #ccc;
 	border-radius: 2px 0 0 2px;
 }
 
-#repo-branches>.list>table td.actions {
-	text-align: right;
-	width: 300px;
-}
 
 #searching-branches {
 	position: absolute; 
