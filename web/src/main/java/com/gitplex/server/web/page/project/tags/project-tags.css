@@ -4,13 +4,15 @@
 
 #project-tags .tag {
 	border-top: 1px solid #DDD;
-	margin: 16px 0;
+	padding: 8px 0;
 }
-
+#project-tags .tag:hover {
+	background: #F5F5F5;
+}
 #project-tags .tag>.title>a.name {
 	color: #444;
 	font-weight: bold;
-	font-size: 16px;
+	font-size: 15px;
 }
 #project-tags .annotated {
 	color: #999;
