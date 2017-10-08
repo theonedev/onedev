@@ -1270,13 +1270,15 @@ public class RevisionDiffPanel extends Panel {
 	
 	@Nullable
 	private CodeComment getOpenComment() {
-		CodeComment comment = ((CommentSupport)commentSupport).getOpenComment();
-		if (comment != null) {
-			String commit = comment.getMarkPos().getCommit();
-			String oldCommitHash = getOldCommitId().name();
-			String newCommitHash = getNewCommitId().name();
-			if (commit.equals(oldCommitHash) || commit.equals(newCommitHash))
-				return comment;
+		if (commentSupport != null) {
+			CodeComment comment = ((CommentSupport)commentSupport).getOpenComment();
+			if (comment != null) {
+				String commit = comment.getMarkPos().getCommit();
+				String oldCommitHash = getOldCommitId().name();
+				String newCommitHash = getNewCommitId().name();
+				if (commit.equals(oldCommitHash) || commit.equals(newCommitHash))
+					return comment;
+			}
 		}
 		return null;
 	}

@@ -127,15 +127,16 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		}
 		
 		initialMarks = new ArrayList<>();
-		MarkPos mark = commentSupport.getMark();
-		if (mark != null) {
-			initialMarks.add(mark);
+		if (commentSupport != null) {
+			MarkPos mark = commentSupport.getMark();
+			if (mark != null) {
+				initialMarks.add(mark);
+			}
+			for (CodeComment comment: commentSupport.getComments()) {
+				mark = comment.getMarkPos();
+				initialMarks.add(mark);
+			}
 		}
-		for (CodeComment comment: commentSupport.getComments()) {
-			mark = comment.getMarkPos();
-			initialMarks.add(mark);
-		}
-		
 	}
 
 	private String getJson(MarkPos mark) {
