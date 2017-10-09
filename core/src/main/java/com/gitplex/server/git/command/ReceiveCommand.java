@@ -20,8 +20,8 @@ public class ReceiveCommand extends GitCommand<Void> {
 	
 	private OutputStream output;
 	
-	public ReceiveCommand(File repoDir, Map<String, String> environments) {
-		super(repoDir, environments);
+	public ReceiveCommand(File gitDir, Map<String, String> environments) {
+		super(gitDir, environments);
 	}
 	
 	public ReceiveCommand input(InputStream input) {

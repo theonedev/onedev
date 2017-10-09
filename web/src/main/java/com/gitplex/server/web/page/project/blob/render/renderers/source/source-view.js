@@ -548,7 +548,7 @@ gitplex.server.sourceView = {
             		$gutter.append("<span class='author'>" + blameInfo.authorName + "</span>");
             		cm.setGutterMarker(range.from, "CodeMirror-annotations", $gutter[0]);
             		
-            		for (var line = range.from+1; line<range.to; line++) {
+            		for (var line = range.from+1; line<=range.to; line++) {
             			var $gutter = $(document.createElement("div"));
             			$gutter.addClass("CodeMirror-annotation");
             			$gutter.append("<span class='same-as-above'>...</span>");

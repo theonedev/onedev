@@ -2,12 +2,15 @@ package com.gitplex.server.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
@@ -16,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.jsymbol.Range;
-import com.gitplex.server.git.Blame;
+import com.gitplex.server.git.BlameBlock;
 import com.gitplex.server.git.BlameCommit;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.util.execution.Commandline;
@@ -24,11 +27,11 @@ import com.gitplex.server.util.execution.ExecuteResult;
 import com.gitplex.server.util.execution.LineConsumer;
 import com.google.common.base.Preconditions;
 
-public class BlameCommand extends GitCommand<Map<String, Blame>> {
+public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(BlameCommand.class);
 	
-	private static final ReferenceMap<String, Map<String, Blame>> cache = 
+	private static final ReferenceMap<String, Collection<BlameBlock>> cache = 
 			new ReferenceMap<>(ReferenceStrength.HARD, ReferenceStrength.SOFT);
 	
 	private static final int CACHE_THRESHOLD = 1000;
@@ -37,8 +40,10 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 	
 	private String file;
 	
-	public BlameCommand(File repoDir) {
-		super(repoDir);
+	private Range range;
+	
+	public BlameCommand(File gitDir) {
+		super(gitDir);
 	}
 
 	public BlameCommand commitHash(String commitHash) {
@@ -51,34 +56,56 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 		return this;
 	}
 	
+	/**
+	 * Calculate blames of specified range
+	 * @param range
+	 * 			0-indexed and inclusive from and to
+	 * @return
+	 */
+	public BlameCommand range(@Nullable Range range) {
+		this.range = range;
+		return this;
+	}
+	
 	private Commandline buildCmd() {
 		Commandline cmd = cmd().addArgs("blame", "--porcelain");
+		if (range != null)
+			cmd.addArgs("-L" + (range.getFrom()+1) + "," + (range.getTo()+1));
 		cmd.addArgs(commitHash, "--", file);
 		return cmd;
 	}
 	
 	@Override
-	public Map<String, Blame> call() {
+	public Collection<BlameBlock> call() {
 		Preconditions.checkArgument(commitHash!=null && GitUtils.isHash(commitHash), "commit hash has to be specified.");
 		Preconditions.checkNotNull(file, "file parameter has to be specified.");
 
-		String cacheKey = commitHash + ":" + file;
+		String cacheKey = commitHash + ":" + file + ":" + (range!=null?range.toString():"");
 		
-		Map<String, Blame> cached = cache.get(cacheKey);
+		Collection<BlameBlock> cached = cache.get(cacheKey);
 		if (cached != null)
 			return cached;
 		
 		Commandline cmd = buildCmd();
 		
-		final Map<String, Blame> blames = new HashMap<>();
-		final Map<String, BlameCommit> commitMap = new HashMap<>();
+		Map<String, BlameBlock> blocks = new HashMap<>();
+		Map<String, BlameCommit> commitMap = new HashMap<>();
 		
-		final AtomicReference<BlameCommit> commitRef = new AtomicReference<>(null);
-		final CommitBuilder commitBuilder = new CommitBuilder();
+		AtomicReference<BlameCommit> commitRef = new AtomicReference<>(null);
+		CommitBuilder commitBuilder = new CommitBuilder();
 		
-		final AtomicBoolean endOfFile = new AtomicBoolean(false);
-		final AtomicInteger beginLine = new AtomicInteger(0);
-		final AtomicInteger endLine = new AtomicInteger(0);
+		AtomicBoolean endOfFile = new AtomicBoolean(false);
+		
+		AtomicInteger beginLine;
+		AtomicInteger endLine;
+		
+		if (range != null) {
+			beginLine = new AtomicInteger(range.getFrom());
+			endLine = new AtomicInteger(range.getFrom());
+		} else {
+			beginLine = new AtomicInteger(0);
+			endLine = new AtomicInteger(0);
+		}
 		
 		long time = System.currentTimeMillis();
 		
@@ -95,12 +122,12 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 					commitBuilder.hash = StringUtils.substringBefore(line, " ");
 					BlameCommit commit = commitRef.get();
 					if (commit != null && !commitBuilder.hash.equals(commit.getHash())) {
-						Blame blame = blames.get(commit.getHash());
-						if (blame == null) {
-							blame = new Blame(commit, new ArrayList<>());
-							blames.put(commit.getHash(), blame);
+						BlameBlock block = blocks.get(commit.getHash());
+						if (block == null) {
+							block = new BlameBlock(commit, new ArrayList<>());
+							blocks.put(commit.getHash(), block);
 						}
-						blame.getRanges().add(new Range(beginLine.get(), endLine.get()));
+						block.getRanges().add(new Range(beginLine.get(), endLine.get()-1));
 						commitRef.set(null);
 						beginLine.set(endLine.get());
 					}
@@ -143,18 +170,18 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 		
 		if (endLine.get() > beginLine.get()) {
 			BlameCommit commit = commitRef.get();
-			Blame blame = blames.get(commit.getHash());
-			if (blame == null) {
-				blame = new Blame(commit, new ArrayList<Range>());
-				blames.put(commit.getHash(), blame);
+			BlameBlock block = blocks.get(commit.getHash());
+			if (block == null) {
+				block = new BlameBlock(commit, new ArrayList<Range>());
+				blocks.put(commit.getHash(), block);
 			}
-			blame.getRanges().add(new Range(beginLine.get(), endLine.get()));
+			block.getRanges().add(new Range(beginLine.get(), endLine.get()-1));
 		}
 		
 		if (System.currentTimeMillis()-time > CACHE_THRESHOLD)
-			cache.put(cacheKey, blames);
+			cache.put(cacheKey, blocks.values());
 		
-		return blames;
+		return blocks.values();
 	}
 
     private static class CommitBuilder {

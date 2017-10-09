@@ -20,8 +20,8 @@ public class UploadCommand extends GitCommand<Void> {
 	
 	private OutputStream output;
 	
-	public UploadCommand(File repoDir, Map<String, String> environments) {
-		super(repoDir, environments);
+	public UploadCommand(File gitDir, Map<String, String> environments) {
+		super(gitDir, environments);
 	}
 	
 	public UploadCommand input(InputStream input) {

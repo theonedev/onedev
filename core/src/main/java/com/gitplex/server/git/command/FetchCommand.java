@@ -17,8 +17,8 @@ public class FetchCommand extends GitCommand<Void> {
     
     private String[] refspec = new String[0];
     
-	public FetchCommand(final File repoDir) {
-		super(repoDir);
+	public FetchCommand(final File gitDir) {
+		super(gitDir);
 	}
 
 	public FetchCommand from(String from) {

@@ -58,21 +58,25 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.gitplex.jsymbol.Range;
 import com.gitplex.launcher.loader.ListenerRegistry;
 import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
+import com.gitplex.server.git.BlameBlock;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.BlobIdentFilter;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.git.Submodule;
+import com.gitplex.server.git.command.BlameCommand;
 import com.gitplex.server.git.exception.NotFileException;
 import com.gitplex.server.git.exception.ObjectNotFoundException;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.StorageManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.CommitMessageTransformSetting;
 import com.gitplex.server.model.support.TagProtection;
@@ -877,6 +881,23 @@ public class Project extends AbstractEntity {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	public List<User> getAuthors(String filePath, ObjectId commitId, @Nullable Range range) {
+		BlameCommand cmd = new BlameCommand(getGitDir());
+		cmd.commitHash(commitId.name());
+		cmd.file(filePath);
+		cmd.range(range);
+
+		List<User> authors = new ArrayList<>();
+		UserManager userManager = GitPlex.getInstance(UserManager.class);
+		for (BlameBlock block: cmd.call()) {
+			User author = userManager.find(block.getCommit().getAuthor());
+			if (author != null && !authors.contains(author))
+				authors.add(author);
+		}
+		
+		return authors;
 	}
 	
 }
