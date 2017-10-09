@@ -169,7 +169,7 @@ gitplex.server.sourceEdit = {
 		return $("#" + containerId + ">.source-edit>.code>.CodeMirror")[0].CodeMirror;		
 	},
 	onSubmit: function(containerId) {
-		var cm = gitplex.server.sourceEdit.getCodeMirror(containerId);		
+		var cm = gitplex.server.sourceEdit.getCodeMirror(containerId);	
 		$("#" + containerId + ">.source-edit>textarea").val(cm.getValue());
 	},
 	onIndentTypeChange: function(containerId, indentType) {
