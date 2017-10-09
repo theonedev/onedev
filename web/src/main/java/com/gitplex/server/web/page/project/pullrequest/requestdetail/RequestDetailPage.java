@@ -524,6 +524,15 @@ public abstract class RequestDetailPage extends ProjectPage {
 					
 				}));
 				
+				add(new DropdownLink("checkoutInstructionsTrigger") {
+
+					@Override
+					protected Component newContent(String id, FloatingPanel dropdown) {
+						return new CheckoutRequestInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
+					}
+					
+				});
+				
 			}
 
 			@Override
