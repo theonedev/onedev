@@ -82,6 +82,9 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			GitUtils.updateRef(refUpdate);
 		}
 
+		request.setHeadCommitHash(update.getHeadCommitHash());
+		pullRequestManager.save(request);
+		
 		if (independent) {
 			PullRequestUpdated event = new PullRequestUpdated(update);
 			listenerRegistry.post(event);
@@ -91,8 +94,6 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			lastEvent.setType(EditableUtils.getName(event.getClass()));
 			request.setLastEvent(lastEvent);
 		}
-		request.setHeadCommitHash(update.getHeadCommitHash());
-		pullRequestManager.save(request);
 	}
 
 	@Sessional
