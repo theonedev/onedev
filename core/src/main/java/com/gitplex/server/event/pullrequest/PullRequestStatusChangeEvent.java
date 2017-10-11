@@ -10,13 +10,20 @@ public class PullRequestStatusChangeEvent extends PullRequestEvent implements Ma
 
 	private final PullRequestStatusChange statusChange;
 	
-	public PullRequestStatusChangeEvent(PullRequestStatusChange statusChange) {
+	private final Object statusData;
+	
+	public PullRequestStatusChangeEvent(PullRequestStatusChange statusChange, Object statusData) {
 		super(statusChange.getRequest());
 		this.statusChange = statusChange;
+		this.statusData = statusData;
 	}
 
 	public PullRequestStatusChange getStatusChange() {
 		return statusChange;
+	}
+
+	public Object getStatusData() {
+		return statusData;
 	}
 
 	@Override

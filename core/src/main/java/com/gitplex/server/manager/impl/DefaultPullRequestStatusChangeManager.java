@@ -23,9 +23,14 @@ public class DefaultPullRequestStatusChangeManager extends AbstractEntityManager
 	}
 
 	@Override
-	public void save(PullRequestStatusChange statusChange) {
+	public void save(PullRequestStatusChange statusChange, Object statusData) {
 		dao.persist(statusChange);
-		listenerRegistry.post(new PullRequestStatusChangeEvent(statusChange));
+		listenerRegistry.post(new PullRequestStatusChangeEvent(statusChange, statusData));
+	}
+
+	@Override
+	public void save(PullRequestStatusChange statusChange) {
+		save(statusChange, null);
 	}
 	
 }

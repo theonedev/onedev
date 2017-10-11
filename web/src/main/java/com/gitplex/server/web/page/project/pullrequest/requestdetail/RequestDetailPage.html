@@ -46,12 +46,13 @@
 				</div>
 				<div wicket:id="noConflict" class="no-conflict">
 					<label><i class="fa fa-check-circle"></i> Able to merge without conflicts</label> 
-					<wicket:enclosure child="mergePreview">
-						<span class="middot"></span> Target branch will be updated to the 
+					<ul>
+						<li>Target branch will be updated to the 
 						<a wicket:id="mergePreview">merge result</a> 
 						<span wicket:id="verificationStatus" class="verification-status"></span> 
-						upon approvals of all reviewers and verifications
-					</wicket:enclosure>
+						upon approvals of all reviewers and verifications</li>
+						<li>Follow <a wicket:id="checkoutInstructionsTrigger" href="javascript:void(0);">this instruction</a> if you want to verify the pull request locally</li>
+					</ul>						
 				</div>
 				<div wicket:id="conflict" class="conflict">
 					<span><i class="fa fa-warning"></i> There are merge conflicts.</span>

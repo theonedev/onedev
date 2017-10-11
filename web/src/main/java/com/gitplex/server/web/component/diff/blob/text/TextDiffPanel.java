@@ -42,7 +42,7 @@ import com.gitplex.jsyntax.TextToken;
 import com.gitplex.jsyntax.TokenUtils;
 import com.gitplex.jsyntax.Tokenized;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.git.Blame;
+import com.gitplex.server.git.BlameBlock;
 import com.gitplex.server.git.BlameCommit;
 import com.gitplex.server.git.BlobChange;
 import com.gitplex.server.git.BlobIdent;
@@ -127,15 +127,16 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		}
 		
 		initialMarks = new ArrayList<>();
-		MarkPos mark = commentSupport.getMark();
-		if (mark != null) {
-			initialMarks.add(mark);
+		if (commentSupport != null) {
+			MarkPos mark = commentSupport.getMark();
+			if (mark != null) {
+				initialMarks.add(mark);
+			}
+			for (CodeComment comment: commentSupport.getComments()) {
+				mark = comment.getMarkPos();
+				initialMarks.add(mark);
+			}
 		}
-		for (CodeComment comment: commentSupport.getComments()) {
-			mark = comment.getMarkPos();
-			initialMarks.add(mark);
-		}
-		
 	}
 
 	private String getJson(MarkPos mark) {
@@ -153,9 +154,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
 			cmd.commitHash(getOldCommit().name()).file(oldPath);
-			for (Blame blame: cmd.call().values()) {
+			for (BlameBlock blame: cmd.call()) {
 				for (Range range: blame.getRanges()) {
-					for (int i=range.getFrom(); i<range.getTo(); i++) 
+					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.oldBlame.put(i, blame.getCommit());
 				}
 			}
@@ -163,9 +164,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		String newPath = change.getNewBlobIdent().path;
 		if (newPath != null) {
 			cmd.commitHash(getNewCommit().name()).file(newPath);
-			for (Blame blame: cmd.call().values()) {
+			for (BlameBlock blame: cmd.call()) {
 				for (Range range: blame.getRanges()) {
-					for (int i=range.getFrom(); i<range.getTo(); i++) 
+					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.newBlame.put(i, blame.getCommit());
 				}
 			}

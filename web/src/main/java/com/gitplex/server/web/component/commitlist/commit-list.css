@@ -45,6 +45,9 @@
 .commit-list .alert {
 	margin-bottom: 12px;
 }
+.commit-list .pull-right {
+	margin-top: 6px;
+}
 .commit-list .verification-status {
 	margin-right: 4px;
 }

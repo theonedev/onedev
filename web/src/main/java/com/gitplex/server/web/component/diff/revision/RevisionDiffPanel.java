@@ -68,6 +68,7 @@ import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.ProjectAndRevision;
@@ -825,7 +826,23 @@ public class RevisionDiffPanel extends Panel {
 							String autosaveKey = "autosave:addCodeCommentOnDiff:" + projectModel.getObject().getId() 
 									+ ":" + change.getPath();
 							CommentInput contentInput;
-							form.add(contentInput = new CommentInput("content", Model.of(""), true) {
+							
+							StringBuilder mentions = new StringBuilder();
+
+							if (requestModel.getObject() == null) {
+								/*
+								 * Outside of pull request, no one will be notified of the comment. So we automatically 
+								 * mention authors of commented lines
+								 */
+								Range range = new Range(markPos.getRange().getBeginLine(), markPos.getRange().getEndLine());
+								ObjectId commitId = ObjectId.fromString(markPos.getCommit());
+								for (User user: projectModel.getObject().getAuthors(markPos.getPath(), commitId, range)) {
+									if (user.getEmail() != null)
+										mentions.append("@").append(user.getName()).append(" ");
+								}
+							}
+							
+							form.add(contentInput = new CommentInput("content", Model.of(mentions.toString()), true) {
 
 								@Override
 								protected ProjectAttachmentSupport getAttachmentSupport() {
@@ -1270,13 +1287,15 @@ public class RevisionDiffPanel extends Panel {
 	
 	@Nullable
 	private CodeComment getOpenComment() {
-		CodeComment comment = ((CommentSupport)commentSupport).getOpenComment();
-		if (comment != null) {
-			String commit = comment.getMarkPos().getCommit();
-			String oldCommitHash = getOldCommitId().name();
-			String newCommitHash = getNewCommitId().name();
-			if (commit.equals(oldCommitHash) || commit.equals(newCommitHash))
-				return comment;
+		if (commentSupport != null) {
+			CodeComment comment = ((CommentSupport)commentSupport).getOpenComment();
+			if (comment != null) {
+				String commit = comment.getMarkPos().getCommit();
+				String oldCommitHash = getOldCommitId().name();
+				String newCommitHash = getNewCommitId().name();
+				if (commit.equals(oldCommitHash) || commit.equals(newCommitHash))
+					return comment;
+			}
 		}
 		return null;
 	}

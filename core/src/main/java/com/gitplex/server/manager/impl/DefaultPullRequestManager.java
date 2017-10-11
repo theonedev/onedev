@@ -77,7 +77,6 @@ import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.QualityCheckStatus;
-import com.gitplex.server.util.QualityCheckStatusImpl;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.concurrent.Prioritized;
 import com.google.common.base.Preconditions;
@@ -710,7 +709,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public QualityCheckStatus checkQuality(PullRequest request) {
-		return new QualityCheckStatusImpl(request);
+		return new QualityCheckStatus(request);
 	}
 
 	@Transactional

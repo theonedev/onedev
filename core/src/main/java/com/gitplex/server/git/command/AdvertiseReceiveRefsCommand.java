@@ -16,8 +16,8 @@ public class AdvertiseReceiveRefsCommand extends GitCommand<Void> {
 	
 	private OutputStream output;
 	
-	public AdvertiseReceiveRefsCommand(File repoDir) {
-		super(repoDir);
+	public AdvertiseReceiveRefsCommand(File gitDir) {
+		super(gitDir);
 	}
 
 	public AdvertiseReceiveRefsCommand output(OutputStream output) {

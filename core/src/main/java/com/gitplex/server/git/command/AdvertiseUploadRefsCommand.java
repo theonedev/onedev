@@ -16,8 +16,8 @@ public class AdvertiseUploadRefsCommand extends GitCommand<Void> {
 	
 	private OutputStream output;
 	
-	public AdvertiseUploadRefsCommand(File repoDir) {
-		super(repoDir);
+	public AdvertiseUploadRefsCommand(File gitDir) {
+		super(gitDir);
 	}
 
 	public AdvertiseUploadRefsCommand output(OutputStream output) {

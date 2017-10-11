@@ -25,8 +25,8 @@ public class CloneCommand extends GitCommand<Void> {
 	
 	private String branch;
 	
-	public CloneCommand(File repoDir) {
-		super(repoDir);
+	public CloneCommand(File gitDir) {
+		super(gitDir);
 	}
 
 	public CloneCommand from(String from) {

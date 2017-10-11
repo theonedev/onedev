@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.util.ContentDetector;
+import com.gitplex.server.util.StringUtils;
 import com.google.common.base.Charsets;
 
 @SuppressWarnings("serial")
@@ -42,10 +43,17 @@ class SourceFormComponent extends FormComponentPanel<byte[]> {
 	@Override
 	public void convertInput() {
 		String content = input.getConvertedInput();
-		if (content != null)
+		if (content != null) {
+			/*
+			 * Textarea always uses CRLF as line ending, and below we change back to original EOL
+			 */
+			String initialContent = input.getModelObject();
+			if (initialContent == null || !initialContent.contains("\r\n"))
+				content = StringUtils.replace(content, "\r\n", "\n");
 			setConvertedInput(content.getBytes(Charsets.UTF_8));
-		else
+		} else {
 			setConvertedInput(new byte[0]);
+		}
 	}
 	
 }

@@ -59,7 +59,7 @@ import com.gitplex.jsymbol.SymbolExtractor;
 import com.gitplex.jsymbol.SymbolExtractorRegistry;
 import com.gitplex.jsymbol.TokenPosition;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.git.Blame;
+import com.gitplex.server.git.BlameBlock;
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
@@ -68,6 +68,7 @@ import com.gitplex.server.manager.CodeCommentManager;
 import com.gitplex.server.model.CodeComment;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.CompareContext;
 import com.gitplex.server.model.support.MarkPos;
 import com.gitplex.server.model.support.ProjectAndRevision;
@@ -434,7 +435,22 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 					String autosaveKey = "autosave:addCodeCommentOnSource:" + context.getProject().getId() 
 							+ ":" + context.getBlobIdent().path;
 					CommentInput contentInput;
-					form.add(contentInput = new CommentInput("content", Model.of(""), true) {
+					
+					StringBuilder mentions = new StringBuilder();
+
+					if (context.getPullRequest() == null) {
+						/*
+						 * Outside of pull request, no one will be notified of the comment. So we automatically 
+						 * mention authors of commented lines
+						 */
+						Range range = new Range(mark.getBeginLine(), mark.getEndLine());
+						for (User user: context.getProject().getAuthors(context.getBlobIdent().path, context.getCommit(), range)) {
+							if (user.getEmail() != null)
+								mentions.append("@").append(user.getName()).append(" ");
+						}
+					}
+					
+					form.add(contentInput = new CommentInput("content", Model.of(mentions.toString()), true) {
 
 						@Override
 						protected ProjectAttachmentSupport getAttachmentSupport() {
@@ -819,7 +835,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			
 			BlameCommand cmd = new BlameCommand(context.getProject().getGitDir());
 			cmd.commitHash(commitHash).file(context.getBlobIdent().path);
-			for (Blame blame: cmd.call().values()) {
+			for (BlameBlock blame: cmd.call()) {
 				BlameInfo blameInfo = new BlameInfo();
 				blameInfo.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
 				blameInfo.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());

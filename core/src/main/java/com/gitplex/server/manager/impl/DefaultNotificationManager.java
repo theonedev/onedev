@@ -21,12 +21,12 @@ import com.gitplex.server.event.MarkdownAware;
 import com.gitplex.server.event.codecomment.CodeCommentCreated;
 import com.gitplex.server.event.codecomment.CodeCommentEvent;
 import com.gitplex.server.event.codecomment.CodeCommentReplied;
-import com.gitplex.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentEvent;
 import com.gitplex.server.event.pullrequest.PullRequestCodeCommentReplied;
 import com.gitplex.server.event.pullrequest.PullRequestCommentCreated;
 import com.gitplex.server.event.pullrequest.PullRequestEvent;
+import com.gitplex.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.event.pullrequest.PullRequestUpdated;
@@ -39,7 +39,6 @@ import com.gitplex.server.manager.PullRequestTaskManager;
 import com.gitplex.server.manager.PullRequestWatchManager;
 import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.manager.VisitManager;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.BranchWatch;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.PullRequestStatusChange;
@@ -47,9 +46,10 @@ import com.gitplex.server.model.PullRequestStatusChange.Type;
 import com.gitplex.server.model.PullRequestTask;
 import com.gitplex.server.model.PullRequestWatch;
 import com.gitplex.server.model.ReviewInvitation;
+import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.EntityCriteria;
-import com.gitplex.server.persistence.dao.EntityPersisted;
+import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.markdown.MentionParser;
 import com.google.common.collect.Sets;
@@ -118,6 +118,46 @@ public class DefaultNotificationManager implements NotificationManager {
 			}
 		}
 	}
+
+	private boolean process(ReviewInvitation invitation, String subject) {
+		PullRequest request = invitation.getRequest();
+		User user = invitation.getUser();
+		EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
+		criteria.add(Restrictions.eq("request", request))
+				.add(Restrictions.eq("user", user))
+				.add(Restrictions.eq("type", REVIEW));
+
+		boolean notified = false;
+		
+		if (invitation.getType() == ReviewInvitation.Type.EXCLUDE) {
+			for (PullRequestTask task: pullRequestTaskManager.findAll(criteria))
+				pullRequestTaskManager.delete(task);
+		} else {
+			if (pullRequestTaskManager.find(criteria) == null) {
+				PullRequestTask task = new PullRequestTask();
+				task.setRequest(request);
+				task.setUser(user);
+				task.setType(REVIEW);
+				
+				pullRequestTaskManager.save(task);
+				
+				String url = urlManager.urlFor(request);
+				String body = String.format(""
+						+ "Dear %s,"
+						+ "<p style='margin: 16px 0;'>"
+						+ "%s"
+						+ "<p style='margin: 16px 0;'>"
+						+ "Visit <a href='%s'>%s</a> for details."
+						+ "<p style='margin: 16px 0;'>"
+						+ "-- Sent by GitPlex",
+						user.getDisplayName(), subject, url, url);
+				mailManager.sendMailAsync(Sets.newHashSet(task.getUser().getEmail()), subject, body);
+				notified = true;
+			}
+			watch(request, user, "You are set to watch this pull request as you are invited as a reviewer.");
+		}
+		return notified;
+	}
 	
 	@Transactional
 	@Listen
@@ -132,11 +172,28 @@ public class DefaultNotificationManager implements NotificationManager {
 				if (invitation.getType() != ReviewInvitation.Type.EXCLUDE) 
 					notifiedUsers.add(invitation.getUser());
 			}
+			String subject = String.format("You are invited to review pull request #%d - %s", request.getNumber(), 
+					request.getTitle());
+			for (ReviewInvitation invitation: request.getReviewInvitations()) {
+				if (process(invitation, subject))
+					notifiedUsers.add(invitation.getUser());
+			}
 		} else if (event instanceof PullRequestUpdated) {
 			EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
 			criteria.add(Restrictions.eq("request", request)).add(Restrictions.eq("type", UPDATE));
-			for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) {
+			for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) 
 				pullRequestTaskManager.delete(task);
+			
+			if (!request.isMergeIntoTarget()) {
+				QualityCheckStatus qualityCheckStatus = request.getQualityCheckStatus();					
+				for (ReviewInvitation invitation: request.getReviewInvitations()) {
+					String subject = String.format("There are new changes to review in pull request #%d - %s", 
+							request.getNumber(), request.getTitle());
+					if (qualityCheckStatus.getAwaitingReviewers().contains(invitation.getUser())) { 
+						if (process(invitation, subject))
+							notifiedUsers.add(invitation.getUser());
+					}
+				}
 			}
 		} else if (event instanceof PullRequestMergePreviewCalculated) {
 			if (request.getSubmitter() != null && request.getMergePreview() != null) {
@@ -179,15 +236,15 @@ public class DefaultNotificationManager implements NotificationManager {
 				}
 			}
 		} else if (event instanceof PullRequestStatusChangeEvent) {
-			PullRequestStatusChange statusChange = ((PullRequestStatusChangeEvent)event).getStatusChange();
+			PullRequestStatusChangeEvent statusChangeEvent = (PullRequestStatusChangeEvent)event;
+			PullRequestStatusChange statusChange = statusChangeEvent.getStatusChange();
 			PullRequestStatusChange.Type type = statusChange.getType();
 			EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
 			criteria.add(Restrictions.eq("request", request));
 			if (type == PullRequestStatusChange.Type.APPROVED || type == PullRequestStatusChange.Type.DISAPPROVED) {
 				criteria.add(Restrictions.eq("user", statusChange.getUser())).add(Restrictions.eq("type", REVIEW));
-				for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) {
+				for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) 
 					pullRequestTaskManager.delete(task);
-				}
 				if (type == PullRequestStatusChange.Type.DISAPPROVED && request.getSubmitter() != null) {
 					PullRequestTask task = new PullRequestTask();
 					task.setRequest(request);
@@ -217,9 +274,20 @@ public class DefaultNotificationManager implements NotificationManager {
 					}
 				}
 			} else if (type == PullRequestStatusChange.Type.MERGED || type == PullRequestStatusChange.Type.DISCARDED) {
-				for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) {
+				for (PullRequestTask task: pullRequestTaskManager.findAll(criteria))
 					pullRequestTaskManager.delete(task);
-				}
+			} else if (type == PullRequestStatusChange.Type.REMOVED_REVIEWER) {
+				String subject = String.format("You no longer needs to review pull request #%d - %s", request.getNumber(), 
+						request.getTitle());
+				ReviewInvitation invitation = (ReviewInvitation) statusChangeEvent.getStatusData();
+				if (process(invitation, subject))
+					notifiedUsers.add(invitation.getUser());
+			} else if (type == PullRequestStatusChange.Type.ADDED_REVIEWER) {
+				String subject = String.format("You are invited to review pull request #%d - %s", request.getNumber(), 
+						request.getTitle());
+				ReviewInvitation invitation = (ReviewInvitation) statusChangeEvent.getStatusData();
+				if (process(invitation, subject))
+					notifiedUsers.add(invitation.getUser());
 			}
 		}
 		
@@ -368,30 +436,6 @@ public class DefaultNotificationManager implements NotificationManager {
 		}
 	}
 	
-	private void requestReview(ReviewInvitation invitation) {
-		PullRequest request = invitation.getRequest();
-		
-		PullRequestTask task = new PullRequestTask();
-		task.setRequest(request);
-		task.setUser(invitation.getUser());
-		task.setType(REVIEW);
-		
-		pullRequestTaskManager.save(task);
-		
-		String subject = String.format("Please review pull request #%d - %s", request.getNumber(), request.getTitle());
-		String url = urlManager.urlFor(request);
-		String body = String.format(""
-				+ "Dear %s,"
-				+ "<p style='margin: 16px 0;'>"
-				+ "You are selected to review pull request #%d - %s."
-				+ "<p style='margin: 16px 0;'>"
-				+ "Visit <a href='%s'>%s</a> for details."
-				+ "<p style='margin: 16px 0;'>"
-				+ "-- Sent by GitPlex",
-				invitation.getUser().getDisplayName(), request.getNumber(), request.getTitle(), url, url);
-		mailManager.sendMailAsync(Sets.newHashSet(task.getUser().getEmail()), subject, body);
-	}
-	
 	private void watch(PullRequest request, User user, String reason) {
 		PullRequestWatch watch = request.getWatch(user);
 		if (watch == null) {
@@ -401,32 +445,6 @@ public class DefaultNotificationManager implements NotificationManager {
 			watch.setReason(reason);
 			request.getWatches().add(watch);
 			pullRequestWatchManager.save(watch);
-		}
-	}
-
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof ReviewInvitation) {
-			ReviewInvitation invitation = (ReviewInvitation) event.getEntity();
-			PullRequest request = invitation.getRequest();
-			User user = invitation.getUser();
-			if (invitation.getType() == ReviewInvitation.Type.EXCLUDE) {
-				EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-				criteria.add(Restrictions.eq("request", request)).add(Restrictions.eq("user", user)).add(Restrictions.eq("type", REVIEW));
-				for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) {
-					pullRequestTaskManager.delete(task);
-				}
-			} else {
-				EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-				criteria.add(Restrictions.eq("request", request))
-						.add(Restrictions.eq("user", user))
-						.add(Restrictions.eq("type", PullRequestTask.Type.REVIEW));
-				if (pullRequestTaskManager.find(criteria) == null)
-					requestReview(invitation);
-				watch(invitation.getRequest(), invitation.getUser(), 
-						"You are set to watch this pull request as you are invited as a reviewer.");
-			} 
 		}
 	}
 

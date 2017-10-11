@@ -2,13 +2,13 @@ package com.gitplex.server.git.command;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.junit.Test;
 
+import com.gitplex.jsymbol.Range;
 import com.gitplex.server.git.AbstractGitTest;
-import com.gitplex.server.git.Blame;
-import com.gitplex.server.git.command.BlameCommand;
+import com.gitplex.server.git.BlameBlock;
 
 public class BlameCommandTest extends AbstractGitTest {
 
@@ -28,12 +28,12 @@ public class BlameCommandTest extends AbstractGitTest {
 				"initial commit");
 		
 		String commitHash = git.getRepository().resolve("master").name();
-		Map<String, Blame> blames = new BlameCommand(git.getRepository().getDirectory())
+		Collection<BlameBlock> blames = new BlameCommand(git.getRepository().getDirectory())
 				.commitHash(commitHash)
 				.file("file")
 				.call();
 		assertEquals(1, blames.size());
-		assertEquals(commitHash + ": 0-9", blames.get(commitHash).toString());
+		assertEquals(commitHash + ": 0-8", blames.iterator().next().toString());
 		
 		addFileAndCommit(
 				"file", 
@@ -52,12 +52,13 @@ public class BlameCommandTest extends AbstractGitTest {
 		blames = new BlameCommand(git.getRepository().getDirectory())
 				.commitHash(commitHash)
 				.file("file")
+				.range(new Range(5, 8))
 				.call();
 		assertEquals(2, blames.size());
 		
-		assertEquals(commitHash + ": 0-1, 8-9", blames.get(commitHash).toString());
+		assertEquals(commitHash + ": 8-8", getBlock(blames, commitHash).toString());
 		commitHash = git.getRepository().resolve("master~1").name();
-		assertEquals(commitHash + ": 1-8", blames.get(commitHash).toString());
+		assertEquals(commitHash + ": 5-7", getBlock(blames, commitHash).toString());
 		
 		addFileAndCommit(
 				"file", 
@@ -73,7 +74,14 @@ public class BlameCommandTest extends AbstractGitTest {
 		commitHash = git.getRepository().resolve("master~1").name();
 		
 		assertEquals(1, blames.size());
-		assertEquals(commitHash + ": 0-2", blames.get(commitHash).toString());
+		assertEquals(commitHash + ": 0-1", getBlock(blames, commitHash).toString());
 	}
 
+	private BlameBlock getBlock(Collection<BlameBlock> blameBlocks, String commitHash) {
+		for (BlameBlock block: blameBlocks) {
+			if (block.getCommit().getHash().equals(commitHash))
+				return block;
+		}
+		return null;
+	}
 }

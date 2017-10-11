@@ -9,6 +9,7 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.util.ContentDetector;
+import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.markdown.MarkdownEditor;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -53,10 +54,17 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 	@Override
 	public void convertInput() {
 		String content = input.getConvertedInput();
-		if (content != null)
+		if (content != null) {
+			/*
+			 * Textarea always uses CRLF as line ending, and below we change back to original EOL
+			 */
+			String initialContent = input.getModelObject();
+			if (initialContent == null || !initialContent.contains("\r\n"))
+				content = StringUtils.replace(content, "\r\n", "\n");
 			setConvertedInput(content.getBytes(Charset.forName(charset)));
-		else
+		} else {
 			setConvertedInput(new byte[0]);
+		}
 	}
 
 	@Override
