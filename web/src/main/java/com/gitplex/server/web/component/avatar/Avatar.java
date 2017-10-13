@@ -32,7 +32,7 @@ public class Avatar extends WebComponent {
 		} else {
 			userId = user.getId();
 		}
-		url = avatarManager.getAvatarUrl(user.getFacade());
+		url = avatarManager.getAvatarUrl(user!=null?user.getFacade():null);
 	}
 	
 	public Avatar(String id, PersonIdent person) {
