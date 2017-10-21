@@ -12,6 +12,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -21,6 +22,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
@@ -38,7 +40,7 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.avatar.AvatarLink;
-import com.gitplex.server.web.component.datatable.HistoryAwareNavToolbar;
+import com.gitplex.server.web.component.datatable.HistoryAwarePagingNavigator;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.BranchLink;
 import com.gitplex.server.web.component.link.UserLink;
@@ -386,7 +388,14 @@ public class RequestListPage extends ProjectPage {
 				dataProvider, WebConstants.PAGE_SIZE);
 		dataTable.setCurrentPage(pagingHistorySupport.getCurrentPage());
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
-		dataTable.addBottomToolbar(new HistoryAwareNavToolbar(dataTable, pagingHistorySupport));
+		dataTable.addBottomToolbar(new NavigationToolbar(dataTable) {
+
+			@Override
+			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
+				return new HistoryAwarePagingNavigator(navigatorId, table, pagingHistorySupport);
+			}
+			
+		});
 		add(dataTable);		
 	}
 
