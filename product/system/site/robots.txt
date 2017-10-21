@@ -1,12 +1,2 @@
-User-agent: * 
-Disallow: /*/*/blob
-Disallow: /*/*/commits
-Disallow: /*/*/commit
-Disallow: /*/*/archive
-Disallow: /*/*/branches
-Disallow: /*/*/tags
-Disallow: /*/*/pulls
-Disallow: /*/*/comments
-Disallow: /*/*/compare
-Disallow: /wicket/*
-Disallow: /*?*-*.*.*
+User-agent: *
+Disallow: /
