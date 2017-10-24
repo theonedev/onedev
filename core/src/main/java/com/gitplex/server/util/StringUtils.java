@@ -11,7 +11,6 @@ import java.util.StringTokenizer;
 
 import javax.annotation.Nullable;
 
-import com.gitplex.jsyntax.TokenUtils;
 import com.google.common.base.CaseFormat;
 
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
@@ -301,10 +300,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      
         // the distance is the cost for transforming all letters in both strings        
         return cost[len0 - 1];                                                          
-    }
-
-    public static String escapeHtml(String text) {
-    	return TokenUtils.escapeHtml(text);
     }
 
 }

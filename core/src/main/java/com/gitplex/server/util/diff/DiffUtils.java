@@ -12,7 +12,6 @@ import javax.annotation.Nullable;
 
 import com.gitplex.jsyntax.TextToken;
 import com.gitplex.jsyntax.TokenTypes;
-import com.gitplex.jsyntax.TokenUtils;
 import com.gitplex.jsyntax.Tokenized;
 import com.gitplex.jsyntax.Tokenizer;
 import com.gitplex.jsyntax.TokenizerRegistry;
@@ -20,6 +19,7 @@ import com.gitplex.server.model.support.TextRange;
 import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.diff.DiffMatchPatch.Diff;
 import com.gitplex.server.util.diff.DiffMatchPatch.Operation;
+import com.gitplex.jsyntax.TokenUtils;
 import com.google.common.base.Preconditions;
 
 public class DiffUtils {

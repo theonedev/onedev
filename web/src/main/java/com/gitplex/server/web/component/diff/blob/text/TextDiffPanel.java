@@ -39,7 +39,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.jsymbol.Range;
 import com.gitplex.jsyntax.TextToken;
-import com.gitplex.jsyntax.TokenUtils;
 import com.gitplex.jsyntax.Tokenized;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlameBlock;
@@ -79,6 +78,7 @@ import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.mergepreview.MergePreviewPage;
 import com.gitplex.server.web.util.DateUtils;
+import com.gitplex.jsyntax.TokenUtils;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
