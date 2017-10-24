@@ -11,6 +11,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -18,6 +19,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -32,7 +34,7 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.avatar.AvatarLink;
-import com.gitplex.server.web.component.datatable.HistoryAwareNavToolbar;
+import com.gitplex.server.web.component.datatable.HistoryAwarePagingNavigator;
 import com.gitplex.server.web.component.link.UserLink;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
@@ -160,7 +162,14 @@ public class ProjectListPanel extends Panel {
 		if (pagingHistorySupport != null)
 			projectsTable.setCurrentPage(pagingHistorySupport.getCurrentPage());
 		
-		projectsTable.addBottomToolbar(new HistoryAwareNavToolbar(projectsTable, pagingHistorySupport));
+		projectsTable.addBottomToolbar(new NavigationToolbar(projectsTable) {
+
+			@Override
+			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
+				return new HistoryAwarePagingNavigator(navigatorId, table, pagingHistorySupport);
+			}
+			
+		});
 		projectsTable.addBottomToolbar(new NoRecordsToolbar(projectsTable, Model.of("No Projects Found")));
 		add(projectsTable);
 		
