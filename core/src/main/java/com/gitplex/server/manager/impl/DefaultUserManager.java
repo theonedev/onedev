@@ -22,7 +22,7 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityPersisted;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.StringUtils;
 
 @Singleton
 public class DefaultUserManager extends AbstractEntityManager<User> implements UserManager {

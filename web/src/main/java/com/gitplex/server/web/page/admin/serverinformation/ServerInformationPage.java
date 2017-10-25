@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.gitplex.server.util.FileUtils;
+import com.gitplex.utils.FileUtils;
 import com.gitplex.server.web.page.admin.AdministrationPage;
 import com.gitplex.server.web.util.DateUtils;
 

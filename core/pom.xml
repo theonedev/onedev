@@ -49,6 +49,12 @@
             <groupId>org.apache.shiro</groupId>  
             <artifactId>shiro-guice</artifactId>  
             <version>${shiro.version}</version> 
+            <exclusions>
+            	<exclusion>
+            		<groupId>com.google.guava</groupId>
+            		<artifactId>guava</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>  
         <dependency> 
             <groupId>org.hibernate</groupId>  
@@ -130,10 +136,6 @@
             <artifactId>unbescape</artifactId> 
         </dependency>  
         <dependency> 
-            <groupId>com.google.guava</groupId>  
-            <artifactId>guava</artifactId> 
-        </dependency>  
-        <dependency> 
             <groupId>com.gitplex</groupId>  
             <artifactId>launcher-bootstrap</artifactId>  
             <version>1.0.0</version> 
@@ -153,14 +155,6 @@
         <dependency> 
             <groupId>org.apache.commons</groupId>  
             <artifactId>commons-email</artifactId> 
-        </dependency>  
-        <dependency> 
-            <groupId>org.apache.commons</groupId>  
-            <artifactId>commons-collections4</artifactId> 
-        </dependency>  
-        <dependency> 
-            <groupId>org.apache.ant</groupId>  
-            <artifactId>ant</artifactId> 
         </dependency>  
         <dependency> 
             <groupId>org.javassist</groupId>  
@@ -231,16 +225,6 @@
         	<artifactId>jsyntax</artifactId>
         	<version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <dependency> 
-            <groupId>org.quartz-scheduler</groupId>  
-            <artifactId>quartz</artifactId>  
-            <exclusions> 
-                <exclusion> 
-                    <groupId>c3p0</groupId>  
-                    <artifactId>c3p0</artifactId> 
-                </exclusion> 
-            </exclusions> 
-        </dependency> 
         <dependency> 
             <groupId>com.fasterxml.jackson.core</groupId>  
             <artifactId>jackson-databind</artifactId> 

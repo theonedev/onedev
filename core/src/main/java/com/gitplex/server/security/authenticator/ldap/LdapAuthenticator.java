@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.security.authenticator.Authenticated;
 import com.gitplex.server.security.authenticator.Authenticator;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.Password;
+import com.gitplex.utils.StringUtils;
 
 @Editable(name="Generic LDAP", order=200)
 public class LdapAuthenticator extends Authenticator {

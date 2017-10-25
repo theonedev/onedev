@@ -52,13 +52,13 @@ import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.MembershipFacade;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserAuthorizationFacade;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 

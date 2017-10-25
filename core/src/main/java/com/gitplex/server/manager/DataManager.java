@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.gitplex.server.model.support.setting.BackupSetting;
-import com.gitplex.server.util.init.ManualConfig;
+import com.gitplex.utils.init.ManualConfig;
 
 public interface DataManager {
 

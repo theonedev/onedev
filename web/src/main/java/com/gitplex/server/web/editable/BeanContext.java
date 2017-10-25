@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.util.ClassUtils;
+import com.gitplex.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public abstract class BeanContext<T> extends BeanDescriptor {

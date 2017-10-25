@@ -5,7 +5,7 @@ import java.util.List;
 import org.hibernate.Session;
 
 import com.gitplex.server.model.AbstractEntity;
-import com.gitplex.server.util.ReflectionUtils;
+import com.gitplex.utils.ReflectionUtils;
 
 public abstract class AbstractEntityManager<T extends AbstractEntity> implements EntityManager<T> {
 

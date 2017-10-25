@@ -15,13 +15,13 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.gitplex.server.util.Provider;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.project.blob.navigator.BlobNameChanging;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.page.project.blob.render.commitoption.CommitOptionPanel;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import com.gitplex.utils.Provider;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")

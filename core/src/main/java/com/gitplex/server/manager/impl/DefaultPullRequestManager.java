@@ -78,7 +78,7 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.Verification;
-import com.gitplex.server.util.concurrent.Prioritized;
+import com.gitplex.utils.concurrent.Prioritized;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 

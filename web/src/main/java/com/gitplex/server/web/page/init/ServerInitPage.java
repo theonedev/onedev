@@ -15,14 +15,14 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.init.InitStage;
-import com.gitplex.server.util.init.ManualConfig;
-import com.gitplex.server.util.init.Skippable;
 import com.gitplex.server.web.WebSession;
 import com.gitplex.server.web.component.wizard.ManualConfigStep;
 import com.gitplex.server.web.component.wizard.Wizard;
 import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.dashboard.DashboardPage;
+import com.gitplex.utils.init.InitStage;
+import com.gitplex.utils.init.ManualConfig;
+import com.gitplex.utils.init.Skippable;
 
 @SuppressWarnings("serial")
 public class ServerInitPage extends BasePage {

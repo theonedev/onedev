@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.util.execution.Commandline;
-import com.gitplex.server.util.execution.LineConsumer;
+import com.gitplex.utils.command.Commandline;
+import com.gitplex.utils.command.LineConsumer;
 
 public abstract class LogCommand extends GitCommand<Void> {
 

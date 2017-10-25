@@ -21,6 +21,7 @@ public class SortPosition {
 		return itemIndex;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)

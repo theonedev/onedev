@@ -13,7 +13,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 
 import com.gitplex.codeassist.InputCompletion;
 import com.gitplex.codeassist.InputStatus;
-import com.gitplex.jsymbol.Range;
+import com.gitplex.utils.Range;
 import com.gitplex.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 
 @SuppressWarnings("serial")

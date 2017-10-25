@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.server.util.editable.annotation.Editable;
-import com.gitplex.server.util.execution.Commandline;
-import com.gitplex.server.util.execution.LineConsumer;
 import com.gitplex.server.util.validation.Validatable;
 import com.gitplex.server.util.validation.annotation.ClassValidating;
+import com.gitplex.utils.command.Commandline;
+import com.gitplex.utils.command.LineConsumer;
 
 /**
  * Git relevant settings.

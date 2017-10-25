@@ -1,7 +1,7 @@
 package com.gitplex.server.manager;
 
 import com.gitplex.server.util.BatchWorker;
-import com.gitplex.server.util.concurrent.Prioritized;
+import com.gitplex.utils.concurrent.Prioritized;
 
 public interface BatchWorkManager {
 

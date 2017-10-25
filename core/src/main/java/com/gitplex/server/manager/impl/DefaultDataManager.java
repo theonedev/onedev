@@ -16,19 +16,18 @@ import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 
+import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.launcher.loader.ManagedSerializedForm;
-import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.launcher.bootstrap.BootstrapUtils;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.lifecycle.SystemStarting;
-import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.DataManager;
 import com.gitplex.server.manager.MailManager;
-import com.gitplex.server.model.User;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Config;
 import com.gitplex.server.model.Config.Key;
+import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.setting.BackupSetting;
 import com.gitplex.server.model.support.setting.MailSetting;
 import com.gitplex.server.model.support.setting.SecuritySetting;
@@ -37,11 +36,12 @@ import com.gitplex.server.persistence.IdManager;
 import com.gitplex.server.persistence.PersistManager;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.init.ManualConfig;
-import com.gitplex.server.util.init.Skippable;
-import com.gitplex.server.util.schedule.SchedulableTask;
-import com.gitplex.server.util.schedule.TaskScheduler;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.ZipUtils;
+import com.gitplex.utils.init.ManualConfig;
+import com.gitplex.utils.init.Skippable;
+import com.gitplex.utils.schedule.SchedulableTask;
+import com.gitplex.utils.schedule.TaskScheduler;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -57,8 +57,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final IdManager idManager;
 	
-	private final TaskScheduler taskScheduler;
-	
 	private final Validator validator;
 	
 	private final PersistManager persistManager;
@@ -71,14 +69,13 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	@Inject
 	public DefaultDataManager(IdManager idManager, UserManager userManager, 
-			ConfigManager configManager, TaskScheduler taskScheduler, 
-			PersistManager persistManager, MailManager mailManager, 
-			Validator validator, PasswordService passwordService) {
+			ConfigManager configManager, PersistManager persistManager, 
+			MailManager mailManager, Validator validator, 
+			PasswordService passwordService) {
 		this.userManager = userManager;
 		this.configManager = configManager;
 		this.validator = validator;
 		this.idManager = idManager;
-		this.taskScheduler = taskScheduler;
 		this.persistManager = persistManager;
 		this.mailManager = mailManager;
 		this.passwordService = passwordService;
@@ -192,13 +189,13 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public void scheduleBackup(BackupSetting backupSetting) {
 		if (backupTaskId != null)
-			taskScheduler.unschedule(backupTaskId);
+			TaskScheduler.getInstance().unschedule(backupTaskId);
 		if (backupSetting != null) { 
-			backupTaskId = taskScheduler.schedule(new SchedulableTask() {
+			backupTaskId = TaskScheduler.getInstance().schedule(new SchedulableTask() {
 
 				@Override
 				public void execute() {
-					File tempDir = BootstrapUtils.createTempDir("backup");
+					File tempDir = FileUtils.createTempDir("backup");
 					try {
 						File backupDir = new File(backupSetting.getFolder());
 						if (!backupDir.isAbsolute()) 
@@ -209,7 +206,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 						persistManager.exportData(tempDir);
 						File backupFile = new File(backupDir, 
 								DateTimeFormat.forPattern(BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
-						BootstrapUtils.zip(tempDir, backupFile);
+						ZipUtils.zip(tempDir, backupFile);
 					} catch (Exception e) {
 						notifyBackupError(e);
 						throw Throwables.propagate(e);

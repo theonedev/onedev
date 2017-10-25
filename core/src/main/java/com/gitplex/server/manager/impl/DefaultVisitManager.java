@@ -20,7 +20,7 @@ import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.EntityRemoved;
-import com.gitplex.server.util.FileUtils;
+import com.gitplex.utils.FileUtils;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.env.Environment;

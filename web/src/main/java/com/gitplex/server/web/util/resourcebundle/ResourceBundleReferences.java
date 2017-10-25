@@ -27,8 +27,8 @@ import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
 
 import com.gitplex.launcher.loader.LoaderUtils;
-import com.gitplex.server.util.DependencyAware;
-import com.gitplex.server.util.DependencyUtils;
+import com.gitplex.utils.DependencyAware;
+import com.gitplex.utils.DependencyUtils;
 
 public class ResourceBundleReferences {
 

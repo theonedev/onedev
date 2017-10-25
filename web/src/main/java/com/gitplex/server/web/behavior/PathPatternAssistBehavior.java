@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 import com.gitplex.codeassist.InputCompletion;
 import com.gitplex.codeassist.InputStatus;
 import com.gitplex.codeassist.InputSuggestion;
-import com.gitplex.jsymbol.Range;
+import com.gitplex.utils.Range;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
 import com.gitplex.server.web.util.SuggestionUtils;

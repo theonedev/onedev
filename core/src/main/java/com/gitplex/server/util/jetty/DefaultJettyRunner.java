@@ -17,8 +17,7 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.launcher.bootstrap.BootstrapUtils;
-import com.gitplex.server.util.schedule.TaskScheduler;
+import com.google.common.base.Throwables;
 import com.google.inject.servlet.GuiceFilter;
 
 @Singleton
@@ -45,7 +44,7 @@ public class DefaultJettyRunner implements JettyRunner, Provider<ServletContextH
 	@Inject
 	public DefaultJettyRunner(
 			Provider<Set<ServerConfigurator>> serverConfiguratorsProvider, 
-			Provider<Set<ServletConfigurator>> servletConfiguratorsProvider, TaskScheduler taskScheduler) {
+			Provider<Set<ServletConfigurator>> servletConfiguratorsProvider) {
 		this.serverConfiguratorsProvider = serverConfiguratorsProvider;
 		this.servletConfiguratorsProvider = servletConfiguratorsProvider;
 	}
@@ -94,7 +93,7 @@ public class DefaultJettyRunner implements JettyRunner, Provider<ServletContextH
 			try {
 				jettyServer.start();
 			} catch (Exception e) {
-				throw BootstrapUtils.unchecked(e);
+				throw Throwables.propagate(e);
 			}
 		}
 	}
@@ -105,7 +104,7 @@ public class DefaultJettyRunner implements JettyRunner, Provider<ServletContextH
 			try {
 				jettyServer.stop();
 			} catch (Exception e) {
-				throw BootstrapUtils.unchecked(e);
+				throw Throwables.propagate(e);
 			}
 		}
 	}

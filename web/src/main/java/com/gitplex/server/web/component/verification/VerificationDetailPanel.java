@@ -19,9 +19,9 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.gitplex.server.util.Pair;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.Verification.Status;
+import com.gitplex.utils.Pair;
 
 @SuppressWarnings("serial")
 public class VerificationDetailPanel extends GenericPanel<Map<String, Verification>> {

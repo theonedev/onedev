@@ -13,7 +13,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.FileUtils;
+import com.gitplex.utils.FileUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 

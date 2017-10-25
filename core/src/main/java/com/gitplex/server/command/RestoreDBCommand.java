@@ -12,14 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.launcher.bootstrap.BootstrapUtils;
 import com.gitplex.launcher.bootstrap.Command;
 import com.gitplex.server.persistence.DefaultPersistManager;
 import com.gitplex.server.persistence.HibernateProperties;
 import com.gitplex.server.persistence.IdManager;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.validation.EntityValidator;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.ZipUtils;
 
 @Singleton
 public class RestoreDBCommand extends DefaultPersistManager {
@@ -59,9 +59,9 @@ public class RestoreDBCommand extends DefaultPersistManager {
 		sessionFactory = metadata.getSessionFactoryBuilder().applyInterceptor(interceptor).build();
 
 		if (backupFile.isFile()) {
-			File dataDir = BootstrapUtils.createTempDir("restore");
+			File dataDir = FileUtils.createTempDir("restore");
 			try {
-				BootstrapUtils.unzip(backupFile, dataDir);
+				ZipUtils.unzip(backupFile, dataDir);
 				doRestore(metadata, dataDir);
 			} finally {
 				FileUtils.deleteDir(dataDir);

@@ -18,7 +18,7 @@ import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityRemoved;
-import com.gitplex.server.util.FileUtils;
+import com.gitplex.utils.FileUtils;
 
 @Singleton
 public class DefaultStorageManager implements StorageManager {

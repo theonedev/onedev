@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -13,11 +12,8 @@ import javax.inject.Singleton;
 
 import org.dom4j.Element;
 
-import com.gitplex.server.GitPlex;
-import com.gitplex.server.manager.CodeCommentManager;
-import com.gitplex.server.model.CodeComment;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Charsets;
 
 @Singleton

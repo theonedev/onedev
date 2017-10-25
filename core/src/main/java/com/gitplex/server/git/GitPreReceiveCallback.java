@@ -29,7 +29,7 @@ import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.permission.ProjectPermission;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")

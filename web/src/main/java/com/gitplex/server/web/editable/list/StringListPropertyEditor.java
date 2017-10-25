@@ -12,7 +12,6 @@ import org.apache.wicket.util.convert.ConversionException;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.gitplex.server.util.ReflectionUtils;
 import com.gitplex.server.web.component.select2.ChoiceProvider;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.Select2MultiChoice;
@@ -20,6 +19,7 @@ import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.PropertyEditor;
+import com.gitplex.utils.ReflectionUtils;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")

@@ -37,8 +37,8 @@ import org.dom4j.io.XMLWriter;
 import org.xml.sax.EntityResolver;
 
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.util.ClassUtils;
-import com.gitplex.server.util.FileUtils;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.ClassUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;

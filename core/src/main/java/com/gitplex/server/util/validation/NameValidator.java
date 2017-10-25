@@ -3,8 +3,8 @@ package com.gitplex.server.util.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.validation.annotation.Name;
+import com.gitplex.utils.StringUtils;
 
 public class NameValidator implements ConstraintValidator<Name, String> {
 	

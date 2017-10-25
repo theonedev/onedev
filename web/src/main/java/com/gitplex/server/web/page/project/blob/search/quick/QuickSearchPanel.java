@@ -42,13 +42,13 @@ import com.gitplex.server.search.query.BlobQuery;
 import com.gitplex.server.search.query.FileQuery;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TooGeneralQueryException;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.RunTaskBehavior;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.search.result.SearchResultPanel;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import com.gitplex.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class QuickSearchPanel extends Panel {

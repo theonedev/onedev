@@ -40,13 +40,13 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.BlobIdentFilter;
 import com.gitplex.server.model.Project;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.web.component.floating.FloatingPanel;
 import com.gitplex.server.web.component.link.DropdownLink;
 import com.gitplex.server.web.component.projectfilepicker.ProjectFilePicker;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.PathUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

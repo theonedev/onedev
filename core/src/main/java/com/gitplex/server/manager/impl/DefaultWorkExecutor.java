@@ -12,9 +12,9 @@ import javax.inject.Singleton;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.manager.WorkExecutor;
-import com.gitplex.server.util.concurrent.PrioritizedCallable;
-import com.gitplex.server.util.concurrent.PrioritizedExecutor;
-import com.gitplex.server.util.concurrent.PrioritizedRunnable;
+import com.gitplex.utils.concurrent.PrioritizedCallable;
+import com.gitplex.utils.concurrent.PrioritizedExecutor;
+import com.gitplex.utils.concurrent.PrioritizedRunnable;
 
 @Singleton
 public class DefaultWorkExecutor implements WorkExecutor {

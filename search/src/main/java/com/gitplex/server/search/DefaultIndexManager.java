@@ -78,8 +78,8 @@ import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.util.BatchWorker;
 import com.gitplex.server.util.ContentDetector;
 import com.gitplex.server.util.IndexResult;
-import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.util.concurrent.Prioritized;
+import com.gitplex.utils.StringUtils;
+import com.gitplex.utils.concurrent.Prioritized;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 

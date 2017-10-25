@@ -16,12 +16,12 @@ import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.FileUtils;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.web.component.markdown.AttachmentSupport;
 import com.gitplex.server.web.util.resource.AttachmentResource;
 import com.gitplex.server.web.util.resource.AttachmentResourceReference;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 

@@ -41,8 +41,8 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityPersisted;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.BatchWorker;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.concurrent.Prioritized;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.concurrent.Prioritized;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;

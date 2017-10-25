@@ -16,7 +16,6 @@ import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.component.avatar.Avatar;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
@@ -24,6 +23,7 @@ import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.layout.LayoutPage;
 import com.gitplex.server.web.util.model.EntityModel;
+import com.gitplex.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class UserPage extends LayoutPage {

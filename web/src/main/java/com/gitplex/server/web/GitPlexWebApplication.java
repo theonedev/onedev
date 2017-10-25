@@ -47,7 +47,6 @@ import org.apache.wicket.util.IProvider;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.util.ExceptionUtils;
 import com.gitplex.server.web.page.base.BasePage;
 import com.gitplex.server.web.page.dashboard.DashboardPage;
 import com.gitplex.server.web.page.error.BaseErrorPage;
@@ -56,6 +55,7 @@ import com.gitplex.server.web.page.error.UnexpectedExceptionPage;
 import com.gitplex.server.web.util.AbsoluteUrlRenderer;
 import com.gitplex.server.web.util.resourcebundle.ResourceBundleReferences;
 import com.gitplex.server.web.websocket.WebSocketManager;
+import com.gitplex.utils.ExceptionUtils;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 

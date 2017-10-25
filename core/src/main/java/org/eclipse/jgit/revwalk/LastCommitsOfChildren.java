@@ -27,7 +27,7 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.RawParseUtils;
 
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Throwables;
 
 /**

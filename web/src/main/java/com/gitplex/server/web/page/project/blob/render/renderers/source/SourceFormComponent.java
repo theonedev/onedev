@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.util.ContentDetector;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Charsets;
 
 @SuppressWarnings("serial")

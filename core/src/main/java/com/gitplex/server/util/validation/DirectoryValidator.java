@@ -5,7 +5,8 @@ import java.io.File;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.gitplex.server.util.FileUtils;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.server.util.validation.annotation.Directory;
 
 public class DirectoryValidator implements ConstraintValidator<Directory, String> {
@@ -37,7 +38,7 @@ public class DirectoryValidator implements ConstraintValidator<Directory, String
 				}
 			}
 			if (annotation.outsideOfInstallDir()) {
-				if (!FileUtils.isOutsideOfInstallDir(dir)) {
+				if (dir.getCanonicalFile().toPath().startsWith(Bootstrap.installDir.toPath())) {
 					constraintContext.disableDefaultConstraintViolation();
 					constraintContext.buildConstraintViolationWithTemplate("Please specify a directory outside of the installation directory").addConstraintViolation();
 					return false;

@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
 
-import com.gitplex.jsymbol.Range;
+import com.gitplex.utils.Range;
 import com.gitplex.jsymbol.Symbol;
 
 public class SymbolHit extends QueryHit {

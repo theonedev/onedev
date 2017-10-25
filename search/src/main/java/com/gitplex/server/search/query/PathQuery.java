@@ -15,8 +15,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.search.hit.PathHit;
 import com.gitplex.server.search.hit.QueryHit;
-import com.gitplex.server.util.PathUtils;
-import com.gitplex.jsymbol.Range;
+import com.gitplex.utils.PathUtils;
+import com.gitplex.utils.Range;
 
 public class PathQuery extends BlobQuery {
 

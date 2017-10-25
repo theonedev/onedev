@@ -7,8 +7,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.gitplex.server.util.concurrent.PrioritizedCallable;
-import com.gitplex.server.util.concurrent.PrioritizedRunnable;
+import com.gitplex.utils.concurrent.PrioritizedCallable;
+import com.gitplex.utils.concurrent.PrioritizedRunnable;
 
 /**
  * This executor is intended to run resource intensive long running tasks

@@ -30,9 +30,9 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.model.Project;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.BlobIcon;
 import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
+import com.gitplex.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class PathSelector extends Panel {

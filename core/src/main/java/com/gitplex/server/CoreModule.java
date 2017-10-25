@@ -142,17 +142,15 @@ import com.gitplex.server.security.DefaultWebSecurityManager;
 import com.gitplex.server.security.FilterChainConfigurator;
 import com.gitplex.server.security.GitPlexAuthorizingRealm;
 import com.gitplex.server.security.authenticator.Authenticator;
-import com.gitplex.server.util.ClassUtils;
 import com.gitplex.server.util.jackson.ObjectMapperConfigurator;
 import com.gitplex.server.util.jackson.ObjectMapperProvider;
 import com.gitplex.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
 import com.gitplex.server.util.jetty.DefaultJettyRunner;
 import com.gitplex.server.util.jetty.JettyRunner;
-import com.gitplex.server.util.schedule.DefaultTaskScheduler;
-import com.gitplex.server.util.schedule.TaskScheduler;
 import com.gitplex.server.util.validation.DefaultEntityValidator;
 import com.gitplex.server.util.validation.EntityValidator;
 import com.gitplex.server.util.validation.ValidatorProvider;
+import com.gitplex.utils.ClassUtils;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.thoughtworks.xstream.XStream;
@@ -190,8 +188,6 @@ public class CoreModule extends AbstractPluginModule {
 		}).in(Singleton.class);
 		
 		bind(Validator.class).toProvider(ValidatorProvider.class).in(Singleton.class);
-		
-		bind(TaskScheduler.class).to(DefaultTaskScheduler.class);
 
 		// configure markdown
 		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		

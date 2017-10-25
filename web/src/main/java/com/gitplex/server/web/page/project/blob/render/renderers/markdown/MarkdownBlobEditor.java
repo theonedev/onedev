@@ -9,10 +9,10 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
 import com.gitplex.server.util.ContentDetector;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.markdown.MarkdownEditor;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import com.gitplex.utils.StringUtils;
 
 @SuppressWarnings("serial")
 abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {

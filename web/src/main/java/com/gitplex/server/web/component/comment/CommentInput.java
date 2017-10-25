@@ -16,13 +16,13 @@ import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.facade.UserFacade;
-import com.gitplex.server.util.matchscore.MatchScoreProvider;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.component.markdown.MarkdownEditor;
 import com.gitplex.server.web.component.markdown.PullRequestReferenceSupport;
 import com.gitplex.server.web.component.markdown.UserMentionSupport;
+import com.gitplex.utils.StringUtils;
+import com.gitplex.utils.matchscore.MatchScoreProvider;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public abstract class CommentInput extends MarkdownEditor {

@@ -14,12 +14,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.gitplex.server.model.Group;
 import com.gitplex.server.model.User;
-import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.util.editable.annotation.BranchPattern;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.util.editable.annotation.ReviewRequirementSpec;
 import com.gitplex.server.util.editable.annotation.VerificationChoice;
 import com.gitplex.server.util.reviewrequirement.ReviewRequirement;
+import com.gitplex.utils.PathUtils;
 
 @Editable
 public class BranchProtection implements Serializable {

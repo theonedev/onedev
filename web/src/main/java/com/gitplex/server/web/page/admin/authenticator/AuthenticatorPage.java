@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.security.authenticator.Authenticated;
-import com.gitplex.server.util.ExceptionUtils;
 import com.gitplex.server.web.behavior.testform.TestFormBehavior;
 import com.gitplex.server.web.behavior.testform.TestResult;
 import com.gitplex.server.web.component.modal.ModalPanel;
@@ -31,6 +30,7 @@ import com.gitplex.server.web.editable.EditorChanged;
 import com.gitplex.server.web.editable.PropertyContext;
 import com.gitplex.server.web.editable.PropertyEditor;
 import com.gitplex.server.web.page.admin.AdministrationPage;
+import com.gitplex.utils.ExceptionUtils;
 import com.google.common.base.Joiner;
 
 @SuppressWarnings("serial")

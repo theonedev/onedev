@@ -18,13 +18,13 @@ import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.model.User;
-import com.gitplex.server.util.ExceptionUtils;
 import com.gitplex.server.web.behavior.testform.TestFormBehavior;
 import com.gitplex.server.web.behavior.testform.TestResult;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.BeanEditor;
 import com.gitplex.server.web.editable.EditorChanged;
 import com.gitplex.server.web.page.admin.AdministrationPage;
+import com.gitplex.utils.ExceptionUtils;
 
 @SuppressWarnings("serial")
 public class MailSettingPage extends AdministrationPage {

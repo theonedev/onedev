@@ -16,11 +16,11 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobIdent;
-import com.gitplex.server.util.PathUtils;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.project.blob.render.view.BlobViewPanel;
+import com.gitplex.utils.PathUtils;
 
 @SuppressWarnings("serial")
 public class SymbolLinkPanel extends BlobViewPanel {

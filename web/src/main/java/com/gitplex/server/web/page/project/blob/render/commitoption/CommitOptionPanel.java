@@ -54,7 +54,6 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.Provider;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.server.web.component.diff.blob.BlobDiffPanel;
 import com.gitplex.server.web.component.diff.revision.DiffViewMode;
@@ -65,6 +64,7 @@ import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.ajaxlistener.TrackViewStateListener;
+import com.gitplex.utils.Provider;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 

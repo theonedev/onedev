@@ -47,12 +47,12 @@ import com.gitplex.server.search.query.FileQuery;
 import com.gitplex.server.search.query.SymbolQuery;
 import com.gitplex.server.search.query.TextQuery;
 import com.gitplex.server.search.query.TooGeneralQueryException;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.RunTaskBehavior;
 import com.gitplex.server.web.component.tabbable.AjaxActionTab;
 import com.gitplex.server.web.component.tabbable.Tab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.project.blob.search.result.SearchResultPanel;
+import com.gitplex.utils.StringUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

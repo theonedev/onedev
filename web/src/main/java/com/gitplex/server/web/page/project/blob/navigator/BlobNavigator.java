@@ -39,7 +39,6 @@ import org.eclipse.jgit.lib.FileMode;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.BlobIdentFilter;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.component.BlobIcon;
 import com.gitplex.server.web.component.floating.AlignPlacement;
 import com.gitplex.server.web.component.floating.FloatingPanel;
@@ -49,6 +48,7 @@ import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Splitter;
 
 @SuppressWarnings("serial")

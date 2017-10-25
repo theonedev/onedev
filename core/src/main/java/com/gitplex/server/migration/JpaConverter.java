@@ -14,13 +14,13 @@ import org.dom4j.Element;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.proxy.HibernateProxy;
 
-import com.google.common.base.Throwables;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.util.ClassUtils;
-import com.gitplex.server.util.ReflectionUtils;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.ClassUtils;
+import com.gitplex.utils.ReflectionUtils;
+import com.gitplex.utils.StringUtils;
+import com.google.common.base.Throwables;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;

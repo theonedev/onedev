@@ -19,7 +19,7 @@ import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.annotation.Transactional;
-import com.gitplex.server.util.ClassUtils;
+import com.gitplex.utils.ClassUtils;
 
 @Singleton
 @SuppressWarnings("unchecked")

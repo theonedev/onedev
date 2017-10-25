@@ -15,7 +15,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.request.resource.ResourceReference.Key;
 import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
 
-import com.gitplex.server.util.PathUtils;
+import com.gitplex.utils.PathUtils;
 
 /*
  * When css is bundled, and its access url can be changed (unless its resource is annotated with @ResourceBundle), 

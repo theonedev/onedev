@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.gitplex.codeassist.InputSuggestion;
-import com.gitplex.jsymbol.Range;
+import com.gitplex.utils.Range;
+import com.gitplex.utils.stringmatch.PatternApplied;
+import com.gitplex.utils.stringmatch.WildcardUtils;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
@@ -21,8 +23,6 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.facade.UserFacade;
-import com.gitplex.server.util.stringmatch.PatternApplied;
-import com.gitplex.server.util.stringmatch.WildcardUtils;
 import com.gitplex.server.web.behavior.inputassist.InputAssistBehavior;
 import com.google.common.base.Preconditions;
 

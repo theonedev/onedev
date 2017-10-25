@@ -7,11 +7,11 @@ import org.hibernate.cfg.Environment;
 import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.server.persistence.HibernateProperties;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.FileUtils;
 import com.gitplex.server.util.jetty.ServerConfigurator;
 import com.gitplex.server.util.jetty.ServletConfigurator;
 import com.gitplex.server.util.serverconfig.ServerConfig;
+import com.gitplex.utils.StringUtils;
 
 public class ProductModule extends AbstractPluginModule {
 

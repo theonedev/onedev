@@ -12,7 +12,7 @@ import com.gitplex.server.git.Blob;
 import com.gitplex.server.git.BlobChange;
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.util.Provider;
+import com.gitplex.utils.Provider;
 
 @SuppressWarnings("serial")
 public class ImageDiffPanel extends Panel {

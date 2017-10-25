@@ -18,10 +18,10 @@ import org.unbescape.html.HtmlEscape;
 
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.model.Project;
-import com.gitplex.server.util.Highlighter;
-import com.gitplex.server.util.Transformer;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
+import com.gitplex.utils.Highlighter;
+import com.gitplex.utils.Transformer;
 
 @SuppressWarnings("serial")
 public class ExpandableCommitMessagePanel extends Panel {

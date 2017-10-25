@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import org.apache.wicket.markup.html.form.FormComponent;
 
-import com.gitplex.server.util.init.ManualConfig;
 import com.gitplex.server.web.editable.BeanContext;
+import com.gitplex.utils.init.ManualConfig;
 
 @SuppressWarnings("serial")
 public class ManualConfigStep implements WizardStep {

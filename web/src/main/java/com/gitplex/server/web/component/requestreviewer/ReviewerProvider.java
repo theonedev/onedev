@@ -13,11 +13,11 @@ import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.QualityCheckStatus;
 import com.gitplex.server.util.facade.UserFacade;
-import com.gitplex.server.util.matchscore.MatchScoreProvider;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.userchoice.AbstractUserChoiceProvider;
+import com.gitplex.utils.matchscore.MatchScoreProvider;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 public class ReviewerProvider extends AbstractUserChoiceProvider {
 

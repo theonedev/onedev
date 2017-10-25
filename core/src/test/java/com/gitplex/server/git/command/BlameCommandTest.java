@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import com.gitplex.jsymbol.Range;
+import com.gitplex.utils.Range;
 import com.gitplex.server.git.AbstractGitTest;
 import com.gitplex.server.git.BlameBlock;
 

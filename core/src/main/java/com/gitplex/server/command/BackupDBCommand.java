@@ -12,13 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.launcher.bootstrap.BootstrapUtils;
 import com.gitplex.server.persistence.DefaultPersistManager;
 import com.gitplex.server.persistence.HibernateProperties;
 import com.gitplex.server.persistence.IdManager;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.validation.EntityValidator;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.ZipUtils;
 import com.google.common.base.Throwables;
 
 @Singleton
@@ -60,10 +60,10 @@ public class BackupDBCommand extends DefaultPersistManager {
 		Metadata metadata = buildMetadata();
 		sessionFactory = metadata.getSessionFactoryBuilder().applyInterceptor(interceptor).build();
 
-		File tempDir = BootstrapUtils.createTempDir("backup");
+		File tempDir = FileUtils.createTempDir("backup");
 		try {
 			exportData(tempDir);
-			BootstrapUtils.zip(tempDir, backupFile);
+			ZipUtils.zip(tempDir, backupFile);
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
 		} finally {

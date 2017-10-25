@@ -39,8 +39,8 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.concurrent.PrioritizedRunnable;
 import com.gitplex.server.util.serverconfig.ServerConfig;
+import com.gitplex.utils.concurrent.PrioritizedRunnable;
 
 @Singleton
 public class GitFilter implements Filter {

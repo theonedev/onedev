@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.gitplex.server.util.BeanUtils;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.utils.BeanUtils;
 import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")

@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.lifecycle.SystemStopping;
-import com.gitplex.server.util.FileUtils;
+import com.gitplex.utils.FileUtils;
 import com.google.common.base.Charsets;
 
 import jetbrains.exodus.ArrayByteIterable;

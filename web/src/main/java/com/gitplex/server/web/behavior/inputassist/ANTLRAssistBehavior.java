@@ -27,8 +27,8 @@ import com.gitplex.codeassist.InputStatus;
 import com.gitplex.codeassist.InputSuggestion;
 import com.gitplex.codeassist.ParentedElement;
 import com.gitplex.codeassist.grammar.ElementSpec;
-import com.gitplex.jsymbol.Range;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.Range;
+import com.gitplex.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class ANTLRAssistBehavior extends InputAssistBehavior {

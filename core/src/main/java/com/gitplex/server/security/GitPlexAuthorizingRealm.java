@@ -39,12 +39,12 @@ import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.security.permission.PublicPermission;
 import com.gitplex.server.security.permission.SystemAdministration;
 import com.gitplex.server.security.permission.UserAdministration;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.GroupFacade;
 import com.gitplex.server.util.facade.MembershipFacade;
 import com.gitplex.server.util.facade.UserAuthorizationFacade;
 import com.gitplex.server.util.facade.UserFacade;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Throwables;
 
 @Singleton

@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.gitplex.launcher.loader.LoaderUtils;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.StringUtils;
 
 public class GitVersion implements Comparable<GitVersion> {
 

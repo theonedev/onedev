@@ -6,9 +6,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.gitplex.launcher.bootstrap.Bootstrap;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.serverconfig.ServerConfig;
 import com.gitplex.server.util.serverconfig.SslConfig;
+import com.gitplex.utils.StringUtils;
 
 @Singleton
 public class DefaultServerConfig implements ServerConfig {

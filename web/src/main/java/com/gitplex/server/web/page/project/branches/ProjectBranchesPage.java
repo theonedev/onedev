@@ -62,7 +62,6 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.branchchoice.BranchChoiceProvider;
@@ -85,6 +84,7 @@ import com.gitplex.server.web.page.project.pullrequest.requestlist.SearchOption;
 import com.gitplex.server.web.page.project.pullrequest.requestlist.SearchOption.Status;
 import com.gitplex.server.web.page.project.pullrequest.requestlist.SortOption;
 import com.gitplex.server.web.util.PagingHistorySupport;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;

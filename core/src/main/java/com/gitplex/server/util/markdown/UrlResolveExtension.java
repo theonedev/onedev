@@ -3,7 +3,7 @@ package com.gitplex.server.util.markdown;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.gitplex.server.util.PathUtils;
+import com.gitplex.utils.PathUtils;
 import com.vladsch.flexmark.ast.Image;
 import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.ast.util.TextCollectingVisitor;

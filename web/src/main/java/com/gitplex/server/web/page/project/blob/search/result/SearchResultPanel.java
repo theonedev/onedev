@@ -35,7 +35,7 @@ import com.gitplex.server.search.hit.TextHit;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
-import com.gitplex.jsymbol.Range;
+import com.gitplex.utils.Range;
 import com.gitplex.jsymbol.util.HighlightableLabel;
 
 @SuppressWarnings("serial")

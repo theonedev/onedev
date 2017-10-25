@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.git.GitVersion;
 import com.gitplex.server.git.config.GitConfig;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.execution.Commandline;
-import com.gitplex.server.util.execution.LineConsumer;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.command.Commandline;
+import com.gitplex.utils.command.LineConsumer;
 
 public abstract class GitCommand<V> implements Callable<V> {
 

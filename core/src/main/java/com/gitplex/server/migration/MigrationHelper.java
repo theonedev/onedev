@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Throwables;
 
 public class MigrationHelper {

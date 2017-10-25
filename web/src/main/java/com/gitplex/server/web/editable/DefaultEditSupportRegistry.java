@@ -8,8 +8,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.gitplex.server.util.GeneralException;
-
 @Singleton
 public class DefaultEditSupportRegistry implements EditSupportRegistry {
 
@@ -28,7 +26,7 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 			if (editContext != null)
 				return (BeanContext<Serializable>) editContext;
 		}
-		throw new GeneralException(String.format("Unable to find edit context (bean: %s). "
+		throw new RuntimeException(String.format("Unable to find edit context (bean: %s). "
 				+ "Possible reason: forget to annotate the class with @Editable.", beanClass.getName()));
 	}
 
@@ -40,7 +38,7 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 			if (editContext != null)
 				return (PropertyContext<Serializable>) editContext;
 		}
-		throw new GeneralException(String.format(
+		throw new RuntimeException(String.format(
 				"Unable to find edit context (bean: %s, property: %s). Possible reason: forget to annotate "
 				+ "return type of the method with @Editable.", 
 				beanClass.getName(), propertyName));

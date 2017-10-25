@@ -16,13 +16,11 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.junit.Assert;
 import org.mockito.Mockito;
 
-import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.git.command.GitCommand;
-import com.gitplex.server.git.config.GitConfig;
-import com.gitplex.server.util.FileUtils;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.loader.AppLoaderMocker;
-import com.gitplex.launcher.bootstrap.BootstrapUtils;
+import com.gitplex.server.git.command.GitCommand;
+import com.gitplex.server.git.config.GitConfig;
+import com.gitplex.utils.FileUtils;
 
 public abstract class AbstractGitTest extends AppLoaderMocker {
 
@@ -34,7 +32,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 
 	@Override
 	protected void setup() {
-		gitDir = BootstrapUtils.createTempDir();
+		gitDir = FileUtils.createTempDir();
 		
 		try {
 			git = org.eclipse.jgit.api.Git.init().setBare(false).setDirectory(gitDir).call();

@@ -53,7 +53,6 @@ import com.gitplex.server.git.command.RevListCommand;
 import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.support.ProjectAndRevision;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.clipboard.CopyClipboardBehavior;
@@ -72,6 +71,7 @@ import com.gitplex.server.web.page.project.commit.CommitQueryParser.QueryContext
 import com.gitplex.server.web.page.project.compare.RevisionComparePage;
 import com.gitplex.server.web.util.ajaxlistener.IndicateLoadingListener;
 import com.gitplex.server.web.util.model.CommitRefsModel;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;

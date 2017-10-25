@@ -12,9 +12,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.component.avatar.AvatarChanged;
 import com.gitplex.server.web.util.avatar.AvatarManager;
+import com.gitplex.utils.FileUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

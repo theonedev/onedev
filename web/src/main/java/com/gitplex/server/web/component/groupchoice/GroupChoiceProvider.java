@@ -7,11 +7,11 @@ import java.util.List;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.util.facade.GroupFacade;
-import com.gitplex.server.util.matchscore.MatchScoreProvider;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
+import com.gitplex.utils.matchscore.MatchScoreProvider;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 public class GroupChoiceProvider extends AbstractGroupChoiceProvider {
 

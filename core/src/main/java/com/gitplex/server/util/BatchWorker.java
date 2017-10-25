@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.gitplex.server.util.concurrent.Prioritized;
+import com.gitplex.utils.concurrent.Prioritized;
 import com.google.common.base.Preconditions;
 
 public abstract class BatchWorker {

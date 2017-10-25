@@ -3,7 +3,7 @@ package com.gitplex.server.util.facade;
 import javax.annotation.Nullable;
 
 import com.gitplex.server.model.User;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 public class UserFacade extends EntityFacade {
 

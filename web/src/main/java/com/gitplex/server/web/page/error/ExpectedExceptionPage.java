@@ -7,10 +7,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.util.string.Strings;
 
-import com.gitplex.server.util.WordUtils;
 import com.gitplex.server.web.component.MultilineLabel;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.page.dashboard.DashboardPage;
+import com.gitplex.utils.WordUtils;
 
 @SuppressWarnings("serial")
 public class ExpectedExceptionPage extends BaseErrorPage {

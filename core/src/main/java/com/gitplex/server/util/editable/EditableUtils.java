@@ -12,13 +12,12 @@ import javax.annotation.Nullable;
 import javax.validation.Validator;
 
 import com.gitplex.launcher.loader.AppLoader;
-import com.gitplex.server.util.BeanUtils;
-import com.gitplex.server.util.ClassUtils;
-import com.gitplex.server.util.GeneralException;
-import com.gitplex.server.util.ReflectionUtils;
-import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.util.WordUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
+import com.gitplex.utils.BeanUtils;
+import com.gitplex.utils.ClassUtils;
+import com.gitplex.utils.ReflectionUtils;
+import com.gitplex.utils.StringUtils;
+import com.gitplex.utils.WordUtils;
 
 public class EditableUtils {
 	
@@ -45,7 +44,7 @@ public class EditableUtils {
 		else if (element instanceof Package) 
 			return ((Package)element).getName();
 		else
-			throw new GeneralException("Invalid element type: " + element.getClass().getName());
+			throw new RuntimeException("Invalid element type: " + element.getClass().getName());
 	}
 	
 	/**

@@ -29,7 +29,7 @@ import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.EntityRemoved;
-import com.gitplex.server.util.FileUtils;
+import com.gitplex.utils.FileUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.util.Verification.Status;
 

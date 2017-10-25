@@ -20,7 +20,7 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.gitplex.jsymbol.Range;
+import com.gitplex.utils.Range;
 import com.gitplex.jsymbol.TokenPosition;
 import com.gitplex.server.search.IndexConstants;
 import com.gitplex.server.search.hit.QueryHit;

@@ -39,7 +39,6 @@ import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.contributorpanel.ContributorPanel;
@@ -57,6 +56,7 @@ import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.commit.CommitDetailPage;
 import com.gitplex.server.web.util.PagingHistorySupport;
 import com.gitplex.server.web.util.ajaxlistener.ConfirmListener;
+import com.gitplex.utils.StringUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

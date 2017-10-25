@@ -17,7 +17,6 @@ import org.apache.wicket.util.convert.ConversionException;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.gitplex.server.util.WordUtils;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.editable.annotation.ExcludeValues;
 import com.gitplex.server.web.component.select2.ChoiceProvider;
@@ -27,6 +26,7 @@ import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.PropertyEditor;
+import com.gitplex.utils.WordUtils;
 
 @SuppressWarnings({"serial", "unchecked", "rawtypes"})
 public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {

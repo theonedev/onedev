@@ -7,7 +7,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.model.AbstractEntity;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.util.ClassUtils;
+import com.gitplex.utils.ClassUtils;
 
 public class EntityModel<T extends AbstractEntity> extends LoadableDetachableModel<T> {
 

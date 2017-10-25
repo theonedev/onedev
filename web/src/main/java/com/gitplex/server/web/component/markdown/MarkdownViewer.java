@@ -18,8 +18,8 @@ import org.hibernate.StaleStateException;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.manager.MarkdownManager;
-import com.gitplex.server.util.StringUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
+import com.gitplex.utils.StringUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

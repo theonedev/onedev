@@ -23,8 +23,8 @@ import org.apache.shiro.web.filter.PathMatchingFilter;
 import org.apache.shiro.web.util.WebUtils;
 
 import com.gitplex.launcher.loader.PluginManager;
-import com.gitplex.server.util.ExceptionUtils;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.ExceptionUtils;
+import com.gitplex.utils.StringUtils;
 
 @Singleton
 public class BasicAuthenticationFilter extends PathMatchingFilter {

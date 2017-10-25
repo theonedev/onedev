@@ -29,14 +29,14 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserAuthorizationFacade;
-import com.gitplex.server.util.matchscore.MatchScoreProvider;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.ComponentRenderer;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.link.ViewStateAwarePageLink;
 import com.gitplex.server.web.component.projectlist.ProjectListPanel;
 import com.gitplex.server.web.page.layout.LayoutPage;
 import com.gitplex.server.web.util.PagingHistorySupport;
+import com.gitplex.utils.matchscore.MatchScoreProvider;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public class ProjectListPage extends LayoutPage {

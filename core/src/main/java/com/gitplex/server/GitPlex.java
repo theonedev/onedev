@@ -32,11 +32,11 @@ import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.persistence.PersistManager;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.server.persistence.annotation.Sessional;
-import com.gitplex.server.util.init.InitStage;
-import com.gitplex.server.util.init.ManualConfig;
 import com.gitplex.server.util.jetty.JettyRunner;
-import com.gitplex.server.util.schedule.TaskScheduler;
 import com.gitplex.server.util.serverconfig.ServerConfig;
+import com.gitplex.utils.init.InitStage;
+import com.gitplex.utils.init.ManualConfig;
+import com.gitplex.utils.schedule.TaskScheduler;
 
 public class GitPlex extends AbstractPlugin implements Serializable {
 
@@ -47,8 +47,6 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	private static final Pattern DOCLINK_PATTERN = Pattern.compile("\\d+\\.\\d+");
 	
 	private final JettyRunner jettyRunner;
-	
-	private final TaskScheduler taskScheduler;
 	
 	private final PersistManager persistManager;
 	
@@ -67,11 +65,10 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	private volatile InitStage initStage;
 	
 	@Inject
-	public GitPlex(JettyRunner jettyRunner, TaskScheduler taskScheduler, PersistManager persistManager, 
+	public GitPlex(JettyRunner jettyRunner, PersistManager persistManager, 
 			UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry) {
 		this.jettyRunner = jettyRunner;
-		this.taskScheduler = taskScheduler;
 		this.persistManager = persistManager;
 		this.unitOfWork = unitOfWork;
 		this.configManager = configManager;
@@ -88,7 +85,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		jettyRunner.start();
 		
 		if (Bootstrap.command == null) {
-			taskScheduler.start();
+			TaskScheduler.getInstance().start();
 		}
 		
 		persistManager.start();
@@ -181,7 +178,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		}
 		persistManager.stop();
 		
-		taskScheduler.stop();
+		TaskScheduler.getInstance().stop();
 		jettyRunner.stop();
 	}
 		

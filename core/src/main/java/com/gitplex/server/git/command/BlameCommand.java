@@ -18,13 +18,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.jsymbol.Range;
 import com.gitplex.server.git.BlameBlock;
 import com.gitplex.server.git.BlameCommit;
 import com.gitplex.server.git.GitUtils;
-import com.gitplex.server.util.execution.Commandline;
-import com.gitplex.server.util.execution.ExecuteResult;
-import com.gitplex.server.util.execution.LineConsumer;
+import com.gitplex.utils.Range;
+import com.gitplex.utils.command.Commandline;
+import com.gitplex.utils.command.ExecuteResult;
+import com.gitplex.utils.command.LineConsumer;
 import com.google.common.base.Preconditions;
 
 public class BlameCommand extends GitCommand<Collection<BlameBlock>> {

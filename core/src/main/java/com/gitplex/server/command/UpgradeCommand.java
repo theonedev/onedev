@@ -25,11 +25,11 @@ import com.gitplex.server.persistence.DefaultPersistManager;
 import com.gitplex.server.persistence.HibernateProperties;
 import com.gitplex.server.persistence.IdManager;
 import com.gitplex.server.persistence.dao.Dao;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.StringUtils;
-import com.gitplex.server.util.execution.Commandline;
-import com.gitplex.server.util.execution.LineConsumer;
+import com.gitplex.utils.FileUtils;
 import com.gitplex.server.util.validation.EntityValidator;
+import com.gitplex.utils.StringUtils;
+import com.gitplex.utils.command.Commandline;
+import com.gitplex.utils.command.LineConsumer;
 import com.google.common.base.Charsets;
 
 @Singleton

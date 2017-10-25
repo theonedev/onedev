@@ -49,8 +49,6 @@ import com.gitplex.server.util.facade.GroupFacade;
 import com.gitplex.server.util.facade.MembershipFacade;
 import com.gitplex.server.util.facade.UserAuthorizationFacade;
 import com.gitplex.server.util.facade.UserFacade;
-import com.gitplex.server.util.matchscore.MatchScoreProvider;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
@@ -68,6 +66,8 @@ import com.gitplex.server.web.component.userchoice.AbstractUserChoiceProvider;
 import com.gitplex.server.web.component.userchoice.UserChoiceResourceReference;
 import com.gitplex.server.web.page.project.setting.ProjectSettingPage;
 import com.gitplex.server.web.util.PagingHistorySupport;
+import com.gitplex.utils.matchscore.MatchScoreProvider;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public class ProjectAuthorizationsPage extends ProjectSettingPage {

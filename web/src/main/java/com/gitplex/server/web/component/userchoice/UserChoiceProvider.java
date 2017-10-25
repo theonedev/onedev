@@ -11,13 +11,13 @@ import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.editable.annotation.UserChoice;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
-import com.gitplex.server.util.matchscore.MatchScoreProvider;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.component.select2.Response;
 import com.gitplex.server.web.component.select2.ResponseFiller;
 import com.gitplex.server.web.page.project.ProjectPage;
 import com.gitplex.server.web.util.WicketUtils;
+import com.gitplex.utils.matchscore.MatchScoreProvider;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 public class UserChoiceProvider extends AbstractUserChoiceProvider {
 

@@ -24,10 +24,10 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityPersisted;
 import com.gitplex.server.persistence.dao.EntityRemoved;
-import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.util.facade.ProjectFacade;
-import com.gitplex.server.util.schedule.SchedulableTask;
-import com.gitplex.server.util.schedule.TaskScheduler;
+import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.schedule.SchedulableTask;
+import com.gitplex.utils.schedule.TaskScheduler;
 
 @Singleton
 public class DefaultAttachmentManager implements AttachmentManager, SchedulableTask {
@@ -38,17 +38,14 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	
 	private final StorageManager storageManager;
 	
-	private final TaskScheduler taskScheduler;
-	
     private final Dao dao;
     
     private String taskId;
     
 	@Inject
-	public DefaultAttachmentManager(Dao dao, StorageManager storageManager, TaskScheduler taskScheduler) {
+	public DefaultAttachmentManager(Dao dao, StorageManager storageManager) {
 		this.dao = dao;
 		this.storageManager = storageManager;
-		this.taskScheduler = taskScheduler;
 	}
 	
 	@Override
@@ -88,12 +85,12 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 	@Listen
 	public void on(SystemStarted event) {
-		taskId = taskScheduler.schedule(this);
+		taskId = TaskScheduler.getInstance().schedule(this);
 	}
 
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
+		TaskScheduler.getInstance().unschedule(taskId);
 	}
 
 	@Sessional

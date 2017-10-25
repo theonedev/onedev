@@ -26,7 +26,7 @@ import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.persistence.UnitOfWork;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.StringUtils;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")

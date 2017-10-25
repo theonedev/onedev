@@ -9,7 +9,7 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.gitplex.server.util.BeanUtils;
+import com.gitplex.utils.BeanUtils;
 
 public class PropertyDescriptor implements Serializable {
 

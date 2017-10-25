@@ -21,8 +21,8 @@ import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.manager.BatchWorkManager;
 import com.gitplex.server.manager.WorkExecutor;
 import com.gitplex.server.util.BatchWorker;
-import com.gitplex.server.util.concurrent.Prioritized;
-import com.gitplex.server.util.concurrent.PrioritizedRunnable;
+import com.gitplex.utils.concurrent.Prioritized;
+import com.gitplex.utils.concurrent.PrioritizedRunnable;
 
 @Singleton
 public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {

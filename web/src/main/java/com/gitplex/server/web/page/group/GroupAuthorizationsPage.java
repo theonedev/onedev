@@ -42,8 +42,6 @@ import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.util.facade.GroupAuthorizationFacade;
 import com.gitplex.server.util.facade.ProjectFacade;
-import com.gitplex.server.util.matchscore.MatchScoreProvider;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.WebConstants;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
 import com.gitplex.server.web.component.datatable.HistoryAwareDataTable;
@@ -58,6 +56,8 @@ import com.gitplex.server.web.component.select2.ResponseFiller;
 import com.gitplex.server.web.component.select2.SelectToAddChoice;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.util.PagingHistorySupport;
+import com.gitplex.utils.matchscore.MatchScoreProvider;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public class GroupAuthorizationsPage extends GroupPage {

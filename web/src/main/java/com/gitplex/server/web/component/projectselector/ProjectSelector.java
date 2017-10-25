@@ -28,12 +28,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.model.Project;
-import com.gitplex.server.util.matchscore.MatchScoreProvider;
-import com.gitplex.server.util.matchscore.MatchScoreUtils;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.behavior.InputChangeBehavior;
 import com.gitplex.server.web.component.link.PreventDefaultAjaxLink;
 import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
+import com.gitplex.utils.matchscore.MatchScoreProvider;
+import com.gitplex.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public abstract class ProjectSelector extends Panel {

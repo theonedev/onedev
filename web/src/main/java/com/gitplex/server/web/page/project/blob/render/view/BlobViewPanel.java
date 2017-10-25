@@ -22,7 +22,6 @@ import org.apache.wicket.model.Model;
 
 import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.security.SecurityUtils;
-import com.gitplex.server.util.FileUtils;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -30,6 +29,7 @@ import com.gitplex.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.gitplex.server.web.util.ajaxlistener.TrackViewStateListener;
 import com.gitplex.server.web.util.resource.RawBlobResource;
 import com.gitplex.server.web.util.resource.RawBlobResourceReference;
+import com.gitplex.utils.FileUtils;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")

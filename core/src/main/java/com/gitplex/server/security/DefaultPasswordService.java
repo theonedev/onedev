@@ -4,7 +4,7 @@ import javax.inject.Singleton;
 
 import org.apache.shiro.authc.credential.PasswordService;
 
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.StringUtils;
 import com.pmease.security.shiro.bcrypt.BCryptPasswordService;
 
 @Singleton

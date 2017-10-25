@@ -36,10 +36,10 @@ import org.apache.wicket.util.string.Strings;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.model.User;
-import com.gitplex.server.util.FileUtils;
-import com.gitplex.server.util.StringUtils;
+import com.gitplex.utils.FileUtils;
 import com.gitplex.server.web.page.dashboard.DashboardPage;
 import com.gitplex.server.web.util.DateUtils;
+import com.gitplex.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class UnexpectedExceptionPage extends BaseErrorPage {
