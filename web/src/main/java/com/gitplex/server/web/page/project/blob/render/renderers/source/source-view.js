@@ -432,7 +432,9 @@ gitplex.server.sourceView = {
 		// Mark again to make sure marked text still exists in viewport after layout change
 		gitplex.server.sourceView.mark(mark);
 		
-		gitplex.server.sourceView.highlightCommentTrigger();
+		gitplex.server.sourceView.highlightCommentTrigger();		
+		var $textarea = $sourceView.find(".comment textarea");
+		$textarea.caret($textarea.val().length);		
 	},
 	onOpenComment: function(comment) {
 		gitplex.server.sourceView.exitFullScreen();

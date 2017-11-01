@@ -971,7 +971,14 @@ public class RevisionDiffPanel extends Panel {
 									sourceAware.onCommentClosed(target, prevComment);
 							}  
 							((CommentSupport)commentSupport).onAddComment(target, markPos);
-							target.appendJavaScript("gitplex.server.revisionDiff.reposition();");		
+							String script = String.format(""
+									+ "gitplex.server.revisionDiff.reposition(); "
+									+ "setTimeout(function() {"
+									+ "  var $textarea = $('#%s textarea');"
+									+ "  $textarea.caret($textarea.val().length);"
+									+ "}, 100);", 
+									commentContainer.getMarkupId());
+							target.appendJavaScript(script);		
 						}
 
 						@Override
