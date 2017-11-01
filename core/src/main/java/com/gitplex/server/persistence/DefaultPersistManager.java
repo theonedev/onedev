@@ -41,7 +41,6 @@ import org.hibernate.tool.schema.TargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.migration.DatabaseMigrator;
 import com.gitplex.server.migration.MigrationHelper;
 import com.gitplex.server.migration.VersionedDocument;
@@ -51,6 +50,7 @@ import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.validation.EntityValidator;
 import com.gitplex.utils.BeanUtils;
+import com.gitplex.utils.ClassUtils;
 import com.gitplex.utils.FileUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -119,7 +119,7 @@ public class DefaultPersistManager implements PersistManager {
 	
 	protected Metadata buildMetadata() {
 		MetadataSources metadataSources = new MetadataSources(serviceRegistry);
-		for (Class<? extends AbstractEntity> each: LoaderUtils.findImplementations(AbstractEntity.class, AbstractEntity.class)) {
+		for (Class<? extends AbstractEntity> each: ClassUtils.findImplementations(AbstractEntity.class, AbstractEntity.class)) {
 			metadataSources.addAnnotatedClass(each);
 		}
 		

@@ -26,7 +26,6 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.loader.ImplementationRegistry;
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.editable.annotation.Horizontal;
 import com.gitplex.server.util.editable.annotation.Vertical;
@@ -39,6 +38,7 @@ import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.PropertyEditor;
+import com.gitplex.utils.ClassUtils;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
@@ -75,7 +75,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 	@SuppressWarnings("unchecked")
 	private List<Serializable> newList() {
-		if (LoaderUtils.isConcrete(getPropertyDescriptor().getPropertyClass())) {
+		if (ClassUtils.isConcrete(getPropertyDescriptor().getPropertyClass())) {
 			try {
 				return (List<Serializable>) getPropertyDescriptor().getPropertyClass().newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {

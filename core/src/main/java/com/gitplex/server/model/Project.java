@@ -59,7 +59,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.gitplex.launcher.loader.ListenerRegistry;
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.git.BlameBlock;
@@ -659,7 +658,7 @@ public class Project extends AbstractEntity {
 		String path = null;
 		String url = null;
 		
-		for (String line: LoaderUtils.splitAndTrim(content, "\r\n")) {
+		for (String line: StringUtils.splitAndTrim(content, "\r\n")) {
 			if (line.startsWith("[") && line.endsWith("]")) {
 				if (path != null && url != null)
 					submodules.put(path, url);

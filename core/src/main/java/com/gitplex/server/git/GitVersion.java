@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.utils.StringUtils;
 
 public class GitVersion implements Comparable<GitVersion> {
@@ -16,7 +15,7 @@ public class GitVersion implements Comparable<GitVersion> {
 	private boolean msysgit = false;
 	
 	public GitVersion(String versionStr) {
-		for (String each: LoaderUtils.splitAndTrim(versionStr, ".")) {
+		for (String each: StringUtils.splitAndTrim(versionStr, ".")) {
 			if (NumberUtils.isDigits(each))
 				parts.add(Integer.valueOf(each));
 			else if (each.equals("msysgit"))

@@ -6,7 +6,6 @@ import java.util.Set;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.util.editable.annotation.Editable;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.editable.EditSupport;
@@ -15,6 +14,7 @@ import com.gitplex.server.web.editable.PropertyContext;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.PropertyEditor;
 import com.gitplex.server.web.editable.PropertyViewer;
+import com.gitplex.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class PolymorphicEditSuport implements EditSupport {
@@ -28,7 +28,7 @@ public class PolymorphicEditSuport implements EditSupport {
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptpr = new PropertyDescriptor(beanClass, propertyName);
 		Class<?> propertyClass = propertyDescriptpr.getPropertyClass();
-		if (propertyClass.getAnnotation(Editable.class) != null && !LoaderUtils.isConcrete(propertyClass)) {
+		if (propertyClass.getAnnotation(Editable.class) != null && !ClassUtils.isConcrete(propertyClass)) {
 			return new PropertyContext<Serializable>(propertyDescriptpr) {
 
 				@Override

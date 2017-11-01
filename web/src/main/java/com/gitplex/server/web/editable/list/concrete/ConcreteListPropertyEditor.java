@@ -27,7 +27,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.web.behavior.sortable.SortBehavior;
 import com.gitplex.server.web.behavior.sortable.SortPosition;
@@ -35,10 +34,11 @@ import com.gitplex.server.web.editable.BeanDescriptor;
 import com.gitplex.server.web.editable.EditorChanged;
 import com.gitplex.server.web.editable.ErrorContext;
 import com.gitplex.server.web.editable.PathSegment;
+import com.gitplex.server.web.editable.PathSegment.Property;
 import com.gitplex.server.web.editable.PropertyContext;
 import com.gitplex.server.web.editable.PropertyDescriptor;
 import com.gitplex.server.web.editable.PropertyEditor;
-import com.gitplex.server.web.editable.PathSegment.Property;
+import com.gitplex.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable>> {
@@ -62,7 +62,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 	
 	@SuppressWarnings("unchecked")
 	private List<Serializable> newList() {
-		if (LoaderUtils.isConcrete(getPropertyDescriptor().getPropertyClass())) {
+		if (ClassUtils.isConcrete(getPropertyDescriptor().getPropertyClass())) {
 			try {
 				return (List<Serializable>) getPropertyDescriptor().getPropertyClass().newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {

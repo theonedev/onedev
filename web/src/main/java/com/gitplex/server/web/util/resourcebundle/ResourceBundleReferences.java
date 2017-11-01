@@ -26,7 +26,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
 
-import com.gitplex.launcher.loader.LoaderUtils;
+import com.gitplex.utils.ClassUtils;
 import com.gitplex.utils.DependencyAware;
 import com.gitplex.utils.DependencyUtils;
 
@@ -150,7 +150,7 @@ public class ResourceBundleReferences {
 		Map<ResourceReference, DependencyAware<ResourceReference>> dependencyMap = new LinkedHashMap<>();
 		Collection<Class<? extends ResourceReference>> resourceClasses = new ArrayList<>();
 		for (Class<?> packageScope: packageScopes) {
-			for (Class<? extends ResourceReference> resourceClass: LoaderUtils.findImplementations(ResourceReference.class, packageScope)) {
+			for (Class<? extends ResourceReference> resourceClass: ClassUtils.findImplementations(ResourceReference.class, packageScope)) {
 				if (JavaScriptResourceReference.class.isAssignableFrom(resourceClass) 
 						|| CssResourceReference.class.isAssignableFrom(resourceClass)) {
 					resourceClasses.add(resourceClass);

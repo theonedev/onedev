@@ -17,7 +17,6 @@ import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Project;
@@ -74,7 +73,7 @@ public class GitPreReceiveCallback extends HttpServlet {
             return;
         }
 
-        List<String> fields = LoaderUtils.splitAndTrim(request.getPathInfo(), "/");
+        List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
@@ -94,7 +93,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	         */
 	        String callbackData = new String(baos.toByteArray());
 	        callbackData = StringUtils.reverse(StringUtils.remove(callbackData, '\n'));
-	        fields = LoaderUtils.splitAndTrim(callbackData, " ");
+	        fields = StringUtils.splitAndTrim(callbackData, " ");
 	        
 	        int pos = 0;
 	        while (true) {

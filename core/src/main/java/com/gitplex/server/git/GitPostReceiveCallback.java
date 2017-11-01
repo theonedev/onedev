@@ -20,11 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gitplex.launcher.loader.ListenerRegistry;
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.manager.ProjectManager;
-import com.gitplex.server.model.User;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.model.User;
 import com.gitplex.server.persistence.UnitOfWork;
 import com.gitplex.utils.StringUtils;
 import com.google.common.base.Preconditions;
@@ -61,7 +60,7 @@ public class GitPostReceiveCallback extends HttpServlet {
             return;
         }
 
-        List<String> fields = LoaderUtils.splitAndTrim(request.getPathInfo(), "/");
+        List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
         Long projectId = Long.valueOf(fields.get(0));
@@ -80,7 +79,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         callbackData = StringUtils.reverse(StringUtils.remove(callbackData, '\n'));
         
         fields.clear();
-        fields.addAll(LoaderUtils.splitAndTrim(callbackData, " "));
+        fields.addAll(StringUtils.splitAndTrim(callbackData, " "));
         
         unitOfWork.doAsync(new Runnable() {
 

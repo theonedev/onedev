@@ -8,7 +8,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import com.gitplex.launcher.loader.LoaderUtils;
 import com.gitplex.server.util.editable.EditableUtils;
 import com.gitplex.server.util.editable.annotation.ChoiceProvider;
 import com.gitplex.server.util.editable.annotation.Editable;
@@ -23,6 +22,7 @@ import com.gitplex.server.web.editable.list.concrete.ConcreteListPropertyEditor;
 import com.gitplex.server.web.editable.list.concrete.ConcreteListPropertyViewer;
 import com.gitplex.server.web.editable.list.polymorphic.PolymorphicListPropertyEditor;
 import com.gitplex.server.web.editable.list.polymorphic.PolymorphicListPropertyViewer;
+import com.gitplex.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class ListEditSupport implements EditSupport {
@@ -106,7 +106,7 @@ public class ListEditSupport implements EditSupport {
 						}
 		            	
 		            };
-				} else if (LoaderUtils.isConcrete(elementClass)) {
+				} else if (ClassUtils.isConcrete(elementClass)) {
 					if (elementClass.getAnnotation(Editable.class) != null) {
 						return new PropertyContext<List<Serializable>>(propertyDescriptor) {
 
