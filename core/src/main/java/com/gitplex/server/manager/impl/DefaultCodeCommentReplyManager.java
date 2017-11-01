@@ -37,9 +37,9 @@ public class DefaultCodeCommentReplyManager extends AbstractEntityManager<CodeCo
 		dao.persist(reply);
 		if (isNew) {
 			CodeCommentReplied event = new CodeCommentReplied(reply, request); 
-			listenerRegistry.post(event);
 			reply.getComment().setCompareContext(compareContext);
 			reply.getComment().setLastEvent(event);
+			listenerRegistry.post(event);
 			codeCommentManager.save(reply.getComment());
 		}
 	}
