@@ -91,7 +91,6 @@
 }
 #request-detail>.summary .no-conflict .verification-status {
 	margin-right: 0;
-	margin-left: -3px;
 }
 #request-detail>.summary .no-conflict>* {
 	margin-right: 4px;
