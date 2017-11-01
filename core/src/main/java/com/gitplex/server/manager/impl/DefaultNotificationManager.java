@@ -31,7 +31,9 @@ import com.gitplex.server.event.pullrequest.PullRequestOpened;
 import com.gitplex.server.event.pullrequest.PullRequestStatusChangeEvent;
 import com.gitplex.server.event.pullrequest.PullRequestUpdated;
 import com.gitplex.server.event.pullrequest.PullRequestVerificationEvent;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationInError;
 import com.gitplex.server.event.pullrequest.PullRequestVerificationRunning;
+import com.gitplex.server.event.pullrequest.PullRequestVerificationSucceeded;
 import com.gitplex.server.manager.BranchWatchManager;
 import com.gitplex.server.manager.MailManager;
 import com.gitplex.server.manager.MarkdownManager;
@@ -370,7 +372,8 @@ public class DefaultNotificationManager implements NotificationManager {
 				notifyWatchers = true;
 			}
 		} else if (!(event instanceof PullRequestMergePreviewCalculated) 
-				&& !(event instanceof PullRequestVerificationRunning)) {
+				&& !(event instanceof PullRequestVerificationRunning)
+				&& !(event instanceof PullRequestVerificationSucceeded)) {
 			notifyWatchers = true;
 		}
 		
