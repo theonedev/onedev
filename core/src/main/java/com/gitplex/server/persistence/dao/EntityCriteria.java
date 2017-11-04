@@ -2,7 +2,7 @@ package com.gitplex.server.persistence.dao;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
