@@ -20,7 +20,7 @@ import com.gitplex.launcher.bootstrap.Bootstrap;
 import com.gitplex.server.git.GitFilter;
 import com.gitplex.server.git.GitPostReceiveCallback;
 import com.gitplex.server.git.GitPreReceiveCallback;
-import com.gitplex.server.security.DefaultWebEnvironment;
+import com.gitplex.server.security.GitPlexWebEnvironment;
 import com.gitplex.server.util.jetty.ClasspathAssetServlet;
 import com.gitplex.server.util.jetty.FileAssetServlet;
 import com.gitplex.server.util.jetty.ServletConfigurator;
@@ -67,7 +67,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.getSessionHandler().getSessionManager().setMaxInactiveInterval(serverConfig.getSessionTimeout());
 		
-		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, DefaultWebEnvironment.class.getName());
+		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, GitPlexWebEnvironment.class.getName());
 		context.addEventListener(new EnvironmentLoaderListener());
 		FilterHolder shiroFilterHolder = new FilterHolder(shiroFilter);
 		context.addFilter(shiroFilterHolder, "/*", EnumSet.allOf(DispatcherType.class));

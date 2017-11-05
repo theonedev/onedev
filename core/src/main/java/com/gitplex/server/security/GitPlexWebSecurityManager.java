@@ -5,8 +5,9 @@ import javax.inject.Singleton;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -16,13 +17,11 @@ import org.apache.shiro.web.mgt.DefaultWebSubjectFactory;
 import org.apache.shiro.web.subject.WebSubjectContext;
 import org.apache.shiro.web.subject.support.WebDelegatingSubject;
 
-import com.gitplex.launcher.loader.PluginManager;
-
 @Singleton
-public class DefaultWebSecurityManager extends org.apache.shiro.web.mgt.DefaultWebSecurityManager {
+public class GitPlexWebSecurityManager extends org.apache.shiro.web.mgt.DefaultWebSecurityManager {
 
 	@Inject
-	public DefaultWebSecurityManager(PluginManager pluginManager, AuthorizingRealm authorizingRealm) {
+	public GitPlexWebSecurityManager(Realm realm, RememberMeManager rememberMeManager) {
 		
 		setSubjectFactory(new DefaultWebSubjectFactory() {
 
@@ -68,7 +67,8 @@ public class DefaultWebSecurityManager extends org.apache.shiro.web.mgt.DefaultW
 			
 		});
 		
-		setRealm(authorizingRealm);
+		setRealm(realm);
+		setRememberMeManager(rememberMeManager);
 	}
 
 	/**

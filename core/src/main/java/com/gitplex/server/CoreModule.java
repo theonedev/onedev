@@ -19,7 +19,8 @@ import javax.validation.ValidatorFactory;
 
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.guice.aop.ShiroAopModule;
-import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.mgt.RememberMeManager;
+import org.apache.shiro.realm.Realm;
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
@@ -136,11 +137,12 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.DefaultDao;
 import com.gitplex.server.security.BasicAuthenticationFilter;
-import com.gitplex.server.security.DefaultFilterChainResolver;
-import com.gitplex.server.security.DefaultPasswordService;
-import com.gitplex.server.security.DefaultWebSecurityManager;
-import com.gitplex.server.security.FilterChainConfigurator;
 import com.gitplex.server.security.GitPlexAuthorizingRealm;
+import com.gitplex.server.security.GitPlexFilterChainResolver;
+import com.gitplex.server.security.GitPlexPasswordService;
+import com.gitplex.server.security.GitPlexRememberMeManager;
+import com.gitplex.server.security.GitPlexWebSecurityManager;
+import com.gitplex.server.security.FilterChainConfigurator;
 import com.gitplex.server.security.authenticator.Authenticator;
 import com.gitplex.server.util.jackson.ObjectMapperConfigurator;
 import com.gitplex.server.util.jackson.ObjectMapperProvider;
@@ -241,11 +243,12 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
 	    
-		bind(AuthorizingRealm.class).to(GitPlexAuthorizingRealm.class);
-		bind(WebSecurityManager.class).to(DefaultWebSecurityManager.class);
-		bind(FilterChainResolver.class).to(DefaultFilterChainResolver.class);
+		bind(Realm.class).to(GitPlexAuthorizingRealm.class);
+		bind(RememberMeManager.class).to(GitPlexRememberMeManager.class);
+		bind(WebSecurityManager.class).to(GitPlexWebSecurityManager.class);
+		bind(FilterChainResolver.class).to(GitPlexFilterChainResolver.class);
 		bind(BasicAuthenticationFilter.class);
-		bind(PasswordService.class).to(DefaultPasswordService.class);
+		bind(PasswordService.class).to(GitPlexPasswordService.class);
 		bind(ShiroFilter.class);
 		install(new ShiroAopModule());
         contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {

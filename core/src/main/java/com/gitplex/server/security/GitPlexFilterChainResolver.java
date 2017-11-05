@@ -9,10 +9,10 @@ import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 
 @Singleton
-public class DefaultFilterChainResolver extends PathMatchingFilterChainResolver {
+public class GitPlexFilterChainResolver extends PathMatchingFilterChainResolver {
 
 	@Inject
-	public DefaultFilterChainResolver(
+	public GitPlexFilterChainResolver(
 			Set<FilterChainConfigurator> filterChainConfigurators, 
 			BasicAuthenticationFilter basicAuthenticationFilter) {
 		

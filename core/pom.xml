@@ -269,7 +269,7 @@
     <properties> 
         <moduleClass>com.gitplex.server.CoreModule</moduleClass> 
         <hibernate.version>5.2.10.Final</hibernate.version> 
-        <shiro.version>1.2.2</shiro.version> 
+        <shiro.version>1.4.0</shiro.version> 
         <jgit.version>4.7.0.201704051617-r</jgit.version>  
         <flexmark.version>0.18.3</flexmark.version>
     </properties> 

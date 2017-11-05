@@ -8,7 +8,7 @@ import com.gitplex.utils.StringUtils;
 import com.pmease.security.shiro.bcrypt.BCryptPasswordService;
 
 @Singleton
-public class DefaultPasswordService implements PasswordService {
+public class GitPlexPasswordService implements PasswordService {
 
 	private final PasswordService bcryptPasswordService = new BCryptPasswordService();
 	
