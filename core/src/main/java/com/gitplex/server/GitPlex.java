@@ -62,14 +62,17 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private final ListenerRegistry listenerRegistry;
 	
+	private final TaskScheduler taskScheduler;
+	
 	private volatile InitStage initStage;
 	
 	@Inject
-	public GitPlex(JettyRunner jettyRunner, PersistManager persistManager, 
+	public GitPlex(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
 			UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
+		this.taskScheduler = taskScheduler;
 		this.unitOfWork = unitOfWork;
 		this.configManager = configManager;
 		this.dataManager = dataManager;
@@ -85,7 +88,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		jettyRunner.start();
 		
 		if (Bootstrap.command == null) {
-			TaskScheduler.getInstance().start();
+			taskScheduler.start();
 		}
 		
 		persistManager.start();
@@ -178,7 +181,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		}
 		persistManager.stop();
 		
-		TaskScheduler.getInstance().stop();
+		taskScheduler.stop();
 		jettyRunner.stop();
 	}
 		

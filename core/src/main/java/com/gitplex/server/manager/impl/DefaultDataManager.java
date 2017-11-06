@@ -65,16 +65,19 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final PasswordService passwordService;
 	
+	private final TaskScheduler taskScheduler;
+	
 	private String backupTaskId;
 	
 	@Inject
 	public DefaultDataManager(IdManager idManager, UserManager userManager, 
 			ConfigManager configManager, PersistManager persistManager, 
-			MailManager mailManager, Validator validator, 
+			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
 			PasswordService passwordService) {
 		this.userManager = userManager;
 		this.configManager = configManager;
 		this.validator = validator;
+		this.taskScheduler = taskScheduler;
 		this.idManager = idManager;
 		this.persistManager = persistManager;
 		this.mailManager = mailManager;
@@ -189,9 +192,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public void scheduleBackup(BackupSetting backupSetting) {
 		if (backupTaskId != null)
-			TaskScheduler.getInstance().unschedule(backupTaskId);
+			taskScheduler.unschedule(backupTaskId);
 		if (backupSetting != null) { 
-			backupTaskId = TaskScheduler.getInstance().schedule(new SchedulableTask() {
+			backupTaskId = taskScheduler.schedule(new SchedulableTask() {
 
 				@Override
 				public void execute() {

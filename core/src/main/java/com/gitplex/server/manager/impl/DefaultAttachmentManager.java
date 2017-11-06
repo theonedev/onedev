@@ -38,14 +38,17 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	
 	private final StorageManager storageManager;
 	
+	private final TaskScheduler taskScheduler;
+	
     private final Dao dao;
     
     private String taskId;
     
 	@Inject
-	public DefaultAttachmentManager(Dao dao, StorageManager storageManager) {
+	public DefaultAttachmentManager(Dao dao, StorageManager storageManager, TaskScheduler taskScheduler) {
 		this.dao = dao;
 		this.storageManager = storageManager;
+		this.taskScheduler = taskScheduler;
 	}
 	
 	@Override
@@ -85,12 +88,12 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 	@Listen
 	public void on(SystemStarted event) {
-		taskId = TaskScheduler.getInstance().schedule(this);
+		taskId = taskScheduler.schedule(this);
 	}
 
 	@Listen
 	public void on(SystemStopping event) {
-		TaskScheduler.getInstance().unschedule(taskId);
+		taskScheduler.unschedule(taskId);
 	}
 
 	@Sessional
