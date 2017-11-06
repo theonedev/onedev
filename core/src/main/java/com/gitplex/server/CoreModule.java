@@ -153,6 +153,8 @@ import com.gitplex.server.util.validation.DefaultEntityValidator;
 import com.gitplex.server.util.validation.EntityValidator;
 import com.gitplex.server.util.validation.ValidatorProvider;
 import com.gitplex.utils.ClassUtils;
+import com.gitplex.utils.schedule.DefaultTaskScheduler;
+import com.gitplex.utils.schedule.TaskScheduler;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.thoughtworks.xstream.XStream;
@@ -205,6 +207,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(StorageManager.class).to(DefaultStorageManager.class);
 		bind(ConfigManager.class).to(DefaultConfigManager.class);
 		bind(DataManager.class).to(DefaultDataManager.class);
+		bind(TaskScheduler.class).to(DefaultTaskScheduler.class).in(Singleton.class);
 		bind(PullRequestCommentManager.class).to(DefaultPullRequestCommentManager.class);
 		bind(CodeCommentManager.class).to(DefaultCodeCommentManager.class);
 		bind(PullRequestManager.class).to(DefaultPullRequestManager.class);
