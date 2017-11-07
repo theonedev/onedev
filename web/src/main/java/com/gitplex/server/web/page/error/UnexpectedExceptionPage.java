@@ -122,7 +122,7 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 		add(new BookmarkablePageLink<Void>("dashboardTop", DashboardPage.class));
 		add(new BookmarkablePageLink<Void>("dashboardBottom", DashboardPage.class));
 		
-		add(new WebMarkupContainer("dashboardUrl") {
+		add(new WebMarkupContainer("backUrl") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {

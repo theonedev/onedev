@@ -25,7 +25,11 @@ body.error .center-box .detail>.body {
 }
 
 body.error .center-box textarea {
-	height: 800px;
+	height: 600px;
+}
+
+body.error .has-errors, body.error .submitting {
+	display: none;
 }
 
 body.error form .actions {
@@ -34,6 +38,7 @@ body.error form .actions {
 body.error td.name {
 	font-weight: bold;
 	color: #444;
+	width: 140px;
 }
 body.error form .error {
 	margin-top: 8px;

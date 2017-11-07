@@ -15,6 +15,7 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {		
+				throw new RuntimeException("OOPS!");
 			}
 			
 		});
