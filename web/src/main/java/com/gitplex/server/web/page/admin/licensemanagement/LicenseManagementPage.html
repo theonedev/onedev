@@ -1,0 +1,52 @@
+<wicket:extend>
+	<div class="license-management panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">Current License</h4>
+		</div>
+		<div class="panel-body">
+			<div wicket:id="licenseDetail"></div>	
+		</div>
+	</div>
+	<div class="actions">
+		<a wicket:id="inputLicenseKey" class="btn btn-primary">Install New License</a>
+		<a wicket:id="removeLicense" class="btn btn-danger">Remove Current License</a>
+	</div>
+	<wicket:fragment wicket:id="licenseDetailFrag">
+		<div class="license-detail">
+			<div wicket:id="expiredNotice" class="expired alert alert-danger"></div>
+			<div wicket:id="aboutToExpireNotice" class="about-to-expire alert alert-warning"></div>
+			<table class="properties">
+				<tr>
+					<td class="name">Users</td>
+					<td wicket:id="users" class="value"></td>
+				</tr>
+				<tr>
+					<td class="name">Issue Date</td>
+					<td wicket:id="issueDate" class="value"></td>
+				</tr>
+				<tr>
+					<td class="name">Expiration Date</td>
+					<td wicket:id="expirationDate" class="value"></td>
+				</tr>
+			</table>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="licenseKeyInputFrag">
+		<form wicket:id="form" class="credit-key-input">
+			<div class="modal-header">
+				<button wicket:id="close" type="button" class="close">&times;</button>
+				<h4 class="modal-title">Input License Key</h4>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="feedback"></div>
+				<textarea wicket:id="licenseKey" rows="10" class="form-control autofocus"></textarea>
+				<p class="help-block">License key can be generated from account at 
+				<a href="https://www.gitplex.com">gitplex.com</a>
+			</div>
+			<div class="modal-footer">
+				<button wicket:id="ok" class="btn btn-primary">Ok</button>
+				<button wicket:id="cancel" class="btn btn-default">Cancel</button>
+			</div>
+		</form>	
+	</wicket:fragment>
+</wicket:extend>

@@ -20,6 +20,7 @@ import com.gitplex.server.persistence.dao.AbstractEntityManager;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.authenticator.Authenticator;
+import com.gitplex.utils.license.LicenseDetail;
 import com.google.common.base.Preconditions;
 
 @Singleton
@@ -36,6 +37,8 @@ public class DefaultConfigManager extends AbstractEntityManager<Config> implemen
 	private volatile Long securitySettingConfigId;
 	
 	private volatile Long authenticatorConfigId;
+	
+	private volatile Long licenseConfigId;
 	
 	@Inject
 	public DefaultConfigManager(Dao dao, DataManager dataManager) {
@@ -188,6 +191,32 @@ public class DefaultConfigManager extends AbstractEntityManager<Config> implemen
 			config.setSetting(VersionedDocument.fromBean(authenticator));
 		else
 			config.setSetting(null);
+		dao.persist(config);
+	}
+
+	@Sessional
+	@Override
+	public LicenseDetail getLicense() {
+        Config config;
+        if (licenseConfigId == null) {
+    		config = getConfig(Key.LICENSE);
+    		Preconditions.checkNotNull(config);
+            licenseConfigId = config.getId();
+        } else {
+            config = load(licenseConfigId);
+        }
+        return (LicenseDetail) config.getSetting(); 
+	}
+
+	@Transactional
+	@Override
+	public void saveLicense(LicenseDetail license) {
+		Config config = getConfig(Key.LICENSE);
+		if (config == null) {
+			config = new Config();
+			config.setKey(Key.LICENSE);
+		}
+		config.setSetting(license);
 		dao.persist(config);
 	}
 	

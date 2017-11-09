@@ -9,6 +9,7 @@ import com.gitplex.server.model.support.setting.SecuritySetting;
 import com.gitplex.server.model.support.setting.SystemSetting;
 import com.gitplex.server.persistence.dao.EntityManager;
 import com.gitplex.server.security.authenticator.Authenticator;
+import com.gitplex.utils.license.LicenseDetail;
 
 public interface ConfigManager extends EntityManager<Config> {
 	
@@ -92,5 +93,10 @@ public interface ConfigManager extends EntityManager<Config> {
 	Authenticator getAuthenticator();
 	
 	void saveAuthenticator(@Nullable Authenticator authenticator);
+	
+	@Nullable
+	LicenseDetail getLicense();
+	
+	void saveLicense(@Nullable LicenseDetail license);
 	
 }

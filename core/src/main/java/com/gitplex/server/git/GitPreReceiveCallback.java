@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
@@ -17,6 +18,7 @@ import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.gitplex.server.manager.ConfigManager;
 import com.gitplex.server.manager.ProjectManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.Project;
@@ -26,9 +28,11 @@ import com.gitplex.server.model.User;
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.persistence.annotation.Sessional;
+import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.ProjectPrivilege;
 import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.utils.StringUtils;
+import com.gitplex.utils.license.LicenseDetail;
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
@@ -41,18 +45,24 @@ public class GitPreReceiveCallback extends HttpServlet {
 	
 	private final UserManager userManager;
 	
+	private final ConfigManager configManager;
+	
 	@Inject
-	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager) {
+	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager, ConfigManager configManager) {
 		this.projectManager = projectManager;
 		this.userManager = userManager;
+		this.configManager = configManager;
 	}
 	
-	private void error(Output output, String refName, String... messages) {
+	private void error(Output output, @Nullable String refName, String... messages) {
 		output.markError();
 		output.writeLine();
 		output.writeLine("*******************************************************");
 		output.writeLine("*");
-		output.writeLine("*  ERROR PUSHING REF: " + refName);
+		if (refName != null)
+			output.writeLine("*  ERROR PUSHING REF: " + refName);
+		else
+			output.writeLine("*  ERROR PUSHING");
 		output.writeLine("-------------------------------------------------------");
 		for (String message: messages)
 			output.writeLine("*  " + message);
@@ -64,6 +74,18 @@ public class GitPreReceiveCallback extends HttpServlet {
 	@Sessional
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int userCount = userManager.count(EntityCriteria.of(User.class));
+		int licenseLimit = LicenseDetail.FREE_LICENSE_USERS;
+		LicenseDetail license = configManager.getLicense();
+		if (license != null && license.getRemainingDays() >= 0) {
+			licenseLimit += license.getLicensedUsers();
+		} 
+		if (userCount > licenseLimit) {
+			String message = String.format("Push is disabled as number of users in system exceeds license limit");
+			response.sendError(HttpServletResponse.SC_FORBIDDEN, message);
+			return;
+		}
+		
         String clientIp = request.getHeader("X-Forwarded-For");
         if (clientIp == null) clientIp = request.getRemoteAddr();
 

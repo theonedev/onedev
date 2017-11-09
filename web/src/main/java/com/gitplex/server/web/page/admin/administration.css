@@ -27,3 +27,15 @@
 	color: white;
 }
 
+.license-detail .properties td {
+	padding: 0 16px 16px 0;
+}
+.license-detail .properties tr:last-child td {
+	padding-bottom: 0;
+}
+.license-detail .properties td.name {
+	width: 200px;
+}
+.license-management .actions a {
+	margin-right: 16px;
+}

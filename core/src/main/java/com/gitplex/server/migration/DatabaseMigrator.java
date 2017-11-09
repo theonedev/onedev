@@ -387,4 +387,22 @@ public class DatabaseMigrator {
 		}		
 	}
 	
+	private void migrate11(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Configs.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				long maxId = 0;
+				for (Element element: dom.getRootElement().elements()) {
+					Long id = Long.parseLong(element.elementTextTrim("id"));
+					if (maxId < id)
+						maxId = id;
+				}
+				Element licenseConfigElement = dom.getRootElement().addElement("com.gitplex.server.model.Config");
+				licenseConfigElement.addElement("id").setText(String.valueOf(maxId+1));
+				licenseConfigElement.addElement("key").setText("LICENSE");
+				dom.writeToFile(file, false);
+			} 
+		}
+	}
+	
 }

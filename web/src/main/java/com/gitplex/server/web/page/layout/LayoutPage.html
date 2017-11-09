@@ -26,6 +26,11 @@
 			<div class="help pull-right">
 				<a wicket:id="docLink" title="Help"><i class="fa fa-question"></i></a>
 			</div>
+			<wicket:enclosure child="pushDisabled">
+			<div class="push-disabled pull-right">
+				<span wicket:id="pushDisabled" class="label label-danger">Git Push Disabled</span>
+			</div>
+			</wicket:enclosure>
 		</div>
 		<div class="body">
 			<wicket:child></wicket:child>

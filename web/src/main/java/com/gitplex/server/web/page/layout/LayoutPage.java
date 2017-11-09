@@ -25,9 +25,12 @@ import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.launcher.loader.Plugin;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
+import com.gitplex.server.persistence.dao.EntityCriteria;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.ComponentRenderer;
+import com.gitplex.server.web.behavior.TooltipBehavior;
 import com.gitplex.server.web.component.avatar.AvatarLink;
 import com.gitplex.server.web.component.floating.AlignPlacement;
 import com.gitplex.server.web.component.floating.FloatingPanel;
@@ -43,6 +46,10 @@ import com.gitplex.server.web.page.user.UserProfilePage;
 import com.gitplex.server.web.websocket.PageDataChanged;
 import com.gitplex.server.web.websocket.TaskChangedRegion;
 import com.gitplex.server.web.websocket.WebSocketRegion;
+import com.gitplex.utils.license.LicenseDetail;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
@@ -74,7 +81,22 @@ public abstract class LayoutPage extends BasePage {
 			}
 			
 		});
-		
+
+		int userCount = GitPlex.getInstance(UserManager.class).count(EntityCriteria.of(User.class));
+		int licenseLimit = LicenseDetail.FREE_LICENSE_USERS;
+		LicenseDetail license = GitPlex.getInstance(ConfigManager.class).getLicense();
+		if (license != null && license.getRemainingDays()>=0)
+			licenseLimit += license.getLicensedUsers();
+		if (userCount > licenseLimit) {
+			String tooltip = String.format(""
+					+ "Git push is disabled as number of users (%d) in system exceeds license limit (%d).", 
+					userCount, licenseLimit);
+			TooltipBehavior tooltipBehavior = new TooltipBehavior(Model.of(tooltip), 
+					new TooltipConfig().withPlacement(Placement.bottom)); 
+			head.add(new WebMarkupContainer("pushDisabled").add(tooltipBehavior));
+		} else {
+			head.add(new WebMarkupContainer("pushDisabled").setVisible(false));
+		}
 		head.add(new ExternalLink("docLink", GitPlex.getInstance().getDocLink()));
 		
 		User user = getLoginUser();

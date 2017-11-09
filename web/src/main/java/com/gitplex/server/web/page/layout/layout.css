@@ -13,6 +13,12 @@ html, body {
 	text-decoration: none;
 	color: #CCC;
 }
+#main>.head .push-disabled {
+	padding-top: 6px;
+}
+#main>.head .push-disabled .label {
+	font-size: 15px;
+}
 #main>.head>.logo .fa {
 	font-size: 28px;
 	color: #EEE;

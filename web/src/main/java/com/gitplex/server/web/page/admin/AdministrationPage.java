@@ -16,6 +16,7 @@ import com.gitplex.server.web.component.tabbable.PageTab;
 import com.gitplex.server.web.component.tabbable.Tabbable;
 import com.gitplex.server.web.page.admin.authenticator.AuthenticatorPage;
 import com.gitplex.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import com.gitplex.server.web.page.admin.licensemanagement.LicenseManagementPage;
 import com.gitplex.server.web.page.admin.mailsetting.MailSettingPage;
 import com.gitplex.server.web.page.admin.securitysetting.SecuritySettingPage;
 import com.gitplex.server.web.page.admin.serverinformation.ServerInformationPage;
@@ -43,6 +44,7 @@ public abstract class AdministrationPage extends LayoutPage {
 		tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));
 		tabs.add(new AdministrationTab("Server Log", "fa fa-fw fa-file-text-o", ServerLogPage.class));
 		tabs.add(new AdministrationTab("Server Information", "fa fa-fw fa-desktop", ServerInformationPage.class));
+		tabs.add(new AdministrationTab("License Management", "fa fa-fw fa-vcard-o", LicenseManagementPage.class));
 		
 		add(new Tabbable("tabs", tabs));
 	}

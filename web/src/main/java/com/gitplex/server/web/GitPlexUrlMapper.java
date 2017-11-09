@@ -11,6 +11,7 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.gitplex.server.web.page.admin.authenticator.AuthenticatorPage;
 import com.gitplex.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import com.gitplex.server.web.page.admin.licensemanagement.LicenseManagementPage;
 import com.gitplex.server.web.page.admin.mailsetting.MailSettingPage;
 import com.gitplex.server.web.page.admin.securitysetting.SecuritySettingPage;
 import com.gitplex.server.web.page.admin.serverinformation.ServerInformationPage;
@@ -103,6 +104,7 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		add(new GitPlexPageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 		add(new GitPlexPageMapper("administration/server-log", ServerLogPage.class));
 		add(new GitPlexPageMapper("administration/server-information", ServerInformationPage.class));
+		add(new GitPlexPageMapper("administration/license-management", LicenseManagementPage.class));
 	}
 	
 	private void addUserPages() {

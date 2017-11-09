@@ -186,6 +186,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
+		Config licenseKeyConfig = configManager.getConfig(Key.LICENSE);
+		if (licenseKeyConfig == null) {
+			configManager.saveLicense(null);
+		}
+		
 		return manualConfigs;
 	}
 
