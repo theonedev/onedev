@@ -95,6 +95,7 @@ public class LicenseManagementPage extends AdministrationPage {
 					WebConstants.DATE_FORMATTER.print(new DateTime(licenseDetail.getIssueDate()))));
 			fragment.add(new Label("expirationDate", 
 					WebConstants.DATE_FORMATTER.print(new DateTime(licenseDetail.getExpirationDate())) + " (<a href=\"https://www.gitplex.com/purchase\">renew</a>)").setEscapeModelStrings(false));
+			fragment.add(new Label("issueAccount", licenseDetail.getIssueAccount()));
 			add(fragment);
 		} else {
 			if (getUserCount() > LicenseDetail.FREE_LICENSE_USERS) {
