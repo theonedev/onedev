@@ -33,4 +33,4 @@ or inability to use the Software or related documentation, even if
 PMEase has been advised of the possibility of such damages. In no event 
 shall PMEase liability exceed the license fee paid, if any.  
 
-Copyright (C) 2005-2018 by PMEase All rights reserved. 
+Copyright (C) 2018 by PMEase All rights reserved. 
