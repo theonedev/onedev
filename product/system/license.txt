@@ -1,18 +1,18 @@
 Software License Agreement for GitPlex.
 
-This is a legal agreement between you and GitPlex Pty covering your 
+This is a legal agreement between you and PMEase covering your 
 use of GitPlex (the "Software"). Be sure to read the following 
 agreement before using the Software. BY USING THE SOFTWARE, YOU ARE 
 AGREEING TO BE BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT 
 AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT USE THE SOFTWARE AND 
 DESTROY ALL COPIES IN YOUR POSSESSION.  
 
-The Software is owned by GitPlex Pty and is protected by 
+The Software is owned by PMEase and is protected by 
 international treaty provisions.  Therefore, you must treat the 
 Software like any other copyrighted material (e.  g., a book or 
 musical recording).  
 
-GitPlex Pty grants you the right to use GitPlex for free for 10 
+PMEase grants you the right to use GitPlex for free for 10 
 named users on unlimited servers. Additional users require license 
 generated from gitplex.com account. Licenses generated from single 
 gitplex.com account should only be used in a single GitPlex instance, 
@@ -25,13 +25,13 @@ Software terminates automatically and you must then destroy all copies
 of the Software in your possession.  
 
 The Software and its related documentation are provided "AS IS" and 
-without warranty of any kind and GitPlex Pty expressly disclaims all 
+without warranty of any kind and PMEase expressly disclaims all 
 other warranties, expressed or implied, including, but not limited to, 
 the implied warranties of merchantability and fitness for a particular 
-purpose. Under no circumstances shall GitPlex Pty be liable for any 
+purpose. Under no circumstances shall PMEase be liable for any 
 incidental, special, or consequential damages that result from the use 
 or inability to use the Software or related documentation, even if 
-GitPlex Pty has been advised of the possibility of such damages. In no 
-event shall GitPlex Pty liability exceed the license fee paid, if any.  
+PMEase has been advised of the possibility of such damages. In no 
+event shall PMEase liability exceed the license fee paid, if any.  
 
-Copyright (C) 2018 by GitPlex Pty All rights reserved. 
+Copyright (C) 2018 by PMEase All rights reserved. 
