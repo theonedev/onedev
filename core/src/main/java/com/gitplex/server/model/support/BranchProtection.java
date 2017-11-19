@@ -73,7 +73,7 @@ public class BranchProtection implements Serializable {
 	}
 
 	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "
-			+ "specified branch. GitPlex assumes that the user submitting the change has completed the review already.")
+			+ "specified branch. GitPlex assumes that the user submitting the change has completed the review already")
 	@ReviewRequirementSpec
 	public String getReviewRequirementSpec() {
 		return reviewRequirementSpec;
@@ -84,8 +84,10 @@ public class BranchProtection implements Serializable {
 	}
 
 	@Editable(order=500, name="Required Verifications", description="Optionally choose required verifications. "
-			+ "Available verifications are populated as external system (such as CI system) verifies and publishes "
-			+ "commit status of current project")
+			+ "Verifications listed here are populated when external system (such as CI system) verifies and "
+			+ "publishes commit statuses. Run relevant external system against this project if you can not "
+			+ "find desired verifications here"
+			+ "")
 	@VerificationChoice
 	public List<String> getVerifications() {
 		return verifications;
@@ -95,8 +97,8 @@ public class BranchProtection implements Serializable {
 		this.verifications = verifications;
 	}
 
-	@Editable(order=600, name="Verify Merged Commits", description="For required verifications specified above, this "
-			+ "option determines whether or not to verify merged commits of relevant pull requests")
+	@Editable(order=600, name="Verify Merged Commits", description="If checked, verifications specified above "
+			+ "will be performed against merged commit (instead of head commit) when pull request is involved")
 	public boolean isVerifyMerges() {
 		return verifyMerges;
 	}
