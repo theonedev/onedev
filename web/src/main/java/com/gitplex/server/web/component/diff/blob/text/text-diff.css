@@ -139,9 +139,10 @@
 .text-diff>.body>tbody>tr>td.number>.comment-indicator {
 	margin: 0 4px;
 	color: #999;
+	font-size: 13px;
 }
 .text-diff>.body>tbody>tr>td.number>.comment-indicator:hover {
-	color: #333;
+	color: #555;
 }
 .comment-popover a {
 	display: block;
@@ -150,12 +151,11 @@
 	white-space: nowrap;
 }
 .comment-popover a:hover {
-	color: #333;
+	color: #555;
 }
 .text-diff>.body>tbody>tr>td.number>.comment-trigger.active, 
 .comment-popover .comment-trigger.active {
-	font-size: 16px;	
-	color: #333;	
+	color: black;	
 }
 .text-diff>.body>tbody>tr>td.number>.comment-trigger.active {
 	line-height: 14px;
