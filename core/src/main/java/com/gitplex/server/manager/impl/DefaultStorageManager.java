@@ -37,7 +37,8 @@ public class DefaultStorageManager implements StorageManager {
         this.configManager = configManager;
     }
 
-    private File getStorageDir() {
+    @Override
+    public File getStorageDir() {
     	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
     	FileUtils.createDir(storageDir);
     	return storageDir;

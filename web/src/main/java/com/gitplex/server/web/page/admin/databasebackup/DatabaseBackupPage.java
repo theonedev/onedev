@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.tika.mime.MimeTypes;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.request.resource.AbstractResource;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ConfigManager;
+import com.gitplex.server.manager.StorageManager;
 import com.gitplex.server.persistence.PersistManager;
 import com.gitplex.server.web.editable.BeanContext;
 import com.gitplex.server.web.page.admin.AdministrationPage;
@@ -22,6 +24,8 @@ public class DatabaseBackupPage extends AdministrationPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		add(new Label("storageDir", GitPlex.getInstance(StorageManager.class).getStorageDir()));
 		
 		BackupSettingHolder backupSettingHolder = new BackupSettingHolder();
 		backupSettingHolder.setBackupSetting(GitPlex.getInstance(ConfigManager.class).getBackupSetting());
