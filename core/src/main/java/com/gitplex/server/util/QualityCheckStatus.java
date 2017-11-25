@@ -133,31 +133,41 @@ public class QualityCheckStatus {
 	}
 	
 	private void checkVerifications(List<String> verificationNames, boolean verifyMerges) {
-		String commit;
+		VerificationManager verificationManager = GitPlex.getInstance(VerificationManager.class);
 		if (verifyMerges) {
 			MergePreview preview = request.getMergePreview();
 			if (preview != null && preview.getMerged() != null) {
-				commit = preview.getMerged();
+				Map<String, Verification> mergeVerifications = 
+						verificationManager.getVerifications(request.getTargetProject(), preview.getMerged());
+				Map<String, Verification> headVerifications = 
+						verificationManager.getVerifications(request.getTargetProject(), request.getHeadCommitHash());
+				for (String verificationName: verificationNames) {
+					Verification verification = mergeVerifications.get(verificationName);
+					if (verification == null) {
+						/*
+						 * TeamCity always publishes build status against head commit hash, and for merged commit, it
+						 * appends " - merge" after the verification name  
+						 */
+						verification = headVerifications.get(verificationName + " - merge");
+					}
+					if (verification != null) 
+						effectiveVerifications.put(verificationName, verification);
+					else 
+						awaitingVerifications.add(verificationName);
+				}
 			} else {
-				commit = null;
+				awaitingVerifications.addAll(verificationNames);
 			}
 		} else {
-			commit = request.getHeadCommitHash();			
-		}
-		
-		Map<String, Verification> verifications;
-		if (commit != null) {
-			verifications = GitPlex.getInstance(VerificationManager.class)
-					.getVerifications(request.getTargetProject(), commit);
-		} else {
-			verifications = new HashMap<>();
-		}
-		for (String verificationName: verificationNames) {
-			Verification verification = verifications.get(verificationName);
-			if (verification != null) 
-				effectiveVerifications.put(verificationName, verification);
-			else
-				awaitingVerifications.add(verificationName);
+			Map<String, Verification> verifications = 
+					verificationManager.getVerifications(request.getTargetProject(), request.getHeadCommitHash());
+			for (String verificationName: verificationNames) {
+				Verification verification = verifications.get(verificationName);
+				if (verification != null) 
+					effectiveVerifications.put(verificationName, verification);
+				else
+					awaitingVerifications.add(verificationName);
+			}
 		}
 	}
 	
