@@ -195,7 +195,7 @@ public class QualityCheckStatus {
 		int effectiveCount = 0;
 		Set<UserFacade> potentialReviewers = new HashSet<>();
 		for (UserFacade user: users) {
-			if (user.getId().equals(request.getSubmitter().getId())) {
+			if (request.getSubmitter() != null && user.getId().equals(request.getSubmitter().getId())) {
 				effectiveCount++;
 			} else if (isAwaitingReviewer(user.getId())) {
 				requiredCount--;
