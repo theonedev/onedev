@@ -194,7 +194,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		Matcher matcher = DOCLINK_PATTERN.matcher(productVersion);
 		if (!matcher.find())
 			throw new RuntimeException("Unexpected product version format: " + productVersion);
-		return "https://www.gitplex.com/projects/gitplex-docs/blob/" + matcher.group();
+		return "https://dev.gitplex.com/projects/gitplex-docs/blob/" + matcher.group();
 	}
 	
 }

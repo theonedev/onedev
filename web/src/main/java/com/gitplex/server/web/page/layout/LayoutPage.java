@@ -97,7 +97,7 @@ public abstract class LayoutPage extends BasePage {
 		} else {
 			head.add(new WebMarkupContainer("pushDisabled").setVisible(false));
 		}
-		head.add(new ExternalLink("docLink", GitPlex.getInstance().getDocLink()));
+		head.add(new ExternalLink("docLink", GitPlex.getInstance().getDocLink() + "/readme.md"));
 		
 		User user = getLoginUser();
 		boolean signedIn = user != null;
