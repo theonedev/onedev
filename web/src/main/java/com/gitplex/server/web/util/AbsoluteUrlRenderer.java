@@ -3,6 +3,7 @@ package com.gitplex.server.web.util;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.UrlRenderer;
+import org.apache.wicket.request.Url.StringMode;
 import org.apache.wicket.util.string.Strings;
 
 import com.gitplex.server.web.util.mapper.PathAwareUrl;
@@ -17,7 +18,7 @@ public class AbsoluteUrlRenderer extends UrlRenderer {
 	@Override
 	public String renderRelativeUrl(Url url) {
 		if (url.isFull()) {
-			return url.toString();
+			return url.toString(StringMode.FULL);
 		} else if (url.getSegments().isEmpty()) {
 			Url absolute = copy(url);
 			absolute.prependLeadingSegments(Lists.newArrayList("", ""));
