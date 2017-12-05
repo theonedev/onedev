@@ -41,7 +41,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	private static final String[] SAFE_TAGS = new String[] { "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "br", "b",
 			"i", "strong", "em", "a", "pre", "code", "img", "tt", "div", "ins", "del", "sup", "sub", "p", "ol", "ul",
 			"li", "table", "thead", "tbody", "tfoot", "th", "tr", "td", "rt", "rp", "blockquote", "dl", "dt", "dd",
-			"kbd", "q", "hr", "strike", "caption", "cite", "col", "colgroup", "small", "span", "u", "input" };
+			"kbd", "q", "hr", "strike", "caption", "cite", "col", "colgroup", "small", "span", "u", "input", "video", "source"};
 
 	private static final String[] SAFE_ATTRIBUTES = new String[] { "abbr", "accept", "accept-charset", "accesskey",
 			"action", "align", "alt", "axis", "border", "cellpadding", "cellspacing", "char", "charoff", "charset",
@@ -50,7 +50,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 			"longdesc", "maxlength", "media", "method", "multiple", "name", "nohref", "noshade", "nowrap", "prompt",
 			"readonly", "rel", "rev", "rows", "rowspan", "rules", "scope", "selected", "shape", "size", "span", "start",
 			"style", "summary", "tabindex", "target", "title", "type", "usemap", "valign", "value", "vspace", "width",
-			"itemprop", "class" };
+			"itemprop", "class", "controls"};
 
 	private static final String[] SAFE_ANCHOR_SCHEMES = new String[] { "http", "https", "mailto", };
 
@@ -81,6 +81,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 				.addAttributes("a", "href", "title")
 				.addAttributes("img", "align", "alt", "height", "src", "title", "width")
 				.addAttributes("div", "itemscope", "itemtype")
+				.addAttributes("source", "src")
 				.addAttributes(":all", SAFE_ATTRIBUTES)
 				.addProtocols("a", "href", SAFE_ANCHOR_SCHEMES)
 				.addProtocols("blockquote", "cite", "http", "https")
