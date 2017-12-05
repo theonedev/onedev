@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
@@ -256,8 +257,12 @@ public class GitPlexWebApplication extends WebApplication {
 					return new ExpectedExceptionPage(expectedException);
 			}
 		}
-		
-		return new UnexpectedExceptionPage(e);
+
+		HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
+		if (!response.isCommitted())
+			return new UnexpectedExceptionPage(e);
+		else
+			return null;
 	}
 
 }
