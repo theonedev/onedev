@@ -56,11 +56,13 @@ public class ContentDetector {
 		MediaType mediaType = detectMediaType(contentBytes, fileName);
 		
 		return !mediaType.getType().equalsIgnoreCase("text")
+				&& !mediaType.equals(MediaType.application("xhtml+xml"))
 				&& !mediaType.equals(MediaType.APPLICATION_XML)
 				&& !mediaType.equals(MediaType.application("json"))
 				&& !mediaType.equals(MediaType.application("x-sh"))
 				&& !mediaType.equals(MediaType.application("javascript"))
-				&& !mediaType.equals("x-httpd-jsp");
+				&& !mediaType.equals(MediaType.application("x-httpd-jsp"))
+				&& !mediaType.equals(MediaType.application("x-httpd-php"));
 	}
 	
 	/**
