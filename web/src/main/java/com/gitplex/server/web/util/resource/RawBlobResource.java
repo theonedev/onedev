@@ -38,7 +38,7 @@ public class RawBlobResource extends AbstractResource {
 
 	private static final String PARAM_PATH = "path";
 	
-	private static final int BUFFER_SIZE = 64*1024;
+	private static final int BUFFER_SIZE = 8*1024;
 
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
