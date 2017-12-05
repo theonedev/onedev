@@ -16,7 +16,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.archive.TgzFormat;
 import org.eclipse.jgit.archive.ZipFormat;
-import org.eclipse.jgit.lib.Constants;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.ProjectManager;
@@ -43,17 +42,14 @@ public class ArchiveResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String repoName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
-		if (StringUtils.isBlank(repoName))
+		String projectName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
+		if (StringUtils.isBlank(projectName))
 			throw new IllegalArgumentException("project name has to be specified");
 		
-		if (repoName.endsWith(Constants.DOT_GIT_EXT))
-			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
-		
-		Project project = GitPlex.getInstance(ProjectManager.class).find(repoName);
+		Project project = GitPlex.getInstance(ProjectManager.class).find(projectName);
 		
 		if (project == null) 
-			throw new EntityNotFoundException("Unable to find project " + repoName);
+			throw new EntityNotFoundException("Unable to find project " + projectName);
 		
 		String revision = params.get(PARAM_REVISION).toString();
 		if (StringUtils.isBlank(revision))

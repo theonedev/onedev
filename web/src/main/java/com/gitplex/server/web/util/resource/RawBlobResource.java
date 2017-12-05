@@ -15,7 +15,6 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.io.IOUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
-import org.eclipse.jgit.lib.Constants;
 
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.Blob;
@@ -44,9 +43,6 @@ public class RawBlobResource extends AbstractResource {
 		String projectName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
 		if (StringUtils.isBlank(projectName))
 			throw new IllegalArgumentException("project name has to be specified");
-		
-		if (projectName.endsWith(Constants.DOT_GIT_EXT))
-			projectName = projectName.substring(0, projectName.length() - Constants.DOT_GIT_EXT.length());
 		
 		Project project = GitPlex.getInstance(ProjectManager.class).find(projectName);
 		

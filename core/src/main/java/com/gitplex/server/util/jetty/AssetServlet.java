@@ -7,6 +7,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpContent;
@@ -106,7 +107,13 @@ public abstract class AssetServlet extends DefaultServlet {
 	@Override
 	protected void putHeaders(HttpServletResponse response, HttpContent content, long contentLength) {
 		super.putHeaders(response, content, contentLength);
-		HttpFields fields = ((Response) response).getHttpFields();
+		
+		HttpFields fields;
+		if (response instanceof Response)
+			fields = ((Response) response).getHttpFields();
+		else
+			fields = ((Response)((HttpServletResponseWrapper) response).getResponse()).getHttpFields();
+		
 		if (requestHolder.get().getDispatcherType() == DispatcherType.ERROR) {
 			/*
 			 * Do not cache error page and also makes sure that error page is not eligible for 
