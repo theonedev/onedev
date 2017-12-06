@@ -421,10 +421,12 @@ public class UpgradeCommand extends DefaultPersistManager {
 			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, Charsets.UTF_8);
 			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
 					"hibernate.hikari.autoCommit=true");
-			hibernateProps = StringUtils.replace(hibernateProps, 
-					"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider", 
-					"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider\r\n"
-					+ "hibernate.connection.autocommit=true");
+			if (!hibernateProps.contains("hibernate.connection.autocommit=true")) {
+				hibernateProps = StringUtils.replace(hibernateProps, 
+						"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider", 
+						"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider\r\n"
+						+ "hibernate.connection.autocommit=true");
+			}
 			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, Charsets.UTF_8);
 
 			File logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
