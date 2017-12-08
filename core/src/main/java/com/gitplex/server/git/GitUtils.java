@@ -364,24 +364,25 @@ public class GitUtils {
 		}
 	}
     
-    public static boolean isMergedInto(Repository repository, ObjectId base, ObjectId tip) {
-		try (RevWalk revWalk = new RevWalk(repository)) {
-			RevCommit baseCommit;
-			try {
-				baseCommit = revWalk.parseCommit(base);
-			} catch (MissingObjectException e) {
-				return false;
-			}
-			return revWalk.isMergedInto(baseCommit, revWalk.parseCommit(tip));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} 			
-    }
-    
-    public static boolean isMergedInto(File gitDir, Map<String, String> gitEnvs, String base, String tip) {
-    	IsAncestorCommand cmd = new IsAncestorCommand(gitDir, gitEnvs);
-    	cmd.ancestor(base).descendant(tip);
-    	return cmd.call();
+    public static boolean isMergedInto(Repository repository, @Nullable Map<String, String> gitEnvs, 
+    		ObjectId base, ObjectId tip) {
+    	if (gitEnvs != null && !gitEnvs.isEmpty()) {
+        	IsAncestorCommand cmd = new IsAncestorCommand(repository.getDirectory(), gitEnvs);
+        	cmd.ancestor(base.name()).descendant(tip.name());
+        	return cmd.call();
+    	} else {
+    		try (RevWalk revWalk = new RevWalk(repository)) {
+    			RevCommit baseCommit;
+    			try {
+    				baseCommit = revWalk.parseCommit(base);
+    			} catch (MissingObjectException e) {
+    				return false;
+    			}
+    			return revWalk.isMergedInto(baseCommit, revWalk.parseCommit(tip));
+    		} catch (IOException e) {
+    			throw new RuntimeException(e);
+    		} 			
+    	}
     }
     
     /**

@@ -1,8 +1,8 @@
 package com.gitplex.server.git;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
@@ -65,9 +64,16 @@ public class GitPostReceiveCallback extends HttpServlet {
         
         Long projectId = Long.valueOf(fields.get(0));
         Long userId = Long.valueOf(fields.get(1));
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IOUtils.copy(request.getInputStream(), baos);
+
+        String refUpdateInfo = null;
+        Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+        	String paramName = paramNames.nextElement();
+        	if (paramName.contains(" ")) {
+        		refUpdateInfo = paramName;
+        	} 
+        }
+        Preconditions.checkState(refUpdateInfo != null, "Git ref update information is not available");
         
         /*
          * If multiple refs are updated, the hook stdin will put each ref update info into
@@ -75,11 +81,10 @@ public class GitPostReceiveCallback extends HttpServlet {
          * to curl via "@-", below logic is used to parse these info correctly even 
          * without line breaks.  
          */
-        String callbackData = new String(baos.toByteArray());
-        callbackData = StringUtils.reverse(StringUtils.remove(callbackData, '\n'));
+        refUpdateInfo = StringUtils.reverse(StringUtils.remove(refUpdateInfo, '\n'));
         
         fields.clear();
-        fields.addAll(StringUtils.splitAndTrim(callbackData, " "));
+        fields.addAll(StringUtils.splitAndTrim(refUpdateInfo, " "));
         
         unitOfWork.doAsync(new Runnable() {
 

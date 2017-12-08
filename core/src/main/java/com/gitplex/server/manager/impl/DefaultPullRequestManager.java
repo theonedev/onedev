@@ -505,7 +505,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							ObjectId requestHeadId = ObjectId.fromString(mergePreview.getRequestHead());
 							Repository repository = targetProject.getRepository();
 							if ((mergePreview.getMergeStrategy() == MERGE_IF_NECESSARY) 
-									&& GitUtils.isMergedInto(repository, targetHeadId, requestHeadId)) {
+									&& GitUtils.isMergedInto(repository, null, targetHeadId, requestHeadId)) {
 								mergePreview.setMerged(mergePreview.getRequestHead());
 								RefUpdate refUpdate = GitUtils.getRefUpdate(repository, request.getMergeRef());
 								refUpdate.setNewObjectId(requestHeadId);

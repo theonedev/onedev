@@ -76,7 +76,7 @@ public enum PullRequestOperation {
 					&& request.getSourceProject() != null 
 					&& request.getSource().getObjectName(false) != null
 					&& pullRequestManager.findEffective(request.getTarget(), request.getSource()) == null
-					&& !GitUtils.isMergedInto(request.getTargetProject().getRepository(), 
+					&& !GitUtils.isMergedInto(request.getTargetProject().getRepository(), null,
 							request.getSource().getObjectId(), request.getTarget().getObjectId());
 		}
 

@@ -314,7 +314,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 
 	private Collection<String> getChangedFiles(Project project, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
-		if (gitEnvs != null) {
+		if (gitEnvs != null && !gitEnvs.isEmpty()) {
 			ListChangedFilesCommand cmd = new ListChangedFilesCommand(project.getGitDir(), gitEnvs);
 			cmd.fromRev(oldObjectId.name()).toRev(newObjectId.name());
 			return cmd.call();

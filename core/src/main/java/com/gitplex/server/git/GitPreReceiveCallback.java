@@ -117,7 +117,9 @@ public class GitPreReceiveCallback extends HttpServlet {
             	if (paramName.contains(" ")) {
             		refUpdateInfo = paramName;
             	} else if (paramName.startsWith("ENV_")) {
-            		gitEnvs.put(paramName.substring("ENV_".length()), request.getParameter(paramName));
+            		String paramValue = request.getParameter(paramName);
+            		if (StringUtils.isNotBlank(paramValue))
+            			gitEnvs.put(paramName.substring("ENV_".length()), paramValue);
             	}
             }
             
@@ -160,7 +162,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 		    				BranchProtection protection = project.getBranchProtection(branchName);
 		    				if (protection != null && protection.isNoDeletion())
 		    					error(output, refName, "Can not delete this branch according to branch protection setting");
-		    			} else if (!GitUtils.isMergedInto(project.getGitDir(), gitEnvs, oldObjectId.name(), newObjectId.name())) {
+		    			} else if (!GitUtils.isMergedInto(project.getRepository(), gitEnvs, oldObjectId, newObjectId)) {
 		    				BranchProtection protection = project.getBranchProtection(branchName);
 		    				if (protection != null && protection.isNoForcedPush())
 			    				error(output, refName, "Can not force-push to this branch according to branch protection setting");

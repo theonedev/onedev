@@ -732,8 +732,8 @@ public class PullRequest extends AbstractEntity {
 	
 	public boolean isMergeIntoTarget() {
 		if (mergedIntoTarget == null) { 
-			mergedIntoTarget = GitUtils.isMergedInto(getTargetProject().getRepository(), ObjectId.fromString(getHeadCommitHash()), 
-					getTarget().getObjectId());
+			mergedIntoTarget = GitUtils.isMergedInto(getTargetProject().getRepository(), null, 
+					ObjectId.fromString(getHeadCommitHash()), getTarget().getObjectId());
 		}
 		return mergedIntoTarget;
 	}
