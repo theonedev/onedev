@@ -36,6 +36,7 @@ import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.event.lifecycle.SystemStopping;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.command.CloneCommand;
+import com.gitplex.server.git.command.ListChangedFilesCommand;
 import com.gitplex.server.manager.CacheManager;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.ProjectManager;
@@ -200,7 +201,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         
         try {
 			String content = FileUtils.readFileToString(hookFile);
-			if (!content.contains("GITPLEX_USER_ID"))
+			if (!content.contains("ENV_GIT_ALTERNATE_OBJECT_DIRECTORIES"))
 				return false;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -311,22 +312,29 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		return projects;
 	}
 
-	private Set<String> getChangedFiles(Project project, ObjectId oldObjectId, ObjectId newObjectId) {
-		Set<String> changedFiles = new HashSet<>();
-		try (TreeWalk treeWalk = new TreeWalk(project.getRepository())) {
-			treeWalk.setFilter(TreeFilter.ANY_DIFF);
-			treeWalk.setRecursive(true);
-			RevCommit oldCommit = project.getRevCommit(oldObjectId);
-			RevCommit newCommit = project.getRevCommit(newObjectId);
-			treeWalk.addTree(oldCommit.getTree());
-			treeWalk.addTree(newCommit.getTree());
-			while (treeWalk.next()) {
-				changedFiles.add(treeWalk.getPathString());
+	private Collection<String> getChangedFiles(Project project, ObjectId oldObjectId, ObjectId newObjectId, 
+			Map<String, String> gitEnvs) {
+		if (gitEnvs != null) {
+			ListChangedFilesCommand cmd = new ListChangedFilesCommand(project.getGitDir(), gitEnvs);
+			cmd.fromRev(oldObjectId.name()).toRev(newObjectId.name());
+			return cmd.call();
+		} else {
+			Set<String> changedFiles = new HashSet<>();
+			try (TreeWalk treeWalk = new TreeWalk(project.getRepository())) {
+				treeWalk.setFilter(TreeFilter.ANY_DIFF);
+				treeWalk.setRecursive(true);
+				RevCommit oldCommit = project.getRevCommit(oldObjectId);
+				RevCommit newCommit = project.getRevCommit(newObjectId);
+				treeWalk.addTree(oldCommit.getTree());
+				treeWalk.addTree(newCommit.getTree());
+				while (treeWalk.next()) {
+					changedFiles.add(treeWalk.getPathString());
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			return changedFiles;
 		}
-		return changedFiles;
 	}
 	
 	@Override
@@ -350,7 +358,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	}
 
 	@Override
-	public boolean isPushNeedsQualityCheck(User user, Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
+	public boolean isPushNeedsQualityCheck(User user, Project project, String branch, ObjectId oldObjectId, 
+			ObjectId newObjectId, Map<String, String> gitEnvs) {
 		BranchProtection branchProtection = project.getBranchProtection(branch);
 		if (branchProtection != null) {
 			if (branchProtection.getReviewRequirement() != null 
@@ -363,7 +372,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 				return true;
 			}
 			
-			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId)) {
+			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) {
 				FileProtection fileProtection = branchProtection.getFileProtection(changedFile);
 				if (fileProtection != null && !fileProtection.getReviewRequirement().matches(user))
 					return true;

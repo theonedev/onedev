@@ -1,6 +1,7 @@
 package com.gitplex.server.manager;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -62,9 +63,12 @@ public interface ProjectManager extends EntityManager<Project> {
 	 * 			old object id of the ref
 	 * @param newObjectId
 	 * 			new object id of the ref
+	 * @param gitEnvs
+	 * 			git environments
 	 * @return
 	 * 			result of the check
 	 */
-	boolean isPushNeedsQualityCheck(User user, Project project, String branchName, ObjectId oldObjectId, ObjectId newObjectId);
+	boolean isPushNeedsQualityCheck(User user, Project project, String branchName, ObjectId oldObjectId, 
+			ObjectId newObjectId, @Nullable Map<String, String> gitEnvs);
 	
 }

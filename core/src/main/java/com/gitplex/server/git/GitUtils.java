@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
@@ -43,6 +44,7 @@ import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
 import com.gitplex.server.git.command.FetchCommand;
+import com.gitplex.server.git.command.IsAncestorCommand;
 import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.git.exception.RefUpdateException;
 import com.gitplex.server.util.diff.WhitespaceOption;
@@ -374,6 +376,12 @@ public class GitUtils {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} 			
+    }
+    
+    public static boolean isMergedInto(File gitDir, Map<String, String> gitEnvs, String base, String tip) {
+    	IsAncestorCommand cmd = new IsAncestorCommand(gitDir, gitEnvs);
+    	cmd.ancestor(base).descendant(tip);
+    	return cmd.call();
     }
     
     /**

@@ -1,9 +1,11 @@
 package com.gitplex.server.git;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -13,7 +15,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -94,7 +95,7 @@ public class GitPreReceiveCallback extends HttpServlet {
                     "Git hook callbacks can only be accessed from localhost.");
             return;
         }
-
+        
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
@@ -102,9 +103,26 @@ public class GitPreReceiveCallback extends HttpServlet {
         try {
             Project project = projectManager.load(Long.valueOf(fields.get(0)));
             
-	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        IOUtils.copy(request.getInputStream(), baos);
-	        
+            String refUpdateInfo = null;
+            
+            /*
+             * Since git 2.11, pushed commits will be placed in to a QUARANTINE directory when pre-receive hook 
+             * is fired. Current version of jgit does not pick up objects in this directory so we should call 
+             * native git instead with various environments passed from pre-receive hook   
+             */
+            Map<String, String> gitEnvs = new HashMap<>();
+            Enumeration<String> paramNames = request.getParameterNames();
+            while (paramNames.hasMoreElements()) {
+            	String paramName = paramNames.nextElement();
+            	if (paramName.contains(" ")) {
+            		refUpdateInfo = paramName;
+            	} else if (paramName.startsWith("ENV_")) {
+            		gitEnvs.put(paramName.substring("ENV_".length()), request.getParameter(paramName));
+            	}
+            }
+            
+            Preconditions.checkState(refUpdateInfo != null, "Git ref update information is not available");
+            
 	        Output output = new Output(response.getOutputStream());
 	        
 	        /*
@@ -113,9 +131,8 @@ public class GitPreReceiveCallback extends HttpServlet {
 	         * to curl via "@-", below logic is used to parse these info correctly even 
 	         * without line breaks.  
 	         */
-	        String callbackData = new String(baos.toByteArray());
-	        callbackData = StringUtils.reverse(StringUtils.remove(callbackData, '\n'));
-	        fields = StringUtils.splitAndTrim(callbackData, " ");
+	        refUpdateInfo = StringUtils.reverse(StringUtils.remove(refUpdateInfo, '\n'));
+	        fields = StringUtils.splitAndTrim(refUpdateInfo, " ");
 	        
 	        int pos = 0;
 	        while (true) {
@@ -143,12 +160,12 @@ public class GitPreReceiveCallback extends HttpServlet {
 		    				BranchProtection protection = project.getBranchProtection(branchName);
 		    				if (protection != null && protection.isNoDeletion())
 		    					error(output, refName, "Can not delete this branch according to branch protection setting");
-		    			} else if (!GitUtils.isMergedInto(project.getRepository(), oldObjectId, newObjectId)) {
+		    			} else if (!GitUtils.isMergedInto(project.getGitDir(), gitEnvs, oldObjectId.name(), newObjectId.name())) {
 		    				BranchProtection protection = project.getBranchProtection(branchName);
 		    				if (protection != null && protection.isNoForcedPush())
 			    				error(output, refName, "Can not force-push to this branch according to branch protection setting");
 		    			} else {
-		    				if (projectManager.isPushNeedsQualityCheck(user, project, branchName, oldObjectId, newObjectId)) {
+		    				if (projectManager.isPushNeedsQualityCheck(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
 		    					error(output, refName, 
 		    							"Your changes need to be reviewed/verified. Please submit pull request instead");
 		    				}

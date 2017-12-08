@@ -168,12 +168,13 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canModify(Project project, String branch, String file) {
-		return canWrite(project) && !GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(getUser(), project, branch, file); 
+		return canWrite(project) && !GitPlex.getInstance(ProjectManager.class)
+				.isModificationNeedsQualityCheck(getUser(), project, branch, file); 
 	}
 	
 	public static boolean canPush(Project project, String branchName, ObjectId oldObjectId, ObjectId newObjectId) {
-		return canWrite(project) && !GitPlex.getInstance(ProjectManager.class).isPushNeedsQualityCheck(getUser(), project, branchName, 
-				oldObjectId, newObjectId); 
+		return canWrite(project) && !GitPlex.getInstance(ProjectManager.class)
+				.isPushNeedsQualityCheck(getUser(), project, branchName, oldObjectId, newObjectId, null); 
 	}
 	
 	public static boolean canManage(User user) {
