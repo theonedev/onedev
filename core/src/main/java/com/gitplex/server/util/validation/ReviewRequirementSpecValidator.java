@@ -4,7 +4,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.gitplex.server.util.editable.annotation.ReviewRequirementSpec;
-import com.gitplex.server.util.reviewrequirement.MalformedSpecException;
+import com.gitplex.server.util.reviewrequirement.InvalidReviewRuleException;
 import com.gitplex.server.util.reviewrequirement.ReviewRequirement;
 
 public class ReviewRequirementSpecValidator implements ConstraintValidator<ReviewRequirementSpec, String> {
@@ -19,7 +19,7 @@ public class ReviewRequirementSpecValidator implements ConstraintValidator<Revie
 			try {
 				new ReviewRequirement(value);
 				return true;
-			} catch (MalformedSpecException e) {
+			} catch (InvalidReviewRuleException e) {
 				constraintContext.disableDefaultConstraintViolation();
 				constraintContext.buildConstraintViolationWithTemplate(e.getMessage()).addConstraintViolation();
 				return false;

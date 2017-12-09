@@ -38,10 +38,10 @@ public class ReviewRequirement {
 					if (!users.contains(user)) { 
 						users.add(user);
 					} else {
-						throw new MalformedSpecException("User '" + userName + "' is included multiple times");
+						throw new InvalidReviewRuleException("User '" + userName + "' is included multiple times");
 					}
 				} else {
-					throw new MalformedSpecException("Unable to find user '" + userName + "'");
+					throw new InvalidReviewRuleException("Unable to find user '" + userName + "'");
 				}
 			} else if (criteriaContext.groupCriteria() != null) {
 				String groupName = getBracedValue(criteriaContext.groupCriteria().Value());
@@ -58,10 +58,10 @@ public class ReviewRequirement {
 							groups.put(group, 1);
 						}
 					} else {
-						throw new MalformedSpecException("Group '" + groupName + "' is included multiple times");
+						throw new InvalidReviewRuleException("Group '" + groupName + "' is included multiple times");
 					}
 				} else {
-					throw new MalformedSpecException("Unable to find group '" + groupName + "'");
+					throw new InvalidReviewRuleException("Unable to find group '" + groupName + "'");
 				}
 			}
 		}

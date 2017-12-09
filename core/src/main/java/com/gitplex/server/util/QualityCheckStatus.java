@@ -33,6 +33,7 @@ import com.gitplex.server.security.permission.ProjectPermission;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.util.reviewrequirement.ReviewRequirement;
+import com.gitplex.server.util.reviewrequirement.InvalidReviewRuleException;
 
 public class QualityCheckStatus {
 
@@ -262,7 +263,7 @@ public class QualityCheckStatus {
 			String errorMessage = String.format("Impossible to provide required number of reviewers "
 					+ "(candidates: %s, required number of reviewers: %d, pull request: #%d)", 
 					reviewers, missingCount, update.getRequest().getNumber());
-			throw new RuntimeException(errorMessage);
+			throw new InvalidReviewRuleException(errorMessage);
 		}
 
 		UserManager userManager = GitPlex.getInstance(UserManager.class);

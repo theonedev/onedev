@@ -21,6 +21,7 @@ import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.server.git.exception.GitException;
 import com.gitplex.server.manager.UrlManager;
 import com.gitplex.server.util.markdown.HtmlTransformer;
+import com.gitplex.server.util.reviewrequirement.InvalidReviewRuleException;
 import com.gitplex.server.web.component.comment.MentionTransformer;
 import com.gitplex.server.web.component.comment.PullRequestTransformer;
 import com.gitplex.server.web.component.diff.DiffRenderer;
@@ -97,7 +98,8 @@ public class WebModule extends AbstractPluginModule {
 			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
 				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
 						ObjectNotFoundException.class, StaleStateException.class, UnauthorizedException.class, 
-						GitException.class, PageExpiredException.class, StalePageException.class);
+						GitException.class, PageExpiredException.class, StalePageException.class, 
+						InvalidReviewRuleException.class);
 			}
 			
 		});

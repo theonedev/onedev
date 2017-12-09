@@ -53,6 +53,11 @@ public class UserFacade extends EntityFacade {
 			return getName();
 	}
 	
+	@Override
+	public String toString() {
+		return getDisplayName();
+	}
+
 	public double getMatchScore(@Nullable String queryTerm) {
 		double scoreOfName = MatchScoreUtils.getMatchScore(name, queryTerm);
 		double scoreOfFullName = MatchScoreUtils.getMatchScore(fullName, queryTerm);
