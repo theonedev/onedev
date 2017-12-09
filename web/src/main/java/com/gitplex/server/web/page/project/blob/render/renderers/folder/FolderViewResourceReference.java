@@ -6,6 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.gitplex.server.web.component.avatar.AvatarResourceReference;
 import com.gitplex.server.web.page.base.BaseDependentResourceReference;
 
 public class FolderViewResourceReference extends BaseDependentResourceReference {
@@ -21,6 +22,9 @@ public class FolderViewResourceReference extends BaseDependentResourceReference 
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(CssHeaderItem.forReference(
 				new CssResourceReference(FolderViewResourceReference.class, "folder-view.css")));
+		
+		// add this dependency as the lazy loaded last commits information includes avatar displaying
+		dependencies.add(CssHeaderItem.forReference(new AvatarResourceReference()));
 		return dependencies;
 	}
 

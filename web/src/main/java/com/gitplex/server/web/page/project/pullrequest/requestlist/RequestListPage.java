@@ -91,32 +91,57 @@ public class RequestListPage extends ProjectPage {
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Open requests";
+					}
+
+					@Override
+					public AbstractLink newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								searchOption = new SearchOption();
+								searchOption.setStatus(Status.OPEN);
+								
+								setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Closed requests";
+					}
+
+					@Override
+					public AbstractLink newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								searchOption = new SearchOption();
+								searchOption.setStatus(Status.CLOSED);
+								
+								setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
+							}
+							
+						};
+					}
+					
+				});
+				
 				User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 				if (currentUser != null) {
 					String userName = currentUser.getName();
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "Open requests";
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new Link<Void>(id) {
-
-								@Override
-								public void onClick() {
-									searchOption = new SearchOption();
-									searchOption.setStatus(Status.OPEN);
-									
-									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-								}
-								
-							};
-						}
-						
-					});
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -134,29 +159,6 @@ public class RequestListPage extends ProjectPage {
 									searchOption.setStatus(Status.OPEN);
 									searchOption.setSubmitterName(userName);
 
-									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-								}
-								
-							};
-						}
-						
-					});
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "Closed requests";
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new Link<Void>(id) {
-
-								@Override
-								public void onClick() {
-									searchOption = new SearchOption();
-									searchOption.setStatus(Status.CLOSED);
-									
 									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
 								}
 								

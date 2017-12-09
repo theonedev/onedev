@@ -381,6 +381,11 @@ public class ProjectTagsPage extends ProjectPage {
 	}
 	
 	@Override
+	protected String getRobotsMeta() {
+		return "noindex,nofollow";
+	}
+	
+	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new ProjectTagsResourceReference()));

@@ -743,6 +743,11 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 	}
 
 	@Override
+	protected String getRobotsMeta() {
+		return "noindex,nofollow";
+	}
+	
+	@Override
 	public void onMark(AjaxRequestTarget target, MarkPos mark) {
 		state.mark = mark;
 		pushState(target);

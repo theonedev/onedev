@@ -138,6 +138,11 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 	
 	@Override
+	protected String getRobotsMeta() {
+		return "noindex,nofollow";
+	}
+	
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

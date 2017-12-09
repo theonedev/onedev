@@ -538,6 +538,11 @@ public class ProjectCommitsPage extends ProjectPage {
 	}
 	
 	@Override
+	protected String getRobotsMeta() {
+		return "noindex,nofollow";
+	}
+
+	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		

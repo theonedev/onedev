@@ -117,6 +117,16 @@ public abstract class BasePage extends WebPage {
 
 		});
 		
+		add(new WebMarkupContainer("robots") {
+			
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.put("content", getRobotsMeta());
+			}
+			
+		});
+		
 		add(new WebMarkupContainer("favicon") {
 
 			@Override
@@ -264,6 +274,10 @@ public abstract class BasePage extends WebPage {
 
 	protected boolean isPermitted() {
 		return true;
+	}
+	
+	protected String getRobotsMeta() {
+		return "";
 	}
 	
 	@Nullable

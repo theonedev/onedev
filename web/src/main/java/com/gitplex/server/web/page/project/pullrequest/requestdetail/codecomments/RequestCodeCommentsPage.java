@@ -30,6 +30,11 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 	}
 
 	@Override
+	protected String getRobotsMeta() {
+		return "noindex,nofollow";
+	}
+	
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 

@@ -528,6 +528,11 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 		return fragment;
 	}
 	
+	@Override
+	protected String getRobotsMeta() {
+		return "noindex,nofollow";
+	}
+	
 	private Fragment newCanSendFrag() {
 		Fragment fragment = new Fragment("status", "canSendFrag", this);
 		Form<?> form = new Form<Void>("form");

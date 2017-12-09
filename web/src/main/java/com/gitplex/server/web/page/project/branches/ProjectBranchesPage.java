@@ -284,6 +284,11 @@ public class ProjectBranchesPage extends ProjectPage {
 	}
 	
 	@Override
+	protected String getRobotsMeta() {
+		return "noindex,nofollow";
+	}
+	
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
