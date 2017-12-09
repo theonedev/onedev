@@ -16,7 +16,7 @@
 
 #-----------------------------------------------------------------------------
 # These settings can be modified to fit the needs of your application
-# Optimized for use with version 3.5.32-st of the Wrapper.
+# Optimized for use with version 3.5.34-st of the Wrapper.
 
 # IMPORTANT - Please always stop and uninstall an application before making
 #             any changes to this file.  Failure to do so could remove the
@@ -104,7 +104,7 @@ WAIT_FOR_STARTED_TIMEOUT=120
 
 # Set the mode used to 'pause' or 'resume' the Wrapper. Possible values are
 #  'signals' which uses SIGUSR1 and SIGUSR2, and 'file' which uses the command
-#  file to to communicate these actions.  The default value is 'signals'.
+#  file to communicate these actions.  The default value is 'signals'.
 #  Be aware that depending on the mode, the properties wrapper.signal.mode.usr1,
 #  wrapper.signal.mode.usr2, or wrapper.commandfile of the configuration file may
 #  be overriden.
@@ -134,11 +134,6 @@ SU_BIN=su
 #  the '-s' option.
 #SU_OPTS="-s /bin/bash"
 
-# Set the full path to the 'id' command.
-# For example:
-#  ID_BIN=/usr/bin/id
-ID_BIN=id
-
 # By default we show a detailed usage block.  Uncomment to show brief usage.
 #BRIEF_USAGE=true
 
@@ -149,6 +144,17 @@ ID_BIN=id
 # When set to 'auto', this script file will try to detect in the order of the 
 # list for each platform which service management tool to use to install the Wrapper.
 SERVICE_MANAGEMENT_TOOL=auto
+
+# Specify how the Wrapper daemon and its child processes should be killed
+#  when using systemd.
+#  The default is 'control-group' which tells systemd to kill all child
+#  processes (including detached ones) in the control group of the daemon
+#  when it stops.
+#  Alternatively, 'process' can be specified to prevent systemd from
+#  killing the child processes leaving this responsibility to the Wrapper.
+#  In this case child processes marked as 'detached' will not be killed on shutdown.
+# NOTE - the daemon must be reinstalled for any changes on this property to take effect.
+SYSTEMD_KILLMODE=control-group
 
 # When installing on Mac OSX platforms, the following domain will be used to
 #  prefix the plist file name.
@@ -304,26 +310,26 @@ installedStatus=0 # 0: not installed
                   # 1: installed (default)
                   # 2: installed with systemd
                   # 3: installed with upstart
-                  # 4: installed with SRC (complete: both lssrc & lsitab returned a record)
-                  # 5: installed with SRC (partial: lssrc xor lsitab returned a record)
+                  # 4: installed with SRC
+                  # 5: incomplete installation with SRC (lssrc or lsitab failed to return a record)
 installedWith=""
 
 # Resolve the location of the 'ps' command
 PS_BIN="/usr/ucb/ps"
+if [ ! -x "$PS_BIN" ]
+then
+    PS_BIN="/usr/bin/ps"
     if [ ! -x "$PS_BIN" ]
     then
-        PS_BIN="/usr/bin/ps"
+        PS_BIN="/bin/ps"
         if [ ! -x "$PS_BIN" ]
         then
-            PS_BIN="/bin/ps"
-            if [ ! -x "$PS_BIN" ]
-            then
-                eval echo `gettext 'Unable to locate "ps".'`
-                eval echo `gettext 'Please report this message along with the location of the command on your system.'`
-                exit 1
-            fi
+            eval echo `gettext 'Unable to locate "ps".'`
+            eval echo `gettext 'Please report this message along with the location of the command on your system.'`
+            exit 1
         fi
     fi
+fi
 
 TR_BIN="/usr/bin/tr"
 if [ ! -x "$TR_BIN" ]
@@ -358,6 +364,43 @@ case "$DIST_OS" in
         DIST_OS="zos"
         ;;
 esac
+
+resolveIdLocation() {
+    if [ "X$ID_BIN" = "X" ] ; then
+        # On Solaris, the version in /usr/xpg4/bin should be used.
+        ID_BIN="/usr/xpg4/bin/id"
+        if [ ! -x "$ID_BIN" ] ; then
+            ID_BIN="id"
+            result=`command -v id 2>/dev/null`
+            if [ $? -ne 0 ] ; then
+                ID_BIN="/usr/bin/id"
+                if [ ! -x "$ID_BIN" ] ; then
+                    eval echo `gettext 'Unable to locate "id".'`
+                    eval echo `gettext 'Please report this message along with the location of the command on your system.'`
+                    exit 1
+                fi
+            fi
+        fi
+    fi
+}
+
+resolvePidofLocation() {
+    if [ "X$PIDOF_BIN" = "X" ] ; then
+        PIDOF_BIN="pidof"
+        result=`command -v pidof 2>/dev/null`
+        if [ $? -ne 0 ] ; then
+            PIDOF_BIN="/bin/pidof"
+            if [ ! -x "$PIDOF_BIN" ] ; then
+                PIDOF_BIN="/usr/sbin/pidof"
+                if [ ! -x "$PIDOF_BIN" ] ; then
+                    eval echo `gettext 'Unable to locate "pidof".'`
+                    eval echo `gettext 'Please report this message along with the location of the command on your system.'`
+                    exit 1
+                fi
+            fi
+        fi
+    fi
+}
 
 # Compare Versions $1<$2=0, $1==$2=1, $1>$2=2
 compareVersions () {
@@ -730,19 +773,7 @@ checkUser() {
     # Check the configured user.  If necessary rerun this script as the desired user.
     if [ "X$RUN_AS_USER" != "X" ]
     then
-        # Resolve the location of the 'id' command
-        ID_BIN="/usr/xpg4/bin/id"
-        if [ ! -x "$ID_BIN" ]
-        then
-            ID_BIN="/usr/bin/id"
-            if [ ! -x "$ID_BIN" ]
-            then
-                eval echo `gettext 'Unable to locate "id".'`
-                eval echo `gettext 'Please report this message along with the location of the command on your system.'`
-                exit 1
-            fi
-        fi
-
+        resolveIdLocation
         if [ "`$ID_BIN -u -n`" = "$RUN_AS_USER" ]
         then
             # Already running as the configured user.  Avoid password prompts by not calling su.
@@ -1032,7 +1063,7 @@ launchdtrap() {
     exit 
 }
 
-waitforwrapperstop() {
+waitForWrapperStop() {
     getpid
     while [ "X$pid" != "X" ] ; do
         sleep 1
@@ -1048,7 +1079,7 @@ launchinternal() {
         prepAdditionalParams "$@"
 
         # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.32 $ADDITIONAL_PARA"
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.34 $ADDITIONAL_PARA"
         eval $COMMAND_LINE
     else
         eval echo `gettext '$APP_LONG_NAME is already running.'`
@@ -1057,7 +1088,7 @@ launchinternal() {
     # launchd expects that this script stay up and running so we need to do our own monitoring of the Wrapper process.
     if [ $WAIT_FOR_STARTED_STATUS = true ]
     then
-        waitforwrapperstop
+        waitForWrapperStop
     fi
 }
 
@@ -1071,7 +1102,7 @@ console() {
         prepAdditionalParams "$@"
 
         # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" $APPNAMEPROP $ANCHORPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.32 $ADDITIONAL_PARA"
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" $APPNAMEPROP $ANCHORPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.34 $ADDITIONAL_PARA"
         eval $COMMAND_LINE
         COMMAND_EXIT_CODE=$?
         if [ $COMMAND_EXIT_CODE -ne 0 ] ; then
@@ -1141,23 +1172,37 @@ startwait() {
 }
 
 mustBeRootOrExit() {
-    if [ `id | sed 's/^uid=//;s/(.*$//'` != "0" ] ; then       
+    if [ `id | sed 's/^uid=//;s/(.*$//'` != "0" ] ; then
         eval echo `gettext 'Must be root to perform this action.'`
         exit 1
     fi
+    IS_ROOT=true
 }
 
-
-macosxStart() {
-    # The daemon has been installed.
-    eval echo `gettext 'Starting $APP_LONG_NAME.  Detected Mac OSX and installed launchd daemon.'`
-    mustBeRootOrExit
-    
+mustBeStoppedOrExit() {
     getpid
     if [ "X$pid" != "X" ] ; then
         eval echo `gettext '$APP_LONG_NAME is already running.'`
         exit 1
     fi
+}
+
+checkRunning() {
+    getpid
+    if [ "X$pid" = "X" ] ; then
+        eval echo `gettext '$APP_LONG_NAME is not running.'`
+        if [ "X$1" = "X1" ] ; then
+            exit 1
+        fi
+    fi
+}
+
+
+macosxStart() {
+    mustBeRootOrExit
+    mustBeStoppedOrExit
+    
+    eval echo `gettext 'Starting $APP_LONG_NAME with launchd...'`
     
     # If the daemon was just installed, it may not be loaded.
     LOADED_PLIST=`launchctl list | grep ${APP_PLIST_BASE}`
@@ -1174,45 +1219,36 @@ macosxStart() {
 }
 
 macosxStop() {
-    # The daemon should be running.
-    eval echo `gettext 'Stopping $APP_LONG_NAME...'`
     mustBeRootOrExit
+    # The daemon must be running.
+    checkRunning "1"
     
-    getpid
-    if [ "X$pid" = "X" ] ; then
-        eval echo `gettext '$APP_LONG_NAME is not running.'`
-        exit 1
-    else
-        if [ "$MACOSX_KEEP_RUNNING" = "true" ] ; then
-            echo ""
-            eval echo `gettext 'Daemon is set to be kept continuously running and it will be automatically restarted.'`
-            eval echo `gettext 'To stop the daemon you need to uninstall it.'`
-            eval echo `gettext 'If you want to use the \"stop\" argument, you need to find MACOSX_KEEP_RUNNING'`
-            eval echo `gettext 'at the beginning of the script file and set it to \"false\".'`
-            echo ""
-        fi
-        launchctl stop ${APP_PLIST_BASE}
+    eval echo `gettext 'Stopping $APP_LONG_NAME...'`
+    
+    if [ "$MACOSX_KEEP_RUNNING" = "true" ] ; then
+        echo ""
+        eval echo `gettext 'Daemon is set to be kept continuously running and it will be automatically restarted.'`
+        eval echo `gettext 'To stop the daemon you need to uninstall it.'`
+        eval echo `gettext 'If you want to use the \"stop\" argument, you need to find MACOSX_KEEP_RUNNING'`
+        eval echo `gettext 'at the beginning of the script file and set it to \"false\".'`
+        echo ""
     fi
+    launchctl stop ${APP_PLIST_BASE}
 }
 
 macosxRestart() {
-    # The daemon should be running.
-    eval echo `gettext 'Restarting $APP_LONG_NAME...'`
     mustBeRootOrExit
-    
-    getpid
-    if [ "X$pid" = "X" ] ; then
-        eval echo `gettext '$APP_LONG_NAME is not running.'`
-        exit 1
+    checkRunning $1
+
+    eval echo `gettext 'Restarting $APP_LONG_NAME...'`
+
+    if [ "$MACOSX_KEEP_RUNNING" = "true" ] ; then
+        # by stopping it, launchd will automatically restart it
+        launchctl stop ${APP_PLIST_BASE}
     else
-        if [ "$MACOSX_KEEP_RUNNING" = "true" ] ; then
-            # by stopping it, launchd will automatically restart it
-            launchctl stop ${APP_PLIST_BASE}
-        else
-            launchctl unload "/Library/LaunchDaemons/${APP_PLIST}"
-            sleep 1
-            launchctl load   "/Library/LaunchDaemons/${APP_PLIST}"
-        fi
+        launchctl unload "/Library/LaunchDaemons/${APP_PLIST}"
+        sleep 1
+        launchctl load   "/Library/LaunchDaemons/${APP_PLIST}"
     fi
     
     startwait
@@ -1221,29 +1257,68 @@ macosxRestart() {
 # Detect if upstart is installed
 # Returns 0 if upstart is found, otherwise returns 1.
 upstartDetection() {
-    INITCTL_BIN="/sbin/initctl"
-    if [ ! -x "$INITCTL_BIN" ] ; then
+    if [ ! -d "/etc/init" ] ; then
         return 1
     fi
     
-    result='initctl version | grep upstart'
-    # if the word "restart" is in the result, then we assume upstart is installed.
+    INITCTL_BIN="initctl"
+    result=`command -v $INITCTL_BIN 2>/dev/null`
+    if [ $? -ne 0 ] ; then
+        INITCTL_BIN="/sbin/initctl"
+        if [ ! -x "$INITCTL_BIN" ] ; then
+            return 1
+        fi
+    fi
+    
+    result=`$INITCTL_BIN version 2>/dev/null`
     if [ $? -eq 0 ] ; then
+        # if the word "upstart" is in the result, then we assume upstart is installed.
+        result=`echo $result | grep upstart`
+        if [ $? -eq 0 ] ; then
+            return 0
+        fi
+    fi
+    
+    # The command /sbin/initctl may fail if the user doesn't have enough privilege 
+    # but that doesn't mean upstart is not present.
+    # In this case we can assume upstart exists if the service was previously 
+    # installed by the root user.
+    if  [ -f "/etc/init/${APP_NAME}.conf" ] ; then
         return 0
     fi
+    
     return 1
 }
 
-upstartstart() {
-    # The daemon has been installed.
-    eval echo `gettext 'Starting $APP_LONG_NAME.  Detected Linux and installed upstart.'`
-    mustBeRootOrExit
-    
-    getpid
-    if [ "X$pid" != "X" ] ; then
-        eval echo `gettext '$APP_LONG_NAME is already running.'`
-        exit 1
+upstartInstall() {
+    # Always verify that upstart exists.
+    upstartDetection
+    if [ $? -ne 0 ] ; then
+        eval echo `gettext 'Unable to install the $APP_LONG_NAME daemon because upstart does not exist.'`
+        return 1
     fi
+    
+    eval echo `gettext ' Installing the $APP_LONG_NAME daemon using upstart...'`
+    if [ -f "${REALDIR}/${APP_NAME}.install" ] ; then 
+        eval echo `gettext ' a custom upstart conf file ${APP_NAME}.install found'`
+        cp "${REALDIR}/${APP_NAME}.install" "/etc/init/${APP_NAME}.conf"
+    else
+        eval echo `gettext ' creating default upstart conf file...'`
+        echo "# ${APP_NAME} - ${APP_LONG_NAME}"                           > "/etc/init/${APP_NAME}.conf"
+        echo "description \"${APP_LONG_NAME}\""                          >> "/etc/init/${APP_NAME}.conf"
+        echo "author \"Tanuki Software Ltd. <info@tanukisoftware.com>\"" >> "/etc/init/${APP_NAME}.conf"
+        echo "start on runlevel [2345]"                                  >> "/etc/init/${APP_NAME}.conf"
+        echo "stop on runlevel [!2345]"                                  >> "/etc/init/${APP_NAME}.conf"
+        echo "env LANG=${LANG}"                                          >> "/etc/init/${APP_NAME}.conf"
+        echo "exec \"${REALPATH}\" upstartinternal"                      >> "/etc/init/${APP_NAME}.conf"
+    fi
+}
+
+upstartStart() {
+    mustBeRootOrExit
+    mustBeStoppedOrExit
+
+    eval echo `gettext 'Starting $APP_LONG_NAME with upstart...'`
     
     /sbin/start ${APP_NAME}
         
@@ -1251,47 +1326,54 @@ upstartstart() {
 }
 
 upstartStop() {
-    # The daemon has been installed.
-    eval echo `gettext 'Stopping $APP_LONG_NAME...'`
     mustBeRootOrExit
-    
-    getpid
-    if [ "X$pid" = "X" ] ; then
-        eval echo `gettext '$APP_LONG_NAME is not running.'`
-        exit 1
-    fi
+    # The daemon must be running.
+    checkRunning "1"
+
+    eval echo `gettext 'Stopping $APP_LONG_NAME...'`
     
     /sbin/stop ${APP_NAME}
 }
 
 upstartRestart() {
-    # The daemon has been installed.
-    eval echo `gettext 'Restarting $APP_LONG_NAME...'`
     mustBeRootOrExit
-    
-    getpid
+    checkRunning $1
+
     if [ "X$pid" = "X" ] ; then
-        eval echo `gettext '$APP_LONG_NAME is not running.'`
-        exit 1
-    fi
-    
-    /sbin/restart ${APP_NAME}
+        # Don't use /sbin/restart because it requires the daemon to be running.
+        #  We want to match with other systems behaviour which is to restart the
+        #  daemon even if it was not running.
+        upstartStart
+    else
+        # The daemon was running
+        eval echo `gettext 'Restarting $APP_LONG_NAME...'`
+
+        /sbin/restart ${APP_NAME}
         
-    startwait
+        startwait
+    fi
 }
 
 # Method to check if systemd is running.
 # Returns 0 if systemd is found, otherwise returns 1.
 systemdDetection() {
-    PIDOF_BIN="/bin/pidof"
-    if [ ! -x "$PIDOF_BIN" ] ; then
+    if [ ! -d "/etc/systemd" ] ; then
         return 1
     fi
-    result=`/bin/pidof systemd`
+
+    resolvePidofLocation
+    result=`$PIDOF_BIN systemd`
     return $?
 }
 
 systemdInstall() {
+    # Always verify that systemd exists.
+    systemdDetection
+    if [ $? -ne 0 ] ; then
+      eval echo `gettext 'Unable to install the $APP_LONG_NAME daemon because systemd does not exist.'`
+      return 1
+    fi
+    
     eval echo `gettext ' Installing the $APP_LONG_NAME daemon using systemd...'`
     if [ -f "${REALDIR}/${APP_NAME}.service" ] ; then 
         eval echo `gettext ' a custom service file ${APP_NAME}.service found'`
@@ -1309,16 +1391,34 @@ systemdInstall() {
         if [ "X${RUN_AS_USER}" != "X" ] ; then
           echo "User=${RUN_AS_USER}"            >> "${SYSTEMD_SERVICE_FILE}"
         fi
+        if [ "X${SYSTEMD_KILLMODE}" != "X" ] ; then
+          echo "KillMode=${SYSTEMD_KILLMODE}"   >> "${SYSTEMD_SERVICE_FILE}"
+        fi
+        if [ $SYSTEMD_KILLMODE != "process" -a $SYSTEMD_KILLMODE != "none" ] ; then
+          # Set an environment variable to show a warning if a detached process is launched by the WrapperManager.
+          echo "Environment=SYSTEMD_KILLMODE_WARNING=true" >> "${SYSTEMD_SERVICE_FILE}"
+        fi
         echo ""                                 >> "${SYSTEMD_SERVICE_FILE}"
         echo "[Install]"                        >> "${SYSTEMD_SERVICE_FILE}"
         echo "WantedBy=multi-user.target"       >> "${SYSTEMD_SERVICE_FILE}"
-
     fi
     systemctl daemon-reload
     systemctl enable "${APP_NAME}"
 }
 
 systemdStart() {
+    # Don't do mustBeRootOrExit because systemd will ask for the password when not root
+    mustBeStoppedOrExit
+    
+    result=`systemctl -p KillMode show $APP_NAME`
+    if [ $result != "KillMode=$SYSTEMD_KILLMODE" ] ; then
+        eval echo `gettext "SYSTEMD_KILLMODE is set to \'${SYSTEMD_KILLMODE}\' on the top of the script, but the daemon is running with $result."`
+        eval echo `gettext 'The daemon must be reinstalled for the value of SYSTEMD_KILLMODE to take effect.'`
+        exit 1
+    fi
+    
+    eval echo `gettext 'Starting $APP_LONG_NAME with systemd...'`
+
     systemctl start $APP_NAME
     if [ $? -ne 0 ] ; then
         eval echo `gettext 'Failed to start service $APP_NAME'`
@@ -1329,6 +1429,12 @@ systemdStart() {
 }
 
 systemdStop() {
+    # Don't do mustBeRootOrExit because systemd will ask for the password when not root
+    # The daemon must be running.
+    checkRunning "1"
+
+    eval echo `gettext 'Stopping $APP_LONG_NAME...'`
+
     systemctl stop $APP_NAME
     if [ $? -ne 0 ] ; then
         eval echo `gettext 'Failed to stop service $APP_NAME'`
@@ -1337,6 +1443,11 @@ systemdStop() {
 }
 
 systemdRestart() {
+    # Don't do mustBeRootOrExit because systemd will ask for the password when not root
+    checkRunning $1
+
+    eval echo `gettext 'Restarting $APP_LONG_NAME...'`
+
     systemctl restart $APP_NAME
     if [ $? -ne 0 ] ; then
         eval echo `gettext 'Failed to restart service $APP_NAME'`
@@ -1354,28 +1465,44 @@ systemdRemove() {
     systemctl daemon-reload
 }
 
-# Method to check if src is running.
-# Returns 0 if src is found, otherwise returns 1.
+# Method to check if SRC is running.
+# Returns 0 if SRC is found, otherwise returns 1.
 srcDetection() {
-    result=`ps -A | grep srcmstr`
+    # $PS_BIN has already been resolved at startup
+    result=`$PS_BIN -A | grep srcmstr`
     return $?
 }
 
 srcInstall() {
+    # Always verify that SRC exists.
+    srcDetection
+    if [ $? -ne 0 ] ; then
+      eval echo `gettext 'Unable to install the $APP_LONG_NAME daemon because SRC does not exist.'`
+      return 1
+    fi
+    
     if [ "X$RUN_AS_USER" = "X" ] ; then
         USERID="0"
     else
+        resolveIdLocation
         USERID=`$ID_BIN -u "$RUN_AS_USER"`
         if [ $? -ne 0 ] ; then 
             eval echo `gettext 'Failed to get user id for $RUN_AS_USER'`
             exit 1
         fi
     fi
+    
+    validateAppNameLength
     /usr/bin/mkssys -s "$APP_NAME" -p "$REALPATH" -a "launchdinternal" -u "$USERID" -f 9 -n 15 -S
     /usr/sbin/mkitab "$APP_NAME":2:once:"/usr/bin/startsrc -s \"${APP_NAME}\" >/dev/console 2>&1"
 }
 
 srcStart() {
+    mustBeRootOrExit
+    mustBeStoppedOrExit
+
+    eval echo `gettext 'Starting $APP_LONG_NAME with SRC...'`
+
     startsrc -s "${APP_NAME}"
     if [ $? -ne 0 ] ; then
         eval echo `gettext 'Failed to start service $APP_NAME'`
@@ -1386,6 +1513,12 @@ srcStart() {
 }
 
 srcStop() {
+    mustBeRootOrExit
+    # The daemon must be running.
+    checkRunning "1"
+
+    eval echo `gettext 'Stopping $APP_LONG_NAME...'`
+
     stopsrc -s "${APP_NAME}"
     if [ $? -ne 0 ] ; then
         eval echo `gettext 'Failed to stop service $APP_NAME'`
@@ -1394,24 +1527,28 @@ srcStop() {
 }
 
 srcRestart() {
-    srcStop
+    mustBeRootOrExit
+    checkRunning $1
+
+    if [ "X$pid" != "X" ] ; then
+        # The daemon was running. Stop it first.
+        eval echo `gettext 'Restarting $APP_LONG_NAME...'`
+        srcStop
+        waitForWrapperStop
+    fi
     srcStart
 }
 
 start() {
+    mustBeStoppedOrExit
+    
     eval echo `gettext 'Starting $APP_LONG_NAME...'`
-    getpid
-    if [ "X$pid" = "X" ]
-    then
-        prepAdditionalParams "$@"
+    
+    prepAdditionalParams "$@"
 
-        # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.32 $ADDITIONAL_PARA"
-        eval $COMMAND_LINE
-    else
-        eval echo `gettext '$APP_LONG_NAME is already running.'`
-        exit 1
-    fi
+    # The string passed to eval must handles spaces in paths correctly.
+    COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.34 $ADDITIONAL_PARA"
+    eval $COMMAND_LINE
     
     startwait
 }
@@ -1419,16 +1556,18 @@ start() {
 stopit() {
     # $1 exit if down flag
     
-    eval echo `gettext 'Stopping $APP_LONG_NAME...'`
     getpid
     if [ "X$pid" = "X" ]
     then
-        eval echo `gettext '$APP_LONG_NAME was not running.'`
+        eval echo `gettext '$APP_LONG_NAME is not running.'`
         if [ "X$1" = "X1" ]
         then
             exit 1
         fi
     else
+        # The daemon should be running.
+        eval echo `gettext 'Stopping $APP_LONG_NAME...'`
+
         if [ "X$IGNORE_SIGNALS" = "X" ]
         then
             # Running so try to stop it.
@@ -1620,14 +1759,27 @@ checkInstalled() {
             installedWith="init.d"
         else
             validateAppNameLength
-            if [ -n "`/usr/sbin/lsitab $APP_NAME`" -a -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
-                installedStatus=4
-                installedWith="SRC"
-            elif [ -n "`/usr/sbin/lsitab $APP_NAME`" -o -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
-                installedStatus=5
-                installedWith="SRC"
+            if [ "$IS_ROOT" = "true" ] ; then
+                # Check both lssrc & lsitab to make sure the installation is complete. lsitab requires root privileges.
+                # We will go through this case before installing or removing a service, so we can redo a clean installation
+                # or a clean removal if installedStatus=5
+                if [ -n "`/usr/sbin/lsitab $APP_NAME`" -a -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+                    installedStatus=4
+                    installedWith="SRC"
+                elif [ -n "`/usr/sbin/lsitab $APP_NAME`" -o -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+                    installedStatus=5
+                    installedWith="SRC"
+                else
+                    installedStatus=0
+                fi
             else
-                installedStatus=0
+                # Using lssrc is enough to test normal installations and doesn't require root privileges
+                if [ -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+                    installedStatus=4
+                    installedWith="SRC"
+                else
+                    installedStatus=0
+                fi
             fi
         fi
     elif [ "$DIST_OS" = "freebsd" ] ; then
@@ -1697,23 +1849,6 @@ validateAppNameLength() {
     fi
 }
 
-installUpstart() {
-    eval echo `gettext ' Installing the $APP_LONG_NAME daemon using upstart..'`
-    if [ -f "${REALDIR}/${APP_NAME}.install" ] ; then 
-        eval echo `gettext ' a custom upstart conf file ${APP_NAME}.install found'`
-        cp "${REALDIR}/${APP_NAME}.install" "/etc/init/${APP_NAME}.conf"
-    else
-        eval echo `gettext ' creating default upstart conf file..'`
-        echo "# ${APP_NAME} - ${APP_LONG_NAME}"                           > "/etc/init/${APP_NAME}.conf"
-        echo "description \"${APP_LONG_NAME}\""                          >> "/etc/init/${APP_NAME}.conf"
-        echo "author \"Tanuki Software Ltd. <info@tanukisoftware.com>\"" >> "/etc/init/${APP_NAME}.conf"
-        echo "start on runlevel [2345]"                                  >> "/etc/init/${APP_NAME}.conf"
-        echo "stop on runlevel [!2345]"                                  >> "/etc/init/${APP_NAME}.conf"
-        echo "env LANG=${LANG}"                                          >> "/etc/init/${APP_NAME}.conf"
-        echo "exec \"${REALPATH}\" upstartinternal"                      >> "/etc/init/${APP_NAME}.conf"
-    fi
-}
-
 installdaemon() {
     mustBeRootOrExit
     
@@ -1724,7 +1859,7 @@ installdaemon() {
         if [ $installedStatus -gt 0 ] ; then
             eval echo `gettext ' The $APP_LONG_NAME daemon is already installed.'`
         else
-            eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+            eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
             ln -s "$REALPATH" "/etc/init.d/$APP_NAME"
             for i in `ls "/etc/rc3.d/K"??"$APP_NAME_LOWER" "/etc/rc3.d/S"??"$APP_NAME_LOWER" 2>/dev/null` ; do
                 eval echo `gettext ' Removing unexpected file before proceeding: $i'`
@@ -1738,13 +1873,13 @@ installdaemon() {
             eval echo `gettext 'Detected RHEL or Fedora:'`
             if [ $installedStatus -gt 0 ] ; then
                 eval echo `gettext ' The $APP_LONG_NAME daemon is already installed with $installedWith.'`
-            elif [ -n "$USE_SYSTEMD" -a -d "/etc/systemd" ] ; then
+            elif [ -n "$USE_SYSTEMD" ] ; then
                     systemdInstall
             else
-                if [ -n "$USE_UPSTART" -a -d "/etc/init" ] ; then
-                    installUpstart
+                if [ -n "$USE_UPSTART" ] ; then
+                    upstartInstall
                 else 
-                    eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+                    eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
                     ln -s "$REALPATH" "/etc/init.d/$APP_NAME"
                     /sbin/chkconfig --add "$APP_NAME"
                     /sbin/chkconfig "$APP_NAME" on
@@ -1754,10 +1889,10 @@ installdaemon() {
             eval echo `gettext 'Detected SuSE or SLES:'`
             if [ $installedStatus -gt 0 ] ; then
                 eval echo `gettext ' The $APP_LONG_NAME daemon is already installed with $installedWith.'`
-            elif [ -n "$USE_SYSTEMD" -a -d "/etc/systemd" ] ; then
+            elif [ -n "$USE_SYSTEMD" ] ; then
                     systemdInstall
             else
-                eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+                eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
                 ln -s "$REALPATH" "/etc/init.d/$APP_NAME"
                 insserv "/etc/init.d/$APP_NAME"
             fi
@@ -1766,12 +1901,12 @@ installdaemon() {
             if [ $installedStatus -gt 0 ] ; then
                 eval echo `gettext ' The $APP_LONG_NAME daemon is already installed with $installedWith.'`
             else
-                if [ -n "$USE_SYSTEMD" -a -d "/etc/systemd" ] ; then
+                if [ -n "$USE_SYSTEMD" ] ; then
                     systemdInstall
-                elif [ -n "$USE_UPSTART" -a -d "/etc/init" ] ; then
-                    installUpstart
+                elif [ -n "$USE_UPSTART" ] ; then
+                    upstartInstall
                 else 
-                    eval echo `gettext ' Installing the $APP_LONG_NAME daemon using init.d..'`
+                    eval echo `gettext ' Installing the $APP_LONG_NAME daemon using init.d...'`
                     ln -s "$REALPATH" "/etc/init.d/$APP_NAME"
                     update-rc.d "$APP_NAME" defaults
                 fi
@@ -1781,7 +1916,7 @@ installdaemon() {
             if [ $installedStatus -gt 0 ] ; then
                 eval echo `gettext ' The $APP_LONG_NAME daemon is already installed.'`
             else
-                eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+                eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
                 ln -s "$REALPATH" /etc/init.d/$APP_NAME
                 for i in `ls "/etc/rc3.d/K"??"$APP_NAME_LOWER" "/etc/rc5.d/K"??"$APP_NAME_LOWER" "/etc/rc3.d/S"??"$APP_NAME_LOWER" "/etc/rc5.d/S"??"$APP_NAME_LOWER" 2>/dev/null` ; do
                     eval echo `gettext ' Removing unexpected file before proceeding: $i'`
@@ -1798,7 +1933,7 @@ installdaemon() {
         if [ $installedStatus -gt 0 ] ; then
             eval echo `gettext ' The $APP_LONG_NAME daemon is already installed.'`
         else
-            eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+            eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
             ln -s "$REALPATH" "/sbin/init.d/$APP_NAME"
             for i in `ls "/sbin/rc3.d/K"??"$APP_NAME_LOWER" "/sbin/rc3.d/S"??"$APP_NAME_LOWER" 2>/dev/null` ; do
                 eval echo `gettext ' Removing unexpected file before proceeding: $i'`
@@ -1813,7 +1948,7 @@ installdaemon() {
         if [ $installedStatus -eq 1 -o $installedStatus -eq 4 ] ; then
             eval echo `gettext ' The $APP_LONG_NAME daemon is already installed with $installedWith.'`
         else
-            eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+            eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
             if [ -n "`/usr/sbin/lsitab install_assist`" ] ; then 
                 eval echo `gettext ' The task /usr/sbin/install_assist was found in the inittab, this might cause problems for all subsequent tasks to launch as this process is known to block the init task. Please make sure this task is not needed anymore and remove/deactivate it.'`
             fi
@@ -1824,7 +1959,6 @@ installdaemon() {
             done
             
             if [ -n "$USE_SRC" ] ; then
-                validateAppNameLength
                 srcInstall
             else
                 # install using initd
@@ -1838,7 +1972,7 @@ installdaemon() {
         if [ $installedStatus -gt 0 ] ; then
             eval echo `gettext ' The $APP_LONG_NAME daemon is already installed.'`
         else
-            eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+            eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
             sed -i .bak "/${APP_NAME}_enable=\"YES\"/d" /etc/rc.conf
             if [ -f "${REALDIR}/${APP_NAME}.install" ] ; then
                 ln -s "${REALDIR}/${APP_NAME}.install" "/etc/rc.d/$APP_NAME"
@@ -1875,7 +2009,7 @@ installdaemon() {
         if [ $installedStatus -gt 0 ] ; then
             eval echo `gettext ' The $APP_LONG_NAME daemon is already installed.'`
         else
-            eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+            eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
             if [ -f "${REALDIR}/${APP_PLIST}" ] ; then
                 ln -s "${REALDIR}/${APP_PLIST}" "/Library/LaunchDaemons/${APP_PLIST}"
             else
@@ -1909,7 +2043,7 @@ installdaemon() {
         if [ $installedStatus -gt 0 ] ; then
             eval echo `gettext ' The $APP_LONG_NAME daemon is already installed.'`
         else
-            eval echo `gettext ' Installing the $APP_LONG_NAME daemon..'`
+            eval echo `gettext ' Installing the $APP_LONG_NAME daemon...'`
             cp /etc/rc /etc/rc.bak
             sed  "s:echo /etc/rc script executed, \`date\`::g" /etc/rc.bak > /etc/rc
             echo "_BPX_JOBNAME='${APP_NAME}' \"${REALDIR}/${APP_NAME}\" start" >>/etc/rc
@@ -1920,7 +2054,19 @@ installdaemon() {
         exit 1
     fi
     
+    # Exit with 1 if the daemon was already installed when calling installdaemon().
+    #  The test below requires $installedStatus to be unchanged since the call to
+    #  checkInstalled() at the beginning of the function. If the script was launched
+    #  with 'installstart' we want to start normally, so don't exit here.
     if [ $installedStatus -gt 0 -a "$COMMAND" != 'installstart' ] ; then
+        exit 1
+    fi
+    
+    # Check again the installation status. The script should exit with 1 if the service
+    #  could not be installed (even if it was launched with 'installstart').
+    checkInstalled
+    if [ $installedStatus -eq 0 ] ; then
+        eval echo `gettext 'Service not installed.'`
         exit 1
     fi
 }
@@ -1929,7 +2075,7 @@ startdaemon() {
     if [ "$DIST_OS" = "macosx" -a -f "/Library/LaunchDaemons/${APP_PLIST}" ] ; then
         macosxStart
     elif [ "$DIST_OS" = "linux" -a -n "$USE_UPSTART" ] && [ -f "/etc/init/${APP_NAME}.conf" ] ; then
-        upstartstart
+        upstartStart
     elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] && [ -f "${SYSTEMD_SERVICE_FILE}" ] ; then
         systemdStart
     elif [ "$DIST_OS" = "aix" -a -n "$USE_SRC" ] && [ -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
@@ -1944,13 +2090,36 @@ startdaemon() {
             shift
         fi
         
-        # In case the user set SERVICE_MANAGEMENT_TOOL to something different than 'auto' or 'initd',
-        # then we show a warning saying that because he didn't run "install", it will not use 
-        # the service management tool to start the service.
         if [ "$SERVICE_MANAGEMENT_TOOL" != "auto" -a "$SERVICE_MANAGEMENT_TOOL" != "initd" ] ; then
-            eval echo `gettext 'Script configured to use a service management tool $SERVICE_MANAGEMENT_TOOL, but the service was not installed.'`
+            eval echo `gettext "Starting without using the configured service management tool \'$SERVICE_MANAGEMENT_TOOL\' because the service $APP_NAME is not installed."`
         fi
         
+        start "$@"
+    fi
+}
+
+restartdaemon() {
+    if [ "$DIST_OS" = "macosx" -a -f "/Library/LaunchDaemons/${APP_PLIST}" ] ; then
+        macosxRestart $1
+    elif [ "$DIST_OS" = "linux" -a -n "$USE_UPSTART" ] && [ -f "/etc/init/${APP_NAME}.conf" ] ; then
+        upstartRestart $1
+    elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] && [ -f "${SYSTEMD_SERVICE_FILE}" ] ; then
+        systemdRestart $1
+    elif [ "$DIST_OS" = "aix" -a -n "$USE_SRC" ] && [ -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
+        srcRestart $1
+    else
+        checkUser touchlock "$COMMAND"
+
+        checkRunning $1
+        if [ "X$pid" != "X" ] ; then
+            # The daemon was running. Stop it first.
+            eval echo `gettext 'Restarting $APP_LONG_NAME...'`
+            stopit $1
+        fi
+        shift
+        if [ ! -n "$FIXED_COMMAND" ] ; then
+            shift
+        fi
         start "$@"
     fi
 }
@@ -2060,7 +2229,7 @@ removedaemon() {
                 /usr/sbin/rmitab $APP_NAME
                 /usr/bin/rmssys -s $APP_NAME
             fi
-        else
+        else 
             eval echo `gettext ' The $APP_LONG_NAME daemon is not currently installed.'`
             exit 1
         fi
@@ -2246,17 +2415,22 @@ showUsage() {
     exit 1
 }
 
-# Resolve the service management tool for 3 platforms: linux, solairs, aix.
+# Resolve the service management tool for linux and aix.
 setServiceManagementTool() {
     if [ ! -n "$SERVICE_MANAGEMENT_TOOL" ] ; then
-        # Set the default value to auto
+        # Set the default value to auto.
         SERVICE_MANAGEMENT_TOOL=auto
     fi
+    
     if [ "$DIST_OS" = "linux" ] ; then
         setServiceManagementToolLinux
     elif [ "$DIST_OS" = "aix" ] ; then
         setServiceManagementToolAix
     else
+        if [ "$SERVICE_MANAGEMENT_TOOL" != "auto" ] ; then
+            eval echo `gettext "The script does not support the service management tool \'$SERVICE_MANAGEMENT_TOOL\' on this platform."`
+            SERVICE_MANAGEMENT_TOOL=auto
+        fi
         return
     fi
     
@@ -2313,7 +2487,6 @@ setServiceManagementToolAix() {
 }
 
 docommand() {
-    setServiceManagementTool
   
     case "$COMMAND" in
         'console')
@@ -2325,10 +2498,12 @@ docommand() {
             ;;
     
         'start')
+            setServiceManagementTool
             startdaemon "$@"
             ;;
     
         'stop')
+            setServiceManagementTool
             if [ "$DIST_OS" = "macosx" -a -f "/Library/LaunchDaemons/${APP_PLIST}" ] ; then
                 macosxStop
             elif [ "$DIST_OS" = "linux" -a -n "$USE_UPSTART" ] && [ -f "/etc/init/${APP_NAME}.conf" ] ; then
@@ -2344,37 +2519,17 @@ docommand() {
             ;;
     
         'restart')
-            if [ "$DIST_OS" = "macosx" -a -f "/Library/LaunchDaemons/${APP_PLIST}" ] ; then
-                macosxRestart
-            elif [ "$DIST_OS" = "linux" -a -n "$USE_UPSTART" ] && [ -f "/etc/init/${APP_NAME}.conf" ] ; then
-                upstartRestart
-            elif [ "$DIST_OS" = "linux" -a -n "$USE_SYSTEMD" -a -z "$SYSD" ] && [ -f "${SYSTEMD_SERVICE_FILE}" ] ; then
-                systemdRestart
-            elif [ "$DIST_OS" = "aix" -a -n "$USE_SRC" ] && [ -n "`/usr/bin/lssrc -S -s $APP_NAME`" ] ; then
-                srcRestart
-            else
-                if [ -n "$SMF" ] ; then
-                    shift
-                fi
-                checkUser touchlock "$COMMAND"
-                if [ ! -n "$FIXED_COMMAND" ] ; then
-                    shift
-                fi
-                stopit "0"
-                start "$@"
-            fi
+            setServiceManagementTool
+            restartdaemon "0" "$@"
             ;;
     
         'condrestart')
-            checkUser touchlock "$COMMAND"
-            if [ ! -n "$FIXED_COMMAND" ] ; then
-                shift
-            fi
-            stopit "1"
-            start "$@"
+            setServiceManagementTool
+            restartdaemon "1" "$@"
             ;;
     
         'pause')
+            setServiceManagementTool
             if [ -n "$PAUSABLE" ]
             then
                 pause
@@ -2384,6 +2539,7 @@ docommand() {
             ;;
     
         'resume')
+            setServiceManagementTool
             if [ -n "$PAUSABLE" ]
             then
                 resume
@@ -2393,19 +2549,23 @@ docommand() {
             ;;
     
         'status')
+            setServiceManagementTool
             status
             ;;
     
         'install')
+            setServiceManagementTool
             installdaemon "$@"
             ;;
     
         'installstart')
+            setServiceManagementTool
             installdaemon "$@"
             startdaemon "$@"
             ;;
     
         'remove')
+            setServiceManagementTool
             removedaemon
             ;;
     
