@@ -939,7 +939,8 @@ gitplex.server.markdown = {
 				if (!isError)
 					$input.caret($input.caret() + message.length);
 			} else {
-				$input.caret(message);
+				// use range instead of caret here as otherwise the editor will be scrolled to the bottom
+				$input.range(message); 
 				if (isError)
 					$input.range($input.caret()-message.length, $input.caret());
 			}

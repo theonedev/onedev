@@ -102,6 +102,14 @@ body.fullscreen {
 	background: white;
 }
 
+/* 
+ * Do not display header link in preview mode as otherwise we need to reserve a big margin 
+ * at left side 
+ */ 
+.markdown-editor>.body>.preview>.markdown-rendered .header-link {
+	display: none;
+}
+
 .markdown-editor.normal-mode.edit-mode>.body>.edit {
 	width: 100%;
 }
