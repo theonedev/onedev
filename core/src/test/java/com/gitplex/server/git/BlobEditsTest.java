@@ -305,7 +305,7 @@ public class BlobEditsTest extends AbstractGitTest {
 	}
 	
 	@Test
-	public void testAddExistFile() throws IOException {
+	public void testOverwriteExistFile() throws IOException {
 		createDir("client");
 		addFileAndCommit("client/a.java", "a", "add a");
 		addFileAndCommit("client/b.java", "b", "add b");
@@ -317,15 +317,33 @@ public class BlobEditsTest extends AbstractGitTest {
 		
 		String refName = "refs/heads/master";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
-		
+
+		Set<String> oldPaths = Sets.newHashSet("server/src/com/example/b/b.java");
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		newBlobs.put("client/a.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
-		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
-		try {
-			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
-			assertTrue("An ObjectAlreadyExistException should be thrown", false);
-		} catch (ObjectAlreadyExistsException e) {
+		newBlobs.put("server/src/a.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("server/src/com/example/b/b.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		
+		BlobEdits edits = new BlobEdits(oldPaths, newBlobs);
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, 
+				oldCommitId, oldCommitId, user, "test rename tree");
+		
+		List<String> paths = new ArrayList<>();
+		try (	RevWalk revWalk = new RevWalk(git.getRepository());
+				TreeWalk treeWalk = new TreeWalk(git.getRepository());) {
+			treeWalk.addTree(revWalk.parseCommit(newCommitId).getTree());
+			treeWalk.setRecursive(true);
+			while (treeWalk.next()) {
+				paths.add(treeWalk.getPathString());
+			}
 		}
+
+		assertEquals(5, paths.size());
+		assertEquals("client/a.java", paths.get(0));
+		assertEquals("client/b.java", paths.get(1));
+		assertEquals("server/src/a.java", paths.get(2));
+		assertEquals("server/src/com/example/a/a.java", paths.get(3));
+		assertEquals("server/src/com/example/b/b.java", paths.get(4));
 	}
 	
 	@Test

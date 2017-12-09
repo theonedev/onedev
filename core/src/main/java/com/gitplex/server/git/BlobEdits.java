@@ -78,14 +78,19 @@ public class BlobEdits implements Serializable {
 				String name = treeWalk.getNameString();
 				if (currentOldPaths.contains(name)) {
 					currentOldPaths.remove(name);
-					BlobContent currentNewBlob = currentNewBlobs.get(name);
+					BlobContent currentNewBlob = currentNewBlobs.remove(name);
 					if (currentNewBlob != null) {
-						currentNewBlobs.remove(name);
 						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, currentNewBlob.getBytes());
 						entries.add(new TreeFormatterEntry(name, currentNewBlob.getMode(), blobId));
 					}
 				} else if (currentNewBlobs.containsKey(name)) {
-					throw new ObjectAlreadyExistsException("Path already exist: " + treeWalk.getPathString());
+					if ((treeWalk.getRawMode(0) & FileMode.TYPE_MASK) == FileMode.TYPE_TREE) {
+						throw new ObjectAlreadyExistsException("Path already exist: " + treeWalk.getPathString());
+					} else {
+						BlobContent currentNewBlob = currentNewBlobs.remove(name);
+						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, currentNewBlob.getBytes());
+						entries.add(new TreeFormatterEntry(name, currentNewBlob.getMode(), blobId));
+					}
 				} else {
 					Set<String> childOldPaths = new HashSet<>();
 					for (Iterator<String> it = currentOldPaths.iterator(); it.hasNext();) {
@@ -149,7 +154,7 @@ public class BlobEdits implements Serializable {
 							String blobPath = topLevelPathSegment;
 							if (parentPath != null)
 								blobPath = parentPath + "/" + path;
-							throw new ObjectAlreadyExistsException("Blob path already exists: " + blobPath);
+							throw new ObjectAlreadyExistsException("Overlapped blob path: " + blobPath);
 						} else {
 							topLevelPathSegments.add(topLevelPathSegment);
 						}

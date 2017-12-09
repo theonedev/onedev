@@ -349,7 +349,7 @@ public class CommitOptionPanel extends Panel {
 					newCommitId = new BlobEdits(oldPaths, newBlobs).commit(repository, refName, 
 							prevCommitId, prevCommitId, user.asPerson(), commitMessage);
 				} catch (ObjectAlreadyExistsException e) {
-					CommitOptionPanel.this.error("A file with same name already exists. "
+					CommitOptionPanel.this.error("A path with same name already exists. "
 							+ "Please choose a different name and try again.");
 					target.add(feedback);
 					break;
