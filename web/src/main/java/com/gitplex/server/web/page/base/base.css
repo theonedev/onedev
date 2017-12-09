@@ -148,20 +148,7 @@ form>.test-feedback {
 	margin-bottom: 0;
 }
 .editable table.list>tfoot>tr.add-element>td {
-	padding: 4px 0;
-	vertical-align: middle;
-}
-.editable table.list>tfoot>tr.add-element>td>a {
-	display: block; 
-	text-decoration: none; 
-	padding: 4px 8px;
-}
-
-.editable table.list>tfoot>tr.add-element>td:hover {
-	background-color: #F2F2F2;
-}
-.editable table.list>tbody>tr.no-elements>td {
-	font-style: italic;
+	padding: 12px 0;
 }
 
 .editable>.reflection>table {
@@ -219,10 +206,10 @@ form>.test-feedback {
 .editor>table.list>tbody>tr>td.actions {
 	text-align: right;
 }
-.editor>table.list>tbody>tr>td.actions .fa, .editor>table.list>tfoot>tr>td.add-element .fa {
+.editor>table.list>tbody>tr>td.actions .fa {
 	vertical-align: center;
-	font-size: 20px;
-	color: #666;
+	font-size: 16px;
+	color: #444;
 }
 .editor>table.list>tbody>tr>td.actions .handle {
 	cursor: move; 

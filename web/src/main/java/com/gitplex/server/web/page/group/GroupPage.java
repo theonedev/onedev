@@ -47,7 +47,7 @@ public abstract class GroupPage extends LayoutPage {
 		tabs.add(new GroupTab("Profile", "fa fa-fw fa-list-alt", GroupProfilePage.class));
 		tabs.add(new GroupTab("Members", "fa fa-fw fa-user", GroupMembershipsPage.class));
 		if (SecurityUtils.isAdministrator() && !getGroup().isAdministrator())
-			tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-lock", GroupAuthorizationsPage.class));
+			tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", GroupAuthorizationsPage.class));
 		
 		add(new Tabbable("groupTabs", tabs));
 	}

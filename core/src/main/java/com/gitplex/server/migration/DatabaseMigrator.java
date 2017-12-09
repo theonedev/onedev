@@ -405,4 +405,21 @@ public class DatabaseMigrator {
 		}
 	}
 	
+	private void migrate12(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element projectElement: dom.getRootElement().elements()) {
+					for (Element branchProtectionElement: projectElement.element("branchProtections").elements()) {
+						branchProtectionElement.addElement("enabled").setText("true");
+					}
+					for (Element tagProtectionElement: projectElement.element("tagProtections").elements()) {
+						tagProtectionElement.addElement("enabled").setText("true");
+					}
+				}
+				dom.writeToFile(file, false);
+			} 
+		}
+	}
+	
 }

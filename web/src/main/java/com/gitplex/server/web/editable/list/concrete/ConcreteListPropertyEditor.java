@@ -158,22 +158,6 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 			table.setVisible(false);
 		}
 		
-		final WebMarkupContainer noElementsRow = new WebMarkupContainer("noElementsRow") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(rows.size() == 0);
-			}
-			
-		};
-		noElementsRow.setOutputMarkupPlaceholderTag(true);
-		table.add(noElementsRow);
-		
-		WebMarkupContainer noElementsColumn = new WebMarkupContainer("noElementsColumn");
-		noElementsColumn.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
-		noElementsRow.add(noElementsColumn);
-		
 		WebMarkupContainer newRow = new WebMarkupContainer("newRow");
 		newRow.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
 		newRow.add(new AjaxButton("addElement") {
@@ -198,9 +182,6 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 
 				target.prependJavaScript(script);
 				target.add(newRow);
-				
-				if (rows.size() == 1)
-					target.add(noElementsRow);
 				
 				send(ConcreteListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 			}
@@ -229,8 +210,8 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 				
 				// Do not use code above as removing components outside of a container and add again 
 				// can cause the fenced feedback panel not functioning properly
-				int fromIndex = from.getItemIndex()-1;
-				int toIndex = to.getItemIndex()-1;
+				int fromIndex = from.getItemIndex();
+				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
 						rows.swap(fromIndex+i, fromIndex+i+1);

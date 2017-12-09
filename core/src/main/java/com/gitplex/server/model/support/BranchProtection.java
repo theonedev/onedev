@@ -26,6 +26,8 @@ public class BranchProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private boolean enabled = true;
+	
 	private String branch;
 	
 	private boolean noForcedPush = true;
@@ -41,6 +43,14 @@ public class BranchProtection implements Serializable {
 	private transient Optional<ReviewRequirement> reviewRequirementOpt;
 	
 	private List<FileProtection> fileProtections = new ArrayList<>();
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
 
 	@Editable(order=100, description="Specify branch to be protected. Wildcard may be used to "
 			+ "specify multiple branches")

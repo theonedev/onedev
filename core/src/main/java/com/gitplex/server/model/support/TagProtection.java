@@ -18,6 +18,8 @@ public class TagProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private boolean enabled = true;
+	
 	private String tag;
 	
 	private boolean noUpdate = true;
@@ -25,6 +27,14 @@ public class TagProtection implements Serializable {
 	private boolean noDeletion = true;
 	
 	private TagCreator tagCreator = new ProjectWriters();
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
 
 	@Editable(order=100, description="Specify tag to be protected. Wildcard can be used to match multiple tags")
 	@TagPattern

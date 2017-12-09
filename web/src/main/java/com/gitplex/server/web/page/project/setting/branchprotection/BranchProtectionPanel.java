@@ -4,7 +4,11 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.web.editable.BeanContext;
@@ -68,7 +72,29 @@ abstract class BranchProtectionPanel extends Panel {
 			
 		});
 		
+		add(new AjaxCheckBox("enable", Model.of(protection.isEnabled())) {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				protection.setEnabled(!protection.isEnabled());
+				onSave(target, protection);
+				target.add(BranchProtectionPanel.this);
+			}
+			
+		});
+		
 		add(BeanContext.viewBean("protection", protection).setOutputMarkupId(true));
+		
+		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return !protection.isEnabled()? "disabled": "";
+			}
+			
+		}));
+		
+		setOutputMarkupId(true);
 	}
 	
 	protected abstract void onDelete(AjaxRequestTarget target);

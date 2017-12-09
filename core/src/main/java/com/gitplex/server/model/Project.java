@@ -835,7 +835,7 @@ public class Project extends AbstractEntity {
 	@Nullable
 	public TagProtection getTagProtection(String tagName) {
 		for (TagProtection protection: tagProtections) {
-			if (PathUtils.matchChildAware(protection.getTag(), tagName))
+			if (protection.isEnabled() && PathUtils.matchChildAware(protection.getTag(), tagName))
 				return protection;
 		}
 		return null;
@@ -844,7 +844,7 @@ public class Project extends AbstractEntity {
 	@Nullable
 	public BranchProtection getBranchProtection(String branchName) {
 		for (BranchProtection protection: branchProtections) {
-			if (PathUtils.matchChildAware(protection.getBranch(), branchName))
+			if (protection.isEnabled() && PathUtils.matchChildAware(protection.getBranch(), branchName))
 				return protection;
 		}
 		return null;

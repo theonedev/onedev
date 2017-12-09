@@ -36,6 +36,9 @@
 	color: #444; 
 	margin-right: 8px;
 }
+#project-setting .panel-list .panel-heading input {
+	vertical-align: text-top;
+}
 #project-setting .panel-list .add-new {
 	display: block; 
 	padding: 16px; 
@@ -51,13 +54,14 @@
 	background-color: #EBEBEB; 
 	border-color: #ADADAD;
 }
-#project-setting .panel-list a.add-new .fa {
-	margin-left: 8px;
-}
 #project-setting .panel-list .concrete.list td.path, 
 #project-setting .panel-list .concrete.list td.reviewerNames,
 #project-setting .panel-list .concrete.list td.reviewAppointment {
 	width: 45%;
+}
+
+#project-setting .disabled .panel {
+	color: #999;
 }
 
 #project-setting .commit-message-transform>label {

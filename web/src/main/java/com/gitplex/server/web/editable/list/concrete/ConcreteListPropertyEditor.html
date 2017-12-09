@@ -11,11 +11,6 @@
 			<th>&nbsp;</th>
 		</thead>
 		<tbody>
-			<!-- Put no-elements row here as Firefox has some issues displaying top border 
-			of no-elements if tbody is empty -->
-			<tr wicket:id="noElementsRow" class="no-elements">
-				<td wicket:id="noElementsColumn"><div>No Elements Defined</div></td>
-			</tr>
 			<tr wicket:id="elements">
 				<td wicket:id="properties">
 					<div wicket:id="propertyEditor"></div>
@@ -29,7 +24,7 @@
 		</tbody>
 		<tfoot>
 			<tr class="add-element">
-				<td wicket:id="newRow" class="add-element"><a wicket:id="addElement" title="Add new element"><span class="fa fa-plus-circle add"></span></a></td>
+				<td wicket:id="newRow" class="add-element"><a wicket:id="addElement" title="Add new element" class="btn btn-default"><span class="fa fa-plus-circle add"></span> Add Item</a></td>
 			</tr>
 		</tfoot>
 	</table>
