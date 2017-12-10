@@ -206,6 +206,7 @@ gitplex.server = {
 			if ($dirtyForms.length != 0) {
 				if (confirm("There are unsaved changes, do you want to discard and continue?")) {
 					gitplex.server.form.clearAutosavings($dirtyForms);
+					return true;
 				} else {
 					return false;
 				}
