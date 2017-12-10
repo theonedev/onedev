@@ -8,7 +8,7 @@ gitplex.server.sourceView = {
 
 		var cm = CodeMirror($code[0], {
 			value: fileContent,
-			readOnly: gitplex.server.isDevice()?"nocursor":true,
+			readOnly: "nocursor",
 			theme: "eclipse",
 			lineNumbers: true,
 			lineWrapping: lineWrapMode == "Soft wrap",
@@ -55,11 +55,11 @@ gitplex.server.sourceView = {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
 			$(document).data("SourceViewShortcutsBinded", true);
 
-			document.addEventListener("keydown", function(e) {
-				if (e.altKey && e.keyCode === 79 && $(".modal:visible").length == 0) {
+			$(document).bind("keydown", "o", function(e) {
+				if ($(".modal:visible").length == 0) {
 					e.preventDefault();
 					var $sourceView = $(".source-view");
-					if ($sourceView.length != 0)
+					if ($sourceView.length != 0 && $(".outline-toggle").length != 0)
 						$sourceView.data("callback")("outlineSearch");
 				}
 			});

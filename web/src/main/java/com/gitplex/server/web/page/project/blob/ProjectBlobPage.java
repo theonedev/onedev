@@ -427,7 +427,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 					@Override
 					public String getShortcut() {
-						return "Alt+Q";
+						return "T";
 					}
 
 					@Override
@@ -458,7 +458,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 					@Override
 					public String getShortcut() {
-						return "Alt+A";
+						return "V";
 					}
 
 					@Override

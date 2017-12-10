@@ -1158,7 +1158,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 
 				@Override
 				public String getShortcut() {
-					return "Alt+O";
+					return "O";
 				}
 
 				@Override

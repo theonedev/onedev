@@ -75,17 +75,15 @@ gitplex.server.projectBlob = {
 					"autofit", [$blobContent.width(), $blobContent.height()]);
 		});
 		
-		document.addEventListener("keydown", function(e) {
-			if (e.altKey && $(".modal:visible").length == 0) {
-				if (e.keyCode === 81) {
-					e.preventDefault();
-					callback("quickSearch");
-				} else if (e.keyCode === 65) {
-					e.preventDefault();
-					callback("advancedSearch");
-				}
-			}
+		$(document).bind("keydown", "t", function(e) {
+			if ($(".modal:visible").length == 0)
+				callback("quickSearch");
 		});
+		$(document).bind("keydown", "v", function(e) {
+			if ($(".modal:visible").length == 0)
+				callback("advancedSearch");
+		});
+
 	},
 	getClientHeight: function() {
 		var height = $(window).height()-$("#project-blob>.blob-content").offset().top;
