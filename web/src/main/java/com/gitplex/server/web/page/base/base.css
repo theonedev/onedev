@@ -87,6 +87,12 @@ table .row-selector {
 .navigatorLabel {
 	display: none;
 }
+
+a.disabled {
+	color: #999 !important;
+	text-decoration: none;
+}
+
 a.wicket_orderUp:after, a.wicket_orderDown:after, a.wicket_orderNone:after { 
     font-family: FontAwesome; 
     font-weight: normal; 

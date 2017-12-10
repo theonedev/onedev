@@ -11,6 +11,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -38,6 +39,8 @@ import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.RefInfo;
 import com.gitplex.server.manager.VerificationManager;
+import com.gitplex.server.model.Project;
+import com.gitplex.server.model.support.TagProtection;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.Verification;
 import com.gitplex.server.web.behavior.OnTypingDoneBehavior;
@@ -320,6 +323,13 @@ public class ProjectTagsPage extends ProjectPage {
 					}
 
 					@Override
+					protected void disableLink(ComponentTag tag) {
+						super.disableLink(tag);
+						tag.append("class", "disabled", " ");
+						tag.put("title", "Deletion not allowed due to branch protection rule");
+					}
+
+					@Override
 					public void onClick(AjaxRequestTarget target) {
 						getProject().deleteTag(tagName);
 						target.add(tagsContainer);
@@ -331,7 +341,13 @@ public class ProjectTagsPage extends ProjectPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						setVisible(SecurityUtils.canDeleteTag(getProject(), tagName));
+						Project project = getProject();
+						if (SecurityUtils.canWrite(project)) {
+							TagProtection protection = project.getTagProtection(tagName);
+							setEnabled(protection == null || !protection.isNoDeletion());
+						} else {
+							setVisible(false);
+						}
 					}
 					
 				});

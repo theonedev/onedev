@@ -22,6 +22,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -393,12 +394,26 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			}
 			
 			@Override
+			protected void disableLink(ComponentTag tag) {
+				super.disableLink(tag);
+				tag.append("class", "disabled", " ");
+				tag.put("title", "Add files not allowed. Submit pull request for review instead");
+			}
+
+			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible((state.mode == Mode.VIEW || state.mode == Mode.BLAME) 
+				
+				Project project = getProject();
+				if ((state.mode == Mode.VIEW || state.mode == Mode.BLAME) 
 						&& isOnBranch() && state.blobIdent.isTree() 
-						&& SecurityUtils.canWrite(getProject())
-						&& !GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(getLoginUser(), getProject(), state.blobIdent.revision, null));
+						&& SecurityUtils.canWrite(project)) {
+					ProjectManager projectManager = GitPlex.getInstance(ProjectManager.class);
+					setEnabled(!projectManager.isModificationNeedsQualityCheck(
+							getLoginUser(), project, state.blobIdent.revision, null));
+				} else {
+					setVisible(false);
+				}
 			}
 			
 		});

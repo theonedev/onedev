@@ -255,11 +255,6 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 				
 				target.appendJavaScript($(row).chain("remove").get());
 				rows.remove(row);
-
-				if (rows.size() == 0) {
-					WebMarkupContainer table = (WebMarkupContainer) ConcreteListPropertyEditor.this.get("listEditor");
-					target.add(table.get("noElementsRow"));
-				}
 				send(ConcreteListPropertyEditor.this, Broadcast.BUBBLE, new EditorChanged(target));								
 			}
 

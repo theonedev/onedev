@@ -40,12 +40,12 @@ public class MarkdownBlobViewPanel extends BlobViewPanel {
 	}
 
 	@Override
-	protected boolean canEdit() {
+	protected boolean isEditSupported() {
 		return true;
 	}
 
 	@Override
-	protected boolean canBlame() {
+	protected boolean isBlameSupported() {
 		return true;
 	}
 

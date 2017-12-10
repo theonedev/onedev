@@ -9,6 +9,7 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -20,7 +21,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 
+import com.gitplex.server.GitPlex;
 import com.gitplex.server.git.BlobIdent;
+import com.gitplex.server.manager.ProjectManager;
+import com.gitplex.server.manager.UserManager;
+import com.gitplex.server.model.Project;
+import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
@@ -47,9 +53,9 @@ public abstract class BlobViewPanel extends Panel {
 		this.context = context;
 	}
 	
-	protected abstract boolean canEdit();
+	protected abstract boolean isEditSupported();
 	
-	protected abstract boolean canBlame();
+	protected abstract boolean isBlameSupported();
 	
 	protected WebMarkupContainer newOptions(String id) {
 		WebMarkupContainer options = new WebMarkupContainer(id);
@@ -63,12 +69,54 @@ public abstract class BlobViewPanel extends Panel {
 
 	private void newChangeActions(@Nullable IPartialPageRequestHandler target) {
 		WebMarkupContainer changeActions = new WebMarkupContainer("changeActions");
-		changeActions.setVisible(SecurityUtils.canModify(context.getProject(), context.getBlobIdent().revision, context.getBlobIdent().path) 
-				&& (context.isOnBranch()));
-		changeActions.setOutputMarkupId(true);
-		
-		if (canEdit()) {
-			AjaxLink<Void> editLink = new ViewStateAwareAjaxLink<Void>("edit", true) {
+
+		Project project = context.getProject();
+		if (SecurityUtils.canWrite(project) && context.isOnBranch()) {
+			ProjectManager projectManager = GitPlex.getInstance(ProjectManager.class);
+			User user = GitPlex.getInstance(UserManager.class).getCurrent();
+			boolean needsQualityCheck = projectManager.isModificationNeedsQualityCheck(
+					user, project, context.getBlobIdent().revision, context.getBlobIdent().path);
+
+			if (isEditSupported()) {
+				AjaxLink<Void> editLink = new ViewStateAwareAjaxLink<Void>("edit", true) {
+
+					@Override
+					protected void disableLink(ComponentTag tag) {
+						super.disableLink(tag);
+						tag.append("class", "disabled", " ");
+						tag.put("title", "Direct edit not allowed. Submit pull request for review instead");
+					}
+					
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+					}
+					
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						context.onModeChange(target, Mode.EDIT);
+					}
+					
+				};
+				if (needsQualityCheck)
+					editLink.setEnabled(false);
+				else
+					editLink.add(AttributeAppender.append("title", "Edit on branch " + context.getBlobIdent().revision));
+				
+				changeActions.add(editLink);
+			} else {
+				changeActions.add(new WebMarkupContainer("edit").setVisible(false));
+			}
+			
+			AjaxLink<Void> deleteLink = new ViewStateAwareAjaxLink<Void>("delete") {
+
+				@Override
+				protected void disableLink(ComponentTag tag) {
+					super.disableLink(tag);
+					tag.append("class", "disabled", " ");
+					tag.put("title", "Direct deletion not allowed. Submit pull request for review instead");
+				}
 
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -78,32 +126,25 @@ public abstract class BlobViewPanel extends Panel {
 				
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					context.onModeChange(target, Mode.EDIT);
+					context.onModeChange(target, Mode.DELETE);
 				}
-				
+
 			};
-			editLink.add(AttributeAppender.append("title", "Edit on branch " + context.getBlobIdent().revision));
-			changeActions.add(editLink);
+
+			if (needsQualityCheck)
+				deleteLink.setEnabled(false);
+			else
+				deleteLink.add(AttributeAppender.append("title", "Delete from branch " + context.getBlobIdent().revision));
+			
+			changeActions.add(deleteLink);
+			
 		} else {
-			changeActions.add(new WebMarkupContainer("edit").setVisible(false));
+			changeActions.setVisible(false);
+			changeActions.add(new WebMarkupContainer("edit"));
+			changeActions.add(new WebMarkupContainer("delete"));
 		}
 		
-		AjaxLink<Void> deleteLink = new ViewStateAwareAjaxLink<Void>("delete") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-			}
-			
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				context.onModeChange(target, Mode.DELETE);
-			}
-
-		};
-		deleteLink.add(AttributeAppender.append("title", "Delete from branch " + context.getBlobIdent().revision));
-		changeActions.add(deleteLink);
+		changeActions.setOutputMarkupId(true);
 		
 		if (target != null) {
 			replace(changeActions);

@@ -60,6 +60,7 @@ import com.gitplex.server.manager.VerificationManager;
 import com.gitplex.server.model.BranchWatch;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.model.PullRequest;
+import com.gitplex.server.model.support.BranchProtection;
 import com.gitplex.server.model.support.ProjectAndBranch;
 import com.gitplex.server.security.SecurityUtils;
 import com.gitplex.server.util.Verification;
@@ -660,6 +661,17 @@ public class ProjectBranchesPage extends ProjectPage {
 				actionsContainer.add(new ModalLink("delete") {
 
 					@Override
+					protected void disableLink(ComponentTag tag) {
+						super.disableLink(tag);
+						tag.append("class", "disabled", " ");
+						if (getProject().getDefaultBranch().equals(branch)) {
+							tag.put("title", "Can not delete default branch");
+						} else {
+							tag.put("title", "Deletion not allowed due to branch protection rule");
+						}
+					}
+
+					@Override
 					protected Component newContent(String id, ModalPanel modal) {
 						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", ProjectBranchesPage.this);
 						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
@@ -714,12 +726,18 @@ public class ProjectBranchesPage extends ProjectPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (!getProject().getDefaultBranch().equals(branch) 
-								&& SecurityUtils.canDeleteBranch(getProject(), branch)) {
-							setVisible(true);
+						Project project = getProject();
+						if (SecurityUtils.canWrite(project)) {
+							if (project.getDefaultBranch().equals(branch)) {
+								setEnabled(false);
+							} else {
+								BranchProtection protection = project.getBranchProtection(branch);
+								setEnabled(protection == null || !protection.isNoDeletion());
+							}
 						} else {
 							setVisible(false);
 						}
+						
 					}
 
 				});

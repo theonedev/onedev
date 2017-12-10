@@ -138,24 +138,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 	
-	public static boolean canUpdateTag(Project project, String tagName) {
-		if (canWrite(project)) {
-			TagProtection protection = project.getTagProtection(tagName);
-			return protection == null || !protection.isNoUpdate();
-		} else {
-			return false;
-		}
-	}
-	
-	public static boolean canDeleteTag(Project project, String tagName) {
-		if (canWrite(project)) {
-			TagProtection protection = project.getTagProtection(tagName);
-			return protection == null || !protection.isNoDeletion();
-		} else {
-			return false;
-		}
-	}
-	
 	@Nullable
 	public static boolean canCreateTag(Project project, String tagName) {
 		if (canWrite(project)) {

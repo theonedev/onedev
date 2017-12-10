@@ -957,12 +957,12 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	}
 
 	@Override
-	protected boolean canEdit() {
+	protected boolean isEditSupported() {
 		return true;
 	}
 	
 	@Override
-	protected boolean canBlame() {
+	protected boolean isBlameSupported() {
 		return true;
 	}
 
