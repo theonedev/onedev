@@ -8,6 +8,8 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
+import com.gitplex.server.GitPlex;
+import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.util.ContentDetector;
 import com.gitplex.server.web.component.markdown.MarkdownEditor;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
@@ -44,7 +46,15 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 				return MarkdownBlobEditor.this.getAutosaveKey();
 			}
 
+			@Override
+			protected String renderMarkdown(String markdown) {
+				MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
+				String html = markdownManager.render(markdown);
+				return markdownManager.process(html, context);
+			}
+
 		});
+		
 		if (context.getMode() != Mode.EDIT) {
 			input.add(AttributeAppender.append("class", "no-autofocus"));
 		}

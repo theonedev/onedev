@@ -148,7 +148,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 				sourceFormat.getIndentType(), 
 				sourceFormat.getTabSize(), 
 				sourceFormat.getLineWrapMode(), 
-				context.getMode() == Mode.EDIT, 
+				context.getMode() == Mode.EDIT || context.getInitialNewPath() != null, 
 				autosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		

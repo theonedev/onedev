@@ -38,21 +38,18 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.crypt.Base64;
-import org.eclipse.jgit.lib.FileMode;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitplex.launcher.loader.AppLoader;
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.git.BlobIdent;
 import com.gitplex.server.manager.MarkdownManager;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.component.markdown.emoji.EmojiOnes;
 import com.gitplex.server.web.component.modal.ModalPanel;
-import com.gitplex.server.web.page.project.blob.ProjectBlobPage;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
 import com.gitplex.server.web.util.avatar.AvatarManager;
 import com.google.common.base.Charsets;
@@ -112,29 +109,21 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		input.setModelObject(getModelObject());
 	}
 
-	@Nullable
-	public String getBaseUrl() {
-		if (blobRenderContext != null) {
-			BlobIdent blobIdent = new BlobIdent(blobRenderContext.getBlobIdent().revision, blobRenderContext.getNewPath(), 
-					FileMode.REGULAR_FILE.getBits());
-			ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-			return urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(blobRenderContext.getProject(), state)).toString();
-		} else {
-			return null;
-		}
-	}
-	
-	private String render(String markdown) {
-		if (StringUtils.isNotBlank(markdown)) {
-			MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
-			
+	private String renderInput(String input) {
+		if (StringUtils.isNotBlank(input)) {
 			// Normalize line breaks to make source position tracking information comparable 
 			// to textarea caret position when sync edit/preview scroll bar
-			markdown = StringUtils.replace(markdown, "\r\n", "\n");
-			return markdownManager.render(markdown, getBaseUrl(), true);
+			input = StringUtils.replace(input, "\r\n", "\n");
+			return renderMarkdown(input);
 		} else {
 			return "<div class='message'>Nothing to preview</div>";
 		}
+	}
+	
+	protected String renderMarkdown(String markdown) {
+		MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
+		String rendered = markdownManager.render(markdown);
+		return markdownManager.process(rendered, blobRenderContext);
 	}
 	
 	@Override
@@ -167,7 +156,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 
 		if (initialSplit) {
 			container.add(AttributeAppender.append("class", "split-mode"));
-			preview.add(new Label("rendered", render(getModelObject())) {
+			preview.add(new Label("rendered", renderInput(getModelObject())) {
 
 				@Override
 				public void renderHead(IHeaderResponse response) {
@@ -203,7 +192,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				switch (action) {
 				case "render":
 					String markdown = params.getParameterValue("param1").toString();
-					String rendered = render(markdown);
+					String rendered = renderInput(markdown);
 					String script = String.format("gitplex.server.markdown.onRendered('%s', '%s');", 
 							container.getMarkupId(), JavaScriptEscape.escapeJavaScript(rendered));
 					target.appendJavaScript(script);

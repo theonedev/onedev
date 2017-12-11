@@ -240,11 +240,10 @@ public class FolderViewPanel extends Panel {
 		}, null) {
 
 			@Override
-			protected String getBaseUrl() {
-				ProjectBlobPage.State state = new ProjectBlobPage.State(readmeModel.getObject());
-				return urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(context.getProject(), state)).toString();
+			protected Object getRenderContext() {
+				return context;
 			}
-			
+
 		});
 		
 		add(readmeContainer);

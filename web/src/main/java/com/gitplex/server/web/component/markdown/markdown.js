@@ -117,7 +117,7 @@ gitplex.server.markdown = {
 			function render() {
 				/* 
 				 * in case an ajax call is ongoing we postpone the render 
-				 * as it the ongoing call may alter the component layout
+				 * as the ongoing call may alter the component layout
 				 */
 				if (gitplex.server.ajaxRequests.count != 0) {  
 					setTimeout(render, 10);
@@ -265,6 +265,18 @@ gitplex.server.markdown = {
 			}
 		});
 
+		$container.on("nameChanging", function() {
+			/*
+			 * Re-render the markdown in case of name changing, as rendering process 
+			 * may depend on name associated with the markdown. For instance, the 
+			 * markdown editor might be used as a blob editor, and it might be 
+			 * referencing relative paths to other blob files. A name change might 
+			 * change the directory structure of the file being edited as well, hence
+			 * affect the relative path rendering
+			 */
+			gitplex.server.markdown.fireInputEvent($input);
+		});
+		
 		$edit.resizable({
 			autoHide: false,
 			handles: {"s": $edit.children(".ui-resizable-handle")},

@@ -34,7 +34,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		super.onInitialize();
 
 		Blob blob = context.getProject().getBlob(context.getBlobIdent());
-		String targetPath = PathUtils.normalize(
+		String targetPath = PathUtils.normalizeDots(
 				PathUtils.resolveSibling(context.getBlobIdent().path, blob.getText().getContent()));
 		if (targetPath != null && (targetPath.startsWith("/") || new File(targetPath).isAbsolute())) 
 			targetPath = null;

@@ -1,18 +1,18 @@
-package com.gitplex.server.web.component.comment;
+package com.gitplex.server.web.util.markdown;
 
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Document;
 
 import com.gitplex.server.model.PullRequest;
-import com.gitplex.server.util.markdown.HtmlTransformer;
+import com.gitplex.server.util.markdown.MarkdownProcessor;
 import com.gitplex.server.util.markdown.PullRequestParser;
 import com.gitplex.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
 
-public class PullRequestTransformer extends PullRequestParser implements HtmlTransformer {
+public class PullRequestProcessor extends PullRequestParser implements MarkdownProcessor {
 	
 	@Override
-	public void transform(Element body) {
-		parseRequests(body);
+	public void process(Document document, Object context) {
+		parseRequests(document);
 	}
 
 	@Override

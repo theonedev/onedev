@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import com.gitplex.server.web.behavior.AbstractPostAjaxBehavior;
 import com.gitplex.server.web.component.link.ViewStateAwareAjaxLink;
 import com.gitplex.server.web.page.project.blob.navigator.BlobNameChanging;
 import com.gitplex.server.web.page.project.blob.render.BlobRenderContext;
@@ -105,10 +106,11 @@ public abstract class BlobEditPanel extends Panel {
 			
 		}));
 		
-		add(recreateBehavior = new AbstractDefaultAjaxBehavior() {
+		add(recreateBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
+				// recreate content editor as different name might be using different editor
 				context.onModeChange(target, Mode.ADD);
 			}
 			
@@ -125,15 +127,15 @@ public abstract class BlobEditPanel extends Panel {
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
-		if ((event.getPayload() instanceof BlobNameChanging) && context.getMode() == Mode.ADD) {
+		if (event.getPayload() instanceof BlobNameChanging) {
 			/*
 			 * Blob name is changing and current editor might be inappropriate for current  
 			 * blob name, so we need to re-create the editor if the form does not have 
 			 * any change yet
 			 */
 			BlobNameChanging payload = (BlobNameChanging) event.getPayload();
-			String script = String.format("gitplex.server.blobEdit.checkClean('%s', %s);", 
-					getMarkupId(), recreateBehavior.getCallbackFunction());
+			String script = String.format("gitplex.server.blobEdit.onNameChanging('%s', %s, %s);", 
+					getMarkupId(), context.getMode() == Mode.ADD, recreateBehavior.getCallbackFunction());
 			payload.getHandler().appendJavaScript(script);
 		}
 	}

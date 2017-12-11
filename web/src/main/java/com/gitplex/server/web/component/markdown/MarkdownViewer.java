@@ -41,6 +41,10 @@ public class MarkdownViewer extends GenericPanel<String> {
 			lastContentVersion = contentVersionSupport.getVersion();
 	}
 	
+	protected Object getRenderContext() {
+		return null;
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -55,7 +59,9 @@ public class MarkdownViewer extends GenericPanel<String> {
 			protected String load() {
 				String markdown = MarkdownViewer.this.getModelObject();
 				if (markdown != null) {
-					return AppLoader.getInstance(MarkdownManager.class).render(markdown, getBaseUrl(), true);
+					MarkdownManager markdownManager = AppLoader.getInstance(MarkdownManager.class);
+					String html = markdownManager.render(markdown);
+					return markdownManager.process(html, getRenderContext());
 				} else {
 					return null;
 				}
@@ -95,10 +101,6 @@ public class MarkdownViewer extends GenericPanel<String> {
 		setOutputMarkupId(true);
 	}
 	
-	protected String getBaseUrl() {
-		return null; 
-	}
-
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

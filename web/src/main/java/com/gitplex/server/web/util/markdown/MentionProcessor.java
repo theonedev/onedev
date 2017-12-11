@@ -1,18 +1,18 @@
-package com.gitplex.server.web.component.comment;
+package com.gitplex.server.web.util.markdown;
 
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Document;
 
 import com.gitplex.server.model.User;
-import com.gitplex.server.util.markdown.HtmlTransformer;
+import com.gitplex.server.util.markdown.MarkdownProcessor;
 import com.gitplex.server.util.markdown.MentionParser;
 import com.gitplex.server.web.page.user.UserProfilePage;
 
-public class MentionTransformer extends MentionParser implements HtmlTransformer {
+public class MentionProcessor extends MentionParser implements MarkdownProcessor {
 	
 	@Override
-	public void transform(Element body) {
-		parseMentions(body);
+	public void process(Document document, Object context) {
+		parseMentions(document);
 	}
 
 	@Override

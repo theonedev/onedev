@@ -108,7 +108,7 @@ public class CommitOptionPanel extends Panel {
 
 	@Nullable
 	private String getOldPath() {
-		return context.getBlobIdent().isFile()?context.getBlobIdent().path:null;
+		return context.getMode()!=Mode.ADD? context.getBlobIdent().path: null;
 	}
 	
 	private String getDefaultCommitMessage() {
@@ -317,7 +317,6 @@ public class CommitOptionPanel extends Panel {
 
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
-				
 				if (GitPlex.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(SecurityUtils.getUser(), 
 						context.getProject(), context.getBlobIdent().revision, context.getNewPath())) {
 					CommitOptionPanel.this.error("Adding of file '" + context.getNewPath() + "' need to be reviewed/verified. "

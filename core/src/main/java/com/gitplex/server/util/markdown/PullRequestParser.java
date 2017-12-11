@@ -6,16 +6,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
 
-import com.google.common.collect.ImmutableSet;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.model.PullRequest;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.util.JsoupUtils;
 import com.gitplex.server.util.TextNodeVisitor;
+import com.google.common.collect.ImmutableSet;
 
 public class PullRequestParser {
 	
@@ -23,11 +23,11 @@ public class PullRequestParser {
 	
 	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)#(\\d+)(?=($|\\s+))");
 
-	public Collection<PullRequest> parseRequests(String html) {
-		return parseRequests(Jsoup.parseBodyFragment(html).body());		
+	public Collection<PullRequest> parseRequests(String rendered) {
+		return parseRequests(Jsoup.parseBodyFragment(rendered));		
 	}
 	
-	public Collection<PullRequest> parseRequests(Element body) {
+	public Collection<PullRequest> parseRequests(Document document) {
 		Collection<PullRequest> references = new HashSet<>();
 		
 		TextNodeVisitor visitor = new TextNodeVisitor() {
@@ -42,7 +42,7 @@ public class PullRequestParser {
 		};
 		
 		NodeTraversor tranversor = new NodeTraversor(visitor);
-		tranversor.traverse(body);
+		tranversor.traverse(document);
 		
 		Dao dao = GitPlex.getInstance(Dao.class);
 		

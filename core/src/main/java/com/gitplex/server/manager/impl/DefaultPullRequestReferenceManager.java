@@ -43,9 +43,9 @@ public class DefaultPullRequestReferenceManager extends AbstractEntityManager<Pu
 		if (event instanceof MarkdownAware) {
 			String markdown = ((MarkdownAware)event).getMarkdown();
 			if (markdown != null) {
-				String html = markdownManager.render(markdown, null, false);
+				String rendered = markdownManager.render(markdown);
 				
-				for (PullRequest referenced: new PullRequestParser().parseRequests(html)) {
+				for (PullRequest referenced: new PullRequestParser().parseRequests(rendered)) {
 					if (!referenced.equals(event.getRequest())) {
 						EntityCriteria<PullRequestReference> criteria = EntityCriteria.of(PullRequestReference.class);
 						criteria.add(Restrictions.eq("referenced", referenced));

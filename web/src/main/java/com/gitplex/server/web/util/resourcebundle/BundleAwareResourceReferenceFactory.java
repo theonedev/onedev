@@ -53,7 +53,7 @@ class BundleAwareResourceReferenceFactory implements IResourceReferenceFactory {
 							possibleName = PathUtils.resolve(referenceParentPath, relativePath);
 						else
 							possibleName = relativePath.toString();
-						possibleName = PathUtils.normalize(possibleName);
+						possibleName = PathUtils.normalizeDots(possibleName);
 						if (possibleName != null) {
 							Key possibleKey = new Key(headerItem.getReference().getScope().getName(), possibleName, 
 									key.getLocale(), key.getStyle(), key.getVariation());

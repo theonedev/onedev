@@ -184,19 +184,11 @@ abstract class InsertUrlPanel extends Panel {
 
 							@Override
 							protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-								String baseUrl = markdownEditor.getBaseUrl();
+								String baseUrl = blobRenderContext.getBaseUrl();
 								String referenceUrl = urlFor(ProjectBlobPage.class, 
 										ProjectBlobPage.paramsOf(blobRenderContext.getProject(), blobIdent)).toString();
 								String relativized = PathUtils.relativize(baseUrl, referenceUrl);		
-								String relativePath;
-								if (relativized.length() != 0) {
-									relativePath = relativized.toString().substring("../".length());
-								} else if (baseUrl.contains("/")) {
-									relativePath = StringUtils.substringAfterLast(baseUrl, "/");
-								} else {
-									relativePath = baseUrl;
-								}
-								markdownEditor.insertUrl(target, isImage, relativePath, blobIdent.getName(), null);
+								markdownEditor.insertUrl(target, isImage, relativized, blobIdent.getName(), null);
 								onClose(target);
 								dropdown.close();
 							}

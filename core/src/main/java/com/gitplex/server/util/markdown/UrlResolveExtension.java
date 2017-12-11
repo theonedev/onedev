@@ -57,7 +57,9 @@ public class UrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
 					                        url += content;
 					                    }
 
-						                html.attr("src", resolveUrl(baseUrl, url));
+					                    String resolvedUrl = resolveUrl(baseUrl, url); 
+						                html.attr("src", resolvedUrl);
+					                    html.attr("data-resolved", String.valueOf(!resolvedUrl.equals(url)));
 					                    html.attr("alt", altText);
 					                    if (image.getTitle().isNotNull()) {
 					                        html.attr("title", image.getTitle().unescape());
@@ -77,7 +79,9 @@ public class UrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
 					                    ResolvedLink resolvedLink = 
 					                    		context.resolveLink(LinkType.LINK, link.getUrl().unescape(), null);
 
-					                    html.attr("href", resolveUrl(baseUrl, resolvedLink.getUrl()));
+					                    String resolvedUrl = resolveUrl(baseUrl, resolvedLink.getUrl());
+					                    html.attr("href", resolvedUrl);
+					                    html.attr("data-resolved", String.valueOf(!resolvedUrl.equals(resolvedLink.getUrl())));
 					                    if (link.getTitle().isNotNull()) {
 					                        html.attr("title", link.getTitle().unescape());
 					                    }
@@ -103,7 +107,7 @@ public class UrlResolveExtension implements HtmlRenderer.HtmlRendererExtension {
     	if (urlToResolve.contains(":") || urlToResolve.startsWith("/") || urlToResolve.startsWith("#")) {
     		return urlToResolve;
     	} else {
-        	return PathUtils.normalize(PathUtils.resolveSibling(baseUrl, urlToResolve));
+        	return PathUtils.normalizeDots(PathUtils.resolve(baseUrl, urlToResolve));
     	}
     }
     

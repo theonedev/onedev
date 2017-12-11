@@ -35,6 +35,29 @@ public interface BlobRenderContext extends Serializable {
 	
 	String getMarkUrl(TextRange mark);
 	
+	/**
+	 * Base path of current blob, which can be used to calculate relative paths 
+	 * for other files referenced by current blob
+	 * 
+	 * @return
+	 * 			base path of current blob for relative path calculation
+	 * 
+	 * @return
+	 */
+	@Nullable
+	String getBasePath();
+	
+	/**
+	 * Base url of current blob, which can be used to calculate relative urls 
+	 * for other files referenced by current blob
+	 * 
+	 * @return
+	 * 			base url of current blob for relative url calculation
+	 */
+	String getBaseUrl();
+	
+	String getRootUrl();
+	
 	Mode getMode();
 
 	boolean isOnBranch();
@@ -62,10 +85,19 @@ public interface BlobRenderContext extends Serializable {
 	 * @return
 	 * 			new path of the file being added/edited, or <tt>null</tt> if new path is not specified yet
 	 * @throws
-	 * 			IllegalStateException if call this method if file is not being added or edited
+	 * 			IllegalStateException if file is not being added/edited
 	 */
 	@Nullable
 	String getNewPath();
+	
+	/**
+	 * Get initial new path when add a file
+	 * 
+	 * @return
+	 * 			initial path of the file being added, or <tt>null</tt> if no initial path is specified
+	 */
+	@Nullable
+	String getInitialNewPath();
 	
 	String getAutosaveKey();
 }

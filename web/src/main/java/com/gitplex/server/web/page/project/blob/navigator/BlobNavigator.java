@@ -245,8 +245,8 @@ public class BlobNavigator extends Panel {
 			Form<?> form = new Form<Void>("form");
 			lastSegment.add(form);
 			String name;
-			if (context.getMode() == Mode.ADD)
-				name = "";
+			if (context.getMode() == Mode.ADD) 
+				name = context.getInitialNewPath();
 			else if (file.path.contains("/"))
 				name = StringUtils.substringAfterLast(file.path, "/");
 			else

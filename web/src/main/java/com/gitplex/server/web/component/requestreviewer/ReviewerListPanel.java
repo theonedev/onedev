@@ -31,6 +31,7 @@ import com.gitplex.server.model.Review;
 import com.gitplex.server.model.ReviewInvitation;
 import com.gitplex.server.model.User;
 import com.gitplex.server.security.SecurityUtils;
+import com.gitplex.server.util.JsoupUtils;
 import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.server.web.behavior.dropdown.DropdownHover;
 import com.gitplex.server.web.component.avatar.AvatarLink;
@@ -130,7 +131,8 @@ public class ReviewerListPanel extends GenericPanel<PullRequest> {
 							@Override
 							protected Component newContent(String id) {
 								MarkdownManager markdownManager = GitPlex.getInstance(MarkdownManager.class);
-								Label label = new Label(id, markdownManager.render(reviewNote, null, true));
+								String rendered = markdownManager.render(reviewNote);
+								Label label = new Label(id, JsoupUtils.clean(rendered).body().html());
 								label.add(AttributeAppender.append("class", "review-note"));
 								label.setEscapeModelStrings(false);
 								return label;

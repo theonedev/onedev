@@ -13,18 +13,10 @@ public interface MarkdownManager {
 	 * @return
 	 * 			rendered html
 	 */
-	String render(String markdown, @Nullable String baseUrl, boolean postProcess);
-
-	/**
-	 * Sanitize and transform specified html.
-	 * 
-	 * @param html
-	 * 			html to be post-processed
-	 * @return
-	 * 			post-processed html
-	 */
-	String postProcess(String html);
+	String render(String markdown);
 	
+	String process(String rendered, @Nullable Object context);
+
 	/**
 	 * Escape html characters in specified markdown so that the markdown plain text 
 	 * can be embedded in html content such as html email.

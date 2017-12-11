@@ -91,8 +91,8 @@ public class DefaultNotificationManager implements NotificationManager {
 		if (event.getRequest() == null) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
-			String html = markdownManager.render(markdown, null, false);
-			Collection<User> mentionUsers = new MentionParser().parseMentions(html);
+			String rendered = markdownManager.render(markdown);
+			Collection<User> mentionUsers = new MentionParser().parseMentions(rendered);
 			if (!mentionUsers.isEmpty()) {
 				String url;
 				if (event instanceof CodeCommentCreated)
@@ -298,8 +298,8 @@ public class DefaultNotificationManager implements NotificationManager {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			if (markdown != null) {
-				String html = markdownManager.render(markdown, null, false);
-				mentionUsers.addAll(new MentionParser().parseMentions(html));
+				String rendered = markdownManager.render(markdown);
+				mentionUsers.addAll(new MentionParser().parseMentions(rendered));
 				if (!mentionUsers.isEmpty()) {
 					String url;
 					if (event instanceof PullRequestCommentCreated)

@@ -17,7 +17,7 @@ public abstract class TextNodeVisitor implements NodeVisitor {
 
 	private final List<TextNode> matchedNodes = Lists.newArrayList();
 
-	abstract protected boolean isApplicable(TextNode node);
+	protected abstract boolean isApplicable(TextNode node);
 
 	@Override
 	public void head(Node node, int depth) {

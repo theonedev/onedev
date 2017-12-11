@@ -66,8 +66,12 @@ gitplex.server.blobEdit = {
 			$body.children(".commit-options").show();
 		}
 	},
-	checkClean: function(containerId, recreateCallback) {
-		if ($("#" + containerId + ">.blob-edit>.body form.dirty").length == 0)
+	onNameChanging: function(containerId, addingFile, recreateCallback) {
+		var $body = $("#" + containerId + ">.blob-edit>.body");
+		var contentModified = $body.find("form.dirty").length != 0;
+		if (addingFile && !contentModified)
 			recreateCallback();
+		else
+			$body.find(".name-changing-listener").trigger("nameChanging");
 	}
 };

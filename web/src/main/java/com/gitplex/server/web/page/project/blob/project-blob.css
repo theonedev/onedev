@@ -98,3 +98,17 @@
 	background: #EEE;
 }
 
+.markdown-rendered a+.missing, img+.missing {
+	color: #333;
+	background: #FDB3B3;
+	margin-left: 4px;
+	padding: 0 2px;
+}
+.markdown-rendered img+.missing {
+	vertical-align: middle;
+}
+
+.markdown-rendered .missing+.add-missing {
+	color: #05B305;
+	margin-left: 4px;
+}

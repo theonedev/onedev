@@ -49,6 +49,7 @@ import com.gitplex.server.git.exception.ObsoleteCommitException;
 import com.gitplex.server.git.exception.RefUpdateException;
 import com.gitplex.server.util.diff.WhitespaceOption;
 import com.gitplex.utils.LockUtils;
+import com.gitplex.utils.PathUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -214,31 +215,20 @@ public class GitUtils {
 	}
 
 	public static List<String> splitPath(@Nullable String path) {
-		List<String> pathElements = new ArrayList<>();
-		if (path != null) {
-			for (String element: Splitter.on("/").split(path)) {
-				if (element.length() != 0)
-					pathElements.add(element);
-			}
-		}
-		return pathElements;
-	}
-
-	public static @Nullable String joinPath(List<String> pathSegments) {
-		List<String> nonEmptyElements = new ArrayList<>();
-		for (String element: pathSegments){
-			if (element.length() != 0)
-				nonEmptyElements.add(element);
-		}
-		if (!nonEmptyElements.isEmpty()) {
-			return Joiner.on("/").join(nonEmptyElements);
-		} else {
-			return null;
-		}
+		List<String> pathSegments;
+		if (path != null)
+			pathSegments = Splitter.on("/").omitEmptyStrings().splitToList(path);
+		else
+			pathSegments = new ArrayList<>();
+		return pathSegments;
 	}
 
 	public static @Nullable String normalizePath(@Nullable String path) {
-		return joinPath(splitPath(path));
+		List<String> pathSegments = splitPath(PathUtils.normalizeDots(path));
+		if (!pathSegments.isEmpty()) 
+			return Joiner.on("/").join(pathSegments);
+		else 
+			return null;
 	}
 
 	/**

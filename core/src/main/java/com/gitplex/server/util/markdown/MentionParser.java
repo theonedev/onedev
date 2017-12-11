@@ -6,16 +6,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
 
-import com.google.common.collect.ImmutableSet;
 import com.gitplex.server.GitPlex;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.model.User;
 import com.gitplex.server.util.JsoupUtils;
 import com.gitplex.server.util.TextNodeVisitor;
+import com.google.common.collect.ImmutableSet;
 
 public class MentionParser {
 	
@@ -23,11 +23,11 @@ public class MentionParser {
 	
 	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)(?=($|\\s+))");
 
-	public Collection<User> parseMentions(String html) {
-		return parseMentions(Jsoup.parseBodyFragment(html).body());		
+	public Collection<User> parseMentions(String rendered) {
+		return parseMentions(Jsoup.parseBodyFragment(rendered));		
 	}
 	
-	public Collection<User> parseMentions(Element body) {
+	public Collection<User> parseMentions(Document document) {
 		Collection<User> mentions = new HashSet<>();
 		
 		TextNodeVisitor visitor = new TextNodeVisitor() {
@@ -42,7 +42,7 @@ public class MentionParser {
 		};
 		
 		NodeTraversor tranversor = new NodeTraversor(visitor);
-		tranversor.traverse(body);
+		tranversor.traverse(document);
 		
 		UserManager userManager = GitPlex.getInstance(UserManager.class);
 		

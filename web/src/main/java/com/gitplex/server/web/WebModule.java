@@ -20,10 +20,8 @@ import com.gitplex.launcher.loader.AbstractPlugin;
 import com.gitplex.launcher.loader.AbstractPluginModule;
 import com.gitplex.server.git.exception.GitException;
 import com.gitplex.server.manager.UrlManager;
-import com.gitplex.server.util.markdown.HtmlTransformer;
+import com.gitplex.server.util.markdown.MarkdownProcessor;
 import com.gitplex.server.util.reviewrequirement.InvalidReviewRuleException;
-import com.gitplex.server.web.component.comment.MentionTransformer;
-import com.gitplex.server.web.component.comment.PullRequestTransformer;
 import com.gitplex.server.web.component.diff.DiffRenderer;
 import com.gitplex.server.web.component.markdown.SourcePositionTrackExtension;
 import com.gitplex.server.web.component.markdown.emoji.EmojiExtension;
@@ -36,6 +34,9 @@ import com.gitplex.server.web.util.avatar.AvatarManager;
 import com.gitplex.server.web.util.avatar.DefaultAvatarManager;
 import com.gitplex.server.web.util.commitmessagetransform.CommitMessageTransformer;
 import com.gitplex.server.web.util.commitmessagetransform.PatternCommitMessageTransformer;
+import com.gitplex.server.web.util.markdown.MentionProcessor;
+import com.gitplex.server.web.util.markdown.PullRequestProcessor;
+import com.gitplex.server.web.util.markdown.RelativeUrlProcessor;
 import com.gitplex.server.web.websocket.CodeCommentChangeBroadcaster;
 import com.gitplex.server.web.websocket.CommitIndexedBroadcaster;
 import com.gitplex.server.web.websocket.DefaultWebSocketManager;
@@ -80,8 +81,10 @@ public class WebModule extends AbstractPluginModule {
 
 		contribute(Extension.class, new EmojiExtension());
 		contribute(Extension.class, new SourcePositionTrackExtension());
-		contribute(HtmlTransformer.class, new MentionTransformer());
-		contribute(HtmlTransformer.class, new PullRequestTransformer());
+		
+		contribute(MarkdownProcessor.class, new MentionProcessor());
+		contribute(MarkdownProcessor.class, new PullRequestProcessor());
+		contribute(MarkdownProcessor.class, new RelativeUrlProcessor());
 
 		contribute(ResourcePackScopeContribution.class, new ResourcePackScopeContribution() {
 			

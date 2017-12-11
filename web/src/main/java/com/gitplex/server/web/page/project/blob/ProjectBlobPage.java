@@ -104,6 +104,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	
 	private static final String PARAM_PATH = "path";
 	
+	private static final String PARAM_INITIAL_NEW_PATH = "initial-new-path";
+	
 	private static final String PARAM_REQUEST = "request";
 	
 	private static final String PARAM_COMMENT = "comment";
@@ -166,6 +168,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		
 		state.query = params.get(PARAM_QUERY).toString();
+	
+		state.initialNewPath = params.get(PARAM_INITIAL_NEW_PATH).toString();
 		
 		if (state.mode == Mode.ADD || state.mode == Mode.EDIT || state.mode == Mode.DELETE) {
 			if (!isOnBranch()) 
@@ -736,6 +740,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			params.add(PARAM_MODE, state.mode.name().toLowerCase());
 		if (state.query != null)
 			params.add(PARAM_QUERY, state.query);
+		if (state.initialNewPath != null)
+			params.add(PARAM_INITIAL_NEW_PATH, state.initialNewPath);
 	}
 	
 	public static PageParameters paramsOf(Project project, State state) {
@@ -802,7 +808,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	public BlobIdent getBlobIdent() {
 		return state.blobIdent;
 	}
-
+	
 	@Override
 	public TextRange getMark() {
 		return state.mark;
@@ -929,6 +935,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		public Mode mode = Mode.VIEW;
 		
 		public String query;
+		
+		public String initialNewPath;
 
 		public State(BlobIdent blobIdent) {
 			this.blobIdent = blobIdent;
@@ -942,6 +950,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 	@Override
 	public void onModeChange(AjaxRequestTarget target, Mode mode) {
+		state.initialNewPath = null;
+		
 		/*
 		 * User might be changing blob name when adding a file, and onModeChange will be called. 
 		 * In this case, we only need to re-create blob content
@@ -1025,6 +1035,49 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 		// fix the issue that sometimes indexing indicator of new commit does not disappear 
 		target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
+	}
+	
+	@Override
+	public String getInitialNewPath() {
+		return state.initialNewPath;
+	}
+	
+	@Override
+	public String getBasePath() {
+		String path;
+		if (state.mode == Mode.ADD || state.mode == Mode.EDIT) {
+			path = getNewPath();
+			if (path != null) {
+				if (path.contains("/"))
+					path = StringUtils.substringBeforeLast(path, "/");
+				else
+					path = null;
+			} else {
+				throw new IllegalStateException();
+			}
+		} else if (state.blobIdent.isTree()) {
+			path = state.blobIdent.path;
+		} else if (state.blobIdent.path.contains("/")) {
+			path = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
+		} else {
+			path = null;
+		}
+		return path;
+	}
+	
+	@Override
+	public String getBaseUrl() {
+		String revision = state.blobIdent.revision;
+		BlobIdent blobIdent = new BlobIdent(revision, getBasePath(), FileMode.TREE.getBits());
+		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
+		return urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), state)).toString();
+	}
+
+	@Override
+	public String getRootUrl() {
+		BlobIdent blobIdent = new BlobIdent(state.blobIdent.revision, null, FileMode.TREE.getBits());
+		return RequestCycle.get().urlFor(ProjectBlobPage.class, 
+				ProjectBlobPage.paramsOf(getProject(), blobIdent)).toString();
 	}
 	
 	@Override
