@@ -8,7 +8,9 @@ gitplex.server.sourceView = {
 
 		var cm = CodeMirror($code[0], {
 			value: fileContent,
-			readOnly: "nocursor",
+			// do not use "readOnly: true" here as otherwise CodeMirror will eat key input
+			// and the search dialog can not be brought out via shortcuts
+			readOnly: "nocursor", 
 			theme: "eclipse",
 			lineNumbers: true,
 			lineWrapping: lineWrapMode == "Soft wrap",
@@ -65,16 +67,17 @@ gitplex.server.sourceView = {
 			});
 		}
 	    
-	    $code.selectionPopover("init", function() {
-	    	if (cm.hasFocus()) {
-		    	var from = cm.getCursor("from");
-		    	var to = cm.getCursor("to");
-		    	if (from.line != to.line || from.ch != to.ch) {
-		    		callback("openSelectionPopover", from.line, from.ch, to.line, to.ch);
-		    		return;
-		    	}
-	    	}	
-	    	return "close";
+	    $code.selectionPopover("init", function(e) {
+	    	if ($(e.target).closest(".selection-popover").length != 0)
+	    		return;
+	    	var from = cm.getCursor("from");
+	    	var to = cm.getCursor("to");
+	    	if (from.line != to.line || from.ch != to.ch) {
+	    		callback("openSelectionPopover", from.line, from.ch, to.line, to.ch);
+	    		return;
+	    	} else {
+	    		return "close";
+	    	}
 	    });
 	    
 	    $code.mouseover(function(e) {
@@ -105,7 +108,7 @@ gitplex.server.sourceView = {
 				}
 			}, 500);
 		});
-			
+		
 		$sourceView.on("getViewState", function() {
 		    return gitplex.server.codemirror.getViewState(cm);
 		});
@@ -347,6 +350,9 @@ gitplex.server.sourceView = {
 			clipboard.on("success", function(e) {
 				clipboard.destroy();
 			});
+			$content.children("a.copy-marked").click(function() {
+				$(".selection-popover").remove();
+			});
 			if (loggedIn) {
 				$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
 				$content.children("a.comment").click(function() {
@@ -354,6 +360,7 @@ gitplex.server.sourceView = {
 							&& !confirm("There are unsaved changes, discard and continue?")) {
 						return;
 					}
+					$(".selection-popover").remove();
 					var callback = $(".source-view").data("callback");
 					callback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 				});

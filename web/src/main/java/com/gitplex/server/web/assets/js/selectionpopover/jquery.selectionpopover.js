@@ -38,17 +38,17 @@
     	}
 
     	if (action === "init") {
-    	    $container.on("mouseup", function() {
+    	    $container.on("mouseup", function(e) {
     			// use a timeout to make sure selection remains stable after mouse or keyboard action
     	    	setTimeout(function() {
-        	    	popover(options());
+        	    	popover(options(e));
     	    	}, 100);
     	    });
     	    $container.on("keyup", function(e) {
     	    	if (e.which == 37 || e.which == 38 || e.which == 39 || e.which == 40) {
         			// use a timeout to make sure selection remains stable after mouse or keyboard action
         	    	setTimeout(function() {
-            	    	popover(options());
+            	    	popover(options(e));
         	    	}, 100);
     	    	}
     	    });
@@ -65,8 +65,7 @@
 
 $(function() {
 	$(document).keydown(function(e) {
-		if (e.keyCode == 27) {
+		if (e.keyCode == 27) 
 			$(".selection-popover").remove();
-		}
 	});
 });
