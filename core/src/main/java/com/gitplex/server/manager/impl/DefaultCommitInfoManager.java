@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +21,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -40,6 +40,7 @@ import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.event.lifecycle.SystemStarted;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.NameAndEmail;
+import com.gitplex.server.git.UserContribution;
 import com.gitplex.server.git.command.FileChange;
 import com.gitplex.server.git.command.LogCommand;
 import com.gitplex.server.git.command.LogCommit;
@@ -54,9 +55,11 @@ import com.gitplex.server.persistence.annotation.Sessional;
 import com.gitplex.server.persistence.dao.Dao;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.BatchWorker;
+import com.gitplex.server.util.Day;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.utils.FileUtils;
+import com.gitplex.utils.Pair;
 import com.gitplex.utils.PathUtils;
 import com.gitplex.utils.StringUtils;
 import com.gitplex.utils.concurrent.Prioritized;
@@ -79,7 +82,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final int INFO_VERSION = 2;
+	private static final int INFO_VERSION = 3;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
 	
@@ -95,15 +98,25 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private static final String COMMITS_STORE = "commits";
 	
-	private static final String CONTRIBUTIONS_STORE = "contributions";
+	private static final String MODIFICATIONS_STORE = "modifications";
 
 	private static final String RENAMES_STORE = "renames";
-
+	
+	private static final String PATH_TO_INDEX_STORE = "pathToIndex";
+	
+	private static final String EMAIL_TO_INDEX_STORE = "emailToIndex";
+	
+	private static final String INDEX_TO_EMAIL_STORE = "indexToEmail";
+	
+	private static final String DAILY_CONTRIBUTIONS_STORE = "dailyContributions";
+	
+	private static final ByteIterable NEXT_PATH_INDEX_KEY = new StringByteIterable("nextPathIndex");
+	
+	private static final ByteIterable NEXT_EMAIL_INDEX_KEY = new StringByteIterable("nextEmailIndex");
+	
 	private static final ByteIterable LAST_COMMIT_KEY = new StringByteIterable("lastCommit");
 	
-	private static final ByteIterable AUTHORS_KEY = new StringByteIterable("authors");
-	
-	private static final ByteIterable COMMITTERS_KEY = new StringByteIterable("committers");
+	private static final ByteIterable USERS_KEY = new StringByteIterable("users");
 	
 	private static final ByteIterable FILES_KEY = new StringByteIterable("files");
 	
@@ -125,9 +138,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private final Map<Long, Integer> commitCountCache = new ConcurrentHashMap<>();
 	
-	private final Map<Long, List<NameAndEmail>> authorsCache = new ConcurrentHashMap<>();
-	
-	private final Map<Long, List<NameAndEmail>> committersCache = new ConcurrentHashMap<>();
+	private final Map<Long, List<NameAndEmail>> usersCache = new ConcurrentHashMap<>();
 	
 	@Inject
 	public DefaultCommitInfoManager(ProjectManager projectManager, StorageManager storageManager, 
@@ -179,8 +190,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			doCollect(project, commitId, false);
 		} else {
 			Store commitsStore = getStore(env, COMMITS_STORE);
-			Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE); 
+			Store modificationsStore = getStore(env, MODIFICATIONS_STORE); 
 			Store renamesStore = getStore(env, RENAMES_STORE);
+			Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
+			Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);
+			Store indexToEmailStore = getStore(env, INDEX_TO_EMAIL_STORE);
+			Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);
 			
 			env.executeInTransaction(new TransactionalExecutable() {
 				
@@ -201,29 +216,17 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 							lastCommitId = null;
 						}
 						
-						bytes = getBytes(defaultStore.get(txn, COMMIT_COUNT_KEY));
-						int prevCommitCount;
-						if (bytes != null)
-							prevCommitCount = (int) SerializationUtils.deserialize(bytes);
-						else
-							prevCommitCount = 0;
-						int newCommitCount = prevCommitCount;
+						int commitCount = readInt(defaultStore, txn, COMMIT_COUNT_KEY, 0);
 						
-						Set<NameAndEmail> prevAuthors;
-						bytes = getBytes(defaultStore.get(txn, AUTHORS_KEY));
-						if (bytes != null)
-							prevAuthors = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
-						else
-							prevAuthors = new HashSet<>();
-						Set<NameAndEmail> authors = new HashSet<>(prevAuthors);			
+						int nextEmailIndex = readInt(defaultStore, txn, NEXT_EMAIL_INDEX_KEY, 0);
+						int nextPathIndex = readInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, 0);
 						
-						Set<NameAndEmail> prevCommitters;
-						bytes = getBytes(defaultStore.get(txn, COMMITTERS_KEY));
+						Set<NameAndEmail> users;
+						bytes = getBytes(defaultStore.get(txn, USERS_KEY));
 						if (bytes != null)
-							prevCommitters = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
+							users = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
 						else
-							prevCommitters = new HashSet<>();
-						Set<NameAndEmail> committers = new HashSet<>(prevCommitters);
+							users = new HashSet<>();
 
 						Map<String, Long> files;
 						bytes = getBytes(defaultStore.get(txn, FILES_KEY));
@@ -300,7 +303,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 								}
 								commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
 								
-								newCommitCount++;
+								commitCount++;
 								
 								for (String parentHash: commit.getParentHashes()) {
 									keyBytes = new byte[20];
@@ -318,69 +321,86 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 								}
 								
 								if (commit.getCommitter() != null) {
-									committers.add(new NameAndEmail(commit.getCommitter()));
+									users.add(new NameAndEmail(commit.getCommitter()));
 									for (String file: commit.getChangedFiles())
 										files.put(file, commit.getCommitter().getWhen().getTime());
 								}
 
 								if (commit.getAuthor() != null) {
-									authors.add(new NameAndEmail(commit.getAuthor()));
-									for (String changedFile: commit.getChangedFiles()) {
-										updateContribution(txn, contributionsStore, 
-												commit.getAuthor().getEmailAddress(), changedFile);
-										while (changedFile.contains("/")) {
-											changedFile = StringUtils.substringBeforeLast(changedFile, "/");
-											updateContribution(txn, contributionsStore, 
-													commit.getAuthor().getEmailAddress(), changedFile);
+									users.add(new NameAndEmail(commit.getAuthor()));
+									
+									String emailAddress = commit.getAuthor().getEmailAddress();
+									if (StringUtils.isNotBlank(emailAddress)) {
+										key = new StringByteIterable(emailAddress);
+										int emailIndex = readInt(emailToIndexStore, txn, key, -1);
+										if (emailIndex == -1) {
+											emailIndex = nextEmailIndex++;
+											writeInt(emailToIndexStore, txn, key, emailIndex);
+											indexToEmailStore.put(txn, 
+													new IntByteIterable(emailIndex), 
+													new StringByteIterable(emailAddress));
 										}
-										updateContribution(txn, contributionsStore, 
-												commit.getAuthor().getEmailAddress(), "");
-									}
-									for (FileChange change: commit.getFileChanges()) {
-										if (change.getAction() == FileChange.Action.COPY 
-												|| change.getAction() == FileChange.Action.RENAME) {
-											ByteIterable renameKey = new StringByteIterable(change.getNewPath());
-											List<String> renamedFroms;
-											valueBytes = getBytes(renamesStore.get(txn, renameKey));
-											if (valueBytes != null) {
-												renamedFroms = (List<String>) SerializationUtils.deserialize(valueBytes);
-											} else {
-												renamedFroms = new ArrayList<>();
+										
+										for (String changedFile: commit.getChangedFiles()) {
+											nextPathIndex = updateModification(
+													txn, modificationsStore, pathToIndexStore, emailIndex, 
+													nextPathIndex, changedFile);
+											while (changedFile.contains("/")) {
+												changedFile = StringUtils.substringBeforeLast(changedFile, "/");
+												nextPathIndex = updateModification(
+														txn, modificationsStore, pathToIndexStore, emailIndex, 
+														nextPathIndex, changedFile);
 											}
-											if (!renamedFroms.contains(change.getOldPath())) {
-												renamedFroms.add(0, change.getOldPath());
-												if (renamedFroms.size() > MAX_HISTORY_PATHS)
-													renamedFroms.remove(renamedFroms.size()-1);
-											}
-											
-											valueBytes = SerializationUtils.serialize((Serializable) renamedFroms);
-											renamesStore.put(txn, renameKey, new ArrayByteIterable(valueBytes));
+											nextPathIndex = updateModification(
+													txn, modificationsStore, pathToIndexStore, emailIndex, 
+													nextPathIndex, "");
+										}
+
+										if (commit.getCommitter() != null) {
+											int day = new Day(commit.getCommitter().getWhen()).getValue();
+											increaseCommitCount(dailyContributionsStore, txn, emailIndex, day);
+											increaseCommitCount(dailyContributionsStore, txn, -1, day);
 										}
 									}
 								}
+								
+								for (FileChange change: commit.getFileChanges()) {
+									if (change.getAction() == FileChange.Action.COPY 
+											|| change.getAction() == FileChange.Action.RENAME) {
+										ByteIterable renameKey = new StringByteIterable(change.getNewPath());
+										List<String> renamedFroms;
+										valueBytes = getBytes(renamesStore.get(txn, renameKey));
+										if (valueBytes != null) {
+											renamedFroms = (List<String>) SerializationUtils.deserialize(valueBytes);
+										} else {
+											renamedFroms = new ArrayList<>();
+										}
+										if (!renamedFroms.contains(change.getOldPath())) {
+											renamedFroms.add(0, change.getOldPath());
+											if (renamedFroms.size() > MAX_HISTORY_PATHS)
+												renamedFroms.remove(renamedFroms.size()-1);
+										}
+										
+										valueBytes = SerializationUtils.serialize((Serializable) renamedFroms);
+										renamesStore.put(txn, renameKey, new ArrayByteIterable(valueBytes));
+									}
+								}
+								
 							}		
 							commitOptional = queue.take();
 						}
 						if (logException.get() != null)
 							throw logException.get();
 						
-						if (newCommitCount != prevCommitCount) {
-							bytes = SerializationUtils.serialize(newCommitCount);
-							defaultStore.put(txn, COMMIT_COUNT_KEY, new ArrayByteIterable(bytes));
-							commitCountCache.put(project.getId(), newCommitCount);
-						}
+						writeInt(defaultStore, txn, COMMIT_COUNT_KEY, commitCount);
+						commitCountCache.remove(project.getId());
 						
-						if (!authors.equals(prevAuthors)) {
-							bytes = SerializationUtils.serialize((Serializable) authors);
-							defaultStore.put(txn, AUTHORS_KEY, new ArrayByteIterable(bytes));
-							authorsCache.remove(project.getId());
-						} 
+						writeInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, nextPathIndex);
+						writeInt(defaultStore, txn, NEXT_EMAIL_INDEX_KEY, nextEmailIndex);
 						
-						if (!committers.equals(prevCommitters)) {
-							bytes = SerializationUtils.serialize((Serializable) committers);
-							defaultStore.put(txn, COMMITTERS_KEY, new ArrayByteIterable(bytes));
-							committersCache.remove(project.getId());
-						}
+						bytes = SerializationUtils.serialize((Serializable) users);
+						defaultStore.put(txn, USERS_KEY, new ArrayByteIterable(bytes));
+						usersCache.remove(project.getId());
 						
 						if (files.size() > MAX_COLLECTING_FILES) {
 							List<String> fileList = new ArrayList<>(files.keySet());
@@ -404,78 +424,50 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		}
 	}
 	
-	private void updateContribution(Transaction txn, Store contributionsStore, String email, String path) {
-		ArrayByteIterable contributionKey = 
-				new ArrayByteIterable(getContributionKey(email, path));
-		byte[] contributionBytes = 
-				getBytes(contributionsStore.get(txn, contributionKey));
-		int contributions;
-		if (contributionBytes != null)
-			contributions = ByteBuffer.wrap(contributionBytes).getInt() + 1;
-		else
-			contributions = 1;
-		ByteBuffer byteBuffer = ByteBuffer.allocate(4);
-		byteBuffer.putInt(contributions);
-		contributionsStore.put(txn, contributionKey, 
-				new ArrayByteIterable(byteBuffer.array()));
+	private int updateModification(Transaction txn, Store modificationsStore, Store pathToIndexStore, 
+			int emailIndex, int nextPathIndex, String path) {
+		StringByteIterable pathKey = new StringByteIterable(path);
+		int pathIndex = readInt(pathToIndexStore, txn, pathKey, -1);
+		if (pathIndex == -1) {
+			pathIndex = nextPathIndex++;
+			writeInt(pathToIndexStore, txn, pathKey, pathIndex);
+		}
+		
+		ByteIterable modificationKey = getModificationKey(emailIndex, pathIndex);
+		int modifications = readInt(modificationsStore, txn, modificationKey, 0) + 1;
+		writeInt(modificationsStore, txn, modificationKey, modifications);
+		return nextPathIndex;
 	}
 	
 	@Override
-	public List<NameAndEmail> getAuthors(Project project) {
-		List<NameAndEmail> authors = authorsCache.get(project.getId());
-		if (authors == null) {
+	public List<NameAndEmail> getUsers(Project project) {
+		List<NameAndEmail> users = usersCache.get(project.getId());
+		if (users == null) {
 			Environment env = getEnv(project.getId().toString());
 			Store store = getStore(env, DEFAULT_STORE);
 
-			authors = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
+			users = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
 
 				@SuppressWarnings("unchecked")
 				@Override
 				public List<NameAndEmail> compute(Transaction txn) {
-					byte[] bytes = getBytes(store.get(txn, AUTHORS_KEY));
+					byte[] bytes = getBytes(store.get(txn, USERS_KEY));
 					if (bytes != null) { 
-						List<NameAndEmail> authors = 
+						List<NameAndEmail> users = 
 								new ArrayList<>((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
-						Collections.sort(authors);
-						return authors;
+						Collections.sort(users);
+						return users;
 					} else { 
 						return new ArrayList<>();
 					}
 				}
+				
 			});
-			authorsCache.put(project.getId(), authors);
+			usersCache.put(project.getId(), users);
 		}
-		return authors;	
+		return users;	
 	}
 
-	@Override
-	public List<NameAndEmail> getCommitters(Project project) {
-		List<NameAndEmail> committers = committersCache.get(project.getId());
-		if (committers == null) {
-			Environment env = getEnv(project.getId().toString());
-			Store store = getStore(env, DEFAULT_STORE);
-
-			committers = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
-
-				@SuppressWarnings("unchecked")
-				@Override
-				public List<NameAndEmail> compute(Transaction txn) {
-					byte[] bytes = getBytes(store.get(txn, COMMITTERS_KEY));
-					if (bytes != null) { 
-						List<NameAndEmail> committers = 
-								new ArrayList<>((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
-						Collections.sort(committers);
-						return committers;
-					} else { 
-						return new ArrayList<>();
-					}
-				}
-			});
-			committersCache.put(project.getId(), committers);
-		}
-		return committers;	
-	}
-	
 	@Override
 	public List<String> getFiles(Project project) {
 		List<String> files = filesCache.get(project.getId());
@@ -516,25 +508,33 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		return files;
 	}
 	
-	private byte[] getContributionKey(String email, String file) {
-		return (email + " " + file).getBytes(Charsets.UTF_8);
+	private ByteIterable getModificationKey(int emailIndex, int pathIndex) {
+		ByteBuffer buffer = ByteBuffer.allocate(8);
+		buffer.putInt(emailIndex);
+		buffer.putInt(4, pathIndex);
+		return new ArrayByteIterable(buffer.array());
 	}
 	
 	@Override
-	public int getContributions(ProjectFacade project, UserFacade user, String path) {
+	public int getModifications(ProjectFacade project, UserFacade user, String path) {
 		if (user.getEmail() != null) {
 			Environment env = getEnv(project.getId().toString());
-			Store store = getStore(env, CONTRIBUTIONS_STORE);
+			Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);
+			Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
+			Store modificationsStore = getStore(env, MODIFICATIONS_STORE);
 			return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
 
 				@Override
-				public Integer compute(Transaction tx) {
-					byte[] contributionKey = getContributionKey(user.getEmail(), path);
-					byte[] bytes = getBytes(store.get(tx, new ArrayByteIterable(contributionKey)));
-					if (bytes != null)
-						return ByteBuffer.wrap(bytes).getInt();
-					else
-						return 0;
+				public Integer compute(Transaction txn) {
+					int emailIndex = readInt(emailToIndexStore, txn, new StringByteIterable(user.getEmail()), -1);
+					if (emailIndex != -1) {
+						int pathIndex = readInt(pathToIndexStore, txn, new StringByteIterable(path), -1);
+						if (pathIndex != -1) {
+							ByteIterable modificationKey = getModificationKey(emailIndex, pathIndex);
+							return readInt(modificationsStore, txn, modificationKey, 0);
+						} 
+					} 
+					return 0;
 				}
 			});
 		} else {
@@ -635,7 +635,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			removeEnv(projectId.toString());
 			filesCache.remove(projectId);
 			commitCountCache.remove(projectId);
-			authorsCache.remove(projectId);
+			usersCache.remove(projectId);
 		}
 	}
 	
@@ -743,12 +743,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 				@Override
 				public Integer compute(Transaction txn) {
-					byte[] bytes = getBytes(store.get(txn, COMMIT_COUNT_KEY));
-					if (bytes != null) {
-						return (Integer) SerializationUtils.deserialize(bytes);
-					} else {
-						return 0;
-					}
+					return readInt(store, txn, COMMIT_COUNT_KEY, 0);
 				}
 			});
 			commitCountCache.put(project.getId(), commitCount);
@@ -807,24 +802,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		}
 	}
 
-	@Sessional
-	@Nullable
-	@Override
-	public ObjectId getLastCommit(Project project) {
-		Environment env = getEnv(project.getId().toString());
-		Store defaultStore = getStore(env, DEFAULT_STORE);
-
-		return env.computeInTransaction(new TransactionalComputable<ObjectId>() {
-			
-			@Override
-			public ObjectId compute(Transaction txn) {
-				byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
-				return bytes != null? ObjectId.fromRaw(bytes): null;
-			}
-			
-		});
-	}
-
 	@Override
 	protected File getEnvDir(String envKey) {
 		File infoDir = new File(storageManager.getProjectInfoDir(Long.valueOf(envKey)), INFO_DIR);
@@ -832,7 +809,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			FileUtils.createDir(infoDir);
 		return infoDir;
 	}
-
+	
 	@Sessional
 	@Override
 	public Collection<String> getPossibleHistoryPaths(Project project, String path) {
@@ -868,6 +845,120 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		});
 	}
 	
+	@Sessional
+	@Override
+	public Map<Integer, Integer> getAllContributions(Project project) {
+		Environment env = getEnv(project.getId().toString());
+		Store store = getStore(env, DAILY_CONTRIBUTIONS_STORE);
+
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<Integer, Integer>>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Map<Integer, Integer> compute(Transaction txn) {
+				byte[] bytes = getBytes(store.get(txn, new IntByteIterable(-1)));
+				if (bytes != null)
+					return (Map<Integer, Integer>) SerializationUtils.deserialize(bytes);
+				else
+					return new HashMap<>();
+			}
+			
+		});
+	}
+
+	@Sessional
+	@Override
+	public List<UserContribution> getUserContributions(Project project, int top, int fromDay, int toDay) {
+		Environment env = getEnv(project.getId().toString());
+		Store defaultStore = getStore(env, DEFAULT_STORE);
+		Store indexToEmailStore = getStore(env, INDEX_TO_EMAIL_STORE);
+		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);
+		
+		return env.computeInReadonlyTransaction(new TransactionalComputable<List<UserContribution>>() {
+
+			@Override
+			public List<UserContribution> compute(Transaction txn) {
+				int nextEmailIndex = readInt(defaultStore, txn, NEXT_EMAIL_INDEX_KEY, 0);
+				List<Pair<ByteIterable, Integer>> list = new ArrayList<>();
+				for (int emailIndex=0; emailIndex<nextEmailIndex; emailIndex++) {
+					ByteIterable emailKey = new IntByteIterable(emailIndex);
+					Map<Integer, Integer> dailyCommitCounts = readCommitCounts(dailyContributionsStore, txn, emailKey);
+					int totalCommitCount = 0;
+					for (Map.Entry<Integer, Integer> entry: dailyCommitCounts.entrySet()) {
+						if (entry.getKey()>=fromDay && entry.getKey()<=toDay)
+							totalCommitCount += entry.getValue();
+					}
+					list.add(new Pair<>(emailKey, totalCommitCount));
+				}
+				Collections.sort(list, new Comparator<Pair<ByteIterable, Integer>>() {
+
+					@Override
+					public int compare(Pair<ByteIterable, Integer> o1, Pair<ByteIterable, Integer> o2) {
+						return o2.getSecond() - o1.getSecond();
+					}
+					
+				});
+
+				List<UserContribution> userContributions = new ArrayList<>();
+				int numContributionsToReturn = top;
+				if (numContributionsToReturn > list.size())
+					numContributionsToReturn = list.size();
+				for (int i=0; i<numContributionsToReturn; i++) {
+					Pair<ByteIterable, Integer> pair = list.get(i);
+					ByteIterable emailKey = pair.getFirst();
+					byte[] bytes = getBytes(indexToEmailStore.get(txn, emailKey));
+					if (bytes != null) {
+						Map<Integer, Integer> commitCounts = readCommitCounts(dailyContributionsStore, txn, emailKey);
+						for (Iterator<Map.Entry<Integer, Integer>> it = commitCounts.entrySet().iterator(); it.hasNext();) {
+							Map.Entry<Integer, Integer> entry = it.next();
+							if (entry.getKey()<fromDay && entry.getKey()>toDay)
+								it.remove();
+						}
+						userContributions.add(new UserContribution(new String(bytes, Charsets.UTF_8), commitCounts));
+					}
+				}
+				
+				return userContributions;
+			}
+			
+		});
+	}
+
+	/**
+	 * Increase contribution 
+	 * 
+	 * @param store
+	 * 			store to operate on
+	 * @param txn
+	 * 			transaction to operate on
+	 * @param emailIndex 
+	 * 			email index to increase contribution, use -1 for all contributions
+	 * @param day
+	 * 			day of the contribution
+	 */
+	private void increaseCommitCount(Store store, Transaction txn, int emailIndex, int day) {
+		ByteIterable key = new IntByteIterable(emailIndex);
+		HashMap<Integer, Integer> dailyCommitCounts = readCommitCounts(store, txn, key);
+		
+		Integer commitCount = dailyCommitCounts.get(day);
+		if (commitCount != null)
+			commitCount++;
+		else
+			commitCount = 1;
+		dailyCommitCounts.put(day, commitCount);
+		
+		store.put(txn, key, new ArrayByteIterable(SerializationUtils.serialize(dailyCommitCounts)));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private HashMap<Integer, Integer> readCommitCounts(Store store, Transaction txn, ByteIterable key) {
+		byte[] bytes = getBytes(store.get(txn, new IntByteIterable(0)));
+		if (bytes != null)
+			return (HashMap<Integer, Integer>) SerializationUtils.deserialize(bytes);
+		else
+			return new HashMap<>();
+	}
+
 	@Override
 	protected long getLogFileSize() {
 		return LOG_FILE_SIZE;

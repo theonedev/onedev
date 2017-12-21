@@ -303,7 +303,7 @@ public class QualityCheckStatus {
 		int addedContributions = 0;
 		for (Map.Entry<UserFacade, Integer> entry: contributions.entrySet()) {
 			UserFacade user = entry.getKey();
-			int fileContribution = commitInfoManager.getContributions(
+			int fileContribution = commitInfoManager.getModifications(
 					update.getRequest().getTargetProject().getFacade(), user, file);
 			entry.setValue(entry.getValue() + fileContribution);
 			addedContributions += fileContribution;

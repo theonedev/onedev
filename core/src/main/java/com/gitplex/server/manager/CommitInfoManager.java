@@ -2,11 +2,13 @@ package com.gitplex.server.manager;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.git.NameAndEmail;
+import com.gitplex.server.git.UserContribution;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
@@ -15,13 +17,11 @@ public interface CommitInfoManager {
 	
 	List<String> getFiles(Project project);
 	
-	int getContributions(ProjectFacade project, UserFacade user, String path);
+	int getModifications(ProjectFacade project, UserFacade user, String path);
 	
 	int getCommitCount(Project project);
 	
-	List<NameAndEmail> getAuthors(Project project);
-	
-	List<NameAndEmail> getCommitters(Project project);
+	List<NameAndEmail> getUsers(Project project);
 	
 	/**
 	 * Given an ancestor commit, get all its descendant commits including the ancestor commit itself. 
@@ -51,8 +51,10 @@ public interface CommitInfoManager {
 
 	void cloneInfo(Project from, Project to);
 	
-	ObjectId getLastCommit(Project project);
-	
 	Collection<String> getPossibleHistoryPaths(Project project, String path);
+	
+	Map<Integer, Integer> getAllContributions(Project project);
+	
+	List<UserContribution> getUserContributions(Project project, int top, int fromDay, int toDay);
 	
 }
