@@ -50,7 +50,7 @@ public abstract class LogCommand extends GitCommand<Void> {
         	cmd.addArgs("--branches");
         }
   
-        cmd.addArgs("--name-status", "--find-renames=100%", "--find-copies=100%");
+        cmd.addArgs("--name-status");
         
         AtomicReference<LogCommit.Builder> commitBuilderRef = new AtomicReference<>();
         AtomicBoolean inFileChangesBlock = new AtomicBoolean();
