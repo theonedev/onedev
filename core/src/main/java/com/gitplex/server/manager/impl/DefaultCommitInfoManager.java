@@ -956,13 +956,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		else
 			commitCount = 1;
 		dailyCommitCounts.put(day, commitCount);
-		
 		store.put(txn, key, new ArrayByteIterable(SerializationUtils.serialize(dailyCommitCounts)));
 	}
 	
 	@SuppressWarnings("unchecked")
 	private HashMap<Integer, Integer> readCommitCounts(Store store, Transaction txn, ByteIterable key) {
-		byte[] bytes = getBytes(store.get(txn, new IntByteIterable(0)));
+		byte[] bytes = getBytes(store.get(txn, key));
 		if (bytes != null)
 			return (HashMap<Integer, Integer>) SerializationUtils.deserialize(bytes);
 		else
