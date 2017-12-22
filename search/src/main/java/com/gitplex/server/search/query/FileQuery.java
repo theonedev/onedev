@@ -13,12 +13,11 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.gitplex.utils.Range;
-import com.gitplex.utils.stringmatch.WildcardUtils;
 import com.gitplex.server.search.hit.FileHit;
 import com.gitplex.server.search.hit.QueryHit;
+import com.gitplex.utils.Range;
+import com.gitplex.utils.stringmatch.WildcardUtils;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 
 public class FileQuery extends BlobQuery {
 
@@ -42,22 +41,16 @@ public class FileQuery extends BlobQuery {
 		String blobPath = treeWalk.getPathString();
 		String blobName = blobPath.substring(blobPath.lastIndexOf('/')+1);
 		if (caseSensitive) {
-			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames)) {
-				if (WildcardUtils.matchString(pattern, blobName) 
-						&& (excludeFileName == null || !excludeFileName.equals(blobName))) {
-					Range matchRange = WildcardUtils.rangeOfMatch(pattern, blobName);
-					hits.add(new FileHit(blobPath, matchRange));
-					break;
-				}
+			if (WildcardUtils.matchString(fileNames, blobName) 
+					&& (excludeFileName == null || !excludeFileName.equals(blobName))) {
+				Range matchRange = WildcardUtils.rangeOfMatch(fileNames, blobName);
+				hits.add(new FileHit(blobPath, matchRange));
 			}
 		} else {
-			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase())) {
-				if (WildcardUtils.matchString(pattern, blobName.toLowerCase()) 
-						&& (excludeFileName == null || !excludeFileName.equalsIgnoreCase(blobName))) {
-					Range matchRange = WildcardUtils.rangeOfMatch(pattern, blobName.toLowerCase());
-					hits.add(new FileHit(blobPath, matchRange));
-					break;
-				}
+			if (WildcardUtils.matchString(fileNames, blobName.toLowerCase()) 
+					&& (excludeFileName == null || !excludeFileName.equalsIgnoreCase(blobName))) {
+				Range matchRange = WildcardUtils.rangeOfMatch(fileNames, blobName.toLowerCase());
+				hits.add(new FileHit(blobPath, matchRange));
 			}
 		}
 	}
@@ -74,14 +67,7 @@ public class FileQuery extends BlobQuery {
 		if (tooGeneral)
 			throw new TooGeneralQueryException();
 		
-		BooleanQuery subQuery = new BooleanQuery(true);
-		for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))
-			subQuery.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), Occur.SHOULD);
-		
-		if (subQuery.getClauses().length != 0)
-			query.add(subQuery, Occur.MUST);
-		else
-			throw new TooGeneralQueryException();
+		query.add(new WildcardQuery(new Term(BLOB_NAME.name(), fileNames.toLowerCase())), Occur.MUST);
 	}
 
 	public static class Builder {

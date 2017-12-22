@@ -37,7 +37,7 @@ public abstract class LogCommand extends GitCommand<Void> {
 	@Override
     public Void call() {
         Commandline cmd = cmd();
-        cmd.addArgs("log",
+        cmd.addArgs("-c", "diff.renameLimit=1000", "log",
                         "--format=*** commit_begin ***%nhash:%H%nauthor:%aN%nauthorEmail:%aE%n"
                         + "committerEmail:%cE%ncommitter:%cN%nparents:%P%ncommitterDate:%cd %n"
                         + "authorDate:%ad %n",
@@ -50,7 +50,7 @@ public abstract class LogCommand extends GitCommand<Void> {
         	cmd.addArgs("--branches");
         }
   
-        cmd.addArgs("--name-status", "--find-renames=100%", "--find-copies=100%");
+        cmd.addArgs("--name-status", "--find-renames");
         
         AtomicReference<LogCommit.Builder> commitBuilderRef = new AtomicReference<>();
         AtomicBoolean inFileChangesBlock = new AtomicBoolean();
