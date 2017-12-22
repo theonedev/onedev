@@ -92,7 +92,7 @@ public class LogCommit implements Serializable {
 		
 		public LogCommit build() {
 			PersonIdent committer;
-			if (StringUtils.isNotBlank(committerName) && StringUtils.isNotBlank(committerEmail) 
+			if ((StringUtils.isNotBlank(committerName) || StringUtils.isNotBlank(committerEmail)) 
 					&& committerDate != null) {
 				committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
 			} else {
@@ -100,7 +100,7 @@ public class LogCommit implements Serializable {
 			}
 
 			PersonIdent author;
-			if (StringUtils.isNotBlank(authorName) && StringUtils.isNotBlank(authorEmail) 
+			if ((StringUtils.isNotBlank(authorName) || StringUtils.isNotBlank(authorEmail)) 
 					&& authorDate != null) {
 				author = GitUtils.newPersonIdent(authorName, authorEmail, authorDate);
 			} else {
