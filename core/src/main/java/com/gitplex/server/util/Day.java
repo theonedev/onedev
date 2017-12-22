@@ -5,7 +5,7 @@ import java.util.Date;
 
 import org.joda.time.DateTime;
 
-public class Day implements Serializable {
+public class Day implements Serializable, Comparable<Day> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,6 +34,11 @@ public class Day implements Serializable {
 	
 	public int getValue() {
 		return (dateTime.getYear()<<16) | (dateTime.getMonthOfYear()<<8) | (dateTime.getDayOfMonth());
+	}
+
+	@Override
+	public int compareTo(Day o) {
+		return dateTime.compareTo(o.dateTime);
 	}
 	
 }

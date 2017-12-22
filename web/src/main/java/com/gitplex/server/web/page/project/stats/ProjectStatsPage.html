@@ -1,0 +1,25 @@
+<wicket:extend>
+	<div id="project-stats">
+		<div class="contribution">
+			<h2>Overall contribution</h2>
+			<div wicket:id="overallContribution"></div>
+		</div>
+	
+		<div class="user-contributions">
+			<h2>Top 10 User Contributions</h2>	
+			<form wicket:id="dateRange">
+				<div wicket:id="feedback"></div>
+				<input wicket:id="fromDay" placeholder="yyyy-MM-dd"></input>
+				<input wicket:id="toDay" placeholder="yyyy-MM-dd"></input>
+				<a wicket:id="update">Update</a>
+			</form>
+			<div wicket:id="userContributions" class="contribution">
+				<div wicket:id="user"></div>
+				<div wicket:id="userContribution"></div>
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="userFrag">
+		<a wicket:id="avatar"></a> <a wicket:id="link"></a>
+	</wicket:fragment>
+</wicket:extend>

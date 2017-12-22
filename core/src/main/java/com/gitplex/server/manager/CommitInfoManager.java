@@ -2,14 +2,15 @@ package com.gitplex.server.manager;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.gitplex.server.git.DayAndCommits;
 import com.gitplex.server.git.NameAndEmail;
 import com.gitplex.server.git.UserContribution;
 import com.gitplex.server.model.Project;
+import com.gitplex.server.util.Day;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
 
@@ -53,8 +54,8 @@ public interface CommitInfoManager {
 	
 	Collection<String> getPossibleHistoryPaths(Project project, String path);
 	
-	Map<Integer, Integer> getAllContributions(Project project);
+	List<DayAndCommits> getOverallContributions(Project project);
 	
-	List<UserContribution> getUserContributions(Project project, int top, int fromDay, int toDay);
+	List<UserContribution> getUserContributions(Project project, int top, Day fromDay, Day toDay);
 	
 }

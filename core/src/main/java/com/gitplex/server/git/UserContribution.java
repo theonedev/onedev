@@ -1,27 +1,29 @@
 package com.gitplex.server.git;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
+
+import org.eclipse.jgit.lib.PersonIdent;
 
 public class UserContribution implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String email;
+	private final PersonIdent user;
 	
-	private final Map<Integer, Integer> commits;
+	private final List<DayAndCommits> dayAndCommits;
 	
-	public UserContribution(String email, Map<Integer, Integer> commits) {
-		this.email = email;
-		this.commits = commits;
+	public UserContribution(PersonIdent user, List<DayAndCommits> dayAndCommits) {
+		this.user = user;
+		this.dayAndCommits = dayAndCommits;
 	}
 
-	public String getEmail() {
-		return email;
+	public PersonIdent getUser() {
+		return user;
 	}
 
-	public Map<Integer, Integer> getCommits() {
-		return commits;
+	public List<DayAndCommits> getDayAndCommits() {
+		return dayAndCommits;
 	}
-	
+
 }
