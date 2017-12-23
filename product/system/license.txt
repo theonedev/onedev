@@ -34,4 +34,4 @@ or inability to use the Software or related documentation, even if
 GitPlex Pty has been advised of the possibility of such damages. In no 
 event shall GitPlex Pty liability exceed the license fee paid, if any.  
 
-Copyright (C) 2018 by GitPlex Pty All rights reserved. 
+Copyright (C) 2016-2017 by GitPlex Pty All rights reserved. 
