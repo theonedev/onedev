@@ -293,7 +293,7 @@ public abstract class BasePage extends WebPage {
 	}
 	
 	protected final String getPageTitle() {
-		return "GitPlex - Enterprise Git Management System";
+		return "GitPlex - Git Management and Code Review";
 	};
 
 	protected int getPageRefreshInterval() {

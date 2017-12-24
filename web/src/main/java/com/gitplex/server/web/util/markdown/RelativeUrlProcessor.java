@@ -62,7 +62,8 @@ public class RelativeUrlProcessor implements MarkdownProcessor {
 									String referencedPath = PathUtils.resolve(basePath, path);
 									referencedPath = GitUtils.normalizePath(referencedPath);
 									if (referencedPath == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null) {
-											Element missingElement = element.after("<span class='missing'>!!missing!!</span>");
+											element.after("<span class='missing'>!!missing!!</span>");
+											Element missingElement = element.nextElementSibling();
 											BlobIdent blobIdent = blobRenderContext.getBlobIdent();
 											Mode mode = blobRenderContext.getMode();
 											if (referencedPath != null && mode != Mode.ADD && mode != Mode.EDIT 
