@@ -52,7 +52,7 @@ public interface CommitInfoManager {
 
 	void cloneInfo(Project from, Project to);
 	
-	Collection<String> getPossibleHistoryPaths(Project project, String path);
+	Collection<String> getHistoryPaths(Project project, String path);
 	
 	List<DayAndCommits> getOverallContributions(Project project);
 	
