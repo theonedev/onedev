@@ -33,6 +33,7 @@ gitplex.server.sourceView = {
 	    if (mark) {
 	    	gitplex.server.codemirror.mark(cm, mark);
 			$sourceView.data("mark", mark);
+			cm.setCursor({line: mark.beginLine, ch: 0});
 	    }
 
 	    if (openComment)

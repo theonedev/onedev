@@ -98,12 +98,8 @@
 	text-decoration: none;
 	white-space: nowrap;
 }
-.comment-popover a:hover {
+.comment-popover a:hover, .comment-trigger.active {
 	color: #333;
-}
-.comment-trigger.active {
-	font-size: 16px;	
-	color: #333;	
 }
 .CodeMirror-comment .comment-trigger.active {
 	line-height: 14px;
