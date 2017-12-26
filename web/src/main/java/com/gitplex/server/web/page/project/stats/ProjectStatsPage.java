@@ -1,12 +1,15 @@
 package com.gitplex.server.web.page.project.stats;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.form.TextField;
@@ -20,8 +23,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.gitplex.server.GitPlex;
-import com.gitplex.server.git.DayAndCommits;
-import com.gitplex.server.git.UserContribution;
+import com.gitplex.server.git.Contribution;
+import com.gitplex.server.git.Contributor;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.util.Day;
 import com.gitplex.server.web.WebConstants;
@@ -34,19 +37,22 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public class ProjectStatsPage extends ProjectPage {
 
-	private final IModel<List<DayAndCommits>> overallContributionsModel = 
-			new LoadableDetachableModel<List<DayAndCommits>>() {
+	private final IModel<List<DayContribution>> overallContributionsModel = 
+			new LoadableDetachableModel<List<DayContribution>>() {
 
 		@Override
-		protected List<DayAndCommits> load() {
-			return GitPlex.getInstance(CommitInfoManager.class).getOverallContributions(getProject());
+		protected List<DayContribution> load() {
+			Map<Day, Contribution> map = GitPlex.getInstance(CommitInfoManager.class).getOverallContributions(getProject());
+			return sort(map);
 		}
 		
 	};
-	
+
 	private String fromDayText;
 	
 	private String toDayText;
+	
+	private String orderBy = Contribution.Type.COMMITS.name();
 	
 	public ProjectStatsPage(PageParameters params) {
 		super(params);
@@ -57,14 +63,22 @@ public class ProjectStatsPage extends ProjectPage {
 		overallContributionsModel.detach();
 		super.onDetach();
 	}
+
+	private List<DayContribution> sort(Map<Day, Contribution> map) {
+		List<DayContribution> list = new ArrayList<>();
+		for (Map.Entry<Day, Contribution> entry: map.entrySet())
+			list.add(new DayContribution(entry.getKey(), entry.getValue()));
+		Collections.sort(list);
+		return list;
+	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ContributionPanel("overallContribution", overallContributionsModel));
+		add(new ContributionListPanel("overallContribution", overallContributionsModel));
 		
-		Form<?> form = new Form<Void>("dateRange");
+		Form<?> form = new Form<Void>("topOptions");
 		form.add(new SubmitLink("update") {
 
 			@Override
@@ -93,13 +107,19 @@ public class ProjectStatsPage extends ProjectPage {
 		
 		form.add(new TextField<String>("fromDay", new PropertyModel<String>(this, "fromDayText")));
 		form.add(new TextField<String>("toDay", new PropertyModel<String>(this, "toDayText")));
+		List<String> orderByChoices = new ArrayList<>();
+		for (Contribution.Type type: Contribution.Type.values())
+			orderByChoices.add(type.name());
+		
+		form.add(new DropDownChoice<String>("orderBy", new PropertyModel<String>(this, "orderBy"), orderByChoices));
+		
 		add(form);
 		
-		add(new ListView<UserContribution>("userContributions", new LoadableDetachableModel<List<UserContribution>>() {
+		add(new ListView<Contributor>("topContributors", new LoadableDetachableModel<List<Contributor>>() {
 
 			@Override
-			protected List<UserContribution> load() {
-				List<DayAndCommits> overallContributions = overallContributionsModel.getObject();
+			protected List<Contributor> load() {
+				List<DayContribution> overallContributions = overallContributionsModel.getObject();
 				int size = overallContributions.size();
 				if (size != 0) {
 					Day fromDay;
@@ -117,7 +137,7 @@ public class ProjectStatsPage extends ProjectPage {
 					}
 					
 					return GitPlex.getInstance(CommitInfoManager.class)
-							.getUserContributions(getProject(), 10, fromDay, toDay);
+							.getTopContributors(getProject(), 25, Contribution.Type.valueOf(orderBy), fromDay, toDay);
 				} else {
 					return new ArrayList<>();
 				}
@@ -126,18 +146,18 @@ public class ProjectStatsPage extends ProjectPage {
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<UserContribution> item) {
-				UserContribution userContribution = item.getModelObject();
+			protected void populateItem(ListItem<Contributor> item) {
+				Contributor userContribution = item.getModelObject();
 				Fragment fragment = new Fragment("user", "userFrag", ProjectStatsPage.this);
 				fragment.add(new AvatarLink("avatar", userContribution.getUser()));
 				fragment.add(new UserLink("link", userContribution.getUser()));
 				item.add(fragment);
 
-				item.add(new ContributionPanel("userContribution", new AbstractReadOnlyModel<List<DayAndCommits>>() {
+				item.add(new ContributionListPanel("contributions", new AbstractReadOnlyModel<List<DayContribution>>() {
 
 					@Override
-					public List<DayAndCommits> getObject() {
-						return item.getModelObject().getDayAndCommits();
+					public List<DayContribution> getObject() {
+						return sort(item.getModelObject().getDailyContributions());
 					}
 					
 				}));

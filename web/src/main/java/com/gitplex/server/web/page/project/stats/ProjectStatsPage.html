@@ -1,21 +1,34 @@
 <wicket:extend>
 	<div id="project-stats">
-		<div class="contribution">
+		<div class="well">
 			<h2>Overall contribution</h2>
 			<div wicket:id="overallContribution"></div>
 		</div>
 	
-		<div class="user-contributions">
+		<div class="top-contributors">
 			<h2>Top 10 User Contributions</h2>	
-			<form wicket:id="dateRange">
+			<form wicket:id="topOptions" class="form-inline">
 				<div wicket:id="feedback"></div>
-				<input wicket:id="fromDay" placeholder="yyyy-MM-dd"></input>
-				<input wicket:id="toDay" placeholder="yyyy-MM-dd"></input>
-				<a wicket:id="update">Update</a>
+				<div class="form-group">
+					<label class="control-label">From Day: </label>
+					<input wicket:id="fromDay" placeholder="yyyy-MM-dd" class="form-control"></input>
+				</div>
+				<div class="form-group">
+					<label class="control-label">To Day: </label>
+					<input wicket:id="toDay" placeholder="yyyy-MM-dd" class="form-control"></input>
+				</div>
+				<div class="form-group">
+					<label class="control-label">Order By: </label>
+					<select wicket:id="orderBy" class="form-control"></select>
+				</div>
+				<div class="form-group">
+					<a wicket:id="update" class="btn btn-default">Update</a>
+				</div>
 			</form>
-			<div wicket:id="userContributions" class="contribution">
+			<hr/>
+			<div wicket:id="topContributors" class="well">
 				<div wicket:id="user"></div>
-				<div wicket:id="userContribution"></div>
+				<div wicket:id="contributions"></div>
 			</div>
 		</div>
 	</div>

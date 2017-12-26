@@ -108,15 +108,17 @@ public abstract class AbstractEnvironmentManager {
 		}
 	}
 
-	protected byte[] getBytes(@Nullable ByteIterable byteIterable) {
-		if (byteIterable != null)
-			return Arrays.copyOf(byteIterable.getBytesUnsafe(), byteIterable.getLength());
+	@Nullable 
+	protected byte[] readBytes(Store store, Transaction txn, ByteIterable key) {
+		ByteIterable value = store.get(txn, key);
+		if (value != null) 
+			return Arrays.copyOf(value.getBytesUnsafe(), value.getLength());
 		else
 			return null;
 	}
 	
 	protected int readInt(Store store, Transaction txn, ByteIterable key, int defaultValue) {
-		byte[] bytes = getBytes(store.get(txn, key));
+		byte[] bytes = readBytes(store, txn, key);
 		if (bytes != null)
 			return ByteBuffer.wrap(bytes).getInt();
 		else
@@ -129,7 +131,7 @@ public abstract class AbstractEnvironmentManager {
 	}
 	
 	protected long readLong(Store store, Transaction txn, ByteIterable key, long defaultValue) {
-		byte[] bytes = getBytes(store.get(txn, key));
+		byte[] bytes = readBytes(store, txn, key);
 		if (bytes != null)
 			return ByteBuffer.wrap(bytes).getLong();
 		else

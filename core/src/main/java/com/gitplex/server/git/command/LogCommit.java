@@ -19,6 +19,8 @@ public class LogCommit implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private final String hash;
+	
+	private final Date commitDate;
     
     private final PersonIdent committer;
     
@@ -27,10 +29,12 @@ public class LogCommit implements Serializable {
     private final List<String> parentHashes;
     
     private final List<FileChange> fileChanges;
-
-    public LogCommit(String hash, @Nullable PersonIdent committer, @Nullable PersonIdent author, 
-    		List<String> parentHashes, List<FileChange> fileChanges) {
+    
+    public LogCommit(String hash, @Nullable Date commitDate, @Nullable PersonIdent committer, 
+    		@Nullable PersonIdent author, List<String> parentHashes, List<FileChange> fileChanges, 
+    		int addedLines, int deletedLines) {
     	this.hash = hash;
+    	this.commitDate = commitDate;
     	this.committer = committer;
     	this.author = author;
     	this.parentHashes = new ArrayList<>(parentHashes);
@@ -48,8 +52,8 @@ public class LogCommit implements Serializable {
     public Collection<String> getChangedFiles() {
     	Collection<String> changedFiles = new HashSet<>();
     	for (FileChange change: getFileChanges()) {
-    		if (change.getNewPath() != null)
-    			changedFiles.add(change.getNewPath());
+    		if (change.getPath() != null)
+    			changedFiles.add(change.getPath());
     		if (change.getOldPath() != null)
     			changedFiles.add(change.getOldPath());
     	}
@@ -70,6 +74,24 @@ public class LogCommit implements Serializable {
 		return author;
 	}
 
+	public Date getCommitDate() {
+		return commitDate;
+	}
+
+	public int getAdditions() {
+		int additions = 0;
+		for (FileChange change: fileChanges)
+			additions += change.getAdditions();
+		return additions;
+	}
+	
+	public int getDeletions() {
+		int deletions = 0;
+		for (FileChange change: fileChanges)
+			deletions += change.getDeletions();
+		return deletions;
+	}	
+	
 	public static class Builder {
 
 		public String hash;
@@ -89,25 +111,26 @@ public class LogCommit implements Serializable {
     	public List<String> parentHashes = new ArrayList<>();
 		
     	public List<FileChange> fileChanges = new ArrayList<>();
+    	
+    	public int addedLines;
+    	
+    	public int deletedLines;
 		
 		public LogCommit build() {
 			PersonIdent committer;
-			if ((StringUtils.isNotBlank(committerName) || StringUtils.isNotBlank(committerEmail)) 
-					&& committerDate != null) {
+			if (StringUtils.isNotBlank(committerName) || StringUtils.isNotBlank(committerEmail))
 				committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
-			} else {
+			else 
 				committer = null;
-			}
 
 			PersonIdent author;
-			if ((StringUtils.isNotBlank(authorName) || StringUtils.isNotBlank(authorEmail)) 
-					&& authorDate != null) {
+			if (StringUtils.isNotBlank(authorName) || StringUtils.isNotBlank(authorEmail)) 
 				author = GitUtils.newPersonIdent(authorName, authorEmail, authorDate);
-			} else {
+			else
 				author = null;
-			}
 			
-			return new LogCommit(hash, committer, author, parentHashes, fileChanges);
+			return new LogCommit(hash, committerDate, committer, author, parentHashes, fileChanges, 
+					addedLines, deletedLines);
 		}
 	}
 	

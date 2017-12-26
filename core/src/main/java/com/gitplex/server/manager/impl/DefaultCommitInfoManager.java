@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +26,7 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -38,10 +38,10 @@ import org.slf4j.LoggerFactory;
 import com.gitplex.launcher.loader.Listen;
 import com.gitplex.server.event.RefUpdated;
 import com.gitplex.server.event.lifecycle.SystemStarted;
-import com.gitplex.server.git.DayAndCommits;
+import com.gitplex.server.git.Contribution;
+import com.gitplex.server.git.Contributor;
 import com.gitplex.server.git.GitUtils;
 import com.gitplex.server.git.NameAndEmail;
-import com.gitplex.server.git.UserContribution;
 import com.gitplex.server.git.command.FileChange;
 import com.gitplex.server.git.command.LogCommand;
 import com.gitplex.server.git.command.LogCommit;
@@ -60,7 +60,6 @@ import com.gitplex.server.util.Day;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
 import com.gitplex.utils.FileUtils;
-import com.gitplex.utils.Pair;
 import com.gitplex.utils.PathUtils;
 import com.gitplex.utils.StringUtils;
 import com.gitplex.utils.concurrent.Prioritized;
@@ -99,7 +98,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private static final String COMMITS_STORE = "commits";
 	
-	private static final String MODIFICATIONS_STORE = "modifications";
+	private static final String EDITS_STORE = "edits";
 
 	private static final String HISTORY_PATHS_STORE = "historyPaths";
 	
@@ -122,6 +121,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	private static final ByteIterable USERS_KEY = new StringByteIterable("users");
 	
 	private static final ByteIterable FILES_KEY = new StringByteIterable("files");
+	
+	private static final ByteIterable OVERALL_CONTRIBUTIONS_KEY = new StringByteIterable("overallContributions");
 	
 	private static final ByteIterable COMMIT_COUNT_KEY = new StringByteIterable("commitCount");
 	
@@ -167,7 +168,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 				@Override
 				public ObjectId compute(Transaction txn) {
-					byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
+					byte[] bytes = readBytes(defaultStore, txn, LAST_COMMIT_KEY);
 					return bytes!=null? ObjectId.fromRaw(bytes): null;
 				}
 				
@@ -193,7 +194,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			doCollect(project, commitId, false);
 		} else {
 			Store commitsStore = getStore(env, COMMITS_STORE);
-			Store modificationsStore = getStore(env, MODIFICATIONS_STORE); 
+			Store editsStore = getStore(env, EDITS_STORE); 
 			Store historyPathsStore = getStore(env, HISTORY_PATHS_STORE);
 			Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
 			Store indexToPathStore = getStore(env, INDEX_TO_PATH_STORE);
@@ -207,7 +208,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				@Override
 				public void execute(Transaction txn) {
 					try {
-						byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
+						byte[] bytes = readBytes(defaultStore, txn, LAST_COMMIT_KEY);
 						
 						ObjectId lastCommitId;
 						if (bytes != null) {
@@ -226,23 +227,25 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						nextIndex.user = readInt(defaultStore, txn, NEXT_USER_INDEX_KEY, 0);
 						nextIndex.path = readInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, 0);
 						
-						Map<Integer, Map<Integer, Integer>> dailyCommitsCache = new HashMap<>();
-						Map<Long, Integer> modificationsCache = new HashMap<>();
+						Map<Integer, Map<Integer, Contribution>> dailyContributionsCache = new HashMap<>();
+						Map<Integer, Contribution> overallContributions = 
+								deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
+						Map<Long, Integer> editsCache = new HashMap<>();
 						
 						Set<NameAndEmail> users;
-						bytes = getBytes(defaultStore.get(txn, USERS_KEY));
+						bytes = readBytes(defaultStore, txn, USERS_KEY);
 						if (bytes != null)
 							users = (Set<NameAndEmail>) SerializationUtils.deserialize(bytes);
 						else
 							users = new HashSet<>();
 
 						Map<String, Long> files;
-						bytes = getBytes(defaultStore.get(txn, FILES_KEY));
+						bytes = readBytes(defaultStore, txn, FILES_KEY);
 						if (bytes != null)
 							files = (Map<String, Long>) SerializationUtils.deserialize(bytes);
 						else
 							files = new HashMap<>();
-
+						
 						/*
 						 * Use a synchronous queue to achieve below purpose:
 						 * 1. Add commit to Xodus transactional store in the same thread opening the transaction 
@@ -292,7 +295,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 							byte[] keyBytes = new byte[20];
 							ObjectId.fromString(commit.getHash()).copyRawTo(keyBytes, 0);
 							ByteIterable key = new ArrayByteIterable(keyBytes);
-							byte[] valueBytes = getBytes(commitsStore.get(txn, key));
+							byte[] valueBytes = readBytes(commitsStore, txn, key);
 							
 							if (valueBytes == null || valueBytes.length % 20 == 0) {
 								/*
@@ -317,7 +320,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 									keyBytes = new byte[20];
 									ObjectId.fromString(parentHash).copyRawTo(keyBytes, 0);
 									key = new ArrayByteIterable(keyBytes);
-									valueBytes = getBytes(commitsStore.get(txn, key));
+									valueBytes = readBytes(commitsStore, txn, key);
 									if (valueBytes != null) {
 										newValueBytes = new byte[valueBytes.length+20];
 										System.arraycopy(valueBytes, 0, newValueBytes, 0, valueBytes.length);
@@ -328,11 +331,13 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 									commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
 								}
 								
-								if (commit.getCommitter() != null) {
-									users.add(new NameAndEmail(commit.getCommitter()));
+								if (commit.getCommitDate() != null) {
 									for (String file: commit.getChangedFiles())
-										files.put(file, commit.getCommitter().getWhen().getTime());
+										files.put(file, commit.getCommitDate().getTime());
 								}
+								
+								if (commit.getCommitter() != null)
+									users.add(new NameAndEmail(commit.getCommitter()));
 
 								if (commit.getAuthor() != null) {
 									NameAndEmail nameAndEmail = new NameAndEmail(commit.getAuthor());
@@ -350,42 +355,48 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 													new ArrayByteIterable(SerializationUtils.serialize(nameAndEmail)));
 										}
 										
-										for (String changedPath: commit.getChangedFiles()) {
+										for (FileChange change: commit.getFileChanges()) {
+											String path = change.getPath();
 											int pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
-													nextIndex, changedPath);
-											increaseModifications(modificationsStore, txn, modificationsCache, 
-													userIndex, pathIndex);
-											while (changedPath.contains("/")) {
-												changedPath = StringUtils.substringBeforeLast(changedPath, "/");
+													nextIndex, path);
+											int edits = change.getAdditions() + change.getDeletions();
+											updateEdits(editsStore, txn, editsCache, 
+													userIndex, pathIndex, edits);
+											while (path.contains("/")) {
+												path = StringUtils.substringBeforeLast(path, "/");
 												pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
-														nextIndex, changedPath);
-												increaseModifications(modificationsStore, txn, modificationsCache, 
-														userIndex, pathIndex);
+														nextIndex, path);
+												updateEdits(editsStore, txn, editsCache, 
+														userIndex, pathIndex, edits);
 											}
 											pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
 													nextIndex, "");
-											increaseModifications(modificationsStore, txn, modificationsCache, 
-													userIndex, pathIndex);
+											updateEdits(editsStore, txn, editsCache, userIndex, pathIndex, edits);
 										}
 
-										if (commit.getCommitter() != null && commit.getParentHashes().size() <= 1) {
-											int day = new Day(commit.getCommitter().getWhen()).getValue();
-											increaseDailyCommits(dailyContributionsStore, txn, 
-													dailyCommitsCache, userIndex, day);
-											increaseDailyCommits(dailyContributionsStore, txn, 
-													dailyCommitsCache, -1, day);
+										if (commit.getCommitDate() != null && commit.getParentHashes().size() <= 1) {
+											int dayValue = new Day(commit.getCommitDate()).getValue();
+											Map<Integer, Contribution> contributionsOnDay = 
+													dailyContributionsCache.get(dayValue);
+											if (contributionsOnDay == null) {
+												contributionsOnDay = deserializeContributions(readBytes(
+														dailyContributionsStore, txn, new IntByteIterable(dayValue)));
+												dailyContributionsCache.put(dayValue, contributionsOnDay);
+											}
+											updateContribution(contributionsOnDay, userIndex, commit);
+											
+											updateContribution(overallContributions, dayValue, commit);
 										}
 									}
 								}
 								
 								for (FileChange change: commit.getFileChanges()) {
-									if (change.getAction() == FileChange.Action.COPY 
-											|| change.getAction() == FileChange.Action.RENAME) {
+									if (change.getOldPath() != null) {
 										int pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
-												nextIndex, change.getNewPath());
+												nextIndex, change.getPath());
 										ByteIterable pathKey = new IntByteIterable(pathIndex);
 										Set<Integer> historyPathIndexes = new HashSet<>();
-										byte[] bytesOfHistoryPaths = getBytes(historyPathsStore.get(txn, pathKey));
+										byte[] bytesOfHistoryPaths = readBytes(historyPathsStore, txn, pathKey);
 										if (bytesOfHistoryPaths == null) {
 											bytesOfHistoryPaths = new byte[0];
 											int pos = 0;
@@ -414,6 +425,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 										}
 									}
 								}
+								
 							}		
 							commitOptional = queue.take();
 						}
@@ -440,27 +452,16 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
 						filesCache.remove(project.getId());
 						
-						for (Map.Entry<Integer, Map<Integer, Integer>> dailyCommitsEntry: dailyCommitsCache.entrySet()) {
-							Integer userIndex = dailyCommitsEntry.getKey();
-							Map<Integer, Integer> dailyCommitsOfUser = dailyCommitsEntry.getValue();
-							byte[] bytesOfDailyCommitsOfUser = new byte[dailyCommitsOfUser.size()*Integer.BYTES*2];
-							int pos = 0;
-							for (Map.Entry<Integer, Integer> dailyCommitsOfUserEntry: dailyCommitsOfUser.entrySet()) {
-								byte[] keyBytes = ByteBuffer.allocate(Integer.BYTES)
-										.putInt(dailyCommitsOfUserEntry.getKey()).array(); 
-								System.arraycopy(keyBytes, 0, bytesOfDailyCommitsOfUser, pos, Integer.BYTES);
-								pos += Integer.BYTES;
-								byte[] valueBytes = ByteBuffer.allocate(Integer.BYTES)
-										.putInt(dailyCommitsOfUserEntry.getValue()).array();
-								System.arraycopy(valueBytes, 0, bytesOfDailyCommitsOfUser, pos, Integer.BYTES);
-								pos += Integer.BYTES;
-							}
-							dailyContributionsStore.put(txn, new IntByteIterable(userIndex), 
-									new ArrayByteIterable(bytesOfDailyCommitsOfUser));
+						for (Map.Entry<Integer, Map<Integer, Contribution>> entry: dailyContributionsCache.entrySet()) {
+							byte[] bytesOfContributionsOnDay = serializeContributions(entry.getValue());
+							dailyContributionsStore.put(txn, new IntByteIterable(entry.getKey()), 
+									new ArrayByteIterable(bytesOfContributionsOnDay));
 						}
+						defaultStore.put(txn, OVERALL_CONTRIBUTIONS_KEY, 
+								new ArrayByteIterable(serializeContributions(overallContributions)));
 						
-						for (Map.Entry<Long, Integer> entry: modificationsCache.entrySet()) 
-							writeInt(modificationsStore, txn, new LongByteIterable(entry.getKey()), entry.getValue());
+						for (Map.Entry<Long, Integer> entry: editsCache.entrySet()) 
+							writeInt(editsStore, txn, new LongByteIterable(entry.getKey()), entry.getValue());
 						
 						bytes = new byte[20];
 						commitId.copyRawTo(bytes, 0);
@@ -472,6 +473,19 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				
 			});			
 		}
+	}
+	
+	private void updateContribution(Map<Integer, Contribution> contributions, int key, LogCommit commit) {
+		Contribution contribution = contributions.get(key);
+		if (contribution != null) {
+			contribution = new Contribution(
+					contribution.getCommits()+1, 
+					contribution.getAdditions()+commit.getAdditions(), 
+					contribution.getDeletions()+commit.getDeletions());
+		} else {
+			contribution = new Contribution(1, commit.getAdditions(), commit.getDeletions());
+		}
+		contributions.put(key, contribution);
 	}
 	
 	private int getPathIndex(Store pathToIndexStore, Store indexToPathStore, Transaction txn, 
@@ -486,15 +500,15 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		return pathIndex;
 	}
 	
-	private void increaseModifications(Store modificationsStore, Transaction txn, 
-			Map<Long, Integer> modificationsCache, int userIndex, int pathIndex) {
-		long modificationsKey = (userIndex<<32)|pathIndex;
+	private void updateEdits(Store store, Transaction txn, 
+			Map<Long, Integer> editsCache, int userIndex, int pathIndex, int edits) {
+		long editsKey = (userIndex<<32)|pathIndex;
 		
-		Integer modificationsOfPathByUser = modificationsCache.get(modificationsKey);
-		if (modificationsOfPathByUser == null)
-			modificationsOfPathByUser = readInt(modificationsStore, txn, new LongByteIterable(modificationsKey), 0);
-		modificationsOfPathByUser++;
-		modificationsCache.put(modificationsKey, modificationsOfPathByUser);
+		Integer editsOfPathByUser = editsCache.get(editsKey);
+		if (editsOfPathByUser == null)
+			editsOfPathByUser = readInt(store, txn, new LongByteIterable(editsKey), 0);
+		editsOfPathByUser += edits;
+		editsCache.put(editsKey, editsOfPathByUser);
 	}
 	
 	@Override
@@ -509,7 +523,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				@SuppressWarnings("unchecked")
 				@Override
 				public List<NameAndEmail> compute(Transaction txn) {
-					byte[] bytes = getBytes(store.get(txn, USERS_KEY));
+					byte[] bytes = readBytes(store, txn, USERS_KEY);
 					if (bytes != null) { 
 						List<NameAndEmail> users = 
 								new ArrayList<>((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
@@ -538,7 +552,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				@SuppressWarnings("unchecked")
 				@Override
 				public List<String> compute(Transaction txn) {
-					byte[] bytes = getBytes(store.get(txn, FILES_KEY));
+					byte[] bytes = readBytes(store, txn, FILES_KEY);
 					if (bytes != null) {
 						List<String> files = new ArrayList<>(
 								((Map<String, Long>)SerializationUtils.deserialize(bytes)).keySet());
@@ -567,12 +581,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	}
 
 	@Override
-	public int getModifications(ProjectFacade project, UserFacade user, String path) {
+	public int getEdits(ProjectFacade project, UserFacade user, String path) {
 		if (user.getEmail() != null) {
 			Environment env = getEnv(project.getId().toString());
 			Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);
 			Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
-			Store modificationsStore = getStore(env, MODIFICATIONS_STORE);
+			Store editsStore = getStore(env, EDITS_STORE);
 			return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
 
 				@Override
@@ -581,8 +595,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 					if (userIndex != -1) {
 						int pathIndex = readInt(pathToIndexStore, txn, new StringByteIterable(path), -1);
 						if (pathIndex != -1) {
-							long modificationsKey = (userIndex<<32)|pathIndex;
-							return readInt(modificationsStore, txn, new LongByteIterable(modificationsKey), 0);
+							long editsKey = (userIndex<<32)|pathIndex;
+							return readInt(editsStore, txn, new LongByteIterable(editsKey), 0);
 						} 
 					} 
 					return 0;
@@ -612,7 +626,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 					ObjectId current = stack.pop();
 					byte[] keyBytes = new byte[20];
 					current.copyRawTo(keyBytes, 0);
-					byte[] valueBytes = getBytes(store.get(txn, new ArrayByteIterable(keyBytes)));
+					byte[] valueBytes = readBytes(store, txn, new ArrayByteIterable(keyBytes));
 					if (valueBytes != null) {
 						if (valueBytes.length % 20 == 0) {
 							for (int i=0; i<valueBytes.length/20; i++) {
@@ -657,7 +671,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				
 				byte[] keyBytes = new byte[20];
 				parent.copyRawTo(keyBytes, 0);
-				byte[] valueBytes = getBytes(store.get(txn, new ArrayByteIterable(keyBytes)));
+				byte[] valueBytes = readBytes(store, txn, new ArrayByteIterable(keyBytes));
 				if (valueBytes != null) {
 					if (valueBytes.length % 20 == 0) {
 						for (int i=0; i<valueBytes.length/20; i++) {
@@ -738,7 +752,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 							byte[] keyBytes = new byte[20];
 							commit.copyRawTo(keyBytes, 0);
 							ByteIterable key = new ArrayByteIterable(keyBytes);
-							byte[] valueBytes = getBytes(commitsStore.get(txn, key));
+							byte[] valueBytes = readBytes(commitsStore, txn, key);
 							if (valueBytes == null || valueBytes.length % 20 == 0) 
 								works.add(new CollectingWork(PRIORITY, commit, ref.getName()));
 						}
@@ -875,7 +889,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			private Collection<String> getPaths(Transaction txn, Set<Integer> pathIndexes) {
 				Set<String> paths = new HashSet<>();
 				for (int pathIndex: pathIndexes) {
-					byte[] pathBytes = getBytes(indexToPathStore.get(txn, new IntByteIterable(pathIndex)));
+					byte[] pathBytes = readBytes(indexToPathStore, txn, new IntByteIterable(pathIndex));
 					if (pathBytes != null)
 						paths.add(new String(pathBytes, Charsets.UTF_8));
 				}
@@ -892,7 +906,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						Set<Integer> newPathIndexes = new HashSet<>(pathIndexes);
 						for (int eachPathIndex: pathIndexes) {
 							byte[] bytesOfHistoryPaths = 
-									getBytes(historyPathsStore.get(txn, new IntByteIterable(eachPathIndex)));
+									readBytes(historyPathsStore, txn, new IntByteIterable(eachPathIndex));
 							if (bytesOfHistoryPaths != null) {
 								int pos = 0;
 								for (int i=0; i<bytesOfHistoryPaths.length/Integer.BYTES; i++) {
@@ -918,129 +932,156 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	@Sessional
 	@Override
-	public List<DayAndCommits> getOverallContributions(Project project) {
+	public Map<Day, Contribution> getOverallContributions(Project project) {
 		Environment env = getEnv(project.getId().toString());
-		Store store = getStore(env, DAILY_CONTRIBUTIONS_STORE);
+		Store store = getStore(env, DEFAULT_STORE);
 
-		return env.computeInReadonlyTransaction(new TransactionalComputable<List<DayAndCommits>>() {
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<Day, Contribution>>() {
 
 			@Override
-			public List<DayAndCommits> compute(Transaction txn) {
-				Map<Integer, Integer> map = readDailyCommits(store, txn, new IntByteIterable(-1));
-				List<DayAndCommits> contributions = new ArrayList<>();
-				for (Map.Entry<Integer, Integer> entry: map.entrySet())
-					contributions.add(new DayAndCommits(new Day(entry.getKey()), entry.getValue()));
-				Collections.sort(contributions);
-				return contributions;
+			public Map<Day, Contribution> compute(Transaction txn) {
+				Map<Day, Contribution> overallContributions = new HashMap<>();
+				for (Map.Entry<Integer, Contribution> entry: 
+							deserializeContributions(readBytes(store, txn, OVERALL_CONTRIBUTIONS_KEY)).entrySet()) {
+					overallContributions.put(new Day(entry.getKey()), entry.getValue());
+				}
+				return overallContributions;
 			}
 			
 		});
 	}
-
+	
 	@Sessional
 	@Override
-	public List<UserContribution> getUserContributions(Project project, int top, Day fromDay, Day toDay) {
+	public List<Contributor> getTopContributors(Project project, int top, Contribution.Type orderBy, 
+			Day fromDay, Day toDay) {
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store indexToUserStore = getStore(env, INDEX_TO_USER_STORE);
 		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);
 		
-		return env.computeInReadonlyTransaction(new TransactionalComputable<List<UserContribution>>() {
+		return env.computeInReadonlyTransaction(new TransactionalComputable<List<Contributor>>() {
 
 			@Override
-			public List<UserContribution> compute(Transaction txn) {
-				int nextUserIndex = readInt(defaultStore, txn, NEXT_USER_INDEX_KEY, 0);
-				List<Pair<ByteIterable, Integer>> list = new ArrayList<>();
-				for (int userIndex=0; userIndex<nextUserIndex; userIndex++) {
-					ByteIterable userKey = new IntByteIterable(userIndex);
-					Map<Integer, Integer> dailyCommitCounts = readDailyCommits(dailyContributionsStore, txn, userKey);
-					int totalCommitCount = 0;
-					for (Map.Entry<Integer, Integer> entry: dailyCommitCounts.entrySet()) {
-						if (entry.getKey()>=fromDay.getValue() && entry.getKey()<=toDay.getValue())
-							totalCommitCount += entry.getValue();
+			public List<Contributor> compute(Transaction txn) {
+				Map<Integer, Contribution> overallContributions = 
+						deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
+				Map<Integer, Integer> orderByValues = new HashMap<>();
+				for (int dayValue: overallContributions.keySet()) {
+					if (dayValue >= fromDay.getValue() && dayValue <= toDay.getValue()) {
+						ByteIterable dayKey = new IntByteIterable(dayValue);
+						Map<Integer, Contribution> contributionsOnDay = 
+								deserializeContributions(readBytes(dailyContributionsStore, txn, dayKey));
+						for (Map.Entry<Integer, Contribution> entry: contributionsOnDay.entrySet()) {
+							int orderByValue;
+							if (orderBy == Contribution.Type.COMMITS)
+								orderByValue = entry.getValue().getCommits();
+							else if (orderBy == Contribution.Type.ADDITIONS)
+								orderByValue = entry.getValue().getAdditions();
+							else
+								orderByValue = entry.getValue().getDeletions();
+							Integer userIndex = entry.getKey();
+							Integer existingOrderByValue = orderByValues.get(userIndex);
+							if (existingOrderByValue != null)
+								orderByValue += existingOrderByValue;
+							orderByValues.put(userIndex, orderByValue);
+						}
 					}
-					list.add(new Pair<>(userKey, totalCommitCount));
 				}
-				Collections.sort(list, new Comparator<Pair<ByteIterable, Integer>>() {
+				
+				List<Integer> topUserIndexes = new ArrayList<>(orderByValues.keySet());
+				Collections.sort(topUserIndexes, new Comparator<Integer>() {
 
 					@Override
-					public int compare(Pair<ByteIterable, Integer> o1, Pair<ByteIterable, Integer> o2) {
-						return o2.getSecond() - o1.getSecond();
+					public int compare(Integer o1, Integer o2) {
+						return orderByValues.get(o2) - orderByValues.get(o1);
 					}
 					
 				});
 
-				List<UserContribution> listOfUserContribution = new ArrayList<>();
-				int numContributionsToReturn = top;
-				if (numContributionsToReturn > list.size())
-					numContributionsToReturn = list.size();
-				for (int i=0; i<numContributionsToReturn; i++) {
-					Pair<ByteIterable, Integer> pair = list.get(i);
-					if (pair.getSecond() == 0)
-						break;
-					ByteIterable userKey = pair.getFirst();
-					byte[] userBytes = getBytes(indexToUserStore.get(txn, userKey));
-					if (userBytes != null) {
-						List<DayAndCommits> listOfDayAndCommits = new ArrayList<>();
-						Map<Integer, Integer> commitCounts = readDailyCommits(dailyContributionsStore, txn, userKey);
-						for (Iterator<Map.Entry<Integer, Integer>> it = commitCounts.entrySet().iterator(); it.hasNext();) {
-							Map.Entry<Integer, Integer> entry = it.next();
-							if (entry.getKey()>=fromDay.getValue() && entry.getKey()<=toDay.getValue())
-								listOfDayAndCommits.add(new DayAndCommits(new Day(entry.getKey()), entry.getValue()));
+				if (top < topUserIndexes.size())
+					topUserIndexes = topUserIndexes.subList(0, top);
+				
+				Set<Integer> topUserIndexSet = new HashSet<>(topUserIndexes);
+				
+				Map<Integer, Map<Day, Contribution>> userContributions = new HashMap<>();
+				
+				for (int dayValue: overallContributions.keySet()) {
+					if (dayValue >= fromDay.getValue() && dayValue <= toDay.getValue()) {
+						ByteIterable dayKey = new IntByteIterable(dayValue);
+						Map<Integer, Contribution> contributionsOnDay = 
+								deserializeContributions(readBytes(dailyContributionsStore, txn, dayKey));
+						Day day = new Day(dayValue);
+						for (Map.Entry<Integer, Contribution> entry: contributionsOnDay.entrySet()) {
+							Integer userIndex = entry.getKey();
+							if (topUserIndexSet.contains(userIndex)) {
+								Map<Day, Contribution> contributionsByUser = userContributions.get(userIndex);
+								if (contributionsByUser == null) {
+									contributionsByUser = new HashMap<>();
+									userContributions.put(userIndex, contributionsByUser);
+								}
+								contributionsByUser.put(day, entry.getValue());
+							}
 						}
-						Collections.sort(listOfDayAndCommits);
-						listOfUserContribution.add(new UserContribution(
-								((NameAndEmail)SerializationUtils.deserialize(userBytes)).asPersonIdent(),
-								listOfDayAndCommits));
+					}
+				}
+
+				List<Contributor> contributors = new ArrayList<>();
+				
+				for (int userIndex: topUserIndexes) {
+					byte[] userBytes = readBytes(indexToUserStore, txn, new IntByteIterable(userIndex));
+					Map<Day, Contribution> contributionsByUser = userContributions.get(userIndex);
+					if (userBytes != null && contributionsByUser != null) {
+						PersonIdent user = ((NameAndEmail)SerializationUtils.deserialize(userBytes)).asPersonIdent();
+						contributors.add(new Contributor(user, contributionsByUser));
 					}
 				}
 				
-				return listOfUserContribution;
+				return contributors;
 			}
 			
 		});
 	}
 
-	/**
-	 * Increase contribution 
-	 * 
-	 * @param userIndex 
-	 * 			user index to increase contribution, use -1 for overall contributions
-	 * @param day
-	 * 			day of the contribution
-	 */
-	private void increaseDailyCommits(Store store, Transaction txn, 
-			Map<Integer, Map<Integer, Integer>> dailyCommitsCache, int userIndex, int day) {
-		Map<Integer, Integer> dailyCommitsOfUser = dailyCommitsCache.get(userIndex);
-		if (dailyCommitsOfUser == null) {
-			ByteIterable userKey = new IntByteIterable(userIndex);
-			dailyCommitsOfUser = readDailyCommits(store, txn, userKey);
-			dailyCommitsCache.put(userIndex, dailyCommitsOfUser);
-		}
-		Integer commitCount = dailyCommitsOfUser.get(day);
-		if (commitCount != null)
-			commitCount++;
-		else
-			commitCount = 1;
-		dailyCommitsOfUser.put(day, commitCount);
-	}
-	
-	private Map<Integer, Integer> readDailyCommits(Store store, Transaction txn, ByteIterable userKey) {
-		byte[] bytes = getBytes(store.get(txn, userKey));
+	private Map<Integer, Contribution> deserializeContributions(byte[] bytes) {
 		if (bytes != null) {
-			Map<Integer, Integer> map = new HashMap<>();
+			Map<Integer, Contribution> contributions = new HashMap<>();
 			int pos = 0;
-			for (int i=0; i<bytes.length/2/Integer.BYTES; i++) {
+			for (int i=0; i<bytes.length/4/Integer.BYTES; i++) {
 				int key = ByteBuffer.wrap(bytes, pos, Integer.BYTES).getInt();
 				pos += Integer.BYTES;
-				int value = ByteBuffer.wrap(bytes, pos, Integer.BYTES).getInt(); 
+				int commits = ByteBuffer.wrap(bytes, pos, Integer.BYTES).getInt(); 
 				pos += Integer.BYTES;
-				map.put(key, value);
+				int additions = ByteBuffer.wrap(bytes, pos, Integer.BYTES).getInt();
+				pos += Integer.BYTES;
+				int deletions = ByteBuffer.wrap(bytes, pos, Integer.BYTES).getInt(); 
+				pos += Integer.BYTES;
+				contributions.put(key, new Contribution(commits, additions, deletions));
 			}
-			return map;
+			return contributions;
 		} else {
 			return new HashMap<>();
 		}
+	}
+	
+	private byte[] serializeContributions(Map<Integer, Contribution> contributions) {
+		byte[] bytes = new byte[contributions.size()*Integer.BYTES*4];
+		int pos = 0;
+		for (Map.Entry<Integer, Contribution> entry: contributions.entrySet()) {
+			byte[] keyBytes = ByteBuffer.allocate(Integer.BYTES).putInt(entry.getKey()).array(); 
+			System.arraycopy(keyBytes, 0, bytes, pos, Integer.BYTES);
+			pos += Integer.BYTES;
+			byte[] commitsBytes = ByteBuffer.allocate(Integer.BYTES).putInt(entry.getValue().getCommits()).array();
+			System.arraycopy(commitsBytes, 0, bytes, pos, Integer.BYTES);
+			pos += Integer.BYTES;
+			byte[] additionsBytes = ByteBuffer.allocate(Integer.BYTES).putInt(entry.getValue().getAdditions()).array();
+			System.arraycopy(additionsBytes, 0, bytes, pos, Integer.BYTES);
+			pos += Integer.BYTES;
+			byte[] deletionsBytes = ByteBuffer.allocate(Integer.BYTES).putInt(entry.getValue().getDeletions()).array();
+			System.arraycopy(deletionsBytes, 0, bytes, pos, Integer.BYTES);
+			pos += Integer.BYTES;
+		}
+		return bytes;
 	}
 	
 	@Override
@@ -1058,4 +1099,5 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		
 		int path;
 	}
+
 }

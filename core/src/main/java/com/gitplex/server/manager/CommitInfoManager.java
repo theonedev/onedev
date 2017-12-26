@@ -2,13 +2,14 @@ package com.gitplex.server.manager;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.gitplex.server.git.DayAndCommits;
+import com.gitplex.server.git.Contribution;
+import com.gitplex.server.git.Contributor;
 import com.gitplex.server.git.NameAndEmail;
-import com.gitplex.server.git.UserContribution;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.util.Day;
 import com.gitplex.server.util.facade.ProjectFacade;
@@ -18,7 +19,7 @@ public interface CommitInfoManager {
 	
 	List<String> getFiles(Project project);
 	
-	int getModifications(ProjectFacade project, UserFacade user, String path);
+	int getEdits(ProjectFacade project, UserFacade user, String path);
 	
 	int getCommitCount(Project project);
 	
@@ -54,8 +55,33 @@ public interface CommitInfoManager {
 	
 	Collection<String> getHistoryPaths(Project project, String path);
 	
-	List<DayAndCommits> getOverallContributions(Project project);
+	/**
+	 * Get list of contributions, ordered by day
+	 * 
+	 * @param project
+	 * 			project to get daily commits for
+	 * @return
+	 * 			list of contributions, ordered by day
+	 */
+	Map<Day, Contribution> getOverallContributions(Project project);
 	
-	List<UserContribution> getUserContributions(Project project, int top, Day fromDay, Day toDay);
+	/**
+	 * Get list of top contributors
+	 * 
+	 * @param project
+	 * 			project to get top contributors for
+	 * @param top
+	 * 			number of top contributors to get
+	 * @param orderBy
+	 * 			type of contribution to order by
+	 * @param fromDay
+	 * 			from day
+	 * @param toDay
+	 * 			to day
+	 * @return
+	 * 			list of top user contributors, reversely ordered by number of contributions 
+	 */
+	List<Contributor> getTopContributors(Project project, int top, Contribution.Type orderBy, 
+			Day fromDay, Day toDay);
 	
 }

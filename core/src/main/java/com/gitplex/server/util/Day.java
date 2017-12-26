@@ -3,6 +3,8 @@ package com.gitplex.server.util;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 
 public class Day implements Serializable, Comparable<Day> {
@@ -39,6 +41,23 @@ public class Day implements Serializable, Comparable<Day> {
 	@Override
 	public int compareTo(Day o) {
 		return dateTime.compareTo(o.dateTime);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		} else if (other instanceof Day) {
+			Day otherDay = (Day) other;
+			return new EqualsBuilder().append(dateTime, otherDay.dateTime).isEquals();
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(dateTime).toHashCode();
 	}
 	
 }
