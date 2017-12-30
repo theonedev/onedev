@@ -16,7 +16,6 @@ import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.server.util.facade.ProjectFacade;
 import com.gitplex.server.util.facade.UserFacade;
 
-import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.Transaction;
@@ -52,8 +51,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public void execute(Transaction txn) {
-				store.put(txn, new StringByteIterable(project.getUUID()), 
-						new ArrayByteIterable(longToBytes(System.currentTimeMillis()+1000L)));
+				writeLong(store, txn, new StringByteIterable(project.getUUID()), System.currentTimeMillis()+1000L);
 			}
 			
 		});
@@ -67,9 +65,9 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public Date compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringByteIterable(project.getUUID())));
-				if (bytes != null)
-					return new Date(bytesToLong(bytes));
+				long millis = readLong(store, txn, new StringByteIterable(project.getUUID()), -1);
+				if (millis != -1)
+					return new Date(millis);
 				else
 					return null;
 			}

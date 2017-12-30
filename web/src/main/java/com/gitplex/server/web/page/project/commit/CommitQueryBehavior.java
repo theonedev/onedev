@@ -75,17 +75,13 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 						case CommitQueryParser.COMMITTER:
 							Map<String, Range> suggestedInputs = new LinkedHashMap<>();
 							CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
-							List<NameAndEmail> contributors;
-							if (tokenType == CommitQueryParser.AUTHOR)
-								contributors = commitInfoManager.getAuthors(project);
-							else
-								contributors = commitInfoManager.getCommitters(project);
-							for (NameAndEmail contributor: contributors) {
+							List<NameAndEmail> users = commitInfoManager.getUsers(project);
+							for (NameAndEmail user: users) {
 								String content;
-								if (StringUtils.isNotBlank(contributor.getEmailAddress()))
-									content = contributor.getName() + " <" + contributor.getEmailAddress() + ">";
+								if (StringUtils.isNotBlank(user.getEmailAddress()))
+									content = user.getName() + " <" + user.getEmailAddress() + ">";
 								else
-									content = contributor.getName();
+									content = user.getName();
 								content = content.trim();
 								PatternApplied applied = WildcardUtils.applyPattern(unfencedLowerCaseMatchWith, content, 
 										false);

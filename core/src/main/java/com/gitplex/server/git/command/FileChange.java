@@ -5,39 +5,43 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class FileChange implements Serializable {
 	
-	public enum Action {ADD, MODIFY, DELETE, COPY, RENAME, TYPE}
-	
 	private final String oldPath;
 	
-	private final String newPath;
+	private final String path;
 	
-	private final Action action;
+	private final int additions;
 	
-	public FileChange(Action action, String oldPath, String newPath) {
-		this.action = action;
-		
+	private final int deletions;
+	
+	public FileChange(String oldPath, String newPath, int additions, int deletions) {
 		this.oldPath = oldPath;
-		this.newPath = newPath;
+		this.path = newPath;
+		this.additions = additions;
+		this.deletions = deletions;
 	}
 
 	public String getOldPath() {
 		return oldPath;
 	}
 	
-	public String getNewPath() {
-		return newPath;
+	public String getPath() {
+		return path;
 	}
 
-	public Action getAction() {
-		return action;
+	public int getAdditions() {
+		return additions;
+	}
+
+	public int getDeletions() {
+		return deletions;
 	}
 
 	@Override
 	public String toString() {
-		if (action == Action.COPY || action == Action.RENAME)
-			return action.name() + "\t" + oldPath + "->" + newPath;
+		if (oldPath != null)
+			return oldPath + "=>" + path;
 		else 
-			return action.name() + "\t" + newPath;
+			return path;
 	}
 	
 }

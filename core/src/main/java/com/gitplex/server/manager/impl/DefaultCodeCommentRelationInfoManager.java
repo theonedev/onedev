@@ -153,7 +153,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 			
 			@Override
 			public String compute(Transaction txn) {
-				byte[] value = getBytes(defaultStore.get(txn, LAST_PULL_REQUEST_UPDATE_KEY));
+				byte[] value = readBytes(defaultStore, txn, LAST_PULL_REQUEST_UPDATE_KEY);
 				return value!=null?new String(value):null;									
 			}
 			
@@ -214,7 +214,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 			
 			@Override
 			public String compute(final Transaction txn) {
-				byte[] value = getBytes(defaultStore.get(txn, LAST_CODE_COMMENT_KEY));
+				byte[] value = readBytes(defaultStore, txn, LAST_CODE_COMMENT_KEY);
 				return value!=null?new String(value):null;									
 			}
 			
@@ -280,7 +280,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	
 	@SuppressWarnings("unchecked")
 	private Set<String> getPullRequestUUIDs(Store store, Transaction txn, ByteIterable commitKey) {
-		byte[] valueBytes = getBytes(store.get(txn, commitKey));
+		byte[] valueBytes = readBytes(store, txn, commitKey);
 		if (valueBytes != null) {
 			return (Set<String>) SerializationUtils.deserialize(valueBytes);
 		} else {
@@ -290,7 +290,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	
 	@SuppressWarnings("unchecked")
 	private Map<String, ComparingInfo> getCodeCommentComparingInfos(Store store, Transaction txn, ByteIterable commitKey) {
-		byte[] valueBytes = getBytes(store.get(txn, commitKey));
+		byte[] valueBytes = readBytes(store, txn, commitKey);
 		if (valueBytes != null) {
 			return (Map<String, ComparingInfo>) SerializationUtils.deserialize(valueBytes);
 		} else {

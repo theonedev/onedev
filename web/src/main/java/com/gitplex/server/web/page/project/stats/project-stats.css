@@ -1,0 +1,11 @@
+#project-stats {
+	padding: 20px;
+}
+
+#project-stats .form-inline div {
+	margin-right: 10px;
+}
+
+#project-stats .form-inline div .btn {
+	margin-left: 20px;
+}

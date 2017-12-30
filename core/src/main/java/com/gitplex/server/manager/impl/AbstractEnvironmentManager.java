@@ -108,24 +108,51 @@ public abstract class AbstractEnvironmentManager {
 		}
 	}
 
-	protected byte[] getBytes(@Nullable ByteIterable byteIterable) {
-		if (byteIterable != null)
-			return Arrays.copyOf(byteIterable.getBytesUnsafe(), byteIterable.getLength());
+	@Nullable 
+	protected byte[] readBytes(Store store, Transaction txn, ByteIterable key) {
+		ByteIterable value = store.get(txn, key);
+		if (value != null) 
+			return Arrays.copyOf(value.getBytesUnsafe(), value.getLength());
 		else
 			return null;
 	}
 	
-	protected byte[] longToBytes(long value) {
-	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-	    buffer.putLong(value);
-	    return buffer.array();
+	protected int readInt(Store store, Transaction txn, ByteIterable key, int defaultValue) {
+		byte[] bytes = readBytes(store, txn, key);
+		if (bytes != null)
+			return ByteBuffer.wrap(bytes).getInt();
+		else
+			return defaultValue;
 	}
-
-	protected long bytesToLong(byte[] bytes) {
-	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-	    buffer.put(bytes);
-	    buffer.flip(); 
-	    return buffer.getLong();
+	
+	protected void writeInt(Store store, Transaction txn, ByteIterable key, int value) {
+		byte[] bytes = ByteBuffer.allocate(Integer.BYTES).putInt(value).array();
+		store.put(txn, key, new ArrayByteIterable(bytes));
+	}
+	
+	protected long readLong(Store store, Transaction txn, ByteIterable key, long defaultValue) {
+		byte[] bytes = readBytes(store, txn, key);
+		if (bytes != null)
+			return ByteBuffer.wrap(bytes).getLong();
+		else
+			return defaultValue;
+	}
+	
+	protected void writeLong(Store store, Transaction txn, ByteIterable key, long value) {
+		byte[] bytes = ByteBuffer.allocate(Long.BYTES).putLong(value).array();
+		store.put(txn, key, new ArrayByteIterable(bytes));
+	}
+	
+	static class IntByteIterable extends ArrayByteIterable {
+		IntByteIterable(int value) {
+			super(new ArrayByteIterable(ByteBuffer.allocate(Integer.BYTES).putInt(value).array()));
+		}
+	}
+	
+	static class LongByteIterable extends ArrayByteIterable {
+		LongByteIterable(long value) {
+			super(new ArrayByteIterable(ByteBuffer.allocate(Long.BYTES).putLong(value).array()));
+		}
 	}
 	
 	static class StringByteIterable extends ArrayByteIterable {

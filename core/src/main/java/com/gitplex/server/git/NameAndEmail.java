@@ -23,6 +23,10 @@ public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 		this(person.getName(), person.getEmailAddress());
 	}
 	
+	public PersonIdent asPersonIdent() {
+		return new PersonIdent(name, emailAddress);
+	}
+	
 	public String getName() {
 		return name;
 	}

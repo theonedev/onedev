@@ -22,7 +22,6 @@ import com.gitplex.server.persistence.annotation.Transactional;
 import com.gitplex.server.persistence.dao.EntityRemoved;
 import com.gitplex.utils.FileUtils;
 
-import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.Transaction;
@@ -57,8 +56,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public void execute(Transaction txn) {
-				store.put(txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
-						new ArrayByteIterable(longToBytes(System.currentTimeMillis()+1000L)));
+				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
+						System.currentTimeMillis()+1000L);
 			}
 			
 		});
@@ -72,8 +71,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public void execute(Transaction txn) {
-				store.put(txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
-						new ArrayByteIterable(longToBytes(System.currentTimeMillis()+1000L)));
+				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
+						System.currentTimeMillis()+1000L);
 			}
 			
 		});
@@ -87,8 +86,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public void execute(Transaction txn) {
-				store.put(txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), 
-						new ArrayByteIterable(longToBytes(System.currentTimeMillis()+1000L)));
+				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), 
+						System.currentTimeMillis()+1000L);
 			}
 			
 		});
@@ -102,9 +101,9 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public Date compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringPairByteIterable(user.getUUID(), request.getUUID())));
-				if (bytes != null)
-					return new Date(bytesToLong(bytes));
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), -1);
+				if (millis != -1)
+					return new Date(millis);
 				else
 					return null;
 			}
@@ -120,9 +119,9 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public Date compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringPairByteIterable(user.getUUID(), request.getUUID())));
-				if (bytes != null)
-					return new Date(bytesToLong(bytes));
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), -1);
+				if (millis != -1)
+					return new Date(millis);
 				else
 					return null;
 			}
@@ -138,9 +137,9 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public Date compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringPairByteIterable(user.getUUID(), comment.getUUID())));
-				if (bytes != null)
-					return new Date(bytesToLong(bytes));
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), -1);
+				if (millis != -1)
+					return new Date(millis);
 				else
 					return null;
 			}
