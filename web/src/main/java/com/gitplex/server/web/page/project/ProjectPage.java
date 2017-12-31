@@ -52,6 +52,7 @@ import com.gitplex.server.web.page.project.pullrequest.requestdetail.RequestDeta
 import com.gitplex.server.web.page.project.pullrequest.requestlist.RequestListPage;
 import com.gitplex.server.web.page.project.setting.ProjectSettingPage;
 import com.gitplex.server.web.page.project.setting.general.GeneralSettingPage;
+import com.gitplex.server.web.page.project.stats.ProjectContribsPage;
 import com.gitplex.server.web.page.project.stats.ProjectStatsPage;
 import com.gitplex.server.web.page.project.tags.ProjectTagsPage;
 import com.google.common.base.Preconditions;
@@ -142,7 +143,8 @@ public abstract class ProjectPage extends LayoutPage {
 		
 		tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
 		
-		tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectStatsPage.class));
+		tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
+				ProjectStatsPage.class));
 		
 		if (SecurityUtils.canManage(getProject()))
 			tabs.add(new ProjectTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, ProjectSettingPage.class));

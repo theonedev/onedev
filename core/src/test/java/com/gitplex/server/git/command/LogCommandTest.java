@@ -66,12 +66,12 @@ public class LogCommandTest extends AbstractGitTest {
 				+ "9th line\n");
 		commit("第二个commit");
 		
-		List<LogCommit> commits = new ArrayList<>();
+		List<GitCommit> commits = new ArrayList<>();
 		
 		new LogCommand(git.getRepository().getDirectory()) {
 
 			@Override
-			protected void consume(LogCommit commit) {
+			protected void consume(GitCommit commit) {
 				commits.add(commit);
 			}
 			
@@ -79,7 +79,7 @@ public class LogCommandTest extends AbstractGitTest {
 		
 		assertEquals(2, commits.size());
 
-		LogCommit commit = commits.get(0);
+		GitCommit commit = commits.get(0);
 		
 		assertEquals(3, commit.getFileChanges().size());
 

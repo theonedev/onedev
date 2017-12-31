@@ -1,11 +1,8 @@
 package com.gitplex.server.git;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -16,58 +13,60 @@ public class LineStats implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Map<Day, Map<String, Integer>> dailyLines;
+	private final Map<Day, Map<String, Integer>> linesByDay;
 	
-	private transient List<String> sortedLanguages;
+	private transient Map<String, Map<Day, Integer>> linesByLanguage;
 	
-	public LineStats(Map<Day, Map<String, Integer>> dailyLines) {
-		this.dailyLines = dailyLines;
+	public LineStats(Map<Day, Map<String, Integer>> linesByDay) {
+		this.linesByDay = linesByDay;
 	}
 
-	public Map<Day, Map<String, Integer>> getDailyLines() {
-		return dailyLines;
+	/**
+	 * Get source lines by day and language
+	 * @return
+	 */
+	public Map<Day, Map<String, Integer>> getLinesByDay() {
+		return linesByDay;
 	}
 	
 	@Nullable
 	public Day getFirstDay() {
-		if (!dailyLines.isEmpty())
-			return Collections.min(dailyLines.keySet());
+		if (!linesByDay.isEmpty())
+			return Collections.min(linesByDay.keySet());
 		else
 			return null;
 	}
 	
 	@Nullable 
 	public Day getLastDay() {
-		if (!dailyLines.isEmpty())
-			return Collections.max(dailyLines.keySet());
+		if (!linesByDay.isEmpty())
+			return Collections.max(linesByDay.keySet());
 		else
 			return null;
 	}
 	
-	public List<String> getSortedLanguages() {
-		if (sortedLanguages == null) {
-			Map<String, Integer> languageLines = new HashMap<>();
-			for (Map<String, Integer> each: dailyLines.values()) {
-				for (Map.Entry<String, Integer> entry: each.entrySet()) {
-					Integer lines = languageLines.get(entry.getKey());
-					if (lines != null)
-						lines += entry.getValue();
-					else
-						lines = entry.getValue();
-					languageLines.put(entry.getKey(), lines);
+	/**
+	 * Get lines by language and day
+	 * @return
+	 */
+	public Map<String, Map<Day, Integer>> getLinesByLanguage() {
+		if (linesByLanguage == null) {
+			linesByLanguage = new HashMap<>();
+			for (Map.Entry<Day, Map<String, Integer>> outerEntry: linesByDay.entrySet()) {
+				Day day = outerEntry.getKey();
+				for (Map.Entry<String, Integer> innerEntry: outerEntry.getValue().entrySet()) {
+					String language = innerEntry.getKey();
+					int lines = innerEntry.getValue();
+					Map<Day, Integer> linesOfLanguage = linesByLanguage.get(language);
+					if (linesOfLanguage == null) {
+						linesOfLanguage = new HashMap<>();
+						linesByLanguage.put(language, linesOfLanguage);
+					}
+					linesOfLanguage.put(day, lines);
 				}
 			}
-			sortedLanguages = new ArrayList<>(languageLines.keySet());
-			Collections.sort(sortedLanguages, new Comparator<String>() {
-
-				@Override
-				public int compare(String o1, String o2) {
-					return languageLines.get(o2) - languageLines.get(o1);
-				}
-				
-			});
 		}
-		return sortedLanguages;
+		return linesByLanguage;
 	}
 	
 }

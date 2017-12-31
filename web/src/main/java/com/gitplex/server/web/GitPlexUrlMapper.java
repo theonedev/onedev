@@ -44,7 +44,8 @@ import com.gitplex.server.web.page.project.setting.branchprotection.BranchProtec
 import com.gitplex.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
 import com.gitplex.server.web.page.project.setting.general.GeneralSettingPage;
 import com.gitplex.server.web.page.project.setting.tagprotection.TagProtectionPage;
-import com.gitplex.server.web.page.project.stats.ProjectStatsPage;
+import com.gitplex.server.web.page.project.stats.ProjectContribsPage;
+import com.gitplex.server.web.page.project.stats.SourceLinesPage;
 import com.gitplex.server.web.page.project.tags.ProjectTagsPage;
 import com.gitplex.server.web.page.security.ForgetPage;
 import com.gitplex.server.web.page.security.LoginPage;
@@ -156,7 +157,8 @@ public class GitPlexUrlMapper extends CompoundRequestMapper {
 		add(new GitPlexPageMapper("projects/${project}/commit/${revision}", CommitDetailPage.class));
 		add(new GitPlexPageMapper("projects/${project}/commits", ProjectCommitsPage.class));
 		add(new GitPlexPageMapper("projects/${project}/compare", RevisionComparePage.class));
-		add(new GitPlexPageMapper("projects/${project}/stats", ProjectStatsPage.class));
+		add(new GitPlexPageMapper("projects/${project}/stats/contribs", ProjectContribsPage.class));
+		add(new GitPlexPageMapper("projects/${project}/stats/lines", SourceLinesPage.class));
 
 		add(new GitPlexPageMapper("projects/${project}/branches", ProjectBranchesPage.class));
 		add(new GitPlexPageMapper("projects/${project}/tags", ProjectTagsPage.class));

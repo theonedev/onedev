@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.gitplex.server.git.Contribution;
 import com.gitplex.server.git.Contributor;
+import com.gitplex.server.git.LineStats;
 import com.gitplex.server.git.NameAndEmail;
 import com.gitplex.server.model.Project;
 import com.gitplex.server.util.Day;
@@ -83,5 +84,15 @@ public interface CommitInfoManager {
 	 */
 	List<Contributor> getTopContributors(Project project, int top, Contribution.Type orderBy, 
 			Day fromDay, Day toDay);
+
+	/**
+	 * Get source code line statistics over time
+	 * 
+	 * @param project
+	 * 			project to get line stats for
+	 * @return
+	 * 			line statistics data
+	 */
+	LineStats getLineStats(Project project);
 	
 }

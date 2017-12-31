@@ -1,7 +1,6 @@
 package com.gitplex.server.git.command;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -13,8 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitplex.server.git.GitUtils;
+import com.google.common.base.Preconditions;
 
-public class LogCommit implements Serializable {
+public class GitCommit implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -30,21 +30,21 @@ public class LogCommit implements Serializable {
     
     private final List<FileChange> fileChanges;
     
-    public LogCommit(String hash, @Nullable Date commitDate, @Nullable PersonIdent committer, 
-    		@Nullable PersonIdent author, List<String> parentHashes, List<FileChange> fileChanges, 
-    		int addedLines, int deletedLines) {
-    	this.hash = hash;
+    public GitCommit(String hash, @Nullable Date commitDate, @Nullable PersonIdent committer, 
+    		@Nullable PersonIdent author, List<String> parentHashes, @Nullable List<FileChange> fileChanges) {
+    	this.hash = Preconditions.checkNotNull(hash);
     	this.commitDate = commitDate;
     	this.committer = committer;
     	this.author = author;
-    	this.parentHashes = new ArrayList<>(parentHashes);
-    	this.fileChanges = new ArrayList<>(fileChanges);
+    	this.parentHashes = Preconditions.checkNotNull(parentHashes);
+    	this.fileChanges = fileChanges;
     }
     
 	public List<String> getParentHashes() {
 		return parentHashes;
 	}
 	
+	@Nullable
     public List<FileChange> getFileChanges() {
 		return fileChanges;
 	}
@@ -74,6 +74,7 @@ public class LogCommit implements Serializable {
 		return author;
 	}
 
+	@Nullable
 	public Date getCommitDate() {
 		return commitDate;
 	}
@@ -108,15 +109,11 @@ public class LogCommit implements Serializable {
 		
 		public Date committerDate;
 		
-    	public List<String> parentHashes = new ArrayList<>();
+    	public List<String> parentHashes;
 		
-    	public List<FileChange> fileChanges = new ArrayList<>();
+    	public List<FileChange> fileChanges;
     	
-    	public int addedLines;
-    	
-    	public int deletedLines;
-		
-		public LogCommit build() {
+		public GitCommit build() {
 			PersonIdent committer;
 			if (StringUtils.isNotBlank(committerName) || StringUtils.isNotBlank(committerEmail))
 				committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
@@ -129,8 +126,7 @@ public class LogCommit implements Serializable {
 			else
 				author = null;
 			
-			return new LogCommit(hash, committerDate, committer, author, parentHashes, fileChanges, 
-					addedLines, deletedLines);
+			return new GitCommit(hash, committerDate, committer, author, parentHashes, fileChanges);
 		}
 	}
 	

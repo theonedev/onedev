@@ -2,6 +2,7 @@ package com.gitplex.server.git.command;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,7 +21,11 @@ public abstract class LogCommand extends GitCommand<Void> {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogCommand.class); 
 	
+	public enum Field {PARENTS, AUTHOR, COMMITTER, FILE_CHANGES};
+	
     private List<String> revisions = new ArrayList<>();
+    
+    private EnumSet<Field> fields = EnumSet.allOf(Field.class);
     
     public LogCommand(File gitDir) {
         super(gitDir);
@@ -29,35 +34,56 @@ public abstract class LogCommand extends GitCommand<Void> {
 	public List<String> revisions() {
 		return revisions;
 	}
-
+	
 	public LogCommand revisions(List<String> revisions) {
 		this.revisions = revisions;
 		return this;
 	}
 	
+	public EnumSet<Field> fields() {
+		return fields;
+	}
+	
+	public LogCommand fields(EnumSet<Field> fields) {
+		this.fields = fields;
+		return this;
+	}
+
 	@Override
     public Void call() {
 		Preconditions.checkArgument(!revisions.isEmpty(), "Log revisions have to be specified");
 		
         Commandline cmd = cmd();
 
-        String format = ""
-                + "hash:%H %n"
-                + "author:%aN %n"
-                + "authorEmail:%aE %n"
-                + "committer:%cN %n"
-                + "committerEmail:%cE %n"
-                + "parents:%P %n"
-                + "committerDate:%cd %n"
-                + "authorDate:%ad %n";
+        String format = "hash:%H %n";
 
-        cmd.addArgs("-c", "diff.renameLimit=1000", "log", "--format=" + format, "--date=raw", "--numstat", 
-        		"--find-renames");
+        if (fields.contains(Field.PARENTS)) {
+        	format += "parents:%P %n";
+        }
+        if (fields.contains(Field.AUTHOR)) {
+        	format += ""
+        			+ "author:%aN %n"
+                    + "authorEmail:%aE %n"
+        			+ "authorDate:%ad %n";
+        }
+        if (fields.contains(Field.COMMITTER)) {
+        	format += ""
+                    + "committer:%cN %n"
+                    + "committerEmail:%cE %n"
+        			+ "committerDate:%cd %n";
+        }
+        
+        if (fields.contains(Field.FILE_CHANGES))
+	        cmd.addArgs("-c", "diff.renameLimit=1000", "log", "--numstat", "--find-renames");
+        else 
+	        cmd.addArgs("log");
+        
+        cmd.addArgs("--format=" + format, "--date=raw");
         
     	for (String revision: revisions)
     		cmd.addArgs(revision);
         
-        AtomicReference<LogCommit.Builder> commitBuilderRef = new AtomicReference<>();
+        AtomicReference<GitCommit.Builder> commitBuilderRef = new AtomicReference<>(null);
         cmd.execute(new LineConsumer() {
 
             @Override
@@ -65,7 +91,11 @@ public abstract class LogCommand extends GitCommand<Void> {
             	if (line.startsWith("hash:")) {
             		if (commitBuilderRef.get() != null)
 	            		LogCommand.this.consume(commitBuilderRef.get().build());
-            		commitBuilderRef.set(new LogCommit.Builder());
+            		commitBuilderRef.set(new GitCommit.Builder());
+            		if (fields.contains(Field.PARENTS))
+            			commitBuilderRef.get().parentHashes = new ArrayList<>();
+            		if (fields.contains(Field.FILE_CHANGES))
+            			commitBuilderRef.get().fileChanges = new ArrayList<>();
                 	commitBuilderRef.get().hash = line.substring("hash:".length()).trim();
             	} else if (line.startsWith("author:")) {
             		commitBuilderRef.get().authorName = line.substring("author:".length()).trim();
@@ -135,6 +165,6 @@ public abstract class LogCommand extends GitCommand<Void> {
         return null;
     }
 	
-	protected abstract void consume(LogCommit commit);
+	protected abstract void consume(GitCommit commit);
 	
 }
