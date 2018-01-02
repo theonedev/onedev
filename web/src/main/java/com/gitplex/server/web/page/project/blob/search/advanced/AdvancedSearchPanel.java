@@ -3,6 +3,8 @@ package com.gitplex.server.web.page.project.blob.search.advanced;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -404,7 +406,18 @@ public abstract class AdvancedSearchPanel extends Panel {
 									.count(1)
 									.build();
 							try {
+								if (regex)
+									Pattern.compile(validatable.getValue());
 								query.asLuceneQuery();
+							} catch (PatternSyntaxException e) {
+								validatable.error(new IValidationError() {
+									
+									@Override
+									public Serializable getErrorMessage(IErrorMessageSource messageSource) {
+										return "Invalid PCRE syntax";
+									}
+									
+								});
 							} catch (TooGeneralQueryException e) {
 								validatable.error(new IValidationError() {
 									
