@@ -13,11 +13,17 @@ public class FileChange implements Serializable {
 	
 	private final Action action;
 	
-	public FileChange(Action action, String oldPath, String newPath) {
+	private final int additions;
+	
+	private final int deletions;
+	
+	public FileChange(Action action, String oldPath, String newPath, int additions, int deletions) {
 		this.action = action;
 		
 		this.oldPath = oldPath;
 		this.newPath = newPath;
+		this.additions = additions;
+		this.deletions = deletions;
 	}
 
 	public String getOldPath() {
@@ -30,6 +36,14 @@ public class FileChange implements Serializable {
 
 	public Action getAction() {
 		return action;
+	}
+
+	public int getAdditions() {
+		return additions;
+	}
+
+	public int getDeletions() {
+		return deletions;
 	}
 
 	@Override

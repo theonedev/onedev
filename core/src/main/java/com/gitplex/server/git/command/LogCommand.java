@@ -88,7 +88,7 @@ public abstract class LogCommand extends GitCommand<Void> {
             			} else {
             				path1 = path2 = QuotedString.GIT_PATH.dequote(path);
             			}
-            			FileChange fileChange = new FileChange(action, path1, path2);
+            			FileChange fileChange = new FileChange(action, path1, path2, -1, -1);
         				commitBuilderRef.get().fileChanges.add(fileChange);
             		}
             	} else if (line.startsWith("hash:")) {

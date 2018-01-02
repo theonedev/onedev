@@ -29,6 +29,8 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gitplex.server.git.GitUtils;
+import com.gitplex.server.git.command.FileChange;
+import com.gitplex.server.git.command.ListFileChangesCommand;
 import com.gitplex.server.manager.impl.DefaultCodeCommentRelationManager;
 import com.google.common.base.Preconditions;
 
@@ -59,6 +61,8 @@ public class PullRequestUpdate extends AbstractEntity {
 	private transient List<RevCommit> commits;
 	
 	private transient Collection<String> changedFiles;
+	
+	private transient Collection<FileChange> fileChanges;
 
 	public PullRequest getRequest() {
 		return request;
@@ -101,6 +105,16 @@ public class PullRequestUpdate extends AbstractEntity {
 	public void deleteRefs() {
 		GitUtils.deleteRef(GitUtils.getRefUpdate(getRequest().getTargetProject().getRepository(), getHeadRef()));
 	}	
+	
+	public Collection<FileChange> getFileChanges() {
+		if (fileChanges == null) {
+			ListFileChangesCommand cmd = new ListFileChangesCommand(getRequest().getTargetProject().getGitDir());
+			cmd.fromRev(getBaseCommitHash());
+			cmd.toRev(getHeadCommitHash());
+			fileChanges = cmd.call();
+		}
+		return fileChanges;
+	}
 	
 	/**
 	 * Get changed files of this update since previous update. This calculation 

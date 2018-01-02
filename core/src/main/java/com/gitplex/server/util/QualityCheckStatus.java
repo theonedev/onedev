@@ -2,6 +2,7 @@ package com.gitplex.server.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.Permission;
 
 import com.gitplex.server.GitPlex;
+import com.gitplex.server.git.command.FileChange;
 import com.gitplex.server.manager.CommitInfoManager;
 import com.gitplex.server.manager.UserManager;
 import com.gitplex.server.manager.VerificationManager;
@@ -274,20 +276,29 @@ public class QualityCheckStatus {
 	}
 	
 	private void sortByContributions(List<UserFacade> users, PullRequestUpdate update) {
+		if (users.size() <= 1)
+			return;
+		
 		CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
-		Map<UserFacade, Integer> contributions = new HashMap<>();
+		Map<UserFacade, Long> contributions = new HashMap<>();
 		for (UserFacade user: users)
-			contributions.put(user, 0);
+			contributions.put(user, 0L);
 
 		int count = 0;
-		for (String file: update.getChangedFiles()) {
-			int addedContributions = addContributions(contributions, commitInfoManager, file, update);
+		for (FileChange change: update.getFileChanges()) {
+			String path = change.getNewPath();
+			int edits = change.getAdditions() + change.getDeletions();
+			if (edits < 0)
+				edits = 100;
+			else if (edits == 0)
+				edits = 1;
+			int addedContributions = addContributions(contributions, commitInfoManager, path, edits, update);
 			while (addedContributions == 0) {
-				if (file.contains("/")) {
-					file = StringUtils.substringBeforeLast(file, "/");
-					addedContributions = addContributions(contributions, commitInfoManager, file, update);
+				if (path.contains("/")) {
+					path = StringUtils.substringBeforeLast(path, "/");
+					addedContributions = addContributions(contributions, commitInfoManager, path, edits, update);
 				} else {
-					addContributions(contributions, commitInfoManager, "", update);
+					addContributions(contributions, commitInfoManager, "", edits, update);
 					break;
 				}
 			}
@@ -295,18 +306,28 @@ public class QualityCheckStatus {
 				break;
 		}
 
-		users.sort((user1, user2)-> contributions.get(user2) - contributions.get(user1));
+		Collections.sort(users, new Comparator<UserFacade>() {
+
+			@Override
+			public int compare(UserFacade o1, UserFacade o2) {
+				if (contributions.get(o1) < contributions.get(o2))
+					return 1;
+				else
+					return -1;
+			}
+			
+		});
 	}
 	
-	private int addContributions(Map<UserFacade, Integer> contributions, CommitInfoManager commitInfoManager, 
-			String file, PullRequestUpdate update) {
+	private int addContributions(Map<UserFacade, Long> contributions, CommitInfoManager commitInfoManager, 
+			String path, int edits, PullRequestUpdate update) {
 		int addedContributions = 0;
-		for (Map.Entry<UserFacade, Integer> entry: contributions.entrySet()) {
+		for (Map.Entry<UserFacade, Long> entry: contributions.entrySet()) {
 			UserFacade user = entry.getKey();
-			int fileContribution = commitInfoManager.getContributions(
-					update.getRequest().getTargetProject().getFacade(), user, file);
-			entry.setValue(entry.getValue() + fileContribution);
-			addedContributions += fileContribution;
+			int pathContribution = commitInfoManager.getContributions(
+					update.getRequest().getTargetProject().getFacade(), user, path);
+			entry.setValue(entry.getValue() + edits*pathContribution);
+			addedContributions += pathContribution;
 		}
 		return addedContributions;
 	}
