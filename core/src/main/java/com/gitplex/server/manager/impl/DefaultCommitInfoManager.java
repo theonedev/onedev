@@ -589,6 +589,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 												int pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
 														nextIndex, path);
 												int edits = change.getAdditions() + change.getDeletions();
+												if (edits < 0)
+													edits = 100;
 												updateEdits(editsStore, txn, editsCache, userIndex, pathIndex, edits);
 												while (path.contains("/")) {
 													path = StringUtils.substringBeforeLast(path, "/");

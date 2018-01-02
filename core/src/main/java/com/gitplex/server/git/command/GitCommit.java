@@ -81,15 +81,19 @@ public class GitCommit implements Serializable {
 
 	public int getAdditions() {
 		int additions = 0;
-		for (FileChange change: fileChanges)
-			additions += change.getAdditions();
+		for (FileChange change: fileChanges) {
+			if (change.getAdditions() > 0)
+				additions += change.getAdditions();
+		}
 		return additions;
 	}
 	
 	public int getDeletions() {
 		int deletions = 0;
-		for (FileChange change: fileChanges)
+		for (FileChange change: fileChanges) {
+			if (change.getDeletions() > 0)
 			deletions += change.getDeletions();
+		}
 		return deletions;
 	}	
 	

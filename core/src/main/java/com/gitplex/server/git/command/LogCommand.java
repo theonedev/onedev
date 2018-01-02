@@ -118,9 +118,9 @@ public abstract class LogCommand extends GitCommand<Void> {
             	} else if (line.trim().length() != 0) {
             		StringTokenizer tokenizer = new StringTokenizer(line, "\t");
             		String additionsToken = tokenizer.nextToken();
-            		int additions = additionsToken.equals("-")?0:Integer.parseInt(additionsToken);
+            		int additions = additionsToken.equals("-")?-1:Integer.parseInt(additionsToken);
             		String deletionsToken = tokenizer.nextToken();
-            		int deletions = deletionsToken.equals("-")?0:Integer.parseInt(deletionsToken);
+            		int deletions = deletionsToken.equals("-")?-1:Integer.parseInt(deletionsToken);
             		
             		String path = tokenizer.nextToken();
             		int renameSignIndex = path.indexOf(" => ");

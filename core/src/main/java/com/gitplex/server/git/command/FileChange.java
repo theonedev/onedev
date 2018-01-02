@@ -13,9 +13,9 @@ public class FileChange implements Serializable {
 	
 	private final int deletions;
 	
-	public FileChange(String oldPath, String newPath, int additions, int deletions) {
+	public FileChange(String oldPath, String path, int additions, int deletions) {
 		this.oldPath = oldPath;
-		this.path = newPath;
+		this.path = path;
 		this.additions = additions;
 		this.deletions = deletions;
 	}
