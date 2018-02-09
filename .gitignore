@@ -4,9 +4,6 @@
 .recommenders/
 .idea/
 **/.classpath
-.project
-**/.project
-**/.tern-project
 **/.gitignore
 **/*.iml
 .settings/**

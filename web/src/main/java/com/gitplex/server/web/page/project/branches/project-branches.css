@@ -51,6 +51,9 @@
 	padding-top: 12px;
 	width: 20%;
 }
+#project-branches>.list>table td.behind-ahead.behind>div {
+	text-align: right;
+}
 #project-branches>.list>table td.behind-ahead a {
 	color: #555;
 }
