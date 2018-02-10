@@ -3,21 +3,21 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-rest</artifactId>  
     <parent> 
-        <groupId>com.gitplex</groupId>  
+        <groupId>com.turbodev</groupId>  
         <artifactId>server-parent</artifactId>  
         <version>1.0.0-build98</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.gitplex</groupId>  
+                <groupId>com.turbodev</groupId>  
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
         </plugins> 
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-core</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency> 
@@ -36,6 +36,6 @@
         </dependency>  
     </dependencies>  
     <properties> 
-        <moduleClass>com.gitplex.server.rest.RestModule</moduleClass> 
+        <moduleClass>com.turbodev.server.rest.RestModule</moduleClass> 
     </properties> 
 </project>

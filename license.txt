@@ -1,17 +1,17 @@
-License Agreement for GitPlex Source Code
+License Agreement for TurboDev Source Code
 
-This is a legal agreement between you and GitPlex Pty covering your 
-use of GitPlex source code (the "Source").  Be sure to read the 
+This is a legal agreement between you and TurboDev Pty covering your 
+use of TurboDev source code (the "Source").  Be sure to read the 
 following agreement before using the Source.  BY USING THE SOURCE,
 YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS AGREEMENT.IF YOU 
 DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT USE THE SOURCE 
 AND DESTROY ALL COPIES IN YOUR POSSESSION.  
 
-The Source is owned by GitPlex Pty and is protected by international 
+The Source is owned by TurboDev Pty and is protected by international 
 treaty provisions.  Therefore, you must treat the Source like any 
 other copyrighted material (e.  g., a book or musical recording).  
 
 You may not redistribute the Source, or make any software competing 
-with GitPlex based on the Source. 
+with TurboDev based on the Source. 
 
-Copyright (C) 2016-2018 by GitPlex Pty All rights reserved.
+Copyright (C) 2016-2018 by TurboDev Pty All rights reserved.

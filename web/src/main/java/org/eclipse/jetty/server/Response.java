@@ -657,7 +657,7 @@ public class Response implements HttpServletResponse
         /*
          *  The new http spec now allows to redirect to relative urls. So we comment
          *  out below section to avoid wrongly prepending http scheme to the url if
-         *  GitPlex running with http protocol is exposed to outside as https prococol
+         *  TurboDev running with http protocol is exposed to outside as https prococol
          *  via reverse proxy
          */
         

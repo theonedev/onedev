@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-search</artifactId>  
     <parent> 
-        <groupId>com.gitplex</groupId>  
+        <groupId>com.turbodev</groupId>  
         <artifactId>server-parent</artifactId>  
         <version>1.0.0-build98</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.gitplex</groupId>  
+                <groupId>com.turbodev</groupId>  
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
             <plugin> 
@@ -24,7 +24,7 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-core</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency>  
@@ -60,7 +60,7 @@
         </dependency>  
     </dependencies>  
     <properties> 
-        <moduleClass>com.gitplex.server.search.SearchModule</moduleClass>  
+        <moduleClass>com.turbodev.server.search.SearchModule</moduleClass>  
         <lucene.version>4.10.3</lucene.version> 
     </properties> 
 </project>

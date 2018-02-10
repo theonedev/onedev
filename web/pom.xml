@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-web</artifactId>  
     <parent> 
-        <groupId>com.gitplex</groupId>  
+        <groupId>com.turbodev</groupId>  
         <artifactId>server-parent</artifactId>  
         <version>1.0.0-build98</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.gitplex</groupId>  
+                <groupId>com.turbodev</groupId>  
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
             <plugin> 
@@ -77,12 +77,12 @@
 			<version>5.21.0</version>
 		</dependency>
 		<dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-core</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-rest</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency>  
@@ -102,18 +102,18 @@
             <version>4.0.1.Final</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-search</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency> 
         <dependency>
-        	<groupId>com.gitplex</groupId>
+        	<groupId>com.turbodev</groupId>
         	<artifactId>codeassist</artifactId>
         	<version>1.0.0</version>
         </dependency>
     </dependencies>  
     <properties> 
-        <moduleClass>com.gitplex.server.web.WebModule</moduleClass>  
+        <moduleClass>com.turbodev.server.web.WebModule</moduleClass>  
         <wicket.version>7.3.0</wicket.version>  
         <wicketbootstrap.version>0.10.6</wicketbootstrap.version> 
     </properties> 

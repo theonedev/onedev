@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-product</artifactId>  
-    <name>GitPlex</name>  
+    <name>TurboDev</name>  
     <parent> 
-        <groupId>com.gitplex</groupId>  
+        <groupId>com.turbodev</groupId>  
         <artifactId>server-parent</artifactId>  
         <version>1.0.0-build98</version> 
     </parent>  
@@ -31,7 +31,7 @@
                 </executions> 
             </plugin>  
             <plugin> 
-                <groupId>com.gitplex</groupId>  
+                <groupId>com.turbodev</groupId>  
                 <artifactId>plugin-maven</artifactId>  
                 <executions> 
                     <execution> 
@@ -123,30 +123,30 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-core</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-web</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-rest</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.gitplex</groupId>  
+            <groupId>com.turbodev</groupId>  
             <artifactId>server-search</artifactId>  
             <version>1.0.0-build98</version> 
         </dependency> 
     </dependencies>  
     <properties> 
         <executables>bin/*.sh, boot/wrapper-*</executables>  
-        <bootstrapClass>com.gitplex.launcher.bootstrap.Bootstrap</bootstrapClass>  
-        <moduleClass>com.gitplex.server.product.ProductModule</moduleClass>  
+        <bootstrapClass>com.turbodev.launcher.bootstrap.Bootstrap</bootstrapClass>  
+        <moduleClass>com.turbodev.server.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
     </properties> 
 </project>
