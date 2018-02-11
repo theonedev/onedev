@@ -17,9 +17,9 @@ target(default:"prepare to package the product") {
 	}
 	
 	filterset(id: "appFilterSet") {
-		filter(token: "app.name", value: "${lowerCaseProductName}")
-		filter(token: "app.long.name", value: "${productName}")
-		filter(token: "app.description", value: "${productName}")
+		filter(token: "app.name", value: "turbodev")
+		filter(token: "app.long.name", value: "TurboDev")
+		filter(token: "app.description", value: "TurboDev")
 		filter(token: "app.class", value: "${bootstrapClass}")
 	}
 	filterset(id: "batchCommandCommonFilterSet") {
@@ -33,37 +33,37 @@ target(default:"prepare to package the product") {
 	copy(tofile: binDir.absolutePath + "/server.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset() {
 			filter(token: "set_fixed_command", value: "")
-			filter(token: "properties_and_parameters", value: "wrapper.pidfile=../status/${lowerCaseProductName}.pid")
+			filter(token: "properties_and_parameters", value: "wrapper.pidfile=../status/turbodev.pid")
 		}
 	}
 	copy(tofile: binDir.absolutePath + "/restore.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Restore\" wrapper.pidfile=${lowerCaseProductName}_restore.pid wrapper.name=${lowerCaseProductName}_restore wrapper.displayname=\"${productName} Restore\" wrapper.description=\"${productName} Restore\" -- restore")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"TurboDev Restore\" wrapper.pidfile=turbodev_restore.pid wrapper.name=turbodev_restore wrapper.displayname=\"TurboDev Restore\" wrapper.description=\"TurboDev Restore\" -- restore")
 		}
 	}
 	copy(tofile: binDir.absolutePath + "/backup.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Backup\" wrapper.pidfile=${lowerCaseProductName}_backup.pid wrapper.name=${lowerCaseProductName}_backup wrapper.displayname=\"${productName} Backup\" wrapper.description=\"${productName} Backup\" -- backup")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"TurboDev Backup\" wrapper.pidfile=turbodev_backup.pid wrapper.name=turbodev_backup wrapper.displayname=\"TurboDev Backup\" wrapper.description=\"TurboDev Backup\" -- backup")
 		}
 	}
 	copy(tofile: binDir.absolutePath + "/upgrade.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Upgrade\" wrapper.pidfile=${lowerCaseProductName}_upgrade.pid wrapper.name=${lowerCaseProductName}_upgrade wrapper.displayname=\"${productName} Upgrade\" wrapper.description=\"${productName} Upgrade\" -- upgrade")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"TurboDev Upgrade\" wrapper.pidfile=turbodev_upgrade.pid wrapper.name=turbodev_upgrade wrapper.displayname=\"TurboDev Upgrade\" wrapper.description=\"TurboDev Upgrade\" -- upgrade")
 		}
 	}
 	copy(tofile: binDir.absolutePath + "/apply_db_constraints.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Apply DB Constraints\" wrapper.pidfile=${lowerCaseProductName}_apply_db_constraints.pid wrapper.name=${lowerCaseProductName}_apply_db_constraints wrapper.displayname=\"${productName} Apply DB Constraints\" wrapper.description=\"${productName} Apply DB Constraints\" -- apply_db_constraints")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"TurboDev Apply DB Constraints\" wrapper.pidfile=turbodev_apply_db_constraints.pid wrapper.name=turbodev_apply_db_constraints wrapper.displayname=\"TurboDev Apply DB Constraints\" wrapper.description=\"TurboDev Apply DB Constraints\" -- apply_db_constraints")
 		}
 	}
 	copy(tofile: binDir.absolutePath + "/reset_admin_password.bat", file: "${jswPath}/AppCommand.bat.in") {
 		filterset(refid: "batchCommandCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"${productName} Reset Admin Password\" wrapper.pidfile=${lowerCaseProductName}_reset_admin_password.pid wrapper.name=${lowerCaseProductName}_reset_admin_password wrapper.displayname=\"${productName} Reset Admin Password\" wrapper.description=\"${productName} Reset Admin Password\" -- reset_admin_password")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title=\"TurboDev Reset Admin Password\" wrapper.pidfile=turbodev_reset_admin_password.pid wrapper.name=turbodev_reset_admin_password wrapper.displayname=\"TurboDev Reset Admin Password\" wrapper.description=\"TurboDev Reset Admin Password\" -- reset_admin_password")
 		}
 	}
 	
@@ -77,62 +77,62 @@ target(default:"prepare to package the product") {
 	}	
 	copy(tofile: binDir.absolutePath + "/restore.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
-			filter(token: "app.name", value: "${lowerCaseProductName}_restore")
-			filter(token: "app.long.name", value: "${productName} Restore")
-			filter(token: "app.description", value: "${productName} Restore")
+			filter(token: "app.name", value: "turbodev_restore")
+			filter(token: "app.long.name", value: "TurboDev Restore")
+			filter(token: "app.description", value: "TurboDev Restore")
 			filter(token: "app.class", value: "${bootstrapClass}")
 		}
 		filterset(refid: "shellScriptCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Restore' wrapper.name=${lowerCaseProductName}_restore wrapper.displayname='${productName} Restore' wrapper.description='${productName} Restore' -- restore")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='TurboDev Restore' wrapper.name=turbodev_restore wrapper.displayname='TurboDev Restore' wrapper.description='TurboDev Restore' -- restore")
 		}
 	}	
 	copy(tofile: binDir.absolutePath + "/backup.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
-			filter(token: "app.name", value: "${lowerCaseProductName}_backup")
-			filter(token: "app.long.name", value: "${productName} Backup")
-			filter(token: "app.description", value: "${productName} Backup")
+			filter(token: "app.name", value: "turbodev_backup")
+			filter(token: "app.long.name", value: "TurboDev Backup")
+			filter(token: "app.description", value: "TurboDev Backup")
 			filter(token: "app.class", value: "${bootstrapClass}")
 		}
 		filterset(refid: "shellScriptCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Backup' wrapper.name=${lowerCaseProductName}_backup wrapper.displayname='${productName} Backup' wrapper.description='${productName} Backup' -- backup")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='TurboDev Backup' wrapper.name=turbodev_backup wrapper.displayname='TurboDev Backup' wrapper.description='TurboDev Backup' -- backup")
 		}
 	}	
 	copy(tofile: binDir.absolutePath + "/upgrade.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
-			filter(token: "app.name", value: "${lowerCaseProductName}_upgrade")
-			filter(token: "app.long.name", value: "${productName} Upgrade")
-			filter(token: "app.description", value: "${productName} Upgrade")
+			filter(token: "app.name", value: "turbodev_upgrade")
+			filter(token: "app.long.name", value: "TurboDev Upgrade")
+			filter(token: "app.description", value: "TurboDev Upgrade")
 			filter(token: "app.class", value: "${bootstrapClass}")
 		}
 		filterset(refid: "shellScriptCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Upgrade' wrapper.name=${lowerCaseProductName}_upgrade wrapper.displayname='${productName} Upgrade' wrapper.description='${productName} Upgrade' -- upgrade")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='TurboDev Upgrade' wrapper.name=turbodev_upgrade wrapper.displayname='TurboDev Upgrade' wrapper.description='TurboDev Upgrade' -- upgrade")
 		}
 	}	
 	copy(tofile: binDir.absolutePath + "/apply_db_constraints.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
-			filter(token: "app.name", value: "${lowerCaseProductName}_apply_db_constraints")
-			filter(token: "app.long.name", value: "${productName} Apply DB Constraints")
-			filter(token: "app.description", value: "${productName} Apply DB Constraints")
+			filter(token: "app.name", value: "turbodev_apply_db_constraints")
+			filter(token: "app.long.name", value: "TurboDev Apply DB Constraints")
+			filter(token: "app.description", value: "TurboDev Apply DB Constraints")
 			filter(token: "app.class", value: "${bootstrapClass}")
 		}
 		filterset(refid: "shellScriptCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Apply DB Constraints' wrapper.name=${lowerCaseProductName}_apply_db_constraints wrapper.displayname='${productName} Apply DB Constraints' wrapper.description='${productName} Apply DB Constraints' -- apply_db_constraints")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='TurboDev Apply DB Constraints' wrapper.name=turbodev_apply_db_constraints wrapper.displayname='TurboDev Apply DB Constraints' wrapper.description='TurboDev Apply DB Constraints' -- apply_db_constraints")
 		}
 	}	
 	copy(tofile: binDir.absolutePath + "/reset_admin_password.sh", file: "${jswPath}/sh.script.in") {
 		filterset() {
-			filter(token: "app.name", value: "${lowerCaseProductName}_reset_admin_password")
-			filter(token: "app.long.name", value: "${productName} Reset Admin Password")
-			filter(token: "app.description", value: "${productName} Reset Admin Password")
+			filter(token: "app.name", value: "turbodev_reset_admin_password")
+			filter(token: "app.long.name", value: "TurboDev Reset Admin Password")
+			filter(token: "app.description", value: "TurboDev Reset Admin Password")
 			filter(token: "app.class", value: "${bootstrapClass}")
 		}
 		filterset(refid: "shellScriptCommonFilterSet")
 		filterset() {
-			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='${productName} Reset Admin Password' wrapper.name=${lowerCaseProductName}_reset_admin_password wrapper.displayname='${productName} Reset Admin Password' wrapper.description='${productName} Reset Admin Password' -- reset_admin_password")
+			filter(token: "properties_and_parameters", value: "wrapper.logfile.loglevel=NONE wrapper.console.title='TurboDev Reset Admin Password' wrapper.name=turbodev_reset_admin_password wrapper.displayname='TurboDev Reset Admin Password' wrapper.description='TurboDev Reset Admin Password' -- reset_admin_password")
 		}
 	}	
 	

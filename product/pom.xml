@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-product</artifactId>  
-    <name>TurboDev</name>  
     <parent> 
         <groupId>com.turbodev</groupId>  
         <artifactId>server-parent</artifactId>  
@@ -10,26 +9,6 @@
     </parent>  
     <build> 
         <plugins> 
-            <plugin> 
-                <groupId>org.codehaus.gmaven</groupId>  
-                <artifactId>groovy-maven-plugin</artifactId>  
-                <version>2.0</version>  
-                <executions> 
-                    <execution> 
-                        <phase>initialize</phase>  
-                        <goals> 
-                            <goal>execute</goal> 
-                        </goals>  
-                        <configuration> 
-                            <source>
-	                            project.properties["lowerCaseProductName"] = project.name.toLowerCase()
-	                            def wikiSpace = "GP" + project.version.find(/\d+\.\d+/).replace('.', '')
-	                            project.properties["docLink"] = "http://wiki.pmease.com/display/" + wikiSpace
-                            </source> 
-                        </configuration> 
-                    </execution> 
-                </executions> 
-            </plugin>  
             <plugin> 
                 <groupId>com.turbodev</groupId>  
                 <artifactId>plugin-maven</artifactId>  
@@ -43,16 +22,8 @@
                         <configuration> 
                             <target> 
                                 <copy todir="${project.build.directory}/sandbox"> 
-                                    <fileset dir="system" excludes="site/images/**, site/avatars/**, **/*.keystore, **/*.jar"/>  
-                                    <filterset> 
-                                        <filter token="productName" value="${project.name}"/>  
-                                        <filter token="lowerCaseProductName" value="${lowerCaseProductName}"/>  
-                                        <filter token="docLink" value="${docLink}"/> 
-                                    </filterset> 
+                                    <fileset dir="system"/>  
                                 </copy>  
-                                <copy todir="${project.build.directory}/sandbox"> 
-                                    <fileset dir="system" includes="site/images/**, site/avatars/**, **/*.keystore, **/*.jar"/> 
-                                </copy> 
                             </target> 
                         </configuration> 
                     </execution> 
@@ -92,8 +63,6 @@
                                     <definition name="buildDirectory" value="${project.build.directory}"/>  
                                     <definition name="outputDirectory" value="${project.build.outputDirectory}"/>  
                                     <definition name="jswPath" value="${basedir}/build/jsw"/>  
-                                    <definition name="productName" value="${project.name}"/>
-                                    <definition name="lowerCaseProductName" value="${lowerCaseProductName}"/>  
                                     <definition name="productVersion" value="${project.version}"/>
                                     <definition name="bootstrapClass" value="${bootstrapClass}"/> 
                                 </gant> 
@@ -112,7 +81,7 @@
                                 <gant file="build/package.gant"> 
                                     <definition name="buildDirectory" value="${project.build.directory}"/>  
                                     <definition name="executables" value="${executables}"/>  
-                                    <definition name="packageName" value="${lowerCaseProductName}-${project.version}"/> 
+                                    <definition name="productVersion" value="${project.version}"/> 
                                 </gant> 
                             </target> 
                         </configuration> 

@@ -5,9 +5,9 @@ target(default:"package the product") {
 	// do not change this line of code	
 	chmod(dir: sandboxDir, perm: "755", includes: "${executables}")
 
-	File destFile = new File(buildDir, "${packageName}.zip");
+	File destFile = new File(buildDir, "turbodev-${productVersion}.zip");
 	zip(destfile: destFile) {
-		zipfileset(dir: sandboxDir, prefix: "${packageName}", excludes: "${executables}, boot/system.classpath")
-		zipfileset(dir: sandboxDir, prefix: "${packageName}", includes: "${executables}", filemode: "755")
+		zipfileset(dir: sandboxDir, prefix: "turbodev-${productVersion}", excludes: "${executables}, boot/system.classpath")
+		zipfileset(dir: sandboxDir, prefix: "turbodev-${productVersion}", includes: "${executables}", filemode: "755")
 	}
 }		
