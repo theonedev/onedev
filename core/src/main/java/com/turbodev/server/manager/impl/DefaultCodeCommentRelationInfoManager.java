@@ -56,7 +56,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentManager 
 		implements CodeCommentRelationInfoManager {
 
-	private static final int INFO_VERSION = 2;
+	private static final int INFO_VERSION = 3;
 	
 	private static final int BATCH_SIZE = 5000;
 	

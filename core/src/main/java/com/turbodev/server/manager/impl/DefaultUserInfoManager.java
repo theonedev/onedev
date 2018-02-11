@@ -33,7 +33,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 @Singleton
 public class DefaultUserInfoManager extends AbstractEnvironmentManager implements UserInfoManager {
 
-	private static final int INFO_VERSION = 1;
+	private static final int INFO_VERSION = 2;
 	
 	private static final String VISIT_STORE = "visit";
 	

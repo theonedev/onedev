@@ -53,8 +53,8 @@ public class DatabaseMigrator {
 			VersionedDocument dom = VersionedDocument.fromFile(file);
 			for (Element element: dom.getRootElement().elements()) {
 				String name = element.getName();
-				name = StringUtils.replace(name, "com.pmease.commons", "com.turbodev.commons");
-				name = StringUtils.replace(name, "com.pmease.turbodev", "com.turbodev.server");
+				name = StringUtils.replace(name, "com.pmease.commons", "com.gitplex.commons");
+				name = StringUtils.replace(name, "com.pmease.gitplex", "com.gitplex.server");
 				element.setName(name);
 			}
 			if (file.getName().startsWith("Configs.xml")) {
@@ -62,11 +62,11 @@ public class DatabaseMigrator {
 					Element settingElement = element.element("setting");
 					if (settingElement != null) {
 						String clazz = settingElement.attributeValue("class");
-						settingElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.turbodev", "com.turbodev.server"));
+						settingElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex.server"));
 						Element gitConfigElement = settingElement.element("gitConfig");
 						if (gitConfigElement != null) {
 							clazz = gitConfigElement.attributeValue("class");
-							gitConfigElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.turbodev", "com.turbodev.server"));
+							gitConfigElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex.server"));
 						}
 					}
 				}
@@ -113,24 +113,24 @@ public class DatabaseMigrator {
 			try {
 				String content = FileUtils.readFileToString(file, Charsets.UTF_8);
 				content = StringUtils.replace(content, 
-						"com.turbodev.commons.hibernate.migration.VersionTable", 
-						"com.turbodev.server.model.ModelVersion");
+						"com.gitplex.commons.hibernate.migration.VersionTable", 
+						"com.gitplex.server.model.ModelVersion");
 				content = StringUtils.replace(content, 
-						"com.turbodev.server.core.entity.support.IntegrationPolicy", 
-						"com.turbodev.server.model.support.IntegrationPolicy");
+						"com.gitplex.server.core.entity.support.IntegrationPolicy", 
+						"com.gitplex.server.model.support.IntegrationPolicy");
 				content = StringUtils.replace(content, 
-						"com.turbodev.server.core.entity.PullRequest_-IntegrationStrategy", 
-						"com.turbodev.server.model.PullRequest_-IntegrationStrategy");
+						"com.gitplex.server.core.entity.PullRequest_-IntegrationStrategy", 
+						"com.gitplex.server.model.PullRequest_-IntegrationStrategy");
 				content = StringUtils.replace(content, 
-						"com.turbodev.server.core.entity.", "com.turbodev.server.model.");
+						"com.gitplex.server.core.entity.", "com.gitplex.server.model.");
 				content = StringUtils.replace(content, 
-						"com.turbodev.server.core.setting.SpecifiedGit", "com.turbodev.server.git.config.SpecifiedGit");
+						"com.gitplex.server.core.setting.SpecifiedGit", "com.gitplex.server.git.config.SpecifiedGit");
 				content = StringUtils.replace(content, 
-						"com.turbodev.server.core.setting.SystemGit", "com.turbodev.server.git.config.SystemGit");
+						"com.gitplex.server.core.setting.SystemGit", "com.gitplex.server.git.config.SystemGit");
 				content = StringUtils.replace(content, 
-						"com.turbodev.server.core.setting.", "com.turbodev.server.model.support.setting.");
+						"com.gitplex.server.core.setting.", "com.gitplex.server.model.support.setting.");
 				content = StringUtils.replace(content, 
-						"com.turbodev.server.core.gatekeeper.", "com.turbodev.server.gatekeeper.");
+						"com.gitplex.server.core.gatekeeper.", "com.gitplex.server.gatekeeper.");
 				FileUtils.writeStringToFile(file, content, Charsets.UTF_8);
 				
 				if (file.getName().equals("VersionTables.xml")) {
@@ -170,7 +170,7 @@ public class DatabaseMigrator {
 					if (element.elementTextTrim("key").equals("SYSTEM")) {
 						Element settingElement = element.element("setting");
 						settingElement.addElement("curlConfig")
-								.addAttribute("class", "com.turbodev.server.git.config.SystemCurl");
+								.addAttribute("class", "com.gitplex.server.git.config.SystemCurl");
 					}
 				}
 				dom.writeToFile(file, false);
@@ -242,8 +242,8 @@ public class DatabaseMigrator {
 					File renamedFile = new File(dataDir, file.getName().replace("Accounts.xml", "Users.xml"));
 					FileUtils.moveFile(file, renamedFile);
 					String content = FileUtils.readFileToString(renamedFile, Charsets.UTF_8);
-					content = StringUtils.replace(content, "com.turbodev.server.model.Account", 
-							"com.turbodev.server.model.User");
+					content = StringUtils.replace(content, "com.gitplex.server.model.Account", 
+							"com.gitplex.server.model.User");
 					VersionedDocument dom = VersionedDocument.fromXML(content);
 					for (Element element: dom.getRootElement().elements()) {
 						accountIdToName.put(element.elementText("id"), element.elementText("name"));
@@ -271,8 +271,8 @@ public class DatabaseMigrator {
 					File renamedFile = new File(dataDir, file.getName().replace("Depots.xml", "Projects.xml"));
 					FileUtils.moveFile(file, renamedFile);
 					String content = FileUtils.readFileToString(renamedFile, Charsets.UTF_8);
-					content = StringUtils.replace(content, "com.turbodev.server.model.Depot", 
-							"com.turbodev.server.model.Project");
+					content = StringUtils.replace(content, "com.gitplex.server.model.Depot", 
+							"com.gitplex.server.model.Project");
 					VersionedDocument dom = VersionedDocument.fromXML(content);
 					for (Element element: dom.getRootElement().elements()) {
 						String accountId = element.elementText("account");
@@ -289,7 +289,7 @@ public class DatabaseMigrator {
 							adminId = "1";
 						}
 						Element userAuthorizationElement = 
-								userAuthorizationListElement.addElement("com.turbodev.server.model.UserAuthorization");
+								userAuthorizationListElement.addElement("com.gitplex.server.model.UserAuthorization");
 						userAuthorizationElement.addAttribute("revision", "0.0");
 						userAuthorizationElement.addElement("id").setText(String.valueOf(++lastUserAuthorizationId));
 						userAuthorizationElement.addElement("user").setText(adminId);
@@ -376,7 +376,7 @@ public class DatabaseMigrator {
 				if (codeCommentsFromWeiFeng.exists()) {
 					dom = VersionedDocument.fromFile(codeCommentsFromWeiFeng);
 					for (Element commentElement: dom.getRootElement().elements()) {
-						commentElement.setName("com.turbodev.server.model.CodeComment");
+						commentElement.setName("com.gitplex.server.model.CodeComment");
 						commentElement.element("depot").setName("project");
 						commentElement.element("resolved").detach();
 						commentElement.element("commentPos").setName("markPos");
@@ -397,7 +397,7 @@ public class DatabaseMigrator {
 					if (maxId < id)
 						maxId = id;
 				}
-				Element licenseConfigElement = dom.getRootElement().addElement("com.turbodev.server.model.Config");
+				Element licenseConfigElement = dom.getRootElement().addElement("com.gitplex.server.model.Config");
 				licenseConfigElement.addElement("id").setText(String.valueOf(maxId+1));
 				licenseConfigElement.addElement("key").setText("LICENSE");
 				dom.writeToFile(file, false);
@@ -419,6 +419,19 @@ public class DatabaseMigrator {
 				}
 				dom.writeToFile(file, false);
 			} 
+		}
+	}
+	
+	private void migrate13(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			try {
+				String content = FileUtils.readFileToString(file, Charsets.UTF_8);
+				content = StringUtils.replace(content, "gitplex", "turbodev");
+				content = StringUtils.replace(content, "GitPlex", "TurboDev");
+				FileUtils.writeFile(file, content, Charsets.UTF_8.name());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 	

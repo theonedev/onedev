@@ -66,9 +66,11 @@ public class UpgradeCommand extends DefaultPersistManager {
 		if (version.startsWith("1.0-EAP")) {
 			int build = Integer.parseInt(StringUtils.substringAfterLast(version, "build"));
 			if (build <= 26)
-				bootstrapClass = "com.turbodev.commons.bootstrap.Bootstrap";
+				bootstrapClass = "com.gitplex.commons.bootstrap.Bootstrap";
 			else
-				bootstrapClass = "com.turbodev.launcher.bootstrap.Bootstrap";
+				bootstrapClass = "com.gitplex.launcher.bootstrap.Bootstrap";
+		} else if (version.startsWith("1.0.0")) {
+			bootstrapClass = "com.gitplex.launcher.bootstrap.Bootstrap";
 		} else {
 			bootstrapClass = "com.turbodev.launcher.bootstrap.Bootstrap";
 		}
@@ -394,10 +396,10 @@ public class UpgradeCommand extends DefaultPersistManager {
 		}
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
-		File gitplexAvatar = new File(upgradeDir, "site/avatars/turbodev.png");
-		if (!gitplexAvatar.exists()) {
+		File turbodevAvatar = new File(upgradeDir, "site/avatars/turbodev.png");
+		if (!turbodevAvatar.exists()) {
 			try {
-				FileUtils.copyFile(new File(Bootstrap.getSiteDir(), "avatars/turbodev.png"), gitplexAvatar);
+				FileUtils.copyFile(new File(Bootstrap.getSiteDir(), "avatars/turbodev.png"), turbodevAvatar);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -413,7 +415,9 @@ public class UpgradeCommand extends DefaultPersistManager {
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
 			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, Charsets.UTF_8);
-			wrapperConf = StringUtils.replace(wrapperConf, "com.turbodev.commons.bootstrap.Bootstrap", 
+			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
+					"com.turbodev.launcher.bootstrap.Bootstrap");
+			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.launcher.bootstrap.Bootstrap", 
 					"com.turbodev.launcher.bootstrap.Bootstrap");
 			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, Charsets.UTF_8);
 			
@@ -421,6 +425,8 @@ public class UpgradeCommand extends DefaultPersistManager {
 			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, Charsets.UTF_8);
 			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
 					"hibernate.hikari.autoCommit=true");
+			hibernateProps = StringUtils.replace(hibernateProps, "GitPlex", "TurboDev");
+			
 			if (!hibernateProps.contains("hibernate.connection.autocommit=true")) {
 				hibernateProps = StringUtils.replace(hibernateProps, 
 						"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider", 
@@ -433,6 +439,7 @@ public class UpgradeCommand extends DefaultPersistManager {
 			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, Charsets.UTF_8);
 			logbackConfig = StringUtils.replace(logbackConfig, "<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"><maxFileSize>1MB</maxFileSize></triggeringPolicy>");
+			logbackConfig = StringUtils.replace(logbackConfig, "gitplex", "turbodev");
 			FileUtils.writeStringToFile(logbackConfigFile, logbackConfig, Charsets.UTF_8);
 			
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 

@@ -32,7 +32,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 @Singleton
 public class DefaultVisitManager extends AbstractEnvironmentManager implements VisitManager {
 
-	private static final int INFO_VERSION = 1;
+	private static final int INFO_VERSION = 2;
 	
 	private static final String INFO_DIR = "visit";
 	
