@@ -51,7 +51,7 @@ public class GitFilter implements Filter {
 	
 	private static final String INFO_REFS = "info/refs";
 	
-	private final TurboDev gitPlex;
+	private final TurboDev turboDev;
 	
 	private final StorageManager storageManager;
 	
@@ -64,9 +64,9 @@ public class GitFilter implements Filter {
 	private final ConfigManager configManager;
 	
 	@Inject
-	public GitFilter(TurboDev gitPlex, StorageManager storageManager, ProjectManager projectManager, 
+	public GitFilter(TurboDev turboDev, StorageManager storageManager, ProjectManager projectManager, 
 			WorkExecutor workManager, ServerConfig serverConfig, ConfigManager configManager) {
-		this.gitPlex = gitPlex;
+		this.turboDev = turboDev;
 		this.storageManager = storageManager;
 		this.projectManager = projectManager;
 		this.workExecutor = workManager;
@@ -124,10 +124,17 @@ public class GitFilter implements Filter {
         else 
             serverUrl = "https://localhost:" + serverConfig.getSslConfig().getPort();
 
+        environments.put("TURBODEV_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
+		environments.put("TURBODEV_URL", serverUrl);
+		environments.put("TURBODEV_USER_ID", User.getCurrentId().toString());
+		environments.put("TURBODEV_REPOSITORY_ID", project.getId().toString());
+		
+		// to be compatible with old repository
         environments.put("GITPLEX_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
 		environments.put("GITPLEX_URL", serverUrl);
 		environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
 		environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
+		
 		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
@@ -217,12 +224,12 @@ public class GitFilter implements Filter {
 
 		try {
 			if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
-				if (gitPlex.isReady())
+				if (turboDev.isReady())
 					processRefs(httpRequest, httpResponse);
 				else
 					throw new GitException("Server is not ready");
 			} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
-				if (gitPlex.isReady())
+				if (turboDev.isReady())
 					processPacks(httpRequest, httpResponse);
 				else
 					throw new GitException("Server is not ready");

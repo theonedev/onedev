@@ -499,7 +499,7 @@ public class Project extends AbstractEntity {
 		
 		final File cacheDir = new File(
 				TurboDev.getInstance(StorageManager.class).getProjectInfoDir(getId()), 
-				"last_commits/" + path + "/gitplex_last_commits");
+				"last_commits/" + path + "/turbodev_last_commits");
 		
 		final ReadWriteLock lock;
 		try {

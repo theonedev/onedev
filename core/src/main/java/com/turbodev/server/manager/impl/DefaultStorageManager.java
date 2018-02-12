@@ -25,7 +25,7 @@ public class DefaultStorageManager implements StorageManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultStorageManager.class);
 	
-	private static final String DELETE_MARK = "to_be_deleted_when_gitplex_is_restarted";
+	private static final String DELETE_MARK = "to_be_deleted_when_turbodev_is_restarted";
 	
 	private final Dao dao;
 	
