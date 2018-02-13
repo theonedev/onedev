@@ -25,6 +25,8 @@ public class DefaultStorageManager implements StorageManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultStorageManager.class);
 	
+	private static final String OLD_DELETE_MARK = "to_be_deleted_when_gitplex_is_restarted";
+	
 	private static final String DELETE_MARK = "to_be_deleted_when_turbodev_is_restarted";
 	
 	private final Dao dao;
@@ -87,13 +89,13 @@ public class DefaultStorageManager implements StorageManager {
 	@Listen
 	public void on(SystemStarting event) {
         for (File projectDir: getProjectsDir().listFiles()) {
-        	if (new File(projectDir, DELETE_MARK).exists()) { 
+        	if (new File(projectDir, OLD_DELETE_MARK).exists() || new File(projectDir, DELETE_MARK).exists()) { 
         		logger.info("Deleting directory marked for deletion: " + projectDir);
         		FileUtils.deleteDir(projectDir);
         	}
         }
         for (File userDir: getUsersDir().listFiles()) {
-        	if (new File(userDir, DELETE_MARK).exists()) { 
+        	if (new File(userDir, OLD_DELETE_MARK).exists() || new File(userDir, DELETE_MARK).exists()) { 
         		logger.info("Deleting directory marked for deletion: " + userDir);
         		FileUtils.deleteDir(userDir);
         	}
