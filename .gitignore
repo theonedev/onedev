@@ -6,8 +6,6 @@
 **/.classpath
 **/.gitignore
 **/*.iml
-.settings/**
-*/.settings/**
 release.properties
 pom.xml.releaseBackup
 
