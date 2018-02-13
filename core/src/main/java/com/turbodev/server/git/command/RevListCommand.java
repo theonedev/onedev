@@ -16,6 +16,8 @@ public class RevListCommand extends GitCommand<List<String>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RevListCommand.class); 
 	
+	public enum Order {DATE, AUTHOR_DATE, TOPO};
+	
     private List<String> revisions = new ArrayList<>();
     
     private List<String> paths = new ArrayList<>();
@@ -27,6 +29,10 @@ public class RevListCommand extends GitCommand<List<String>> {
     private int count;
     
     private int skip;
+    
+    private Order order;
+    
+    private boolean firstParent;
     
     private boolean ignoreCase;
     
@@ -64,6 +70,24 @@ public class RevListCommand extends GitCommand<List<String>> {
 
 	public RevListCommand after(String after) {
 		this.after = after;
+		return this;
+	}
+	
+	public Order order() {
+		return order;
+	}
+	
+	public RevListCommand order(Order order) {
+		this.order = order;
+		return this;
+	}
+	
+	public boolean firstParent() {
+		return firstParent;
+	}
+	
+	public RevListCommand firstParent(boolean firstParent) {
+		this.firstParent = firstParent;
 		return this;
 	}
 	
@@ -166,7 +190,17 @@ public class RevListCommand extends GitCommand<List<String>> {
         	cmd.addArgs("-" + count);
         if (skip != 0)
         	cmd.addArgs("--skip=" + skip);
+        
+        if (order == Order.DATE)
+        	cmd.addArgs("--date-order");
+        else if (order == Order.AUTHOR_DATE)
+        	cmd.addArgs("--author-date-order");
+        else if (order == Order.TOPO)
+        	cmd.addArgs("--topo-order");
 
+        if (firstParent)
+        	cmd.addArgs("--first-parent");
+        
         for (String author: authors)
         	cmd.addArgs("--author=" + author);
         

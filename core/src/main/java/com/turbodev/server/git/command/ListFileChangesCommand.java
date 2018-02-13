@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.turbodev.utils.command.Commandline;
 import com.turbodev.utils.command.LineConsumer;
 import com.google.common.base.Preconditions;
-import com.turbodev.server.git.command.FileChange.Action;
 
 public class ListFileChangesCommand extends GitCommand<Collection<FileChange>> {
 
@@ -80,7 +79,7 @@ public class ListFileChangesCommand extends GitCommand<Collection<FileChange>> {
 					
     				String file = QuotedString.GIT_PATH.dequote(tokenizer.nextToken());
     				
-    				fileChanges.add(new FileChange(Action.MODIFY, file, file, additions, deletions));
+    				fileChanges.add(new FileChange(null, file, additions, deletions));
 				}
 			}
 			

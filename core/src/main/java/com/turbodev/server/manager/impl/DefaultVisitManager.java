@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.turbodev.launcher.loader.Listen;
-import com.turbodev.utils.FileUtils;
 import com.turbodev.server.event.codecomment.CodeCommentEvent;
 import com.turbodev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import com.turbodev.server.event.pullrequest.PullRequestCommentCreated;
@@ -21,8 +20,8 @@ import com.turbodev.server.model.PullRequest;
 import com.turbodev.server.model.User;
 import com.turbodev.server.persistence.annotation.Transactional;
 import com.turbodev.server.persistence.dao.EntityRemoved;
+import com.turbodev.utils.FileUtils;
 
-import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.Transaction;
@@ -32,7 +31,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 @Singleton
 public class DefaultVisitManager extends AbstractEnvironmentManager implements VisitManager {
 
-	private static final int INFO_VERSION = 2;
+	private static final int INFO_VERSION = 3;
 	
 	private static final String INFO_DIR = "visit";
 	
@@ -57,8 +56,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public void execute(Transaction txn) {
-				store.put(txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
-						new ArrayByteIterable(longToBytes(System.currentTimeMillis()+1000L)));
+				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
+						System.currentTimeMillis()+1000L);
 			}
 			
 		});
@@ -72,8 +71,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public void execute(Transaction txn) {
-				store.put(txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
-						new ArrayByteIterable(longToBytes(System.currentTimeMillis()+1000L)));
+				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
+						System.currentTimeMillis()+1000L);
 			}
 			
 		});
@@ -87,8 +86,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public void execute(Transaction txn) {
-				store.put(txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), 
-						new ArrayByteIterable(longToBytes(System.currentTimeMillis()+1000L)));
+				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), 
+						System.currentTimeMillis()+1000L);
 			}
 			
 		});
@@ -102,9 +101,9 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public Date compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringPairByteIterable(user.getUUID(), request.getUUID())));
-				if (bytes != null)
-					return new Date(bytesToLong(bytes));
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), -1);
+				if (millis != -1)
+					return new Date(millis);
 				else
 					return null;
 			}
@@ -120,9 +119,9 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public Date compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringPairByteIterable(user.getUUID(), request.getUUID())));
-				if (bytes != null)
-					return new Date(bytesToLong(bytes));
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), -1);
+				if (millis != -1)
+					return new Date(millis);
 				else
 					return null;
 			}
@@ -138,9 +137,9 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 			@Override
 			public Date compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringPairByteIterable(user.getUUID(), comment.getUUID())));
-				if (bytes != null)
-					return new Date(bytesToLong(bytes));
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), -1);
+				if (millis != -1)
+					return new Date(millis);
 				else
 					return null;
 			}

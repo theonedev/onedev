@@ -129,7 +129,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		Map<CodeComment, TextRange> comments = new HashMap<>();
 		
 		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();
-		for (String possibleHistoryPath: commitInfoManager.getPossibleHistoryPaths(project, path)) {
+		for (String possibleHistoryPath: commitInfoManager.getHistoryPaths(project, path)) {
 			EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
 			criteria.add(Restrictions.eq("markPos.path", possibleHistoryPath));
 			for (CodeComment comment: findAll(criteria)) {

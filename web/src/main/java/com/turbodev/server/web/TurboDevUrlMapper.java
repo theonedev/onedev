@@ -44,6 +44,8 @@ import com.turbodev.server.web.page.project.setting.branchprotection.BranchProte
 import com.turbodev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
 import com.turbodev.server.web.page.project.setting.general.GeneralSettingPage;
 import com.turbodev.server.web.page.project.setting.tagprotection.TagProtectionPage;
+import com.turbodev.server.web.page.project.stats.ProjectContribsPage;
+import com.turbodev.server.web.page.project.stats.SourceLinesPage;
 import com.turbodev.server.web.page.project.tags.ProjectTagsPage;
 import com.turbodev.server.web.page.security.ForgetPage;
 import com.turbodev.server.web.page.security.LoginPage;
@@ -155,6 +157,8 @@ public class TurboDevUrlMapper extends CompoundRequestMapper {
 		add(new TurboDevPageMapper("projects/${project}/commit/${revision}", CommitDetailPage.class));
 		add(new TurboDevPageMapper("projects/${project}/commits", ProjectCommitsPage.class));
 		add(new TurboDevPageMapper("projects/${project}/compare", RevisionComparePage.class));
+		add(new TurboDevPageMapper("projects/${project}/stats/contribs", ProjectContribsPage.class));
+		add(new TurboDevPageMapper("projects/${project}/stats/lines", SourceLinesPage.class));
 
 		add(new TurboDevPageMapper("projects/${project}/branches", ProjectBranchesPage.class));
 		add(new TurboDevPageMapper("projects/${project}/tags", ProjectTagsPage.class));

@@ -286,7 +286,7 @@ public class QualityCheckStatus {
 
 		int count = 0;
 		for (FileChange change: update.getFileChanges()) {
-			String path = change.getNewPath();
+			String path = change.getPath();
 			int edits = change.getAdditions() + change.getDeletions();
 			if (edits < 0)
 				edits = 100;
@@ -324,10 +324,10 @@ public class QualityCheckStatus {
 		int addedContributions = 0;
 		for (Map.Entry<UserFacade, Long> entry: contributions.entrySet()) {
 			UserFacade user = entry.getKey();
-			int pathContribution = commitInfoManager.getContributions(
+			int pathEdits = commitInfoManager.getEdits(
 					update.getRequest().getTargetProject().getFacade(), user, path);
-			entry.setValue(entry.getValue() + edits*pathContribution);
-			addedContributions += pathContribution;
+			entry.setValue(entry.getValue() + edits*pathEdits);
+			addedContributions += pathEdits;
 		}
 		return addedContributions;
 	}

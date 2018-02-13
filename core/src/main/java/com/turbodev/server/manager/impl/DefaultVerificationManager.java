@@ -44,7 +44,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 @Singleton
 public class DefaultVerificationManager extends AbstractEnvironmentManager implements VerificationManager {
 
-	private static final int INFO_VERSION = 2;
+	private static final int INFO_VERSION = 3;
 	
 	private static final String INFO_DIR = "verification";
 	
@@ -82,7 +82,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 			@Override
 			public void execute(Transaction txn) {
 				ByteIterable key = new StringByteIterable(VERIFICATION_NAMES_KEY);
-				byte[] bytes = getBytes(defaultStore.get(txn, key));
+				byte[] bytes = readBytes(defaultStore, txn, key);
 				Map<String, Date> verificationNames;
 				if (bytes != null)
 					verificationNames = (Map<String, Date>) SerializationUtils.deserialize(bytes);
@@ -102,7 +102,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 						new ArrayByteIterable(SerializationUtils.serialize((Serializable) verificationNames)));
 				
 				key = new StringByteIterable(commit);
-				bytes = getBytes(verificationsStore.get(txn, key));
+				bytes = readBytes(verificationsStore, txn, key);
 				Map<String, Verification> verifications;
 				if (bytes != null)
 					verifications = (Map<String, Verification>) SerializationUtils.deserialize(bytes);
@@ -144,7 +144,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 			@SuppressWarnings("unchecked")
 			@Override
 			public Map<String, Verification> compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringByteIterable(commit)));
+				byte[] bytes = readBytes(store, txn, new StringByteIterable(commit));
 				if (bytes != null)
 					return (Map<String, Verification>) SerializationUtils.deserialize(bytes);
 				else
@@ -183,7 +183,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 			@SuppressWarnings("unchecked")
 			@Override
 			public Collection<String> compute(Transaction txn) {
-				byte[] bytes = getBytes(store.get(txn, new StringByteIterable(VERIFICATION_NAMES_KEY)));
+				byte[] bytes = readBytes(store, txn, new StringByteIterable(VERIFICATION_NAMES_KEY));
 				if (bytes != null)
 					return ((Map<String, Date>) SerializationUtils.deserialize(bytes)).keySet();
 				else
