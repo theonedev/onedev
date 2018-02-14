@@ -21,8 +21,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.turbodev.utils.matchscore.MatchScoreProvider;
-import com.turbodev.utils.matchscore.MatchScoreUtils;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.manager.CacheManager;
 import com.turbodev.server.manager.ProjectManager;
@@ -37,6 +35,8 @@ import com.turbodev.server.web.component.link.ViewStateAwarePageLink;
 import com.turbodev.server.web.component.projectlist.ProjectListPanel;
 import com.turbodev.server.web.page.layout.LayoutPage;
 import com.turbodev.server.web.util.PagingHistorySupport;
+import com.turbodev.utils.matchscore.MatchScoreProvider;
+import com.turbodev.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public class ProjectListPage extends LayoutPage {
@@ -94,8 +94,7 @@ public class ProjectListPage extends LayoutPage {
 		protected List<ProjectFacade> load() {
 			List<ProjectFacade> projects = new ArrayList<>(TurboDev.getInstance(ProjectManager.class)
 					.getAccessibleProjects(getLoginUser()));
-			projects.sort(Comparator.comparing(ProjectFacade::getName));
-			
+			projects.sort(ProjectFacade::compareLastVisit);
 			return MatchScoreUtils.filterAndSort(projects, new MatchScoreProvider<ProjectFacade>() {
 
 				@Override

@@ -130,7 +130,24 @@ public class TurboDevUrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addProjectPages() {
-		add(new TurboDevPageMapper("projects", ProjectListPage.class));
+		add(new TurboDevPageMapper("projects", ProjectListPage.class) {
+			
+			/*
+			 * This logic is added to prevent url "/" from being redirected to "/projects"
+			 */
+			@Override
+			public Url mapHandler(IRequestHandler requestHandler) {
+				if (requestHandler instanceof BookmarkablePageRequestHandler 
+						|| requestHandler instanceof RenderPageRequestHandler) {
+					IPageClassRequestHandler pageClassRequestHandler = (IPageClassRequestHandler) requestHandler;
+					if (pageClassRequestHandler.getPageClass() == ProjectListPage.class) {
+						return null;
+					}
+				}
+				return super.mapHandler(requestHandler);
+			}
+			
+		});
 		add(new TurboDevPageMapper("projects/new", NewProjectPage.class));
 		add(new TurboDevPageMapper("projects/${project}", ProjectBlobPage.class));
 

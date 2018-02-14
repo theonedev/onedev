@@ -1,8 +1,11 @@
 <wicket:extend>
-	<div id="main">
-		<div wicket:id="mainHead" class="head clearfix">
+	<div id="layout">
+		<div wicket:id="head" class="head clearfix">
 			<div class="logo pull-left">
-				<a wicket:id="home" title="Dashboard"><i class="fa fa-ext fa-turbodev-logo"></i></a>
+				<a wicket:id="home" title="Home"><i class="fa fa-ext fa-turbodev-logo"></i></a>
+			</div>
+			<div class="nav pull-left">
+				<a wicket:id="nav" title="Navigation" class="fa fa-bars"></a>
 			</div>
 			<div wicket:id="breadcrumbs" class="breadcrumb pull-left clearfix">
 				<a wicket:id="nav" class="nav pull-left"></a>
@@ -35,7 +38,7 @@
 		<div class="body">
 			<wicket:child></wicket:child>
 		</div>
-		<div wicket:id="mainFoot" class="foot clearfix">
+		<div wicket:id="foot" class="foot clearfix">
 			<div class="pull-left">
 				<a href="https://www.turbodev.com">TurboDev</a>, <span wicket:id="productVersion"></span>, <span wicket:id="releaseDate"></span>
 			</div>

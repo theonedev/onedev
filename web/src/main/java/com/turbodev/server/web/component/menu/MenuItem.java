@@ -23,4 +23,5 @@ public abstract class MenuItem implements Serializable {
 	public String getShortcut() {
 		return null;
 	};
+	
 }

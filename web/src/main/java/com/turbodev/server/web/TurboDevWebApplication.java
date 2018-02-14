@@ -48,15 +48,15 @@ import org.apache.wicket.util.IProvider;
 
 import com.turbodev.launcher.bootstrap.Bootstrap;
 import com.turbodev.launcher.loader.AppLoader;
-import com.turbodev.utils.ExceptionUtils;
 import com.turbodev.server.web.page.base.BasePage;
-import com.turbodev.server.web.page.dashboard.DashboardPage;
 import com.turbodev.server.web.page.error.BaseErrorPage;
 import com.turbodev.server.web.page.error.ExpectedExceptionPage;
 import com.turbodev.server.web.page.error.UnexpectedExceptionPage;
+import com.turbodev.server.web.page.project.ProjectListPage;
 import com.turbodev.server.web.util.AbsoluteUrlRenderer;
 import com.turbodev.server.web.util.resourcebundle.ResourceBundleReferences;
 import com.turbodev.server.web.websocket.WebSocketManager;
+import com.turbodev.utils.ExceptionUtils;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 
@@ -213,7 +213,7 @@ public class TurboDevWebApplication extends WebApplication {
 
 	@Override
 	public Class<? extends Page> getHomePage() {
-		return DashboardPage.class;
+		return ProjectListPage.class;
 	}
 
 	@Override

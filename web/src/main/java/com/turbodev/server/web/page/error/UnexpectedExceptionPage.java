@@ -33,13 +33,13 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.string.Strings;
 
-import com.turbodev.utils.FileUtils;
-import com.turbodev.utils.StringUtils;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.manager.ConfigManager;
 import com.turbodev.server.model.User;
-import com.turbodev.server.web.page.dashboard.DashboardPage;
+import com.turbodev.server.web.page.project.ProjectListPage;
 import com.turbodev.server.web.util.DateUtils;
+import com.turbodev.utils.FileUtils;
+import com.turbodev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class UnexpectedExceptionPage extends BaseErrorPage {
@@ -119,8 +119,8 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 			}
 			
 		});
-		add(new BookmarkablePageLink<Void>("dashboardTop", DashboardPage.class));
-		add(new BookmarkablePageLink<Void>("dashboardBottom", DashboardPage.class));
+		add(new BookmarkablePageLink<Void>("homeTop", ProjectListPage.class));
+		add(new BookmarkablePageLink<Void>("homeBottom", ProjectListPage.class));
 		
 		add(new WebMarkupContainer("backUrl") {
 

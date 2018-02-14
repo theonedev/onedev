@@ -11,9 +11,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 
-import com.turbodev.utils.init.InitStage;
-import com.turbodev.utils.init.ManualConfig;
-import com.turbodev.utils.init.Skippable;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.manager.UserManager;
 import com.turbodev.server.model.User;
@@ -22,7 +19,10 @@ import com.turbodev.server.web.WebSession;
 import com.turbodev.server.web.component.wizard.ManualConfigStep;
 import com.turbodev.server.web.component.wizard.Wizard;
 import com.turbodev.server.web.page.base.BasePage;
-import com.turbodev.server.web.page.dashboard.DashboardPage;
+import com.turbodev.server.web.page.project.ProjectListPage;
+import com.turbodev.utils.init.InitStage;
+import com.turbodev.utils.init.ManualConfig;
+import com.turbodev.utils.init.Skippable;
 
 @SuppressWarnings("serial")
 public class ServerInitPage extends BasePage {
@@ -99,7 +99,7 @@ public class ServerInitPage extends BasePage {
 					WebSession.get().logout();
 					User root = TurboDev.getInstance(UserManager.class).getRoot();
 					SecurityUtils.getSubject().runAs(root.getPrincipals());
-					throw new RestartResponseException(DashboardPage.class);
+					throw new RestartResponseException(ProjectListPage.class);
 				}
 				
 			});

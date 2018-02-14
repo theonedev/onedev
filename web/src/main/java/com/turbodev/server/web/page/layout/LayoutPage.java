@@ -17,13 +17,11 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.turbodev.launcher.loader.AppLoader;
 import com.turbodev.launcher.loader.Plugin;
-import com.turbodev.utils.license.LicenseDetail;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.manager.ConfigManager;
 import com.turbodev.server.manager.UserManager;
@@ -37,16 +35,22 @@ import com.turbodev.server.web.component.floating.AlignPlacement;
 import com.turbodev.server.web.component.floating.FloatingPanel;
 import com.turbodev.server.web.component.link.DropdownLink;
 import com.turbodev.server.web.component.link.ViewStateAwarePageLink;
+import com.turbodev.server.web.component.menu.MenuItem;
+import com.turbodev.server.web.component.menu.MenuLink;
+import com.turbodev.server.web.page.admin.systemsetting.SystemSettingPage;
 import com.turbodev.server.web.page.base.BasePage;
-import com.turbodev.server.web.page.dashboard.DashboardPage;
+import com.turbodev.server.web.page.group.GroupListPage;
+import com.turbodev.server.web.page.project.ProjectListPage;
 import com.turbodev.server.web.page.security.LoginPage;
 import com.turbodev.server.web.page.security.LogoutPage;
 import com.turbodev.server.web.page.security.RegisterPage;
 import com.turbodev.server.web.page.user.TaskListPage;
+import com.turbodev.server.web.page.user.UserListPage;
 import com.turbodev.server.web.page.user.UserProfilePage;
 import com.turbodev.server.web.websocket.PageDataChanged;
 import com.turbodev.server.web.websocket.TaskChangedRegion;
 import com.turbodev.server.web.websocket.WebSocketRegion;
+import com.turbodev.utils.license.LicenseDetail;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -67,10 +71,79 @@ public abstract class LayoutPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer head = new WebMarkupContainer("mainHead");
+		WebMarkupContainer head = new WebMarkupContainer("head");
 		add(head);
 		
 		head.add(new ViewStateAwarePageLink<Void>("home", getApplication().getHomePage()));
+		head.add(new MenuLink("nav") {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator());
+			}
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				List<MenuItem> items = new ArrayList<>();
+				items.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Projects";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new ViewStateAwarePageLink<Void>(id, ProjectListPage.class);
+					}
+					
+				});
+				if (SecurityUtils.isAdministrator()) {
+					items.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Users";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new ViewStateAwarePageLink<Void>(id, UserListPage.class);
+						}
+						
+					});
+					items.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Groups";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new ViewStateAwarePageLink<Void>(id, GroupListPage.class);
+						}
+						
+					});
+					items.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Administration";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new ViewStateAwarePageLink<Void>(id, SystemSettingPage.class);
+						}
+						
+					});
+				}
+				return items;
+			}
+			
+		});
 
 		head.add(new ListView<ComponentRenderer>("breadcrumbs", getBreadcrumbs()) {
 
@@ -159,7 +232,7 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("userMenu").setVisible(false));
 		}
 		
-		add(new WebMarkupContainer("mainFoot") {
+		add(new WebMarkupContainer("foot") {
 
 			@Override
 			protected void onInitialize() {
@@ -179,24 +252,7 @@ public abstract class LayoutPage extends BasePage {
 	}
 
 	protected List<ComponentRenderer> getBreadcrumbs() {
-		List<ComponentRenderer> breadcrumbs = new ArrayList<>();
-		
-		breadcrumbs.add(new ComponentRenderer() {
-			
-			@Override
-			public Component render(String componentId) {
-				return new ViewStateAwarePageLink<Void>(componentId, DashboardPage.class) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of("Home");
-					}
-					
-				};
-			}
-		});
-		
-		return breadcrumbs;
+		return new ArrayList<>();
 	};
 	
 	protected boolean isFootVisible() {

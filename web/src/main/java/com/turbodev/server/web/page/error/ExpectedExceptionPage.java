@@ -7,10 +7,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.util.string.Strings;
 
-import com.turbodev.utils.WordUtils;
 import com.turbodev.server.web.component.MultilineLabel;
 import com.turbodev.server.web.component.link.ViewStateAwarePageLink;
-import com.turbodev.server.web.page.dashboard.DashboardPage;
+import com.turbodev.server.web.page.project.ProjectListPage;
+import com.turbodev.utils.WordUtils;
 
 @SuppressWarnings("serial")
 public class ExpectedExceptionPage extends BaseErrorPage {
@@ -39,7 +39,7 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 		container.add(new Label("title", title));
 		container.add(new Label("description", exception.getMessage()));
 		
-		container.add(new ViewStateAwarePageLink<Void>("dashboard", DashboardPage.class));
+		container.add(new ViewStateAwarePageLink<Void>("home", ProjectListPage.class));
 		
 		container.add(new AjaxLink<Void>("showDetail") {
 

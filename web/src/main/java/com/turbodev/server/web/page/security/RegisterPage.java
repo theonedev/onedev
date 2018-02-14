@@ -19,7 +19,7 @@ import com.turbodev.server.web.editable.BeanContext;
 import com.turbodev.server.web.editable.BeanEditor;
 import com.turbodev.server.web.editable.PathSegment;
 import com.turbodev.server.web.page.base.BasePage;
-import com.turbodev.server.web.page.dashboard.DashboardPage;
+import com.turbodev.server.web.page.project.ProjectListPage;
 import com.turbodev.server.web.page.user.AvatarEditPage;
 import com.turbodev.server.web.page.user.UserPage;
 
@@ -74,7 +74,7 @@ public class RegisterPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(DashboardPage.class);
+				setResponsePage(ProjectListPage.class);
 			}
 			
 		});

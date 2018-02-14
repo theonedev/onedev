@@ -51,7 +51,7 @@
 		<form action="https://www.turbodev.com/bug-report" method="post">
 			<div class="actions">
 				<input type="submit" value="Send Error Report" class="btn btn-primary" onclick="if (validateBugReport()) this.form.submit();return false;"></input>
-				<input wicket:id="dashboardTop" type="button" value="Back to Dashboard" class="btn btn-primary"></input>
+				<input wicket:id="homeTop" type="button" value="Back to Home" class="btn btn-primary"></input>
 			</div>
 			<h4 class="alert alert-danger has-errors">Fix errors below</h4>
 			<h4 class="alert alert-info submitting">Submitting bug report...</h4>
@@ -103,7 +103,7 @@
 			</table>
 			<div class="actions">
 				<input type="submit" value="Send Error Report" onclick="if (validateBugReport()) this.form.submit();return false;" class="btn btn-primary"></input> 
-				<input wicket:id="dashboardBottom" type="button" value="Back to Dashboard" class="btn btn-primary"></input>
+				<input wicket:id="homeBottom" type="button" value="Back to Home" class="btn btn-primary"></input>
 			</div>
 			<input wicket:id="backUrl" type="hidden" name="back_url"></input>
 			<input wicket:id="additionalInfo" type="hidden" name="additional_info"></input>

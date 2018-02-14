@@ -1,73 +1,76 @@
 html, body {
 	background: #F7F6F2;
 }
-#main>.head {
+#layout>.head {
 	background: #010203;
 	padding: 8px 16px;
 	color: #CCC;
 }
-#main>.head>div {
+#layout>.head>div {
 	margin-right: 20px;
 }
-#main>.head a {
+#layout>.head a {
 	text-decoration: none;
 	color: #CCC;
 }
-#main>.head .push-disabled {
+#layout>.head .push-disabled {
 	padding-top: 6px;
 }
-#main>.head .push-disabled .label {
+#layout>.head .push-disabled .label {
 	font-size: 15px;
 }
-#main>.head>.logo .fa {
+#layout>.head>.nav .fa {
+	font-size: 28px;
+}
+#layout>.head>.logo .fa {
 	font-size: 28px;
 	color: #EEE;
 }
-#main>.head>.breadcrumb {
+#layout>.head>.breadcrumb {
 	padding: 0;
 	margin: 0;
 	background: inherit;
 	border-radius: 0;
 	font-size: 20px;
 }
-#main>.head>.breadcrumb .separator {
+#layout>.head>.breadcrumb .separator {
 	margin: 0 8px;
 }
-#main>.head>.help {
+#layout>.head>.help {
 	padding-top: 7px;
 }
-#main>.head>.help .fa {
+#layout>.head>.help .fa {
 	font-size: 18px;
 }
-#main>.head>.user {
+#layout>.head>.user {
 	margin-right: 0;
 }
-#main>.head>.user>.logged-in>.tasks {
+#layout>.head>.user>.logged-in>.tasks {
 	color: #69B7F7;
 	margin-right: 16px;
 }
-#main>.head>.user>.logged-in>a, #main>.head>.user>.logged-in>span {
+#layout>.head>.user>.logged-in>a, #layout>.head>.user>.logged-in>span {
 	margin-right: 8px;
 	font-size: 20px;
 }
-#main>.head>.user>.logged-in>.menu {
+#layout>.head>.user>.logged-in>.menu {
 	margin-right: 8px;
 }
-#main>.head>.user>.logged-out {
+#layout>.head>.user>.logged-out {
 	padding-top: 4px;
 }
-#main>.head>.user>.logged-out a {
+#layout>.head>.user>.logged-out a {
 	font-size: 16px;
 }
-#main>.head>.user>.logged-out>a:FIRST-CHILD {
+#layout>.head>.user>.logged-out>a:FIRST-CHILD {
 	margin-right: 16px;
 }
-#main>.head>.user .avatar {
+#layout>.head>.user .avatar {
 	width: 32px;
 	height: 32px;
 }
 
-#main>.body {
+#layout>.body {
 	border-bottom: 1px solid #BBB;
 	background: white;
 }
@@ -112,11 +115,11 @@ html, body {
 	color: #888;
 	background: #EEE;
 }
-#main>.foot {
+#layout>.foot {
 	font-size: 11px;
 	padding: 8px; 
 }
-#main>.foot>div {
+#layout>.foot>div {
 	white-space: nowrap;
 }
 

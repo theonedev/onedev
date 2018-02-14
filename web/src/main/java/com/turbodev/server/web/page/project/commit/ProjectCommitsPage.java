@@ -294,7 +294,7 @@ public class ProjectCommitsPage extends ProjectPage {
 			
 		});
 
-		foot = new WebMarkupContainer("foot");
+		foot = new WebMarkupContainer("commitsFoot");
 		foot.setOutputMarkupId(true);
 		
 		foot.add(new AjaxLink<Void>("more") {
