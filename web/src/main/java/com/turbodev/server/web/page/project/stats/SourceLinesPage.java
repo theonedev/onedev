@@ -158,7 +158,7 @@ public class SourceLinesPage extends ProjectStatsPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(OnDomReadyHeaderItem.forScript("gitplex.server.stats.lineStats.onDomReady();"));
+		response.render(OnDomReadyHeaderItem.forScript("turbodev.server.stats.lineStats.onDomReady();"));
 	}
 
 }

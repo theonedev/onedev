@@ -1,4 +1,4 @@
-gitplex.server.stats = {
+turbodev.server.stats = {
 	contribs: {
 		onDomReady: function() {
 			

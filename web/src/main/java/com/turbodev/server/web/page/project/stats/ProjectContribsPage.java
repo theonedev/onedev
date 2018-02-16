@@ -167,7 +167,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(OnDomReadyHeaderItem.forScript("gitplex.server.stats.contribs.onDomReady();"));
+		response.render(OnDomReadyHeaderItem.forScript("turbodev.server.stats.contribs.onDomReady();"));
 	}
 
 }
