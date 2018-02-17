@@ -11,14 +11,14 @@
 .blob-view>.head>.info .separator {
 	color: #BBB;	
 }
-.blob-view>.head>.actions {
+.blob-view>.head .actions {
 	white-space: nowrap;
 }
-.blob-view>.head>.actions>* {
+.blob-view>.head .actions>* {
 	color: #333;
 	margin-left: 12px;
 	margin-right: 0;
 }
-.blob-view>.head>.actions>input {
+.blob-view>.head .actions>input {
 	vertical-align: top;
 }

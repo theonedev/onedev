@@ -27,9 +27,10 @@ turbodev.server.projectBlob = {
 		
 		$(window).resize(function(e) {
 			e.stopPropagation();
-			
+
 			var $head = $("#project-blob>.head");
 			var $revisionPicker = $head.find(">.revision-picker");
+			var $operations = $head.find(">.operations");
 					
 			// we should simply call $head.width() here, but the value is incorrect after maximize and restore
 			// window in IE and Chrome (maybe due to use of table in sidebar?), so we go with the complicate 
@@ -37,7 +38,7 @@ turbodev.server.projectBlob = {
 			var headWidth = $("#project").width() - $("#project>.sidebar>table>tbody>tr>td.nav").outerWidth();
 			
 			// below code moves file navigator to bottom if it is too wide
-			var maxWidth = headWidth - $revisionPicker.outerWidth() - 130;
+			var maxWidth = headWidth - $revisionPicker.outerWidth() - $operations.outerWidth();
 			var maxHeight = $head.height();
 
 			var $blobNavigator = $head.find(">.blob-navigator");
@@ -54,6 +55,7 @@ turbodev.server.projectBlob = {
 
 			var $blobContent = $("#project-blob>.blob-content");
 			var width = $(window).width()-$blobContent.offset().left;
+			
 			var height = turbodev.server.projectBlob.getClientHeight();
 			var $searchResult = $("#project-blob>.search-result");
 			if ($searchResult.is(":visible")) {

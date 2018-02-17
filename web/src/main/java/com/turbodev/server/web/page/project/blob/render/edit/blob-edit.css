@@ -14,6 +14,10 @@
 .blob-edit>.head .edit {
 	margin-left: 12px;
 }
+.blob-edit>.head .options {
+	margin-top: 4px;
+	margin-right: -8px;
+}
 .blob-edit>.head .active.tab {
 	background: white;
 	border: 1px solid #BBB;

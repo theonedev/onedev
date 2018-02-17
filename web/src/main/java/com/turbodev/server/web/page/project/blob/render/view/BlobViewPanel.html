@@ -10,16 +10,18 @@
 				</wicket:enclosure>
 				<span wicket:id="size"></span>
 			</div>
-			<div class="pull-right actions">
-				<wicket:container wicket:id="changeActions">
-				<a wicket:id="edit"><i class="fa fa-pencil"></i> Edit</a>
-				<a wicket:id="delete"><i class="fa fa-trash"></i> Delete</a>
-				</wicket:container>
-				<a wicket:id="raw"><i class="fa fa-file-o"></i> Raw</a>
-				<input type="checkbox" wicket:id="blame"> Blame</input>
-				<wicket:container wicket:id="extraActions"></wicket:container>
+			<div class="actions-and-options pull-right clearfix">
+				<div wicket:id="options" class="pull-left options"></div>
+				<div class="pull-left actions">
+					<wicket:container wicket:id="changeActions">
+					<a wicket:id="edit"><i class="fa fa-pencil"></i> Edit</a>
+					<a wicket:id="delete"><i class="fa fa-trash"></i> Delete</a>
+					</wicket:container>
+					<a wicket:id="raw"><i class="fa fa-file-o"></i> Raw</a>
+					<input type="checkbox" wicket:id="blame"> Blame</input>
+					<wicket:container wicket:id="extraActions"></wicket:container>
+				</div>
 			</div>
-			<div wicket:id="options" class="pull-right options"></div>
 		</div>
 		<div class="body">
 			<wicket:child></wicket:child>
