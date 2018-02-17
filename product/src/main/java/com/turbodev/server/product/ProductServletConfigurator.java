@@ -25,8 +25,8 @@ import com.turbodev.server.util.jetty.ClasspathAssetServlet;
 import com.turbodev.server.util.jetty.FileAssetServlet;
 import com.turbodev.server.util.jetty.ServletConfigurator;
 import com.turbodev.server.util.serverconfig.ServerConfig;
-import com.turbodev.server.web.assets.Assets;
 import com.turbodev.server.web.component.markdown.AttachmentUploadServlet;
+import com.turbodev.server.web.img.Img;
 import com.turbodev.server.web.websocket.WebSocketManager;
 
 public class ProductServletConfigurator implements ServletConfigurator {
@@ -91,9 +91,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.addServlet(AttachmentUploadServlet.class, "/attachment_upload");
 		
-		ServletHolder assetServletHolder = new ServletHolder(new ClasspathAssetServlet(Assets.class));
-		context.addServlet(assetServletHolder, "/assets/*");
-		context.addServlet(assetServletHolder, "/favicon.ico");
+		ServletHolder imgServletHolder = new ServletHolder(new ClasspathAssetServlet(Img.class));
+		context.addServlet(imgServletHolder, "/img/*");
 		
 		context.getSessionHandler().addEventListener(new HttpSessionListener() {
 

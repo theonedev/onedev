@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.turbodev.server.web.assets.js.dropzone.DropzoneResourceReference;
+import com.turbodev.server.web.asset.dropzone.DropzoneResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentCssResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentResourceReference;
 

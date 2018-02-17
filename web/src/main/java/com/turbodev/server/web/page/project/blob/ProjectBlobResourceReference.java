@@ -6,9 +6,9 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.turbodev.server.web.assets.js.cookies.CookiesResourceReference;
-import com.turbodev.server.web.assets.js.hotkeys.HotkeysResourceReference;
-import com.turbodev.server.web.assets.js.jqueryui.JQueryUIResourceReference;
+import com.turbodev.server.web.asset.cookies.CookiesResourceReference;
+import com.turbodev.server.web.asset.hotkeys.HotkeysResourceReference;
+import com.turbodev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentCssResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentResourceReference;
 

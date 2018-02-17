@@ -1,18 +1,15 @@
-#user.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
-	width: 220px;
+#user>.sidebar>.head {
+	text-align: center;
+	vertical-align: center;
+	border-bottom: 2px solid #E0E0E0;
+	padding: 8px;
 }
-#user.sidebar>table>tbody>tr>td.nav>.head {
-	margin: -20px 0 20px 0;
-	padding: 10px 10px 0 10px;
-	border-bottom: 1px solid #DDD;
+#user>.sidebar>.tabs {
+	top: 180px;
 }
-#user.sidebar>table>tbody>tr>td.nav>.head>div.avatar img {
-	height: 200px;
-	width: 200px;
-	margin-bottom: 10px;
-}
-#user.sidebar>table>tbody>tr>td.content {
-	padding: 20px;
+#user>.sidebar>.head img {
+	height: 160px;
+	width: 160px;
 }
 
 #user .avatar-edit .upload {
@@ -30,9 +27,6 @@
 	width: 240px;
 } 
 
-.user.list, .new-user {
-	padding: 20px;
-}
 .user.list .actions a {
 	color: #666;
 }

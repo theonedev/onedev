@@ -1,19 +1,11 @@
 <wicket:extend>
-	<div id="user" class="sidebar">
-		<table>
-			<tr>
-				<td class="nav">
-					<div class="head">
-						<div class="avatar">
-							<a wicket:id="avatar"><img wicket:id="avatar"></img></a>
-						</div>
-					</div>
-					<ul wicket:id="userTabs" class="tabs list-unstyled"></ul>
-				</td>
-				<td class="content">
-					<wicket:child></wicket:child>
-				</td>
-			</tr>
-		</table>
+	<div id="user">
+		<div wicket:id="sidebar"></div>
+		<div class="content">
+			<wicket:child></wicket:child>
+		</div>
 	</div>
+	<wicket:fragment wicket:id="sidebarHeadFrag">
+		<a wicket:id="avatar"><img wicket:id="avatar"></img></a>
+	</wicket:fragment>
 </wicket:extend>

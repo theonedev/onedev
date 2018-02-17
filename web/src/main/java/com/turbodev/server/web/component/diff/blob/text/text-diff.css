@@ -1,10 +1,10 @@
 .text-diff {
-	border: 1px solid #D8D8D8;
+	border: 1px solid #E0E0E0;
 	position: relative;
 }
 .text-diff>.head {
 	padding: 8px;
-	border-bottom: 1px solid #D8D8D8;
+	border-bottom: 1px solid #E0E0E0;
 }
 .text-diff>.head .actions>a {
 	margin-right: 0;

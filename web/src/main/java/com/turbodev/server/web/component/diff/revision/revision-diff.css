@@ -86,6 +86,7 @@
 }
 .revision-diff>.body>.detail>.diffs>.diff {
 	margin-bottom: 20px;
+	background: white;
 }
 .revision-diff>.body>.detail {
 	position: relative;

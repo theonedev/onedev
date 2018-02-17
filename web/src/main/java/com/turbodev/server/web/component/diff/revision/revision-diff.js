@@ -65,23 +65,26 @@ turbodev.server.revisionDiff = {
 			var scrollTop = $(window).scrollTop();
 			$comment.css("left", $detail.offset().left - scrollLeft);
 			var topOffset = $diffs.offset().top - scrollTop;
-			if (topOffset <= 0) {
-				$comment.css("top", 0);
+			var headHeight = $("#layout>.head").outerHeight();
+			var footHeight = $("#layout>.foot").outerHeight();
+			if (topOffset <= headHeight) {
+				$comment.css("top", headHeight);
 			} else {
 				$comment.css("top", topOffset);
 			}
 			var $lastDiff = $diffs.children().last();
 			var commentHeight;
 			if ($lastDiff.length != 0) {
-				commentHeight = $lastDiff.offset().top + $lastDiff.height() - scrollTop;
+				commentHeight = $lastDiff.offset().top + $lastDiff.height() - scrollTop - headHeight - footHeight;
 			} else {
-				commentHeight = $diffs.offset().top + $diffs.height() - scrollTop;
+				commentHeight = $diffs.offset().top + $diffs.height() - scrollTop - headHeight - footHeight;
 			}
-			var minCommentHeight = windowHeight-52;
+			var maxCommentHeight = windowHeight - headHeight - footHeight;
+			var minCommentHeight = maxCommentHeight - 52;
 			if (commentHeight < minCommentHeight)
 				commentHeight = minCommentHeight;
-			else if (commentHeight > windowHeight)
-				commentHeight = windowHeight;
+			else if (commentHeight > maxCommentHeight)
+				commentHeight = maxCommentHeight;
 			var $commentResizeHandle = $comment.children(".ui-resizable-handle");
 			$commentResizeHandle.outerHeight(commentHeight - 2);
 			var $commentHead = $comment.find(">.content>.head");
@@ -100,7 +103,7 @@ turbodev.server.revisionDiff = {
 			var commentWidthCookieKey = "revisionDiff.comment.width";
 			var commentWidth = Cookies.get(commentWidthCookieKey);
 			if (!commentWidth)
-				commentWidth = 400;
+				commentWidth = $(".revision-diff").outerWidth()/3;
 			$comment.outerWidth(commentWidth);
 			var $commentResizeHandle = $comment.children(".ui-resizable-handle");
 			var $diffs = $(".revision-diff>.body>.detail>.diffs");

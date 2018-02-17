@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
-import com.turbodev.server.web.assets.js.jqueryui.JQueryUIResourceReference;
+import com.turbodev.server.web.asset.jqueryui.JQueryUIResourceReference;
 
 /**
  * Adds drag & drop behavior to Select2MultiChoice components, i.e. the list of

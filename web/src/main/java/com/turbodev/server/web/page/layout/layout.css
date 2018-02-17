@@ -1,17 +1,20 @@
-html, body {
-	background: #F7F6F2;
-}
 #layout>.head {
-	background: #010203;
+	background: #212121;
 	padding: 8px 16px;
-	color: #CCC;
+	color: #E0E0E0;
+	position: fixed;
+	height: 48px;
+	z-index: 200;
+	left: 0;
+	right: 0;
+	min-width: 375px;
 }
 #layout>.head>div {
 	margin-right: 20px;
 }
 #layout>.head a {
 	text-decoration: none;
-	color: #CCC;
+	color: #E0E0E0;
 }
 #layout>.head .push-disabled {
 	padding-top: 6px;
@@ -32,6 +35,31 @@ html, body {
 }
 #layout>.head>.breadcrumb .separator {
 	margin: 0 8px;
+}
+#layout>.head>.breadcrumb .name {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+@media(min-width: 0px) {
+	#layout>.head>.breadcrumb .name {
+		max-width: 50px;
+	}	
+}
+@media(min-width: 500px) {
+	#layout>.head>.breadcrumb .name {
+		max-width: 100px;
+	}	
+}
+@media(min-width: 600px) {
+	#layout>.head>.breadcrumb .name {
+		max-width: 200px;
+	}	
+}
+@media(min-width: 900px) {
+	#layout>.head>.breadcrumb .name {
+		max-width: 400px;
+	}	
 }
 #layout>.head>.help {
 	padding-top: 7px;
@@ -66,55 +94,21 @@ html, body {
 	width: 32px;
 	height: 32px;
 }
-
 #layout>.body {
-	border-bottom: 1px solid #BBB;
-	background: white;
-}
-
-.sidebar>table>tbody>tr>td.nav {
-	padding: 20px 0;
-	width: 1px;
-	border-right: 1px solid #DDD;
-}
-.sidebar>table>tbody>tr>td.nav>.tabs {
-	margin-bottom: 0;
-}
-.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
-	color: #666;
-	display: block;
-	text-decoration: none;
-	padding: 12px;
-	padding-right: 8px;
-	white-space: nowrap;
-	border-right: 4px solid white;
-	width: 180px;
-	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-	clear: both;
-	position: relative;
-}
-.sidebar>table>tbody>tr>td.nav>.tabs>li>a .fa {
-	font-size: 16px;
-	margin-right: 4px;
-}
-.sidebar>table>tbody>tr>td.nav>.tabs>li:hover>a {
-	color: #010203;
-	border-right-color: #777;
-}
-.sidebar>table>tbody>tr>td.nav>.tabs>li.active>a {
-	color: #010203;
-	border-right-color: #010203;
-	font-weight: bold;
-}
-.sidebar>table>tbody>tr>td.nav>.tabs>li>a .badge {
-	position: absolute;
-	right: 4px;
-	color: #888;
-	background: #EEE;
+	padding: 68px 20px 56px 20px;
+	width: 100%;
 }
 #layout>.foot {
+	border-top: 2px solid #E0E0E0;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 36px;
+	background: #F5F5F5;
 	font-size: 11px;
 	padding: 8px; 
+	z-index: 210;
 }
 #layout>.foot>div {
 	white-space: nowrap;
@@ -135,4 +129,9 @@ html, body {
 }
 .floating>.content>.user a:hover {
 	background: #F2F2F2;
+}
+
+#layout .sidebar {
+	top: 48px;
+	bottom: 36px;
 }

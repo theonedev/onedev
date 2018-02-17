@@ -27,6 +27,7 @@ import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.mapper.HomePageMapper;
 import org.apache.wicket.markup.html.pages.AbstractErrorPage;
+import org.apache.wicket.markup.html.pages.BrowserInfoPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.protocol.ws.WebSocketSettings;
@@ -83,6 +84,8 @@ public class TurboDevWebApplication extends WebApplication {
 		
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
 		
+		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
+		
 		BootstrapSettings bootstrapSettings = new BootstrapSettings();
 		bootstrapSettings.setAutoAppendResources(false);
 		de.agilecoders.wicket.core.Bootstrap.install(this, bootstrapSettings);
@@ -93,8 +96,9 @@ public class TurboDevWebApplication extends WebApplication {
 			public void onInstantiation(Component component) {
 				if ((component instanceof Page) 
 						&& !(component instanceof AbstractErrorPage) 
-						&& !(component instanceof BasePage)) {
-					throw new RuntimeException("All page classes should extend from BasePage.");
+						&& !(component instanceof BasePage)
+						&& !(component instanceof BrowserInfoPage)) {
+					throw new RuntimeException("Page classes should extend from BasePage.");
 				}
 			}
 		});

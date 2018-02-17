@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -17,8 +18,9 @@ import com.turbodev.server.model.Group;
 import com.turbodev.server.security.SecurityUtils;
 import com.turbodev.server.web.ComponentRenderer;
 import com.turbodev.server.web.component.link.ViewStateAwarePageLink;
+import com.turbodev.server.web.component.sidebar.SidebarPanel;
 import com.turbodev.server.web.component.tabbable.PageTab;
-import com.turbodev.server.web.component.tabbable.Tabbable;
+import com.turbodev.server.web.component.tabbable.Tab;
 import com.turbodev.server.web.page.layout.LayoutPage;
 import com.turbodev.server.web.util.model.EntityModel;
 
@@ -42,14 +44,20 @@ public abstract class GroupPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<PageTab> tabs = new ArrayList<>();
-		
-		tabs.add(new GroupTab("Profile", "fa fa-fw fa-list-alt", GroupProfilePage.class));
-		tabs.add(new GroupTab("Members", "fa fa-fw fa-user", GroupMembershipsPage.class));
-		if (SecurityUtils.isAdministrator() && !getGroup().isAdministrator())
-			tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", GroupAuthorizationsPage.class));
-		
-		add(new Tabbable("groupTabs", tabs));
+		add(new SidebarPanel("sidebar", null) {
+
+			@Override
+			protected List<? extends Tab> newTabs() {
+				List<PageTab> tabs = new ArrayList<>();
+				
+				tabs.add(new GroupTab("Profile", "fa fa-fw fa-list-alt", GroupProfilePage.class));
+				tabs.add(new GroupTab("Members", "fa fa-fw fa-user", GroupMembershipsPage.class));
+				if (SecurityUtils.isAdministrator() && !getGroup().isAdministrator())
+					tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", GroupAuthorizationsPage.class));
+				return tabs;
+			}
+			
+		});
 	}
 
 	@Override
@@ -104,7 +112,10 @@ public abstract class GroupPage extends LayoutPage {
 			
 			@Override
 			public Component render(String componentId) {
-				return new Label(componentId, getGroup().getName());
+				Label label = new Label(componentId, getGroup().getName());
+				label.add(AttributeAppender.append("class", "name"));
+				label.add(AttributeAppender.append("title", getGroup().getName()));
+				return label;
 			}
 			
 		});

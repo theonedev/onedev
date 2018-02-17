@@ -231,32 +231,16 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("userMenu").setVisible(false));
 		}
 		
-		add(new WebMarkupContainer("foot") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				Plugin product = AppLoader.getProduct();
-				add(new Label("productVersion", product.getVersion()));
-				add(new Label("releaseDate", new SimpleDateFormat(RELEASE_DATE_FORMAT).format(product.getDate())));
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(isFootVisible());
-			}
-			
-		});
+		WebMarkupContainer foot = new WebMarkupContainer("foot");
+		Plugin product = AppLoader.getProduct();
+		foot.add(new Label("productVersion", product.getVersion()));
+		foot.add(new Label("releaseDate", new SimpleDateFormat(RELEASE_DATE_FORMAT).format(product.getDate())));
+		add(foot);
 	}
 
 	protected List<ComponentRenderer> getBreadcrumbs() {
 		return new ArrayList<>();
 	};
-	
-	protected boolean isFootVisible() {
-		return true;
-	}
 	
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
@@ -275,7 +259,6 @@ public abstract class LayoutPage extends BasePage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
 		response.render(CssHeaderItem.forReference(new LayoutResourceReference()));
 	}
 	

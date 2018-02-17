@@ -1,6 +1,3 @@
-#request-list {
-	padding: 20px;
-}
 #request-list>.head {
 	margin-bottom: 20px;
 }
@@ -9,22 +6,14 @@
 }
 #request-list td.filter {
 	width: 25%;
-	border: 1px solid #DDD;
-}
-#request-list td.filter>.head {
-	font-size: 16px;
-	border-bottom: 1px solid #DDD;
-	padding: 8px 12px;
-	background: #F2F2F2;
-}
-#request-list td.filter>.body {
-	padding: 12px;
+	border: 2px solid #E0E0E0;
+	padding: 20px;
 }
 #request-list td.spacing {
 	width: 20px;
 }
 #request-list td.result {
-	border: 1px solid #DDD;
+	border: 2px solid #E0E0E0;
 }
 #request-list td.request {
 	color: #888;

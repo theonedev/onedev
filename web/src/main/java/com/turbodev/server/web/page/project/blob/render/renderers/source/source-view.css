@@ -5,7 +5,6 @@
 	background: white; 
 	position: absolute;
 	padding-right: 4px;
-	border-left: 3px solid #F2F2F2;
 	top: 0;
 	left: 0;
 }
@@ -28,7 +27,7 @@
 }
 .source-view>.comment>.ui-resizable-handle {
 	position: absolute;
-	border-right: 1px solid #CCC;
+	border-right: 1px solid #E0E0E0;
 	background: #EEE url(vgrabber.png) no-repeat scroll right center;
     cursor: e-resize;
     width: 4px;
@@ -56,7 +55,7 @@
 }
 .source-view>.outline>.ui-resizable-handle {
 	position: absolute;
-	border-left: 1px solid #CCC;
+	border-left: 1px solid #E0E0E0;
 	background: #EEE url(vgrabber.png) no-repeat scroll left center;
     cursor: w-resize;
     width: 4px;

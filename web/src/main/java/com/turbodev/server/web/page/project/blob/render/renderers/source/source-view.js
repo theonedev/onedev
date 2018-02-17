@@ -192,7 +192,7 @@ turbodev.server.sourceView = {
 		var $comment = $sourceView.children(".comment");
 		var commentWidth = Cookies.get(commentWidthCookieKey);
 		if (!commentWidth)
-			commentWidth = 400;
+			commentWidth = $sourceView.outerWidth()/3;
 		$comment.outerWidth(commentWidth);
 		var $commentResizeHandle = $comment.children(".ui-resizable-handle");
 		$comment.resizable({

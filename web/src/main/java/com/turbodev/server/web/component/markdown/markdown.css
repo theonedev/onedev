@@ -28,7 +28,7 @@ body.fullscreen {
 }
 .markdown-editor>.head {
 	background: white;
-	border: 1px solid #CCC;	
+	border: 1px solid #E0E0E0;	
 	border-bottom: none;
 	border-radius: 4px 4px 0 0;
 	padding: 4px;
@@ -45,13 +45,13 @@ body.fullscreen {
 }
 .markdown-editor>.head>.actions .separator {
 	display: block;
-	border-left: 1px solid #CCC;
+	border-left: 1px solid #E0E0E0;
 	margin-right: 4px;
 	height: 24px;
 }
 .markdown-editor>.head>.actions>div>a:hover, .markdown-editor>.head>.actions>div>a.active {
 	background: #EEE;
-	border: 1px solid #CCC;
+	border: 1px solid #E0E0E0;
 }
 
 .markdown-editor>.head>.actions .dropdown .active:BEFORE {
@@ -96,7 +96,7 @@ body.fullscreen {
 }
 
 .markdown-editor>.body>.preview>.markdown-rendered {
-	border: 1px solid #CCC;
+	border: 1px solid #E0E0E0;
 	padding: 8px;
 	border-radius: 0 0 4px 4px;
 	background: white;
@@ -151,7 +151,7 @@ body.fullscreen {
 }
 
 .markdown-editor>.body>.edit>textarea {
-	border: 1px solid #CCC;
+	border: 1px solid #E0E0E0;
 	border-radius: 0 0 4px 4px;
 	overflow: auto;
 	width: 100%;

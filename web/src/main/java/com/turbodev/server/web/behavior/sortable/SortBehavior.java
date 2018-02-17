@@ -9,7 +9,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.turbodev.server.web.assets.js.jqueryui.JQueryUIResourceReference;
+import com.turbodev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import com.turbodev.server.web.behavior.AbstractPostAjaxBehavior;
 
 public abstract class SortBehavior extends AbstractPostAjaxBehavior {

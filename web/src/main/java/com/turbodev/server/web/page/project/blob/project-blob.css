@@ -1,21 +1,26 @@
+#project-blob {
+	margin: -20px;
+}
 #project-blob>.head {
-	border-bottom: 1px solid #BBB;
+	border-bottom: 1px solid #E0E0E0;
 	height: 31px;
 }
+
 #project-blob>.head>.revision-picker {
 	padding: 0;
+	border-right: 1px solid #E0E0E0;
 }
 #project-blob>.head>.comment-context {
-	border-right: 1px solid #BBB;
+	border-right: 1px solid #E0E0E0;
 	padding: 5px 8px 0 8px;
 	height: 31px;
 	cursor: pointer;
 }
 #project-blob>.head>a.revision-picker {
 	display: block;
-	border-right: 1px solid #BBB;
 	color: #333;
 	text-decoration: none;
+	white-space: nowrap;
 }
 #project-blob>.head>a.revision-picker:hover {
 	background: #EEE;
@@ -29,7 +34,7 @@
 }
 #project-blob>.head>.blob-navigator form.name input {
 	height: 30px;
-	border: 1px solid #BBB;
+	border: 1px solid #E0E0E0;
 	border-top: none;
 	border-bottom: none;
 	border-radius: 0;
@@ -38,11 +43,11 @@
 	width: 160px;
 }
 #project-blob>.blob-navigator {
-	border-bottom: 1px solid #BBB;
+	border-bottom: 1px solid #E0E0E0;
 }
 #project-blob>.blob-navigator form.name input {
-	border-top: 1px solid #BBB;
-	border-bottom: 1px solid #BBB;
+	border-top: 1px solid #E0E0E0;
+	border-bottom: 1px solid #E0E0E0;
 	height: 26px;
 	margin-top: -1px;
 	border-radius: 3px;
@@ -51,8 +56,6 @@
 	
 #project-blob>.head>.operations {
 	margin-top: 4px;
-	position: absolute;
-	right: 0;
 }
 #project-blob>.head>.operations>a {
 	padding: 4px 8px;

@@ -10,7 +10,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponent;
 
-import com.turbodev.server.web.assets.js.doneevents.DoneEventsResourceReference;
+import com.turbodev.server.web.asset.doneevents.DoneEventsResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBehavior{

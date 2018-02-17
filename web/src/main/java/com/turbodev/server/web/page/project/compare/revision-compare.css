@@ -1,50 +1,42 @@
-#revision-compare {
-	padding: 20px 20px 0 20px;
-}
-#revision-compare>.head {
-	font-size: 18px;
+#revision-compare>div {
 	margin-bottom: 20px;
 }
-#revision-compare>.body>div {
-	margin-bottom: 20px;
-}
-#revision-compare>.body>.revisions {
+#revision-compare>.revisions {
 	margin-bottom: 20px;
 	width: auto;
 }
-#revision-compare>.body>.revisions td {
+#revision-compare>.revisions td {
 	vertical-align: middle;
-	background: #F5F5F5; 
-	border: 1px solid #DDD;
-	border-radius: 4px;
+	background: #FAFAFA; 
+	border: 2px solid #E0E0E0;
 	padding: 12px;
 }
-#revision-compare>.body>.revisions td.action {
+#revision-compare>.revisions td.action {
 	text-align: center;
 	background: white;
 	border-top: none;
 	border-bottom: none;
 }
-#revision-compare>.body>.revisions .revision .title label {
+#revision-compare>.revisions .revision .title label {
 	font-size: 16px;
 	color: #888;
 	font-weight: normal;
 }
-#revision-compare>.body>.revisions .revision .title input {
+#revision-compare>.revisions .revision .title input {
 	margin-left: 16px;
 }
-#revision-compare>.body>.revisions .revision .title span {
+#revision-compare>.revisions .revision .title span {
 	color: #888;
 	margin-left: 4px;
 }
-#revision-compare>.body>.revisions .revision .title a {
+#revision-compare>.revisions .revision .title a {
 	color: #666;
 	margin-left: 4px;
 }
-#revision-compare>.body>.revisions .revision .message {
+#revision-compare>.revisions .revision .message {
 	margin-top: 8px;
 }
-#revision-compare>.body>.revisions .revision .message a {
+#revision-compare>.revisions .revision .message a {
 	font-size: 13px;
 	color: #888;
 }

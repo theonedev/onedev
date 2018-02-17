@@ -12,8 +12,9 @@ import org.apache.wicket.model.Model;
 import com.turbodev.server.security.SecurityUtils;
 import com.turbodev.server.web.ComponentRenderer;
 import com.turbodev.server.web.component.link.ViewStateAwarePageLink;
+import com.turbodev.server.web.component.sidebar.SidebarPanel;
 import com.turbodev.server.web.component.tabbable.PageTab;
-import com.turbodev.server.web.component.tabbable.Tabbable;
+import com.turbodev.server.web.component.tabbable.Tab;
 import com.turbodev.server.web.page.admin.authenticator.AuthenticatorPage;
 import com.turbodev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import com.turbodev.server.web.page.admin.licensemanagement.LicenseManagementPage;
@@ -36,17 +37,23 @@ public abstract class AdministrationPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new AdministrationTab("System Setting", "fa fa-fw fa-sliders", SystemSettingPage.class));
-		tabs.add(new AdministrationTab("Security Setting", "fa fa-fw fa-lock", SecuritySettingPage.class));
-		tabs.add(new AdministrationTab("External Authentication", "fa fa-fw fa-key", AuthenticatorPage.class));
-		tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
-		tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));
-		tabs.add(new AdministrationTab("Server Log", "fa fa-fw fa-file-text-o", ServerLogPage.class));
-		tabs.add(new AdministrationTab("Server Information", "fa fa-fw fa-desktop", ServerInformationPage.class));
-		tabs.add(new AdministrationTab("License Management", "fa fa-fw fa-vcard-o", LicenseManagementPage.class));
-		
-		add(new Tabbable("tabs", tabs));
+		add(new SidebarPanel("sidebar", null) {
+
+			@Override
+			protected List<? extends Tab> newTabs() {
+				List<PageTab> tabs = new ArrayList<>();
+				tabs.add(new AdministrationTab("System Setting", "fa fa-fw fa-sliders", SystemSettingPage.class));
+				tabs.add(new AdministrationTab("Security Setting", "fa fa-fw fa-lock", SecuritySettingPage.class));
+				tabs.add(new AdministrationTab("External Authentication", "fa fa-fw fa-key", AuthenticatorPage.class));
+				tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
+				tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));
+				tabs.add(new AdministrationTab("Server Log", "fa fa-fw fa-file-text-o", ServerLogPage.class));
+				tabs.add(new AdministrationTab("Server Information", "fa fa-fw fa-desktop", ServerInformationPage.class));
+				tabs.add(new AdministrationTab("License Management", "fa fa-fw fa-vcard-o", LicenseManagementPage.class));
+				return tabs;
+			}
+			
+		});
 	}
 
 	@Override

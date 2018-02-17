@@ -9,8 +9,9 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.turbodev.server.security.SecurityUtils;
+import com.turbodev.server.web.component.sidebar.SidebarPanel;
 import com.turbodev.server.web.component.tabbable.PageTab;
-import com.turbodev.server.web.component.tabbable.Tabbable;
+import com.turbodev.server.web.component.tabbable.Tab;
 import com.turbodev.server.web.page.project.ProjectPage;
 import com.turbodev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import com.turbodev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
@@ -34,14 +35,20 @@ public abstract class ProjectSettingPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new ProjectSettingTab("General Setting", "fa fa-fw fa-sliders", GeneralSettingPage.class));
-		tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
-		tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
-		tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
-		tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-exchange", CommitMessageTransformPage.class));
-		
-		add(new Tabbable("projectSettingTabs", tabs));
+		add(new SidebarPanel("projectSettingSidebar", null) {
+
+			@Override
+			protected List<? extends Tab> newTabs() {
+				List<PageTab> tabs = new ArrayList<>();
+				tabs.add(new ProjectSettingTab("General Setting", "fa fa-fw fa-sliders", GeneralSettingPage.class));
+				tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
+				tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
+				tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
+				tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-exchange", CommitMessageTransformPage.class));
+				return tabs;
+			}
+			
+		});
 	}
 
 	@Override

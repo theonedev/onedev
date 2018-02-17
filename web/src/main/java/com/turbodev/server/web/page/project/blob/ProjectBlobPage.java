@@ -44,11 +44,11 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.turbodev.jsymbol.TokenPosition;
 import com.turbodev.jsymbol.util.NoAntiCacheImage;
 import com.turbodev.launcher.loader.ListenerRegistry;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.event.RefUpdated;
 import com.turbodev.server.git.BlobIdent;
@@ -903,11 +903,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		return getProject().getRevCommit(resolvedRevision);
 	}
 	
-	@Override
-	protected boolean isFootVisible() {
-		return false;
-	}
-
 	@Override
 	public Collection<WebSocketRegion> getWebSocketRegions() {
 		Collection<WebSocketRegion> regions = super.getWebSocketRegions();

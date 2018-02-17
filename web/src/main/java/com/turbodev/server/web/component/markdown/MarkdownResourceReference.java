@@ -6,13 +6,13 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import com.turbodev.server.web.assets.js.atwho.AtWhoResourceReference;
-import com.turbodev.server.web.assets.js.caret.CaretResourceReference;
-import com.turbodev.server.web.assets.js.codemirror.CodeMirrorResourceReference;
-import com.turbodev.server.web.assets.js.cookies.CookiesResourceReference;
-import com.turbodev.server.web.assets.js.doneevents.DoneEventsResourceReference;
-import com.turbodev.server.web.assets.js.jqueryui.JQueryUIResourceReference;
-import com.turbodev.server.web.assets.js.textareacaretposition.TextareaCaretPositionResourceReference;
+import com.turbodev.server.web.asset.atwho.AtWhoResourceReference;
+import com.turbodev.server.web.asset.caret.CaretResourceReference;
+import com.turbodev.server.web.asset.codemirror.CodeMirrorResourceReference;
+import com.turbodev.server.web.asset.cookies.CookiesResourceReference;
+import com.turbodev.server.web.asset.doneevents.DoneEventsResourceReference;
+import com.turbodev.server.web.asset.jqueryui.JQueryUIResourceReference;
+import com.turbodev.server.web.asset.textareacaretposition.TextareaCaretPositionResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentCssResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentResourceReference;
 

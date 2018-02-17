@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.turbodev.server.web.assets.js.uri.URIResourceReference;
+import com.turbodev.server.web.asset.uri.URIResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentResourceReference;
 
 public class SearchResultResourceReference extends BaseDependentResourceReference {

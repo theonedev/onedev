@@ -6,24 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -37,8 +32,9 @@ import com.turbodev.server.web.ComponentRenderer;
 import com.turbodev.server.web.component.floating.FloatingPanel;
 import com.turbodev.server.web.component.link.DropdownLink;
 import com.turbodev.server.web.component.link.ViewStateAwarePageLink;
+import com.turbodev.server.web.component.sidebar.SidebarPanel;
 import com.turbodev.server.web.component.tabbable.PageTab;
-import com.turbodev.server.web.component.tabbable.Tabbable;
+import com.turbodev.server.web.component.tabbable.Tab;
 import com.turbodev.server.web.page.layout.LayoutPage;
 import com.turbodev.server.web.page.project.blob.ProjectBlobPage;
 import com.turbodev.server.web.page.project.branches.ProjectBranchesPage;
@@ -59,7 +55,7 @@ import com.turbodev.server.web.page.project.tags.ProjectTagsPage;
 public abstract class ProjectPage extends LayoutPage {
 
 	private static final String PARAM_PROJECT = "project";
-
+	
 	protected final IModel<Project> projectModel;
 	
 	public static PageParameters paramsOf(Project project) {
@@ -123,53 +119,46 @@ public abstract class ProjectPage extends LayoutPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
-		tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
-				ProjectCommitsPage.class, CommitDetailPage.class));
-		tabs.add(new ProjectTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
-				0, ProjectBranchesPage.class));
-		tabs.add(new ProjectTab(Model.of("Tags"), "fa fa-fw fa-tag", 
-				0, ProjectTagsPage.class));
-		
-		tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-				0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class));
-		
-		tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
-				0, ProjectCodeCommentsPage.class));
-		
-		tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
-		
-		/*
-		tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
-				ProjectStatsPage.class));
-		*/
-		
-		if (SecurityUtils.canManage(getProject()))
-			tabs.add(new ProjectTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, ProjectSettingPage.class));
-		
-		WebMarkupContainer sidebar = new WebMarkupContainer("sidebar");
-		add(sidebar);
-		
-		/*
-		 * Add mini class here instead of project.js as we want the sidebar to 
-		 * be minimized initially even if the page takes some time to load 
-		 */
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie("project.miniSidebar");
-		if (cookie != null && "yes".equals(cookie.getValue()))
-			sidebar.add(AttributeAppender.append("class", " mini"));
-		
-		sidebar.add(new Tabbable("projectTabs", tabs));
+
+		add(new SidebarPanel("sidebar", "project.miniSidebar") {
+			
+			@Override
+			protected List<? extends Tab> newTabs() {
+				List<PageTab> tabs = new ArrayList<>();
+				tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
+				tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
+						ProjectCommitsPage.class, CommitDetailPage.class));
+				tabs.add(new ProjectTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
+						0, ProjectBranchesPage.class));
+				tabs.add(new ProjectTab(Model.of("Tags"), "fa fa-fw fa-tag", 
+						0, ProjectTagsPage.class));
+				
+				tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
+						0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class));
+				
+				tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
+						0, ProjectCodeCommentsPage.class));
+				
+				tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
+				
+				/*
+				tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
+						ProjectStatsPage.class));
+				*/
+				
+				if (SecurityUtils.canManage(getProject()))
+					tabs.add(new ProjectTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, ProjectSettingPage.class));
+				
+				return tabs;
+			}
+		});
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(JavaScriptHeaderItem.forReference(new ProjectResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("turbodev.server.project();"));
+		response.render(CssHeaderItem.forReference(new ProjectResourceReference()));
 	}
 
 	@Override
@@ -228,7 +217,8 @@ public abstract class ProjectPage extends LayoutPage {
 						return Model.of(getProject().getName());
 					}
 					
-				});
+				}.add(AttributeAppender.append("title", getProject().getName())));
+				
 				fragment.add(new DropdownLink("moreInfo") {
 
 					@Override

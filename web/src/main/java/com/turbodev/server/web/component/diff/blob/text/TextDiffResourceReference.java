@@ -7,9 +7,9 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.turbodev.server.web.assets.js.clipboard.ClipboardResourceReference;
-import com.turbodev.server.web.assets.js.hover.HoverResourceReference;
-import com.turbodev.server.web.assets.js.selectionpopover.SelectionPopoverResourceReference;
+import com.turbodev.server.web.asset.clipboard.ClipboardResourceReference;
+import com.turbodev.server.web.asset.hover.HoverResourceReference;
+import com.turbodev.server.web.asset.selectionpopover.SelectionPopoverResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentResourceReference;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;

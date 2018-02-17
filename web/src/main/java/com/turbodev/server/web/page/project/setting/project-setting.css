@@ -1,27 +1,13 @@
-#project-setting>table>tbody>tr>td.nav {
-	width: 200px;
-	border-right: 1px solid #DDD;
-	white-space: nowrap;
-	padding: 20px 0;
+#project-setting>.sidebar {
+	left: 240px;
+	background: white;
+	border-left: none;
 }
-#project-setting>table>tbody>tr>td.nav a {
-	display: block;
-	color: #666;
-	text-decoration: none;
-	padding: 6px 12px;
-	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+#project-setting>.sidebar>.tabs>li>a {
+	border-left: none;
 }
-#project-setting>table>tbody>tr>td.nav li:hover a {
-	background: #F5F5F5;
-	color: #010203;
-}
-#project-setting>table>tbody>tr>td.nav li.active a {
-	background: #E8E8E8;
-	color: #010203;
-	font-weight: bold;
-}
-#project-setting>table>tbody>tr>td.content {
-	padding: 20px;
+#project>.minimized.sidebar+.content>#project-setting>.sidebar {
+	left: 44px;
 }
 #project-setting .general-setting form .delete {
 	margin-right: 0;

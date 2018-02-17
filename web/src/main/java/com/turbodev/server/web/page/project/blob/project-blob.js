@@ -54,9 +54,23 @@ turbodev.server.projectBlob = {
 			}
 
 			var $blobContent = $("#project-blob>.blob-content");
-			var width = $(window).width()-$blobContent.offset().left;
 			
-			var height = turbodev.server.projectBlob.getClientHeight();
+			var minWindowWidth = turbodev.server.projectBlob.parseCssDimension($("body").css("min-width"));
+
+			var windowWidth = $(window).width();
+			if (windowWidth < minWindowWidth) {
+				windowWidth = minWindowWidth;
+				$("body").css("overflow-x", "visible");
+			} else {
+				$("body").css("overflow-x", "hidden");
+			}
+			var width = windowWidth-$blobContent.offset().left;
+
+			var height = $(window).height()-$blobContent.offset().top;
+			
+			if ($("#layout>.foot").length != 0) 
+				height -= $("#layout>.foot").outerHeight();
+			
 			var $searchResult = $("#project-blob>.search-result");
 			if ($searchResult.is(":visible")) {
 				var $searchResultHead = $searchResult.find(".search-result>.head");
@@ -87,11 +101,13 @@ turbodev.server.projectBlob = {
 		});
 
 	},
-	getClientHeight: function() {
-		var height = $(window).height()-$("#project-blob>.blob-content").offset().top;
-		if ($("#main>.foot").length != 0) 
-			height -= $("#main>.foot").outerHeight();
-		return height;
+	parseCssDimension: function(cssDimension) {
+		var index = cssDimension.indexOf("px");
+		if (index && index != -1) {
+			return parseInt(cssDimension.substring(0, index));
+		} else {
+			return 0;
+		}
 	},
 	onWindowLoad: function() {
 		if (location.hash && !turbodev.server.viewState.getFromHistory()) {

@@ -1,5 +1,5 @@
 .blob-view>.head {
-	border-bottom: 1px solid #BBB; 
+	border-bottom: 1px solid #E0E0E0; 
 	padding: 4px 8px;
 }
 .blob-view>.body {
@@ -9,7 +9,7 @@
 	color: #666;
 }
 .blob-view>.head>.info .separator {
-	color: #BBB;	
+	color: #E0E0E0;	
 }
 .blob-view>.head .actions {
 	white-space: nowrap;

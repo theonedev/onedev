@@ -1,8 +1,8 @@
 package com.turbodev.server.web.page.layout;
 
-import org.apache.wicket.request.resource.CssResourceReference;
+import com.turbodev.server.web.page.base.BaseDependentCssResourceReference;
 
-public class LayoutResourceReference extends CssResourceReference {
+public class LayoutResourceReference extends BaseDependentCssResourceReference {
 
 	private static final long serialVersionUID = 1L;
 

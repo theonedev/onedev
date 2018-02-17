@@ -8,9 +8,11 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.turbodev.server.web.assets.js.align.AlignResourceReference;
-import com.turbodev.server.web.assets.js.areyousure.AreYouSureResourceReference;
-import com.turbodev.server.web.assets.js.autosize.AutoSizeResourceReference;
+import com.turbodev.server.web.asset.align.AlignResourceReference;
+import com.turbodev.server.web.asset.areyousure.AreYouSureResourceReference;
+import com.turbodev.server.web.asset.autosize.AutoSizeResourceReference;
+import com.turbodev.server.web.asset.cookies.CookiesResourceReference;
+import com.turbodev.server.web.asset.perfectscrollbar.PerfectScrollbarResourceReference;
 
 import de.agilecoders.wicket.core.Bootstrap;
 
@@ -31,6 +33,9 @@ public class BaseResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new AlignResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AutoSizeResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AreYouSureResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new PerfectScrollbarResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
+		
 		dependencies.add(CssHeaderItem.forReference(new BaseCssResourceReference()));
 		
 		return dependencies;

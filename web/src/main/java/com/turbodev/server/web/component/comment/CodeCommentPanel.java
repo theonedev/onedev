@@ -47,7 +47,7 @@ import com.turbodev.server.model.PullRequest;
 import com.turbodev.server.model.User;
 import com.turbodev.server.model.support.CompareContext;
 import com.turbodev.server.security.SecurityUtils;
-import com.turbodev.server.web.assets.js.caret.CaretResourceReference;
+import com.turbodev.server.web.asset.caret.CaretResourceReference;
 import com.turbodev.server.web.component.avatar.AvatarLink;
 import com.turbodev.server.web.component.link.UserLink;
 import com.turbodev.server.web.component.markdown.AttachmentSupport;

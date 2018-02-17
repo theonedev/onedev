@@ -1,14 +1,8 @@
 <wicket:extend>
-	<div id="administration" class="sidebar">
-		<table>
-			<tr>
-				<td class="nav">
-					<ul wicket:id="tabs" class="tabs list-unstyled"></ul>
-				</td>
-				<td class="content">
-					<wicket:child></wicket:child>
-				</td>
-			</tr>
-		</table>
+	<div id="administration">
+		<div wicket:id="sidebar"></div>
+		<div class="content">
+			<wicket:child></wicket:child>
+		</div>
 	</div>
 </wicket:extend>

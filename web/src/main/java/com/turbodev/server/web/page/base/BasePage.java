@@ -35,7 +35,6 @@ import org.apache.wicket.protocol.ws.api.message.TextMessage;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.time.Duration;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.unbescape.javascript.JavaScriptEscape;
@@ -44,7 +43,6 @@ import com.turbodev.launcher.loader.AppLoader;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.manager.UserManager;
 import com.turbodev.server.model.User;
-import com.turbodev.server.web.assets.Assets;
 import com.turbodev.server.web.behavior.AbstractPostAjaxBehavior;
 import com.turbodev.server.web.page.init.ServerInitPage;
 import com.turbodev.server.web.page.security.LoginPage;
@@ -94,7 +92,8 @@ public abstract class BasePage extends WebPage {
 					autosaveKeyToClear = "'" + JavaScriptEscape.escapeJavaScript(autosaveKeyToClear) + "'";
 				else
 					autosaveKeyToClear = "undefined";
-				response.render(OnDomReadyHeaderItem.forScript(String.format("turbodev.server.onDomReady(%s);", 
+				response.render(OnDomReadyHeaderItem.forScript(
+						String.format("turbodev.server.onDomReady(%s);", 
 						autosaveKeyToClear)));
 				response.render(OnLoadHeaderItem.forScript("turbodev.server.onWindowLoad();"));
 			}
@@ -127,43 +126,6 @@ public abstract class BasePage extends WebPage {
 			
 		});
 		
-		add(new WebMarkupContainer("favicon") {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				CharSequence url = urlFor(
-						new PackageResourceReference(Assets.class, "favicon.ico"), 
-						new PageParameters()); 
-				tag.put("href", url);
-			}
-
-		});
-		add(new WebMarkupContainer("appleTouchIcon") {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				CharSequence url = urlFor(
-						new PackageResourceReference(Assets.class, "image/apple-touch-icon.png"), 
-						new PageParameters()); 
-				tag.put("href", url);
-			}
-
-		});
-		add(new WebMarkupContainer("appleTouchIconPrecomposed") {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				CharSequence url = urlFor(
-						new PackageResourceReference(Assets.class, "image/apple-touch-icon.png"), 
-						new PageParameters()); 
-				tag.put("href", url);
-			}
-			
-		});
-				
 		add(new AbstractPostAjaxBehavior() {
 			
 			@Override

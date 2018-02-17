@@ -1,11 +1,9 @@
 #repo-commits {
 	position: relative;
-	padding: 20px;
 }
 #repo-commits>.head>.query {
 	margin-bottom: 20px;
 }
-
 #repo-commits>.body .no-commits {
 	font-size: 16px;
 }

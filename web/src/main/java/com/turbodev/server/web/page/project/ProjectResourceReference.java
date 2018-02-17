@@ -1,29 +1,13 @@
 package com.turbodev.server.web.page.project;
 
-import java.util.List;
+import com.turbodev.server.web.page.base.BaseDependentCssResourceReference;
 
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.HeaderItem;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.request.resource.CssResourceReference;
-
-import com.turbodev.server.web.assets.js.cookies.CookiesResourceReference;
-import com.turbodev.server.web.page.base.BaseDependentResourceReference;
-
-public class ProjectResourceReference extends BaseDependentResourceReference {
+public class ProjectResourceReference extends BaseDependentCssResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
 	public ProjectResourceReference() {
-		super(ProjectResourceReference.class, "project.js");
-	}
-
-	@Override
-	public List<HeaderItem> getDependencies() {
-		List<HeaderItem> dependencies = super.getDependencies();
-		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(ProjectResourceReference.class, "project.css")));
-		return dependencies;
+		super(ProjectResourceReference.class, "project.css");
 	}
 
 }

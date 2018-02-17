@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.turbodev.server.web.assets.js.oneline.OnelineResourceReference;
+import com.turbodev.server.web.asset.oneline.OnelineResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentResourceReference;
 
 public class CommitDetailResourceReference extends BaseDependentResourceReference {

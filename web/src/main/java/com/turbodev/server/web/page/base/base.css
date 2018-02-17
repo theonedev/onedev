@@ -1,13 +1,5 @@
-html, body {
-	background: #F7F6F2;
-}
-
-/**************************************************************
- * This file defines common css styles for TurboDev products. 
- * 
- **************************************************************/
-
-html body {
+body {
+	min-width: 768px;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
@@ -138,7 +130,7 @@ form .form-group ul.feedbackPanel, form td.value ul.feedbackPanel {
 	padding-bottom: 0;
 }
 form .form-group li.feedbackPanelERROR, form td.value li.feedbackPanelERROR {
-	color: #AA0000;
+	color: #e51c23;
 	list-style: disc;
 }
 form>.test-feedback {
@@ -342,7 +334,8 @@ form>.test-feedback {
 
 .center-box { 
 	padding: 50px; 
-	width: 600px; 
+	width: 50%; 
+	min-width: 300px;
 	margin: 0 auto; 
 	background: white;
 	border: 8px solid #DDD;

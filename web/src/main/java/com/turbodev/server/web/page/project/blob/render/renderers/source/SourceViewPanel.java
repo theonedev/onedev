@@ -53,15 +53,11 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.turbodev.utils.Range;
-import com.turbodev.utils.StringUtils;
-import com.turbodev.utils.matchscore.MatchScoreProvider;
-import com.turbodev.utils.matchscore.MatchScoreUtils;
+import com.google.common.base.Preconditions;
 import com.turbodev.jsymbol.Symbol;
 import com.turbodev.jsymbol.SymbolExtractor;
 import com.turbodev.jsymbol.SymbolExtractorRegistry;
 import com.turbodev.jsymbol.TokenPosition;
-import com.google.common.base.Preconditions;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.git.BlameBlock;
 import com.turbodev.server.git.Blob;
@@ -103,8 +99,13 @@ import com.turbodev.server.web.page.project.blob.search.SearchMenuContributor;
 import com.turbodev.server.web.page.project.commit.CommitDetailPage;
 import com.turbodev.server.web.page.project.compare.RevisionComparePage;
 import com.turbodev.server.web.util.DateUtils;
+import com.turbodev.server.web.util.WicketUtils;
 import com.turbodev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.turbodev.server.web.websocket.PageDataChanged;
+import com.turbodev.utils.Range;
+import com.turbodev.utils.StringUtils;
+import com.turbodev.utils.matchscore.MatchScoreProvider;
+import com.turbodev.utils.matchscore.MatchScoreUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -746,7 +747,11 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		if (hasOutline()) {
 			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 			Cookie cookie = request.getCookie(COOKIE_OUTLINE);
-			return cookie==null || !cookie.getValue().equals("no");
+			if (cookie != null) {
+				return cookie.getValue().equals("yes");
+			} else {
+				return !WicketUtils.isDevice();
+			}
 		} else {
 			return false;
 		}

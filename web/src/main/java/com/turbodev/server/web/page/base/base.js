@@ -579,7 +579,7 @@ turbodev.server = {
 		}
 	},
 	
-	onDomReady: function(autosaveKeyToClear) {
+	onDomReady: function(autosaveKeyToClear, minWindowWidth) {
 		turbodev.server.setupAjaxLoadingIndicator();
 		turbodev.server.form.setupDirtyCheck();
 		turbodev.server.focus.setupAutoFocus();
