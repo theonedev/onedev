@@ -20,11 +20,8 @@ html, body {
 	font-size: 15px;
 }
 #layout>.head>.nav .fa {
+	margin-top: 2px;
 	font-size: 28px;
-}
-#layout>.head>.logo .fa {
-	font-size: 28px;
-	color: #EEE;
 }
 #layout>.head>.breadcrumb {
 	padding: 0;

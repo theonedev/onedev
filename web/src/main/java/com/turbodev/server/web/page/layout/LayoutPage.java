@@ -74,7 +74,6 @@ public abstract class LayoutPage extends BasePage {
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		add(head);
 		
-		head.add(new ViewStateAwarePageLink<Void>("home", getApplication().getHomePage()));
 		head.add(new MenuLink("nav") {
 			
 			@Override
