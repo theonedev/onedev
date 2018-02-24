@@ -5,7 +5,7 @@
     <parent> 
         <groupId>com.turbodev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0.1-build100</version> 
+        <version>1.0.1-build101</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -94,22 +94,22 @@
         <dependency> 
             <groupId>com.turbodev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0.1-build100</version> 
+            <version>1.0.1-build101</version> 
         </dependency>  
         <dependency> 
             <groupId>com.turbodev</groupId>  
             <artifactId>server-web</artifactId>  
-            <version>1.0.1-build100</version> 
+            <version>1.0.1-build101</version> 
         </dependency>  
         <dependency> 
             <groupId>com.turbodev</groupId>  
             <artifactId>server-rest</artifactId>  
-            <version>1.0.1-build100</version> 
+            <version>1.0.1-build101</version> 
         </dependency>  
         <dependency> 
             <groupId>com.turbodev</groupId>  
             <artifactId>server-search</artifactId>  
-            <version>1.0.1-build100</version> 
+            <version>1.0.1-build101</version> 
         </dependency> 
     </dependencies>  
     <properties> 
