@@ -9,6 +9,7 @@
 	width: 240px;
 	border-left: 1px solid #FAFAFA;
 	border-right: 2px solid #E0E0E0;
+	z-index: 210;
 }
 .sidebar>.tabs {
 	position: absolute;

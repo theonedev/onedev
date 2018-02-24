@@ -84,8 +84,6 @@ public class TurboDevWebApplication extends WebApplication {
 		
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
 		
-		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
-		
 		BootstrapSettings bootstrapSettings = new BootstrapSettings();
 		bootstrapSettings.setAutoAppendResources(false);
 		de.agilecoders.wicket.core.Bootstrap.install(this, bootstrapSettings);

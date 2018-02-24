@@ -12,7 +12,6 @@ import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.turbodev.server.web.WebSession;
 import com.turbodev.server.web.websocket.PageKey;
 
 public class WicketUtils {
@@ -43,14 +42,6 @@ public class WicketUtils {
 			}
 		}
 		return null;
-	}
-	
-	public static boolean isDevice() {
-		String userAgent = WebSession.get().getClientInfo().getUserAgent().toLowerCase();
-		return userAgent.indexOf("android") != -1 
-				|| userAgent.indexOf("iphone") != -1 
-				|| userAgent.indexOf("ipad") != -1 
-				|| userAgent.indexOf("windows phone") != -1; 
 	}
 	
 	public static void markLastVisibleChild(WebMarkupContainer container) {
