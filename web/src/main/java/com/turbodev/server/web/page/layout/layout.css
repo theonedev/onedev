@@ -1,3 +1,6 @@
+body {
+	background: white;
+}
 #layout>.head {
 	background: #212121;
 	padding: 8px 16px;
