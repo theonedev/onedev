@@ -99,6 +99,7 @@ import com.turbodev.server.web.page.project.blob.search.SearchMenuContributor;
 import com.turbodev.server.web.page.project.commit.CommitDetailPage;
 import com.turbodev.server.web.page.project.compare.RevisionComparePage;
 import com.turbodev.server.web.util.DateUtils;
+import com.turbodev.server.web.util.WicketUtils;
 import com.turbodev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import com.turbodev.server.web.websocket.PageDataChanged;
 import com.turbodev.utils.Range;
@@ -746,7 +747,11 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		if (hasOutline()) {
 			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 			Cookie cookie = request.getCookie(COOKIE_OUTLINE);
-			return cookie != null && "yes".equals(cookie.getValue());
+			if (cookie != null) {
+				return cookie.getValue().equals("yes");
+			} else {
+				return !WicketUtils.isDevice();
+			}
 		} else {
 			return false;
 		}

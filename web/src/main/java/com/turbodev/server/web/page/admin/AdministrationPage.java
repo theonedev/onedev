@@ -37,7 +37,7 @@ public abstract class AdministrationPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new SidebarPanel("sidebar", null) {
+		add(new SidebarPanel("sidebar", "administration.miniSidebar") {
 
 			@Override
 			protected List<? extends Tab> newTabs() {

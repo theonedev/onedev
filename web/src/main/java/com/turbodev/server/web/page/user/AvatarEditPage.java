@@ -13,6 +13,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.turbodev.utils.FileUtils;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.security.SecurityUtils;
+import com.turbodev.server.web.component.avatar.Avatar;
 import com.turbodev.server.web.component.avatar.AvatarChanged;
 import com.turbodev.server.web.util.avatar.AvatarManager;
 
@@ -31,6 +32,8 @@ public class AvatarEditPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new Avatar("avatar", getUser()));
+		
 		Form<?> form = new Form<Void>("form");
 		add(form);
 		form.add(new NotificationPanel("feedback", form));

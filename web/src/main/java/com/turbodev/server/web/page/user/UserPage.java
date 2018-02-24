@@ -46,7 +46,7 @@ public abstract class UserPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new SidebarPanel("sidebar", null) {
+		add(new SidebarPanel("sidebar", "user.miniSidebar") {
 
 			@Override
 			protected Component newHead(String componentId) {

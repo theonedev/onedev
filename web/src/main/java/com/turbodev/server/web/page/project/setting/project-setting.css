@@ -2,6 +2,8 @@
 	left: 240px;
 	background: white;
 	border-left: none;
+	position: absolute;
+	z-index: 205;
 }
 #project-setting>.sidebar>.tabs>li>a {
 	border-left: none;

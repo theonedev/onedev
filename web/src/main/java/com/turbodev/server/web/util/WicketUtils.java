@@ -1,6 +1,7 @@
 package com.turbodev.server.web.util;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -42,6 +43,15 @@ public class WicketUtils {
 			}
 		}
 		return null;
+	}
+	
+	public static boolean isDevice() {
+		HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
+		String userAgent = request.getHeader("User-Agent").toLowerCase();
+		return userAgent.indexOf("android") != -1 
+				|| userAgent.indexOf("iphone") != -1 
+				|| userAgent.indexOf("ipad") != -1 
+				|| userAgent.indexOf("windows phone") != -1; 
 	}
 	
 	public static void markLastVisibleChild(WebMarkupContainer container) {

@@ -17,6 +17,7 @@ import org.apache.wicket.request.http.WebRequest;
 
 import com.turbodev.server.web.component.tabbable.Tab;
 import com.turbodev.server.web.component.tabbable.Tabbable;
+import com.turbodev.server.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
 public abstract class SidebarPanel extends Panel {
@@ -43,8 +44,12 @@ public abstract class SidebarPanel extends Panel {
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie miniCookie = request.getCookie(miniCookieKey);
-		if (miniCookie != null && "yes".equals(miniCookie.getValue()))
+		if (miniCookie != null) {
+			if ("yes".equals(miniCookie.getValue()))
+				add(AttributeAppender.append("class", "minimized"));
+		} else if (WicketUtils.isDevice()) {
 			add(AttributeAppender.append("class", "minimized"));
+		}
 	}
 	
 	protected Component newHead(String componentId) {

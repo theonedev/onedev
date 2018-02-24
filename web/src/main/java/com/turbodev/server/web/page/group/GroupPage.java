@@ -44,7 +44,7 @@ public abstract class GroupPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new SidebarPanel("sidebar", null) {
+		add(new SidebarPanel("sidebar", "group.miniSidebar") {
 
 			@Override
 			protected List<? extends Tab> newTabs() {

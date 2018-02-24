@@ -60,6 +60,7 @@
 	color: #888;
 	font-weight: bold;
 	margin-right: 1px;
+	background: #FAFAFA;
 }
 .minimizable.sidebar>a.mini-toggle .text {
 	margin-left: 8px;

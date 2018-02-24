@@ -2,16 +2,27 @@
 	text-align: center;
 	vertical-align: center;
 	border-bottom: 2px solid #E0E0E0;
-	padding: 8px;
+	padding: 10px;
 }
 #user>.sidebar>.tabs {
-	top: 180px;
+	top: 240px;
 }
 #user>.sidebar>.head img {
-	height: 160px;
-	width: 160px;
+	height: 220px;
+	width: 220px;
+}
+#user>.minimized.sidebar>.head {
+	display: none;
+}
+#user>.minimized.sidebar>.tabs {
+	top: 0;
 }
 
+#user .avatar-edit img.avatar {
+	height: 240px;
+	width: 240px;
+	margin-bottom: 20px;
+}
 #user .avatar-edit .upload {
 	margin-right: 8px;
 }
