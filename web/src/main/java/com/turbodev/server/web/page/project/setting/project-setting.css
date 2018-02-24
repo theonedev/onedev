@@ -3,7 +3,7 @@
 	background: white;
 	border-left: none;
 	position: absolute;
-	z-index: 205;
+	z-index: 0;
 }
 #project-setting>.sidebar>.tabs>li>a {
 	border-left: none;
