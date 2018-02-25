@@ -49,7 +49,7 @@
 .minimizable.sidebar>a.mini-toggle {
 	display: block;
 	border-top: 2px solid #E0E0E0;
-	height: 36px;
+	height: 40px;
 	text-decoration: none;
 	font-size: 24px;
 	text-align: center;
@@ -61,10 +61,6 @@
 	font-weight: bold;
 	margin-right: 1px;
 	background: #FAFAFA;
-}
-.minimizable.sidebar>a.mini-toggle .text {
-	margin-left: 8px;
-	font-size: 20px;	
 }
 .minimizable.sidebar>a.mini-toggle:before {
 	font-family: "FontAwesome";

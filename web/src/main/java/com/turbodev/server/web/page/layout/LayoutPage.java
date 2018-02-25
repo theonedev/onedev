@@ -1,12 +1,12 @@
 package com.turbodev.server.web.page.layout;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -57,8 +57,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
-
-	private static final String RELEASE_DATE_FORMAT = "yyyy-MM-dd";
 	
 	public LayoutPage() {
 	}
@@ -169,7 +167,25 @@ public abstract class LayoutPage extends BasePage {
 		} else {
 			head.add(new WebMarkupContainer("pushDisabled").setVisible(false));
 		}
-		head.add(new ExternalLink("docLink", TurboDev.getInstance().getDocLink() + "/readme.md"));
+
+		head.add(new DropdownLink("info") {
+
+			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", " menu"));
+			}
+			
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment fragment = new Fragment(id, "infoFrag", LayoutPage.this);
+				Plugin product = AppLoader.getProduct();
+				fragment.add(new Label("productVersion", product.getVersion()));
+				fragment.add(new ExternalLink("docLink", TurboDev.getInstance().getDocLink() + "/readme.md"));
+				return fragment;
+			}
+			
+		});
 		
 		User user = getLoginUser();
 		boolean signedIn = user != null;
@@ -231,11 +247,6 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("userMenu").setVisible(false));
 		}
 		
-		WebMarkupContainer foot = new WebMarkupContainer("foot");
-		Plugin product = AppLoader.getProduct();
-		foot.add(new Label("productVersion", product.getVersion()));
-		foot.add(new Label("releaseDate", new SimpleDateFormat(RELEASE_DATE_FORMAT).format(product.getDate())));
-		add(foot);
 	}
 
 	protected List<ComponentRenderer> getBreadcrumbs() {

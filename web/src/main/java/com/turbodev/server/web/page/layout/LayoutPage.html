@@ -23,8 +23,8 @@
 					</div>
 			  	</wicket:enclosure>
 			</div>
-			<div class="help pull-right">
-				<a wicket:id="docLink" title="Help"><i class="fa fa-question"></i></a>
+			<div class="info pull-right">
+				<a wicket:id="info" title="Information"><i class="fa fa-info"></i></a>
 			</div>
 			<wicket:enclosure child="pushDisabled">
 			<div class="push-disabled pull-right">
@@ -35,19 +35,21 @@
 		<div class="body">
 			<wicket:child></wicket:child>
 		</div>
-		<div wicket:id="foot" class="foot clearfix">
-			<div class="pull-left">
-				<a href="https://www.turbodev.com">TurboDev</a>, <span wicket:id="productVersion"></span>, <span wicket:id="releaseDate"></span>
-			</div>
-			<div class="pull-right">
-			    <a href="mailto:support@turbodev.com">Support &amp; Bug Report</a> 
-			</div>
-		</div>
 	</div>
 	<wicket:fragment wicket:id="userMenuFrag">
 		<div class="user">
 			<a wicket:id="profile"><i class="fa fa-fw fa-gear"></i> My profile</a>
 			<a wicket:id="logout"><i class="fa fa-fw fa-sign-out"></i> Logout</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="infoFrag">
+		<div class="turbodev-info">
+			<div>TurboDev <span wicket:id="productVersion"></span></div>
+			<ul>
+				<li><a href="https://www.turbodev.com">Product Home</a></li>
+				<li><a wicket:id="docLink">Document</a></li>
+				<li><a href="mailto:support@turbodev.com">Support &amp; Bug Report</a></li>
+			</ul>
 		</div>
 	</wicket:fragment>
 </wicket:extend>

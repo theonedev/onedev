@@ -61,11 +61,11 @@
 		max-width: 400px;
 	}	
 }
-#layout>.head>.help {
+#layout>.head>.info {
 	padding-top: 7px;
 }
-#layout>.head>.help .fa {
-	font-size: 18px;
+#layout>.head>.info .fa {
+	font-size: 20px;
 }
 #layout>.head>.user {
 	margin-right: 0;
@@ -95,23 +95,8 @@
 	height: 32px;
 }
 #layout>.body {
-	padding: 68px 20px 56px 20px;
+	padding: 68px 20px 20px 20px;
 	width: 100%;
-}
-#layout>.foot {
-	border-top: 2px solid #E0E0E0;
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	height: 36px;
-	background: #F5F5F5;
-	font-size: 11px;
-	padding: 8px; 
-	z-index: 210;
-}
-#layout>.foot>div {
-	white-space: nowrap;
 }
 
 #project-add {
@@ -133,5 +118,10 @@
 
 #layout .sidebar {
 	top: 48px;
-	bottom: 36px;
+}
+
+.turbodev-info>div {
+	padding: 8px 16px;
+	font-weight: bold;
+	font-size: 16px;
 }
