@@ -7,27 +7,5 @@
     "importExportOutsideOfTopBlock": 2,
     "hashBang": 0,
     "pebbleSyntax": 2
-  },
-  "plugins": {
-    "guess-types": {
-      
-    },
-    "browser-extension": {
-      
-    },
-    "bootstrap": {
-      
-    },
-    "jquery-ui1-12": {
-      
-    },
-    "jquery-extension": {
-      
-    }
-  },
-  "libs": [
-    "ecma5",
-    "browser",
-    "jquery"
-  ]
+  }
 }
