@@ -39,17 +39,17 @@ public abstract class SidebarPanel extends Panel {
 
 		add(AttributeAppender.append("class", "sidebar"));
 		
-		if (miniCookieKey != null)
+		if (miniCookieKey != null) {
 			add(AttributeAppender.append("class", "minimizable"));
-		
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie miniCookie = request.getCookie(miniCookieKey);
-		if (miniCookie != null) {
-			if ("yes".equals(miniCookie.getValue()))
+			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+			Cookie miniCookie = request.getCookie(miniCookieKey);
+			if (miniCookie != null) {
+				if ("yes".equals(miniCookie.getValue()))
+					add(AttributeAppender.append("class", "minimized"));
+			} else if (WicketUtils.isDevice()) {
 				add(AttributeAppender.append("class", "minimized"));
-		} else if (WicketUtils.isDevice()) {
-			add(AttributeAppender.append("class", "minimized"));
-		}
+			}
+		} 
 	}
 	
 	protected Component newHead(String componentId) {
