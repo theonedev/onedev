@@ -91,15 +91,15 @@ turbodev.server.projectBlob = {
 					"autofit", [$blobContent.width(), $blobContent.height()]);
 		});
 		
-		$(document).bind("keydown", "t", function(e) {
-			if ($(".modal:visible").length == 0)
-				callback("quickSearch");
+		$(document).on("keydown", function(e) {
+			if (e.key == "t") {
+				if ($(".modal:visible").length == 0)
+					callback("quickSearch");
+			} else if (e.key == "v") {
+				if ($(".modal:visible").length == 0)
+					callback("advancedSearch");
+			}
 		});
-		$(document).bind("keydown", "v", function(e) {
-			if ($(".modal:visible").length == 0)
-				callback("advancedSearch");
-		});
-
 	},
 	parseCssDimension: function(cssDimension) {
 		var index = cssDimension.indexOf("px");

@@ -8,9 +8,7 @@ turbodev.server.sourceView = {
 
 		var cm = CodeMirror($code[0], {
 			value: fileContent,
-			// do not use "readOnly: true" here as otherwise CodeMirror will eat key input
-			// and the search dialog can not be brought out via shortcuts
-			readOnly: "nocursor", 
+			readOnly: turbodev.server.isDevice()?"nocursor": true,
 			theme: "eclipse",
 			lineNumbers: true,
 			lineWrapping: lineWrapMode == "Soft wrap",
@@ -58,8 +56,8 @@ turbodev.server.sourceView = {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
 			$(document).data("SourceViewShortcutsBinded", true);
 
-			$(document).bind("keydown", "o", function(e) {
-				if ($(".modal:visible").length == 0) {
+			$(document).on("keydown", function(e) {
+				if (e.key == "o" && $(".modal:visible").length == 0) {
 					e.preventDefault();
 					var $sourceView = $(".source-view");
 					if ($sourceView.length != 0 && $(".outline-toggle").length != 0)
@@ -116,6 +114,10 @@ turbodev.server.sourceView = {
 		$sourceView.on("setViewState", function(e, viewState) {
 		    return turbodev.server.codemirror.setViewState(cm, viewState);
 		});
+		
+		$code[0].addEventListener("keydown", function(e) {
+			$(document).trigger("keydown", e);
+		});		
 		
 		$sourceView.on("autofit", function(event, width, height) {
 			if (cm.getOption("fullScreen"))

@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import com.turbodev.server.web.asset.cookies.CookiesResourceReference;
-import com.turbodev.server.web.asset.hotkeys.HotkeysResourceReference;
 import com.turbodev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentCssResourceReference;
 import com.turbodev.server.web.page.base.BaseDependentResourceReference;
@@ -25,7 +24,6 @@ public class ProjectBlobResourceReference extends BaseDependentResourceReference
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(ProjectBlobResourceReference.class, "project-blob.css")));
 		return dependencies;
