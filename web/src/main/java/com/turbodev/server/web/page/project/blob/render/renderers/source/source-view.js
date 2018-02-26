@@ -56,8 +56,8 @@ turbodev.server.sourceView = {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
 			$(document).data("SourceViewShortcutsBinded", true);
 
-			$(document).on("keydown", function(e) {
-				if (e.key == "o" && $(".modal:visible").length == 0) {
+			$(document).bind("keydown", "o", function(e) {
+				if ($(".modal:visible").length == 0) {
 					e.preventDefault();
 					var $sourceView = $(".source-view");
 					if ($sourceView.length != 0 && $(".outline-toggle").length != 0)
