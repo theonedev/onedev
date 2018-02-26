@@ -8,7 +8,7 @@
 		<relativePath>../launcher</relativePath>
     </parent>
     <artifactId>server-parent</artifactId>  
-    <version>1.0.1-build105</version>  
+    <version>1.0.1-build106</version>  
     <packaging>pom</packaging>  
     <build>
     	<pluginManagement>
