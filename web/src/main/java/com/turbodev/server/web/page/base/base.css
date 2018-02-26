@@ -234,7 +234,7 @@ form>.test-feedback {
 .viewer .reflection>table>tbody>tr.name-omitted>td {
 	padding: 0;
 }
-.viewer .type-selector {
+.viewer .type-selector, .viewer .no-elements {
 	font-style: italic;
 } 
 
