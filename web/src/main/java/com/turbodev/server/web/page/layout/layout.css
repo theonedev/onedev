@@ -64,10 +64,10 @@
 		max-width: 400px;
 	}	
 }
-#layout>.head>.info {
+#layout>.head>.help {
 	padding-top: 7px;
 }
-#layout>.head>.info .fa {
+#layout>.head>.help .fa {
 	font-size: 20px;
 }
 #layout>.head>.user {
@@ -123,8 +123,7 @@
 	top: 48px;
 }
 
-.turbodev-info>div {
+.turbodev-help>div {
 	padding: 8px 16px;
 	font-weight: bold;
-	font-size: 16px;
 }

@@ -162,7 +162,7 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("pushDisabled").setVisible(false));
 		}
 
-		head.add(new DropdownLink("info") {
+		head.add(new DropdownLink("help") {
 
 			@Override
 			protected void onInitialize(FloatingPanel dropdown) {
@@ -172,7 +172,7 @@ public abstract class LayoutPage extends BasePage {
 			
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				Fragment fragment = new Fragment(id, "infoFrag", LayoutPage.this);
+				Fragment fragment = new Fragment(id, "helpFrag", LayoutPage.this);
 				Plugin product = AppLoader.getProduct();
 				fragment.add(new Label("productVersion", product.getVersion()));
 				fragment.add(new ExternalLink("docLink", TurboDev.getInstance().getDocLink() + "/readme.md"));
