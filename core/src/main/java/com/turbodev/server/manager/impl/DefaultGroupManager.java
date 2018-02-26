@@ -1,5 +1,7 @@
 package com.turbodev.server.manager.impl;
 
+import java.util.Iterator;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -59,10 +61,14 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	@Override
 	public void delete(Group group) {
 		for (Project project: projectManager.findAll()) {
-			for (BranchProtection protection: project.getBranchProtections()) 
-				protection.onGroupDelete(group.getName());
-			for (TagProtection protection: project.getTagProtections())
-				protection.onGroupDelete(group.getName());
+			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
+				if (it.next().onGroupDelete(group.getName()))
+					it.remove();
+			}
+			for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) { 
+				if (it.next().onGroupDelete(group.getName()))
+					it.remove();
+			}
 		}
 		Authenticator authenticator = configManager.getAuthenticator();
 		if (authenticator != null) {

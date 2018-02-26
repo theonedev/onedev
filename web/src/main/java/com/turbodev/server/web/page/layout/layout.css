@@ -1,3 +1,6 @@
+#layout {
+	min-width: 768px;
+}
 #layout>.head {
 	background: #212121;
 	padding: 8px 16px;

@@ -94,7 +94,7 @@ public class QualityCheckStatus {
 			}
 		}
 
-		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(request.getTargetBranch());
+		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
 		if (branchProtection != null) {
 			ReviewRequirement reviewRequirement = branchProtection.getReviewRequirement();
 			if (reviewRequirement != null) 

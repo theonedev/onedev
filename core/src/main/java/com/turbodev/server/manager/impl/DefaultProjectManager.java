@@ -339,7 +339,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
 	@Override
 	public boolean isModificationNeedsQualityCheck(User user, Project project, String branch, @Nullable String file) {
-		BranchProtection branchProtection = project.getBranchProtection(branch);
+		BranchProtection branchProtection = project.getBranchProtection(branch, user);
 		if (branchProtection != null) {
 			if (branchProtection.getReviewRequirement() != null 
 					&& !branchProtection.getReviewRequirement().matches(user)) {
@@ -360,7 +360,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	@Override
 	public boolean isPushNeedsQualityCheck(User user, Project project, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		BranchProtection branchProtection = project.getBranchProtection(branch);
+		BranchProtection branchProtection = project.getBranchProtection(branch, user);
 		if (branchProtection != null) {
 			if (branchProtection.getReviewRequirement() != null 
 					&& !branchProtection.getReviewRequirement().matches(user)) {

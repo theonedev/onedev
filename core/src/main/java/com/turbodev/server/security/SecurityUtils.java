@@ -131,7 +131,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static boolean canDeleteBranch(Project project, String branchName) {
 		if (canWrite(project)) {
-			BranchProtection protection = project.getBranchProtection(branchName);
+			BranchProtection protection = project.getBranchProtection(branchName, getUser());
 			return protection == null || !protection.isNoDeletion();
 		} else {
 			return false;
@@ -141,9 +141,18 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	@Nullable
 	public static boolean canCreateTag(Project project, String tagName) {
 		if (canWrite(project)) {
-			TagProtection protection = project.getTagProtection(tagName);
-			return protection == null || 
-					protection.getTagCreator().getNotMatchMessage(project, SecurityUtils.getUser()) == null;
+			TagProtection protection = project.getTagProtection(tagName, getUser());
+			return protection == null || !protection.isNoCreation();
+		} else {
+			return false;
+		}
+	}
+	
+	@Nullable
+	public static boolean canCreateBranch(Project project, String branchName) {
+		if (canWrite(project)) {
+			BranchProtection protection = project.getBranchProtection(branchName, getUser());
+			return protection == null || !protection.isNoCreation();
 		} else {
 			return false;
 		}

@@ -50,7 +50,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 
-import com.turbodev.utils.StringUtils;
 import com.google.common.base.Preconditions;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.git.BlobIdent;
@@ -84,9 +83,10 @@ import com.turbodev.server.web.page.project.compare.RevisionComparePage;
 import com.turbodev.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.turbodev.server.web.page.project.pullrequest.requestlist.RequestListPage;
 import com.turbodev.server.web.page.project.pullrequest.requestlist.SearchOption;
-import com.turbodev.server.web.page.project.pullrequest.requestlist.SortOption;
 import com.turbodev.server.web.page.project.pullrequest.requestlist.SearchOption.Status;
+import com.turbodev.server.web.page.project.pullrequest.requestlist.SortOption;
 import com.turbodev.server.web.util.PagingHistorySupport;
+import com.turbodev.utils.StringUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -341,7 +341,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(SecurityUtils.canWrite(getProject()));
+				setVisible(SecurityUtils.canCreateBranch(getProject(), Constants.R_HEADS));
 			}
 
 			private RevisionPicker newRevisionPicker() {
@@ -406,13 +406,21 @@ public class ProjectBranchesPage extends ProjectPage {
 							target.focusComponent(nameInput);
 							target.add(form);
 						} else {
-							projectModel.getObject().createBranch(branchName, branchRevision);
-							modal.close();
-							target.add(branchesContainer);
-							target.add(pagingNavigator);
-							target.add(noBranchesContainer);
-							searchField.setModelObject(null);
-							target.add(searchField);
+							Project project = getProject();
+							BranchProtection protection = project.getBranchProtection(branchName, getLoginUser());
+							if (protection != null && protection.isNoCreation()) {
+								form.error("Unable to create protected branch");
+								target.focusComponent(nameInput);
+								target.add(form);
+							} else {
+								project.createBranch(branchName, branchRevision);
+								modal.close();
+								target.add(branchesContainer);
+								target.add(pagingNavigator);
+								target.add(noBranchesContainer);
+								searchField.setModelObject(null);
+								target.add(searchField);
+							}
 						}
 					}
 
@@ -731,7 +739,7 @@ public class ProjectBranchesPage extends ProjectPage {
 							if (project.getDefaultBranch().equals(branch)) {
 								setEnabled(false);
 							} else {
-								BranchProtection protection = project.getBranchProtection(branch);
+								BranchProtection protection = project.getBranchProtection(branch, getLoginUser());
 								setEnabled(protection == null || !protection.isNoDeletion());
 							}
 						} else {

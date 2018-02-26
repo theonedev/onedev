@@ -7,8 +7,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
@@ -111,13 +109,6 @@ public class ForgetPage extends BasePage {
 		});
 		
 		add(form);
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		
-		response.render(CssHeaderItem.forReference(new ForgetResourceReference()));
 	}
 
 	@Editable

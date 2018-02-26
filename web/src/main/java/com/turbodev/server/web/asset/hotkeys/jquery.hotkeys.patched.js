@@ -144,11 +144,12 @@
 
     handleObj.handler = function(event) {
       //      Don't fire in text-accepting inputs that we didn't directly bind to
+    	// Patched to still fire events if key is triggered by a readonly input element 
       if (this !== event.target &&
         (jQuery.hotkeys.options.filterInputAcceptingElements &&
-          jQuery.hotkeys.textInputTypes.test(event.target.nodeName) ||
+          jQuery.hotkeys.textInputTypes.test(event.target.nodeName) && !jQuery(event.target).is('[readonly]') ||
           (jQuery.hotkeys.options.filterContentEditable && jQuery(event.target).attr('contenteditable')) ||
-          (jQuery.hotkeys.options.filterTextInputs &&
+          (jQuery.hotkeys.options.filterTextInputs && !jQuery(event.target).is('[readonly]') &&
             jQuery.inArray(event.target.type, jQuery.hotkeys.textAcceptingInputTypes) > -1))) {
         return;
       }

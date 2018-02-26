@@ -1,11 +1,3 @@
-#login h1 { 
-	font-size: 32px; 
-	margin: 0 0 30px; 
-	font-weight: 300; 
-}
-#login h1 .fa {
-	font-size: 32px;
-}
 #login .input-group-addon { 
 	font-size: 18px; 
 	color: #666; 

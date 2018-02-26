@@ -116,7 +116,7 @@ public abstract class RevisionSelector extends Panel {
 		this.revision = revision;		
 		if (canCreateRef) {
 			Project project = projectModel.getObject();
-			canCreateBranch = SecurityUtils.canWrite(project);						
+			canCreateBranch = SecurityUtils.canCreateBranch(project, Constants.R_HEADS);						
 			canCreateTag = SecurityUtils.canCreateTag(project, Constants.R_TAGS);						
 		} else {
 			canCreateBranch = false;
@@ -277,7 +277,7 @@ public abstract class RevisionSelector extends Panel {
 						itemValues.add(COMMIT_FLAG + revInput);
 					} else if (branchesActive) {
 						if (canCreateBranch) {
-							if (SecurityUtils.canWrite(project))
+							if (SecurityUtils.canCreateBranch(project, revInput))
 								itemValues.add(ADD_FLAG + revInput);
 						}
 					} else {

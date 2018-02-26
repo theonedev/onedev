@@ -1,4 +1,4 @@
-package com.turbodev.server.model.support.tagcreator;
+package com.turbodev.server.model.support.submitter;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -11,8 +11,8 @@ import com.turbodev.server.model.User;
 import com.turbodev.server.util.editable.annotation.Editable;
 import com.turbodev.server.util.editable.annotation.GroupChoice;
 
-@Editable(order=300, name="Specified Group")
-public class SpecifiedGroup implements TagCreator {
+@Editable(order=300, name="Specified group")
+public class SpecifiedGroup implements Submitter {
 
 	private static final long serialVersionUID = 1L;
 
@@ -30,13 +30,10 @@ public class SpecifiedGroup implements TagCreator {
 	}
 
 	@Override
-	public String getNotMatchMessage(Project project, User user) {
+	public boolean matches(Project project, User user) {
 		GroupManager groupManager = TurboDev.getInstance(GroupManager.class);
 		Group group = Preconditions.checkNotNull(groupManager.find(groupName));
-		if (!group.getMembers().contains(user)) 
-			return "This operation can only be performed by group: " + groupName;
-		else 
-			return null;
+		return group.getMembers().contains(user);
 	}
 
 }

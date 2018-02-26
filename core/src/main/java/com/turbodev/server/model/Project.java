@@ -833,19 +833,25 @@ public class Project extends AbstractEntity {
 	}
 
 	@Nullable
-	public TagProtection getTagProtection(String tagName) {
+	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
-			if (protection.isEnabled() && PathUtils.matchChildAware(protection.getTag(), tagName))
+			if (protection.isEnabled() 
+					&& PathUtils.matchChildAware(protection.getTag(), tagName)
+					&& protection.getSubmitter().matches(this, user)) {
 				return protection;
+			}
 		}
 		return null;
 	}
 	
 	@Nullable
-	public BranchProtection getBranchProtection(String branchName) {
+	public BranchProtection getBranchProtection(String branchName, @Nullable User user) {
 		for (BranchProtection protection: branchProtections) {
-			if (protection.isEnabled() && PathUtils.matchChildAware(protection.getBranch(), branchName))
+			if (protection.isEnabled() 
+					&& PathUtils.matchChildAware(protection.getBranch(), branchName)
+					&& protection.getSubmitter().matches(this, user)) {
 				return protection;
+			}
 		}
 		return null;
 	}

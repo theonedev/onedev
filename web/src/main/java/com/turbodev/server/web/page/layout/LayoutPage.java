@@ -75,12 +75,6 @@ public abstract class LayoutPage extends BasePage {
 		head.add(new MenuLink("nav") {
 			
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.isAdministrator());
-			}
-
-			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> items = new ArrayList<>();
 				items.add(new MenuItem() {

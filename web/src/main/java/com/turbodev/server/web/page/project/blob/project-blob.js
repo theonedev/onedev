@@ -55,7 +55,7 @@ turbodev.server.projectBlob = {
 
 			var $blobContent = $("#project-blob>.blob-content");
 			
-			var minWindowWidth = turbodev.server.projectBlob.parseCssDimension($("body").css("min-width"));
+			var minWindowWidth = turbodev.server.projectBlob.parseCssDimension($("#layout").css("min-width"));
 
 			var windowWidth = $(window).width();
 			if (windowWidth < minWindowWidth) {
@@ -67,9 +67,6 @@ turbodev.server.projectBlob = {
 			var width = windowWidth-$blobContent.offset().left;
 
 			var height = $(window).height()-$blobContent.offset().top;
-			
-			if ($("#layout>.foot").length != 0) 
-				height -= $("#layout>.foot").outerHeight();
 			
 			var $searchResult = $("#project-blob>.search-result");
 			if ($searchResult.is(":visible")) {
@@ -90,16 +87,16 @@ turbodev.server.projectBlob = {
 			$blobContent.find(".autofit:visible").first().triggerHandler(
 					"autofit", [$blobContent.width(), $blobContent.height()]);
 		});
-		
-		$(document).on("keydown", function(e) {
-			if (e.key == "t") {
-				if ($(".modal:visible").length == 0)
-					callback("quickSearch");
-			} else if (e.key == "v") {
-				if ($(".modal:visible").length == 0)
-					callback("advancedSearch");
-			}
+
+		$(document).bind("keydown", "t", function(e) {
+			if ($(".modal:visible").length == 0)
+				callback("quickSearch");
 		});
+		$(document).bind("keydown", "v", function(e) {
+			if ($(".modal:visible").length == 0)
+				callback("advancedSearch");
+		});
+		
 	},
 	parseCssDimension: function(cssDimension) {
 		var index = cssDimension.indexOf("px");

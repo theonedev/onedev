@@ -3,6 +3,7 @@ package com.turbodev.server.web.component.createbranch;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
+import org.eclipse.jgit.lib.Constants;
 
 import com.turbodev.server.model.Project;
 import com.turbodev.server.security.SecurityUtils;
@@ -25,7 +26,7 @@ public abstract class CreateBranchLink extends ModalLink {
 	
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canWrite(projectModel.getObject()));
+		setVisible(SecurityUtils.canCreateBranch(projectModel.getObject(), Constants.R_HEADS));
 	}
 	
 	@Override

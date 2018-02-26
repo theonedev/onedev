@@ -1,4 +1,4 @@
-package com.turbodev.server.model.support.tagcreator;
+package com.turbodev.server.model.support.submitter;
 
 import java.io.Serializable;
 
@@ -9,9 +9,8 @@ import com.turbodev.server.model.User;
 import com.turbodev.server.util.editable.annotation.Editable;
 
 @Editable
-public interface TagCreator extends Serializable {
+public interface Submitter extends Serializable {
 	
-	@Nullable
-	String getNotMatchMessage(Project project, User user);
+	boolean matches(Project project, @Nullable User user);
 	
 }

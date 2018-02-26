@@ -3,8 +3,6 @@ package com.turbodev.server.web.page.security;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -79,12 +77,6 @@ public class RegisterPage extends BasePage {
 			
 		});
 		add(form);
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new RegisterResourceReference()));
 	}
 
 }

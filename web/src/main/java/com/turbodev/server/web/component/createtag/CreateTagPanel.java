@@ -113,18 +113,15 @@ public abstract class CreateTagPanel extends Panel {
 					Project project = projectModel.getObject();
 					User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
-					String errorMessage = null;
-					TagProtection protection = project.getTagProtection(tagName);
-					if (protection != null)
-						errorMessage = protection.getTagCreator().getNotMatchMessage(project, user);
-	    			if (errorMessage != null) {
-						form.error("Unable to create protected tag: " + errorMessage);
+					TagProtection protection = project.getTagProtection(tagName, user);
+					if (protection != null && protection.isNoCreation()) {
+						form.error("Unable to create protected tag");
 						target.focusComponent(nameInput);
 						target.add(form);
-	    			} else {
+					} else {
 						project.tag(tagName, revision, user.asPerson(), tagMessage);
 						onCreate(target, tagName);
-	    			}
+					}
 				}
 			}
 

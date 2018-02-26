@@ -6,10 +6,10 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.turbodev.server.model.support.tagcreator.ProjectWriters;
-import com.turbodev.server.model.support.tagcreator.SpecifiedGroup;
-import com.turbodev.server.model.support.tagcreator.SpecifiedUser;
-import com.turbodev.server.model.support.tagcreator.TagCreator;
+import com.turbodev.server.model.support.submitter.Anyone;
+import com.turbodev.server.model.support.submitter.SpecifiedGroup;
+import com.turbodev.server.model.support.submitter.SpecifiedUser;
+import com.turbodev.server.model.support.submitter.Submitter;
 import com.turbodev.server.util.editable.annotation.Editable;
 import com.turbodev.server.util.editable.annotation.TagPattern;
 
@@ -22,12 +22,14 @@ public class TagProtection implements Serializable {
 	
 	private String tag;
 	
+	private Submitter submitter = new Anyone();
+	
 	private boolean noUpdate = true;
 	
 	private boolean noDeletion = true;
 	
-	private TagCreator tagCreator = new ProjectWriters();
-
+	private boolean noCreation = true;
+	
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -45,6 +47,17 @@ public class TagProtection implements Serializable {
 
 	public void setTag(String tag) {
 		this.tag = tag;
+	}
+
+	@Editable(order=150, name="If Performed By", description="This protection rule will apply "
+			+ "only if the action is performed by specified users here")
+	@NotNull
+	public Submitter getSubmitter() {
+		return submitter;
+	}
+
+	public void setSubmitter(Submitter submitter) {
+		this.submitter = submitter;
 	}
 
 	@Editable(order=200, description="Check this to not allow tag update")
@@ -65,46 +78,47 @@ public class TagProtection implements Serializable {
 		this.noDeletion = noDeletion;
 	}
 
-	@Editable(order=400, name="Allowed Creator", description="Specify users allowed to create specified tag")
-	@NotNull
-	public TagCreator getTagCreator() {
-		return tagCreator;
+	@Editable(order=400, description="Check this to not allow tag creation")
+	public boolean isNoCreation() {
+		return noCreation;
 	}
 
-	public void setTagCreator(TagCreator tagCreator) {
-		this.tagCreator = tagCreator;
+	public void setNoCreation(boolean noCreation) {
+		this.noCreation = noCreation;
 	}
-	
+
 	public void onGroupRename(String oldName, String newName) {
-		if (getTagCreator() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getTagCreator();
+		if (getSubmitter() instanceof SpecifiedGroup) {
+			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
 			if (specifiedGroup.getGroupName().equals(oldName))
 				specifiedGroup.setGroupName(newName);
 		}
 	}
 	
-	public void onGroupDelete(String groupName) {
-		if (getTagCreator() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getTagCreator();
+	public boolean onGroupDelete(String groupName) {
+		if (getSubmitter() instanceof SpecifiedGroup) {
+			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
 			if (specifiedGroup.getGroupName().equals(groupName))
-				setTagCreator(new ProjectWriters());
+				return true;
 		}
+		return false;
 	}
 	
 	public void onUserRename(String oldName, String newName) {
-		if (getTagCreator() instanceof SpecifiedUser) {
-			SpecifiedUser specifiedUser = (SpecifiedUser) getTagCreator();
+		if (getSubmitter() instanceof SpecifiedUser) {
+			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(oldName))
 				specifiedUser.setUserName(newName);
 		}
 	}
 	
-	public void onUserDelete(String userName) {
-		if (getTagCreator() instanceof SpecifiedUser) {
-			SpecifiedUser specifiedUser = (SpecifiedUser) getTagCreator();
+	public boolean onUserDelete(String userName) {
+		if (getSubmitter() instanceof SpecifiedUser) {
+			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(userName))
-				setTagCreator(new ProjectWriters());
+				return true;
 		}
+		return false;
 	}
 
 	public boolean onTagDelete(String tagName) {

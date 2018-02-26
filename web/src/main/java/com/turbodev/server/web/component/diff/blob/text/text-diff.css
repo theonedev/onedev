@@ -6,6 +6,9 @@
 	padding: 8px;
 	border-bottom: 1px solid #E0E0E0;
 }
+.text-diff>.head .diff-title span {
+	word-break: break-all;
+}
 .text-diff>.head .actions>a {
 	margin-right: 0;
 }
@@ -32,13 +35,13 @@
 }
 .text-diff>.body>tbody>tr>td.number {
 	padding: 0 4px;
-	border-left: 1px solid #EEE;
+	border-left: 1px solid #E0E0E0;
 	text-align: right;
 	font-size: 12px;
-	color: #BBB;
+	color: #9E9E9E;
 }
 .text-diff>.body>tbody>tr>td.operation {
-	border-left: 1px solid #EEE;
+	border-left: 1px solid #E0E0E0;
 }
 .text-diff>.body>tbody>tr>td:FIRST-CHILD {
 	border-left: none !important;
@@ -166,7 +169,7 @@
 	overflow: hidden;
 	white-space: nowrap;
 	padding: 0 4px;
-	border-left: 1px solid #EEE;
+	border-left: 1px solid #E0E0E0;
 }
 .text-diff>.body>tbody>tr>td.blame.abbr {
 	text-overflow: inherit;

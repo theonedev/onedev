@@ -10,8 +10,12 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 
+import com.google.common.base.Preconditions;
 import com.turbodev.server.git.GitUtils;
 import com.turbodev.server.model.Project;
+import com.turbodev.server.model.User;
+import com.turbodev.server.model.support.BranchProtection;
+import com.turbodev.server.security.SecurityUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -77,8 +81,18 @@ abstract class CreateBranchPanel extends Panel {
 					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					projectModel.getObject().createBranch(branchName, revision);
-					onCreate(target, branchName);
+					Project project = projectModel.getObject();
+					User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+
+					BranchProtection protection = project.getBranchProtection(branchName, user);
+					if (protection != null && protection.isNoCreation()) {
+						form.error("Unable to create protected branch");
+						target.focusComponent(nameInput);
+						target.add(form);
+					} else {
+						project.createBranch(branchName, revision);
+						onCreate(target, branchName);
+					}
 				}
 			}
 

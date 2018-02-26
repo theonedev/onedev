@@ -156,32 +156,32 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    			}
 	    		} else if (refName.startsWith(Constants.R_HEADS)) {
 	    			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(refName));
-
-	    			if (!oldObjectId.equals(ObjectId.zeroId())) {
-		    			if (newObjectId.equals(ObjectId.zeroId())) {
-		    				BranchProtection protection = project.getBranchProtection(branchName);
-		    				if (protection != null && protection.isNoDeletion())
-		    					error(output, refName, "Can not delete this branch according to branch protection setting");
-		    			} else if (!GitUtils.isMergedInto(project.getRepository(), gitEnvs, oldObjectId, newObjectId)) {
-		    				BranchProtection protection = project.getBranchProtection(branchName);
-		    				if (protection != null && protection.isNoForcedPush())
-			    				error(output, refName, "Can not force-push to this branch according to branch protection setting");
-		    			} else {
-		    				if (projectManager.isPushNeedsQualityCheck(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
-		    					error(output, refName, 
-		    							"Your changes need to be reviewed/verified. Please submit pull request instead");
-		    				}
-		    			}
+	    			String errorMessage = null;
+	    			BranchProtection protection = project.getBranchProtection(branchName, user);
+	    			if (protection != null) {
+    					if (oldObjectId.equals(ObjectId.zeroId())) {
+    						if (protection.isNoCreation())
+    							errorMessage = "Can not create this branch according to branch protection setting";
+    					} else if (newObjectId.equals(ObjectId.zeroId())) {
+    						if (protection.isNoDeletion())
+    							errorMessage = "Can not delete this branch according to branch protection setting";
+    					} else if (!GitUtils.isMergedInto(project.getRepository(), gitEnvs, oldObjectId, newObjectId)) {
+							errorMessage = "Can not force-push to this branch according to branch protection setting";
+    					} else if (projectManager.isPushNeedsQualityCheck(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
+	    					error(output, refName, 
+	    							"Your changes need to be reviewed/verified. Please submit pull request instead");
+    					}
 	    			}
+					if (errorMessage != null)
+						error(output, refName, errorMessage);
 	    		} else if (refName.startsWith(Constants.R_TAGS)) {
 	    			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
 	    			String errorMessage = null;
-	    			TagProtection protection = project.getTagProtection(tagName);
+	    			TagProtection protection = project.getTagProtection(tagName, user);
 	    			if (protection != null) {
     					if (oldObjectId.equals(ObjectId.zeroId())) {
-    						errorMessage = protection.getTagCreator().getNotMatchMessage(project, user);
-    						if (errorMessage != null)
-    							errorMessage = "Unable to create protected tag: " + errorMessage;
+    						if (protection.isNoCreation())
+    							errorMessage = "Can not create this tag according to tag protection setting";
     					} else if (newObjectId.equals(ObjectId.zeroId())) {
     						if (protection.isNoDeletion())
     							errorMessage = "Can not delete this tag according to tag protection setting";

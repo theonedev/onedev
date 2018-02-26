@@ -79,6 +79,8 @@ turbodev.server.sourceView = {
 	    	}
 	    });
 	    
+	    $code.find("textarea").attr("readonly", "readonly");
+	    
 	    $code.mouseover(function(e) {
 			var node = e.target || e.srcElement, $node = $(node);
 			if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
@@ -114,10 +116,6 @@ turbodev.server.sourceView = {
 		$sourceView.on("setViewState", function(e, viewState) {
 		    return turbodev.server.codemirror.setViewState(cm, viewState);
 		});
-		
-		$code[0].addEventListener("keydown", function(e) {
-			$(document).trigger("keydown", e);
-		});		
 		
 		$sourceView.on("autofit", function(event, width, height) {
 			if (cm.getOption("fullScreen"))

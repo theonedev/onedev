@@ -1,14 +1,17 @@
 #commit-detail>div {
-	margin-bottom: 16px;
+	margin-bottom: 20px;
+}
+#commit-detail>div:LAST-CHILD {
+	margin-bottom: 0;
 }
 #commit-detail>.info {
-	border: 1px solid #BBB;
+	border: 1px solid #E0E0E0;
 	border-radius: 4px;
 }
 
 #commit-detail>.info>.message {
 	background: #F9F9F9;
-	border-bottom: 1px dashed #BBB;
+	border-bottom: 1px dashed #E0E0E0;
 	padding: 8px 12px;
 	border-radius: 4px 4px 0 0;
 }

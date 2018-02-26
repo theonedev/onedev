@@ -192,13 +192,21 @@ public class ProjectTagsPage extends ProjectPage {
 							target.focusComponent(nameInput);
 							target.add(form);
 						} else {
-							getProject().tag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
-							modal.close();
-							target.add(tagsContainer);
-							target.add(pagingNavigator);
-							target.add(noTagsContainer);
-							searchField.setModelObject(null);
-							target.add(searchField);
+							Project project = getProject();
+							TagProtection protection = project.getTagProtection(tagName, getLoginUser());
+							if (protection != null && protection.isNoCreation()) {
+								form.error("Unable to create protected tag");
+								target.focusComponent(nameInput);
+								target.add(form);
+							} else {
+								getProject().tag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
+								modal.close();
+								target.add(tagsContainer);
+								target.add(pagingNavigator);
+								target.add(noTagsContainer);
+								searchField.setModelObject(null);
+								target.add(searchField);
+							}
 						}
 					}
 
@@ -343,7 +351,7 @@ public class ProjectTagsPage extends ProjectPage {
 
 						Project project = getProject();
 						if (SecurityUtils.canWrite(project)) {
-							TagProtection protection = project.getTagProtection(tagName);
+							TagProtection protection = project.getTagProtection(tagName, getLoginUser());
 							setEnabled(protection == null || !protection.isNoDeletion());
 						} else {
 							setVisible(false);

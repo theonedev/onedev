@@ -1,5 +1,7 @@
 package com.turbodev.server.manager.impl;
 
+import java.util.Iterator;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -128,10 +130,14 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 		dao.remove(user);
 		
 		for (Project project: dao.findAll(Project.class)) {
-			for (BranchProtection protection: project.getBranchProtections())
-				protection.onUserDelete(user.getName());
-			for (TagProtection protection: project.getTagProtections())
-				protection.onUserDelete(user.getName());
+			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) {
+				if (it.next().onUserDelete(user.getName()))
+					it.remove();
+			}
+			for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) {
+				if (it.next().onUserDelete(user.getName()))
+					it.remove();
+			}
 		}
 	}
 

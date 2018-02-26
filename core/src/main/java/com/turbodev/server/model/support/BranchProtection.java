@@ -12,14 +12,18 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.turbodev.utils.PathUtils;
 import com.turbodev.server.model.Group;
 import com.turbodev.server.model.User;
+import com.turbodev.server.model.support.submitter.Anyone;
+import com.turbodev.server.model.support.submitter.SpecifiedGroup;
+import com.turbodev.server.model.support.submitter.SpecifiedUser;
+import com.turbodev.server.model.support.submitter.Submitter;
 import com.turbodev.server.util.editable.annotation.BranchPattern;
 import com.turbodev.server.util.editable.annotation.Editable;
 import com.turbodev.server.util.editable.annotation.ReviewRequirementSpec;
 import com.turbodev.server.util.editable.annotation.VerificationChoice;
 import com.turbodev.server.util.reviewrequirement.ReviewRequirement;
+import com.turbodev.utils.PathUtils;
 
 @Editable
 public class BranchProtection implements Serializable {
@@ -30,9 +34,13 @@ public class BranchProtection implements Serializable {
 	
 	private String branch;
 	
+	private Submitter submitter = new Anyone();
+	
 	private boolean noForcedPush = true;
 	
 	private boolean noDeletion = true;
+	
+	private boolean noCreation = true;
 	
 	private String reviewRequirementSpec;
 	
@@ -64,6 +72,17 @@ public class BranchProtection implements Serializable {
 		this.branch = branch;
 	}
 
+	@Editable(order=150, name="If Submitted By", description="This protection rule will apply "
+			+ "only if the change is submitted by specified users here")
+	@NotNull
+	public Submitter getSubmitter() {
+		return submitter;
+	}
+
+	public void setSubmitter(Submitter submitter) {
+		this.submitter = submitter;
+	}
+
 	@Editable(order=200, description="Check this to not allow forced push")
 	public boolean isNoForcedPush() {
 		return noForcedPush;
@@ -80,6 +99,15 @@ public class BranchProtection implements Serializable {
 
 	public void setNoDeletion(boolean noDeletion) {
 		this.noDeletion = noDeletion;
+	}
+
+	@Editable(order=350, description="Check this to not allow branch creation")
+	public boolean isNoCreation() {
+		return noCreation;
+	}
+
+	public void setNoCreation(boolean noCreation) {
+		this.noCreation = noCreation;
 	}
 
 	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "
@@ -149,6 +177,12 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public void onGroupRename(String oldName, String newName) {
+		if (getSubmitter() instanceof SpecifiedGroup) {
+			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
+			if (specifiedGroup.getGroupName().equals(oldName))
+				specifiedGroup.setGroupName(newName);
+		}
+		
 		ReviewRequirement reviewRequirement = getReviewRequirement();
 		if (reviewRequirement != null) {
 			for (Group group: reviewRequirement.getGroups().keySet()) {
@@ -173,7 +207,13 @@ public class BranchProtection implements Serializable {
 		}
 	}
 	
-	public void onGroupDelete(String groupName) {
+	public boolean onGroupDelete(String groupName) {
+		if (getSubmitter() instanceof SpecifiedGroup) {
+			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
+			if (specifiedGroup.getGroupName().equals(groupName))
+				return true;
+		}
+		
 		ReviewRequirement reviewRequirement = getReviewRequirement();
 		if (reviewRequirement != null) {
 			for (Iterator<Map.Entry<Group, Integer>> it = reviewRequirement.getGroups().entrySet().iterator(); 
@@ -204,9 +244,17 @@ public class BranchProtection implements Serializable {
 				it.remove();
 			}
 		}
+		
+		return false;
 	}
 	
 	public void onUserRename(String oldName, String newName) {
+		if (getSubmitter() instanceof SpecifiedUser) {
+			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
+			if (specifiedUser.getUserName().equals(oldName))
+				specifiedUser.setUserName(newName);
+		}
+		
 		ReviewRequirement reviewRequirement = getReviewRequirement();
 		if (reviewRequirement != null) {
 			for (User user: reviewRequirement.getUsers()) {
@@ -228,10 +276,16 @@ public class BranchProtection implements Serializable {
 			} else {
 				it.remove();
 			}
-		}		
+		}	
 	}
 	
-	public void onUserDelete(String userName) {
+	public boolean onUserDelete(String userName) {
+		if (getSubmitter() instanceof SpecifiedUser) {
+			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
+			if (specifiedUser.getUserName().equals(userName))
+				return true;
+		}
+		
 		ReviewRequirement reviewRequirement = getReviewRequirement();
 		if (reviewRequirement != null) {
 			for (Iterator<User> it = reviewRequirement.getUsers().iterator(); it.hasNext();) {
@@ -260,6 +314,7 @@ public class BranchProtection implements Serializable {
 				it.remove();
 			}
 		}
+		return false;
 	}
 	
 	public boolean onBranchDelete(String branchName) {

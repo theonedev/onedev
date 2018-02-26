@@ -1,6 +1,9 @@
 #revision-compare>div {
 	margin-bottom: 20px;
 }
+#revision-compare>div:LAST-CHILD {
+	margin-bottom: 0;
+}
 #revision-compare>.revisions {
 	margin-bottom: 20px;
 	width: auto;

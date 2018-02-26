@@ -435,4 +435,23 @@ public class DatabaseMigrator {
 		}
 	}
 	
+	private void migrate14(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element projectElement: dom.getRootElement().elements()) {
+					for (Element branchProtectionElement: projectElement.element("branchProtections").elements()) {
+						Element submitterElement = branchProtectionElement.addElement("submitter");
+						submitterElement.addAttribute("class", "com.turbodev.server.model.support.submitter.Anyone");
+						branchProtectionElement.addElement("noCreation").setText("true");
+					}
+					for (Element tagProtectionElement: projectElement.element("tagProtections").elements()) {
+						tagProtectionElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			} 
+		}
+	}
+	
 }

@@ -1,5 +1,4 @@
 body {
-	min-width: 768px;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 	background: white;
 }
@@ -335,15 +334,30 @@ form>.test-feedback {
 
 .center-box { 
 	padding: 50px; 
-	width: 600px; 
+	max-width: 600px; 
 	min-width: 300px;
-	margin: 0 auto; 
 	background: #FAFAFA;
 	border: 8px solid #E0E0E0;
-	margin-top: 100px;
-	margin-bottom: 20px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 50px;
+	margin-bottom: 50px;
 	color: #333;
 }
+.wide.center-box {
+	max-width: 900px;
+	min-width: 900px;	
+}
+
+.center-box h1 { 
+	font-size: 32px; 
+	margin: 0 0 30px; 
+	font-weight: 300; 
+}
+.center-box h1 .fa {
+	font-size: 32px;
+}	
+
 
 a {
 	cursor: pointer;

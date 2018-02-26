@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.basic.Label;
 public class NotDefinedLabel extends Label {
 
 	public NotDefinedLabel(String id) {
-		super(id, "<i>Not Defined</i>");
+		super(id, "<i>Not defined</i>");
 		setEscapeModelStrings(false);
 	}
 

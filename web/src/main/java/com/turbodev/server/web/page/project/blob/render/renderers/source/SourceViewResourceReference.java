@@ -10,6 +10,7 @@ import com.turbodev.server.web.asset.clipboard.ClipboardResourceReference;
 import com.turbodev.server.web.asset.codemirror.CodeMirrorResourceReference;
 import com.turbodev.server.web.asset.cookies.CookiesResourceReference;
 import com.turbodev.server.web.asset.doneevents.DoneEventsResourceReference;
+import com.turbodev.server.web.asset.hotkeys.HotkeysResourceReference;
 import com.turbodev.server.web.asset.hover.HoverResourceReference;
 import com.turbodev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import com.turbodev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
@@ -33,6 +34,7 @@ public class SourceViewResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));

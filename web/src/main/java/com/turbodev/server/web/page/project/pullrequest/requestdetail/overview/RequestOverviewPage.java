@@ -392,7 +392,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		sideInfoContainer.add(newMergeStrategyContainer());
 		sideInfoContainer.add(new ReviewerListPanel("reviewers", requestModel));
 		
-		BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch());
+		BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
 		if (protection != null && !protection.getVerifications().isEmpty() && protection.isVerifyMerges()) {
 			sideInfoContainer.add(new Label("verifyMerges", "(On Merged Commit)"));
 		} else {
