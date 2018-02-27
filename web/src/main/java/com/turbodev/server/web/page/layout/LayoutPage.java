@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -35,8 +34,6 @@ import com.turbodev.server.web.component.floating.AlignPlacement;
 import com.turbodev.server.web.component.floating.FloatingPanel;
 import com.turbodev.server.web.component.link.DropdownLink;
 import com.turbodev.server.web.component.link.ViewStateAwarePageLink;
-import com.turbodev.server.web.component.menu.MenuItem;
-import com.turbodev.server.web.component.menu.MenuLink;
 import com.turbodev.server.web.page.admin.systemsetting.SystemSettingPage;
 import com.turbodev.server.web.page.base.BasePage;
 import com.turbodev.server.web.page.group.GroupListPage;
@@ -72,66 +69,20 @@ public abstract class LayoutPage extends BasePage {
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		add(head);
 		
-		head.add(new MenuLink("nav") {
-			
+		head.add(new DropdownLink("nav") {
+
 			@Override
-			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				List<MenuItem> items = new ArrayList<>();
-				items.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Projects";
-					}
-
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new ViewStateAwarePageLink<Void>(id, ProjectListPage.class);
-					}
-					
-				});
-				if (SecurityUtils.isAdministrator()) {
-					items.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "Users";
-						}
-
-						@Override
-						public WebMarkupContainer newLink(String id) {
-							return new ViewStateAwarePageLink<Void>(id, UserListPage.class);
-						}
-						
-					});
-					items.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "Groups";
-						}
-
-						@Override
-						public WebMarkupContainer newLink(String id) {
-							return new ViewStateAwarePageLink<Void>(id, GroupListPage.class);
-						}
-						
-					});
-					items.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "Administration";
-						}
-
-						@Override
-						public WebMarkupContainer newLink(String id) {
-							return new ViewStateAwarePageLink<Void>(id, SystemSettingPage.class);
-						}
-						
-					});
-				}
-				return items;
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment fragment = new Fragment(id, "navFrag", LayoutPage.this);
+				fragment.add(new ViewStateAwarePageLink<Void>("projects", ProjectListPage.class));
+				fragment.add(new ViewStateAwarePageLink<Void>("users", UserListPage.class).setVisible(SecurityUtils.isAdministrator()));
+				fragment.add(new ViewStateAwarePageLink<Void>("groups", GroupListPage.class).setVisible(SecurityUtils.isAdministrator()));
+				fragment.add(new ViewStateAwarePageLink<Void>("administration", SystemSettingPage.class).setVisible(SecurityUtils.isAdministrator()));
+				
+				Plugin product = AppLoader.getProduct();
+				fragment.add(new Label("productVersion", product.getVersion()));
+				fragment.add(new ExternalLink("docLink", TurboDev.getInstance().getDocLink() + "/readme.md"));
+				return fragment;
 			}
 			
 		});
@@ -162,25 +113,6 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("pushDisabled").setVisible(false));
 		}
 
-		head.add(new DropdownLink("help") {
-
-			@Override
-			protected void onInitialize(FloatingPanel dropdown) {
-				super.onInitialize(dropdown);
-				dropdown.add(AttributeAppender.append("class", " menu"));
-			}
-			
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				Fragment fragment = new Fragment(id, "helpFrag", LayoutPage.this);
-				Plugin product = AppLoader.getProduct();
-				fragment.add(new Label("productVersion", product.getVersion()));
-				fragment.add(new ExternalLink("docLink", TurboDev.getInstance().getDocLink() + "/readme.md"));
-				return fragment;
-			}
-			
-		});
-		
 		User user = getLoginUser();
 		boolean signedIn = user != null;
 

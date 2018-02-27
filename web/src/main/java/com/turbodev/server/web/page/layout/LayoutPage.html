@@ -23,9 +23,6 @@
 					</div>
 			  	</wicket:enclosure>
 			</div>
-			<div class="help pull-right">
-				<a wicket:id="help" title="Help"><i class="fa fa-question"></i></a>
-			</div>
 			<wicket:enclosure child="pushDisabled">
 			<div class="push-disabled pull-right">
 				<span wicket:id="pushDisabled" class="label label-danger">Git Push Disabled</span>
@@ -42,10 +39,21 @@
 			<a wicket:id="logout"><i class="fa fa-fw fa-sign-out"></i> Logout</a>
 		</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="helpFrag">
-		<div class="turbodev-help">
-			<div>TurboDev <span wicket:id="productVersion"></span></div>
+	<wicket:fragment wicket:id="navFrag">
+		<div class="main-nav">
+			<h4>TurboDev <span wicket:id="productVersion"></span></h4>
 			<ul>
+				<li><a wicket:id="projects">Projects</a></li>
+				<wicket:enclosure child="users">
+				<li><a wicket:id="users">Users</a></li>
+				</wicket:enclosure>
+				<wicket:enclosure child="groups">
+				<li><a wicket:id="groups">Groups</a></li>
+				</wicket:enclosure>
+				<wicket:enclosure child="administration">
+				<li><a wicket:id="administration">Administration</a></li>
+				</wicket:enclosure>
+				<li class="divider"></li>
 				<li><a href="https://www.turbodev.com">Product Home</a></li>
 				<li><a wicket:id="docLink">Document</a></li>
 				<li><a href="mailto:support@turbodev.com">Support &amp; Bug Report</a></li>
