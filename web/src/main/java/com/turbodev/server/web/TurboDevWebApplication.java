@@ -23,6 +23,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.application.IComponentInstantiationListener;
+import org.apache.wicket.core.request.handler.ComponentNotFoundException;
+import org.apache.wicket.core.request.handler.EmptyAjaxRequestHandler;
+import org.apache.wicket.core.request.handler.ListenerInvocationNotAllowedException;
 import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.mapper.HomePageMapper;
@@ -190,6 +193,11 @@ public class TurboDevWebApplication extends WebApplication {
 
 					@Override
 					protected IRequestHandler mapExpectedExceptions(Exception e, Application application) {
+						boolean isAjax = ((WebRequest)RequestCycle.get().getRequest()).isAjax();
+						if (isAjax && (e instanceof ListenerInvocationNotAllowedException || e instanceof ComponentNotFoundException)) {
+							return EmptyAjaxRequestHandler.getInstance();
+						}
+						
 						Page errorPage = mapExceptions(e);
 						if (errorPage != null) {
 							return createPageRequestHandler(new PageProvider(errorPage));

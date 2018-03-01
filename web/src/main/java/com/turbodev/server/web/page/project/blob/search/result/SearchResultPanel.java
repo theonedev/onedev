@@ -19,6 +19,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.DisabledAttributeLinkBehavior;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -27,7 +28,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.turbodev.utils.Range;
+import com.turbodev.jsymbol.util.HighlightableLabel;
 import com.turbodev.server.git.BlobIdent;
 import com.turbodev.server.model.support.TextRange;
 import com.turbodev.server.search.hit.FileHit;
@@ -36,7 +37,7 @@ import com.turbodev.server.search.hit.TextHit;
 import com.turbodev.server.web.component.link.ViewStateAwareAjaxLink;
 import com.turbodev.server.web.page.project.blob.ProjectBlobPage;
 import com.turbodev.server.web.page.project.blob.render.BlobRenderContext;
-import com.turbodev.jsymbol.util.HighlightableLabel;
+import com.turbodev.utils.Range;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
@@ -258,6 +259,7 @@ public abstract class SearchResultPanel extends Panel {
 			}
 			
 		});
+		prevMatchLink.add(new DisabledAttributeLinkBehavior());
 		prevMatchLink.setOutputMarkupId(true);
 		
 		add(nextMatchLink = new AjaxLink<Void>("nextMatch") {
@@ -287,6 +289,7 @@ public abstract class SearchResultPanel extends Panel {
 			}
 			
 		});
+		nextMatchLink.add(new DisabledAttributeLinkBehavior());
 		nextMatchLink.setOutputMarkupId(true);
 		
 		add(new AjaxLink<Void>("expandAll") {
