@@ -363,9 +363,9 @@ turbodev.server.markdown = {
 		
 		$head.find(".do-list, .do-orderlist, .do-tasklist").click(function() {
 			var leading;
-			if ($(this).hasClass(".do-list"))
+			if ($(this).hasClass("do-list"))
 				leading = "-";
-			else if ($(this).hasClass(".do-tasklist"))
+			else if ($(this).hasClass("do-orderlist"))
 				leading = "1.";
 			else
 				leading = "- [ ]";
