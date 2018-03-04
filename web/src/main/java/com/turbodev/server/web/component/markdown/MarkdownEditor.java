@@ -6,8 +6,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -46,6 +48,7 @@ import com.turbodev.launcher.loader.AppLoader;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.turbodev.server.TurboDev;
+import com.turbodev.server.git.BlobIdent;
 import com.turbodev.server.manager.MarkdownManager;
 import com.turbodev.server.model.PullRequest;
 import com.turbodev.server.util.facade.UserFacade;
@@ -71,6 +74,12 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	private TextArea<String> input;
 
 	private AbstractPostAjaxBehavior ajaxBehavior;
+	
+	private String activeInsertUrlTab = InsertUrlPanel.TAB_INPUT_URL;
+	
+	private String uploadDirectory;
+	
+	private Set<BlobIdent> filePickerState = new HashSet<>();
 	
 	/**
 	 * @param id 
@@ -399,10 +408,10 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	}
 
 	public void insertUrl(AjaxRequestTarget target, boolean isImage, String url, 
-			@Nullable String name, String replaceMessage) {
-		String script = String.format("turbodev.server.markdown.insertUrl('%s', %s, '%s', %s, %s);",
+			String name, @Nullable String replaceMessage) {
+		String script = String.format("turbodev.server.markdown.insertUrl('%s', %s, '%s', '%s', %s);",
 				container.getMarkupId(), isImage, StringEscapeUtils.escapeEcmaScript(url), 
-				name!=null?"'"+StringEscapeUtils.escapeEcmaScript(name)+"'":"undefined", 
+				StringEscapeUtils.escapeEcmaScript(name), 
 				replaceMessage!=null?"'"+replaceMessage+"'":"undefined");
 		target.appendJavaScript(script);
 	}
@@ -440,6 +449,30 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	@Nullable
 	public BlobRenderContext getBlobRenderContext() {
 		return blobRenderContext;
+	}
+
+	public String getActiveInsertUrlTab() {
+		return activeInsertUrlTab;
+	}
+
+	public void setActiveInsertUrlTab(String activeInsertUrlTab) {
+		this.activeInsertUrlTab = activeInsertUrlTab;
+	}
+
+	public String getUploadDirectory() {
+		return uploadDirectory;
+	}
+
+	public void setUploadDirectory(String uploadDirectory) {
+		this.uploadDirectory = uploadDirectory;
+	}
+
+	public Set<BlobIdent> getFilePickerState() {
+		return filePickerState;
+	}
+
+	public void setFilePickerState(Set<BlobIdent> filePickerState) {
+		this.filePickerState = filePickerState;
 	}
 	
 }

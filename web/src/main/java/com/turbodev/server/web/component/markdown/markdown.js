@@ -958,19 +958,13 @@ turbodev.server.markdown = {
 			}
 		} 
 	},
-	onFileUploadDomReady: function(uploadId, maxSize, maxSizeForDisplay) {
-		var $upload = $('#' + uploadId);
-		$upload.change(function() {
-			var $feedback = $upload.closest('form').find(".feedback");
-			if ($upload[0].files[0].size>maxSize) {
-				$feedback.html("<div class='alert alert-danger'>Size of upload file should be less than " 
-						+ maxSizeForDisplay + "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>" +
-								"<span aria-hidden='true'>&times;</span></button></div>");
-			} else {
-				$feedback.empty();
-				$upload.next().click();
-			}
-		})
+	onInputUrlDomReady: function(containerId) {
+		var $container = $("#"+containerId);
+		var $url = $container.find(".url");
+		var $text = $container.find(".text");
+		$url.on("input", function() {
+			$text.attr("placeholder", turbodev.server.util.describeUrl($url.val()));
+		});
 	}
 	
 };

@@ -2,10 +2,8 @@ package com.turbodev.server.web.component.projectfilepicker;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -16,7 +14,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.FileMode;
@@ -29,26 +28,16 @@ import com.turbodev.server.web.component.BlobIcon;
 import com.turbodev.server.web.component.link.ViewStateAwareAjaxLink;
 
 @SuppressWarnings("serial")
-public abstract class ProjectFilePicker extends GenericPanel<Project> {
+public abstract class ProjectFilePicker extends Panel {
 
-	private final String revision;
-	
 	private final ObjectId commitId;
 	
-	private final String initialDirectoryToOpen;
-	
-	public ProjectFilePicker(String id, IModel<Project> projectModel, String revision) {
-		this(id, projectModel, revision, projectModel.getObject().getObjectId(revision), null);
+	public ProjectFilePicker(String id, ObjectId commitId) {
+		super(id);
+		
+		this.commitId = commitId;
 	}
 
-	public ProjectFilePicker(String id, IModel<Project> projectModel, String revision, ObjectId commitId, 
-			@Nullable String initialDirectoryToOpen) {
-		super(id, projectModel);
-		this.revision = revision;
-		this.commitId = commitId;
-		this.initialDirectoryToOpen = initialDirectoryToOpen;
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -61,7 +50,7 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 
 			@Override
 			public Iterator<? extends BlobIdent> getRoots() {
-				return getChildren(new BlobIdent(revision, null, FileMode.TYPE_TREE));
+				return getChildren(new BlobIdent(commitId.name(), null, FileMode.TYPE_TREE));
 			}
 
 			@Override
@@ -71,12 +60,19 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 
 			@Override
 			public Iterator<? extends BlobIdent> getChildren(BlobIdent node) {
-				return getModelObject().getChildren(node, getBlobIdentFilter(), commitId).iterator();
+				return getProject().getChildren(node, getBlobIdentFilter(), commitId).iterator();
 			}
 
 			@Override
 			public IModel<BlobIdent> model(BlobIdent object) {
 				return Model.of(object);
+			}
+			
+		}, new AbstractReadOnlyModel<Set<BlobIdent>>() {
+
+			@Override
+			public Set<BlobIdent> getObject() {
+				return getState();
 			}
 			
 		}) {
@@ -85,25 +81,13 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 			protected void onInitialize() {
 				super.onInitialize();
 				add(new HumanTheme());	
-				
-				if (initialDirectoryToOpen != null) {
-					reveal(initialDirectoryToOpen);
-				}
-			}
-			
-			private void reveal(String directory) {
-				expand(new BlobIdent(revision, directory, FileMode.TREE.getBits()));
-				if (directory.contains("/")) {
-					reveal(StringUtils.substringBeforeLast(directory, "/"));
-				}
 			}
 			
 			@Override
 			public void expand(BlobIdent blobIdent) {
 				super.expand(blobIdent);
 				
-				List<BlobIdent> children = ProjectFilePicker.this.getModelObject().getChildren(blobIdent, 
-						getBlobIdentFilter(), commitId);
+				List<BlobIdent> children = getProject().getChildren(blobIdent, getBlobIdentFilter(), commitId);
 				if (children.size() == 1 && children.get(0).isTree()) 
 					expand(children.get(0));
 			}
@@ -142,6 +126,10 @@ public abstract class ProjectFilePicker extends GenericPanel<Project> {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new ProjectFilePickerResourceReference()));
 	}
+	
+	protected abstract Project getProject();
+	
+	protected abstract Set<BlobIdent> getState();
 
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
 	

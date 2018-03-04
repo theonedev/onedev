@@ -262,7 +262,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	@Transactional
 	@Listen
 	public void on(RefUpdated event) {
-		if (event.getNewObjectId().equals(ObjectId.zeroId())) {
+		if (event.getNewCommitId().equals(ObjectId.zeroId())) {
 			Project project = event.getProject();
 			String branch = GitUtils.ref2branch(event.getRefName());
 			if (branch != null) {

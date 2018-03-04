@@ -10,15 +10,15 @@ public class RefUpdated {
 	
 	private final String refName;
 	
-	private final ObjectId oldObjectId;
+	private final ObjectId oldCommitId;
 	
-	private final ObjectId newObjectId;
+	private final ObjectId newCommitId;
 	
-	public RefUpdated(Project project, String refName, ObjectId oldObjectId, ObjectId newObjectId) {
+	public RefUpdated(Project project, String refName, ObjectId oldCommitId, ObjectId newCommitId) {
 		this.project = project;
 		this.refName = refName;
-		this.oldObjectId = oldObjectId;
-		this.newObjectId = newObjectId;
+		this.oldCommitId = oldCommitId;
+		this.newCommitId = newCommitId;
 	}
 
 	public Project getProject() {
@@ -29,12 +29,12 @@ public class RefUpdated {
 		return refName;
 	}
 
-	public ObjectId getOldObjectId() {
-		return oldObjectId;
+	public ObjectId getOldCommitId() {
+		return oldCommitId;
 	}
 
-	public ObjectId getNewObjectId() {
-		return newObjectId;
+	public ObjectId getNewCommitId() {
+		return newCommitId;
 	}
 	
 }

@@ -8,7 +8,7 @@ turbodev.server.sourceView = {
 
 		var cm = CodeMirror($code[0], {
 			value: fileContent,
-			readOnly: turbodev.server.isDevice()?"nocursor": true,
+			readOnly: turbodev.server.util.isDevice()?"nocursor": true,
 			theme: "eclipse",
 			lineNumbers: true,
 			lineWrapping: lineWrapMode == "Soft wrap",

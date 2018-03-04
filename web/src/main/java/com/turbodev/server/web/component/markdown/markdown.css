@@ -196,40 +196,21 @@ body.fullscreen {
 	color: inherit;	
 }
 
-.insert-url>.section>.or {
-	font-size: 16px;
-	font-weight: bold;
-	margin: 12px 0;
-}
-.insert-url>.section>.content {
-	padding: 12px;
-	border: 1px dashed #AAA;
-	border-radius: 4px;
-	background: #F9F9F9;
-}
-.insert-url>.section>.content .alert {
-	margin-bottom: 0;
-	margin-top: 20px;
-}
-
-.insert-url input.url {
-	width: 470px;
-	margin-right: 7px;
-}
-.insert-url .attachments {
-	max-height: 300px;
-	overflow: auto;
+.insert-url .attachment {
 	margin-bottom: 20px;
 }
-.insert-url .attachments img {
+.insert-url .attachment:LAST-CHILD {
+	margin-bottom: 0;
+}
+
+.insert-url .attachment.image img {
 	max-width: 100%;
+	border-radius: 4px 4px 0 0 ;
 }
-.insert-url .attachment a {
-	color: #666;
+.insert-url .attachment.image .btn {
+	border-radius: 0 0 4px 4px;
 }
-.insert-url .attachment a.select {
-	margin-right: 6px;
-}
+
 .insert-url .alert-info {
 	margin-top: 20px;
 }

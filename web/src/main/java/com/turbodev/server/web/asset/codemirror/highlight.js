@@ -5,7 +5,7 @@ turbodev.server.highlight = function($container) {
 		var text = $this.text().trim();
 		$this.empty();
 		var cm = CodeMirror(this, {
-			readOnly: turbodev.server.isDevice()?"nocursor":true,
+			readOnly: turbodev.server.util.isDevice()?"nocursor":true,
 			value: text, 
 			highlightIdentifiers: {delay: 500},
 			theme: "eclipse",

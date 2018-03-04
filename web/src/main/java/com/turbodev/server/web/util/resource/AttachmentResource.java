@@ -57,6 +57,8 @@ public class AttachmentResource extends AbstractResource {
 			throw new IllegalArgumentException("attachment parameter has to be specified");
 
 		File attachmentFile = new File(getAttachmentDir(project.getFacade(), storage), attachment);
+		if (!attachmentFile.exists()) 
+			throw new RuntimeException("Attachment not found: " + attachment);
 		
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(attachmentFile.length());

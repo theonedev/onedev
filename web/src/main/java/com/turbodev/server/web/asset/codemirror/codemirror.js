@@ -69,7 +69,7 @@ turbodev.server.codemirror = {
 				}
 	        }
 		});
-		if (turbodev.server.isMac()) {
+		if (turbodev.server.util.isMac()) {
 		    CodeMirror.keyMap.default["Cmd-L"] = "gotoLine";
 		} else {
 		    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
@@ -138,7 +138,7 @@ turbodev.server.codemirror = {
 					return false;
 				}
 			}
-			if (turbodev.server.isMac()) {
+			if (turbodev.server.util.isMac()) {
 				$(document).bind("keydown", "Meta+f", find);
 				$(document).bind("keydown", "Meta+g", findNext);
 				$(document).bind("keydown", "Meta+Shift+g", findPrev);

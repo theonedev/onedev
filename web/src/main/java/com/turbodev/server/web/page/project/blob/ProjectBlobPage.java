@@ -28,6 +28,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -46,19 +47,27 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.turbodev.jsymbol.TokenPosition;
 import com.turbodev.jsymbol.util.NoAntiCacheImage;
 import com.turbodev.launcher.loader.ListenerRegistry;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.event.RefUpdated;
+import com.turbodev.server.git.BlobContent;
+import com.turbodev.server.git.BlobEdits;
 import com.turbodev.server.git.BlobIdent;
 import com.turbodev.server.git.GitUtils;
+import com.turbodev.server.git.exception.NotTreeException;
+import com.turbodev.server.git.exception.ObjectAlreadyExistsException;
+import com.turbodev.server.git.exception.ObsoleteCommitException;
 import com.turbodev.server.manager.CodeCommentManager;
 import com.turbodev.server.manager.ProjectManager;
 import com.turbodev.server.manager.PullRequestManager;
+import com.turbodev.server.manager.UserManager;
 import com.turbodev.server.model.CodeComment;
 import com.turbodev.server.model.Project;
 import com.turbodev.server.model.PullRequest;
+import com.turbodev.server.model.User;
 import com.turbodev.server.model.support.TextRange;
 import com.turbodev.server.persistence.UnitOfWork;
 import com.turbodev.server.search.IndexManager;
@@ -83,6 +92,7 @@ import com.turbodev.server.web.page.project.ProjectPage;
 import com.turbodev.server.web.page.project.blob.navigator.BlobNavigator;
 import com.turbodev.server.web.page.project.blob.render.BlobRenderContext;
 import com.turbodev.server.web.page.project.blob.render.BlobRendererContribution;
+import com.turbodev.server.web.page.project.blob.render.BlobUploadException;
 import com.turbodev.server.web.page.project.blob.render.view.Markable;
 import com.turbodev.server.web.page.project.blob.search.SearchMenuContributor;
 import com.turbodev.server.web.page.project.blob.search.advanced.AdvancedSearchPanel;
@@ -382,8 +392,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 									}
 
 									@Override
-									void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
-										ProjectBlobPage.this.onCommitted(target, oldCommit, newCommit);
+									void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
+										ProjectBlobPage.this.onCommitted(target, refUpdated);
 										modal.close();
 									}
 									
@@ -964,21 +974,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 
 	@Override
-	public void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
-		String refName = GitUtils.branch2ref(state.blobIdent.revision);
+	public void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
 		Project project = getProject();
 		String branch = state.blobIdent.revision;
 		BlobIdent newBlobIdent;
-		getProject().cacheObjectId(branch, newCommit);
+		getProject().cacheObjectId(branch, refUpdated.getNewCommitId());
 
 		Subject subject = SecurityUtils.getSubject();
 		Long projectId = project.getId();
-		ObjectId oldCommitId = oldCommit.copy();
-		ObjectId newCommitId = newCommit.copy();
 		
 		if (state.mode == Mode.DELETE) {
 			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-				RevTree revTree = getProject().getRevCommit(newCommit).getTree();
+				RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId()).getTree();
 				String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
 				while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
 					if (parentPath.contains("/")) {
@@ -1006,9 +1013,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				ThreadContext.bind(subject);
 				try {
 					Project project = TurboDev.getInstance(ProjectManager.class).load(projectId);
-					project.cacheObjectId(branch, newCommitId);
-					RefUpdated event = new RefUpdated(project, refName, oldCommitId, newCommitId);
-					TurboDev.getInstance(ListenerRegistry.class).post(event);
+					project.cacheObjectId(branch, refUpdated.getNewCommitId());
+					TurboDev.getInstance(ListenerRegistry.class).post(refUpdated);
 				} finally {
 					ThreadContext.unbindSubject();
 				}
@@ -1105,6 +1111,66 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 					state.blobIdent.path, getProject().getBlob(state.blobIdent).getBlobId());
 		} else {
 			throw new IllegalStateException();
+		}
+	}
+
+	@Override
+	public RefUpdated uploadFiles(Collection<FileUpload> uploads, String directory, String commitMessage) {
+		ProjectManager projectManager = TurboDev.getInstance(ProjectManager.class);
+		Map<String, BlobContent> newBlobs = new HashMap<>();
+		
+		String parentPath;
+		BlobIdent blobIdent = getBlobIdent();
+		if (blobIdent.path != null) {
+			if (blobIdent.isTree()) 
+				parentPath = blobIdent.path;
+			else if (blobIdent.path.contains("/")) 
+				parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
+			else
+				parentPath = null;
+		} else {
+			parentPath = null;
+		}
+		
+		if (directory != null) { 
+			if (parentPath != null)
+				parentPath += "/" + directory;
+			else
+				parentPath = directory;
+		}
+		
+		for (FileUpload upload: uploads) {
+			String blobPath = upload.getClientFileName();
+			if (parentPath != null)
+				blobPath = parentPath + "/" + blobPath;
+			
+			if (projectManager.isModificationNeedsQualityCheck(SecurityUtils.getUser(), getProject(), 
+					blobIdent.revision, blobPath)) {
+				throw new BlobUploadException("Adding of file '" + blobPath + "' need to be reviewed/verified. "
+						+ "Please submit pull request instead");
+			}
+			
+			BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
+			newBlobs.put(blobPath, blobContent);
+		}
+
+		BlobEdits blobEdits = new BlobEdits(Sets.newHashSet(), newBlobs);
+		String refName = GitUtils.branch2ref(blobIdent.revision);
+
+		User user = Preconditions.checkNotNull(TurboDev.getInstance(UserManager.class).getCurrent());
+
+		ObjectId prevCommitId = getProject().getObjectId(blobIdent.revision);
+
+		while (true) {
+			try {
+				ObjectId newCommitId = blobEdits.commit(getProject().getRepository(), refName, prevCommitId, 
+						prevCommitId, user.asPerson(), commitMessage);
+				return new RefUpdated(getProject(), refName, prevCommitId, newCommitId);
+			} catch (ObjectAlreadyExistsException|NotTreeException e) {
+				throw new BlobUploadException(e.getMessage());
+			} catch (ObsoleteCommitException e) {
+				prevCommitId = e.getOldCommitId();
+			}
 		}
 	}
 

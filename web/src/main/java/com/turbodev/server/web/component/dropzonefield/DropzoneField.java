@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -27,7 +29,11 @@ import com.turbodev.server.web.behavior.AbstractPostAjaxBehavior;
 @SuppressWarnings("serial")
 public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
 
+	private final int maxFiles;
+	
 	private final int maxFilesize;
+	
+	private final String acceptedFiles;
 	
 	private AbstractPostAjaxBehavior uploadBehavior;
 	
@@ -35,9 +41,31 @@ public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
 	
 	private List<FileItem> fileItems = new ArrayList<>();
 	
-	public DropzoneField(String id, IModel<Collection<FileUpload>> model, int maxFilesize) {
+	/**
+	 * @param id
+	 * 			id of the component
+	 * @param model
+	 * 			model of the component
+	 * @param acceptedFiles
+	 * 			accepted mime types, for instance: images/*. Use <tt>null</tt> for unlimited
+	 * @param maxFiles
+	 * 			max number of files, use <tt>0</tt> for unlimited
+	 * @param maxFilesize
+	 * 			max file size in MB
+	 */
+	public DropzoneField(String id, IModel<Collection<FileUpload>> model, @Nullable String acceptedFiles, 
+			int maxFiles, int maxFilesize) {
 		super(id, model);
+		this.acceptedFiles = acceptedFiles;
+		this.maxFiles = maxFiles;
 		this.maxFilesize = maxFilesize;
+	}
+
+	@Override
+	protected void onBeforeRender() {
+		// In order to be consistent with browser side
+		fileItems.clear();
+		super.onBeforeRender();
 	}
 
 	@Override
@@ -105,10 +133,12 @@ public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
 		response.render(JavaScriptHeaderItem.forReference(new DropzoneFieldResourceReference()));
 		
 		String script = String.format(
-				"turbodev.server.onDropzoneDomReady('%s', '%s', %s, %d);", 
+				"turbodev.server.dropzone.onDomReady('%s', '%s', %s, %s, %s, %d);", 
 				getMarkupId(), 
 				uploadBehavior.getCallbackUrl(), 
-				deleteBehavior.getCallbackFunction(CallbackParameter.explicit("name")), 
+				deleteBehavior.getCallbackFunction(CallbackParameter.explicit("name")),
+				acceptedFiles!=null?"'" + acceptedFiles + "'":"null",				
+				maxFiles!=0?maxFiles:"null",
 				maxFilesize);
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));

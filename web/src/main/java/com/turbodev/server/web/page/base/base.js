@@ -343,16 +343,6 @@ turbodev.server = {
 		
 	},
 
-	autoHeight: function(targetSelector, bottomOffset) {
-		var adjustHeight = function() {
-			$(targetSelector).css("max-height", $(document).scrollTop() + $(window).height()
-					- $(targetSelector).offset().top - bottomOffset + "px");
-		};
-		adjustHeight();
-		$(window).resize(adjustHeight);
-		$(window).scroll(adjustHeight);
-	},
-	
 	showSessionFeedback: function() {
 		if ($("#session-feedback li").length != 0) {
 			var feedback = $("#session-feedback");
@@ -542,16 +532,42 @@ turbodev.server = {
 			return history.state != undefined && history.state.visited === true;
 		},
 	},
-	isDevice: function() {
-		var ua = navigator.userAgent.toLowerCase();
-		return ua.indexOf("android") != -1 
-				|| ua.indexOf("iphone") != -1 
-				|| ua.indexOf("ipad") != -1 
-				|| ua.indexOf("windows phone") != -1; 
+	util: {
+		isDevice: function() {
+			var ua = navigator.userAgent.toLowerCase();
+			return ua.indexOf("android") != -1 
+					|| ua.indexOf("iphone") != -1 
+					|| ua.indexOf("ipad") != -1 
+					|| ua.indexOf("windows phone") != -1; 
+		},
+		isMac: function() {
+			return navigator.userAgent.indexOf('Mac') != -1;		
+		},
+		describeUrl: function(url) {
+			if (url.startsWith("http://"))
+				return url.substring("http://".length);
+			if (url.startsWith("https://"))
+				return url.substring("https://".length);
+
+			var index = url.lastIndexOf("/");
+			if (index != -1)
+				url = url.substring(index+1, url.length);
+			index = url.lastIndexOf(".");
+			if (index != -1)
+				url = url.substring(0, index);
+			index = url.lastIndexOf(".");
+			if (index != -1)
+				url = url.substring(index+1);
+
+			url = url.replace(/[-_]/g, " ");
+			var camelized = "";
+			var splitted = url.split(" ");
+			for (var i in splitted) 
+			  camelized += splitted[i].charAt(0).toUpperCase() + splitted[i].slice(1) + " ";
+			return camelized.trim();
+		}
 	},
-	isMac: function() {
-		return navigator.userAgent.indexOf('Mac') != -1;		
-	},
+	
 	mouseState: {
 		pressed: false, 
 		moved: false,

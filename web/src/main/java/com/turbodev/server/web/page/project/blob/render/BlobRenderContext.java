@@ -1,15 +1,17 @@
 package com.turbodev.server.web.page.project.blob.render;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.eclipse.jgit.lib.ObjectId;
+import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.turbodev.jsymbol.TokenPosition;
+import com.turbodev.server.event.RefUpdated;
 import com.turbodev.server.git.BlobIdent;
 import com.turbodev.server.model.CodeComment;
 import com.turbodev.server.model.Project;
@@ -68,11 +70,13 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onModeChange(AjaxRequestTarget target, Mode mode);
 	
-	void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit);
+	void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated);
 	
 	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 
 	void onAddComment(AjaxRequestTarget target, TextRange mark);
+	
+	RefUpdated uploadFiles(Collection<FileUpload> uploads, @Nullable String directory, String commitMessage);
 	
 	@Nullable
 	CodeComment getOpenComment();

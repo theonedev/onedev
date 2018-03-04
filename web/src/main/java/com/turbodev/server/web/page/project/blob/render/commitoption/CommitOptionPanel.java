@@ -42,6 +42,7 @@ import com.turbodev.utils.Provider;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.turbodev.server.TurboDev;
+import com.turbodev.server.event.RefUpdated;
 import com.turbodev.server.git.Blob;
 import com.turbodev.server.git.BlobChange;
 import com.turbodev.server.git.BlobContent;
@@ -392,7 +393,8 @@ public class CommitOptionPanel extends Panel {
 				}
 			}
 			if (newCommitId != null) {
-				context.onCommitted(target, prevCommitId, newCommitId);
+				RefUpdated refUpdated = new RefUpdated(context.getProject(), refName, prevCommitId, newCommitId);
+				context.onCommitted(target, refUpdated);
 				if (autosaveKey != null)
 					target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 				return true;

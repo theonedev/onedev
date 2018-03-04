@@ -4,49 +4,54 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.form.upload.FileUploadField;
+import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.turbodev.utils.FileUtils;
-import com.turbodev.utils.PathUtils;
+import com.google.common.base.Preconditions;
 import com.turbodev.server.git.BlobIdent;
 import com.turbodev.server.git.BlobIdentFilter;
 import com.turbodev.server.model.Project;
-import com.turbodev.server.web.component.floating.FloatingPanel;
-import com.turbodev.server.web.component.link.DropdownLink;
+import com.turbodev.server.web.component.dropzonefield.DropzoneField;
 import com.turbodev.server.web.component.projectfilepicker.ProjectFilePicker;
+import com.turbodev.server.web.component.tabbable.AjaxActionTab;
+import com.turbodev.server.web.component.tabbable.Tab;
+import com.turbodev.server.web.component.tabbable.Tabbable;
 import com.turbodev.server.web.page.project.blob.ProjectBlobPage;
 import com.turbodev.server.web.page.project.blob.render.BlobRenderContext;
+import com.turbodev.server.web.page.project.blob.render.BlobUploadException;
+import com.turbodev.utils.PathUtils;
+import com.turbodev.utils.StringUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -55,7 +60,23 @@ abstract class InsertUrlPanel extends Panel {
 
 	private static final MimetypesFileTypeMap MIME_TYPES = new MimetypesFileTypeMap();
 	
+	static final String TAB_INPUT_URL = "Input URL";
+	
+	static final String TAB_PICK_EXISTING = "Pick Existing";
+	
+	static final String TAB_UPLOAD = "Upload";
+	
+	private static final String CONTENT_ID = "content";
+	
+	private Collection<FileUpload> uploads;
+	
 	private String url;
+	
+	private String text;
+	
+	private String summaryCommitMessage;
+	
+	private String detailCommitMessage;
 	
 	private final MarkdownEditor markdownEditor;
 	
@@ -67,66 +88,59 @@ abstract class InsertUrlPanel extends Panel {
 		this.isImage = isImage;
 	}
 
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		add(new AjaxLink<Void>("close") {
+	private Component newInputUrlPanel() {
+		Fragment fragment = new Fragment(CONTENT_ID, "inputUrlFrag", this) {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onClose(target);
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				String script = String.format("turbodev.server.markdown.onInputUrlDomReady('%s');", getMarkupId());
+				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
-		});
+		};
 		
-		if (isImage)
-			add(new Label("title", "Insert Image"));
-		else
-			add(new Label("title", "Insert Link"));
-			
-		Form<?> urlForm = new Form<Void>("urlForm");
-		add(urlForm);
-		urlForm.add(new NotificationPanel("feedback", urlForm));
+		Form<?> form = new Form<Void>("form");
+		form.add(new NotificationPanel("feedback", form));
 		
-		TextField<String> urlField = new TextField<String>("url", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return url;
-			}
-
-			@Override
-			public void setObject(String object) {
-				url = object;
-			}
-			
-		}); 
-		urlField.setOutputMarkupId(true);
-		urlForm.add(urlField);
+		form.add(new Label("urlLabel", isImage?"Image URL":"Link URL"));
+		form.add(new Label("urlHelp", isImage?"Absolute or relative url of the image":"Absolute or relative url of the link"));
+		form.add(new TextField<String>("url", new PropertyModel<String>(this, "url")));
 		
-		urlForm.add(new AjaxButton("ok", urlForm) {
+		form.add(new Label("textLabel", isImage?"Image Text": "Link Text"));
+		form.add(new TextField<String>("text", new PropertyModel<String>(this, "text")));
+		
+		form.add(new AjaxButton("insert", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				if (StringUtils.isBlank(url)) {
-					error("Url should be specified");
-					target.add(InsertUrlPanel.this);
+					if (isImage)
+						error("Image URL should be specified");
+					else
+						error("Link URL should be specified");
+					target.add(fragment);
 				} else {
-					markdownEditor.insertUrl(target, isImage, url, null, null);
+					if (text == null)
+						text = StringUtils.describeUrl(url);
+					markdownEditor.insertUrl(target, isImage, url, text, null);
 					onClose(target);
 				}
 			}
 			
 		});
-
-		BlobRenderContext blobRenderContext = markdownEditor.getBlobRenderContext();
-		if (blobRenderContext != null) {
+		
+		fragment.add(form);
+		fragment.setOutputMarkupId(true);
+		return fragment;
+	}
+	
+	private Component newPickExistingPanel() {
+		Fragment fragment;
+		BlobRenderContext context = markdownEditor.getBlobRenderContext();
+		if (context != null) {
+			fragment = new Fragment(CONTENT_ID, "pickBlobFrag", this);
 			BlobIdentFilter blobIdentFilter = new BlobIdentFilter() {
 
 				@Override
@@ -151,185 +165,348 @@ abstract class InsertUrlPanel extends Panel {
 			 */
 			ObjectId commitId;
 			try {
-				commitId = blobRenderContext.getProject().getRepository()
-						.resolve(blobRenderContext.getBlobIdent().revision);
+				commitId = context.getProject().getRepository()
+						.resolve(context.getBlobIdent().revision);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 			
-			BlobIdent rootBlobIdent = new BlobIdent(commitId.name(), null, FileMode.TYPE_TREE);
-			if (!blobRenderContext.getProject().getChildren(rootBlobIdent, blobIdentFilter).isEmpty()) {
-				add(new DropdownLink("blobPicker") {
+			Set<BlobIdent> filePickerState = markdownEditor.getFilePickerState();
+			BlobIdent blobIdent = context.getBlobIdent();
+			String parentPath;
+			if (blobIdent.isTree())
+				parentPath = blobIdent.path;
+			else if (blobIdent.path.contains("/"))
+				parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
+			else
+				parentPath = null;
+			
+			while (parentPath != null) {
+				filePickerState.add(new BlobIdent(commitId.name(), parentPath, FileMode.TYPE_TREE));
+				if (parentPath.contains("/"))
+					parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+				else
+					parentPath = null;
+			}
+			
+			fragment.add(new ProjectFilePicker("files", commitId) {
+
+				@Override
+				protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
+					blobIdent = new BlobIdent(context.getBlobIdent().revision, blobIdent.path, blobIdent.mode);
+					String baseUrl = context.getBaseUrl();
+					String referenceUrl = urlFor(ProjectBlobPage.class, 
+							ProjectBlobPage.paramsOf(context.getProject(), blobIdent)).toString();
+					String relativized = PathUtils.relativize(baseUrl, referenceUrl);		
+					markdownEditor.insertUrl(target, isImage, relativized, StringUtils.describeUrl(blobIdent.getName()), null);
+					onClose(target);
+				}
+
+				@Override
+				protected BlobIdentFilter getBlobIdentFilter() {
+					return blobIdentFilter;
+				}
+
+				@Override
+				protected Project getProject() {
+					return markdownEditor.getBlobRenderContext().getProject();
+				}
+
+				@Override
+				protected Set<BlobIdent> getState() {
+					return markdownEditor.getFilePickerState();
+				}
+				
+			});
+		} else {
+			AttachmentSupport attachmentSupport = Preconditions.checkNotNull(markdownEditor.getAttachmentSupport());
+			if (isImage) {
+				fragment = new Fragment(CONTENT_ID, "pickAttachedImageFrag", this);
+				fragment.add(new ListView<String>("attachments", new LoadableDetachableModel<List<String>>() {
 
 					@Override
-					protected Component newContent(String id, FloatingPanel dropdown) {
-				
-						BlobIdent blobIdent = blobRenderContext.getBlobIdent();
-						String openDirectory;
-						if (blobIdent.isTree())
-							openDirectory = blobIdent.path;
-						else if (blobIdent.path.contains("/"))
-							openDirectory = StringUtils.substringBeforeLast(blobIdent.path, "/");
-						else
-							openDirectory = null;
-						
-						return new ProjectFilePicker(id, new AbstractReadOnlyModel<Project>() {
-
-							@Override
-							public Project getObject() {
-								return blobRenderContext.getProject();
-							}
-							
-						}, blobRenderContext.getBlobIdent().revision, commitId, openDirectory) {
-
-							@Override
-							protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-								String baseUrl = blobRenderContext.getBaseUrl();
-								String referenceUrl = urlFor(ProjectBlobPage.class, 
-										ProjectBlobPage.paramsOf(blobRenderContext.getProject(), blobIdent)).toString();
-								String relativized = PathUtils.relativize(baseUrl, referenceUrl);		
-								markdownEditor.insertUrl(target, isImage, relativized, blobIdent.getName(), null);
-								onClose(target);
-								dropdown.close();
-							}
-
-							@Override
-							protected BlobIdentFilter getBlobIdentFilter() {
-								return blobIdentFilter;
-							}
-							
-						};
+					protected List<String> load() {
+						List<String> attachmentNames = new ArrayList<>();
+						for (String attachmentName: attachmentSupport.getAttachments()) {
+							if (markdownEditor.isWebSafeImage(attachmentName))
+								attachmentNames.add(attachmentName);
+						}
+						return attachmentNames;
 					}
 					
-				});
+				}) {
+
+					@Override
+					protected void populateItem(final ListItem<String> item) {
+						String attachmentName = item.getModelObject();
+						String attachmentUrl = attachmentSupport.getAttachmentUrl(attachmentName);
+						
+						AjaxLink<Void> selectLink = new AjaxLink<Void>("select") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								String displayName = StringUtils.describeUrl(attachmentName);
+								markdownEditor.insertUrl(target, true, attachmentUrl, displayName, null);
+								onClose(target);
+							}
+
+						};
+						selectLink.add(new ExternalImage("image", StringEscapeUtils.escapeHtml4(attachmentUrl)));
+						item.add(selectLink);
+						
+						item.add(new AjaxLink<Void>("delete") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								attachmentSupport.deleteAttachemnt(attachmentName);
+								target.add(fragment);
+							}
+							
+						});
+					}
+
+				});			
+				
 			} else {
-				add(new WebMarkupContainer("blobPicker").setVisible(false));
+				fragment = new Fragment(CONTENT_ID, "pickAttachedFileFrag", this);
+				fragment.add(new ListView<String>("attachments", new LoadableDetachableModel<List<String>>() {
+
+					@Override
+					protected List<String> load() {
+						return attachmentSupport.getAttachments();
+					}
+					
+				}) {
+
+					@Override
+					protected void populateItem(final ListItem<String> item) {
+						String attachmentName = item.getModelObject();
+						String attachmentUrl = attachmentSupport.getAttachmentUrl(attachmentName);
+						
+						AjaxLink<Void> selectLink = new AjaxLink<Void>("select") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								String displayName = StringUtils.describeUrl(attachmentName);
+								markdownEditor.insertUrl(target, false, attachmentUrl, displayName, null);
+								onClose(target);
+							}
+
+						};
+						selectLink.add(new Label("file", StringEscapeUtils.escapeHtml4(attachmentName)));
+						item.add(selectLink);
+						
+						item.add(new AjaxLink<Void>("delete") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								attachmentSupport.deleteAttachemnt(attachmentName);
+								target.add(fragment);
+							}
+							
+						});
+					}
+
+				});			
 			}
-		} else {
-			add(new WebMarkupContainer("blobPicker").setVisible(false));
 		}
+		fragment.setOutputMarkupId(true);
+		return fragment;
+	}
+	
+	private Component newUploadPanel() {
+		Fragment fragment;
+
+		IModel<Collection<FileUpload>> model = new PropertyModel<Collection<FileUpload>>(this, "uploads");
+		String acceptedFiles;
+		if (isImage)
+			acceptedFiles = "image/*";
+		else
+			acceptedFiles = null;
 		
 		AttachmentSupport attachmentSupport = markdownEditor.getAttachmentSupport();
-		add(new ListView<String>("attachments", new LoadableDetachableModel<List<String>>() {
-
-			@Override
-			protected List<String> load() {
-				List<String> attachmentNames = new ArrayList<>();
-				if (attachmentSupport != null) {
-					for (String attachmentName: attachmentSupport.getAttachments()) {
-						if (!isImage || markdownEditor.isWebSafeImage(attachmentName))
-							attachmentNames.add(attachmentName);
-					}
-				}
-				return attachmentNames;
-			}
+		if (attachmentSupport != null) {
+			fragment = new Fragment(CONTENT_ID, "uploadAttachmentFrag", this);
 			
-		}) {
+			Form<?> form = new Form<Void>("form") {
 
-			@Override
-			protected void populateItem(final ListItem<String> item) {
-				String attachmentName = item.getModelObject();
-				String attachmentUrl = attachmentSupport.getAttachmentUrl(attachmentName);
-				item.add(new AjaxLink<Void>("select") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						markdownEditor.insertUrl(target, isImage, attachmentUrl, attachmentName, null);
-						onClose(target);
-					}
-
-					@Override
-					public IModel<?> getBody() {
-						String body;
-						if (isImage) 
-							body = "<img src='" + StringEscapeUtils.escapeHtml4(attachmentUrl) + "'></img>";
-						else 
-							body = "<span>" + StringEscapeUtils.escapeHtml4(item.getModelObject()) + "<span>";
-						return Model.of(body);
-					}
+				@Override
+				protected void onSubmit() {
+					super.onSubmit();
 					
-				}.setEscapeModelStrings(false));
-				
-				item.add(new AjaxLink<Void>("delete") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						attachmentSupport.deleteAttachemnt(attachmentName);
-						target.add(InsertUrlPanel.this);
-					}
-					
-				});
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getModelObject().isEmpty());
-			}
-			
-		});
-		
-		FileUploadField uploadField = new FileUploadField("file") {
-
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				
-				String script = String.format("turbodev.server.markdown.onFileUploadDomReady('%s', %d, '%s');", 
-						getMarkupId(), attachmentSupport.getAttachmentMaxSize(), 
-						FileUtils.byteCountToDisplaySize(attachmentSupport.getAttachmentMaxSize()));
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				if (isImage)
-					tag.put("accept", "image/*");
-			}
-			
-		};
-		
-		Form<?> uploadForm = new Form<Void>("uploadForm") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				FileUpload upload = uploadField.getFileUpload();
-				if (upload != null) {
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 					String attachmentName;
+					FileUpload upload = uploads.iterator().next();
 					try (InputStream is = upload.getInputStream()) {
 						attachmentName = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 					markdownEditor.insertUrl(target, isImage, 
-							attachmentSupport.getAttachmentUrl(attachmentName), attachmentName, null);
+							attachmentSupport.getAttachmentUrl(attachmentName), StringUtils.describeUrl(attachmentName), null);
 					onClose(target);
-				} else {
-					error("Please select a non-empty file");
-					target.add(InsertUrlPanel.this);						
 				}
-			}
+
+				@Override
+				protected void onFileUploadException(FileUploadException e, Map<String, Object> model) {
+					throw new RuntimeException(e);
+				}
+				
+			};
+			form.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
+			form.setMultiPart(true);
+			form.add(new NotificationPanel("feedback", form));
 			
-			@Override
-			protected void onFileUploadException(FileUploadException e, Map<String, Object> model) {
-				throw new RuntimeException(e);
-			}
+			int maxFilesize = (int) (attachmentSupport.getAttachmentMaxSize()/1024/1024);
+			if (maxFilesize <= 0)
+				maxFilesize = 1;
+			form.add(new DropzoneField("file", model, acceptedFiles, 1, maxFilesize).setRequired(true));
 			
-		};
-		if (attachmentSupport != null) 
-			uploadForm.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
-		uploadForm.setMultiPart(true);
-		uploadForm.add(new NotificationPanel("feedback", uploadForm).setOutputMarkupPlaceholderTag(true));
-		uploadForm.add(uploadField);
-		uploadForm.add(new AjaxButton("submit") {});
-		uploadForm.setVisible(attachmentSupport != null);
-		add(uploadForm);
+			form.add(new AjaxButton("insert"){});
+			
+			fragment.add(form);
+		} else {
+			fragment = new Fragment(CONTENT_ID, "uploadBlobFrag", this);
+			Form<?> form = new Form<Void>("form");
+			form.setMultiPart(true);
+			form.setFileMaxSize(Bytes.megabytes(Project.MAX_UPLOAD_SIZE));
+			add(form);
+			
+			NotificationPanel feedback = new NotificationPanel("feedback", form);
+			feedback.setOutputMarkupPlaceholderTag(true);
+			form.add(feedback);
+			
+			form.add(new DropzoneField("file", model, acceptedFiles, 1, Project.MAX_UPLOAD_SIZE).setRequired(true));
+
+			form.add(new TextField<String>("directory", 
+					new PropertyModel<String>(markdownEditor, "uploadDirectory")));
+			form.add(new TextField<String>("summaryCommitMessage", 
+					new PropertyModel<String>(InsertUrlPanel.this, "summaryCommitMessage")));
+			form.add(new TextArea<String>("detailCommitMessage", 
+					new PropertyModel<String>(InsertUrlPanel.this, "detailCommitMessage")));
+			
+			form.add(new AjaxButton("insert") {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+
+					BlobRenderContext context = Preconditions.checkNotNull(markdownEditor.getBlobRenderContext());
+					String commitMessage = summaryCommitMessage;
+					if (StringUtils.isBlank(commitMessage))
+						commitMessage = "Add files via upload";
+					
+					if (StringUtils.isNotBlank(detailCommitMessage))
+						commitMessage += "\n\n" + detailCommitMessage;
+
+					try {
+						String directory = markdownEditor.getUploadDirectory();
+						context.uploadFiles(uploads, directory, commitMessage);
+						String fileName = uploads.iterator().next().getClientFileName();
+						String url;
+						if (directory != null) {
+							url = directory + "/" + fileName;
+						} else {
+							url = fileName;
+						}
+						markdownEditor.insertUrl(target, isImage, url, StringUtils.describeUrl(fileName), null);
+						onClose(target);
+					} catch (BlobUploadException e) {
+						form.error(e.getMessage());
+						target.add(feedback);
+					}
+				}
+
+				@Override
+				protected void onError(AjaxRequestTarget target, Form<?> form) {
+					super.onError(target, form);
+					target.add(feedback);
+				}
+				
+			});
+			
+			fragment.add(form);
+		}
 		
-		setOutputMarkupId(true);
+		fragment.setOutputMarkupId(true);
+		return fragment;
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new Label("title", isImage?"Insert Image":"Insert Link"));
+		
+		if (markdownEditor.getBlobRenderContext() == null && markdownEditor.getAttachmentSupport() == null) {
+			add(newInputUrlPanel());
+		} else {
+			Fragment fragment = new Fragment(CONTENT_ID, "tabbedFrag", this);
+			List<Tab> tabs = new ArrayList<>();
+			AjaxActionTab inputUrlTab = new AjaxActionTab(Model.of(TAB_INPUT_URL)) {
+
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					Component content = newInputUrlPanel();
+					target.add(content);
+					fragment.replace(content);
+					markdownEditor.setActiveInsertUrlTab(TAB_INPUT_URL);
+				}
+				
+			};
+			tabs.add(inputUrlTab);
+			
+			AjaxActionTab pickExistingTab = new AjaxActionTab(Model.of(TAB_PICK_EXISTING)) {
+
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					Component content = newPickExistingPanel();
+					target.add(content);
+					fragment.replace(content);
+					markdownEditor.setActiveInsertUrlTab(TAB_PICK_EXISTING);
+				}
+				
+			};
+			tabs.add(pickExistingTab);
+			
+			AjaxActionTab uploadTab = new AjaxActionTab(Model.of(TAB_UPLOAD)) {
+
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					Component content = newUploadPanel();
+					target.add(content);
+					fragment.replace(content);
+					markdownEditor.setActiveInsertUrlTab(TAB_UPLOAD);
+				}
+				
+			};
+			tabs.add(uploadTab);
+			
+			fragment.add(new Tabbable("tabs", tabs));
+			
+			inputUrlTab.setSelected(false);
+			if (markdownEditor.getActiveInsertUrlTab().equals(TAB_INPUT_URL)) {
+				inputUrlTab.setSelected(true);
+				fragment.add(newInputUrlPanel());
+			} else if (markdownEditor.getActiveInsertUrlTab().equals(TAB_PICK_EXISTING)) {
+				pickExistingTab.setSelected(true);
+				fragment.add(newPickExistingPanel());
+			} else {
+				uploadTab.setSelected(true);
+				fragment.add(newUploadPanel());
+			}
+			add(fragment);
+		}
+		
+		add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onClose(target);
+			}
+			
+		});
+		
 	}
 
 	protected abstract void onClose(AjaxRequestTarget target);

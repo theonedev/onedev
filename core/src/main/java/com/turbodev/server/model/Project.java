@@ -104,6 +104,8 @@ public class Project extends AbstractEntity {
 
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
 	
+	public static final int MAX_UPLOAD_SIZE = 10; // In mega bytes
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	private Project forkedFrom;

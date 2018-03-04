@@ -1054,11 +1054,11 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	@Sessional
 	@Listen
 	public void on(RefUpdated event) {
-		if (!event.getNewObjectId().equals(ObjectId.zeroId()) 
+		if (!event.getNewCommitId().equals(ObjectId.zeroId()) 
 				&& (event.getRefName().startsWith(Constants.R_HEADS) 
 						|| event.getRefName().startsWith(Constants.R_TAGS))) {
 			try (RevWalk revWalk = new RevWalk(event.getProject().getRepository())) {
-				RevCommit commit = GitUtils.parseCommit(revWalk, event.getNewObjectId());
+				RevCommit commit = GitUtils.parseCommit(revWalk, event.getNewCommitId());
 				if (commit != null) {
 					CollectingWork work = new CollectingWork(PRIORITY, commit, event.getRefName());
 					batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
