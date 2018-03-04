@@ -177,6 +177,9 @@ body.fullscreen {
 	border-left: none;
 	border-radius: 0 0 4px 0;
 }
+.compact-mode.dropdown a {
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
 
 .atwho-view .emoji {
 	display: inline-block; 

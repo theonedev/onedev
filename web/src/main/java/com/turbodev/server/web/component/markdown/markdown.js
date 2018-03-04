@@ -520,7 +520,17 @@ turbodev.server.markdown = {
 	       	else
 	       		callback("selectLink");
 		});
-
+		
+		$input.on("keydown", function(e) {
+			if ((e.ctrlKey|e.metaKey) && e.keyCode == 76) {
+				e.preventDefault();
+				callback("selectLink");
+			} else if ((e.ctrlKey|e.metaKey) && e.keyCode == 73) {
+				e.preventDefault();
+				callback("selectImage");	
+			} 
+		});
+		
 		$input[0].cachedEmojis = [];
 
 	    $input.atwho({

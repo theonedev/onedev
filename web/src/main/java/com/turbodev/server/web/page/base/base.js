@@ -544,9 +544,9 @@ turbodev.server = {
 			return navigator.userAgent.indexOf('Mac') != -1;		
 		},
 		describeUrl: function(url) {
-			if (url.startsWith("http://"))
+			if (url.indexOf("http://") == 0)
 				return url.substring("http://".length);
-			if (url.startsWith("https://"))
+			if (url.indexOf("https://") == 0)
 				return url.substring("https://".length);
 
 			var index = url.lastIndexOf("/");
