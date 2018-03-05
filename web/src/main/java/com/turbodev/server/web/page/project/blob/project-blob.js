@@ -88,13 +88,18 @@ turbodev.server.projectBlob = {
 					"autofit", [$blobContent.width(), $blobContent.height()]);
 		});
 
-		$(document).bind("keydown", "t", function(e) {
-			if ($(".modal:visible").length == 0)
-				callback("quickSearch");
-		});
-		$(document).bind("keydown", "v", function(e) {
-			if ($(".modal:visible").length == 0)
-				callback("advancedSearch");
+		/*
+		 * Do not use hotkey plugin here as otherwise codemirror readonly mode can not focus 
+		 * to search
+		 */
+		$(document).on("keydown", function(e) {
+			if ($(".modal:visible").length == 0 && !turbodev.server.util.canInput(e.target)) {
+				if (e.keyCode == 84) {
+					callback("quickSearch");
+				} else if (e.keyCode == 86) {
+					callback("advancedSearch");
+				}
+			}
 		});
 		
 	},

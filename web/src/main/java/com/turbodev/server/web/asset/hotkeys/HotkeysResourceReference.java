@@ -13,7 +13,7 @@ public class HotkeysResourceReference extends JavaScriptResourceReference {
 	private static final long serialVersionUID = 1L;
 
 	public HotkeysResourceReference() {
-		super(HotkeysResourceReference.class, "jquery.hotkeys.patched.js");
+		super(HotkeysResourceReference.class, "jquery.hotkeys.js");
 	}
 
 	@Override

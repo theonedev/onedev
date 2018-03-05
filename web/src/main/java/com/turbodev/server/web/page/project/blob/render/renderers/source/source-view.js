@@ -56,9 +56,13 @@ turbodev.server.sourceView = {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
 			$(document).data("SourceViewShortcutsBinded", true);
 
-			$(document).bind("keydown", "o", function(e) {
-				if ($(".modal:visible").length == 0) {
-					e.preventDefault();
+			/*
+			 * Do not use hotkey plugin here as otherwise codemirror readonly mode can not focus 
+			 * to search
+			 */
+			$(document).on("keydown", function(e) {
+				if ($(".modal:visible").length == 0 && !turbodev.server.util.canInput(e.target) 
+						&& e.keyCode == 79) {
 					var $sourceView = $(".source-view");
 					if ($sourceView.length != 0 && $(".outline-toggle").length != 0)
 						$sourceView.data("callback")("outlineSearch");
@@ -79,7 +83,7 @@ turbodev.server.sourceView = {
 	    	}
 	    });
 	    
-	    $code.find("textarea").attr("readonly", "readonly");
+	    $code.find("textarea").addClass("readonly");
 	    
 	    $code.mouseover(function(e) {
 			var node = e.target || e.srcElement, $node = $(node);
