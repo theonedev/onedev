@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -33,6 +35,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.FileMode;
@@ -42,8 +45,8 @@ import com.google.common.base.Preconditions;
 import com.turbodev.server.git.BlobIdent;
 import com.turbodev.server.git.BlobIdentFilter;
 import com.turbodev.server.model.Project;
+import com.turbodev.server.web.component.blobpicker.BlobPicker;
 import com.turbodev.server.web.component.dropzonefield.DropzoneField;
-import com.turbodev.server.web.component.projectfilepicker.ProjectFilePicker;
 import com.turbodev.server.web.component.tabbable.AjaxActionTab;
 import com.turbodev.server.web.component.tabbable.Tab;
 import com.turbodev.server.web.component.tabbable.Tabbable;
@@ -59,6 +62,12 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 abstract class InsertUrlPanel extends Panel {
 
 	private static final MimetypesFileTypeMap MIME_TYPES = new MimetypesFileTypeMap();
+
+	private static final MetaDataKey<String> ACTIVE_TAB = new MetaDataKey<String>(){};
+	
+	private static final MetaDataKey<String> UPLOAD_DIRECTORY = new MetaDataKey<String>(){};
+	
+	private static final MetaDataKey<HashSet<String>> BLOB_PICKER_STATE = new MetaDataKey<HashSet<String>>(){};
 	
 	static final String TAB_INPUT_URL = "Input URL";
 	
@@ -171,7 +180,13 @@ abstract class InsertUrlPanel extends Panel {
 				throw new RuntimeException(e);
 			}
 			
-			Set<BlobIdent> filePickerState = markdownEditor.getFilePickerState();
+			Set<BlobIdent> blobPickerState = new HashSet<>();
+			Set<String> expandedPaths = WebSession.get().getMetaData(BLOB_PICKER_STATE);
+			if (expandedPaths != null) {
+				for (String path: expandedPaths)
+					blobPickerState.add(new BlobIdent(commitId.name(), path, FileMode.TREE.getBits()));
+			} 
+			
 			BlobIdent blobIdent = context.getBlobIdent();
 			String parentPath;
 			if (blobIdent.isTree())
@@ -182,14 +197,14 @@ abstract class InsertUrlPanel extends Panel {
 				parentPath = null;
 			
 			while (parentPath != null) {
-				filePickerState.add(new BlobIdent(commitId.name(), parentPath, FileMode.TYPE_TREE));
+				blobPickerState.add(new BlobIdent(commitId.name(), parentPath, FileMode.TYPE_TREE));
 				if (parentPath.contains("/"))
 					parentPath = StringUtils.substringBeforeLast(parentPath, "/");
 				else
 					parentPath = null;
 			}
 			
-			fragment.add(new ProjectFilePicker("files", commitId) {
+			fragment.add(new BlobPicker("files", commitId) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
@@ -213,8 +228,16 @@ abstract class InsertUrlPanel extends Panel {
 				}
 
 				@Override
+				protected void onStateChange() {
+					HashSet<String> expandedPaths = new HashSet<>();
+					for (BlobIdent blobIdent: blobPickerState)
+						expandedPaths.add(blobIdent.path);
+					WebSession.get().setMetaData(BLOB_PICKER_STATE, expandedPaths);
+				}
+
+				@Override
 				protected Set<BlobIdent> getState() {
-					return markdownEditor.getFilePickerState();
+					return blobPickerState;
 				}
 				
 			});
@@ -378,12 +401,27 @@ abstract class InsertUrlPanel extends Panel {
 			
 			form.add(new DropzoneField("file", model, acceptedFiles, 1, Project.MAX_UPLOAD_SIZE).setRequired(true));
 
-			form.add(new TextField<String>("directory", 
-					new PropertyModel<String>(markdownEditor, "uploadDirectory")));
+			form.add(new TextField<String>("directory", new IModel<String>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public String getObject() {
+					return WebSession.get().getMetaData(UPLOAD_DIRECTORY);
+				}
+
+				@Override
+				public void setObject(String object) {
+					WebSession.get().setMetaData(UPLOAD_DIRECTORY, object);
+				}
+				
+			})); 
 			form.add(new TextField<String>("summaryCommitMessage", 
-					new PropertyModel<String>(InsertUrlPanel.this, "summaryCommitMessage")));
+					new PropertyModel<String>(this, "summaryCommitMessage")));
 			form.add(new TextArea<String>("detailCommitMessage", 
-					new PropertyModel<String>(InsertUrlPanel.this, "detailCommitMessage")));
+					new PropertyModel<String>(this, "detailCommitMessage")));
 			
 			form.add(new AjaxButton("insert") {
 
@@ -400,7 +438,7 @@ abstract class InsertUrlPanel extends Panel {
 						commitMessage += "\n\n" + detailCommitMessage;
 
 					try {
-						String directory = markdownEditor.getUploadDirectory();
+						String directory = WebSession.get().getMetaData(UPLOAD_DIRECTORY);
 						context.uploadFiles(uploads, directory, commitMessage);
 						String fileName = uploads.iterator().next().getClientFileName();
 						String url;
@@ -450,7 +488,7 @@ abstract class InsertUrlPanel extends Panel {
 					Component content = newInputUrlPanel();
 					target.add(content);
 					fragment.replace(content);
-					markdownEditor.setActiveInsertUrlTab(TAB_INPUT_URL);
+					WebSession.get().setMetaData(ACTIVE_TAB, TAB_INPUT_URL);
 				}
 				
 			};
@@ -463,7 +501,7 @@ abstract class InsertUrlPanel extends Panel {
 					Component content = newPickExistingPanel();
 					target.add(content);
 					fragment.replace(content);
-					markdownEditor.setActiveInsertUrlTab(TAB_PICK_EXISTING);
+					WebSession.get().setMetaData(ACTIVE_TAB, TAB_PICK_EXISTING);
 				}
 				
 			};
@@ -476,7 +514,7 @@ abstract class InsertUrlPanel extends Panel {
 					Component content = newUploadPanel();
 					target.add(content);
 					fragment.replace(content);
-					markdownEditor.setActiveInsertUrlTab(TAB_UPLOAD);
+					WebSession.get().setMetaData(ACTIVE_TAB, TAB_UPLOAD);
 				}
 				
 			};
@@ -485,15 +523,16 @@ abstract class InsertUrlPanel extends Panel {
 			fragment.add(new Tabbable("tabs", tabs));
 			
 			inputUrlTab.setSelected(false);
-			if (markdownEditor.getActiveInsertUrlTab().equals(TAB_INPUT_URL)) {
-				inputUrlTab.setSelected(true);
-				fragment.add(newInputUrlPanel());
-			} else if (markdownEditor.getActiveInsertUrlTab().equals(TAB_PICK_EXISTING)) {
+			String activeTab = WebSession.get().getMetaData(ACTIVE_TAB);
+			if (TAB_PICK_EXISTING.equals(activeTab)) {
 				pickExistingTab.setSelected(true);
 				fragment.add(newPickExistingPanel());
-			} else {
+			} else if (TAB_UPLOAD.equals(activeTab)) {
 				uploadTab.setSelected(true);
 				fragment.add(newUploadPanel());
+			} else {
+				inputUrlTab.setSelected(true);
+				fragment.add(newInputUrlPanel());
 			}
 			add(fragment);
 		}

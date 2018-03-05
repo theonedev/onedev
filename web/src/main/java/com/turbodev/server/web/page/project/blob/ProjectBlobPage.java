@@ -581,34 +581,45 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		};
 	}
 	
+	private AdvancedSearchPanel advancedSearchPanel;
+	
+	private ModalPanel advancedSearchPanelModal;
+	
 	private AdvancedSearchPanel newAdvancedSearchPanel(String id, ModalPanel modal) {
-		return new AdvancedSearchPanel(id, projectModel, new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return state.blobIdent.revision;
-			}
-			
-		}) {
-
-			@Override
-			protected void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
-				newSearchResult(target, hits);
-				resizeWindow(target);
-				modal.close();
-			}
-
-			@Override
-			protected void onCancel(AjaxRequestTarget target) {
-				modal.close();
-			}
-
-			@Override
-			protected BlobIdent getCurrentBlob() {
-				return state.blobIdent;
-			}
-			
-		};
+		/*
+		 * Re-use advanced search panel instance so that search options can be preserved in the page
+		 */
+		advancedSearchPanelModal = modal;
+		if (advancedSearchPanel == null) {
+			advancedSearchPanel = new AdvancedSearchPanel(id, projectModel, new AbstractReadOnlyModel<String>() {
+	
+				@Override
+				public String getObject() {
+					return state.blobIdent.revision;
+				}
+				
+			}) {
+	
+				@Override
+				protected void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
+					newSearchResult(target, hits);
+					resizeWindow(target);
+					advancedSearchPanelModal.close();
+				}
+	
+				@Override
+				protected void onCancel(AjaxRequestTarget target) {
+					advancedSearchPanelModal.close();
+				}
+	
+				@Override
+				protected BlobIdent getCurrentBlob() {
+					return state.blobIdent;
+				}
+				
+			};
+		} 
+		return advancedSearchPanel;
 	}
 	
 	private void newBlobContent(@Nullable AjaxRequestTarget target) {
@@ -847,6 +858,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 	@Override
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
+		TextRange prevMark = state.mark;
 		state.mark = TextRange.of(tokenPos);
 		if (!blobIdent.revision.equals(state.blobIdent.revision)) {
 			state.blobIdent = blobIdent;
@@ -857,7 +869,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			onResolvedRevisionChange(target);
 		} else {
 			if (!Objects.equal(state.blobIdent.path, blobIdent.path) 
-					|| state.mark != null && !(get(BLOB_CONTENT_ID) instanceof Markable)) {
+					|| (state.mark != null) != (prevMark != null)) {
 				state.blobIdent.path = blobIdent.path;
 				state.blobIdent.mode = blobIdent.mode;
 				state.mode = Mode.VIEW;

@@ -104,4 +104,5 @@ public interface BlobRenderContext extends Serializable {
 	String getInitialNewPath();
 	
 	String getAutosaveKey();
+	
 }

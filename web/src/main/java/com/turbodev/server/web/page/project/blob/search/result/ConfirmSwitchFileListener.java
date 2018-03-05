@@ -8,12 +8,16 @@ class ConfirmSwitchFileListener implements IAjaxCallListener {
 
 	private final String path;
 	
+	private final boolean hasMark;
+	
 	public ConfirmSwitchFileListener() {
 		path = null;
+		hasMark = false;
 	}
 	
-	public ConfirmSwitchFileListener(String path) {
+	public ConfirmSwitchFileListener(String path, boolean hasMark) {
 		this.path = path;
+		this.hasMark = hasMark;
 	}
 	
 	@Override
@@ -24,8 +28,8 @@ class ConfirmSwitchFileListener implements IAjaxCallListener {
 	@Override
 	public CharSequence getPrecondition(Component component) {
 		if (path != null) {
-			return String.format("return turbodev.server.searchResult.confirmSwitchFileByPath('%s');", 
-					StringEscapeUtils.escapeEcmaScript(path));
+			return String.format("return turbodev.server.searchResult.confirmSwitchFileByPath('%s', %b);", 
+					StringEscapeUtils.escapeEcmaScript(path), hasMark);
 		} else {
 			return String.format("return turbodev.server.searchResult.confirmSwitchFileByLink('%s');", 
 					component.getMarkupId(true));

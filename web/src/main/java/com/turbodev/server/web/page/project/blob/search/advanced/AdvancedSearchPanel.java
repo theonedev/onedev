@@ -2,16 +2,16 @@ package com.turbodev.server.web.page.project.blob.search.advanced;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
 
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.shiro.codec.Base64;
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -28,18 +28,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.http.WebRequest;
-import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.validation.IErrorMessageSource;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
 import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.turbodev.utils.StringUtils;
 import com.turbodev.server.TurboDev;
 import com.turbodev.server.git.BlobIdent;
 import com.turbodev.server.model.Project;
@@ -50,20 +44,25 @@ import com.turbodev.server.search.query.FileQuery;
 import com.turbodev.server.search.query.SymbolQuery;
 import com.turbodev.server.search.query.TextQuery;
 import com.turbodev.server.search.query.TooGeneralQueryException;
+import com.turbodev.server.web.WebSession;
 import com.turbodev.server.web.behavior.RunTaskBehavior;
 import com.turbodev.server.web.component.tabbable.AjaxActionTab;
 import com.turbodev.server.web.component.tabbable.Tab;
 import com.turbodev.server.web.component.tabbable.Tabbable;
 import com.turbodev.server.web.page.project.blob.search.result.SearchResultPanel;
+import com.turbodev.utils.StringUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import jersey.repackaged.com.google.common.base.Throwables;
 
 @SuppressWarnings("serial")
 public abstract class AdvancedSearchPanel extends Panel {
 
-	private static final String COOKIE_SEARCH_TYPE = "blob.search.advanced.type";
+	private static final MetaDataKey<Class<? extends SearchOption>> ACTIVE_TAB = 
+			new MetaDataKey<Class<? extends SearchOption>>(){};
 	
-	private static final Logger logger = LoggerFactory.getLogger(AdvancedSearchPanel.class);
+	private static final MetaDataKey<HashMap<Class<?>, SearchOption>> SEARCH_OPTIONS = 
+			new MetaDataKey<HashMap<Class<?>, SearchOption>>(){};
 	
 	private final IModel<Project> projectModel;
 	
@@ -79,13 +78,12 @@ public abstract class AdvancedSearchPanel extends Panel {
 		this.projectModel = projectModel;
 		this.revisionModel = revisionModel;
 		
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie(COOKIE_SEARCH_TYPE);
-		if (cookie != null) {
+		Class<? extends SearchOption> activeTab = WebSession.get().getMetaData(ACTIVE_TAB);
+		if (activeTab != null) {
 			try {
-				option = (SearchOption) Class.forName(cookie.getValue()).newInstance();
+				option = activeTab.newInstance();
 			} catch (Exception e) {
-				logger.debug("Error restoring search option from cookie", e);
+				Throwables.propagate(e);
 			}
 		}
 	}
@@ -160,11 +158,10 @@ public abstract class AdvancedSearchPanel extends Panel {
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}
-						WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-						byte[] bytes = SerializationUtils.serialize(option);
-						Cookie cookie = new Cookie(option.getClass().getName(), Base64.encodeToString(bytes));
-						cookie.setMaxAge(Integer.MAX_VALUE);
-						response.addCookie(cookie);
+						
+						HashMap<Class<?>, SearchOption> savedOptions = getSavedOptions();
+						savedOptions.put(option.getClass(), option);
+						WebSession.get().setMetaData(SEARCH_OPTIONS, savedOptions);
 						
 						onSearchComplete(target, hits);
 					}
@@ -198,10 +195,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 	}
 	
 	private void onSelectTab(AjaxRequestTarget target) {
-		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-		Cookie cookie = new Cookie(COOKIE_SEARCH_TYPE, option.getClass().getName());
-		cookie.setMaxAge(Integer.MAX_VALUE);
-		response.addCookie(cookie);
+		WebSession.get().setMetaData(ACTIVE_TAB, option.getClass());
 		SearchOptionEditor editor = newSearchOptionEditor(option);
 		form.replace(editor);
 		target.add(editor);
@@ -214,6 +208,13 @@ public abstract class AdvancedSearchPanel extends Panel {
 			return newFileSearchOptionEditor();
 		else
 			return newTextSearchOptionEditor();
+	}
+	
+	private HashMap<Class<?>, SearchOption> getSavedOptions() {
+		HashMap<Class<?>, SearchOption> savedOptions = WebSession.get().getMetaData(SEARCH_OPTIONS);
+		if (savedOptions == null)
+			savedOptions = new HashMap<>();
+		return savedOptions;
 	}
 	
 	private SearchOptionEditor newSymbolSearchOptionEditor() {
@@ -496,17 +497,10 @@ public abstract class AdvancedSearchPanel extends Panel {
 
 		public SearchOptionEditor(String markupId) {
 			super("searchOptions", markupId, AdvancedSearchPanel.this);
-			
-			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-			Cookie cookie = request.getCookie(option.getClass().getName());
-			if (cookie != null) {
-				try {
-					byte[] bytes = Base64.decode(cookie.getValue());
-					option = (SearchOption) SerializationUtils.deserialize(bytes);
-				} catch (Exception e) {
-					logger.debug("Error restoring search option from cookie", e);
-				}
-			} 
+
+			Map<Class<?>, SearchOption> savedOptions = getSavedOptions();
+			if (savedOptions.containsKey(option.getClass()))
+				option = savedOptions.get(option.getClass());
 		}
 		
 		@Override

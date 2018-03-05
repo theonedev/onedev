@@ -57,8 +57,8 @@ turbodev.server.sourceView = {
 			$(document).data("SourceViewShortcutsBinded", true);
 
 			/*
-			 * Do not use hotkey plugin here as otherwise codemirror readonly mode can not focus 
-			 * to search
+			 * Do not use hotkey plugin here as otherwise codemirror search will not function 
+			 * properly in readonly mode
 			 */
 			$(document).on("keydown", function(e) {
 				if ($(".modal:visible").length == 0 && !turbodev.server.util.canInput(e.target) 

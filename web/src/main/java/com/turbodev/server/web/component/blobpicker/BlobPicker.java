@@ -1,4 +1,4 @@
-package com.turbodev.server.web.component.projectfilepicker;
+package com.turbodev.server.web.component.blobpicker;
 
 import java.util.Iterator;
 import java.util.List;
@@ -28,11 +28,11 @@ import com.turbodev.server.web.component.BlobIcon;
 import com.turbodev.server.web.component.link.ViewStateAwareAjaxLink;
 
 @SuppressWarnings("serial")
-public abstract class ProjectFilePicker extends Panel {
+public abstract class BlobPicker extends Panel {
 
 	private final ObjectId commitId;
 	
-	public ProjectFilePicker(String id, ObjectId commitId) {
+	public BlobPicker(String id, ObjectId commitId) {
 		super(id);
 		
 		this.commitId = commitId;
@@ -84,24 +84,32 @@ public abstract class ProjectFilePicker extends Panel {
 			}
 			
 			@Override
+			public void collapse(BlobIdent blobIdent) {
+				super.collapse(blobIdent);
+				onStateChange();
+			}
+
+			@Override
 			public void expand(BlobIdent blobIdent) {
 				super.expand(blobIdent);
 				
 				List<BlobIdent> children = getProject().getChildren(blobIdent, getBlobIdentFilter(), commitId);
 				if (children.size() == 1 && children.get(0).isTree()) 
 					expand(children.get(0));
+				
+				onStateChange();
 			}
 			
 			@Override
 			protected Component newContentComponent(String id, IModel<BlobIdent> node) {
 				BlobIdent blobIdent = node.getObject();
 				if (blobIdent.isTree()) {
-					Fragment fragment = new Fragment(id, "folderFrag", ProjectFilePicker.this);
+					Fragment fragment = new Fragment(id, "folderFrag", BlobPicker.this);
 					fragment.add(new BlobIcon("icon", node));
 					fragment.add(new Label("label", blobIdent.getName()));
 					return fragment;
 				} else {
-					Fragment fragment = new Fragment(id, "fileFrag", ProjectFilePicker.this);
+					Fragment fragment = new Fragment(id, "fileFrag", BlobPicker.this);
 					AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
 
 						@Override
@@ -124,7 +132,11 @@ public abstract class ProjectFilePicker extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ProjectFilePickerResourceReference()));
+		response.render(CssHeaderItem.forReference(new BlobPickerResourceReference()));
+	}
+	
+	protected void onStateChange() {
+		
 	}
 	
 	protected abstract Project getProject();

@@ -535,7 +535,7 @@ turbodev.server = {
 	util: {
 		canInput: function(element) {
 			var $element = $(element);
-			return ($element.is("input") || $element.is("textarea") && $element.is("select")) && !$element.hasClass("readonly");			
+			return ($element.is("input") || $element.is("textarea") || $element.is("select")) && !$element.hasClass("readonly");			
 		},
 		isDevice: function() {
 			var ua = navigator.userAgent.toLowerCase();

@@ -83,7 +83,8 @@ turbodev.server.sourceEdit = {
 		var autosaveValue = localStorage.getItem(autosaveKey);
 		if (autosaveValue) {
 			cm.doc.setValue(autosaveValue);
-			$warning.show();				
+			$warning.show();	
+			$(window).resize();
 		}
 		
 		if (mark && turbodev.server.viewState.getFromHistory() === undefined 

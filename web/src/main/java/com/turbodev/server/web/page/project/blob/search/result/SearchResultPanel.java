@@ -28,6 +28,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
+import com.turbodev.jsymbol.TokenPosition;
 import com.turbodev.jsymbol.util.HighlightableLabel;
 import com.turbodev.server.git.BlobIdent;
 import com.turbodev.server.model.support.TextRange;
@@ -161,6 +162,14 @@ public abstract class SearchResultPanel extends Panel {
 			return activeBlob.getBlobPath();
 	}
 	
+	private TokenPosition getActiveBlobMark(ActiveIndex activeIndex) {
+		MatchedBlob activeBlob = blobs.get(activeIndex.blob);
+		if (activeIndex.hit != -1)
+			return activeBlob.getHits().get(activeIndex.hit).getTokenPos();
+		else
+			return null;
+	}
+	
 	private ActiveIndex getPrevMatch() {
 		if (prevMatchLink.isEnabled()) {
 			ActiveIndex activeIndex = new ActiveIndex(activeBlobIndex, activeHitIndex);
@@ -229,6 +238,13 @@ public abstract class SearchResultPanel extends Panel {
 		}
 	}
 	
+	private String getUrlPath(String blobPath) {
+		ProjectBlobPage.State state = new ProjectBlobPage.State();
+		state.blobIdent = new BlobIdent(context.getBlobIdent());
+		state.blobIdent.path = blobPath;
+		return RequestCycle.get().urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(context.getProject(), state)).toString();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -242,8 +258,13 @@ public abstract class SearchResultPanel extends Panel {
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
 				ActiveIndex activeIndex = getPrevMatch();
-				if (activeIndex != null)
-					attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener(getActiveBlobPath(activeIndex)));
+				if (activeIndex != null) {
+					String prevBlobPath = getActiveBlobPath(activeIndex);
+					TokenPosition prevTokenPos = getActiveBlobMark(activeIndex);
+					
+					String prevUrlPath = getUrlPath(prevBlobPath);
+					attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener(prevUrlPath, prevTokenPos!=null));
+				}
 			}
 
 			@Override
@@ -267,9 +288,14 @@ public abstract class SearchResultPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				ActiveIndex activeIndex = getNextMatch();
-				if (activeIndex != null)
-					attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener(getActiveBlobPath(activeIndex)));
+				ActiveIndex nextIndex = getNextMatch();
+				if (nextIndex != null) {
+					String nextBlobPath = getActiveBlobPath(nextIndex);
+					TokenPosition nextTokenPos = getActiveBlobMark(nextIndex);
+					
+					String nextUrlPath = getUrlPath(nextBlobPath);
+					attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener(nextUrlPath, nextTokenPos!=null));
+				}
 			}
 			
 			@Override
