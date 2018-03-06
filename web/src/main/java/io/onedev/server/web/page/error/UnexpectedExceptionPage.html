@@ -1,0 +1,112 @@
+<wicket:extend>
+	<script type="text/javascript">
+		function validateBugReport() {
+			var noError = true;
+			var value = document.getElementById("subject").value.toString();
+			if (value == null || value.trim().length == 0) {
+				$("#subject_error").show();
+				noError = false;
+			} else {
+				$("#subject_error").hide();
+			}
+			value = document.getElementById("description").value.toString();
+			if (value == null || value.trim().length == 0) {
+				$("#description_error").show();
+				noError = false;
+			} else {
+				$("#description_error").hide();
+			}
+			value = document.getElementById("contact_name").value.toString();
+			if (value == null || value.trim().length == 0) {
+				$("#contact_name_error").show();
+				noError = false;
+			} else {
+				$("#contact_name_error").hide();
+			}
+			value = document.getElementById("contact_email").value.toString();
+			if (value == null || value.trim().length == 0) {
+				$("#contact_email_error").show();
+				noError = false;
+			} else {
+				$("#contact_email_error").hide();
+			}
+
+			if (!noError) {
+				$(".has-errors").show();
+				$(".submitting").hide();
+			} else {
+				$(".has-errors").hide();
+				$(".submitting").show();
+			}
+			return noError;
+		};
+	</script>
+	<div class="wide center-box">
+		<div class="title">Whoops! An Unexpected Exception Occurred</div>
+
+		<div class="description">Sorry, we've encountered an unexpected
+			exception. If you believe it is a bug of OneDev, please send this
+			error using below form to help us improving quality of the product</div>
+
+		<form action="https://www.onedev.io/bug-report" method="post">
+			<div class="actions">
+				<input type="submit" value="Send Error Report" class="btn btn-primary" onclick="if (validateBugReport()) this.form.submit();return false;"></input>
+				<input wicket:id="homeTop" type="button" value="Back to Home" class="btn btn-primary"></input>
+			</div>
+			<h4 class="alert alert-danger has-errors">Fix errors below</h4>
+			<h4 class="alert alert-info submitting">Submitting bug report...</h4>
+			<table class="table properties">
+				<tbody>
+					<tr>
+						<td class="name">Subject <span class="required">*</span></td>
+						<td class="value">
+							<input type="text" id="subject" name="subject" value="Unexpected exception" class="form-control"></input>
+							<div id="subject_error" class="error"><i class="fa fa-warning"></i> Subject can not be empty</div>
+							<div class="help-block">Specify title of the bug report</div>
+						</td>
+					</tr>
+					<tr>
+						<td class="name">Description <span class="required">*</span></td>
+						<td class="value">
+							<textarea wicket:id="description" id="description" name="description" class="form-control no-autosize"></textarea>
+							<div id="description_error" class="error"><i class="fa fa-warning"></i> Description can not be empty</div>
+							<div class="help-block">Please describe details for the
+								error below. It is filled with error message of the exception by
+								default. You may add more details here, for example, to describe
+								steps to reproduce the error</div>
+						</td>
+					</tr>
+					<tr>
+						<td class="name">Contact Email <span class="required">*</span></td>
+						<td class="value">
+							<input wicket:id="contactEmail" id="contact_email" type="text" name="contact_email" class="form-control">
+							<div id="contact_email_error" class="error"><i class="fa fa-warning"></i> Contact email can not be empty</div>
+							<div class="help-block">Please provide an email so that we can contact with to get details of the 
+							error if necessary</div>
+						</td>
+					</tr>
+					<tr>
+						<td class="name">Contact Name <span class="required">*</span></td>
+						<td class="value">
+							<input wicket:id="contactName" id="contact_name" type="text" name="contact_name" class="form-control">
+							<div id="contact_name_error" class="error"><i class="fa fa-warning"></i> Contact name can not be empty</div>
+							<div class="help-block">Please provide name of the contact above</div></td>
+					</tr>
+					<tr>
+						<td colspan="2" class="caption">Below information will also be sent to help us analyzing the problem</td>
+					</tr>
+					<tr wicket:id="props">
+						<td wicket:id="name"></td>
+						<td wicket:id="value"></td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="actions">
+				<input type="submit" value="Send Error Report" onclick="if (validateBugReport()) this.form.submit();return false;" class="btn btn-primary"></input> 
+				<input wicket:id="homeBottom" type="button" value="Back to Home" class="btn btn-primary"></input>
+			</div>
+			<input wicket:id="backUrl" type="hidden" name="back_url"></input>
+			<input wicket:id="additionalInfo" type="hidden" name="additional_info"></input>
+		</form>
+	</div>
+</wicket:extend>

@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-search</artifactId>  
     <parent> 
-        <groupId>com.turbodev</groupId>  
+        <groupId>io.onedev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0.1-build110</version> 
+        <version>1.0.2-build111</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.turbodev</groupId>  
+                <groupId>io.onedev</groupId>  
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
             <plugin> 
@@ -24,9 +24,9 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency>  
         <dependency> 
             <artifactId>lucene-core</artifactId>  
@@ -60,7 +60,7 @@
         </dependency>  
     </dependencies>  
     <properties> 
-        <moduleClass>com.turbodev.server.search.SearchModule</moduleClass>  
+        <moduleClass>io.onedev.server.search.SearchModule</moduleClass>  
         <lucene.version>4.10.3</lucene.version> 
     </properties> 
 </project>

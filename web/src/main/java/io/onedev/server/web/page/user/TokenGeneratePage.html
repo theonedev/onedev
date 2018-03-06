@@ -1,0 +1,19 @@
+<wicket:extend>
+	<div class="token-generate">
+		<div class="body">
+			<div class="alert alert-info">Access token can be used to provide access to OneDev in some third-party 
+			applications not supporting http basic authentication</div>
+			<form wicket:id="form" class="leave-confirm" autocomplete="off">
+				<div wicket:id="editor"></div>
+				<div class="actions">
+					<input type="submit" class="btn btn-primary dirty-aware" value="Display"></input>
+				</div>
+			</form>
+			<wicket:enclosure child="token">
+			<div class="token-value">
+				<b>Access Token:</b> <span wicket:id="token"></span> <a wicket:id="copy"><i class="fa fa-clipboard"></i></a>
+			</div>
+			</wicket:enclosure>
+		</div>
+	</div>
+</wicket:extend>

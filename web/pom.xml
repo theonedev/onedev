@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-web</artifactId>  
     <parent> 
-        <groupId>com.turbodev</groupId>  
+        <groupId>io.onedev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0.1-build110</version> 
+        <version>1.0.2-build111</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.turbodev</groupId>  
+                <groupId>io.onedev</groupId>  
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
             <plugin> 
@@ -77,14 +77,14 @@
 			<version>5.21.0</version>
 		</dependency>
 		<dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-rest</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency>  
         <dependency> 
             <groupId>commons-fileupload</groupId>  
@@ -102,18 +102,18 @@
             <version>4.0.1.Final</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-search</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency> 
         <dependency>
-        	<groupId>com.turbodev</groupId>
+        	<groupId>io.onedev</groupId>
         	<artifactId>codeassist</artifactId>
         	<version>1.0.0</version>
         </dependency>
     </dependencies>  
     <properties> 
-        <moduleClass>com.turbodev.server.web.WebModule</moduleClass>  
+        <moduleClass>io.onedev.server.web.WebModule</moduleClass>  
         <wicket.version>7.3.0</wicket.version>  
         <wicketbootstrap.version>0.10.6</wicketbootstrap.version> 
     </properties> 

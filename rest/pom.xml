@@ -3,23 +3,23 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-rest</artifactId>  
     <parent> 
-        <groupId>com.turbodev</groupId>  
+        <groupId>io.onedev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0.1-build110</version> 
+        <version>1.0.2-build111</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.turbodev</groupId>  
+                <groupId>io.onedev</groupId>  
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
         </plugins> 
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency> 
         <dependency> 
             <groupId>org.glassfish.jersey.containers</groupId>  
@@ -36,6 +36,6 @@
         </dependency>  
     </dependencies>  
     <properties> 
-        <moduleClass>com.turbodev.server.rest.RestModule</moduleClass> 
+        <moduleClass>io.onedev.server.rest.RestModule</moduleClass> 
     </properties> 
 </project>

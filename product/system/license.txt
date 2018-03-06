@@ -1,21 +1,21 @@
-Software License Agreement for TurboDev.
+Software License Agreement for OneDev.
 
-This is a legal agreement between you and TurboDev Pty covering your 
-use of TurboDev (the "Software"). Be sure to read the following 
+This is a legal agreement between you and OneDev Pty covering your 
+use of OneDev (the "Software"). Be sure to read the following 
 agreement before using the Software. BY USING THE SOFTWARE, YOU ARE 
 AGREEING TO BE BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT 
 AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT USE THE SOFTWARE AND 
 DESTROY ALL COPIES IN YOUR POSSESSION.  
 
-The Software is owned by TurboDev Pty and is protected by 
+The Software is owned by OneDev Pty and is protected by 
 international treaty provisions.  Therefore, you must treat the 
 Software like any other copyrighted material (e.  g., a book or 
 musical recording).  
 
-TurboDev Pty grants you the right to use TurboDev for free for 10 
+OneDev Pty grants you the right to use OneDev for free for 10 
 named users on unlimited servers. Additional users require license 
-generated from turbodev.com account. Licenses generated from single 
-turbodev.com account should only be used in a single TurboDev instance, 
+generated from onedev.io account. Licenses generated from single 
+onedev.io account should only be used in a single OneDev instance, 
 except for those used for backup and other non-production purposes. 
 
 You may not rent or lease the Software, nor may you modify, adapt, 
@@ -25,13 +25,13 @@ Software terminates automatically and you must then destroy all copies
 of the Software in your possession.  
 
 The Software and its related documentation are provided "AS IS" and 
-without warranty of any kind and TurboDev Pty expressly disclaims all 
+without warranty of any kind and OneDev Pty expressly disclaims all 
 other warranties, expressed or implied, including, but not limited to, 
 the implied warranties of merchantability and fitness for a particular 
-purpose. Under no circumstances shall TurboDev Pty be liable for any 
+purpose. Under no circumstances shall OneDev Pty be liable for any 
 incidental, special, or consequential damages that result from the use 
 or inability to use the Software or related documentation, even if 
-TurboDev Pty has been advised of the possibility of such damages. In no 
-event shall TurboDev Pty liability exceed the license fee paid, if any.  
+OneDev Pty has been advised of the possibility of such damages. In no 
+event shall OneDev Pty liability exceed the license fee paid, if any.  
 
-Copyright (C) 2016-2018 by TurboDev Pty All rights reserved. 
+Copyright (C) 2016-2018 by OneDev Pty All rights reserved. 

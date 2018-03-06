@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-core</artifactId>  
     <parent> 
-        <groupId>com.turbodev</groupId>  
+        <groupId>io.onedev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0.1-build110</version> 
+        <version>1.0.2-build111</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.turbodev</groupId>  
+                <groupId>io.onedev</groupId>  
                 <artifactId>plugin-maven</artifactId> 
             </plugin>  
             <plugin> 
@@ -136,7 +136,7 @@
             <artifactId>unbescape</artifactId> 
         </dependency>  
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>launcher-loader</artifactId>  
             <version>1.0.0</version> 
         </dependency>  
@@ -170,12 +170,12 @@
             <artifactId>tika-core</artifactId> 
         </dependency> 
         <dependency>
-        	<groupId>com.turbodev</groupId>
+        	<groupId>io.onedev</groupId>
         	<artifactId>jsymbol</artifactId>
         	<version>1.0.0</version>
         </dependency>
         <dependency>
-        	<groupId>com.turbodev</groupId>
+        	<groupId>io.onedev</groupId>
         	<artifactId>jsyntax</artifactId>
         	<version>1.0.0</version>
         </dependency>
@@ -215,7 +215,7 @@
         	<version>${flexmark.version}</version>
         </dependency>
         <dependency>
-        	<groupId>com.turbodev</groupId>
+        	<groupId>io.onedev</groupId>
         	<artifactId>jsyntax</artifactId>
         	<version>1.0.0</version>
         </dependency>
@@ -267,7 +267,7 @@
         </dependency>  
 	</dependencies>  
     <properties> 
-        <moduleClass>com.turbodev.server.CoreModule</moduleClass> 
+        <moduleClass>io.onedev.server.CoreModule</moduleClass> 
         <hibernate.version>5.2.10.Final</hibernate.version> 
         <shiro.version>1.4.0</shiro.version> 
         <jgit.version>4.7.0.201704051617-r</jgit.version>  

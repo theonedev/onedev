@@ -65,7 +65,7 @@ import org.apache.wicket.util.string.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.turbodev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketManager;
 
 /**
  * The base implementation of IWebSocketProcessor. Provides the common logic

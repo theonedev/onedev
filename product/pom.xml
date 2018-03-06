@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>  
     <artifactId>server-product</artifactId>  
     <parent> 
-        <groupId>com.turbodev</groupId>  
+        <groupId>io.onedev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0.1-build110</version> 
+        <version>1.0.2-build111</version> 
     </parent>  
     <build> 
         <plugins> 
             <plugin> 
-                <groupId>com.turbodev</groupId>  
+                <groupId>io.onedev</groupId>  
                 <artifactId>plugin-maven</artifactId>  
                 <executions> 
                     <execution> 
@@ -92,30 +92,30 @@
     </build>  
     <dependencies> 
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-web</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-rest</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency>  
         <dependency> 
-            <groupId>com.turbodev</groupId>  
+            <groupId>io.onedev</groupId>  
             <artifactId>server-search</artifactId>  
-            <version>1.0.1-build110</version> 
+            <version>1.0.2-build111</version> 
         </dependency> 
     </dependencies>  
     <properties> 
         <executables>bin/*.sh, boot/wrapper-*</executables>  
-        <bootstrapClass>com.turbodev.launcher.bootstrap.Bootstrap</bootstrapClass>  
-        <moduleClass>com.turbodev.server.product.ProductModule</moduleClass>  
+        <bootstrapClass>io.onedev.launcher.bootstrap.Bootstrap</bootstrapClass>  
+        <moduleClass>io.onedev.server.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
     </properties> 
 </project>

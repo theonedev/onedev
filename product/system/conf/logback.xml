@@ -37,7 +37,7 @@
 	<logger name="jetbrains.exodus.io.FileDataWriter" level="ERROR"/>
 	<logger name="com.zaxxer.hikari.HikariDataSource" level="ERROR"/>
 	<logger name="org.apache.shiro.mgt" level="ERROR"/>
-	<logger name="com.turbodev" level="INFO"/>	
+	<logger name="io.onedev" level="INFO"/>	
 	
 	<root level="WARN">
 		<appender-ref ref="FILE"/>
