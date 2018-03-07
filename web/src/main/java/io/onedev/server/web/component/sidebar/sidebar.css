@@ -11,6 +11,9 @@
 	border-right: 2px solid #E0E0E0;
 	z-index: 210;
 }
+.sidebar .fa, .sidebar .fa-ext {
+	margin-right: 4px;
+}
 .sidebar>.tabs {
 	position: absolute;
 	left: 0;
@@ -24,7 +27,7 @@
 .sidebar>.tabs>li>a {
 	display: block;
 	border-left: 4px solid #FAFAFA;
-	padding: 8px;
+	padding: 12px 8px;
 	text-decoration: none;
 	color: #616161;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
