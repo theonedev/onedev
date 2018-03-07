@@ -3,6 +3,7 @@
 .metadata/
 .recommenders/
 .idea/
+**/.project
 **/.classpath
 **/.gitignore
 **/*.iml
