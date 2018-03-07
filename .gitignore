@@ -1,6 +1,4 @@
 **/target/
-**/.settings/
-**/.project
 **/.classpath
 **/.gitignore
 release.properties
