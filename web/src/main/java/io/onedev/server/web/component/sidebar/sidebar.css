@@ -64,7 +64,7 @@
 }
 .minimizable.sidebar>a.mini-toggle:before {
 	font-family: "FontAwesome";
-	content: "\f100";
+	content: "\f104";
 }
 .minimizable.sidebar>a.mini-toggle:hover {
 	background: #EEE;
@@ -77,7 +77,7 @@
 	display: none;
 }
 .minimized.sidebar>a.mini-toggle:before {
-	content: "\f101";
+	content: "\f105";
 }
 .minimized.sidebar+.content {
 	padding-left: 44px;
