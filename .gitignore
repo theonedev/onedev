@@ -1,12 +1,8 @@
-*/target/**
-*/bin/**
-.metadata/
-.recommenders/
-.idea/
+**/target/
+**/.settings/
 **/.project
 **/.classpath
 **/.gitignore
-**/*.iml
 release.properties
 pom.xml.releaseBackup
 
