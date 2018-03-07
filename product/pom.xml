@@ -5,7 +5,7 @@
     <parent> 
         <groupId>io.onedev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0.2-build111</version> 
+        <version>1.0.2-build112</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -94,22 +94,22 @@
         <dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0.2-build111</version> 
+            <version>1.0.2-build112</version> 
         </dependency>  
         <dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-web</artifactId>  
-            <version>1.0.2-build111</version> 
+            <version>1.0.2-build112</version> 
         </dependency>  
         <dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-rest</artifactId>  
-            <version>1.0.2-build111</version> 
+            <version>1.0.2-build112</version> 
         </dependency>  
         <dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-search</artifactId>  
-            <version>1.0.2-build111</version> 
+            <version>1.0.2-build112</version> 
         </dependency> 
     </dependencies>  
     <properties> 
