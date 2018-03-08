@@ -8,6 +8,8 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
+import com.google.common.base.Charsets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.util.ContentDetector;
@@ -21,24 +23,21 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 	private final BlobRenderContext context;
 	
-	private final String charset;
-
 	private MarkdownEditor input;
 	
 	public MarkdownBlobEditor(String id, BlobRenderContext context, byte[] initialContent) {
 		super(id, Model.of(initialContent));
 
 		this.context = context;
-		
-		Charset detectedCharset = ContentDetector.detectCharset(getModelObject());
-		charset = (detectedCharset!=null?detectedCharset:Charset.defaultCharset()).name();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(input = new MarkdownEditor("input", Model.of(new String(getModelObject(), Charset.forName(charset))), 
+		Charset detectedCharset = ContentDetector.detectCharset(getModelObject());
+		Charset charset = detectedCharset!=null?detectedCharset:Charset.defaultCharset();
+		add(input = new MarkdownEditor("input", Model.of(new String(getModelObject(), charset)), 
 				false, context) {
 
 			@Override
@@ -71,7 +70,7 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			String initialContent = input.getModelObject();
 			if (initialContent == null || !initialContent.contains("\r\n"))
 				content = StringUtils.replace(content, "\r\n", "\n");
-			setConvertedInput(content.getBytes(Charset.forName(charset)));
+			setConvertedInput(content.getBytes(Charsets.UTF_8));
 		} else {
 			setConvertedInput(new byte[0]);
 		}

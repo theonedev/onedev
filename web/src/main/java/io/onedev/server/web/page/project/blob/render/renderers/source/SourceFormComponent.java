@@ -16,20 +16,18 @@ class SourceFormComponent extends FormComponentPanel<byte[]> {
 
 	private TextArea<String> input;
 
-	private final String charset;
-	
 	public SourceFormComponent(String id, byte[] initialContent) {
 		super(id, Model.of(initialContent));
-		
-		Charset detectedCharset = ContentDetector.detectCharset(getModelObject());
-		charset = (detectedCharset!=null?detectedCharset:Charset.defaultCharset()).name();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String source = new String(getModelObject(), Charset.forName(charset));
+		Charset detectedCharset = ContentDetector.detectCharset(getModelObject());
+		Charset charset = detectedCharset!=null?detectedCharset:Charset.defaultCharset();
+		
+		String source = new String(getModelObject(), charset);
 		add(input = new TextArea<String>("input", Model.of(source)) {
 
 			@Override
