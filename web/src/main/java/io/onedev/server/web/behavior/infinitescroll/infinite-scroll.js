@@ -1,8 +1,7 @@
 onedev.infiniteScroll = {
-	init: function(containerId, callback, loadingIndicatorUrl, pageSize) {
+	init: function(containerId, callback, pageSize) {
 		var $container = $("#" + containerId);
 		$container.data("callback", callback);
-		$container.data("loadingIndicatorUrl", loadingIndicatorUrl);
 		$container.data("page", 1);
 		$container.data("pageSize", pageSize);
 		$container.scroll(function() {
@@ -32,10 +31,10 @@ onedev.infiniteScroll = {
 			page++;
 			$container.data("page", page);
 			if ($container.is("ul")) {
-				$container.append("<li class='loading-indicator'><img src='" + $container.data("loadingIndicatorUrl") + "'></img></li>");
+				$container.append("<li class='loading-indicator'><img src='/img/ajax-indicator.gif'></img></li>");
 			} else {
 				var colspan = $lastItem.children().length;
-				$lastItem.parent().append("<tr class='loading-indicator'><td colspan='" + colspan + "'><img src='" + $container.data("loadingIndicatorUrl") + "'></img></td></tr>");
+				$lastItem.parent().append("<tr class='loading-indicator'><td colspan='" + colspan + "'><img src='/img/ajax-indicator.gif'></img></td></tr>");
 			}
 			$container.scrollIntoView(".loading-indicator");
 			$container.data("callback")(page);

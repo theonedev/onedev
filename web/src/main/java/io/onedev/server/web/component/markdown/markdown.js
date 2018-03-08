@@ -841,9 +841,14 @@ onedev.server.markdown = {
 			if ($image.closest("a").length == 0) {
 		    	$image.click(function() {
 		    		var $image = $(this);
+		    		$image.parent().css("position", "relative");
+		    		var $loadingIndicator = $("<div class='markdown-image-loading'></div>");
+		    		$loadingIndicator.css("width", $image.width()).css("height", $image.height());
+		    		$image.parent().append($loadingIndicator);
+		    		
 		    	    var actualImage = new Image();
 		    	    actualImage.onload = function() {
-
+		    	    	$loadingIndicator.remove();
 		        		var $modal = $("" +
 		        				"<div class='modal fade' role='dialog' tabindex='-1'>" +
 		        				"  <div class='modal-dialog' style='width: " + (actualImage.width+2) + "px; max-width: 90%;'>" +

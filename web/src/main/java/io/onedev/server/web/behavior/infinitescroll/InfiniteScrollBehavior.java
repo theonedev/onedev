@@ -9,8 +9,6 @@ import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
 
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
@@ -44,10 +42,8 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 		super.renderHead(component, response);
 		response.render(JavaScriptReferenceHeaderItem.forReference(new InfiniteScrollResourceReference()));
 		
-		CharSequence url = RequestCycle.get().urlFor(new PackageResourceReference(
-				InfiniteScrollBehavior.class, "ajax-indicator.gif"), new PageParameters());
-		String script = String.format("onedev.infiniteScroll.init('%s', %s, '%s', %s);", 
-				component.getMarkupId(true), getCallbackFunction(explicit("page")), url, pageSize);
+		String script = String.format("onedev.infiniteScroll.init('%s', %s, %s);", 
+				component.getMarkupId(true), getCallbackFunction(explicit("page")), pageSize);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

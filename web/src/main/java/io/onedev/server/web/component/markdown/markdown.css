@@ -321,3 +321,9 @@ body.fullscreen {
 	text-decoration: none;
 }
 
+.markdown-image-loading {
+	position: absolute;
+	left: 0;
+	top: 0;
+	background: url("/img/ajax-indicator-big.gif") center no-repeat;
+}
