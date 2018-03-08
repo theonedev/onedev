@@ -209,7 +209,7 @@ abstract class InsertUrlPanel extends Panel {
 				@Override
 				protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
 					blobIdent = new BlobIdent(context.getBlobIdent().revision, blobIdent.path, blobIdent.mode);
-					String baseUrl = context.getBaseUrl();
+					String baseUrl = context.getDirectoryUrl();
 					String referenceUrl = urlFor(ProjectBlobPage.class, 
 							ProjectBlobPage.paramsOf(context.getProject(), blobIdent)).toString();
 					String relativized = PathUtils.relativize(baseUrl, referenceUrl);		

@@ -38,27 +38,25 @@ public interface BlobRenderContext extends Serializable {
 	String getMarkUrl(TextRange mark);
 	
 	/**
-	 * Base path of current blob, which can be used to calculate relative paths 
-	 * for other files referenced by current blob
+	 * Get directory of the blob. If the blob itself is a directory, the blob path will be returned instead
 	 * 
 	 * @return
-	 * 			base path of current blob for relative path calculation
+	 * 			directory of current blob, or <tt>null</tt> for repository root 
 	 * 
 	 * @return
 	 */
 	@Nullable
-	String getBasePath();
+	String getDirectory();
 	
 	/**
-	 * Base url of current blob, which can be used to calculate relative urls 
-	 * for other files referenced by current blob
+	 * Url to directory of the blob. Refer to {@link #getDirectory()}
 	 * 
 	 * @return
-	 * 			base url of current blob for relative url calculation
+	 * 			url to directory of the blob
 	 */
-	String getBaseUrl();
+	String getDirectoryUrl();
 	
-	String getRootUrl();
+	String getRootDirectoryUrl();
 	
 	Mode getMode();
 

@@ -1057,7 +1057,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 	
 	@Override
-	public String getBasePath() {
+	public String getDirectory() {
 		String path;
 		if (state.mode == Mode.ADD || state.mode == Mode.EDIT) {
 			path = getNewPath();
@@ -1080,15 +1080,15 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 	
 	@Override
-	public String getBaseUrl() {
+	public String getDirectoryUrl() {
 		String revision = state.blobIdent.revision;
-		BlobIdent blobIdent = new BlobIdent(revision, getBasePath(), FileMode.TREE.getBits());
+		BlobIdent blobIdent = new BlobIdent(revision, getDirectory(), FileMode.TREE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		return urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), state)).toString();
 	}
 
 	@Override
-	public String getRootUrl() {
+	public String getRootDirectoryUrl() {
 		BlobIdent blobIdent = new BlobIdent(state.blobIdent.revision, null, FileMode.TREE.getBits());
 		return RequestCycle.get().urlFor(ProjectBlobPage.class, 
 				ProjectBlobPage.paramsOf(getProject(), blobIdent)).toString();

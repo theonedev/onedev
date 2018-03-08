@@ -3,6 +3,7 @@ package io.onedev.server.web.util.markdown;
 import java.io.IOException;
 import java.net.URLDecoder;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -25,6 +26,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.utils.PathUtils;
+import io.onedev.utils.UrlUtils;
 
 public class RelativeUrlProcessor implements MarkdownProcessor {
 
@@ -52,22 +54,22 @@ public class RelativeUrlProcessor implements MarkdownProcessor {
 				public void tail(Node node, int depth) {
 					if (node.nodeName().equals("a")) {
 						String url = node.attr("href");
-						if (url != null) {
+						if (StringUtils.isNotBlank(url)) {
 							url = url.trim();
-							if (isRelative(url)) {
+							if (UrlUtils.isRelative(url) && !url.startsWith("#")) {
 								Element element = (Element) node;
-								element.attr("href", resolveUrl(blobRenderContext.getBaseUrl(), url));
+								element.attr("href", resolveUrl(blobRenderContext.getDirectoryUrl(), url));
 								try {
-									String path = URLDecoder.decode(url, Charsets.UTF_8.name());
-									String basePath = blobRenderContext.getBasePath();
-									String referencedPath = PathUtils.resolve(basePath, path);
+									String path = UrlUtils.trimHashAndQuery(URLDecoder.decode(url, Charsets.UTF_8.name()));
+									String directory = blobRenderContext.getDirectory();
+									String referencedPath = PathUtils.resolve(directory, path);
 									referencedPath = GitUtils.normalizePath(referencedPath);
-									if (referencedPath == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null) {
+									if (referencedPath != null && TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null) {
 											element.after("<span class='missing'>!!missing!!</span>");
 											Element missingElement = element.nextElementSibling();
 											BlobIdent blobIdent = blobRenderContext.getBlobIdent();
 											Mode mode = blobRenderContext.getMode();
-											if (referencedPath != null && mode != Mode.ADD && mode != Mode.EDIT 
+											if (mode != Mode.ADD && mode != Mode.EDIT 
 													&& SecurityUtils.canModify(project, blobIdent.revision, referencedPath)) {
 												ProjectBlobPage.State state = new ProjectBlobPage.State();
 												state.blobIdent = blobRenderContext.getBlobIdent();
@@ -88,16 +90,16 @@ public class RelativeUrlProcessor implements MarkdownProcessor {
 						}
 					} else if (node.nodeName().equals("img")) {
 						String url = node.attr("src");
-						if (url != null) {
+						if (StringUtils.isNotBlank(url)) {
 							url = url.trim();
-							if (isRelative(url)) {
+							if (UrlUtils.isRelative(url) && !url.startsWith("#")) {
 								Element element = (Element) node;
-								element.attr("src", resolveUrl(blobRenderContext.getBaseUrl(), url));
+								element.attr("src", resolveUrl(blobRenderContext.getDirectoryUrl(), url));
 								try {
-									String basePath = blobRenderContext.getBasePath();
-									String referencedPath = PathUtils.resolve(basePath, URLDecoder.decode(url, Charsets.UTF_8.name()));
+									String basePath = blobRenderContext.getDirectory();
+									String referencedPath = PathUtils.resolve(basePath, UrlUtils.trimHashAndQuery(URLDecoder.decode(url, Charsets.UTF_8.name())));
 									referencedPath = GitUtils.normalizePath(referencedPath);
-									if (referencedPath == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null) {
+									if (referencedPath != null && TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null) {
 										element.after("<span class='missing'>!!missing!!</span>");
 									}
 								} catch (IOException e) {
@@ -112,10 +114,6 @@ public class RelativeUrlProcessor implements MarkdownProcessor {
 		}
 	}
 
-	private boolean isRelative(String url) {
-    	return !url.contains(":") && !url.startsWith("/") && !url.startsWith("#");
-	}
-	
 	private String resolveUrl(String baseUrl, String urlToResolve) {
         return PathUtils.normalizeDots(PathUtils.resolve(baseUrl, urlToResolve));
     }
