@@ -344,6 +344,12 @@ form>.test-feedback {
 	margin-bottom: 50px;
 	color: #333;
 }
+@media(max-width: 738px) {
+	.center-box {
+		border: none;
+		background: none;
+	}
+}
 .wide.center-box {
 	max-width: 900px;
 	min-width: 900px;	
