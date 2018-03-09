@@ -5,7 +5,7 @@
     <parent> 
         <groupId>io.onedev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>1.0.2-build113</version> 
+        <version>1.0.2-build114</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -79,12 +79,12 @@
 		<dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>1.0.2-build113</version> 
+            <version>1.0.2-build114</version> 
         </dependency>  
         <dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-rest</artifactId>  
-            <version>1.0.2-build113</version> 
+            <version>1.0.2-build114</version> 
         </dependency>  
         <dependency> 
             <groupId>commons-fileupload</groupId>  
@@ -104,7 +104,7 @@
         <dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-search</artifactId>  
-            <version>1.0.2-build113</version> 
+            <version>1.0.2-build114</version> 
         </dependency> 
         <dependency>
         	<groupId>io.onedev</groupId>
