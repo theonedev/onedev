@@ -21,7 +21,7 @@ import io.onedev.server.model.PullRequestStatusChange;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
 
 @Singleton
 public class DefaultUrlManager implements UrlManager {

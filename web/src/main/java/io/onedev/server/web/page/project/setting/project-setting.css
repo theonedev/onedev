@@ -46,9 +46,9 @@
 	background-color: #EBEBEB; 
 	border-color: #ADADAD;
 }
-#project-setting .panel-list .concrete.list td.path, 
-#project-setting .panel-list .concrete.list td.reviewerNames,
-#project-setting .panel-list .concrete.list td.reviewAppointment {
+#project-setting .panel-list .bean.list td.path, 
+#project-setting .panel-list .bean.list td.reviewerNames,
+#project-setting .panel-list .bean.list td.reviewAppointment {
 	width: 45%;
 }
 
@@ -71,3 +71,4 @@
 #project-setting .authorization.list .head .select2-container {
 	width: 240px;
 } 
+

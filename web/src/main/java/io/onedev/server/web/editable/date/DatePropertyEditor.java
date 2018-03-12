@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.IModel;
@@ -42,6 +44,15 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 		Method propertyGetter = getPropertyDescriptor().getPropertyGetter();
 		if (propertyGetter.getAnnotation(OmitName.class) != null)
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getName(propertyGetter)));
+		
+		input.add(new AjaxFormComponentUpdatingBehavior("change"){
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
 		
 		add(input);
 

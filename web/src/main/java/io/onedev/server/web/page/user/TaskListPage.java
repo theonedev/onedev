@@ -31,7 +31,7 @@ import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.SelectionColumn;
 import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.page.project.pullrequest.requestdetail.overview.RequestOverviewPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
 import io.onedev.server.web.util.DateUtils;
 import io.onedev.server.web.util.PagingHistorySupport;
 

@@ -31,6 +31,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.VerificationManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.Constants;
 import io.onedev.server.util.Verification;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
@@ -42,7 +43,7 @@ import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.commit.CommitDetailPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.model.CommitRefsModel;
 
 @SuppressWarnings("serial")
@@ -176,7 +177,7 @@ public class CommitListPanel extends Panel {
 				} else {
 					fragment = new Fragment("commit", "dateFrag", CommitListPanel.this);
 					DateTime dateTime = new DateTime(getModelObject().get(item.getIndex()+1).getCommitterIdent().getWhen());
-					fragment.add(new Label("date", WebConstants.DATE_FORMATTER.print(dateTime)));
+					fragment.add(new Label("date", Constants.DATE_FORMATTER.print(dateTime)));
 					if (item.getIndex() == 0)
 						item.add(AttributeAppender.append("class", "date first"));
 					else

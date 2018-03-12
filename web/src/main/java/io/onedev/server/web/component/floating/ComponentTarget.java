@@ -24,7 +24,7 @@ public class ComponentTarget implements AlignTarget {
 	@Override
 	public String toString() {
 		return String.format("{element: document.getElementById('%s'), index: %s}", 
-				component.getMarkupId(), index!=-1?index:"undefined");
+				component.getMarkupId(true), index!=-1?index:"undefined");
 	}
 	
 }

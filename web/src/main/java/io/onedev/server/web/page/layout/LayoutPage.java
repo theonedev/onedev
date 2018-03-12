@@ -54,6 +54,8 @@ import io.onedev.utils.license.LicenseDetail;
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
 	
+	private WebMarkupContainer head;
+	
 	public LayoutPage() {
 	}
 	
@@ -65,7 +67,7 @@ public abstract class LayoutPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer head = new WebMarkupContainer("head");
+		head = new WebMarkupContainer("head");
 		add(head);
 		
 		head.add(new DropdownLink("nav") {
@@ -172,6 +174,7 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("userMenu").setVisible(false));
 		}
 		
+		head.setOutputMarkupId(true);
 	}
 
 	protected List<ComponentRenderer> getBreadcrumbs() {
@@ -197,5 +200,5 @@ public abstract class LayoutPage extends BasePage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new LayoutResourceReference()));
 	}
-	
+
 }

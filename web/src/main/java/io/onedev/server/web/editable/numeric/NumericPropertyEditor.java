@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.numeric;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
@@ -29,6 +31,15 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 		input.setType(getPropertyDescriptor().getPropertyClass());
 		add(input);
 
+		input.add(new AjaxFormComponentUpdatingBehavior("change"){
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
+		
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
 
 			@Override

@@ -128,8 +128,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	this.name = name;
     }
     
-	@Editable(order=150, autocomplete="new-password")
-	@Password(confirmative=true)
+	@Editable(order=150)
+	@Password(confirmative=true, autoComplete="new-password")
 	@JsonView(DefaultView.class)
 	@NotEmpty
 	public String getPassword() {

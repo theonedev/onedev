@@ -20,7 +20,7 @@ import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitPostReceiveCallback;
 import io.onedev.server.git.GitPreReceiveCallback;
-import io.onedev.server.security.OneDevWebEnvironment;
+import io.onedev.server.security.OneWebEnvironment;
 import io.onedev.server.util.jetty.ClasspathAssetServlet;
 import io.onedev.server.util.jetty.FileAssetServlet;
 import io.onedev.server.util.jetty.ServletConfigurator;
@@ -67,7 +67,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.getSessionHandler().getSessionManager().setMaxInactiveInterval(serverConfig.getSessionTimeout());
 		
-		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, OneDevWebEnvironment.class.getName());
+		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, OneWebEnvironment.class.getName());
 		context.addEventListener(new EnvironmentLoaderListener());
 		FilterHolder shiroFilterHolder = new FilterHolder(shiroFilter);
 		context.addFilter(shiroFilterHolder, "/*", EnumSet.allOf(DispatcherType.class));

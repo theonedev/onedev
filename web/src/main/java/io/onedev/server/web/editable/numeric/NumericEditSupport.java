@@ -1,14 +1,11 @@
 package io.onedev.server.web.editable.numeric;
 
-import java.util.Set;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.NotDefinedLabel;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -18,12 +15,7 @@ import io.onedev.server.web.editable.PropertyViewer;
 public class NumericEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
-		return null;
-	}
-
-	@Override
-	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 
 		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
@@ -40,7 +32,7 @@ public class NumericEditSupport implements EditSupport {
 							if (model.getObject() != null) {
 								return new Label(id, model.getObject().toString());
 							} else {
-								return new NotDefinedLabel(id);
+								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 							}
 						}
 						

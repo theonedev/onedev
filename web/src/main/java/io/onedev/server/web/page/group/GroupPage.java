@@ -18,7 +18,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.sidebar.SidebarPanel;
+import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.layout.LayoutPage;
@@ -44,7 +44,7 @@ public abstract class GroupPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new SidebarPanel("sidebar", "group.miniSidebar") {
+		add(new SideBar("sidebar", "group.miniSidebar") {
 
 			@Override
 			protected List<? extends Tab> newTabs() {

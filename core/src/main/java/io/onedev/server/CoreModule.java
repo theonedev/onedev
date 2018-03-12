@@ -35,6 +35,16 @@ import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.type.Type;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.matcher.AbstractMatcher;
+import com.google.inject.matcher.Matchers;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import com.thoughtworks.xstream.converters.basic.NullConverter;
+import com.thoughtworks.xstream.converters.extended.ISO8601DateConverter;
+import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter;
+import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
+import com.thoughtworks.xstream.core.JVM;
+import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.AbstractPlugin;
@@ -63,6 +73,8 @@ import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.DataManager;
 import io.onedev.server.manager.GroupAuthorizationManager;
 import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.MembershipManager;
@@ -96,6 +108,8 @@ import io.onedev.server.manager.impl.DefaultConfigManager;
 import io.onedev.server.manager.impl.DefaultDataManager;
 import io.onedev.server.manager.impl.DefaultGroupAuthorizationManager;
 import io.onedev.server.manager.impl.DefaultGroupManager;
+import io.onedev.server.manager.impl.DefaultIssueFieldManager;
+import io.onedev.server.manager.impl.DefaultIssueManager;
 import io.onedev.server.manager.impl.DefaultMailManager;
 import io.onedev.server.manager.impl.DefaultMarkdownManager;
 import io.onedev.server.manager.impl.DefaultMembershipManager;
@@ -139,11 +153,11 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.DefaultDao;
 import io.onedev.server.security.BasicAuthenticationFilter;
 import io.onedev.server.security.FilterChainConfigurator;
-import io.onedev.server.security.OneDevAuthorizingRealm;
-import io.onedev.server.security.OneDevFilterChainResolver;
-import io.onedev.server.security.OneDevPasswordService;
-import io.onedev.server.security.OneDevRememberMeManager;
-import io.onedev.server.security.OneDevWebSecurityManager;
+import io.onedev.server.security.OneAuthorizingRealm;
+import io.onedev.server.security.OneFilterChainResolver;
+import io.onedev.server.security.OnePasswordService;
+import io.onedev.server.security.OneRememberMeManager;
+import io.onedev.server.security.OneWebSecurityManager;
 import io.onedev.server.security.authenticator.Authenticator;
 import io.onedev.server.util.jackson.ObjectMapperConfigurator;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
@@ -156,17 +170,6 @@ import io.onedev.server.util.validation.ValidatorProvider;
 import io.onedev.utils.ClassUtils;
 import io.onedev.utils.schedule.DefaultTaskScheduler;
 import io.onedev.utils.schedule.TaskScheduler;
-
-import com.google.inject.matcher.AbstractMatcher;
-import com.google.inject.matcher.Matchers;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-import com.thoughtworks.xstream.converters.basic.NullConverter;
-import com.thoughtworks.xstream.converters.extended.ISO8601DateConverter;
-import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter;
-import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
-import com.thoughtworks.xstream.core.JVM;
-import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -221,6 +224,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(MailManager.class).to(DefaultMailManager.class);
 		bind(BranchWatchManager.class).to(DefaultBranchWatchManager.class);
 		bind(PullRequestTaskManager.class).to(DefaultPullRequestTaskManager.class);
+		bind(IssueManager.class).to(DefaultIssueManager.class);
+		bind(IssueFieldManager.class).to(DefaultIssueFieldManager.class);
 		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(CommitInfoManager.class).to(DefaultCommitInfoManager.class);
 		bind(VisitManager.class).to(DefaultVisitManager.class);
@@ -248,12 +253,12 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
 	    
-		bind(Realm.class).to(OneDevAuthorizingRealm.class);
-		bind(RememberMeManager.class).to(OneDevRememberMeManager.class);
-		bind(WebSecurityManager.class).to(OneDevWebSecurityManager.class);
-		bind(FilterChainResolver.class).to(OneDevFilterChainResolver.class);
+		bind(Realm.class).to(OneAuthorizingRealm.class);
+		bind(RememberMeManager.class).to(OneRememberMeManager.class);
+		bind(WebSecurityManager.class).to(OneWebSecurityManager.class);
+		bind(FilterChainResolver.class).to(OneFilterChainResolver.class);
 		bind(BasicAuthenticationFilter.class);
-		bind(PasswordService.class).to(OneDevPasswordService.class);
+		bind(PasswordService.class).to(OnePasswordService.class);
 		bind(ShiroFilter.class);
 		install(new ShiroAopModule());
         contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {

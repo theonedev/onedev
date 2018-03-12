@@ -5,7 +5,6 @@ onedev.server.sourceEdit = {
 		var $sourceEdit = $container.children(".source-edit");
 		var $warning = $sourceEdit.children(".warning");
 		var $code = $sourceEdit.children(".code");
-
 		var cm = CodeMirror($code[0], {
 			value: $sourceEdit.children(".input").val(),
 			autofocus: autoFocus,

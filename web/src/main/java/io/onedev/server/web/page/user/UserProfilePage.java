@@ -24,7 +24,7 @@ import io.onedev.server.web.util.ConfirmOnClick;
 @SuppressWarnings("serial")
 public class UserProfilePage extends UserPage {
 
-	private BeanEditor<?> editor;
+	private BeanEditor editor;
 	
 	private String oldName;
 	

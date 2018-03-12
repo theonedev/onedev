@@ -33,6 +33,7 @@ public class PullRequestComment extends AbstractEntity {
 	private long version;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

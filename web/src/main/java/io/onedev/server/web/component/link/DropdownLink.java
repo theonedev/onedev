@@ -12,6 +12,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.AlignTarget;
+import io.onedev.server.web.component.floating.Alignment;
 import io.onedev.server.web.component.floating.ComponentTarget;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.floating.RectTarget;
@@ -84,7 +85,7 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 				alignFloatingWith =  new ComponentTarget(this);
 			} 
 			
-			dropdown = new FloatingPanel(target, alignFloatingWith, placement) {
+			dropdown = new FloatingPanel(target, new Alignment(alignFloatingWith, placement)) {
 	
 				@Override
 				protected void onInitialize() {

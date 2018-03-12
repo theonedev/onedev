@@ -12,7 +12,7 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.reflection.ReflectionPropertyEditor;
+import io.onedev.server.web.editable.bean.BeanPropertyEditor;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")
@@ -36,7 +36,7 @@ public class CommitMessageTransformPage extends ProjectSettingPage {
 			}
 			
 		};
-		form.add(new ReflectionPropertyEditor("editor", new PropertyDescriptor(Project.class, "commitMessageTransformSetting"), new IModel<Serializable>() {
+		form.add(new BeanPropertyEditor("editor", new PropertyDescriptor(Project.class, "commitMessageTransformSetting"), new IModel<Serializable>() {
 
 			@Override
 			public void detach() {

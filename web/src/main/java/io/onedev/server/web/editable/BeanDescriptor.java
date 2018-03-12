@@ -32,14 +32,12 @@ public class BeanDescriptor implements Serializable {
 		EditableUtils.sortAnnotatedElements(propertyGetters);
 		
 		for (Method propertyGetter: propertyGetters) {
-			if (propertyGetter.getAnnotation(Editable.class) == null 
-					|| excludeProperties.contains(BeanUtils.getPropertyName(propertyGetter))) {
-				continue;
+			if (propertyGetter.getAnnotation(Editable.class) != null) {
+				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(propertyGetter); 
+				propertyDescriptors.add(propertyDescriptor);
+				String propertyName = BeanUtils.getPropertyName(propertyGetter);
+				propertyDescriptor.setExcluded(BeanUtils.findSetter(propertyGetter) == null || excludeProperties.contains(propertyName));
 			}
-			Method propertySetter = BeanUtils.findSetter(propertyGetter);
-			if (propertySetter == null)
-				continue;
-			propertyDescriptors.add(new PropertyDescriptor(propertyGetter, propertySetter));
 		}
 	}
 	
@@ -57,8 +55,10 @@ public class BeanDescriptor implements Serializable {
 	}
 
 	public void copyProperties(Object from, Object to) {
-		for (PropertyDescriptor propertyDescriptor: getPropertyDescriptors())
-			propertyDescriptor.copyProperty(from, to);
+		for (PropertyDescriptor propertyDescriptor: getPropertyDescriptors()) {
+			if (!propertyDescriptor.isExcluded())
+				propertyDescriptor.copyProperty(from, to);
+		}
 	}
 
 	public Object newBeanInstance() {

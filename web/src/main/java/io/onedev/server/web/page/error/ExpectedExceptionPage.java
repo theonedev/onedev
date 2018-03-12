@@ -15,29 +15,36 @@ import io.onedev.utils.WordUtils;
 @SuppressWarnings("serial")
 public class ExpectedExceptionPage extends BaseErrorPage {
 	
-	private final Exception exception;
+	private final String title;
+	
+	private final String description;
+	
+	private final String detailMessage;
 	
 	public ExpectedExceptionPage(Exception exception) {
-		this.exception = exception;
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
 		String title = exception.getClass().getSimpleName();
 		String suffixToRemove = "Exception";
 		if (title.endsWith(suffixToRemove))
 			title = title.substring(0, title.length()-suffixToRemove.length());
 		
 		title = WordUtils.capitalizeFully(WordUtils.uncamel(title));
+		this.title = title;
+		
+		this.description = exception.getMessage();
+		this.detailMessage = Strings.toString(exception);
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
 		
 		WebMarkupContainer container = new WebMarkupContainer("error");
 		container.setOutputMarkupId(true);
 		add(container);
 		
 		container.add(new Label("title", title));
-		container.add(new Label("description", exception.getMessage()));
+		container.add(new Label("description", description));
 		
 		container.add(new ViewStateAwarePageLink<Void>("home", ProjectListPage.class));
 		
@@ -46,7 +53,7 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment("detail", "detailFrag", ExpectedExceptionPage.this);
-				fragment.add(new MultilineLabel("body", Strings.toString(exception)));				
+				fragment.add(new MultilineLabel("body", detailMessage));				
 				container.replace(fragment);
 				target.add(container);
 				setVisible(false);

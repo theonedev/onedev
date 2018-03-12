@@ -55,7 +55,7 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.pullrequest.requestdetail.changes.RequestChangesPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
 import io.onedev.server.web.util.DateUtils;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;

@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -8,6 +9,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.launcher.loader.AppLoader;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public abstract class PropertyContext<T> extends PropertyDescriptor {
@@ -19,10 +21,14 @@ public abstract class PropertyContext<T> extends PropertyDescriptor {
 	public PropertyContext(PropertyDescriptor propertyDescriptor) {
 		super(propertyDescriptor);
 	}
-
+	
 	public abstract PropertyViewer renderForView(String componentId, IModel<T> model);
 
 	public abstract PropertyEditor<T> renderForEdit(String componentId, IModel<T> model);
+	
+	public List<String> getPossibleValues() {
+		return Lists.newArrayList();
+	}
 
 	public static PropertyEditor<Serializable> editModel(String componentId, 
 			final IModel<Serializable> beanModel, String propertyName) {
@@ -93,6 +99,9 @@ public abstract class PropertyContext<T> extends PropertyDescriptor {
 	}
 	
 	public static PropertyContext<Serializable> of(PropertyDescriptor propertyDescriptor) {
-		return of(propertyDescriptor.getBeanClass(), propertyDescriptor.getPropertyName());
+		PropertyContext<Serializable> propertyContext = of(propertyDescriptor.getBeanClass(), propertyDescriptor.getPropertyName());
+		propertyContext.setExcluded(propertyDescriptor.isExcluded());
+		return propertyContext;
 	}
+	
 }

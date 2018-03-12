@@ -98,7 +98,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 import io.onedev.server.web.page.project.blob.render.view.Markable;
 import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
-import io.onedev.server.web.page.project.commit.CommitDetailPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.DateUtils;
 import io.onedev.server.web.util.WicketUtils;

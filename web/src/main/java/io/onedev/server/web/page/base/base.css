@@ -103,6 +103,9 @@ a.wicket_orderDown:AFTER {
 .pagination a.first, .pagination a.prev, .pagination a.next, .pagination a.last {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
+.norecords-td {
+	font-style: italic;
+}
 
 /* TREE */
 .tree-theme-windows .tree-node span.tree-content a {
@@ -149,36 +152,31 @@ form>.test-feedback {
 	padding: 12px 0;
 }
 
-.editable>.reflection>table {
+.editable>.bean>table {
 	width: 100%;
 }
-.editable>.reflection>table>tbody>tr>td {
+.editable>.bean>table>tbody>tr>td {
 	vertical-align: top;
+	padding: 0 8px 16px 0;
 }
-.editable>.reflection>table>tbody>tr>td {
-	padding: 10px;
+.editable td.value>div:last-child>div:last-child>table>tbody>tr:last-child>td.value, 
+.editable td.value>div:last-child>div:last-child>div:last-child>div:last-child>table>tbody>tr:last-child>td.value {
+	padding-bottom: 0;
+	margin-bottom: 0;
 }
-.editable>.reflection>table>tbody>tr>td.name {
-	font-weight: bold; 
-	font-size: 13px;
-	background: #F0F0F0; 
+ 
+.editable>.bean>table>tbody>tr>td.name {
+	font-size: 12px;
+	line-height: 22px;
+	font-weight: bold;
+	border-right: 1px solid #E0E0E0;
 	text-align: right; 
 	white-space: nowrap; 
 	width: 20%;
 }
-.editable>.reflection>table>tbody>tr:first-child>td.name {
-	border-radius: 4px 4px 0 0;
+.editable>.bean>table>tbody>tr>td.value {
+	padding-left: 8px;
 }
-.editable>.reflection>table>tbody>tr:last-child>td.name {
-	border-radius: 0 0 4px 4px;
-}
-.editable>.reflection>table>tbody>tr:first-child:last-child>td.name {
-	border-radius: 4px;
-}
-
-.editor>.reflection.properties>div.form-group:last-child {
-	margin-bottom: 0;
-} 
 
 .editable>table.polymorphic.vertical.list>tbody>tr>td>.type-selector {
 	margin-bottom: 8px;
@@ -231,12 +229,31 @@ form>.test-feedback {
 	padding-top: 12px;
 	margin-bottom: 12px;
 }
-.viewer .reflection>table>tbody>tr.name-omitted>td {
-	padding: 0;
+.viewer .bean>table>tbody>tr.name-omitted>td {
+	padding-left: 0;
 }
-.viewer .type-selector, .viewer .no-elements {
+.viewer .type-selector, .viewer .no-elements, .editor .no-elements {
 	font-style: italic;
 } 
+.editable .editor .bean.list>thead>tr>th {
+	border-bottom: 1px solid #E0E0E0;
+}
+.editable .viewer .bean.list>thead>tr>th {
+	font-size: 12px;
+	padding-top: 0;
+	line-height: 22px;
+	white-space: nowrap;
+}
+.editable table.bean.list>thead>tr>th, .editable table.bean.list>tbody>tr>td {
+	padding: 5px 10px 5px 0;
+}
+.editable .editor table.bean.list tr:hover td {
+	background: #F9F9F9;
+}
+.editable .editor table.bean.list tr.add-element:hover td {
+	background: none;
+}
+
 
 /* Select2 */
 .editor .select2-container {

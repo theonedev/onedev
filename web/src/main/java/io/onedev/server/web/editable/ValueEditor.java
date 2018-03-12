@@ -2,15 +2,19 @@ package io.onedev.server.web.editable;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 
 @SuppressWarnings("serial")
 public abstract class ValueEditor<T> extends FormComponentPanel<T> implements ErrorContext {
 
 	public ValueEditor(String id, IModel<T> model) {
 		super(id, model);
+		setConvertedInput(model.getObject());
 	}
 
 	public @Nullable ErrorContext getErrorContext(ValuePath partPath) {
@@ -25,6 +29,21 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 		return context;
 	}
 	
+	public void clearErrors(boolean recursive) {
+		if (recursive) {
+			visitFormComponentsPostOrder(this, new IVisitor<FormComponent<?>, Void>() {
+				
+				@Override
+				public void component(FormComponent<?> formComponent, IVisit<Void> visit) {
+					formComponent.getFeedbackMessages().clear();
+				}
+				
+			});
+		} else {
+			getFeedbackMessages().clear();
+		}
+	}
+
 	/**
 	 * Get error context for specified path segment. 
 	 * 
@@ -44,7 +63,7 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 			error(newValidationError(e));
 		}
 	}
-
+	
 	@Override
 	public void addError(String errorMessage) {
 		error(errorMessage);

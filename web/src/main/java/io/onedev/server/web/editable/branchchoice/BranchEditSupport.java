@@ -3,7 +3,6 @@ package io.onedev.server.web.editable.branchchoice;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -12,9 +11,8 @@ import org.eclipse.jgit.util.StringUtils;
 
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.BranchChoice;
-import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.NotDefinedLabel;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -24,12 +22,7 @@ import io.onedev.server.web.editable.PropertyViewer;
 public class BranchEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
-		return null;
-	}
-
-	@Override
-	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 		Method propertyGetter = propertyDescriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(BranchChoice.class) != null) {
@@ -51,7 +44,7 @@ public class BranchEditSupport implements EditSupport {
 						        	}
 						            return new Label(id, StringUtils.join(branches, ", " ));
 						        } else {
-									return new NotDefinedLabel(id);
+									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }
 							}
 							
@@ -77,7 +70,7 @@ public class BranchEditSupport implements EditSupport {
 						        if (projectAndBranch != null) {
 						        	return new Label(id, projectAndBranch);
 						        } else {
-									return new NotDefinedLabel(id);
+									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }
 							}
 							

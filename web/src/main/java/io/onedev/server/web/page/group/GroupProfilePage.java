@@ -28,7 +28,7 @@ import io.onedev.server.web.util.ConfirmOnClick;
 @SuppressWarnings("serial")
 public class GroupProfilePage extends GroupPage {
 
-	private BeanEditor<?> editor;
+	private BeanEditor editor;
 	
 	private CheckBox administratorInput;
 	

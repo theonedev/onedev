@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Password {
 	boolean confirmative() default false;
+	
+	String autoComplete() default "";
 }

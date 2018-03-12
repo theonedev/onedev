@@ -35,7 +35,7 @@ abstract class ForkOptionPanel extends Panel {
 		project.setForkedFrom(getProject());
 		project.setName(getProject().getName() + "." + SecurityUtils.getUser().getName());
 		
-		BeanEditor<?> editor = BeanContext.editBean("editor", project);
+		BeanEditor editor = BeanContext.editBean("editor", project);
 		
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);

@@ -26,8 +26,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
 import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.util.Constants;
 import io.onedev.server.util.Day;
-import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
 
@@ -84,7 +84,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 				
 				if (StringUtils.isNotBlank(fromDayText)) {
 					try {
-						WebConstants.DATE_FORMATTER.parseDateTime(fromDayText);
+						Constants.DATE_FORMATTER.parseDateTime(fromDayText);
 					} catch (IllegalArgumentException e) {
 						error("Invalid fromDay");
 					}
@@ -92,7 +92,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 				
 				if (StringUtils.isNotBlank(toDayText)) {
 					try {
-						WebConstants.DATE_FORMATTER.parseDateTime(toDayText);
+						Constants.DATE_FORMATTER.parseDateTime(toDayText);
 					} catch (IllegalArgumentException e) {
 						error("Invalid toDay");
 					}
@@ -121,14 +121,14 @@ public class ProjectContribsPage extends ProjectStatsPage {
 				if (size != 0) {
 					Day fromDay;
 					if (StringUtils.isNotBlank(fromDayText)) {
-						fromDay = new Day(WebConstants.DATE_FORMATTER.parseDateTime(fromDayText));
+						fromDay = new Day(Constants.DATE_FORMATTER.parseDateTime(fromDayText));
 					} else {
 						fromDay = overallContributions.get(0).getDay();
 					}
 					
 					Day toDay;
 					if (StringUtils.isNotBlank(toDayText)) {
-						toDay = new Day(WebConstants.DATE_FORMATTER.parseDateTime(toDayText));
+						toDay = new Day(Constants.DATE_FORMATTER.parseDateTime(toDayText));
 					} else {
 						toDay = overallContributions.get(size-1).getDay();
 					}

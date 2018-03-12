@@ -70,10 +70,10 @@ public class MailSetting implements Serializable {
 		this.smtpUser = smtpUser;
 	}
 
-	@Editable(order=400, name="SMTP Password", autocomplete="new-password", description=
+	@Editable(order=400, name="SMTP Password", description=
 		"Optionally specify password here if the SMTP host needs authentication"
 		)
-	@Password
+	@Password(autoComplete="new-password")
 	public String getSmtpPassword() {
 		return smtpPassword;
 	}

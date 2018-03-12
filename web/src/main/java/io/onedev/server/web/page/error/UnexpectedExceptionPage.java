@@ -46,17 +46,16 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 	
 	private static final long serialVersionUID = 1L;
 
-	private Exception exception;
+	private final String description;
 	
 	public UnexpectedExceptionPage(Exception exception) {
-		this.exception = exception;
+		description = "Error Details: \n\n" + StringUtils.replace(Strings.toString(exception).trim(), "    ", "\t");
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String description = "Error Details: \n\n" + StringUtils.replace(Strings.toString(exception).trim(), "    ", "\t"); 
 		add(new TextArea<String>("description", Model.of(description)));
 		add(new WebMarkupContainer("contactName") {
 

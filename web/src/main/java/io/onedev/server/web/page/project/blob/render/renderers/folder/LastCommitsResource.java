@@ -24,7 +24,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.page.project.commit.CommitDetailPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.user.UserProfilePage;
 import io.onedev.server.web.util.DateUtils;
 import io.onedev.server.web.util.avatar.AvatarManager;

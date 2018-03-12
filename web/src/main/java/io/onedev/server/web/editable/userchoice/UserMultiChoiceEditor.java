@@ -5,13 +5,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.UserChoice;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.userchoice.UserChoiceProvider;
@@ -20,18 +26,19 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.util.ComponentContext;
+import io.onedev.utils.ReflectionUtils;
 
 @SuppressWarnings("serial")
 public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
+	private final List<UserFacade> choices = new ArrayList<>();
+	
 	private UserMultiChoice input;
 	
-	private final UserChoice.Type type;
-	
 	public UserMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
-			IModel<List<String>> propertyModel, UserChoice.Type type) {
+			IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
-		this.type = type;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -39,7 +46,23 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<UserFacade> users = new ArrayList<>();
+		OneContext oneContext = new ComponentContext(this);
+		
+		OneContext.push(oneContext);
+		try {
+			UserChoice userChoice = propertyDescriptor.getPropertyGetter().getAnnotation(UserChoice.class);
+			Preconditions.checkNotNull(userChoice);
+			if (userChoice.value().length() != 0) {
+				choices.addAll((List<UserFacade>)ReflectionUtils
+						.invokeStaticMethod(propertyDescriptor.getBeanClass(), userChoice.value()));
+			} else {
+				choices.addAll(OneDev.getInstance(CacheManager.class).getUsers().values());
+			}
+		} finally {
+			OneContext.pop();
+		}
+
+		List<UserFacade> users = new ArrayList<>();
 		if (getModelObject() != null) {
 			UserManager userManager = OneDev.getInstance(UserManager.class);
 			for (String userName: getModelObject()) {
@@ -49,9 +72,18 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 		} 
 		
-		input = new UserMultiChoice("input", new Model((Serializable)users), new UserChoiceProvider(type));
+		input = new UserMultiChoice("input", new Model((Serializable)users), new UserChoiceProvider(choices));
         input.setConvertEmptyInputStringToNull(true);
         
+		input.add(new AjaxFormComponentUpdatingBehavior("change"){
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
+		
         add(input);
 	}
 

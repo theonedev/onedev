@@ -28,7 +28,7 @@ import io.onedev.server.web.behavior.testform.TestResult;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.EditorChanged;
+import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -120,10 +120,10 @@ public class AuthenticatorPage extends AdministrationPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				BeanEditor<Serializable> beanEditor = authenticatorEditor.visitChildren(BeanEditor.class, 
-						new IVisitor<BeanEditor<Serializable>, BeanEditor<Serializable>>() {
+				BeanEditor beanEditor = authenticatorEditor.visitChildren(BeanEditor.class, 
+						new IVisitor<BeanEditor, BeanEditor>() {
 
-					public void component(BeanEditor<Serializable> component, IVisit<BeanEditor<Serializable>> visit) {
+					public void component(BeanEditor component, IVisit<BeanEditor> visit) {
 						visit.stop(component);
 					}
 					
@@ -140,7 +140,7 @@ public class AuthenticatorPage extends AdministrationPage {
 					@Override
 					protected Component newContent(String id) {
 						Fragment fragment = new Fragment(id, "testFrag", AuthenticatorPage.this);
-						BeanEditor<Serializable> tokenEditor = BeanContext.editBean("editor", token);
+						BeanEditor tokenEditor = BeanContext.editBean("editor", token);
 						tokenEditor.setOutputMarkupId(true);
 						Form<?> form = new Form<Void>("form") {
 
@@ -199,9 +199,9 @@ public class AuthenticatorPage extends AdministrationPage {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 
-				if (event.getPayload() instanceof EditorChanged) {
-					EditorChanged editorChanged = (EditorChanged) event.getPayload();
-					editorChanged.getHandler().add(testButton);
+				if (event.getPayload() instanceof PropertyUpdating) {
+					PropertyUpdating propertyChanged = (PropertyUpdating) event.getPayload();
+					propertyChanged.getHandler().add(testButton);
 				}
 				
 			}

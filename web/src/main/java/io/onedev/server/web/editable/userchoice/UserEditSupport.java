@@ -2,7 +2,6 @@ package io.onedev.server.web.editable.userchoice;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -11,9 +10,8 @@ import org.eclipse.jgit.util.StringUtils;
 
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.UserChoice;
-import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.NotDefinedLabel;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -23,12 +21,7 @@ import io.onedev.server.web.editable.PropertyViewer;
 public class UserEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
-		return null;
-	}
-
-	@Override
-	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
         Method propertyGetter = propertyDescriptor.getPropertyGetter();
         UserChoice userChoice = propertyGetter.getAnnotation(UserChoice.class);
@@ -47,7 +40,7 @@ public class UserEditSupport implements EditSupport {
 						        if (userNames != null && !userNames.isEmpty()) {
 						            return new Label(id, StringUtils.join(userNames, ", " ));
 						        } else {
-									return new NotDefinedLabel(id);
+									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }
 							}
 							
@@ -56,7 +49,7 @@ public class UserEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
-						return new UserMultiChoiceEditor(componentId, this, model, userChoice.type());
+						return new UserMultiChoiceEditor(componentId, this, model);
 					}
         			
         		};
@@ -72,7 +65,7 @@ public class UserEditSupport implements EditSupport {
 								if (model.getObject() != null) {
 						            return new Label(id, model.getObject());
 						        } else {
-									return new NotDefinedLabel(id);
+									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }
 							}
 							
@@ -81,7 +74,7 @@ public class UserEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new UserSingleChoiceEditor(componentId, this, model, userChoice.type());
+						return new UserSingleChoiceEditor(componentId, this, model);
 					}
         			
         		};

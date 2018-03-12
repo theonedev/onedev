@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.floating;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -10,29 +12,48 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.DisplayNoneBehavior;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.util.Animation;
 
 @SuppressWarnings("serial")
 public abstract class FloatingPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
-	private final AlignTarget alignTarget;
+	private final Alignment alignment;
 	
-	private final AlignPlacement placement;
+	private final Animation animation;
 	
-	public FloatingPanel(AjaxRequestTarget target, AlignTarget alignTarget, AlignPlacement placement) {
+	public FloatingPanel(AjaxRequestTarget target, @Nullable Alignment alignment, 
+			@Nullable Animation animation) {
 		super(((BasePage)target.getPage()).getRootComponents().newChildId());
+		
+		this.alignment = alignment;
+		this.animation = animation;
 		
 		BasePage page = (BasePage) target.getPage(); 
 		page.getRootComponents().add(this);
-		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
+		
+		String script = String.format("$('body').append(\"<div id='%s'></div>\");", 
+				getMarkupId());
+		target.prependJavaScript(script);
+		
+		if (animation != null)
+			add(new DisplayNoneBehavior());
 		target.add(this);
 
-		this.alignTarget = alignTarget;
-		this.placement = placement;
+		if (animation != null) {
+			script = String.format("$('#%s').show('slide', {direction: '%s'}, 200);", 
+					getMarkupId(true), animation.name().toLowerCase());	
+			target.appendJavaScript(script);
+		}
 	}
 
+	public FloatingPanel(AjaxRequestTarget target, @Nullable Alignment alignment) {
+		this(target, alignment, null);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -53,8 +74,17 @@ public abstract class FloatingPanel extends Panel {
 
 				response.render(JavaScriptHeaderItem.forReference(new FloatingResourceReference()));
 				
-				String script = String.format("onedev.server.floating.init('%s', {target:%s, placement:%s}, %s);", 
-						getMarkupId(true), alignTarget, placement, getCallbackFunction());
+				String jsonOfAlignment;
+				if (alignment != null) {
+					jsonOfAlignment = String.format("{target:%s, placement:%s}", 
+						alignment.getTarget(), alignment.getPlacement());
+				} else {
+					jsonOfAlignment = "undefined";
+				}
+				String script = String.format("onedev.server.floating.init('%s', %s, %s, %s);", 
+						getMarkupId(true), jsonOfAlignment, 
+						animation!=null?"'" + animation + "'":"undefined", 
+						getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 

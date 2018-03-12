@@ -64,22 +64,6 @@ public class EditableUtils {
 	}
 
 	/**
-	 * Get autocomplete attribute of specified element from autocomplete parameter of {@link Editable} annotation.
-	 *
-	 * @param element
-	 * 			annotated element to get autocomplete from
-	 * @return
-	 * 			autocomplete attribute of specified element, or <tt>null</tt> if not defined
-	 */
-	public static @Nullable String getAutocomplete(AnnotatedElement element) {
-		Editable editable = element.getAnnotation(Editable.class);
-		if (editable != null && editable.autocomplete().trim().length() != 0)
-			return editable.autocomplete();
-		else
-			return null;
-	}
-	
-	/**
 	 * Get icon of specified element from icon parameter of {@link Editable} annotation.
 	 *
 	 * @param element
@@ -108,16 +92,6 @@ public class EditableUtils {
 		if (editable != null) {
 			if (editable.description().length() != 0)
 				return editable.description();
-			if (editable.descriptionProvider().length() != 0) {
-				Class<?> clazz;
-				if (element instanceof Method)
-					clazz = ((Method) element).getDeclaringClass();
-				else if (element instanceof Class) 
-					clazz = (Class<?>) element;
-				else 
-					clazz = ((Field) element).getDeclaringClass();
-				return (String) ReflectionUtils.invokeStaticMethod(clazz, editable.descriptionProvider());
-			}
 		}
 		return null;
 	}
@@ -168,9 +142,8 @@ public class EditableUtils {
 	public static boolean hasEditableProperties(Class<?> beanClass) {
 	    for (Method getter: BeanUtils.findGetters(ClassUtils.unproxy(beanClass))) {
 	        Method setter = BeanUtils.findSetter(getter);
-	        if (setter != null && getter.getAnnotation(Editable.class) != null) {
+	        if (setter != null && getter.getAnnotation(Editable.class) != null)
 	        	return true;
-	        }
 	    }
 	    return false;
 	}

@@ -41,7 +41,7 @@ public class NewGroupPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BeanEditor<?> editor = BeanContext.editBean("editor", group, 
+		BeanEditor editor = BeanContext.editBean("editor", group, 
 				Sets.newHashSet("administrator", "canCreateProjects"));
 		
 		Form<?> form = new Form<Void>("form") {

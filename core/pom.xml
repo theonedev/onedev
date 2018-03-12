@@ -123,6 +123,11 @@
             <artifactId>xstream</artifactId>  
             <version>1.4.9</version> 
         </dependency> 
+        <dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy</artifactId>
+			<version>${groovy.version}</version>
+        </dependency>
         <dependency> 
             <groupId>commons-codec</groupId>  
             <artifactId>commons-codec</artifactId> 
@@ -272,5 +277,6 @@
         <shiro.version>1.4.0</shiro.version> 
         <jgit.version>4.7.0.201704051617-r</jgit.version>  
         <flexmark.version>0.18.3</flexmark.version>
+        <groovy.version>2.4.14</groovy.version>
     </properties> 
 </project>

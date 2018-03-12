@@ -99,7 +99,7 @@ import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
 import io.onedev.server.web.page.project.blob.search.advanced.AdvancedSearchPanel;
 import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
-import io.onedev.server.web.page.project.commit.ProjectCommitsPage;
+import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.util.resource.RawBlobResourceReference;
 import io.onedev.server.web.websocket.CodeCommentChangedRegion;
 import io.onedev.server.web.websocket.CommitIndexedRegion;

@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.admin.mailsetting;
 
-import java.io.Serializable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.event.IEvent;
@@ -21,9 +19,9 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.behavior.testform.TestFormBehavior;
 import io.onedev.server.web.behavior.testform.TestResult;
+import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.EditorChanged;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.utils.ExceptionUtils;
 
@@ -39,7 +37,7 @@ public class MailSettingPage extends AdministrationPage {
 		MailSettingHolder mailSettingHolder = new MailSettingHolder();
 		mailSettingHolder.setMailSetting(OneDev.getInstance(ConfigManager.class).getMailSetting());
 		
-		BeanEditor<Serializable> editor = BeanContext.editBean("editor", mailSettingHolder);
+		BeanEditor editor = BeanContext.editBean("editor", mailSettingHolder);
 		
 		Button saveButton = new Button("save") {
 
@@ -88,9 +86,9 @@ public class MailSettingPage extends AdministrationPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				BeanEditor<Serializable> mailSettingEditor = editor.visitChildren(BeanEditor.class, new IVisitor<BeanEditor<Serializable>, BeanEditor<Serializable>>() {
+				BeanEditor mailSettingEditor = editor.visitChildren(BeanEditor.class, new IVisitor<BeanEditor, BeanEditor>() {
 
-					public void component(BeanEditor<Serializable> component, IVisit<BeanEditor<Serializable>> visit) {
+					public void component(BeanEditor component, IVisit<BeanEditor> visit) {
 						visit.stop(component);
 					}
 					
@@ -120,9 +118,9 @@ public class MailSettingPage extends AdministrationPage {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 
-				if (event.getPayload() instanceof EditorChanged) {
-					EditorChanged editorChanged = (EditorChanged) event.getPayload();
-					editorChanged.getHandler().add(testButton);
+				if (event.getPayload() instanceof BeanUpdating) {
+					BeanUpdating beanChanged = (BeanUpdating) event.getPayload();
+					beanChanged.getHandler().add(testButton);
 				}
 				
 			}

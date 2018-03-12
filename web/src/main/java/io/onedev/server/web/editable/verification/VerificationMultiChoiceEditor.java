@@ -51,11 +51,9 @@ public class VerificationMultiChoiceEditor extends PropertyEditor<List<String>> 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
 		List<String> verifications = new ArrayList<>();
-		Collection<String> convertedInput = input.getConvertedInput();
-		if (convertedInput != null) {
-			for (String each: convertedInput)
-				verifications.add(each);
-		} 
+		Collection<String> model = input.getConvertedInput();
+		if (model != null) 
+			verifications.addAll(model);
 		return verifications;
 	}
 

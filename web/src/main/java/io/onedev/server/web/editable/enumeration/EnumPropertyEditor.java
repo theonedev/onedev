@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.IModel;
@@ -61,6 +63,15 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
         input = new DropDownChoice<String>("input", Model.of(stringValue), choices);
 
         input.setNullValid(!getPropertyDescriptor().isPropertyRequired());	
+		input.add(new AjaxFormComponentUpdatingBehavior("change"){
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
+        
         add(input);
         
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {

@@ -3,13 +3,20 @@ package io.onedev.server.web.editable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.OneContext;
+import io.onedev.server.util.editable.annotation.ShowCondition;
+import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.BeanUtils;
+import io.onedev.utils.ReflectionUtils;
 
 public class PropertyDescriptor implements Serializable {
 
@@ -18,6 +25,10 @@ public class PropertyDescriptor implements Serializable {
 	private final Class<?> beanClass;
 	
 	private final String propertyName;
+	
+	private boolean excluded;
+	
+	private final Set<String> dependencyPropertyNames = new HashSet<>();
 	
 	private transient Method propertyGetter;
 	
@@ -31,21 +42,12 @@ public class PropertyDescriptor implements Serializable {
 	public PropertyDescriptor(Method propertyGetter) {
 		this.beanClass = propertyGetter.getDeclaringClass();
 		this.propertyName = BeanUtils.getPropertyName(propertyGetter);
-		this.propertyGetter = propertyGetter;
 	}
 	
-	public PropertyDescriptor(Method propertyGetter, Method propertySetter) {
-		this.beanClass = propertyGetter.getDeclaringClass();
-		this.propertyName = BeanUtils.getPropertyName(propertyGetter);
-		this.propertyGetter = propertyGetter;
-		this.propertySetter = propertySetter;
-	}
-
 	public PropertyDescriptor(PropertyDescriptor propertyDescriptor) {
 		this.beanClass = propertyDescriptor.getBeanClass();
 		this.propertyName = propertyDescriptor.getPropertyName();
-		this.propertyGetter = propertyDescriptor.getPropertyGetter();
-		this.propertySetter = propertyDescriptor.getPropertySetter();
+		this.excluded = propertyDescriptor.isExcluded();
 	}
 	
 	public Class<?> getBeanClass() {
@@ -63,9 +65,17 @@ public class PropertyDescriptor implements Serializable {
 	}
 	
 	public Method getPropertySetter() {
-		if (propertySetter == null)
+		if (propertySetter == null) 
 			propertySetter = BeanUtils.getSetter(getPropertyGetter());
 		return propertySetter;
+	}
+
+	public boolean isExcluded() {
+		return excluded;
+	}
+
+	public void setExcluded(boolean excluded) {
+		this.excluded = excluded;
 	}
 
 	public void copyProperty(Object fromBean, Object toBean) {
@@ -99,4 +109,33 @@ public class PropertyDescriptor implements Serializable {
 				|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
 	}
 
+	public boolean isPropertyVisible(PropertyContextAware propertyContextAware) {
+		return isPropertyVisible(propertyContextAware, new HashSet<>());
+	}
+	
+	public boolean isPropertyVisible(PropertyContextAware propertyContextAware, Set<String> checkedPropertyNames) {
+		if (checkedPropertyNames.contains(getPropertyName()))
+			return true;
+		checkedPropertyNames.add(getPropertyName());
+		
+		OneContext.push(new ComponentContext((Component) propertyContextAware));
+		try {
+			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
+			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
+				return false;
+			for (String propertyName: getDependencyPropertyNames()) {
+				PropertyContext<?> propertyContext = propertyContextAware.getPropertyContext(propertyName);
+				if (!propertyContext.isPropertyVisible(propertyContextAware, checkedPropertyNames))
+					return false;
+			}
+			return true;
+		} finally {
+			OneContext.pop();
+		}
+	}
+	
+	public Set<String> getDependencyPropertyNames() {
+		return dependencyPropertyNames;
+	}
+	
 }

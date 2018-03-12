@@ -16,6 +16,9 @@ import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ManagedSerializedForm;
@@ -26,8 +29,8 @@ import io.onedev.server.manager.DataManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Config;
-import io.onedev.server.model.User;
 import io.onedev.server.model.Config.Key;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.BackupSetting;
 import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.model.support.setting.SecuritySetting;
@@ -42,10 +45,6 @@ import io.onedev.utils.init.ManualConfig;
 import io.onedev.utils.init.Skippable;
 import io.onedev.utils.schedule.SchedulableTask;
 import io.onedev.utils.schedule.TaskScheduler;
-
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -94,8 +93,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (administrator == null) {
 			administrator = new User();
 			administrator.setId(User.ROOT_ID);
-			manualConfigs.add(new ManualConfig("Create Administator User", administrator, 
-					Sets.newHashSet("description", "defaultPrivilege")) {
+			manualConfigs.add(new ManualConfig("Create Administator User", administrator) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -105,7 +103,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 				@Override
 				public void complete() {
 					User user = (User) getSetting();
-					user.setPassword(passwordService.encryptPassword(user.getPassword()));
+					user.setPassword(passwordService.encryptPassword("admin"));
 					userManager.save(user, null);
 					idManager.init(User.class);
 				}

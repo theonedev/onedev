@@ -21,7 +21,7 @@ import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.web.WebConstants;
+import io.onedev.server.util.Constants;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -91,9 +91,9 @@ public class LicenseManagementPage extends AdministrationPage {
 					LicenseDetail.FREE_LICENSE_USERS, licenseDetail.getLicensedUsers());
 			fragment.add(new Label("users", usersInfo).setEscapeModelStrings(false));
 			fragment.add(new Label("issueDate", 
-					WebConstants.DATE_FORMATTER.print(new DateTime(licenseDetail.getIssueDate()))));
+					Constants.DATE_FORMATTER.print(new DateTime(licenseDetail.getIssueDate()))));
 			fragment.add(new Label("expirationDate", 
-					WebConstants.DATE_FORMATTER.print(new DateTime(licenseDetail.getExpirationDate())) + " (<a href=\"https://www.onedev.io/purchase\">renew</a>)").setEscapeModelStrings(false));
+					Constants.DATE_FORMATTER.print(new DateTime(licenseDetail.getExpirationDate())) + " (<a href=\"https://www.onedev.io/purchase\">renew</a>)").setEscapeModelStrings(false));
 			fragment.add(new Label("issueAccount", licenseDetail.getIssueAccount()));
 			add(fragment);
 		} else {

@@ -11,6 +11,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.Alignment;
 import io.onedev.server.web.component.floating.ComponentTarget;
 import io.onedev.server.web.component.floating.FloatingPanel;
 
@@ -56,7 +57,7 @@ public abstract class DropdownHover extends AbstractPostAjaxBehavior {
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		if (dropdown == null) {
-			dropdown = new FloatingPanel(target, new ComponentTarget(alignTarget!=null?alignTarget:getComponent()), placement) {
+			dropdown = new FloatingPanel(target, new Alignment(new ComponentTarget(alignTarget!=null?alignTarget:getComponent()), placement)) {
 				
 				@Override
 				protected void onInitialize() {

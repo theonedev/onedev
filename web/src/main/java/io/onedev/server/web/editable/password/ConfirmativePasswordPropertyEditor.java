@@ -7,11 +7,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.util.editable.EditableUtils;
+import io.onedev.server.util.editable.annotation.Password;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
@@ -38,10 +39,11 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		inputAgain.setRequired(false);
 		add(inputAgain);
 		
-		String autocomplete = EditableUtils.getAutocomplete(getPropertyDescriptor().getPropertyGetter());
-		if (autocomplete != null) {
-			input.add(AttributeAppender.append("autocomplete", autocomplete));
-			inputAgain.add(AttributeAppender.append("autocomplete", autocomplete));
+		Password password = getPropertyDescriptor().getPropertyGetter().getAnnotation(Password.class);
+		String autoComplete = password.autoComplete();
+		if (StringUtils.isNotBlank(autoComplete)) {
+			input.add(AttributeAppender.append("autocomplete", autoComplete));
+			inputAgain.add(AttributeAppender.append("autocomplete", autoComplete));
 		}
 		
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {

@@ -26,6 +26,7 @@ import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.AlignTarget;
+import io.onedev.server.web.component.floating.Alignment;
 import io.onedev.server.web.component.floating.ComponentTarget;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.utils.Range;
@@ -148,7 +149,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 				if (!suggestions.isEmpty()) {
 					int anchor = getAnchor(inputContent.substring(0, inputCaret));
 					if (dropdown == null) {
-						dropdown = new FloatingPanel(target, new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0)) {
+						dropdown = new FloatingPanel(target, new Alignment(new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0))) {
 
 							@Override
 							protected Component newContent(String id) {

@@ -57,7 +57,7 @@ import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.commit.CommitDetailPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.utils.StringUtils;

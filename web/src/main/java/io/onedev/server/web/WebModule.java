@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.vladsch.flexmark.Extension;
 
+import groovy.lang.GroovyRuntimeException;
 import io.onedev.launcher.loader.AbstractPlugin;
 import io.onedev.launcher.loader.AbstractPluginModule;
 import io.onedev.server.git.exception.GitException;
@@ -68,8 +69,8 @@ public class WebModule extends AbstractPluginModule {
 		
 		contributeFromPackage(EditSupport.class, EditSupport.class);
 		
-		bind(WebApplication.class).to(OneDevWebApplication.class);
-		bind(Application.class).to(OneDevWebApplication.class);
+		bind(WebApplication.class).to(OneWebApplication.class);
+		bind(Application.class).to(OneWebApplication.class);
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
@@ -103,7 +104,7 @@ public class WebModule extends AbstractPluginModule {
 				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
 						ObjectNotFoundException.class, StaleStateException.class, UnauthorizedException.class, 
 						GitException.class, PageExpiredException.class, StalePageException.class, 
-						InvalidReviewRuleException.class);
+						InvalidReviewRuleException.class, GroovyRuntimeException.class);
 			}
 			
 		});

@@ -1,16 +1,15 @@
 package io.onedev.server.web.editable.branchpattern;
 
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.util.editable.annotation.BranchPattern;
-import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.NotDefinedLabel;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -20,12 +19,7 @@ import io.onedev.server.web.editable.PropertyViewer;
 public class BranchPatternEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
-		return null;
-	}
-
-	@Override
-	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 		Method propertyGetter = propertyDescriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(BranchPattern.class) != null) {
@@ -45,7 +39,11 @@ public class BranchPatternEditSupport implements EditSupport {
 					        if (refMatch != null) {
 					        	return new Label(id, refMatch);
 					        } else {
-								return new NotDefinedLabel(id);
+								NameOfEmptyValue nameOfEmptyValue = propertyDescriptor.getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
+								if (nameOfEmptyValue != null)
+									return new Label(id, nameOfEmptyValue.value());
+								else 
+									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 					        }
 						}
 						

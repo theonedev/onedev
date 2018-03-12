@@ -1,0 +1,33 @@
+<wicket:panel>
+	<div wicket:id="content" class="bean properties"></div>
+	
+	<wicket:fragment wicket:id="verticalFrag">
+		<div wicket:id="properties" class="form-group">
+			<wicket:enclosure child="name">
+			<label class="name control-label">
+				<span wicket:id="name"></span>
+				<span wicket:id="required" class="required"></span>
+			</label>
+			</wicket:enclosure>
+			<div wicket:id="value" class="value"></div>
+			<div wicket:id="feedback"></div>
+			<div wicket:id="description" class="help-block"></div>
+		</div>
+	</wicket:fragment>
+
+	<wicket:fragment wicket:id="horizontalFrag">
+		<table>
+			<tr wicket:id="properties">
+				<td wicket:id="name" class="name control-label">
+					<span wicket:id="name"></span>
+					<span wicket:id="required" class="required"></span>
+				</td>
+				<td wicket:id="value" class="value">
+					<div wicket:id="value"></div>
+					<div wicket:id="feedback"></div>
+					<div wicket:id="description" class="help-block"></div>
+				</td>
+			</tr>
+		</table>
+	</wicket:fragment>
+</wicket:panel>

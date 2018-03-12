@@ -9,7 +9,7 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.sidebar.SidebarPanel;
+import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -17,6 +17,7 @@ import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizat
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
+import io.onedev.server.web.page.project.setting.issuecustomfields.IssueCustomFieldsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
 
 @SuppressWarnings("serial")
@@ -35,7 +36,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new SidebarPanel("projectSettingSidebar", null) {
+		add(new SideBar("projectSettingSidebar", null) {
 
 			@Override
 			protected List<? extends Tab> newTabs() {
@@ -45,6 +46,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 				tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
 				tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
 				tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-exchange", CommitMessageTransformPage.class));
+				tabs.add(new ProjectSettingTab("Issue Custom Fields", "fa fa-fw fa-list", IssueCustomFieldsPage.class));
 				return tabs;
 			}
 			

@@ -19,7 +19,7 @@ import org.unbescape.html.HtmlEscape;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.page.project.commit.CommitDetailPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.utils.Highlighter;
 import io.onedev.utils.Transformer;
 

@@ -8,8 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UserChoice {
-	
-	public enum Type{ALL, PROJECT_READER, PROJECT_WRITER, PROJECT_ADMINISTRATOR} 
-	
-	Type type() default Type.ALL;
+	String value() default "";
 }

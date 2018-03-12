@@ -37,7 +37,7 @@ public class NewUserPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BeanEditor<?> editor = BeanContext.editBean("editor", user);
+		BeanEditor editor = BeanContext.editBean("editor", user);
 		
 		Form<?> form = new Form<Void>("form") {
 

@@ -1,7 +1,8 @@
 onedev.server.floating = {
-	init: function(floatingId, alignment, closeCallback) {
+	init: function(floatingId, alignment, animation, closeCallback) {
 		var $floating = $("#" + floatingId);
 		$floating.data("closeCallback", closeCallback);
+		$floating.data("animation", animation);
 		
 		$floating.data("mouseUpOrTouchStart", function(e) {
 			/*
@@ -34,15 +35,17 @@ onedev.server.floating = {
 		
 		// use keydown as keypress does not work in chrome/safari
 		$(document).on("keydown", $floating.data("keydown"));
-		
-		if (alignment.target.element)
-			$(alignment.target.element).addClass("floating-aligned");
-		
-		$floating.data("alignment", alignment);
+
+		if (alignment) {
+			if (alignment.target.element)
+				$(alignment.target.element).addClass("floating-aligned");
+			$floating.data("alignment", alignment);
+		}
 		
 		var openTriggered = false;
 		$floating.data("elementReplaced", function() {
-			$floating.align($floating.data("alignment"));
+			if ($floating.data("alignment"))
+				$floating.align($floating.data("alignment"));
 			if (!openTriggered) {
 				$floating.trigger("open");
 				openTriggered = true;
@@ -58,7 +61,7 @@ onedev.server.floating = {
 			
 			var alignment = $floating.data("alignment");
 			
-			if (alignment.target.element)
+			if (alignment && alignment.target.element)
 				$(alignment.target.element).removeClass("floating-aligned");
 			
 			$(document).off("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
@@ -67,7 +70,14 @@ onedev.server.floating = {
 			
 			$floating.trigger("close");
 			
-			$floating.remove();
+			var animation = $floating.data("animation");
+			if (animation) {
+				$floating.hide("slide", {direction: animation.toLowerCase()}, 200, function() {
+					$floating.remove();
+				});
+			} else {
+				$floating.remove();
+			}
 		}
 	}
 	

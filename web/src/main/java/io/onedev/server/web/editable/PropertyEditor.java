@@ -6,6 +6,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
@@ -46,6 +48,14 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 		});
 		
 		add(new AttributeAppender("class", " property editor editable"));
+	}
+	
+	protected void onPropertyUpdating(IPartialPageRequestHandler target) {
+		validate();
+		if (!hasErrors(true)) 
+			send(getParent(), Broadcast.BUBBLE, new PropertyUpdating(target, propertyDescriptor.getPropertyName()));								
+		else
+			clearErrors(true);
 	}
 	
 	public PropertyDescriptor getPropertyDescriptor() {

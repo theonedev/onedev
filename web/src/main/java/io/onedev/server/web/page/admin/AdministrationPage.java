@@ -12,7 +12,7 @@ import org.apache.wicket.model.Model;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.sidebar.SidebarPanel;
+import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
@@ -37,7 +37,7 @@ public abstract class AdministrationPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new SidebarPanel("sidebar", "administration.miniSidebar") {
+		add(new SideBar("sidebar", "administration.miniSidebar") {
 
 			@Override
 			protected List<? extends Tab> newTabs() {

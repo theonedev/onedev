@@ -9,7 +9,13 @@ onedev.server.modal = {
 					&& $("body>.floating").length == 0 
 					&& $(".atwho-view:visible").length == 0
 					&& $modal.nextAll(".modal").length == 0) {
-				onedev.server.modal.close($modal, true);
+				if ($modal.find(".leave-confirm.dirty").length != 0) {
+					if (confirm("There are unsaved changes, do you want to close?")) {
+						onedev.server.modal.close($modal, true);
+					}
+				} else {
+					onedev.server.modal.close($modal, true);
+				}
 			}
 		});
 		

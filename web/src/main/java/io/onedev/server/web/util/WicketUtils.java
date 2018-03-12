@@ -1,5 +1,8 @@
 package io.onedev.server.web.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
@@ -32,7 +35,47 @@ public class WicketUtils {
 			return null;
 		}
 	}
+	
+	@Nullable
+	public static <T> T findOutermost(Component component, Class<T> clazz) {
+		List<T> parents = findParents(component, clazz);
+		if (!parents.isEmpty())
+			return parents.get(parents.size()-1);
+		else
+			return null;
+	}
+	
+	@Nullable
+	public static <T> T findInnermost(Component component, Class<T> clazz) {
+		List<T> parents = findParents(component, clazz);
+		if (!parents.isEmpty())
+			return parents.get(0);
+		else
+			return null;
+	}
+	
+	/**
+	 * Get list of parent components (including current component) of specified clazz
+	 * @param component
+	 * 			starting component
+	 * @param clazz
+	 * 			clazz to check
+	 * @return
+	 * 			list of parent components of specified clazz, with inner component comes first
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> List<T> findParents(Component component, Class<T> clazz) {
+		List<T> parents = new ArrayList<>();
+		Component current = component;
+		do {
+			if (clazz.isAssignableFrom(current.getClass()))
+				parents.add((T) current);
+			current = current.getParent();
+		} while (current != null);
 
+		return parents;
+	}
+	
 	@Nullable
 	public static PageKey getPageKey() {
 		Page page = getPage();

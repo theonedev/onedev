@@ -83,19 +83,6 @@ onedev.server = {
 		}
 	},
 	
-	editable: {
-		adjustReflectionEditor: function(editorId) {
-			var editor = $("#" + editorId);
-			var input = editor.find(".value>input[type=checkbox]");
-			input.parent().prev("label.name").addClass("pull-left");
-			input.after("<div style='clear:both;'/>")
-			
-			input = editor.find(".value>div>input[type=checkbox]");
-			input.parent().parent().prev("label.name").addClass("pull-left");
-			input.after("<div style='clear:both;'/>")
-		}
-	},
-	
 	form: {
 		/*
 		 * This function can be called to mark enclosing form of specified element dirty. It should be
@@ -303,13 +290,22 @@ onedev.server = {
 			var selector = ".has-error:visible:first .autofocus";
 			var $inError = $containers.find(selector).addBack(selector);
 			if ($inError.length != 0 && $inError.closest(".no-autofocus").length == 0) {
-				$inError.focus();
+				if ($inError.children(".CodeMirror").length != 0) {
+					$inError.children(".CodeMirror")[0].CodeMirror.focus();					
+				} else {
+					$inError.focus();
+				}
 			} else {
 				selector = ".autofocus:visible";
 				$containers.find(selector).addBack(selector).each(function() {
 					var $this = $(this);
 					if ($this.closest(".no-autofocus").length == 0) {
-						$this.focus();
+						console.log($this[0]);
+						if ($this.children(".CodeMirror").length != 0) {
+							$this.children(".CodeMirror")[0].CodeMirror.focus();					
+						} else {
+							$this.focus();
+						}
 						return false;
 					}
 				});

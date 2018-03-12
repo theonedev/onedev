@@ -24,7 +24,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 
 	private String oldName;
 	
-	private BeanEditor<?> editor;
+	private BeanEditor editor;
 	
 	public GeneralSettingPage(PageParameters params) {
 		super(params);

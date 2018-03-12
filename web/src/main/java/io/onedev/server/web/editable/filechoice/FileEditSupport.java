@@ -1,16 +1,14 @@
 package io.onedev.server.web.editable.filechoice;
 
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.util.editable.annotation.FileChoice;
-import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.NotDefinedLabel;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -20,12 +18,7 @@ import io.onedev.server.web.editable.PropertyViewer;
 public class FileEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
-		return null;
-	}
-
-	@Override
-	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
         Method propertyGetter = propertyDescriptor.getPropertyGetter();
         FileChoice fileChoice = propertyGetter.getAnnotation(FileChoice.class);
@@ -42,7 +35,7 @@ public class FileEditSupport implements EditSupport {
 								if (model.getObject() != null) {
 						            return new Label(id, model.getObject());
 						        } else {
-									return new NotDefinedLabel(id);
+									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }
 							}
 							

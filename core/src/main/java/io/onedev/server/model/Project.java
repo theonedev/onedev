@@ -58,6 +58,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
@@ -78,6 +82,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.editable.annotation.Editable;
@@ -89,10 +94,6 @@ import io.onedev.utils.LockUtils;
 import io.onedev.utils.PathUtils;
 import io.onedev.utils.Range;
 import io.onedev.utils.StringUtils;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 
 @Entity
 @Table(indexes={@Index(columnList="g_forkedFrom_id")})
@@ -165,6 +166,10 @@ public class Project extends AbstractEntity {
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<CodeComment> codeComments = new ArrayList<>();
+	
+	@Lob
+	@Column(nullable=false, length=65535)
+	private IssueWorkflow issueWorkflow = new IssueWorkflow();
 	
 	private transient Repository repository;
 	
@@ -779,6 +784,14 @@ public class Project extends AbstractEntity {
 
 	public void setCodeComments(Collection<CodeComment> codeComments) {
 		this.codeComments = codeComments;
+	}
+
+	public IssueWorkflow getIssueWorkflow() {
+		return issueWorkflow;
+	}
+
+	public void setIssueWorkflow(IssueWorkflow issueWorkflow) {
+		this.issueWorkflow = issueWorkflow;
 	}
 
 	public long getVersion() {

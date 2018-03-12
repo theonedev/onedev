@@ -33,21 +33,23 @@ import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.sidebar.SidebarPanel;
+import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
-import io.onedev.server.web.page.project.commit.CommitDetailPage;
-import io.onedev.server.web.page.project.commit.ProjectCommitsPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
+import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.page.project.moreinfo.MoreInfoPanel;
-import io.onedev.server.web.page.project.pullrequest.InvalidRequestPage;
-import io.onedev.server.web.page.project.pullrequest.newrequest.NewRequestPage;
-import io.onedev.server.web.page.project.pullrequest.requestdetail.RequestDetailPage;
-import io.onedev.server.web.page.project.pullrequest.requestlist.RequestListPage;
+import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
+import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
+import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
@@ -121,7 +123,7 @@ public abstract class ProjectPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new SidebarPanel("sidebar", "project.miniSidebar") {
+		add(new SideBar("sidebar", "project.miniSidebar") {
 			
 			@Override
 			protected List<? extends Tab> newTabs() {
@@ -136,6 +138,8 @@ public abstract class ProjectPage extends LayoutPage {
 				
 				tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
 						0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class));
+				
+				tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, NewIssuePage.class));
 				
 				tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
 						0, ProjectCodeCommentsPage.class));

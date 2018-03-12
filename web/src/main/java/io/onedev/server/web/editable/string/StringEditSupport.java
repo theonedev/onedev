@@ -1,13 +1,12 @@
 package io.onedev.server.web.editable.string;
 
-import java.util.Set;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.editable.annotation.BranchPattern;
+import io.onedev.server.util.editable.annotation.ChoiceProvider;
+import io.onedev.server.util.editable.annotation.Script;
 import io.onedev.server.util.editable.annotation.GroupChoice;
 import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.editable.annotation.Multiline;
@@ -17,10 +16,8 @@ import io.onedev.server.util.editable.annotation.ReviewRequirementSpec;
 import io.onedev.server.util.editable.annotation.TagPattern;
 import io.onedev.server.util.editable.annotation.UserChoice;
 import io.onedev.server.web.component.MultilineLabel;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.NotDefinedLabel;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -30,16 +27,14 @@ import io.onedev.server.web.editable.PropertyViewer;
 public class StringEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
-		return null;
-	}
-
-	@Override
-	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 
 		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
 		if (propertyClass == String.class 
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(Script.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(Password.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(BranchPattern.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(TagPattern.class) == null
@@ -58,13 +53,11 @@ public class StringEditSupport implements EditSupport {
 							if (model.getObject() != null) {
 								if (propertyDescriptor.getPropertyGetter().getAnnotation(Multiline.class) != null) {
 									return new MultilineLabel(id, model.getObject());
-								} else if (propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) != null) {
-									return new MarkdownViewer(id, Model.of(model.getObject()), null);
 								} else { 
 									return new Label(id, model.getObject());
 								}
 							} else {
-								return new NotDefinedLabel(id);
+								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 							}
 						}
 						

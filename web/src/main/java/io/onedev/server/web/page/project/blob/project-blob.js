@@ -32,10 +32,7 @@ onedev.server.projectBlob = {
 			var $revisionPicker = $head.find(">.revision-picker");
 			var $operations = $head.find(">.operations");
 					
-			// we should simply call $head.width() here, but the value is incorrect after maximize and restore
-			// window in IE and Chrome (maybe due to use of table in sidebar?), so we go with the complicate 
-			// approach of calculating the head width
-			var headWidth = $("#project").width() - $("#project>.sidebar>table>tbody>tr>td.nav").outerWidth();
+			var headWidth = $head.width();
 			
 			// below code moves file navigator to bottom if it is too wide
 			var maxWidth = headWidth - $revisionPicker.outerWidth() - $operations.outerWidth();

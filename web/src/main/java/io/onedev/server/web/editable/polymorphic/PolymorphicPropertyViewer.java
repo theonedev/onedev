@@ -3,6 +3,7 @@ package io.onedev.server.web.editable.polymorphic;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -49,7 +50,10 @@ public class PolymorphicPropertyViewer extends Panel {
 			fragment.add(AttributeAppender.append("class", " horizontal"));
 		add(fragment);
 		
-		fragment.add(new Label("type", EditableUtils.getName(propertyValue.getClass())));
+		String name = EditableUtils.getName(propertyValue.getClass());
+		name = Application.get().getResourceSettings().getLocalizer().getString(name, this, name);
+		
+		fragment.add(new Label("type", name));
 		fragment.add(BeanContext.viewBean("beanViewer", propertyValue));
 	}
 
