@@ -34,6 +34,7 @@ import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.jetty.JettyRunner;
 import io.onedev.server.util.serverconfig.ServerConfig;
+import io.onedev.server.web.websocket.WebSocketManager;
 import io.onedev.utils.init.InitStage;
 import io.onedev.utils.init.ManualConfig;
 import io.onedev.utils.schedule.TaskScheduler;
@@ -66,10 +67,12 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private volatile InitStage initStage;
 	
+	private final WebSocketManager webSocketManager;
+	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
 			UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager, 
-			UserManager userManager, ListenerRegistry listenerRegistry) {
+			UserManager userManager, ListenerRegistry listenerRegistry, WebSocketManager webSocketManager) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
@@ -79,6 +82,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.serverConfig = serverConfig;
 		this.userManager = userManager;
 		this.listenerRegistry = listenerRegistry;
+		this.webSocketManager = webSocketManager;
 		
 		initStage = new InitStage("Server is Starting...");
 	}
@@ -108,11 +112,15 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		} finally {
 			unitOfWork.end();
 		}
+		
+		webSocketManager.start();
 	}
 	
 	@Sessional
 	@Override
 	public void postStart() {
+		webSocketManager.stop();
+		
 		listenerRegistry.post(new SystemStarted());
 		ThreadContext.unbindSubject();
 		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");

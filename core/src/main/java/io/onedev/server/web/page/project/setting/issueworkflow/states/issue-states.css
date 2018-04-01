@@ -1,0 +1,30 @@
+#project-setting .issue-states table td {
+	padding: 0;
+}
+#project-setting .issue-states table td.norecords-td {
+	padding: 5px;
+}
+#project-setting .issue-states table a {
+	display: block;
+	color: #666;
+	text-decoration: none;
+	padding: 5px;
+}
+#project-setting .issue-states table>tbody>tr>td:first-child>div {
+	position: relative;
+	top: 0;
+}
+#project-setting .issue-staets table>tbody>tr>td:first-child>div>.drag-handle {
+	position: absolute;
+	top: 8px;
+}
+#project-setting .issue-states table>tbody>tr>td:first-child>div>a {
+	margin-left: 16px;
+}
+
+.floating.issue-state {
+	width: 600px;
+}
+.floating.issue-state .actions {
+	margin-bottom: 12px;
+}

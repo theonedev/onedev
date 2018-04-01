@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.input.InputContext;
+import io.onedev.server.util.inputspec.InputContext;
 
 public abstract class OneContext {
 

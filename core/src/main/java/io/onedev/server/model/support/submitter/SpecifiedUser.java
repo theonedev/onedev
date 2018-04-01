@@ -9,9 +9,10 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.editable.annotation.UserChoice;
 
-@Editable(order=200, name="Specified user")
+@Editable(order=200, name="User")
 public class SpecifiedUser implements Submitter {
 
 	private static final long serialVersionUID = 1L;
@@ -20,6 +21,7 @@ public class SpecifiedUser implements Submitter {
 
 	@Editable(name="User")
 	@UserChoice
+	@OmitName
 	@NotEmpty
 	public String getUserName() {
 		return userName;

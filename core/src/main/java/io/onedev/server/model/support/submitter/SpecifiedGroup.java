@@ -11,8 +11,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.GroupChoice;
+import io.onedev.server.util.editable.annotation.OmitName;
 
-@Editable(order=300, name="Specified group")
+@Editable(order=300, name="Group")
 public class SpecifiedGroup implements Submitter {
 
 	private static final long serialVersionUID = 1L;
@@ -21,6 +22,7 @@ public class SpecifiedGroup implements Submitter {
 
 	@Editable(name="Group")
 	@GroupChoice
+	@OmitName
 	@NotEmpty
 	public String getGroupName() {
 		return groupName;

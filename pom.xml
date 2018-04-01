@@ -27,7 +27,7 @@
                     <configuration> 
                         <sourceDirectory>${basedir}/src/main/java</sourceDirectory> 
                         <listener>true</listener>
-	                    <visitor>false</visitor> 
+	                    <visitor>true</visitor> 
                     </configuration> 
                 </plugin>  
     		</plugins>
@@ -52,9 +52,6 @@
     </build>
     <modules> 
         <module>core</module>
-        <module>rest</module>
-        <module>search</module>
-        <module>web</module>
         <module>product</module>
     </modules>  
     <dependencyManagement> 

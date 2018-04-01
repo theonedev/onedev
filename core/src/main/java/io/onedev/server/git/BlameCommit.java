@@ -62,6 +62,7 @@ public class BlameCommit implements Serializable {
 		return Objects.equal(hash, rhs.hash);
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)

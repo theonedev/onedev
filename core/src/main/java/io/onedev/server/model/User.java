@@ -182,6 +182,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.requestTasks = requestTasks;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)

@@ -14,13 +14,13 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.input.Input;
+import io.onedev.server.util.inputspec.InputSpec;
 
 @Singleton
 public class DefaultIssueManager extends AbstractEntityManager<Issue> 
 		implements IssueManager {
 
-	private static final String CUSTOM_FIELDS_BEAN_PREFIX = "IssueCustomFieldsBean";
+	private static final String CUSTOM_FIELDS_BEAN_PREFIX = "IssueFieldsBean";
 	
 	private final ProjectManager projectManager;
 	
@@ -35,7 +35,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue>
 	public Class<? extends Serializable> defineCustomFieldsBeanClass(Project project) {
 		String className = CUSTOM_FIELDS_BEAN_PREFIX + project.getId();
 		
-		return (Class<? extends Serializable>) Input.defineClass(className, project.getIssueWorkflow().getFieldSpecs());
+		return (Class<? extends Serializable>) InputSpec.defineClass(className, project.getIssueWorkflow().getFields());
 	}
 	
 	@Override

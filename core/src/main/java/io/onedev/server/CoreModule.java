@@ -5,10 +5,12 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -18,6 +20,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.realm.Realm;
@@ -25,16 +28,30 @@ import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.shiro.web.servlet.ShiroFilter;
+import org.apache.wicket.Application;
+import org.apache.wicket.core.request.mapper.StalePageException;
+import org.apache.wicket.protocol.http.PageExpiredException;
+import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.protocol.http.WicketFilter;
+import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.StaleStateException;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.type.Type;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.thoughtworks.xstream.XStream;
@@ -45,7 +62,9 @@ import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+import com.vladsch.flexmark.Extension;
 
+import groovy.lang.GroovyRuntimeException;
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.AbstractPlugin;
 import io.onedev.launcher.loader.AbstractPluginModule;
@@ -59,6 +78,7 @@ import io.onedev.server.command.ResetAdminPasswordCommand;
 import io.onedev.server.command.RestoreDBCommand;
 import io.onedev.server.command.UpgradeCommand;
 import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.exception.GitException;
 import io.onedev.server.git.jackson.GitObjectMapperConfigurator;
 import io.onedev.server.manager.AttachmentManager;
 import io.onedev.server.manager.BatchWorkManager;
@@ -89,6 +109,7 @@ import io.onedev.server.manager.PullRequestWatchManager;
 import io.onedev.server.manager.ReviewInvitationManager;
 import io.onedev.server.manager.ReviewManager;
 import io.onedev.server.manager.StorageManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.manager.UserAuthorizationManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.manager.UserManager;
@@ -151,6 +172,14 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.DefaultDao;
+import io.onedev.server.rest.RestConstants;
+import io.onedev.server.rest.jersey.DefaultServletContainer;
+import io.onedev.server.rest.jersey.JerseyConfigurator;
+import io.onedev.server.rest.jersey.ResourceConfigProvider;
+import io.onedev.server.search.DefaultIndexManager;
+import io.onedev.server.search.DefaultSearchManager;
+import io.onedev.server.search.IndexManager;
+import io.onedev.server.search.SearchManager;
 import io.onedev.server.security.BasicAuthenticationFilter;
 import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.OneAuthorizingRealm;
@@ -164,9 +193,39 @@ import io.onedev.server.util.jackson.ObjectMapperProvider;
 import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
 import io.onedev.server.util.jetty.DefaultJettyRunner;
 import io.onedev.server.util.jetty.JettyRunner;
+import io.onedev.server.util.markdown.MarkdownProcessor;
+import io.onedev.server.util.reviewrequirement.InvalidReviewRuleException;
 import io.onedev.server.util.validation.DefaultEntityValidator;
 import io.onedev.server.util.validation.EntityValidator;
 import io.onedev.server.util.validation.ValidatorProvider;
+import io.onedev.server.web.DefaultUrlManager;
+import io.onedev.server.web.DefaultWicketFilter;
+import io.onedev.server.web.DefaultWicketServlet;
+import io.onedev.server.web.ExpectedExceptionContribution;
+import io.onedev.server.web.OneWebApplication;
+import io.onedev.server.web.ResourcePackScopeContribution;
+import io.onedev.server.web.WebModule;
+import io.onedev.server.web.component.diff.DiffRenderer;
+import io.onedev.server.web.component.markdown.SourcePositionTrackExtension;
+import io.onedev.server.web.component.markdown.emoji.EmojiExtension;
+import io.onedev.server.web.editable.DefaultEditSupportRegistry;
+import io.onedev.server.web.editable.EditSupport;
+import io.onedev.server.web.editable.EditSupportLocator;
+import io.onedev.server.web.editable.EditSupportRegistry;
+import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
+import io.onedev.server.web.util.avatar.AvatarManager;
+import io.onedev.server.web.util.avatar.DefaultAvatarManager;
+import io.onedev.server.web.util.commitmessagetransform.CommitMessageTransformer;
+import io.onedev.server.web.util.commitmessagetransform.PatternCommitMessageTransformer;
+import io.onedev.server.web.util.markdown.MentionProcessor;
+import io.onedev.server.web.util.markdown.PullRequestProcessor;
+import io.onedev.server.web.util.markdown.RelativeUrlProcessor;
+import io.onedev.server.web.websocket.CodeCommentChangeBroadcaster;
+import io.onedev.server.web.websocket.CommitIndexedBroadcaster;
+import io.onedev.server.web.websocket.DefaultWebSocketManager;
+import io.onedev.server.web.websocket.PullRequestChangeBroadcaster;
+import io.onedev.server.web.websocket.TaskChangeBroadcaster;
+import io.onedev.server.web.websocket.WebSocketManager;
 import io.onedev.utils.ClassUtils;
 import io.onedev.utils.schedule.DefaultTaskScheduler;
 import io.onedev.utils.schedule.TaskScheduler;
@@ -202,6 +261,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		
 		
 		configurePersistence();
+		configureRestServices();
+		configureWeb();
 		
 		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
@@ -273,9 +334,92 @@ public class CoreModule extends AbstractPluginModule {
         });
         contributeFromPackage(Authenticator.class, Authenticator.class);
         
+		bind(IndexManager.class).to(DefaultIndexManager.class);
+		bind(SearchManager.class).to(DefaultSearchManager.class);
+		
 		bind(EntityValidator.class).to(DefaultEntityValidator.class);
 	}
+	
+	private void configureRestServices() {
+		bind(ResourceConfig.class).toProvider(ResourceConfigProvider.class).in(Singleton.class);
+		bind(ServletContainer.class).to(DefaultServletContainer.class);
+		
+		contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
 
+			@Override
+			public void configure(FilterChainManager filterChainManager) {
+				filterChainManager.createChain("/rest/**", "noSessionCreation, authcBasic");
+			}
+			
+		});
+		
+		contribute(JerseyConfigurator.class, new JerseyConfigurator() {
+			
+			@Override
+			public void configure(ResourceConfig resourceConfig) {
+				resourceConfig.packages(RestConstants.class.getPackage().getName());
+			}
+			
+		});
+	}
+
+	private void configureWeb() {
+		bind(WicketServlet.class).to(DefaultWicketServlet.class);
+		bind(WicketFilter.class).to(DefaultWicketFilter.class);
+		bind(WebSocketPolicy.class).toInstance(WebSocketPolicy.newServerPolicy());
+		bind(EditSupportRegistry.class).to(DefaultEditSupportRegistry.class);
+		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
+
+		contribute(CommitMessageTransformer.class, PatternCommitMessageTransformer.class);
+		
+		contributeFromPackage(EditSupport.class, EditSupport.class);
+		
+		bind(WebApplication.class).to(OneWebApplication.class);
+		bind(Application.class).to(OneWebApplication.class);
+		bind(AvatarManager.class).to(DefaultAvatarManager.class);
+		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
+		
+		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
+		
+		bind(CommitIndexedBroadcaster.class);
+		
+		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
+		contributeFromPackage(BlobRendererContribution.class, BlobRendererContribution.class);
+
+		contribute(Extension.class, new EmojiExtension());
+		contribute(Extension.class, new SourcePositionTrackExtension());
+		
+		contribute(MarkdownProcessor.class, new MentionProcessor());
+		contribute(MarkdownProcessor.class, new PullRequestProcessor());
+		contribute(MarkdownProcessor.class, new RelativeUrlProcessor());
+
+		contribute(ResourcePackScopeContribution.class, new ResourcePackScopeContribution() {
+			
+			@Override
+			public Collection<Class<?>> getResourcePackScopes() {
+				return Lists.newArrayList(WebModule.class);
+			}
+			
+		});
+		contribute(ExpectedExceptionContribution.class, new ExpectedExceptionContribution() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
+				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
+						ObjectNotFoundException.class, StaleStateException.class, UnauthorizedException.class, 
+						GitException.class, PageExpiredException.class, StalePageException.class, 
+						InvalidReviewRuleException.class, GroovyRuntimeException.class);
+			}
+			
+		});
+
+		bind(UrlManager.class).to(DefaultUrlManager.class);
+		bind(CodeCommentChangeBroadcaster.class);
+		bind(PullRequestChangeBroadcaster.class);
+		bind(TaskChangeBroadcaster.class);
+	}
+	
 	private void configurePersistence() {
 		// Use an optional binding here in case our client does not like to 
 		// start persist service provided by this plugin

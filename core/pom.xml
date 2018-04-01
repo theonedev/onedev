@@ -21,6 +21,95 @@
     </build>  
     <dependencies> 
         <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-core</artifactId>  
+            <version>${wicket.version}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-extensions</artifactId>  
+            <version>${wicket.version}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-request</artifactId>  
+            <version>${wicket.version}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-util</artifactId>  
+            <version>${wicket.version}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-devutils</artifactId>  
+            <version>${wicket.version}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.apache.wicket</groupId>  
+            <artifactId>wicket-native-websocket-core</artifactId>  
+            <version>${wicket.version}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.webjars</groupId>  
+            <artifactId>font-awesome</artifactId>  
+            <version>4.7.0</version>  
+            <exclusions> 
+                <exclusion> 
+                    <groupId>org.webjars</groupId>  
+                    <artifactId>bootstrap</artifactId> 
+                </exclusion> 
+            </exclusions> 
+        </dependency>  
+        <dependency> 
+            <groupId>de.agilecoders.wicket</groupId>  
+            <artifactId>wicket-bootstrap-core</artifactId>  
+            <version>${wicketbootstrap.version}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>de.agilecoders.wicket</groupId>  
+            <artifactId>wicket-bootstrap-extensions</artifactId>  
+            <version>${wicketbootstrap.version}</version> 
+        </dependency>  
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>codemirror</artifactId>
+			<version>5.21.0</version>
+		</dependency>
+        <dependency> 
+            <groupId>commons-fileupload</groupId>  
+            <artifactId>commons-fileupload</artifactId>  
+            <version>1.3.2</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>commons-validator</groupId>  
+            <artifactId>commons-validator</artifactId>  
+            <version>1.4.0</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.ocpsoft.prettytime</groupId>  
+            <artifactId>prettytime</artifactId>  
+            <version>4.0.1.Final</version> 
+        </dependency>  
+        <dependency>
+        	<groupId>io.onedev</groupId>
+        	<artifactId>codeassist</artifactId>
+        	<version>1.0.0</version>
+        </dependency>
+        <dependency> 
+            <groupId>org.glassfish.jersey.containers</groupId>  
+            <artifactId>jersey-container-servlet</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.glassfish.jersey.ext</groupId>  
+            <artifactId>jersey-bean-validation</artifactId> 
+        </dependency>  
+        <dependency> 
+            <groupId>org.glassfish.hk2</groupId>  
+            <artifactId>guice-bridge</artifactId>  
+            <version>2.4.0-b06</version> 
+        </dependency>  
+        <dependency> 
             <groupId>org.jetbrains.xodus</groupId>  
             <artifactId>xodus-entity-store</artifactId> 
         </dependency>  
@@ -34,6 +123,36 @@
             		<artifactId>slf4j-api</artifactId>
             	</exclusion>
             </exclusions>
+        </dependency>  
+        <dependency> 
+            <artifactId>lucene-core</artifactId>  
+            <groupId>org.apache.lucene</groupId>  
+            <type>jar</type>  
+            <version>${lucene.version}</version> 
+        </dependency>  
+        <dependency> 
+            <artifactId>lucene-queries</artifactId>  
+            <groupId>org.apache.lucene</groupId>  
+            <type>jar</type>  
+            <version>${lucene.version}</version> 
+        </dependency>  
+        <dependency> 
+            <artifactId>lucene-queryparser</artifactId>  
+            <groupId>org.apache.lucene</groupId>  
+            <type>jar</type>  
+            <version>${lucene.version}</version> 
+        </dependency>  
+        <dependency> 
+            <artifactId>lucene-analyzers-common</artifactId>  
+            <groupId>org.apache.lucene</groupId>  
+            <type>jar</type>  
+            <version>${lucene.version}</version> 
+        </dependency>  
+        <dependency> 
+            <artifactId>lucene-facet</artifactId>  
+            <groupId>org.apache.lucene</groupId>  
+            <type>jar</type>  
+            <version>${lucene.version}</version> 
         </dependency>  
         <dependency> 
             <groupId>org.apache.shiro</groupId>  
@@ -273,10 +392,13 @@
 	</dependencies>  
     <properties> 
         <moduleClass>io.onedev.server.CoreModule</moduleClass> 
+        <lucene.version>4.10.3</lucene.version> 
         <hibernate.version>5.2.10.Final</hibernate.version> 
         <shiro.version>1.4.0</shiro.version> 
         <jgit.version>4.7.0.201704051617-r</jgit.version>  
         <flexmark.version>0.18.3</flexmark.version>
         <groovy.version>2.4.14</groovy.version>
+        <wicket.version>7.3.0</wicket.version>  
+        <wicketbootstrap.version>0.10.6</wicketbootstrap.version> 
     </properties> 
 </project>

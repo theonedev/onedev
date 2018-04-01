@@ -119,6 +119,7 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 			.toHashCode();
 	}		
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(BlobIdent.class)
