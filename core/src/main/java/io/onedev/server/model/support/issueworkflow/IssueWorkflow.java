@@ -2,9 +2,7 @@ package io.onedev.server.model.support.issueworkflow;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.onedev.server.util.input.Input;
 import io.onedev.server.util.input.InputContext;
@@ -34,19 +32,19 @@ public class IssueWorkflow implements Serializable, InputContext {
 	}
 
 	@Override
-	public List<String> getScenarios() {
-		List<String> scenarios = new ArrayList<>();
-		for (StateSpec state: getStateSpecs())
-			scenarios.add(state.getName());
-		return scenarios;
-	}
-
-	@Override
-	public Map<String, Input> getInputs() {
-		Map<String, Input> inputs = new LinkedHashMap<>();
+	public List<String> getInputNames() {
+		List<String> inputNames = new ArrayList<>();
 		for (Input field: getFieldSpecs())
-			inputs.put(field.getName(), field);
-		return inputs;
+			inputNames.add(field.getName());
+		return inputNames;
 	}
 	
+	@Override
+	public Input getInput(String inputName) {
+		for (Input field: getFieldSpecs()) {
+			if (field.getName().equals(inputName))
+				return field;
+		}
+		throw new RuntimeException("Unable to find input with name: " + inputName);
+	}
 }

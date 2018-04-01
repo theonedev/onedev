@@ -1,8 +1,7 @@
 package io.onedev.server.web.page.project.setting.issuecustomfields;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -153,20 +152,19 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	protected abstract void onCancel(AjaxRequestTarget target);
 
 	@Override
-	public Map<String, Input> getInputs() {
-		Map<String, Input> inputs = new LinkedHashMap<>();
+	public List<String> getInputNames() {
+		List<String> inputNames = new ArrayList<>();
 		int currentIndex = 0;
 		for (Input field: getFields()) {
 			if (currentIndex != fieldIndex)
-				inputs.put(field.getName(), field);
+				inputNames.add(field.getName());
 			currentIndex++;
 		}
-		return inputs;
+		return inputNames;
 	}
 	
 	@Override
-	public List<String> getScenarios() {
-		return getProject().getIssueWorkflow().getScenarios();
+	public Input getInput(String inputName) {
+		return getField(inputName);
 	}
-
 }

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.Size;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -18,7 +17,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.input.showcondition.ShowCondition;
@@ -54,8 +52,6 @@ public abstract class Input implements Serializable {
 	
 	private String name;
 
-	private List<String> scenarios;
-	
 	private String description;
 	
 	private boolean allowEmpty;
@@ -72,17 +68,6 @@ public abstract class Input implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	@Editable(name="resource.input.scenariosName", order=20, description="resource.input.scenariosDescription")
-	@ChoiceProvider("getScenarioChoices")
-	@Size(min=1, max=100)
-	public List<String> getScenarios() {
-		return scenarios;
-	}
-
-	public void setScenarios(List<String> scenarios) {
-		this.scenarios = scenarios;
 	}
 
 	@Editable(order=30, description="resource.input.description")
@@ -225,11 +210,6 @@ public abstract class Input implements Serializable {
 		if (showCondition != null && oldName.equals(showCondition.getInputName())) {
 			showCondition.setInputName(newName);
 		}
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<String> getScenarioChoices() {
-		return OneContext.get().getInputContext().getScenarios();
 	}
 	
 	public static Class<?> defineClass(String className, List<Input> inputs) {

@@ -1,12 +1,11 @@
 package io.onedev.server.util.input;
 
 import java.util.List;
-import java.util.Map;
 
 public interface InputContext {
 
-	List<String> getScenarios();
+	List<String> getInputNames();
 	
-	Map<String, Input> getInputs();
+	Input getInput(String inputName);
 	
 }

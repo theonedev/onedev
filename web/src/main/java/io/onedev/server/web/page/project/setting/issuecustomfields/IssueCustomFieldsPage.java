@@ -39,7 +39,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
-import io.onedev.utils.StringUtils;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
@@ -102,15 +101,6 @@ public class IssueCustomFieldsPage extends ProjectSettingPage {
 			public void populateItem(Item<ICellPopulator<Input>> cellItem, String componentId, IModel<Input> rowModel) {
 				Input field = rowModel.getObject();
 				cellItem.add(new ColumnFragment(componentId, rowModel, EditableUtils.getName(field.getClass()), false));
-			}
-		});		
-		
-		columns.add(new AbstractColumn<Input, Void>(Model.of("Applicable Issue States")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Input>> cellItem, String componentId, IModel<Input> rowModel) {
-				Input field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, rowModel, StringUtils.join(field.getScenarios(), ", "), false));
 			}
 		});		
 		

@@ -35,7 +35,7 @@ public class ValueIsNotAnyOf implements ValueMatcher {
 		// Access on-screen value of ShowCondition.fiedName
 		String inputName = (String) OneContext.get().getEditContext(1).getOnScreenValue("inputName");
 		if (inputName != null)
-			return OneContext.get().getInputContext().getInputs().get(inputName).getPossibleValues();
+			return OneContext.get().getInputContext().getInput(inputName).getPossibleValues();
 		else
 			return Lists.newArrayList();
 	}

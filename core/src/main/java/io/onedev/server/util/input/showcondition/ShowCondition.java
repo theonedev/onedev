@@ -47,11 +47,11 @@ public class ShowCondition implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getNameChoices() {
-		return new ArrayList<>(OneContext.get().getInputContext().getInputs().keySet());
+		return new ArrayList<>(OneContext.get().getInputContext().getInputNames());
 	}
 	
 	public boolean isVisible() {
-		Input input = OneContext.get().getInputContext().getInputs().get(getInputName());
+		Input input = OneContext.get().getInputContext().getInput(getInputName());
 		String inputValue = input.toString(OneContext.get().getEditContext().getOnScreenValue(getInputName()));
 		return getValueMatcher().matches(inputValue);
 	}

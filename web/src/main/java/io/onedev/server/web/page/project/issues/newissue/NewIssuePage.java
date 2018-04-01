@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.issues.newissue;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -57,13 +56,13 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	}
 
 	@Override
-	public List<String> getScenarios() {
-		return getProject().getIssueWorkflow().getScenarios();
+	public List<String> getInputNames() {
+		return getProject().getIssueWorkflow().getInputNames();
 	}
 
 	@Override
-	public Map<String, Input> getInputs() {
-		return getProject().getIssueWorkflow().getInputs();
+	public Input getInput(String inputName) {
+		return getProject().getIssueWorkflow().getInput(inputName);
 	}
 
 }
