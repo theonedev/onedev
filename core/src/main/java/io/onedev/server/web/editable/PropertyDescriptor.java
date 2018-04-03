@@ -9,10 +9,14 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.GroovyUtils;
+import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.BeanUtils;
@@ -27,6 +31,8 @@ public class PropertyDescriptor implements Serializable {
 	private final String propertyName;
 	
 	private boolean excluded;
+	
+	private boolean optional;
 	
 	private final Set<String> dependencyPropertyNames = new HashSet<>();
 	
@@ -78,6 +84,14 @@ public class PropertyDescriptor implements Serializable {
 		this.excluded = excluded;
 	}
 
+	public boolean isOptional() {
+		return optional;
+	}
+
+	public void setOptional(boolean optional) {
+		this.optional = optional;
+	}
+
 	public void copyProperty(Object fromBean, Object toBean) {
 		setPropertyValue(toBean, getPropertyValue(fromBean));
 	}
@@ -103,10 +117,15 @@ public class PropertyDescriptor implements Serializable {
 	}
 
 	public boolean isPropertyRequired() {
-		return getPropertyGetter().getReturnType().isPrimitive()
-				|| getPropertyGetter().getAnnotation(NotNull.class) != null 
-				|| getPropertyGetter().getAnnotation(NotEmpty.class) != null
-				|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
+		if (getPropertyGetter().getReturnType().isPrimitive()) {
+			return true;
+		} else if (isOptional()) {
+			return false;
+		} else {
+			return getPropertyGetter().getAnnotation(NotNull.class) != null 
+					|| getPropertyGetter().getAnnotation(NotEmpty.class) != null
+					|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
+		}
 	}
 
 	public boolean isPropertyVisible(PropertyContextAware propertyContextAware) {
@@ -138,4 +157,24 @@ public class PropertyDescriptor implements Serializable {
 		return dependencyPropertyNames;
 	}
 	
+	public String getDisplayName(Component component) {
+		String displayName = EditableUtils.getDisplayName(getPropertyGetter());
+		return Application.get().getResourceSettings().getLocalizer().getString(displayName, component, displayName);
+	}
+	
+	public String getDescription(Component component) {
+		String description = EditableUtils.getDescription(getPropertyGetter());
+		if (description != null) {
+			OneContext.push(new ComponentContext(component));
+			try {
+				description = Application.get().getResourceSettings().getLocalizer().getString(description, component, description);
+				description = GroovyUtils.evalGString(description);
+				return JsoupUtils.clean(description).body().html();
+			} finally {
+				OneContext.pop();
+			}
+		} else {
+			return null;
+		}
+	}
 }

@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
@@ -67,10 +68,10 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			vertical = true;
 	}
 
-	private String getName(Class<?> clazz) {
-		String name = EditableUtils.getName(clazz);
-		name = Application.get().getResourceSettings().getLocalizer().getString(name, this, name);
-		return name;
+	private String getDisplayName(Class<?> clazz) {
+		String displayName = EditableUtils.getDisplayName(clazz);
+		displayName = Application.get().getResourceSettings().getLocalizer().getString(displayName, this, displayName);
+		return displayName;
 	}
 	
 	@Override
@@ -89,7 +90,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 		
 		List<String> implementationNames = new ArrayList<String>();
 		for (Class<?> each: implementations)
-			implementationNames.add(getName(each));
+			implementationNames.add(getDisplayName(each));
 				
 		WebMarkupContainer typeSelectorContainer = new WebMarkupContainer("typeSelectorContainer");
 		typeSelectorContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
@@ -116,7 +117,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			public String getObject() {
 				Component beanEditor = fragment.get(BEAN_EDITOR_ID);
 				if (beanEditor instanceof BeanEditor) {
-					return EditableUtils.getName(((BeanEditor) beanEditor).getBeanDescriptor().getBeanClass());
+					return EditableUtils.getDisplayName(((BeanEditor) beanEditor).getBeanDescriptor().getBeanClass());
 				} else {
 					return null;
 				}
@@ -126,7 +127,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			public void setObject(String object) {
 				Serializable propertyValue = null;
 				for (Class<?> each: implementations) {
-					if (getName(each).equals(object)) {
+					if (getDisplayName(each).equals(object)) {
 						try {
 							propertyValue = (Serializable) each.newInstance();
 						} catch (InstantiationException | IllegalAccessException e) {
@@ -152,6 +153,8 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 		};
 		
 		typeSelector.setNullValid(!getPropertyDescriptor().isPropertyRequired());
+		
+		typeSelector.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 		
 		typeSelector.add(new AjaxFormComponentUpdatingBehavior("change"){
 

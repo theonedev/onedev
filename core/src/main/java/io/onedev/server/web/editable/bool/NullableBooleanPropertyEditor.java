@@ -39,6 +39,7 @@ public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 			stringValue = null;
 		}
 		input = new DropDownChoice<String>("input", Model.of(stringValue), Lists.newArrayList("yes", "no"));
+		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 		
 		input.setNullValid(true);
 		

@@ -47,7 +47,8 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 			projectAndBranches.addAll(getModelObject());
 		
 		input = new BranchMultiChoice("input", new Model(projectAndBranches), branchProvider);
-        
+        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+
         add(input);
 	}
 

@@ -4,6 +4,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.Project;
@@ -35,7 +36,9 @@ public class ReviewRequirementSpecEditor extends PropertyEditor<String> {
 			}
     		
     	}, getModel());
-        
+    	
+    	input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));        
+    	
         add(input);
         
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {

@@ -101,6 +101,7 @@ public abstract class PropertyContext<T> extends PropertyDescriptor {
 	public static PropertyContext<Serializable> of(PropertyDescriptor propertyDescriptor) {
 		PropertyContext<Serializable> propertyContext = of(propertyDescriptor.getBeanClass(), propertyDescriptor.getPropertyName());
 		propertyContext.setExcluded(propertyDescriptor.isExcluded());
+		propertyContext.setOptional(propertyDescriptor.isOptional());
 		return propertyContext;
 	}
 	

@@ -33,6 +33,7 @@ public class ScriptPropertyEditor extends PropertyEditor<String> {
 		add(container);
 		
 		container.add(input = new TextArea<String>("input", Model.of(getModelObject())));
+		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));		
 		input.setOutputMarkupId(true);
 		
 		container.add(new AttributeAppender("class", new LoadableDetachableModel<String>() {

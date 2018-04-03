@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -17,7 +16,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
@@ -49,9 +47,8 @@ public class BeanViewer extends Panel implements PropertyContextAware, EditConte
 				WebMarkupContainer valueTd = new WebMarkupContainer("value");
 				item.add(valueTd);
 				
-				String name = EditableUtils.getName(propertyGetter);
-				name = Application.get().getResourceSettings().getLocalizer().getString(name, this, name);
-				Component content = new Label("content", name);
+				String displayName = propertyContext.getDisplayName(this);
+				Component content = new Label("content", displayName);
 				nameTd.add(content);
 				OmitName omitName = propertyGetter.getAnnotation(OmitName.class);
 

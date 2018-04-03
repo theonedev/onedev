@@ -74,6 +74,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 		
 		input = new UserMultiChoice("input", new Model((Serializable)users), new UserChoiceProvider(choices));
         input.setConvertEmptyInputStringToNull(true);
+        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

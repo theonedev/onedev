@@ -750,7 +750,7 @@ public class PullRequest extends AbstractEntity {
 	public void setLastEvent(PullRequestCodeCommentEvent event) {
 		LastEvent lastEvent = new LastEvent();
 		lastEvent.setDate(event.getDate());
-		lastEvent.setType(EditableUtils.getName(event.getClass()));
+		lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
 		lastEvent.setUser(event.getUser());
 		setLastEvent(lastEvent);
 		setLastCodeCommentEventDate(event.getDate());
@@ -759,7 +759,7 @@ public class PullRequest extends AbstractEntity {
 	public void setLastEvent(PullRequestVerificationEvent event) {
 		LastEvent lastEvent = new LastEvent();
 		lastEvent.setDate(event.getDate());
-		lastEvent.setType(EditableUtils.getName(event.getClass()));
+		lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
 		lastEvent.setUser(event.getUser());
 		setLastEvent(lastEvent);
 	}

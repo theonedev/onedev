@@ -198,7 +198,7 @@ public class CodeComment extends AbstractEntity {
 	public void setLastEvent(CodeCommentEvent event) {
 		LastEvent lastEvent = new LastEvent();
 		lastEvent.setDate(event.getDate());
-		lastEvent.setType(EditableUtils.getName(event.getClass()));
+		lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
 		lastEvent.setUser(event.getUser());
 		setLastEvent(lastEvent);
 	}

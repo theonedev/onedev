@@ -30,6 +30,7 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 		input = new TextField<Number>("input", Model.of(getModelObject()));
 		input.setType(getPropertyDescriptor().getPropertyClass());
 		add(input);
+		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

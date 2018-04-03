@@ -37,6 +37,7 @@ public class BooleanPropertyEditor extends PropertyEditor<Boolean> {
 			}
 			
 		});
+		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 		
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
 

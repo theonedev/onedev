@@ -41,7 +41,8 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 				
 				for (Object each: violations) {
 					ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
-					addError(violation.getMessage());
+					if (violation.getInvalidValue() != null || !propertyDescriptor.isOptional())
+						addError(violation.getMessage());
 				}
 			}
 			

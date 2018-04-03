@@ -341,7 +341,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		if (event instanceof PullRequestStatusChangeEvent)
 			eventType = ((PullRequestStatusChangeEvent) event).getStatusChange().getType().getName();
 		else
-			eventType = EditableUtils.getName(event.getClass());
+			eventType = EditableUtils.getDisplayName(event.getClass());
 			
 		String activity = eventType;
 		if (activity.contains(" "))

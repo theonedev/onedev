@@ -43,7 +43,7 @@ public class BeanListPropertyViewer extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
-				item.add(new Label("header", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
+				item.add(new Label("header", EditableUtils.getDisplayName(item.getModelObject().getPropertyGetter())));
 			}
 			
 		});

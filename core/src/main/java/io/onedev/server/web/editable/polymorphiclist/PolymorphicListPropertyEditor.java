@@ -23,6 +23,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
@@ -88,10 +89,10 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		}
 	}
 	
-	private String getName(Class<?> clazz) {
-		String name = EditableUtils.getName(clazz);
-		name = Application.get().getResourceSettings().getLocalizer().getString(name, this, name);
-		return name;
+	private String getDisplayName(Class<?> clazz) {
+		String displayName = EditableUtils.getDisplayName(clazz);
+		displayName = Application.get().getResourceSettings().getLocalizer().getString(displayName, this, displayName);
+		return displayName;
 	}
 	
 	@Override
@@ -101,7 +102,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		if (getPropertyDescriptor().isPropertyRequired()) {
 			add(new WebMarkupContainer("enable").setVisible(false));
 		} else {
-			add(new CheckBox("enable", new IModel<Boolean>() {
+			CheckBox checkBox = new CheckBox("enable", new IModel<Boolean>() {
 				
 				@Override
 				public void detach() {
@@ -118,15 +119,17 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 					PolymorphicListPropertyEditor.this.get("listEditor").setVisible(object);
 				}
 				
-			}).add(new AjaxFormComponentUpdatingBehavior("change") {
+			});
+			checkBox.add(new AjaxFormComponentUpdatingBehavior("change") {
 				
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
 					target.add(PolymorphicListPropertyEditor.this.get("listEditor"));
 				}
 				
-			}));
-			
+			});
+			checkBox.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+			add(checkBox);
 		}
 		
 		List<Serializable> list = getModelObject();
@@ -254,7 +257,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		
 		List<String> implementationNames = new ArrayList<String>();
 		for (Class<?> each: implementations) 
-			implementationNames.add(getName(each));
+			implementationNames.add(getDisplayName(each));
 				
 		row.add(new DropDownChoice<String>("elementTypeSelector", new IModel<String>() {
 			
@@ -266,7 +269,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			public String getObject() {
 				Component elementEditor = row.get("elementEditor");
 				if (elementEditor.isVisible()) {
-					return EditableUtils.getName(((BeanEditor) elementEditor).getBeanDescriptor().getBeanClass());
+					return EditableUtils.getDisplayName(((BeanEditor) elementEditor).getBeanDescriptor().getBeanClass());
 				} else {
 					return null;
 				}
@@ -275,7 +278,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			@Override
 			public void setObject(String object) {
 				for (Class<?> each: implementations) {
-					if (getName(each).equals(object)) {
+					if (getDisplayName(each).equals(object)) {
 						Serializable element;
 						try {
 							element = (Serializable) each.newInstance();

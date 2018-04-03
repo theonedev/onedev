@@ -5,6 +5,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.Project;
@@ -29,6 +30,7 @@ public class TagPatternEditor extends PropertyEditor<String> {
 		super.onInitialize();
     	
     	input = new TextField<String>("input", getModel());
+		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));		
     	
     	input.add(new TagPatternAssistBehavior(new AbstractReadOnlyModel<Project>() {
 

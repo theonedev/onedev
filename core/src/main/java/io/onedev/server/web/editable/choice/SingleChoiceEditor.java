@@ -90,6 +90,8 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
         	}
         	
         };
+        
+        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

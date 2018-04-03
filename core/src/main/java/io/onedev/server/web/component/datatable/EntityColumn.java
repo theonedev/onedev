@@ -33,7 +33,7 @@ public class EntityColumn<T extends AbstractEntity> implements IStyledColumn<T, 
 	@Override
 	public Component getHeader(String componentId) {
 		return new Label(componentId, 
-				EditableUtils.getName(new PropertyDescriptor(entityType, propertyName).getPropertyGetter()));
+				EditableUtils.getDisplayName(new PropertyDescriptor(entityType, propertyName).getPropertyGetter()));
 	}
 	
 	@Override

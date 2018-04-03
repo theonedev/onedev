@@ -92,7 +92,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			
 			LastEvent lastEvent = new LastEvent();
 			lastEvent.setDate(event.getDate());
-			lastEvent.setType(EditableUtils.getName(event.getClass()));
+			lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
 			request.setLastEvent(lastEvent);
 		}
 	}

@@ -39,6 +39,7 @@ public class VerificationMultiChoiceEditor extends PropertyEditor<List<String>> 
 		input = new VerificationMultiChoice("input", new Model((Serializable) verifications), 
 				new VerificationChoiceProvider());
         input.setConvertEmptyInputStringToNull(true);
+        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
         
         add(input);
 	}

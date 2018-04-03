@@ -43,7 +43,9 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 		input.setType(getPropertyDescriptor().getPropertyClass());
 		Method propertyGetter = getPropertyDescriptor().getPropertyGetter();
 		if (propertyGetter.getAnnotation(OmitName.class) != null)
-			input.add(AttributeModifier.replace("placeholder", EditableUtils.getName(propertyGetter)));
+			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(propertyGetter)));
+
+		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 		
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

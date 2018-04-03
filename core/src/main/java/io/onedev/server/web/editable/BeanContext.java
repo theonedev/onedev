@@ -8,18 +8,24 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class BeanContext extends BeanDescriptor {
 	
-	public BeanContext(Class<?> beanClass, Set<String> excludeProperties) {
-		super(beanClass, excludeProperties);
+	public BeanContext(Class<?> beanClass, Set<String> excludedProperties, Set<String> optionalProperties) {
+		super(beanClass, excludedProperties, optionalProperties);
+	}
+	
+	public BeanContext(Class<?> beanClass, Set<String> excludedProperties) {
+		this(beanClass, excludedProperties, Sets.newHashSet());
 	}
 	
 	public BeanContext(Class<?> beanClass) {
-		super(beanClass, new HashSet<>());
+		this(beanClass, Sets.newHashSet());
 	}
 	
 	public BeanContext(BeanDescriptor beanDescriptor) {
@@ -69,25 +75,32 @@ public class BeanContext extends BeanDescriptor {
 		};
 	}
 
-	public static BeanEditor editModel(String componentId, 
-			IModel<? extends Serializable> beanModel) {
-		return editModel(componentId, beanModel, new HashSet<>());
+	public static BeanEditor editModel(String componentId, IModel<? extends Serializable> beanModel) {
+		return editModel(componentId, beanModel, Sets.newHashSet());
+	}
+	
+	public static BeanEditor editModel(String componentId, IModel<? extends Serializable> beanModel, Set<String> excludedProperties) {
+		return editModel(componentId, beanModel, excludedProperties, Sets.newHashSet());
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static BeanEditor editModel(String componentId, 
-			IModel<? extends Serializable> beanModel, Set<String> excludeProperties) {
+			IModel<? extends Serializable> beanModel, Set<String> excludedProperties, Set<String> optionalProperties) {
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext editContext = new BeanContext(beanClass, excludeProperties);
+		BeanContext editContext = new BeanContext(beanClass, excludedProperties);
 		return editContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
 	}
 	
 	public static BeanEditor editBean(String componentId, Serializable bean) {
-		return editBean(componentId, bean, new HashSet<>());
+		return editBean(componentId, bean, Sets.newHashSet());
+	}
+	
+	public static BeanEditor editBean(String componentId, Serializable bean, Set<String> excludedProperties) {
+		return editBean(componentId, bean, excludedProperties, Sets.newHashSet());
 	}
 	
 	public static BeanEditor editBean(String componentId, final Serializable bean, 
-			Set<String> excludeProperties) {
+			Set<String> excludedProperties, Set<String> optionalProperties) {
 		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override
@@ -106,7 +119,7 @@ public class BeanContext extends BeanDescriptor {
 			
 		};
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext editContext = new BeanContext(beanClass, excludeProperties);
+		BeanContext editContext = new BeanContext(beanClass, excludedProperties, optionalProperties);
 		beanModel = editContext.wrapAsSelfUpdating(beanModel);
 		return editContext.renderForEdit(componentId, beanModel);
 	}
@@ -116,13 +129,13 @@ public class BeanContext extends BeanDescriptor {
 	}
 			
 	public static Component viewModel(String componentId, IModel<Serializable> beanModel, 
-			Set<String> excludeProperties) {
-		BeanContext editContext = new BeanContext(beanModel.getObject().getClass(), excludeProperties);
+			Set<String> excludedProperties) {
+		BeanContext editContext = new BeanContext(beanModel.getObject().getClass(), excludedProperties);
 		return editContext.renderForView(componentId, beanModel);
 	}
 	
-	public static Component viewBean(String componentId, Serializable bean, Set<String> excludeProperties) {
-		return viewModel(componentId, Model.of(bean), excludeProperties);
+	public static Component viewBean(String componentId, Serializable bean, Set<String> excludedProperties) {
+		return viewModel(componentId, Model.of(bean), excludedProperties);
 	}
 	
 	public static Component viewBean(String componentId, Serializable bean) {

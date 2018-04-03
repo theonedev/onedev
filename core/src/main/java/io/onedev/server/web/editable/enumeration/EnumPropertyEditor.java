@@ -63,6 +63,8 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
         input = new DropDownChoice<String>("input", Model.of(stringValue), choices);
 
         input.setNullValid(!getPropertyDescriptor().isPropertyRequired());	
+		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+        
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override

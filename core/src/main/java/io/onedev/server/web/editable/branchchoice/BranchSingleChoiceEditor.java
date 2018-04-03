@@ -42,7 +42,7 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
     	
         // add this to control allowClear flag of select2
     	input.setRequired(propertyDescriptor.isPropertyRequired());
-    	input.setLabel(Model.of("Branch selection"));
+        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
         
         add(input);
 	}

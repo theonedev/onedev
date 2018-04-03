@@ -31,7 +31,7 @@ public class EditableUtils {
 	 * @return
 	 * 			display name of the element
 	 */
-	public static String getName(AnnotatedElement element) {
+	public static String getDisplayName(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
 		if (editable != null && editable.name().trim().length() != 0)
 			return editable.name();

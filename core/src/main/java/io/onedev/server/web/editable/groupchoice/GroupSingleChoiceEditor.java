@@ -71,7 +71,7 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 
         // add this to control allowClear flag of select2
     	input.setRequired(propertyDescriptor.isPropertyRequired());
-        input.setLabel(Model.of("Group selection"));
+        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override

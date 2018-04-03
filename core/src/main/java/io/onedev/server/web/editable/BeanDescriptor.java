@@ -23,7 +23,11 @@ public class BeanDescriptor implements Serializable {
 		this(beanClass, Sets.newHashSet());
 	}
 	
-	public BeanDescriptor(Class<?> beanClass, Set<String> excludeProperties) {
+	public BeanDescriptor(Class<?> beanClass, Set<String> excludedProperties) {
+		this(beanClass, excludedProperties, Sets.newHashSet());
+	}
+	
+	public BeanDescriptor(Class<?> beanClass, Set<String> excludedProperties, Set<String> optionalProperties) {
 		this.beanClass = beanClass;
 		
 		propertyDescriptors = new ArrayList<>();
@@ -36,7 +40,8 @@ public class BeanDescriptor implements Serializable {
 				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(propertyGetter); 
 				propertyDescriptors.add(propertyDescriptor);
 				String propertyName = BeanUtils.getPropertyName(propertyGetter);
-				propertyDescriptor.setExcluded(BeanUtils.findSetter(propertyGetter) == null || excludeProperties.contains(propertyName));
+				propertyDescriptor.setExcluded(BeanUtils.findSetter(propertyGetter) == null || excludedProperties.contains(propertyName));
+				propertyDescriptor.setOptional(optionalProperties.contains(propertyName));
 			}
 		}
 	}

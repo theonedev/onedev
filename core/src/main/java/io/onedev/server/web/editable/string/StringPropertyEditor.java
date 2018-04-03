@@ -48,6 +48,7 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 			input.setType(getPropertyDescriptor().getPropertyClass());
 			add(fragment);
 		}
+		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));		
 		
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
@@ -59,7 +60,7 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		});
 		
 		if (getter.getAnnotation(OmitName.class) != null)
-			input.add(AttributeModifier.replace("placeholder", EditableUtils.getName(getter)));
+			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(getter)));
 		
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
 

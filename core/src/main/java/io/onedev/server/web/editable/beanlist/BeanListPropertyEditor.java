@@ -143,7 +143,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
-				item.add(new Label("header", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
+				item.add(new Label("header", EditableUtils.getDisplayName(item.getModelObject().getPropertyGetter())));
 				item.add(AttributeAppender.append("class", " " + item.getModelObject().getPropertyName()));
 				
 				String required;

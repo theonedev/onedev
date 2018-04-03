@@ -50,10 +50,10 @@ public class PolymorphicPropertyViewer extends Panel {
 			fragment.add(AttributeAppender.append("class", " horizontal"));
 		add(fragment);
 		
-		String name = EditableUtils.getName(propertyValue.getClass());
-		name = Application.get().getResourceSettings().getLocalizer().getString(name, this, name);
+		String displayName = EditableUtils.getDisplayName(propertyValue.getClass());
+		displayName = Application.get().getResourceSettings().getLocalizer().getString(displayName, this, displayName);
 		
-		fragment.add(new Label("type", name));
+		fragment.add(new Label("type", displayName));
 		fragment.add(BeanContext.viewBean("beanViewer", propertyValue));
 	}
 

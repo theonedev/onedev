@@ -10,7 +10,6 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
@@ -33,8 +32,6 @@ import org.apache.wicket.validation.IValidator;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.DefaultValueProvider;
@@ -144,9 +141,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					nameContainer = this;
 					valueContainer = this;
 				}
-				String name = EditableUtils.getName(propertyContext.getPropertyGetter());
-				name = Application.get().getResourceSettings().getLocalizer().getString(name, this, name);
-				Label nameLabel = new Label("name", name);
+				Label nameLabel = new Label("name", propertyContext.getDisplayName(this));
 				nameContainer.add(nameLabel);
 				
 				OmitName omitName = propertyContext.getPropertyGetter().getAnnotation(OmitName.class);
@@ -190,18 +185,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				PropertyEditor<Serializable> propertyEditor = propertyContext.renderForEdit("value", Model.of(propertyValue)); 
 				valueContainer.add(propertyEditor);
 				
-				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
-				if (description != null) {
-					OneContext.push(new ComponentContext(this));
-					try {
-						description = Application.get().getResourceSettings().getLocalizer().getString(description, this, description);
-						description = GroovyUtils.evalGString(description);
-						description = JsoupUtils.clean(description).body().html();
-					} finally {
-						OneContext.pop();
-					}
-				}
-				descriptionLabel = new Label("description", description) {
+				descriptionLabel = new Label("description", propertyContext.getDescription(this)) {
 
 					@Override
 					protected void onConfigure() {
@@ -344,7 +328,13 @@ public class BeanEditor extends ValueEditor<Serializable> {
 							continue;
 					}
 					ErrorContext errorContext = getErrorContext(valuePath);
-					errorContext.addError(violation.getMessage());
+					if (errorContext instanceof PropertyEditor) {
+						PropertyEditor<?> propertyEditor = (PropertyEditor<?>) errorContext;
+						if (!propertyEditor.getPropertyDescriptor().isOptional() || violation.getInvalidValue() != null)
+							errorContext.addError(violation.getMessage());
+					} else {
+						errorContext.addError(violation.getMessage());
+					}
 				}
 			}
 			
@@ -395,7 +385,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	
 	public String getPropertyName(String name) {
 		for (PropertyContext<?> propertyContext: propertyContexts) {
-			String displayName = EditableUtils.getName(propertyContext.getPropertyGetter());
+			String displayName = EditableUtils.getDisplayName(propertyContext.getPropertyGetter());
 			if (propertyContext.getPropertyName().equals(name) || displayName.equals(name))
 				return propertyContext.getPropertyName();
 		}

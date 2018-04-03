@@ -61,9 +61,9 @@ public class PolymorphicListPropertyViewer extends Panel {
 					fragment = new Fragment("content", "verticalFrag", PolymorphicListPropertyViewer.this);
 				item.add(fragment);
 				
-				String name = EditableUtils.getName(item.getModelObject().getClass());
-				name = Application.get().getResourceSettings().getLocalizer().getString(name, this, name);
-				fragment.add(new Label("elementType", name));
+				String displayName = EditableUtils.getDisplayName(item.getModelObject().getClass());
+				displayName = Application.get().getResourceSettings().getLocalizer().getString(displayName, this, displayName);
+				fragment.add(new Label("elementType", displayName));
 				fragment.add(BeanContext.viewBean("element", item.getModelObject()));
 			}
 			

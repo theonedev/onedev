@@ -106,7 +106,7 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
 				InputSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, rowModel, EditableUtils.getName(field.getClass()), false));
+				cellItem.add(new ColumnFragment(componentId, rowModel, EditableUtils.getDisplayName(field.getClass()), false));
 			}
 		});		
 		
@@ -179,7 +179,7 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 
 						@Override
 						protected String getTitle() {
-							return getField().getName() + " (type: " + EditableUtils.getName(getField().getClass()) + ")";
+							return getField().getName() + " (type: " + EditableUtils.getDisplayName(getField().getClass()) + ")";
 						}
 
 						@Override

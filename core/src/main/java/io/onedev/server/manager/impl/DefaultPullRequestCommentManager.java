@@ -48,7 +48,7 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 			
 			LastEvent lastEvent = new LastEvent();
 			lastEvent.setDate(event.getDate());
-			lastEvent.setType(EditableUtils.getName(event.getClass()));
+			lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
 			lastEvent.setUser(event.getUser());
 			comment.getRequest().setLastEvent(lastEvent);
 			pullRequestManager.save(event.getRequest());
