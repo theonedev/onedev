@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.submitter;
+package io.onedev.server.model.support.ifsubmittedby;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.editable.annotation.Editable;
 
 @Editable
-public interface Submitter extends Serializable {
+public interface IfSubmittedBy extends Serializable {
 	
 	boolean matches(Project project, @Nullable User user);
 	

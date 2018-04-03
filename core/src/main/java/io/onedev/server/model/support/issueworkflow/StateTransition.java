@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
 import io.onedev.server.model.support.issueworkflow.action.IssueAction;
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -50,6 +51,7 @@ public class StateTransition implements Serializable {
 
 	@Editable(order=300, description="Enable if applicability of this transition depends on "
 			+ "value of particular field")
+	@NameOfEmptyValue("No prerequisite")
 	public TransitionPrerequisite getPrerequisite() {
 		return prerequisite;
 	}
@@ -58,8 +60,8 @@ public class StateTransition implements Serializable {
 		this.prerequisite = prerequisite;
 	}
 
-	@Editable(order=400, description="Do the transition when")
-	@NotNull
+	@Editable(order=400, name="Do Transition When")
+	@NotNull(message="may not be empty")
 	public IssueAction getOnAction() {
 		return onAction;
 	}

@@ -19,6 +19,7 @@ import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMe
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.fields.IssueFieldsPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
+import io.onedev.server.web.page.project.setting.issueworkflow.statetransitions.StateTransitionsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
 
 @SuppressWarnings("serial")
@@ -49,6 +50,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 				tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));
 				tabs.add(new ProjectSettingTab("Issue Fields", "fa fa-fw fa-list-ul", IssueFieldsPage.class));
 				tabs.add(new ProjectSettingTab("Issue States", "fa fa-fw fa-check", IssueStatesPage.class));
+				tabs.add(new ProjectSettingTab("Issue State Transitions", "fa fa-fw fa-exchange", StateTransitionsPage.class));
 				return tabs;
 			}
 			

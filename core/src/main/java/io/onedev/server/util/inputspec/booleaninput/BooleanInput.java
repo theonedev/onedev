@@ -20,7 +20,7 @@ public class BooleanInput extends InputSpec {
 	private DefaultValueProvider defaultValueProvider = new FalseDefaultValue();
 
 	@Editable(name="Default Value", order=1000)
-	@NotNull
+	@NotNull(message="may not be empty")
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;
 	}

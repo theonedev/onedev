@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.submitter;
+package io.onedev.server.model.support.ifsubmittedby;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -7,7 +7,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.editable.annotation.Editable;
 
 @Editable(order=400, name="Project administrators")
-public class ProjectAdministrators implements Submitter {
+public class ProjectAdministrators implements IfSubmittedBy {
 
 	private static final long serialVersionUID = 1L;
 

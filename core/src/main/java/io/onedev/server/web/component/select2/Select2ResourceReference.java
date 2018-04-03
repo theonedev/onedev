@@ -14,7 +14,7 @@ public class Select2ResourceReference extends BaseDependentResourceReference {
 	private static final long serialVersionUID = 1L;
 
 	public Select2ResourceReference() {
-		super(Select2ResourceReference.class, "res/select2.min.js");
+		super(Select2ResourceReference.class, "res/select2-patched.js");
 	}
 
 	@Override

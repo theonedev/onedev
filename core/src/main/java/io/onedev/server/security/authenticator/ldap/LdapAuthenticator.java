@@ -141,7 +141,7 @@ public class LdapAuthenticator extends Authenticator {
 	}
 
 	@Editable(order=900)
-	@NotNull
+	@NotNull(message="may not be empty")
 	public GroupRetrieval getGroupRetrieval() {
 		return groupRetrieval;
 	}

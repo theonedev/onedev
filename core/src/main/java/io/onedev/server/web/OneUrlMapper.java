@@ -46,6 +46,7 @@ import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMe
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.fields.IssueFieldsPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
+import io.onedev.server.web.page.project.setting.issueworkflow.statetransitions.StateTransitionsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
@@ -202,6 +203,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue-fields", IssueFieldsPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue-states", IssueStatesPage.class));
+		add(new OnePageMapper("projects/${project}/settings/issue-state-transitions", StateTransitionsPage.class));
 		
 		add(new OnePageMapper("projects/${project}/no-commits", NoCommitsPage.class));
 	}

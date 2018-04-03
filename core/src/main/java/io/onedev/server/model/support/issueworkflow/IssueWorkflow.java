@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 
@@ -79,7 +81,49 @@ public class IssueWorkflow implements Serializable, InputContext {
 				transition.getToStates().set(index, newName);
 		}
 	}
+	
+	@Nullable
+	public StateSpec getState(String stateName) {
+		for (StateSpec state: getStates()) {
+			if (state.getName().equals(stateName))
+				return state;
+		}
+		return null;
+	}
 
+	public int getStateIndex(String stateName) {
+		for (int i=0; i<getStates().size(); i++) {
+			if (getStates().get(i).getName().equals(stateName))
+				return i;
+		}
+		return -1;
+	}
+	
+	public int getTransitionIndex(StateTransition transition) {
+		for (int i=0; i<getStateTransitions().size(); i++) {
+			if (getStateTransitions().get(i) == transition)
+				return i;
+		}
+		return -1;
+	}
+	
+	@Nullable
+	public InputSpec getField(String fieldName) {
+		for (InputSpec field: getFields()) {
+			if (field.getName().equals(fieldName))
+				return field;
+		}
+		return null;
+	}
+
+	public int getFieldIndex(String fieldName) {
+		for (int i=0; i<getFields().size(); i++) {
+			if (getFields().get(i).getName().equals(fieldName))
+				return i;
+		}
+		return -1;
+	}
+	
 	public void onFieldRename(String oldName, String newName) {
 		for (StateSpec state: getStates()) 
 			state.onFieldRename(oldName, newName);

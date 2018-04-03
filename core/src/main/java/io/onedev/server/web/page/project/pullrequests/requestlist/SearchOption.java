@@ -50,7 +50,7 @@ public class SearchOption implements Serializable {
 	private Date endDate;
 	
 	@Editable(order=100)
-	@NotNull
+	@NotNull(message="may not be empty")
 	public Status getStatus() {
 		return status;
 	}

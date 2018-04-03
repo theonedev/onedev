@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.submitter;
+package io.onedev.server.model.support.authorized;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -13,7 +13,7 @@ import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.editable.annotation.UserChoice;
 
 @Editable(order=200, name="User")
-public class SpecifiedUser implements Submitter {
+public class SpecifiedUser implements Authorized {
 
 	private static final long serialVersionUID = 1L;
 	

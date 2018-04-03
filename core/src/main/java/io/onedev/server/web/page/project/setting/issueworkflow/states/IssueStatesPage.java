@@ -15,8 +15,8 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -157,19 +157,9 @@ public class IssueStatesPage extends IssueWorkflowPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new IssueStatesResourceReference()));
+		response.render(CssHeaderItem.forReference(new IssueStatesResourceReference()));
 	}
 
-	public int getStateIndex(String stateName) {
-		int index = 0;
-		for (StateSpec state: getWorkflow().getStates()) {
-			if (state.getName().equals(stateName))
-				break;
-			index++;
-		}
-		return index;
-	}
-	
 	private class ColumnFragment extends Fragment {
 
 		private final int index;
@@ -178,7 +168,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 		
 		public ColumnFragment(String id, IModel<StateSpec> model, String label, boolean nameColumn) {
 			super(id, nameColumn?"nameColumnFrag":"otherColumnFrag", IssueStatesPage.this, model);
-			this.index = getStateIndex(getState().getName());
+			this.index = getWorkflow().getStateIndex(getState().getName());
 			this.label = label;
 		}
 		

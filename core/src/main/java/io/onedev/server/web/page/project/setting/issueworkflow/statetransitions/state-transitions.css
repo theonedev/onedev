@@ -1,0 +1,30 @@
+#project-setting .state-transitions table td {
+	padding: 0;
+}
+#project-setting .state-transitions table td.norecords-td {
+	padding: 5px;
+}
+#project-setting .state-transitions table a {
+	display: block;
+	color: #666;
+	text-decoration: none;
+	padding: 5px;
+}
+
+.state-transition-edit .property-prerequisite>.value .control-label, 
+.state-transition-edit .property-onAction>.value .control-label {
+	font-weight: normal;
+}
+.floating.state-transition {
+	width: 400px;
+}
+.floating.state-transition .actions {
+	margin-bottom: 12px;
+}
+.floating.state-transition .property-authorized .name {
+	font-weight: normal;
+	border-right: none;
+} 
+.floating.state-transition .property-authorized .value {
+	white-space: nowrap;
+} 

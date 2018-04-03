@@ -152,16 +152,6 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 		response.render(CssHeaderItem.forReference(new IssueFieldsResourceReference()));
 	}
 
-	public int getFieldIndex(String fieldName) {
-		int index = 0;
-		for (InputSpec field: getWorkflow().getFields()) {
-			if (field.getName().equals(fieldName))
-				break;
-			index++;
-		}
-		return index;
-	}
-	
 	private class ColumnFragment extends Fragment {
 
 		private final int index;
@@ -170,7 +160,7 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 		
 		public ColumnFragment(String id, IModel<InputSpec> model, String label, boolean nameColumn) {
 			super(id, nameColumn?"nameColumnFrag":"otherColumnFrag", IssueFieldsPage.this, model);
-			this.index = getFieldIndex(getField().getName());
+			this.index = getWorkflow().getFieldIndex(getField().getName());
 			this.label = label;
 		}
 		

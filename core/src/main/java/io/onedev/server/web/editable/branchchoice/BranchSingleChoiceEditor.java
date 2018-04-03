@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.branchchoice;
 
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.Project;
@@ -41,6 +42,7 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
     	
         // add this to control allowClear flag of select2
     	input.setRequired(propertyDescriptor.isPropertyRequired());
+    	input.setLabel(Model.of("Branch selection"));
         
         add(input);
 	}

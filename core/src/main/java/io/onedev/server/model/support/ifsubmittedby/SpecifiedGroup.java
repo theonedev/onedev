@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.submitter;
+package io.onedev.server.model.support.ifsubmittedby;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -14,7 +14,7 @@ import io.onedev.server.util.editable.annotation.GroupChoice;
 import io.onedev.server.util.editable.annotation.OmitName;
 
 @Editable(order=300, name="Group")
-public class SpecifiedGroup implements Submitter {
+public class SpecifiedGroup implements IfSubmittedBy {
 
 	private static final long serialVersionUID = 1L;
 

@@ -26,7 +26,7 @@ public class GroupChoiceInput extends InputSpec {
 	private DefaultValueProvider defaultValueProvider;
 	
 	@Editable(order=1000, name="Available Choices")
-	@NotNull
+	@NotNull(message="may not be empty")
 	public ChoiceProvider getChoiceProvider() {
 		return choiceProvider;
 	}

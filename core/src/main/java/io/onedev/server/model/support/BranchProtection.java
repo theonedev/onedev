@@ -14,10 +14,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.submitter.Anyone;
-import io.onedev.server.model.support.submitter.SpecifiedGroup;
-import io.onedev.server.model.support.submitter.SpecifiedUser;
-import io.onedev.server.model.support.submitter.Submitter;
+import io.onedev.server.model.support.ifsubmittedby.Anyone;
+import io.onedev.server.model.support.ifsubmittedby.SpecifiedGroup;
+import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
+import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
 import io.onedev.server.util.editable.annotation.BranchPattern;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.ReviewRequirementSpec;
@@ -34,7 +34,7 @@ public class BranchProtection implements Serializable {
 	
 	private String branch;
 	
-	private Submitter submitter = new Anyone();
+	private IfSubmittedBy submitter = new Anyone();
 	
 	private boolean noForcedPush = true;
 	
@@ -74,12 +74,12 @@ public class BranchProtection implements Serializable {
 
 	@Editable(order=150, name="If Submitted By", description="This protection rule will apply "
 			+ "only if the change is submitted by specified users here")
-	@NotNull
-	public Submitter getSubmitter() {
+	@NotNull(message="may not be empty")
+	public IfSubmittedBy getSubmitter() {
 		return submitter;
 	}
 
-	public void setSubmitter(Submitter submitter) {
+	public void setSubmitter(IfSubmittedBy submitter) {
 		this.submitter = submitter;
 	}
 
@@ -147,7 +147,7 @@ public class BranchProtection implements Serializable {
 
 	@Editable(order=700, description="Optionally specify additional users to review particular paths. For each changed file, "
 			+ "the first matched file protection setting will be used")
-	@NotNull
+	@NotNull(message="may not be empty")
 	public List<FileProtection> getFileProtections() {
 		return fileProtections;
 	}

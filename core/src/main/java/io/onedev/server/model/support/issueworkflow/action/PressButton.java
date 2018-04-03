@@ -1,6 +1,10 @@
 package io.onedev.server.model.support.issueworkflow.action;
 
-import io.onedev.server.model.support.submitter.Submitter;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
+import io.onedev.server.model.support.authorized.Authorized;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.OmitName;
 
@@ -11,9 +15,10 @@ public class PressButton implements IssueAction, Button {
 
 	private String name;
 
-	private Submitter submitter;
+	private Authorized authorized;
 	
 	@Editable(order=100)
+	@NotEmpty
 	@OmitName
 	@Override
 	public String getName() {
@@ -25,13 +30,14 @@ public class PressButton implements IssueAction, Button {
 	}
 
 	@Editable(order=200, name="Is pressed by")
+	@NotNull(message="may not be empty")
 	@Override
-	public Submitter getSubmitter() {
-		return submitter;
+	public Authorized getAuthorized() {
+		return authorized;
 	}
 	
-	public void setSubmitter(Submitter submitter) {
-		this.submitter = submitter;
+	public void setAuthorized(Authorized authorized) {
+		this.authorized = authorized;
 	}
 
 	@Override

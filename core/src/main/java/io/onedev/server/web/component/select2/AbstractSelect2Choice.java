@@ -20,7 +20,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
@@ -158,7 +158,9 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 		// initialize select2
 		response.render(JavaScriptHeaderItem.forReference(new Select2ResourceReference()));
 
-		response.render(OnDomReadyHeaderItem
+		// Use OnLoad instead of OnDomReady here as otherwise the placeholder 
+		// of multi-choice can not be displayed in a modal dialog
+		response.render(OnLoadHeaderItem
 				.forScript(JQuery.execute("$('#%s').select2(%s);", getJquerySafeMarkupId(), settings.toJson())));
 
 		// select current value

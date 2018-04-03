@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.project.setting.issueworkflow.states;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -38,15 +36,6 @@ abstract class StateEditPanel extends Panel {
 		return page.getProject();
 	}
 
-	@Nullable
-	private StateSpec getState(String stateName) {
-		for (StateSpec state: getWorkflow().getStates()) {
-			if (state.getName().equals(stateName))
-				return state;
-		}
-		return null;
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -92,11 +81,11 @@ abstract class StateEditPanel extends Panel {
 
 				if (stateIndex != -1) { 
 					StateSpec oldState = getWorkflow().getStates().get(stateIndex);
-					if (!state.getName().equals(oldState.getName()) && getState(state.getName()) != null) {
+					if (!state.getName().equals(oldState.getName()) && getWorkflow().getState(state.getName()) != null) {
 						editor.getErrorContext(new PathSegment.Property("name"))
 								.addError("This name has already been used by another state");
 					}
-				} else if (getState(state.getName()) != null) {
+				} else if (getWorkflow().getState(state.getName()) != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another state");
 				}

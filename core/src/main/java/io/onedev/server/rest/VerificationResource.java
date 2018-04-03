@@ -62,7 +62,7 @@ public class VerificationResource {
 	@Path("/{projectId}/{commit}/{name}")
     @POST
     public void save(@PathParam("projectId") Long projectId, @PathParam("commit") String commit, 
-    		@PathParam("name") String name, @NotNull @Valid Verification verification) {
+    		@PathParam("name") String name, @NotNull(message="may not be empty") @Valid Verification verification) {
 		Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canWrite(project))
     		throw new UnauthorizedException();

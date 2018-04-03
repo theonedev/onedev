@@ -287,29 +287,34 @@ onedev.server = {
 		},
 		
 		doFocus: function($containers) {
-			var selector = ".has-error:visible:first .autofocus";
-			var $inError = $containers.find(selector).addBack(selector);
-			if ($inError.length != 0 && $inError.closest(".no-autofocus").length == 0) {
-				if ($inError.children(".CodeMirror").length != 0) {
-					$inError.children(".CodeMirror")[0].CodeMirror.focus();					
-				} else {
-					$inError.focus();
-				}
-			} else {
-				selector = ".autofocus:visible";
-				$containers.find(selector).addBack(selector).each(function() {
-					var $this = $(this);
-					if ($this.closest(".no-autofocus").length == 0) {
-						console.log($this[0]);
-						if ($this.children(".CodeMirror").length != 0) {
-							$this.children(".CodeMirror")[0].CodeMirror.focus();					
-						} else {
-							$this.focus();
-						}
-						return false;
+			/*
+			 * Do focus with a timeout as otherwise it will not work in a panel replaced
+			 * via Wicket
+			 */
+			setTimeout(function() {
+				var selector = ".has-error:visible:first .autofocus";
+				var $inError = $containers.find(selector).addBack(selector);
+				if ($inError.length != 0 && $inError.closest(".no-autofocus").length == 0) {
+					if ($inError.children(".CodeMirror").length != 0) {
+						$inError.children(".CodeMirror")[0].CodeMirror.focus();					
+					} else if (!$inError.hasClass("select2-input") && !$inError.hasClass("select2-offscreen")) {
+						$inError.focus();
 					}
-				});
-			}
+				} else {
+					selector = ".autofocus:visible";
+					$containers.find(selector).addBack(selector).each(function() {
+						var $this = $(this);
+						if ($this.closest(".no-autofocus").length == 0) {
+							if ($this.children(".CodeMirror").length != 0) {
+								$this.children(".CodeMirror")[0].CodeMirror.focus();					
+							} else if (!$this.hasClass("select2-input") && !$this.hasClass("select2-offscreen")) {
+								$this.focus();
+							}
+							return false;
+						}
+					});
+				}
+			}, 0);
 		},
 		
 		setupAutoFocus: function() {
@@ -325,8 +330,9 @@ onedev.server = {
 				onedev.server.focus.$components = $();
 			});
 			Wicket.Event.subscribe('/ajax/call/complete', function() {
-				if (onedev.server.focus.$components != null)
+				if (onedev.server.focus.$components != null) {
 					onedev.server.focus.doFocus(onedev.server.focus.$components);
+				}
 			});
 
 			onedev.server.focus.doFocus($(document));

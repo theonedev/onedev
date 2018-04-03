@@ -104,7 +104,7 @@ public class ReviewResource {
     
     @Transactional
     @POST
-    public Long save(@NotNull @Valid Review review) {
+    public Long save(@NotNull(message="may not be empty") @Valid Review review) {
     	if (!SecurityUtils.canRead(review.getRequest().getTargetProject()) 
     			|| !review.getUser().equals(userManager.getCurrent()) && !SecurityUtils.isAdministrator()) {
     		throw new UnauthorizedException();

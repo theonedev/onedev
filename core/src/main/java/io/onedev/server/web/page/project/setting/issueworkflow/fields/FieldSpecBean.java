@@ -15,7 +15,7 @@ public class FieldSpecBean implements Serializable {
 	private InputSpec fieldSpec;
 
 	@Editable(name="Type")
-	@NotNull
+	@NotNull(message="may not be empty")
 	public InputSpec getFieldSpec() {
 		return fieldSpec;
 	}

@@ -15,7 +15,7 @@ package io.onedev.server.web.component.select2;
 import java.util.Collections;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.string.Strings;
 import org.json.JSONException;
@@ -80,7 +80,7 @@ public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 			} catch (JSONException e) {
 				throw new RuntimeException("Error converting model object to Json", e);
 			}
-			response.render(OnDomReadyHeaderItem.forScript(
+			response.render(OnLoadHeaderItem.forScript(
 					JQuery.execute("$('#%s').select2('data', %s);", getJquerySafeMarkupId(), selection.toJson())));
 		}
 	}

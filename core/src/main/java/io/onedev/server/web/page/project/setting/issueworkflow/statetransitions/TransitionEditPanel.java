@@ -1,7 +1,7 @@
-package io.onedev.server.web.page.project.setting.issueworkflow.fields;
+package io.onedev.server.web.page.project.setting.issueworkflow.statetransitions;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -16,8 +16,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.model.support.issueworkflow.StateTransition;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
@@ -25,14 +24,14 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
-abstract class FieldEditPanel extends Panel implements InputContext {
+abstract class TransitionEditPanel extends Panel {
 
-	private final int fieldIndex;
+	private final int transitionIndex;
 	
-	public FieldEditPanel(String id, int fieldIndex) {
+	public TransitionEditPanel(String id, int transitionIndex) {
 		super(id);
 	
-		this.fieldIndex = fieldIndex;
+		this.transitionIndex = transitionIndex;
 	}
 	
 	private Project getProject() {
@@ -44,9 +43,11 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		FieldSpecBean bean = new FieldSpecBean();
-		if (fieldIndex != -1)
-			bean.setFieldSpec(SerializationUtils.clone(getWorkflow().getFields().get(fieldIndex)));
+		StateTransition transition;
+		if (transitionIndex != -1)
+			transition = SerializationUtils.clone(getWorkflow().getStateTransitions().get(transitionIndex));
+		else
+			transition = new StateTransition();
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -63,7 +64,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(FieldEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(TransitionEditPanel.this));
 			}
 
 			@Override
@@ -73,7 +74,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 			
 		});
 		
-		BeanEditor editor = BeanContext.editBean("editor", bean);
+		BeanEditor editor = BeanContext.editBean("editor", transition);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 
@@ -81,34 +82,21 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				InputSpec field = bean.getFieldSpec();
-				if (fieldIndex != -1) { 
-					InputSpec oldField = getWorkflow().getFields().get(fieldIndex);
-					if (!field.getName().equals(oldField.getName()) && getWorkflow().getField(field.getName()) != null) {
-						editor.getErrorContext(new PathSegment.Property("fieldSpec"))
-								.getErrorContext(new PathSegment.Property("name"))
-								.addError("This name has already been used by another field");
-					}
-				} else if (getWorkflow().getField(field.getName()) != null) {
-					editor.getErrorContext(new PathSegment.Property("fieldSpec"))
-							.getErrorContext(new PathSegment.Property("name"))
-							.addError("This name has already been used by another field");
-				}
-
-				if (!editor.hasErrors(true)) {
-					if (fieldIndex != -1) {
-						InputSpec oldField = getWorkflow().getFields().get(fieldIndex);
-						if (!field.getName().equals(oldField.getName()))
-							getWorkflow().onFieldRename(oldField.getName(), field.getName());
-						getWorkflow().getFields().set(fieldIndex, bean.getFieldSpec());
-					} else {
-						getWorkflow().getFields().add(bean.getFieldSpec());
-					}
+				Collection<String> states = new ArrayList<>(transition.getFromStates());
+				states.retainAll(transition.getToStates());
+				if (!states.isEmpty()) {
+					String error = "Can not do transition between same states";
+					editor.getErrorContext(new PathSegment.Property("fromStates")).addError(error);
+					editor.getErrorContext(new PathSegment.Property("toStates")).addError(error);
+					target.add(form);
+				} else {
+					if (transitionIndex != -1)
+						getWorkflow().getStateTransitions().set(transitionIndex, transition);
+					else 
+						getWorkflow().getStateTransitions().add(transition);
 					getProject().setIssueWorkflow(getWorkflow());
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					onSave(target);
-				} else {
-					target.add(form);
 				}
 			}
 			
@@ -119,7 +107,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(FieldEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(TransitionEditPanel.this));
 			}
 
 			@Override
@@ -139,20 +127,4 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 
-	@Override
-	public List<String> getInputNames() {
-		List<String> inputNames = new ArrayList<>();
-		int currentIndex = 0;
-		for (InputSpec field: getWorkflow().getFields()) {
-			if (currentIndex != fieldIndex)
-				inputNames.add(field.getName());
-			currentIndex++;
-		}
-		return inputNames;
-	}
-	
-	@Override
-	public InputSpec getInput(String inputName) {
-		return getWorkflow().getField(inputName);
-	}
 }

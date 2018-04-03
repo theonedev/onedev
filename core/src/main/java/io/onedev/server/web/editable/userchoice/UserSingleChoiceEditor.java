@@ -72,6 +72,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
         
         // add this to control allowClear flag of select2
     	input.setRequired(propertyDescriptor.isPropertyRequired());
+    	input.setLabel(Model.of("User selection"));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

@@ -1,2 +1,21 @@
 <wicket:extend>
+	<div class="state-transitions list">
+		<div class="head clearfix">
+			<div class="pull-left">
+				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+			</div>
+		</div>
+		<table wicket:id="stateTransitions" class="table table-hover table-condensed"></table>
+	</div>
+	<wicket:fragment wicket:id="columnFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="viewTransitionFrag">
+		<div class="actions">
+			<a wicket:id="edit" class="btn btn-sm btn-default"><i class="fa fa-pencil"></i> Edit</a>
+			<a wicket:id="delete" class="btn btn-sm btn-default"><i class="fa fa-trash"></i> Delete</a>
+		</div>
+		<div wicket:id="feedback"></div>
+		<div wicket:id="viewer"></div>
+	</wicket:fragment>
 </wicket:extend>

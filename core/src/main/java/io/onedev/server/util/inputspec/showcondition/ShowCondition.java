@@ -36,7 +36,7 @@ public class ShowCondition implements Serializable {
 
 	@Editable(order=200)
 	@OmitName
-	@NotNull
+	@NotNull(message="may not be empty")
 	public ValueMatcher getValueMatcher() {
 		return valueMatcher;
 	}
