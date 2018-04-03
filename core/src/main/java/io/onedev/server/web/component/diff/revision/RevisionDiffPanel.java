@@ -861,6 +861,7 @@ public class RevisionDiffPanel extends Panel {
 								
 							});
 							contentInput.setRequired(true);
+							contentInput.setLabel(Model.of("Comment"));
 							
 							NotificationPanel feedback = new NotificationPanel("feedback", form); 
 							feedback.setOutputMarkupPlaceholderTag(true);

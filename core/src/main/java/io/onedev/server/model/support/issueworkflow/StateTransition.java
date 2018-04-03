@@ -1,14 +1,17 @@
 package io.onedev.server.model.support.issueworkflow;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 import io.onedev.server.model.support.issueworkflow.action.IssueAction;
+import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
+import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class StateTransition implements Serializable {
@@ -24,6 +27,8 @@ public class StateTransition implements Serializable {
 	private IssueAction onAction;
 	
 	@Editable(order=100)
+	@Size(min=1, message="At least one state needs to be specified")
+	@ChoiceProvider("getStateChoices")
 	public List<String> getFromStates() {
 		return fromStates;
 	}
@@ -33,7 +38,8 @@ public class StateTransition implements Serializable {
 	}
 
 	@Editable(order=200)
-	@NotEmpty
+	@Size(min=1, message="At least one state needs to be specified")
+	@ChoiceProvider("getStateChoices")
 	public List<String> getToStates() {
 		return toStates;
 	}
@@ -62,4 +68,13 @@ public class StateTransition implements Serializable {
 		this.onAction = onAction;
 	}
 
+	@SuppressWarnings("unused")
+	private static List<String> getStateChoices() {
+		IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
+		List<String> stateNames = new ArrayList<>();
+		for (StateSpec state: page.getWorkflow().getStates())
+			stateNames.add(state.getName());
+		return stateNames;
+	}
+	
 }

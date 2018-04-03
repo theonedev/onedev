@@ -331,7 +331,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			}
 			
 		};
-		input.setRequired(true);
+		input.setRequired(true).setLabel(Model.of("Comment"));
 		form.add(input);
 		
 		form.add(new NotificationPanel("feedback", input));

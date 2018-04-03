@@ -383,7 +383,8 @@ abstract class InsertUrlPanel extends Panel {
 			int maxFilesize = (int) (attachmentSupport.getAttachmentMaxSize()/1024/1024);
 			if (maxFilesize <= 0)
 				maxFilesize = 1;
-			form.add(new DropzoneField("file", model, acceptedFiles, 1, maxFilesize).setRequired(true));
+			form.add(new DropzoneField("file", model, acceptedFiles, 1, maxFilesize)
+					.setRequired(true).setLabel(Model.of("Attachment")));
 			
 			form.add(new AjaxButton("insert"){});
 			
@@ -399,7 +400,8 @@ abstract class InsertUrlPanel extends Panel {
 			feedback.setOutputMarkupPlaceholderTag(true);
 			form.add(feedback);
 			
-			form.add(new DropzoneField("file", model, acceptedFiles, 1, Project.MAX_UPLOAD_SIZE).setRequired(true));
+			form.add(new DropzoneField("file", model, acceptedFiles, 1, Project.MAX_UPLOAD_SIZE)
+					.setRequired(true).setLabel(Model.of("Attachment")));
 
 			form.add(new TextField<String>("directory", new IModel<String>() {
 

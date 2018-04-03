@@ -469,7 +469,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 						}
 						
 					});
-					contentInput.setRequired(true);
+					contentInput.setRequired(true).setLabel(Model.of("Comment"));
 					
 					NotificationPanel feedback = new NotificationPanel("feedback", form); 
 					feedback.setOutputMarkupPlaceholderTag(true);

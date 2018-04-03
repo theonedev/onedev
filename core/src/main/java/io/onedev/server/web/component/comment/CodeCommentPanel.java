@@ -171,6 +171,7 @@ public abstract class CodeCommentPanel extends Panel {
 				};
 				form.add(contentInput);
 				contentInput.setRequired(true);
+				contentInput.setLabel(Model.of("Comment"));
 				
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
@@ -342,6 +343,7 @@ public abstract class CodeCommentPanel extends Panel {
 					
 				};
 				contentInput.setRequired(true);
+				contentInput.setLabel(Model.of("Comment"));
 				form.add(contentInput);
 				
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
@@ -658,6 +660,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 		};
 		contentInput.setRequired(true);
+		contentInput.setLabel(Model.of("Comment"));
 		form.add(contentInput);
 		
 		NotificationPanel feedback = new NotificationPanel("feedback", form); 

@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
@@ -62,7 +63,8 @@ abstract class BlobUploadPanel extends Panel {
 		form.add(feedback);
 		
 		form.add(new DropzoneField("files", 
-				new PropertyModel<Collection<FileUpload>>(this, "uploads"), null, 0, Project.MAX_UPLOAD_SIZE).setRequired(true));
+				new PropertyModel<Collection<FileUpload>>(this, "uploads"), null, 0, Project.MAX_UPLOAD_SIZE)
+				.setRequired(true).setLabel(Model.of("File")));
 		form.add(new AjaxButton("upload") {
 
 			@Override

@@ -46,7 +46,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 				tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
 				tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
 				tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
-				tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-exchange", CommitMessageTransformPage.class));
+				tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));
 				tabs.add(new ProjectSettingTab("Issue Fields", "fa fa-fw fa-list-ul", IssueFieldsPage.class));
 				tabs.add(new ProjectSettingTab("Issue States", "fa fa-fw fa-check", IssueStatesPage.class));
 				return tabs;

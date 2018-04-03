@@ -100,7 +100,16 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Issue Closed")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Initial")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
+				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().isInitial()?"Yes":"No", false));
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Closed")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
@@ -194,7 +203,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "issue-custom-state"));
+							add(AttributeAppender.append("class", "issue-state"));
 						}
 
 						@Override

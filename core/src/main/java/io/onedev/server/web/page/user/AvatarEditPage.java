@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.lang.Bytes;
@@ -51,7 +52,7 @@ public class AvatarEditPage extends UserPage {
 		IModel<Collection<FileUpload>> model = new PropertyModel<>(this, "uploads");
 		
 		DropzoneField dropzoneField = new DropzoneField("file", model, "image/*", 1, MAX_IMAGE_SIZE);
-		dropzoneField.setRequired(true);
+		dropzoneField.setRequired(true).setLabel(Model.of("Image"));
 		form.add(dropzoneField);
 		
 		form.add(new AjaxButton("useUploaded") {

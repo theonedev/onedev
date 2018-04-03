@@ -14,7 +14,7 @@
 	position: relative;
 	top: 0;
 }
-#project-setting .issue-staets table>tbody>tr>td:first-child>div>.drag-handle {
+#project-setting .issue-states table>tbody>tr>td:first-child>div>.drag-handle {
 	position: absolute;
 	top: 8px;
 }
@@ -22,9 +22,6 @@
 	margin-left: 16px;
 }
 
-.floating.issue-state {
-	width: 600px;
-}
 .floating.issue-state .actions {
 	margin-bottom: 12px;
 }

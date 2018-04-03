@@ -587,7 +587,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 			}
 			
 		});
-		titleInput.setRequired(true);
+		titleInput.setRequired(true).setLabel(Model.of("Title"));
 		titleContainer.add(titleInput);
 		
 		titleContainer.add(new NotificationPanel("feedback", titleInput));

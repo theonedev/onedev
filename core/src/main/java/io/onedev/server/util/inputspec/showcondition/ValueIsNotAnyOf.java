@@ -21,7 +21,7 @@ public class ValueIsNotAnyOf implements ValueMatcher {
 	@Editable
 	@ChoiceProvider("getValueChoices")
 	@OmitName
-	@Size(min=1, max=100)
+	@Size(min=1, message="At least one value needs to be specified")
 	public List<String> getValues() {
 		return values;
 	}

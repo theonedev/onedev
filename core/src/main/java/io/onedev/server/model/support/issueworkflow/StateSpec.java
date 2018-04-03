@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -29,6 +31,7 @@ public class StateSpec implements Serializable {
 	
 	@Editable(order=100)
 	@Name
+	@NotEmpty
 	public String getName() {
 		return name;
 	}
@@ -46,7 +49,9 @@ public class StateSpec implements Serializable {
 		this.description = description;
 	}
 
-	@Editable(order=250, description="Issue will be in this state after created if this option is enabled")
+	@Editable(order=250, description="Enable if this is an initial state. Issues will be in initial state after creation.<br>"
+			+ "<b>NOTE: </b> If multiple initial states are defined, the last initial state with satisifed field "
+			+ "requirements will be used")
 	public boolean isInitial() {
 		return initial;
 	}
@@ -64,9 +69,8 @@ public class StateSpec implements Serializable {
 		this.closed = closed;
 	}
 
-	@Editable(order=500, description="Select issue fields attached to this state. "
-			+ "Attached fields will be prompted for user input when issue transits "
-			+ "to this state")
+	@Editable(order=500, name="Required Fields", description="Select issue fields required by this state. "
+			+ "Required fields will be prompted for user input when issue transits to this state")
 	@ChoiceProvider("getFieldChoices")
 	public List<String> getFields() {
 		return fields;
