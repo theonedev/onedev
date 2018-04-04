@@ -1,6 +1,9 @@
 package io.onedev.server.util.inputspec.numberinput;
 
+import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.Lists;
 
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
@@ -67,18 +70,13 @@ public class NumberInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		if (string != null)
-			return Integer.valueOf(string);
-		else
-			return null;
+	public Object convertToObject(List<String> strings) {
+		return Integer.valueOf(strings.iterator().next());
 	}
 
 	@Override
-	public String toString(Object value) {
-		if (value != null)
-			return String.valueOf(value);
-		else
-			return null;
+	public List<String> convertToStrings(Object value) {
+		return Lists.newArrayList(String.valueOf(value));
 	}
+	
 }

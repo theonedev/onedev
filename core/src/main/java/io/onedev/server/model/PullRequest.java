@@ -237,10 +237,6 @@ public class PullRequest extends AbstractEntity {
 		return submitterName;
 	}
 
-	public void setSubmitterName(String submitterName) {
-		this.submitterName = submitterName;
-	}
-
 	public Project getTargetProject() {
 		return targetProject;
 	}

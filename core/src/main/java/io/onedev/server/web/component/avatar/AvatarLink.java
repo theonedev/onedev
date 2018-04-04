@@ -33,10 +33,10 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 	private String url;
 	
 	public AvatarLink(String id, @Nullable User user) {
-		this(id, user, false);
+		this(id, user, null);
 	}
 	
-	public AvatarLink(String id, @Nullable User user, boolean showTooltip) {
+	public AvatarLink(String id, @Nullable User user, @Nullable String tooltip) {
 		super(id, UserProfilePage.class);
 
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
@@ -50,22 +50,15 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 			userId = user.getId();
 			params = UserPage.paramsOf(user);
 		}
-		if (showTooltip) {
-			if (user != null)
-				tooltip = user.getDisplayName();
-			else
-				tooltip = OneDev.NAME;
-		} else {
-			tooltip = null;
-		}
+		this.tooltip = tooltip;
 		url = avatarManager.getAvatarUrl(user!=null?user.getFacade():null);
 	}
 	
 	public AvatarLink(String id, PersonIdent person) {
-		this(id, person, false);
+		this(id, person, null);
 	}
 	
-	public AvatarLink(String id, PersonIdent person, boolean showTooltip) {
+	public AvatarLink(String id, PersonIdent person, @Nullable String tooltip) {
 		super(id, UserProfilePage.class);
 		
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
@@ -81,10 +74,7 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 			url = avatarManager.getAvatarUrl(person);
 		}
 		
-		if (showTooltip)
-			tooltip = person.getName();
-		else
-			tooltip = null;
+		this.tooltip = tooltip;
 	}
 	
 	@Override

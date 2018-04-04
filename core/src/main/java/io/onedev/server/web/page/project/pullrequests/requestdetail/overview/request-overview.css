@@ -260,6 +260,12 @@
 	margin-bottom: 8px;
 }
 
+#request-detail .side-info>div {
+	background: #F9F9F9;
+	padding: 20px;
+	border: 1px solid #E0E0E0;
+	border-radius: 4px;
+}
 #request-detail .side-info>div>div {
 	border-bottom: 1px dotted #BBB; 
 	margin-bottom: 20px; 

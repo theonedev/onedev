@@ -12,11 +12,7 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueManager extends EntityManager<Issue> {
 	
-	Class<? extends Serializable> defineFieldBeanClass(Project project);
-	
-	@Nullable
-	Class<? extends Serializable> loadFieldBeanClass(String className);
-	
 	List<Issue> query(@Nullable Project project, User user);
 	
+	void save(Issue issue, Serializable fieldBean);
 }

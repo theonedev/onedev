@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -71,7 +70,6 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.verification.RequiredVerificationsPanel;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -117,9 +115,6 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 	public NewRequestPage(PageParameters params) {
 		super(params);
 		
-		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
-
 		User currentUser = getLoginUser();
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);

@@ -3,10 +3,13 @@ package io.onedev.server.model.support.issueworkflow;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.OneException;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 
@@ -16,9 +19,13 @@ public class IssueWorkflow implements Serializable, InputContext {
 	
 	private List<StateSpec> states = new ArrayList<>();
 	
+	private transient Map<String, StateSpec> stateMap;
+	
 	private List<StateTransition> stateTransitions = new ArrayList<>();
 	
 	private List<InputSpec> fields = new ArrayList<>();
+	
+	private transient Map<String, InputSpec> fieldMap;
 	
 	public List<StateSpec> getStates() {
 		return states;
@@ -44,21 +51,35 @@ public class IssueWorkflow implements Serializable, InputContext {
 		this.fields = fields;
 	}
 
+	private Map<String, InputSpec> getFieldMap() {
+		if (fieldMap == null) {
+			fieldMap = new LinkedHashMap<>();
+			for (InputSpec field: getFields())
+				fieldMap.put(field.getName(), field);
+		}
+		return fieldMap;
+	}
+	
+	private Map<String, StateSpec> getStateMap() {
+		if (stateMap == null) {
+			stateMap = new LinkedHashMap<>();
+			for (StateSpec state: getStates())
+				stateMap.put(state.getName(), state);
+		}
+		return stateMap;
+	}
+	
 	@Override
 	public List<String> getInputNames() {
-		List<String> inputNames = new ArrayList<>();
-		for (InputSpec field: getFields())
-			inputNames.add(field.getName());
-		return inputNames;
+		return new ArrayList<>(getFieldMap().keySet());
 	}
 	
 	@Override
 	public InputSpec getInput(String inputName) {
-		for (InputSpec field: getFields()) {
-			if (field.getName().equals(inputName))
-				return field;
-		}
-		throw new RuntimeException("Unable to find input with name: " + inputName);
+		InputSpec field = getFieldMap().get(inputName);
+		if (field == null)
+			throw new RuntimeException("Unable to find input: " + inputName);
+		return field;
 	}
 	
 	public void onStateDelete(String stateName) {
@@ -82,11 +103,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 	
 	@Nullable
 	public StateSpec getState(String stateName) {
-		for (StateSpec state: getStates()) {
-			if (state.getName().equals(stateName))
-				return state;
-		}
-		return null;
+		return getStateMap().get(stateName);
 	}
 
 	public int getStateIndex(String stateName) {
@@ -107,11 +124,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 	
 	@Nullable
 	public InputSpec getField(String fieldName) {
-		for (InputSpec field: getFields()) {
-			if (field.getName().equals(fieldName))
-				return field;
-		}
-		return null;
+		return getFieldMap().get(fieldName);
 	}
 
 	public int getFieldIndex(String fieldName) {
@@ -143,6 +156,13 @@ public class IssueWorkflow implements Serializable, InputContext {
 			if (transition.getPrerequisite() != null && transition.getPrerequisite().getFieldName().equals(fieldName))
 				it.remove();
 		}
+	}
+	
+	public StateSpec getInitialState() {
+		if (!getStates().isEmpty())
+			return getStates().iterator().next();
+		else
+			throw new OneException("No any issue state is defined");
 	}
 	
 }

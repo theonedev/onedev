@@ -1,21 +1,16 @@
 package io.onedev.server.util.inputspec.usermultichoiceinput;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.userchoiceprovider.ProjectReaders;
 import io.onedev.server.util.inputspec.usermultichoiceinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.utils.StringUtils;
 
 @Editable(order=151, name=InputSpec.USER_MULTI_CHOICE)
 public class UserMultiChoiceInput extends InputSpec {
@@ -47,16 +42,6 @@ public class UserMultiChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public List<String> getPossibleValues() {
-		List<String> possibleValues = new ArrayList<>();
-		if (OneDev.getInstance(Validator.class).validate(getChoiceProvider()).isEmpty()) {
-			for (UserFacade user: getChoiceProvider().getChoices(true))
-				possibleValues.add(user.getName());
-		}
-		return possibleValues;
-	}
-
-	@Override
 	public String getPropertyDef(Map<String, Integer> indexes) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
@@ -68,14 +53,14 @@ public class UserMultiChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		return StringUtils.splitAndTrim(string);
+	public Object convertToObject(List<String> strings) {
+		return strings;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String toString(Object value) {
-		return StringUtils.join((List<String>)value);
+	public List<String> convertToStrings(Object value) {
+		return (List<String>) value;
 	}
 
 }

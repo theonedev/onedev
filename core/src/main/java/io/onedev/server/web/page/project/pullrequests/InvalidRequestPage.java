@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.pullrequests;
 
 import javax.persistence.EntityNotFoundException;
 
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
@@ -16,7 +15,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
@@ -31,9 +29,6 @@ public class InvalidRequestPage extends ProjectPage {
 	public InvalidRequestPage(PageParameters params) {
 		super(params);
 		
-		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
-
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
 			@Override

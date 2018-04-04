@@ -33,7 +33,6 @@ import org.apache.wicket.validation.IValidator;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.DefaultValueProvider;
 import io.onedev.server.util.editable.annotation.Horizontal;
 import io.onedev.server.util.editable.annotation.OmitName;
@@ -237,7 +236,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				 * Field will be be display name of the property when the bean class being edited is 
 				 * generated via groovy script    
 				 */
-				String propertyName = getPropertyName(name);
+				String propertyName = beanDescriptor.getPropertyName(name);
 				propertyContext.getDependencyPropertyNames().add(propertyName);
 
 				Optional<Object> result= BeanEditor.this.visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, Optional<Object>>() {
@@ -375,15 +374,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		});
 		
 		return bean;
-	}
-	
-	public String getPropertyName(String name) {
-		for (PropertyContext<?> propertyContext: propertyContexts) {
-			String displayName = EditableUtils.getDisplayName(propertyContext.getPropertyGetter());
-			if (propertyContext.getPropertyName().equals(name) || displayName.equals(name))
-				return propertyContext.getPropertyName();
-		}
-		throw new RuntimeException("No property found with name: " + name);
 	}
 	
 	private abstract class PropertyContainer extends WebMarkupContainer implements EditContext, PropertyContextAware {

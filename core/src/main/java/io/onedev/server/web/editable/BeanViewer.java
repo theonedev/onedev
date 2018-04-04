@@ -21,10 +21,14 @@ import io.onedev.server.util.editable.annotation.OmitName;
 @SuppressWarnings("serial")
 public class BeanViewer extends Panel implements PropertyContextAware, EditContext {
 
+	private final BeanDescriptor beanDescriptor;
+	
 	private final List<PropertyContext<Serializable>> propertyContexts = new ArrayList<>();
 	
 	public BeanViewer(String id, BeanDescriptor beanDescriptor, IModel<Serializable> model) {
 		super(id, model);
+	
+		this.beanDescriptor = beanDescriptor;
 		
 		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
 			propertyContexts.add(PropertyContext.of(propertyDescriptor));
@@ -82,7 +86,8 @@ public class BeanViewer extends Panel implements PropertyContextAware, EditConte
 	}
 	
 	@Override
-	public Object getOnScreenValue(String propertyName) {
+	public Object getOnScreenValue(String name) {
+		String propertyName = beanDescriptor.getPropertyName(name);
 		return getPropertyContext(propertyName).getPropertyValue(getDefaultModelObject());
 	}
 

@@ -145,8 +145,9 @@ public abstract class InputSpec implements Serializable {
 		buffer.append("\n");
 	}
 	
-	protected void appendAnnotations(StringBuffer buffer, int index, String notEmptyAnnotation, 
-			@Nullable String choiceAnnotation, boolean hasDefaultValueProvider) {
+	protected void appendAnnotations(StringBuffer buffer, int index, 
+			@Nullable String notEmptyAnnotation, @Nullable String choiceAnnotation, 
+			boolean hasDefaultValueProvider) {
 		if (description != null) {
 			buffer.append("    @Editable(name=\"" + escape(name) + "\", description=\"" + 
 					escape(description) + "\", order=" + index + ")\n");
@@ -154,7 +155,7 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("    @Editable(name=\"" + escape(name) + 
 					"\", order=" + index + ")\n");
 		}
-		if (!allowEmpty)
+		if (!allowEmpty && notEmptyAnnotation != null)
 			buffer.append("    @" + notEmptyAnnotation + "\n");
 		if (showCondition != null) 
 			buffer.append("    @ShowCondition(\"isInput" + index + "Visible\")\n");
@@ -242,10 +243,16 @@ public abstract class InputSpec implements Serializable {
 		return (Class<?>) GroovyUtils.evalScript(buffer.toString(), new HashMap<>());
 	}
 
-	@Nullable
-	public abstract String toString(@Nullable Object object);
-	
-	@Nullable
-	public abstract Object toObject(@Nullable String string);
+	public abstract List<String> convertToStrings(Object object);
+
+	/**
+	 * Convert list of strings to object
+	 * 
+	 * @param strings
+	 * 			list of strings, will not be empty
+	 * @return
+	 * 			converted object
+	 */
+	public abstract Object convertToObject(List<String> strings);
 	
 }

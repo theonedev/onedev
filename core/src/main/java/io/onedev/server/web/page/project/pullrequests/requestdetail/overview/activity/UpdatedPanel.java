@@ -72,7 +72,7 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 			protected void populateItem(final ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
 				
-				item.add(new AvatarLink("author", commit.getAuthorIdent(), true));
+				item.add(new AvatarLink("author", commit.getAuthorIdent(), commit.getAuthorIdent().getName()));
 
 				IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
 

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -54,7 +53,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.revisionpicker.RevisionPicker;
 import io.onedev.server.web.component.verification.VerificationStatusPanel;
-import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -75,9 +73,6 @@ public class ProjectTagsPage extends ProjectPage {
 	
 	public ProjectTagsPage(PageParameters params) {
 		super(params);
-		
-		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
 	}
 	
 	@Override

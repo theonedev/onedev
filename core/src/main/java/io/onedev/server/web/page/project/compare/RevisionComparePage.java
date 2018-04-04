@@ -9,7 +9,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -51,7 +50,6 @@ import io.onedev.server.web.component.revisionpicker.AffinalRevisionPicker;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
@@ -167,9 +165,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 	public RevisionComparePage(PageParameters params) {
 		super(params);
 		
-		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
-
 		String str = params.get(PARAM_LEFT).toString();
 		if (str != null) {
 			state.leftSide = new ProjectAndRevision(str);

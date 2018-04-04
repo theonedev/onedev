@@ -1,8 +1,11 @@
 package io.onedev.server.util.inputspec.dateinput;
 
+import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+
+import com.google.common.collect.Lists;
 
 import io.onedev.server.util.Constants;
 import io.onedev.server.util.editable.annotation.Editable;
@@ -39,19 +42,13 @@ public class DateInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		if (string != null)
-			return Constants.DATE_FORMATTER.parseDateTime(string).toDate();
-		else
-			return null;
+	public Object convertToObject(List<String> strings) {
+		return Constants.DATE_FORMATTER.parseDateTime(strings.iterator().next()).toDate();
 	}
 
 	@Override
-	public String toString(Object value) {
-		if (value != null)
-			return Constants.DATE_FORMATTER.print(new DateTime(value));
-		else
-			return null;
+	public List<String> convertToStrings(Object value) {
+		return Lists.newArrayList(Constants.DATE_FORMATTER.print(new DateTime(value)));
 	}
 
 }

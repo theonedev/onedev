@@ -86,7 +86,6 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
@@ -108,7 +107,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 	
 	private static final String HINT_ID = "hint";
 	
-	protected IModel<PullRequest> requestModel;
+	protected final IModel<PullRequest> requestModel;
 	
 	private boolean editingTitle;
 	
@@ -117,9 +116,6 @@ public abstract class RequestDetailPage extends ProjectPage {
 	public RequestDetailPage(PageParameters params) {
 		super(params);
 		
-		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
-
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
 			@Override

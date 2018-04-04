@@ -16,16 +16,12 @@ import io.onedev.utils.ClassUtils;
 @SuppressWarnings("serial")
 public class BeanContext extends BeanDescriptor {
 	
-	public BeanContext(Class<?> beanClass, Set<String> excludedProperties, Set<String> optionalProperties) {
-		super(beanClass, excludedProperties, optionalProperties);
+	public BeanContext(Class<?> beanClass) {
+		this(beanClass, Sets.newHashSet());
 	}
 	
 	public BeanContext(Class<?> beanClass, Set<String> excludedProperties) {
-		this(beanClass, excludedProperties, Sets.newHashSet());
-	}
-	
-	public BeanContext(Class<?> beanClass) {
-		this(beanClass, Sets.newHashSet());
+		super(beanClass, excludedProperties);
 	}
 	
 	public BeanContext(BeanDescriptor beanDescriptor) {
@@ -79,13 +75,9 @@ public class BeanContext extends BeanDescriptor {
 		return editModel(componentId, beanModel, Sets.newHashSet());
 	}
 	
-	public static BeanEditor editModel(String componentId, IModel<? extends Serializable> beanModel, Set<String> excludedProperties) {
-		return editModel(componentId, beanModel, excludedProperties, Sets.newHashSet());
-	}
-	
 	@SuppressWarnings("unchecked")
 	public static BeanEditor editModel(String componentId, 
-			IModel<? extends Serializable> beanModel, Set<String> excludedProperties, Set<String> optionalProperties) {
+			IModel<? extends Serializable> beanModel, Set<String> excludedProperties) {
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
 		BeanContext beanContext = new BeanContext(beanClass, excludedProperties);
 		return beanContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
@@ -95,12 +87,8 @@ public class BeanContext extends BeanDescriptor {
 		return editBean(componentId, bean, Sets.newHashSet());
 	}
 	
-	public static BeanEditor editBean(String componentId, Serializable bean, Set<String> excludedProperties) {
-		return editBean(componentId, bean, excludedProperties, Sets.newHashSet());
-	}
-	
 	public static BeanEditor editBean(String componentId, final Serializable bean, 
-			Set<String> excludedProperties, Set<String> optionalProperties) {
+			Set<String> excludedProperties) {
 		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override
@@ -119,7 +107,7 @@ public class BeanContext extends BeanDescriptor {
 			
 		};
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext beanContext = new BeanContext(beanClass, excludedProperties, optionalProperties);
+		BeanContext beanContext = new BeanContext(beanClass, excludedProperties);
 		beanModel = beanContext.wrapAsSelfUpdating(beanModel);
 		return beanContext.renderForEdit(componentId, beanModel);
 	}

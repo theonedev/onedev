@@ -64,7 +64,6 @@ import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.vladsch.flexmark.Extension;
 
-import groovy.lang.GroovyRuntimeException;
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.AbstractPlugin;
 import io.onedev.launcher.loader.AbstractPluginModule;
@@ -78,7 +77,6 @@ import io.onedev.server.command.ResetAdminPasswordCommand;
 import io.onedev.server.command.RestoreDBCommand;
 import io.onedev.server.command.UpgradeCommand;
 import io.onedev.server.git.config.GitConfig;
-import io.onedev.server.git.exception.GitException;
 import io.onedev.server.git.jackson.GitObjectMapperConfigurator;
 import io.onedev.server.manager.AttachmentManager;
 import io.onedev.server.manager.BatchWorkManager;
@@ -188,13 +186,13 @@ import io.onedev.server.security.OnePasswordService;
 import io.onedev.server.security.OneRememberMeManager;
 import io.onedev.server.security.OneWebSecurityManager;
 import io.onedev.server.security.authenticator.Authenticator;
+import io.onedev.server.util.OneException;
 import io.onedev.server.util.jackson.ObjectMapperConfigurator;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
 import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
 import io.onedev.server.util.jetty.DefaultJettyRunner;
 import io.onedev.server.util.jetty.JettyRunner;
 import io.onedev.server.util.markdown.MarkdownProcessor;
-import io.onedev.server.util.reviewrequirement.InvalidReviewRuleException;
 import io.onedev.server.util.validation.DefaultEntityValidator;
 import io.onedev.server.util.validation.EntityValidator;
 import io.onedev.server.util.validation.ValidatorProvider;
@@ -408,8 +406,7 @@ public class CoreModule extends AbstractPluginModule {
 			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
 				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
 						ObjectNotFoundException.class, StaleStateException.class, UnauthorizedException.class, 
-						GitException.class, PageExpiredException.class, StalePageException.class, 
-						InvalidReviewRuleException.class, GroovyRuntimeException.class);
+						OneException.class, PageExpiredException.class, StalePageException.class);
 			}
 			
 		});

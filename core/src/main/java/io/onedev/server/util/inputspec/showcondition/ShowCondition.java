@@ -52,8 +52,18 @@ public class ShowCondition implements Serializable {
 	
 	public boolean isVisible() {
 		InputSpec input = OneContext.get().getInputContext().getInput(getInputName());
-		String inputValue = input.toString(OneContext.get().getEditContext().getOnScreenValue(getInputName()));
-		return getValueMatcher().matches(inputValue);
+		Object inputValue = OneContext.get().getEditContext().getOnScreenValue(getInputName());
+		if (inputValue != null) {
+			List<String> strings = input.convertToStrings(inputValue);
+			if (strings.isEmpty())
+				return getValueMatcher().matches(null);
+			else if (strings.size() == 1)
+				return getValueMatcher().matches(strings.iterator().next());
+			else 
+				throw new IllegalStateException("Show condition should not be based on a multi-value input");
+		} else {
+			return getValueMatcher().matches(null);
+		}
 	}
 	
 }

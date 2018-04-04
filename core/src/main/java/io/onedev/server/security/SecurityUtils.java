@@ -14,6 +14,7 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
@@ -80,6 +81,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 
+	public static boolean canModify(Issue issue) {
+		Project project = issue.getProject();
+		if (canManage(project)) {
+			return true;
+		} else {
+			User currentUser = getUser();
+			return currentUser != null && currentUser.equals(issue.getReporter());
+		}
+	}
+	
 	public static User getUser() {
 		return OneDev.getInstance(UserManager.class).getCurrent();
 	}

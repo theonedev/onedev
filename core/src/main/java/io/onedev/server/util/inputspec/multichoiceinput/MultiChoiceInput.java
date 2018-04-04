@@ -1,20 +1,16 @@
 package io.onedev.server.util.inputspec.multichoiceinput;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.inputspec.multichoiceinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.utils.StringUtils;
 
 @Editable(order=146, name=InputSpec.MULTI_CHOICE)
 public class MultiChoiceInput extends InputSpec {
@@ -46,14 +42,6 @@ public class MultiChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public List<String> getPossibleValues() {
-		if (OneDev.getInstance(Validator.class).validate(getChoiceProvider()).isEmpty())
-			return getChoiceProvider().getChoices(true);
-		else
-			return new ArrayList<>();
-	}
-
-	@Override
 	public String getPropertyDef(Map<String, Integer> indexes) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
@@ -65,14 +53,14 @@ public class MultiChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		return StringUtils.split(string);
+	public Object convertToObject(List<String> strings) {
+		return strings;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String toString(Object value) {
-		return StringUtils.join((List<String>)value);
+	public List<String> convertToStrings(Object value) {
+		return (List<String>) value;
 	}
 
 }

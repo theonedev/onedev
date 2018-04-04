@@ -142,13 +142,21 @@ public class PropertyDescriptor implements Serializable {
 		return dependencyPropertyNames;
 	}
 	
+	public String getDisplayName() {
+		return EditableUtils.getDisplayName(getPropertyGetter());
+	}
+	
 	public String getDisplayName(Component component) {
-		String displayName = EditableUtils.getDisplayName(getPropertyGetter());
+		String displayName = getDisplayName();
 		return Application.get().getResourceSettings().getLocalizer().getString(displayName, component, displayName);
 	}
 	
+	public String getDescription() {
+		return EditableUtils.getDescription(getPropertyGetter());
+	}
+	
 	public String getDescription(Component component) {
-		String description = EditableUtils.getDescription(getPropertyGetter());
+		String description = getDescription();
 		if (description != null) {
 			OneContext.push(new ComponentContext(component));
 			try {

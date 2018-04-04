@@ -1,0 +1,46 @@
+<wicket:extend>
+	<div id="issue-detail" class="clearfix">
+		<div class="primary pull-left">
+			<div wicket:id="title" class="title"></div>
+			<div class="state-reporter-actions">
+				<span wicket:id="state" class="state label label-default"></span>
+				<span class="reporter">Opened by <a wicket:id="reporter"></a> <span wicket:id="reportDate"></span></span>
+				<span class="btn-group transitions">
+					<a wicket:id="transitions" class="btn btn-sm btn-default"><span wicket:id="label"></span></a>
+				</span>
+				<span class="btn-group">
+					<a wicket:id="edit" class="btn btn-sm btn-default"><i class="fa fa-pencil"></i> Edit</a>
+					<a wicket:id="delete" class="btn btn-sm btn-default"><i class="fa fa-trash"></i> Delete</a>
+				</span>
+				<a wicket:id="newIssue" class="new-issue btn btn-sm btn-success"><i class="fa fa-plus"></i> New Issue</a>
+			</div>
+			<div wicket:id="actionOptions" class="action-options"></div>
+			<div wicket:id="description" class="description"></div>
+		</div>
+		<div class="additional pull-right">
+			<wicket:enclosure child="fields">
+			<div class="fields">
+				<table>
+					<tr wicket:id="fields">
+						<td class="name"><span wicket:id="name"></span></td>
+						<td class="value"><span wicket:id="value"></span></td>
+					</tr>
+				</table>
+			</div>
+			</wicket:enclosure>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="usersFrag">
+		<a wicket:id="avatars" class="avatar"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="transitionFrag">
+		<form wicket:id="form" class="state-transition leave-confirm">
+			<div wicket:id="fields"></div>
+			<div wicket:id="comment"></div>
+			<div class="actions">
+				<button wicket:id="save" type="submit" class="btn btn-primary">Ok</button>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:extend>

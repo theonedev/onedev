@@ -1,21 +1,16 @@
 package io.onedev.server.util.inputspec.groupmultichoiceinput;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.groupchoiceprovider.AllGroups;
 import io.onedev.server.util.inputspec.groupchoiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.groupmultichoiceinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.utils.StringUtils;
 
 @Editable(order=161, name=InputSpec.GROUP_MULTI_CHOICE)
 public class GroupMultiChoiceInput extends InputSpec {
@@ -47,16 +42,6 @@ public class GroupMultiChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public List<String> getPossibleValues() {
-		List<String> possibleValues = new ArrayList<>();
-		if (OneDev.getInstance(Validator.class).validate(getChoiceProvider()).isEmpty()) {
-			for (GroupFacade group: getChoiceProvider().getChoices(true))
-				possibleValues.add(group.getName());
-		}
-		return possibleValues;
-	}
-
-	@Override
 	public String getPropertyDef(Map<String, Integer> indexes) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
@@ -68,14 +53,14 @@ public class GroupMultiChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		return StringUtils.splitAndTrim(string);
+	public Object convertToObject(List<String> strings) {
+		return strings;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String toString(Object value) {
-		return StringUtils.join((List<String>)value);
+	public List<String> convertToStrings(Object value) {
+		return (List<String>)value;
 	}
 
 }

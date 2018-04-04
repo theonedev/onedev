@@ -13,6 +13,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
@@ -25,6 +27,7 @@ import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 
 @SuppressWarnings("serial")
@@ -39,6 +42,7 @@ public class IssueListPage extends ProjectPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
 		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())));
 		
 		List<IColumn<Issue, Void>> columns = new ArrayList<>();
@@ -47,7 +51,7 @@ public class IssueListPage extends ProjectPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId, IModel<Issue> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getId()));
+				cellItem.add(new Label(componentId, "#" + rowModel.getObject().getId()));
 			}
 		});		
 		
@@ -55,7 +59,11 @@ public class IssueListPage extends ProjectPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId, IModel<Issue> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getTitle()));
+				Fragment fragment = new Fragment(componentId, "titleFrag", IssueListPage.this);
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueDetailPage.class, IssueDetailPage.paramsOf(rowModel.getObject()));
+				link.add(new Label("label", Model.of(rowModel.getObject().getTitle())));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 		});		
 		

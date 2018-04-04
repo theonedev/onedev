@@ -24,6 +24,7 @@ public class IssueField extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 
+	@Column(nullable=false)
 	private String value;
 
 	@Column(nullable=false)

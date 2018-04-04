@@ -1,11 +1,14 @@
-#request-detail {
-	padding: 20px;
-}
 #request-detail>div, #request-detail>ul {
 	margin-bottom: 20px;
 }
 #request-detail>div:last-child {
 	margin-bottom: 0;
+}
+#request-detail>.summary {
+	border: 1px solid #E0E0E0;
+	border-radius: 4px;
+	background: #F9F9F9;
+	padding: 20px;
 }
 #request-detail>.summary .md-editor {
 	margin-bottom: 20px;
@@ -35,16 +38,11 @@
 }
 
 #request-detail>.status-and-branches {
-	font-size: 18px;
+	font-size: 16px;
 }
 #request-detail>.status-and-branches>.status {
-	font-size: 18px;
+	font-size: 16px;
 	margin: -2px 12px 0 0;
-}
-#request-detail>.status-and-branches .branch {
-	background: #EEE;
-	padding: 2px 4px;
-	border-radius: 2px;
 }
 #request-detail>.summary>div {
 	border-bottom: 1px dotted #BBB; 

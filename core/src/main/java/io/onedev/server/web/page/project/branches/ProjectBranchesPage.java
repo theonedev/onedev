@@ -16,7 +16,6 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -77,7 +76,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.revisionpicker.RevisionPicker;
 import io.onedev.server.web.component.verification.VerificationStatusPanel;
-import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -85,8 +83,8 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.SearchOption;
-import io.onedev.server.web.page.project.pullrequests.requestlist.SortOption;
 import io.onedev.server.web.page.project.pullrequests.requestlist.SearchOption.Status;
+import io.onedev.server.web.page.project.pullrequests.requestlist.SortOption;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.utils.StringUtils;
 
@@ -279,9 +277,6 @@ public class ProjectBranchesPage extends ProjectPage {
 		baseBranch = params.get(PARAM_BASE).toString();
 		if (baseBranch == null)
 			baseBranch = Preconditions.checkNotNull(getProject().getDefaultBranch());
-		
-		if (getProject().getDefaultBranch() == null) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
 	}
 	
 	@Override

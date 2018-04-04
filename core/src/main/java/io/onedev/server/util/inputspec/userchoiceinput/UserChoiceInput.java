@@ -15,6 +15,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.userchoiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.userchoiceprovider.ProjectReaders;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=150, name=InputSpec.USER_CHOICE)
 public class UserChoiceInput extends InputSpec {
@@ -67,13 +68,13 @@ public class UserChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		return string;
+	public Object convertToObject(List<String> strings) {
+		return strings.iterator().next();
 	}
 
 	@Override
-	public String toString(Object value) {
-		return (String) value;
+	public List<String> convertToStrings(Object value) {
+		return Lists.newArrayList((String) value);
 	}
 
 }

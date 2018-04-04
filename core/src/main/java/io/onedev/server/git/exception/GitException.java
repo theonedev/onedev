@@ -1,6 +1,8 @@
 package io.onedev.server.git.exception;
 
-public class GitException extends RuntimeException {
+import io.onedev.server.util.OneException;
+
+public class GitException extends OneException {
 
 	private static final long serialVersionUID = 1L;
 

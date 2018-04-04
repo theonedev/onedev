@@ -6,46 +6,25 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.inputspec.InputSpec;
 
 @Singleton
-public class DefaultIssueManager extends AbstractEntityManager<Issue> 
-		implements IssueManager {
+public class DefaultIssueManager extends AbstractEntityManager<Issue> implements IssueManager {
 
-	private static final String FIELD_BEAN_PREFIX = "IssueFieldBean";
-	
-	private final ProjectManager projectManager;
+	private final IssueFieldManager issueFieldManager;
 	
 	@Inject
-	public DefaultIssueManager(Dao dao, ProjectManager projectManager) {
+	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager) {
 		super(dao);
-		this.projectManager = projectManager;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Class<? extends Serializable> defineFieldBeanClass(Project project) {
-		String className = FIELD_BEAN_PREFIX + project.getId();
-		
-		return (Class<? extends Serializable>) InputSpec.defineClass(className, project.getIssueWorkflow().getFields());
-	}
-	
-	@Override
-	public Class<? extends Serializable> loadFieldBeanClass(String className) {
-		if (className.startsWith(FIELD_BEAN_PREFIX)) {
-			Long projectId = Long.valueOf(className.substring(FIELD_BEAN_PREFIX.length()));
-			return defineFieldBeanClass(projectManager.load(projectId));
-		} else {
-			return null;
-		}
+		this.issueFieldManager = issueFieldManager;
 	}
 
 	@Sessional
@@ -56,6 +35,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue>
 		//query.setMaxResults(1);
 		//return query.list();
 		return null;
+	}
+
+	@Transactional
+	@Override
+	public void save(Issue issue, Serializable fieldBean) {
+		save(issue);
+		issueFieldManager.saveFields(issue, fieldBean);
 	}
 
 }

@@ -2,7 +2,13 @@ package io.onedev.server.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,9 +23,12 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.MultiValueIssueField;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
+import io.onedev.server.util.inputspec.InputSpec;
 
 @Entity
 @Table(
@@ -53,10 +62,17 @@ public class Issue extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private User reporter;
 	
+	private String reporterName;
+	
+	@Column(nullable=false)
+	private Date reportDate;
+	
 	private int votes;
-
+	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
+	
+	private transient Map<String, MultiValueIssueField> multiValueFields;
 	
 	public long getVersion() {
 		return version;
@@ -71,6 +87,7 @@ public class Issue extends AbstractEntity {
 	}
 
 	@Editable(order=100)
+	@NotEmpty
 	public String getTitle() {
 		return title;
 	}
@@ -105,6 +122,19 @@ public class Issue extends AbstractEntity {
 		this.reporter = reporter;
 	}
 
+	@Nullable
+	public String getReporterName() {
+		return reporterName;
+	}
+
+	public Date getReportDate() {
+		return reportDate;
+	}
+
+	public void setReportDate(Date reportDate) {
+		this.reportDate = reportDate;
+	}
+
 	public int getVotes() {
 		return votes;
 	}
@@ -119,6 +149,35 @@ public class Issue extends AbstractEntity {
 
 	public void setFields(Collection<IssueField> fields) {
 		this.fields = fields;
+	}
+	
+	public Map<String, MultiValueIssueField> getMultiValueFields() {
+		if (multiValueFields == null) {
+			multiValueFields = new LinkedHashMap<>();
+			
+			Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
+			for (IssueField field: getFields()) {
+				List<IssueField> fieldsOfName = fieldMap.get(field.getName());
+				if (fieldsOfName == null) {
+					fieldsOfName = new ArrayList<>();
+					fieldMap.put(field.getName(), fieldsOfName);
+				}
+				fieldsOfName.add(field);
+			}
+			
+			for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFields()) {
+				String fieldName = fieldSpec.getName();
+				List<IssueField> fields = fieldMap.get(fieldName);
+				if (fields != null) {
+					String type = fields.iterator().next().getType();
+					List<String> values = new ArrayList<>();
+					for (IssueField field: fields)
+						values.add(field.getValue());
+					multiValueFields.put(fieldName, new MultiValueIssueField(fieldName, type, values));
+				}
+			}
+		}
+		return multiValueFields;
 	}
 	
 }

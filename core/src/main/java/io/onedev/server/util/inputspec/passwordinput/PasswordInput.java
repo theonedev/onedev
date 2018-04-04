@@ -1,11 +1,13 @@
 package io.onedev.server.util.inputspec.passwordinput;
 
+import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.passwordinput.defaultvalueprovider.DefaultValueProvider;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=500, name=InputSpec.PASSWORD)
 public class PasswordInput extends InputSpec {
@@ -37,13 +39,13 @@ public class PasswordInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		return string;
+	public Object convertToObject(List<String> strings) {
+		return strings.iterator().next();
 	}
 
 	@Override
-	public String toString(Object value) {
-		return (String) value;
+	public List<String> convertToStrings(Object value) {
+		return Lists.newArrayList((String)value);
 	}
 
 }

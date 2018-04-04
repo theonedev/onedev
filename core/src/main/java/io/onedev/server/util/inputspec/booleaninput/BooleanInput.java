@@ -45,24 +45,21 @@ public class BooleanInput extends InputSpec {
 		int index = indexes.get(getName());
 		
 		StringBuffer buffer = new StringBuffer();
-		appendField(buffer, index, "Boolean");
-		appendAnnotations(buffer, index, "NotNull", null, defaultValueProvider!=null);
-		appendMethods(buffer, index, "Boolean", null, defaultValueProvider);
+		appendField(buffer, index, "boolean");
+		appendAnnotations(buffer, index, null, null, defaultValueProvider!=null);
+		appendMethods(buffer, index, "boolean", null, defaultValueProvider);
 		
 		return buffer.toString();
 	}
 
 	@Override
-	public Object toObject(String string) {
-		return Boolean.valueOf(string);
+	public Object convertToObject(List<String> strings) {
+		return Boolean.valueOf(strings.iterator().next());
 	}
 
 	@Override
-	public String toString(Object value) {
-		if (value != null)
-			return ((Boolean)value)?"true":"false";
-		else
-			return "false";
+	public List<String> convertToStrings(Object value) {
+		return Lists.newArrayList(((Boolean)value)?"true":"false");
 	}
 
 }

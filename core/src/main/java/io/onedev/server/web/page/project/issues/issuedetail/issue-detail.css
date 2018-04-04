@@ -1,0 +1,41 @@
+#issue-detail>.primary {
+	width: 73%;
+}
+#issue-detail>.primary>div {
+	margin-bottom: 20px;
+}
+#issue-detail>.primary>.title {
+	font-size: 18px;
+	font-weight: bold;
+}
+#issue-detail>.primary>.state-reporter-actions>.state {
+	font-size: 16px;  
+}
+#issue-detail>.primary>.state-reporter-actions>span {
+	margin-right: 8px;
+}
+#issue-detail>.primary>.description {
+	border-top: 1px solid #E0E0E0;
+	padding-top: 20px;
+}
+#issue-detail>.additional {
+	width: 24%;
+	border: 1px solid #E0E0E0;
+	padding: 20px;
+	background: #F9F9F9;
+	border-radius: 4px;
+}
+#issue-detail>.additional>div {
+	margin-bottom: 20px;
+}
+#issue-detail>.additional .fields td {
+	padding: 4px 8px;
+}
+#issue-detail>.additional .fields .name {
+	font-weight: bold;
+	font-size: 13px;
+	line-height: 22px;
+}
+#issue-detail>.additional .fields .avatar {
+	margin-right: 4px;
+}

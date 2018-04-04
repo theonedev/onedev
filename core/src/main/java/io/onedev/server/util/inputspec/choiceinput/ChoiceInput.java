@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
@@ -64,13 +66,13 @@ public class ChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		return string;
+	public Object convertToObject(List<String> strings) {
+		return strings.iterator().next();
 	}
 
 	@Override
-	public String toString(Object value) {
-		return (String) value;
+	public List<String> convertToStrings(Object value) {
+		return Lists.newArrayList((String) value);
 	}
 
 }

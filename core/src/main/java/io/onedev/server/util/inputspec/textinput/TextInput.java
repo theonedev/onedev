@@ -1,11 +1,13 @@
 package io.onedev.server.util.inputspec.textinput;
 
+import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=100, name=InputSpec.TEXT)
 public class TextInput extends InputSpec {
@@ -63,13 +65,13 @@ public class TextInput extends InputSpec {
 	}
 
 	@Override
-	public Object toObject(String string) {
-		return string;
+	public Object convertToObject(List<String> strings) {
+		return strings.iterator().next();
 	}
 
 	@Override
-	public String toString(Object value) {
-		return (String) value;
+	public List<String> convertToStrings(Object value) {
+		return Lists.newArrayList((String) value);
 	}
 	
 }
