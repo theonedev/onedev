@@ -8,20 +8,20 @@ import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
 
 @Editable
-public class FieldSpecBean implements Serializable {
+public class FieldBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private InputSpec fieldSpec;
+	private InputSpec field;
 
 	@Editable(name="Type")
 	@NotNull(message="may not be empty")
-	public InputSpec getFieldSpec() {
-		return fieldSpec;
+	public InputSpec getField() {
+		return field;
 	}
 
-	public void setFieldSpec(InputSpec fieldSpec) {
-		this.fieldSpec = fieldSpec;
+	public void setField(InputSpec field) {
+		this.field = field;
 	}
 	
 }

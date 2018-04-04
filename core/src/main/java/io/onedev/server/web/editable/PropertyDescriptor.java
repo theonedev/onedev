@@ -32,8 +32,6 @@ public class PropertyDescriptor implements Serializable {
 	
 	private boolean excluded;
 	
-	private boolean optional;
-	
 	private final Set<String> dependencyPropertyNames = new HashSet<>();
 	
 	private transient Method propertyGetter;
@@ -84,14 +82,6 @@ public class PropertyDescriptor implements Serializable {
 		this.excluded = excluded;
 	}
 
-	public boolean isOptional() {
-		return optional;
-	}
-
-	public void setOptional(boolean optional) {
-		this.optional = optional;
-	}
-
 	public void copyProperty(Object fromBean, Object toBean) {
 		setPropertyValue(toBean, getPropertyValue(fromBean));
 	}
@@ -117,15 +107,10 @@ public class PropertyDescriptor implements Serializable {
 	}
 
 	public boolean isPropertyRequired() {
-		if (getPropertyGetter().getReturnType().isPrimitive()) {
-			return true;
-		} else if (isOptional()) {
-			return false;
-		} else {
-			return getPropertyGetter().getAnnotation(NotNull.class) != null 
-					|| getPropertyGetter().getAnnotation(NotEmpty.class) != null
-					|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
-		}
+		return getPropertyGetter().getReturnType().isPrimitive()
+				|| getPropertyGetter().getAnnotation(NotNull.class) != null 
+				|| getPropertyGetter().getAnnotation(NotEmpty.class) != null
+				|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
 	}
 
 	public boolean isPropertyVisible(PropertyContextAware propertyContextAware) {

@@ -328,13 +328,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 							continue;
 					}
 					ErrorContext errorContext = getErrorContext(valuePath);
-					if (errorContext instanceof PropertyEditor) {
-						PropertyEditor<?> propertyEditor = (PropertyEditor<?>) errorContext;
-						if (!propertyEditor.getPropertyDescriptor().isOptional() || violation.getInvalidValue() != null)
-							errorContext.addError(violation.getMessage());
-					} else {
-						errorContext.addError(violation.getMessage());
-					}
+					errorContext.addError(violation.getMessage());
 				}
 			}
 			

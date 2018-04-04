@@ -12,10 +12,10 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueManager extends EntityManager<Issue> {
 	
-	Class<? extends Serializable> defineCustomFieldsBeanClass(Project project);
+	Class<? extends Serializable> defineFieldBeanClass(Project project);
 	
 	@Nullable
-	Class<? extends Serializable> loadCustomFieldsBeanClass(String className);
+	Class<? extends Serializable> loadFieldBeanClass(String className);
 	
 	List<Issue> query(@Nullable Project project, User user);
 	

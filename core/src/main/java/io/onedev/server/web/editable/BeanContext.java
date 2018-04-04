@@ -87,8 +87,8 @@ public class BeanContext extends BeanDescriptor {
 	public static BeanEditor editModel(String componentId, 
 			IModel<? extends Serializable> beanModel, Set<String> excludedProperties, Set<String> optionalProperties) {
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext editContext = new BeanContext(beanClass, excludedProperties);
-		return editContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
+		BeanContext beanContext = new BeanContext(beanClass, excludedProperties);
+		return beanContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
 	}
 	
 	public static BeanEditor editBean(String componentId, Serializable bean) {
@@ -119,9 +119,9 @@ public class BeanContext extends BeanDescriptor {
 			
 		};
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext editContext = new BeanContext(beanClass, excludedProperties, optionalProperties);
-		beanModel = editContext.wrapAsSelfUpdating(beanModel);
-		return editContext.renderForEdit(componentId, beanModel);
+		BeanContext beanContext = new BeanContext(beanClass, excludedProperties, optionalProperties);
+		beanModel = beanContext.wrapAsSelfUpdating(beanModel);
+		return beanContext.renderForEdit(componentId, beanModel);
 	}
 
 	public static Component viewModel(String componentId, IModel<Serializable> beanModel) {

@@ -59,7 +59,7 @@ public abstract class AbstractClassResolver implements IClassResolver
 	@Override
 	public final Class<?> resolveClass(final String className) throws ClassNotFoundException
 	{
-		Class<?> clazz = OneDev.getInstance(IssueManager.class).loadCustomFieldsBeanClass(className); 
+		Class<?> clazz = OneDev.getInstance(IssueManager.class).loadFieldBeanClass(className); 
 		
 		if (clazz != null)
 			return clazz;

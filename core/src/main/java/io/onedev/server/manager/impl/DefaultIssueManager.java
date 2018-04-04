@@ -20,7 +20,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 public class DefaultIssueManager extends AbstractEntityManager<Issue> 
 		implements IssueManager {
 
-	private static final String CUSTOM_FIELDS_BEAN_PREFIX = "IssueFieldsBean";
+	private static final String FIELD_BEAN_PREFIX = "IssueFieldBean";
 	
 	private final ProjectManager projectManager;
 	
@@ -32,17 +32,17 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue>
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Class<? extends Serializable> defineCustomFieldsBeanClass(Project project) {
-		String className = CUSTOM_FIELDS_BEAN_PREFIX + project.getId();
+	public Class<? extends Serializable> defineFieldBeanClass(Project project) {
+		String className = FIELD_BEAN_PREFIX + project.getId();
 		
 		return (Class<? extends Serializable>) InputSpec.defineClass(className, project.getIssueWorkflow().getFields());
 	}
 	
 	@Override
-	public Class<? extends Serializable> loadCustomFieldsBeanClass(String className) {
-		if (className.startsWith(CUSTOM_FIELDS_BEAN_PREFIX)) {
-			Long projectId = Long.valueOf(className.substring(CUSTOM_FIELDS_BEAN_PREFIX.length()));
-			return defineCustomFieldsBeanClass(projectManager.load(projectId));
+	public Class<? extends Serializable> loadFieldBeanClass(String className) {
+		if (className.startsWith(FIELD_BEAN_PREFIX)) {
+			Long projectId = Long.valueOf(className.substring(FIELD_BEAN_PREFIX.length()));
+			return defineFieldBeanClass(projectManager.load(projectId));
 		} else {
 			return null;
 		}

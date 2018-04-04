@@ -44,9 +44,9 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		FieldSpecBean bean = new FieldSpecBean();
+		FieldBean bean = new FieldBean();
 		if (fieldIndex != -1)
-			bean.setFieldSpec(SerializationUtils.clone(getWorkflow().getFields().get(fieldIndex)));
+			bean.setField(SerializationUtils.clone(getWorkflow().getFields().get(fieldIndex)));
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -81,16 +81,16 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				InputSpec field = bean.getFieldSpec();
+				InputSpec field = bean.getField();
 				if (fieldIndex != -1) { 
 					InputSpec oldField = getWorkflow().getFields().get(fieldIndex);
 					if (!field.getName().equals(oldField.getName()) && getWorkflow().getField(field.getName()) != null) {
-						editor.getErrorContext(new PathSegment.Property("fieldSpec"))
+						editor.getErrorContext(new PathSegment.Property("field"))
 								.getErrorContext(new PathSegment.Property("name"))
 								.addError("This name has already been used by another field");
 					}
 				} else if (getWorkflow().getField(field.getName()) != null) {
-					editor.getErrorContext(new PathSegment.Property("fieldSpec"))
+					editor.getErrorContext(new PathSegment.Property("field"))
 							.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another field");
 				}
@@ -100,9 +100,9 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 						InputSpec oldField = getWorkflow().getFields().get(fieldIndex);
 						if (!field.getName().equals(oldField.getName()))
 							getWorkflow().onFieldRename(oldField.getName(), field.getName());
-						getWorkflow().getFields().set(fieldIndex, bean.getFieldSpec());
+						getWorkflow().getFields().set(fieldIndex, bean.getField());
 					} else {
-						getWorkflow().getFields().add(bean.getFieldSpec());
+						getWorkflow().getFields().add(bean.getField());
 					}
 					getProject().setIssueWorkflow(getWorkflow());
 					OneDev.getInstance(ProjectManager.class).save(getProject());

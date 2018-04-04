@@ -37,14 +37,14 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		Form<?> form = new Form<Void>("form");
 		form.add(BeanContext.editBean("generalSetting", issue));
 		
-		Serializable customFieldsBean;
+		Serializable fieldsBean;
 		try {
-			customFieldsBean = getIssueManager().defineCustomFieldsBeanClass(getProject()).newInstance();
+			fieldsBean = getIssueManager().defineFieldBeanClass(getProject()).newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 		
-		form.add(BeanContext.editBean("customFields", customFieldsBean));
+		form.add(BeanContext.editBean("fields", fieldsBean));
 		
 		add(form);
 	}

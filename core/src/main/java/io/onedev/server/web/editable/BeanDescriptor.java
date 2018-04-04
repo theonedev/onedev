@@ -41,7 +41,6 @@ public class BeanDescriptor implements Serializable {
 				propertyDescriptors.add(propertyDescriptor);
 				String propertyName = BeanUtils.getPropertyName(propertyGetter);
 				propertyDescriptor.setExcluded(BeanUtils.findSetter(propertyGetter) == null || excludedProperties.contains(propertyName));
-				propertyDescriptor.setOptional(optionalProperties.contains(propertyName));
 			}
 		}
 	}
