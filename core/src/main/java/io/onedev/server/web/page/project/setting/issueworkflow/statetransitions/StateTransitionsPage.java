@@ -98,8 +98,7 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateTransition>> cellItem, String componentId, IModel<StateTransition> rowModel) {
-				String label = StringUtils.join(rowModel.getObject().getFromStates());
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), label));
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), rowModel.getObject().getToState()));
 			}
 			
 		});		

@@ -2,6 +2,7 @@ package io.onedev.server.model.support.issueworkflow.action;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.editable.annotation.BranchChoice;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.OmitName;
 
@@ -13,6 +14,7 @@ public class OpenPullRequest implements IssueAction {
 	private String targetBranch;
 
 	@Editable
+	@BranchChoice
 	@OmitName
 	@NotEmpty
 	public String getTargetBranch() {
