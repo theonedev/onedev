@@ -65,8 +65,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 		for (Iterator<StateTransition> it = getStateTransitions().iterator(); it.hasNext();) {
 			StateTransition transition = it.next();
 			transition.getFromStates().remove(stateName);
-			transition.getToStates().remove(stateName);
-			if (transition.getFromStates().isEmpty() || transition.getToStates().isEmpty())
+			if (transition.getFromStates().isEmpty() || transition.getToState().equals(stateName))
 				it.remove();
 		}
 	}
@@ -76,9 +75,8 @@ public class IssueWorkflow implements Serializable, InputContext {
 			int index = transition.getFromStates().indexOf(oldName);
 			if (index != -1)
 				transition.getFromStates().set(index, newName);
-			index = transition.getToStates().indexOf(oldName);
-			if (index != -1)
-				transition.getToStates().set(index, newName);
+			if (transition.getToState().equals(oldName))
+				transition.setToState(newName);
 		}
 	}
 	

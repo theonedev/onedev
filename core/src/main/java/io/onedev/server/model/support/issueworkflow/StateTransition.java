@@ -7,6 +7,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import io.onedev.server.model.support.issueworkflow.action.IssueAction;
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
@@ -21,7 +23,7 @@ public class StateTransition implements Serializable {
 	
 	private List<String> fromStates;
 	
-	private List<String> toStates;
+	private String toState;
 	
 	private TransitionPrerequisite prerequisite;
 	
@@ -39,14 +41,14 @@ public class StateTransition implements Serializable {
 	}
 
 	@Editable(order=200)
-	@Size(min=1, message="At least one state needs to be specified")
+	@NotEmpty
 	@ChoiceProvider("getStateChoices")
-	public List<String> getToStates() {
-		return toStates;
+	public String getToState() {
+		return toState;
 	}
 
-	public void setToStates(List<String> toStates) {
-		this.toStates = toStates;
+	public void setToState(String toState) {
+		this.toState = toState;
 	}
 
 	@Editable(order=300, description="Enable if applicability of this transition depends on "

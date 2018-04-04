@@ -5,11 +5,14 @@
 				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
 			</div>
 		</div>
-		<table wicket:id="issueStates" class="table table-hover table-condensed"></table>
+		<div class="body">
+			<div class="alert alert-info">The first state will be used as initial state of created issues</div>
+			<table wicket:id="issueStates" class="table table-hover table-condensed"></table>
+		</div>
 	</div>
 	<wicket:fragment wicket:id="nameColumnFrag">
 		<span class="drag-handle fa fa-arrows" title="Drag to reorder states"></span>
-		<a wicket:id="link"><span wicket:id="label"></span></a>
+		<a wicket:id="link"><span wicket:id="label"></span> <label wicket:id="initial" class="label label-default">Initial</label></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="otherColumnFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>

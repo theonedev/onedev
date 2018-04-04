@@ -1,8 +1,5 @@
 package io.onedev.server.web.page.project.setting.issueworkflow.statetransitions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -82,10 +79,8 @@ abstract class TransitionEditPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				Collection<String> states = new ArrayList<>(transition.getFromStates());
-				states.retainAll(transition.getToStates());
-				if (!states.isEmpty()) {
-					String error = "Can not do transition between same states";
+				if (transition.getFromStates().contains(transition.getToState())) {
+					String error = "Can not do transition between same state";
 					editor.getErrorContext(new PathSegment.Property("fromStates")).addError(error);
 					editor.getErrorContext(new PathSegment.Property("toStates")).addError(error);
 					target.add(form);

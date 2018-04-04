@@ -17,6 +17,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -100,16 +101,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Initial")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().isInitial()?"Yes":"No", false));
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Closed")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Issue Closed")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
@@ -162,12 +154,15 @@ public class IssueStatesPage extends IssueWorkflowPage {
 
 	private class ColumnFragment extends Fragment {
 
+		private final boolean nameColumn;
+		
 		private final int index;
 		
 		private final String label;
 		
 		public ColumnFragment(String id, IModel<StateSpec> model, String label, boolean nameColumn) {
 			super(id, nameColumn?"nameColumnFrag":"otherColumnFrag", IssueStatesPage.this, model);
+			this.nameColumn = nameColumn;
 			this.index = getWorkflow().getStateIndex(getState().getName());
 			this.label = label;
 		}
@@ -262,6 +257,8 @@ public class IssueStatesPage extends IssueWorkflowPage {
 				link.add(new Label("label", label));
 			else
 				link.add(new Label("label", "&nbsp;").setEscapeModelStrings(false));
+			if (nameColumn)
+				link.add(new WebMarkupContainer("initial").setVisible(index==0));
 			add(link);
 		}
 		

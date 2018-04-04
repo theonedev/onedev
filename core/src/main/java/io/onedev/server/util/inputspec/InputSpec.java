@@ -73,6 +73,7 @@ public abstract class InputSpec implements Serializable {
 	}
 
 	@Editable(order=30, description="resource.input.description")
+	@NameOfEmptyValue("No description")
 	public String getDescription() {
 		return description;
 	}

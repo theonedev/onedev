@@ -114,8 +114,8 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 					public int compare(StateTransition transition1, StateTransition transition2) {
 						int fromStateIndex1 = getWorkflow().getStateIndex(transition1.getFromStates().get(0));
 						int fromStateIndex2 = getWorkflow().getStateIndex(transition2.getFromStates().get(0));
-						int toStateIndex1 = getWorkflow().getStateIndex(transition1.getToStates().get(0));
-						int toStateIndex2 = getWorkflow().getStateIndex(transition2.getToStates().get(0));
+						int toStateIndex1 = getWorkflow().getStateIndex(transition1.getToState());
+						int toStateIndex2 = getWorkflow().getStateIndex(transition2.getToState());
 						if (fromStateIndex1 != fromStateIndex2)
 							return fromStateIndex1 - fromStateIndex2;
 						else

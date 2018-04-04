@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.validation.annotation.Name;
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
@@ -22,8 +23,6 @@ public class StateSpec implements Serializable {
 	private String name;
 	
 	private String description;
-	
-	private boolean initial;
 	
 	private boolean closed;
 	
@@ -41,6 +40,7 @@ public class StateSpec implements Serializable {
 	}
 
 	@Editable(order=200)
+	@NameOfEmptyValue("No description")
 	public String getDescription() {
 		return description;
 	}
@@ -49,18 +49,7 @@ public class StateSpec implements Serializable {
 		this.description = description;
 	}
 
-	@Editable(order=250, description="Enable if this is an initial state. Issues will be in initial state after creation.<br>"
-			+ "<b>NOTE: </b> If multiple initial states are defined, the last initial state with satisifed field "
-			+ "requirements will be used")
-	public boolean isInitial() {
-		return initial;
-	}
-
-	public void setInitial(boolean initial) {
-		this.initial = initial;
-	}
-
-	@Editable(order=300, description="Enable if issue with this state is considered closed")
+	@Editable(order=300, name="Issue Closed", description="Enable if issue with this state is considered closed")
 	public boolean isClosed() {
 		return closed;
 	}
@@ -72,6 +61,7 @@ public class StateSpec implements Serializable {
 	@Editable(order=500, name="Required Fields", description="Select issue fields required by this state. "
 			+ "Required fields will be prompted for user input when issue transits to this state")
 	@ChoiceProvider("getFieldChoices")
+	@NameOfEmptyValue("No required fields")
 	public List<String> getFields() {
 		return fields;
 	}
