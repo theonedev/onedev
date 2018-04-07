@@ -13,6 +13,7 @@ import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.inputspec.groupchoiceprovider.AllGroups;
 import io.onedev.server.util.inputspec.groupchoiceprovider.ChoiceProvider;
 import jersey.repackaged.com.google.common.collect.Lists;
@@ -77,4 +78,24 @@ public class GroupChoiceInput extends InputSpec {
 		return Lists.newArrayList((String) value);
 	}
 
+	@Override
+	public void onRenameGroup(String oldName, String newName) {
+		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
+			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
+			if (specifiedDefaultValue.getValue().equals(oldName))
+				specifiedDefaultValue.setValue(newName);
+		}
+	}
+
+	@Override
+	public List<String> onDeleteGroup(String groupName) {
+		List<String> usages = super.onDeleteGroup(groupName);
+		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
+			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
+			if (specifiedDefaultValue.getValue().equals(groupName))
+				usages.add("Default Value"); 
+		}
+		return usages;
+	}
+	
 }

@@ -11,6 +11,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.groupchoiceprovider.AllGroups;
 import io.onedev.server.util.inputspec.groupchoiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.groupmultichoiceinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.util.inputspec.groupmultichoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 
 @Editable(order=161, name=InputSpec.GROUP_MULTI_CHOICE)
 public class GroupMultiChoiceInput extends InputSpec {
@@ -50,6 +51,27 @@ public class GroupMultiChoiceInput extends InputSpec {
 		appendMethods(buffer, index, "List<String>", choiceProvider, defaultValueProvider);
 		
 		return buffer.toString();
+	}
+
+	@Override
+	public void onRenameGroup(String oldName, String newName) {
+		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
+			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
+			int index = specifiedDefaultValue.getValue().indexOf(oldName);
+			if (index != -1)
+				specifiedDefaultValue.getValue().set(index, newName);
+		}
+	}
+
+	@Override
+	public List<String> onDeleteGroup(String groupName) {
+		List<String> usages = super.onDeleteGroup(groupName);
+		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
+			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
+			if (specifiedDefaultValue.getValue().contains(groupName))
+				usages.add("Default Value");
+		}
+		return usages;
 	}
 
 	@Override

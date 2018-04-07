@@ -10,7 +10,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.util.OneException;
+import io.onedev.server.exception.OneException;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.utils.BeanUtils;

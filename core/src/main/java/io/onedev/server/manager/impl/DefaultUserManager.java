@@ -1,6 +1,7 @@
 package io.onedev.server.manager.impl;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,7 +14,10 @@ import org.hibernate.query.Query;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.lifecycle.SystemStarted;
+import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.CacheManager;
+import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -24,6 +28,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityPersisted;
+import io.onedev.server.util.UsageUtils;
 import io.onedev.utils.StringUtils;
 
 @Singleton
@@ -31,15 +36,23 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 
     private final PasswordService passwordService;
     
+    private final ProjectManager projectManager;
+    
+    private final IssueFieldManager issueFieldManager;
+    
     private final CacheManager cacheManager;
     
     private final ListenerRegistry listenerRegistry;
     
 	@Inject
-    public DefaultUserManager(Dao dao, CacheManager cacheManager, PasswordService passwordService, ListenerRegistry listenerRegistry) {
+    public DefaultUserManager(Dao dao, ProjectManager projectManager, 
+    		IssueFieldManager issueFieldManager, CacheManager cacheManager, 
+    		PasswordService passwordService, ListenerRegistry listenerRegistry) {
         super(dao);
         
         this.passwordService = passwordService;
+        this.projectManager = projectManager;
+        this.issueFieldManager = issueFieldManager;
         this.cacheManager = cacheManager;
         this.listenerRegistry = listenerRegistry;
     }
@@ -55,12 +68,15 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	}
 
     	if (oldName != null && !oldName.equals(user.getName())) {
-    		for (Project project: dao.findAll(Project.class)) {
+    		for (Project project: projectManager.findAll()) {
     			for (BranchProtection protection: project.getBranchProtections())
-    				protection.onUserRename(oldName, user.getName());
+    				protection.onRenameUser(oldName, user.getName());
     			for (TagProtection protection: project.getTagProtections())
-    				protection.onUserRename(oldName, user.getName());
+    				protection.onRenameUser(oldName, user.getName());
+    			project.getIssueWorkflow().onRenameUser(oldName, user.getName());
     		}
+    		
+    		issueFieldManager.onRenameUser(oldName, user.getName());
     	}
     }
     
@@ -134,17 +150,18 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.executeUpdate();
     	
 		dao.remove(user);
-		
-		for (Project project: dao.findAll(Project.class)) {
-			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) {
-				if (it.next().onUserDelete(user.getName()))
-					it.remove();
-			}
-			for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) {
-				if (it.next().onUserDelete(user.getName()))
-					it.remove();
-			}
+
+		List<String> usages = new ArrayList<>();
+		for (Project project: projectManager.findAll()) {
+			for (BranchProtection protection: project.getBranchProtections()) 
+				usages.addAll(UsageUtils.prependCategory("Project '" + project.getName() + "' / Branch Protection", protection.onDeleteUser(user.getName())));
+			for (TagProtection protection: project.getTagProtections()) 
+				usages.addAll(UsageUtils.prependCategory("Project '" + project.getName() + "' / Tag Protection", protection.onDeleteUser(user.getName())));
+			usages.addAll(UsageUtils.prependCategory("Project '" + project.getName(), project.getIssueWorkflow().onDeleteUser(user.getName())));
 		}
+		
+		if (!usages.isEmpty())
+			throw new InUseException("User '" + user.getName() + "'", usages);
 	}
 
 	@Sessional

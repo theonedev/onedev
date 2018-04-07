@@ -86,11 +86,12 @@ public class StateSpec implements Serializable {
 		}
 	}
 	
-	public void onFieldDelete(String fieldName) {
+	public List<String> onFieldDelete(String fieldName) {
 		for (Iterator<String> it = getFields().iterator(); it.hasNext();) {
 			if (it.next().equals(fieldName))
 				it.remove();
 		}
+		return new ArrayList<>();
 	}
 	
 }

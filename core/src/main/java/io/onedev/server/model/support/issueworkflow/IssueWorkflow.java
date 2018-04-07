@@ -9,7 +9,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.util.OneException;
+import io.onedev.server.exception.OneException;
+import io.onedev.server.util.UsageUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 
@@ -82,13 +83,14 @@ public class IssueWorkflow implements Serializable, InputContext {
 		return field;
 	}
 	
-	public void onStateDelete(String stateName) {
+	public List<String> onDeleteState(String stateName) {
 		for (Iterator<StateTransition> it = getStateTransitions().iterator(); it.hasNext();) {
 			StateTransition transition = it.next();
 			transition.getFromStates().remove(stateName);
 			if (transition.getFromStates().isEmpty() || transition.getToState().equals(stateName))
 				it.remove();
 		}
+		return new ArrayList<>();
 	}
 	
 	public void onStateRename(String oldName, String newName) {
@@ -138,24 +140,53 @@ public class IssueWorkflow implements Serializable, InputContext {
 	public void onFieldRename(String oldName, String newName) {
 		for (StateSpec state: getStates()) 
 			state.onFieldRename(oldName, newName);
-		for (StateTransition transition: getStateTransitions()) {
-			if (transition.getPrerequisite() != null && transition.getPrerequisite().getFieldName().equals(oldName))
-				transition.getPrerequisite().setFieldName(newName);
-		}
+		for (StateTransition transition: getStateTransitions())
+			transition.onFieldRename(oldName, newName);
 		for (InputSpec field: getFields())
 			field.onInputRename(oldName, newName);
 	}
 	
-	public void onFieldDelete(String fieldName) {
-		for (StateSpec state: getStates()) 
-			state.onFieldDelete(fieldName);
+	public List<String> onFieldDelete(String fieldName) {
+		List<String> usages = new ArrayList<>();
+		for (StateSpec state: getStates())  
+			usages.addAll(UsageUtils.prependCategory("Issue state '" + state.getName() + "'", state.onFieldDelete(fieldName)));
+		for (StateTransition transition: getStateTransitions()) 
+			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onFieldDelete(fieldName)));
 		for (InputSpec field: getFields())
-			field.onInputDelete(fieldName);
-		for (Iterator<StateTransition> it = getStateTransitions().iterator(); it.hasNext();) {
-			StateTransition transition = it.next();
-			if (transition.getPrerequisite() != null && transition.getPrerequisite().getFieldName().equals(fieldName))
-				it.remove();
-		}
+			usages.addAll(UsageUtils.prependCategory("Issue field '" + field.getName() + "'", field.onInputDelete(fieldName)));
+		return usages;
+	}
+	
+	public void onRenameUser(String oldName, String newName) {
+		for (StateTransition transition: getStateTransitions())
+			transition.onRenameUser(oldName, newName);
+		for (InputSpec field: getFields())
+			field.onRenameUser(oldName, newName);
+	}
+	
+	public List<String> onDeleteUser(String userName) {
+		List<String> usages = new ArrayList<>();
+		for (InputSpec field: getFields())
+			usages.addAll(UsageUtils.prependCategory("Issue field '" + field.getName() + "'" , field.onDeleteUser(userName)));
+		for (StateTransition transition: getStateTransitions())
+			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onDeleteUser(userName)));
+		return usages;
+	}
+	
+	public void onRenameGroup(String oldName, String newName) {
+		for (StateTransition transition: getStateTransitions()) 
+			transition.onRenameGroup(oldName, newName);
+		for (InputSpec field: getFields())
+			field.onRenameGroup(oldName, newName);
+	}
+	
+	public List<String> onDeleteGroup(String groupName) {
+		List<String> usages = new ArrayList<>();
+		for (InputSpec field: getFields()) 
+			usages.addAll(UsageUtils.prependCategory("Issue field '"  + field.getName() + "'", field.onDeleteGroup(groupName)));
+		for (StateTransition transition: getStateTransitions())
+			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onDeleteGroup(groupName)));
+		return usages;
 	}
 	
 	public StateSpec getInitialState() {

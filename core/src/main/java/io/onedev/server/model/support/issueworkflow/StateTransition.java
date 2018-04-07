@@ -9,12 +9,16 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.model.support.authorized.SpecifiedGroup;
+import io.onedev.server.model.support.authorized.SpecifiedUser;
 import io.onedev.server.model.support.issueworkflow.action.IssueAction;
+import io.onedev.server.model.support.issueworkflow.action.PressButton;
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.utils.StringUtils;
 
 @Editable
 public class StateTransition implements Serializable {
@@ -71,7 +75,71 @@ public class StateTransition implements Serializable {
 	public void setOnAction(IssueAction onAction) {
 		this.onAction = onAction;
 	}
-
+	
+	public void onRenameUser(String oldName, String newName) {
+		IssueAction onAction = getOnAction();
+		if (onAction instanceof PressButton) {
+			PressButton pressButton = (PressButton) onAction;
+			if (pressButton.getAuthorized() instanceof SpecifiedUser) {
+				SpecifiedUser specifiedUser = (SpecifiedUser) pressButton.getAuthorized();
+				if (specifiedUser.getUserName().equals(oldName))
+					specifiedUser.setUserName(newName);
+			}
+		}
+	}
+	
+	public List<String> onDeleteUser(String userName) {
+		List<String> usages = new ArrayList<>();
+		IssueAction onAction = getOnAction();
+		if (onAction instanceof PressButton) {
+			PressButton pressButton = (PressButton) onAction;
+			if (pressButton.getAuthorized() instanceof SpecifiedUser) {
+				SpecifiedUser specifiedUser = (SpecifiedUser) pressButton.getAuthorized();
+				if (specifiedUser.getUserName().equals(userName))
+					usages.add("On Action");
+			}
+		}
+		return usages;
+	}
+	
+	public void onRenameGroup(String oldName, String newName) {
+		IssueAction onAction = getOnAction();
+		if (onAction instanceof PressButton) {
+			PressButton pressButton = (PressButton) onAction;
+			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
+				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
+				if (specifiedGroup.getGroupName().equals(oldName))
+					specifiedGroup.setGroupName(newName);
+			}
+		}
+	}
+	
+	public List<String> onDeleteGroup(String groupName) {
+		List<String> usages = new ArrayList<>();
+		IssueAction onAction = getOnAction();
+		if (onAction instanceof PressButton) {
+			PressButton pressButton = (PressButton) onAction;
+			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
+				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
+				if (specifiedGroup.getGroupName().equals(groupName))
+					usages.add("On Action");
+			}
+		}
+		return usages;
+	}
+	
+	public void onFieldRename(String oldName, String newName) {
+		if (getPrerequisite() != null && getPrerequisite().getFieldName().equals(oldName))
+			getPrerequisite().setFieldName(newName);
+	}
+	
+	public List<String> onFieldDelete(String fieldName) {
+		List<String> usages = new ArrayList<>();
+		if (getPrerequisite() != null && getPrerequisite().getFieldName().equals(fieldName))
+			usages.add("Prerequisite");
+		return usages;
+	}
+	
 	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
 		IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
@@ -79,6 +147,11 @@ public class StateTransition implements Serializable {
 		for (StateSpec state: page.getWorkflow().getStates())
 			stateNames.add(state.getName());
 		return stateNames;
+	}
+	
+	@Override
+	public String toString() {
+		return StringUtils.join(getFromStates()) + "-->" + getToState();		
 	}
 	
 }

@@ -11,7 +11,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -84,6 +86,7 @@ public class UserProfilePage extends UserPage {
 				}
 				
 			};	
+			form.add(new NotificationPanel("feedback", form));
 			form.add(editor);
 			
 			form.add(new Link<Void>("delete") {
@@ -97,8 +100,12 @@ public class UserProfilePage extends UserPage {
 
 				@Override
 				public void onClick() {
-					OneDev.getInstance(UserManager.class).delete(getUser());
-					setResponsePage(UserListPage.class);
+					try {
+						OneDev.getInstance(UserManager.class).delete(getUser());
+						setResponsePage(UserListPage.class);
+					} catch (InUseException e) {
+						form.error(e.getNotificationMessage());
+					}
 				}
 				
 			}.add(new ConfirmOnClick("Do you really want to delete user '" + getUser().getDisplayName() + "'?")));

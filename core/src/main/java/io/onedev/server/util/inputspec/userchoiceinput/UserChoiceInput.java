@@ -13,7 +13,9 @@ import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.inputspec.userchoiceprovider.ChoiceProvider;
+import io.onedev.server.util.inputspec.userchoiceprovider.GroupUsers;
 import io.onedev.server.util.inputspec.userchoiceprovider.ProjectReaders;
 import jersey.repackaged.com.google.common.collect.Lists;
 
@@ -67,6 +69,46 @@ public class UserChoiceInput extends InputSpec {
 		return buffer.toString();
 	}
 
+	@Override
+	public void onRenameUser(String oldName, String newName) {
+		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
+			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
+			if (specifiedDefaultValue.getValue().equals(oldName))
+				specifiedDefaultValue.setValue(newName);
+		}
+	}
+
+	@Override
+	public List<String> onDeleteUser(String userName) {
+		List<String> usages = super.onDeleteUser(userName);
+		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
+			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
+			if (specifiedDefaultValue.getValue().equals(userName))
+				usages.add("Default Value");
+		}
+		return usages;
+	}
+
+	@Override
+	public void onRenameGroup(String oldName, String newName) {
+		if (choiceProvider instanceof GroupUsers) {
+			GroupUsers groupUsers = (GroupUsers) choiceProvider;
+			if (groupUsers.getGroupName().equals(oldName))
+				groupUsers.setGroupName(newName);
+		}
+	}
+
+	@Override
+	public List<String> onDeleteGroup(String groupName) {
+		List<String> usages = super.onDeleteGroup(groupName);
+		if (choiceProvider instanceof GroupUsers) {
+			GroupUsers groupUsers = (GroupUsers) choiceProvider;
+			if (groupUsers.getGroupName().equals(groupName))
+				usages.add("Available Choices");
+		}
+		return usages;
+	}
+	
 	@Override
 	public Object convertToObject(List<String> strings) {
 		return strings.iterator().next();

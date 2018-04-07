@@ -2,9 +2,7 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -12,12 +10,14 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.ifsubmittedby.Anyone;
+import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedGroup;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
-import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
 import io.onedev.server.util.editable.annotation.BranchPattern;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.ReviewRequirementSpec;
@@ -176,7 +176,7 @@ public class BranchProtection implements Serializable {
 		return reviewRequirementOpt.orElse(null);
 	}
 	
-	public void onGroupRename(String oldName, String newName) {
+	public void onRenameGroup(String oldName, String newName) {
 		if (getSubmitter() instanceof SpecifiedGroup) {
 			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
 			if (specifiedGroup.getGroupName().equals(oldName))
@@ -192,63 +192,46 @@ public class BranchProtection implements Serializable {
 			setReviewRequirementSpec(reviewRequirement.toSpec());
 		}
 		
-		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
-			FileProtection fileProtection = it.next();
+		for (FileProtection fileProtection: getFileProtections()) {
 			reviewRequirement = fileProtection.getReviewRequirement();
-			if (reviewRequirement != null) {
-				for (Group group: reviewRequirement.getGroups().keySet()) {
-					if (group.getName().equals(oldName))
-						group.setName(newName);
-				}
-				fileProtection.setReviewRequirementSpec(reviewRequirement.toSpec());
-			} else {
-				it.remove();
+			for (Group group: reviewRequirement.getGroups().keySet()) {
+				if (group.getName().equals(oldName))
+					group.setName(newName);
 			}
+			String spec = reviewRequirement.toSpec();
+			Preconditions.checkState(spec != null);
+			fileProtection.setReviewRequirementSpec(spec);
 		}
 	}
 	
-	public boolean onGroupDelete(String groupName) {
+	public List<String> onDeleteGroup(String groupName) {
+		List<String> usages = new ArrayList<>();
 		if (getSubmitter() instanceof SpecifiedGroup) {
 			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
 			if (specifiedGroup.getGroupName().equals(groupName))
-				return true;
+				usages.add("If Submitted By");
 		}
 		
 		ReviewRequirement reviewRequirement = getReviewRequirement();
 		if (reviewRequirement != null) {
-			for (Iterator<Map.Entry<Group, Integer>> it = reviewRequirement.getGroups().entrySet().iterator(); 
-					it.hasNext();) {
-				Group group = it.next().getKey();
+			for (Group group: reviewRequirement.getGroups().keySet()) {
 				if (group.getName().equals(groupName))
-					it.remove();
+					usages.add("Review Requirement");
 			}
-			setReviewRequirementSpec(reviewRequirement.toSpec());
 		}
 		
-		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
-			FileProtection fileProtection = it.next();
+		for (FileProtection fileProtection: getFileProtections()) {
 			reviewRequirement = fileProtection.getReviewRequirement();
-			if (reviewRequirement != null) {
-				for (Iterator<Map.Entry<Group, Integer>> itGroup = reviewRequirement.getGroups().entrySet().iterator(); 
-						itGroup.hasNext();) {
-					Group group = itGroup.next().getKey();
-					if (group.getName().equals(groupName))
-						itGroup.remove();
-				}
-				String reviewRequirementSpec = reviewRequirement.toSpec();
-				if (reviewRequirementSpec != null)
-					fileProtection.setReviewRequirementSpec(reviewRequirementSpec);
-				else
-					it.remove();
-			} else {
-				it.remove();
+			for (Group group: reviewRequirement.getGroups().keySet()) {
+				if (group.getName().equals(groupName))
+					usages.add("File protection '" + fileProtection.getPath() + "': Review Requirement");
 			}
 		}
 		
-		return false;
+		return usages;
 	}
 	
-	public void onUserRename(String oldName, String newName) {
+	public void onRenameUser(String oldName, String newName) {
 		if (getSubmitter() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(oldName))
@@ -264,60 +247,45 @@ public class BranchProtection implements Serializable {
 			setReviewRequirementSpec(reviewRequirement.toSpec());
 		}
 		
-		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
-			FileProtection fileProtection = it.next();
+		for (FileProtection fileProtection: getFileProtections()) {
 			reviewRequirement = fileProtection.getReviewRequirement();
-			if (reviewRequirement != null) {
-				for (User user: reviewRequirement.getUsers()) {
-					if (user.getName().equals(oldName))
-						user.setName(newName);
-				}
-				fileProtection.setReviewRequirementSpec(reviewRequirement.toSpec());
-			} else {
-				it.remove();
+			for (User user: reviewRequirement.getUsers()) {
+				if (user.getName().equals(oldName))
+					user.setName(newName);
 			}
+			String spec = reviewRequirement.toSpec();
+			Preconditions.checkState(spec != null);
+			fileProtection.setReviewRequirementSpec(spec);
 		}	
 	}
 	
-	public boolean onUserDelete(String userName) {
+	public List<String> onDeleteUser(String userName) {
+		List<String> usages = new ArrayList<>();
 		if (getSubmitter() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(userName))
-				return true;
+				usages.add("If Submitted By");
 		}
 		
 		ReviewRequirement reviewRequirement = getReviewRequirement();
 		if (reviewRequirement != null) {
-			for (Iterator<User> it = reviewRequirement.getUsers().iterator(); it.hasNext();) {
-				User user = it.next();
+			for (User user: reviewRequirement.getUsers()) {
 				if (user.getName().equals(userName))
-					it.remove();
+					usages.add("Required Reviewers");
 			}
-			setReviewRequirementSpec(reviewRequirement.toSpec());
 		}
 		
-		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
-			FileProtection fileProtection = it.next();
+		for (FileProtection fileProtection: getFileProtections()) {
 			reviewRequirement = fileProtection.getReviewRequirement();
-			if (reviewRequirement != null) {
-				for (Iterator<User> itUser = reviewRequirement.getUsers().iterator(); itUser.hasNext();) {
-					User user = itUser.next();
-					if (user.getName().equals(userName))
-						itUser.remove();
-				}
-				String reviewRequirementSpec = reviewRequirement.toSpec();
-				if (reviewRequirementSpec != null)
-					fileProtection.setReviewRequirementSpec(reviewRequirementSpec);
-				else
-					it.remove();
-			} else {
-				it.remove();
+			for (User user: reviewRequirement.getUsers()) {
+				if (user.getName().equals(userName))
+					usages.add("File protection '" + fileProtection.getPath() + "': Review Requirement");
 			}
 		}
-		return false;
+		return usages;
 	}
 	
-	public boolean onBranchDelete(String branchName) {
+	public boolean onBranchDeleted(String branchName) {
 		return branchName.equals(getBranch());
 	}
 

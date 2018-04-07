@@ -28,6 +28,9 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.ProjectRenamed;
@@ -60,9 +63,6 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 
 @Singleton
 public class DefaultProjectManager extends AbstractEntityManager<Project> implements ProjectManager {
@@ -268,14 +268,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			String branch = GitUtils.ref2branch(event.getRefName());
 			if (branch != null) {
 				for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) {
-					if (it.next().onBranchDelete(branch))	
+					if (it.next().onBranchDeleted(branch))	
 						it.remove();
 				}
 			}
 			String tag = GitUtils.ref2tag(event.getRefName());
 			if (tag != null) {
 				for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) {
-					if (it.next().onTagDelete(tag))	
+					if (it.next().onTagDeleted(tag))	
 						it.remove();
 				}
 			}

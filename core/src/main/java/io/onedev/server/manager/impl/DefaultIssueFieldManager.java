@@ -129,4 +129,26 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 		return excludedFields;
 	}
 
+	@Transactional
+	@Override
+	public void onRenameGroup(String oldName, String newName) {
+		Query query = getSession().createQuery("update IssueField set value=:newName where (type=:groupChoice or type=:groupMultiChoice) and value=:oldName");
+		query.setParameter("groupChoice", InputSpec.GROUP_CHOICE);
+		query.setParameter("groupMultiChoice", InputSpec.GROUP_MULTI_CHOICE);
+		query.setParameter("oldName", oldName);
+		query.setParameter("newName", newName);
+		query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void onRenameUser(String oldName, String newName) {
+		Query query = getSession().createQuery("update IssueField set value=:newName where (type=:userChoice or type=:userMultiChoice) and value=:oldName");
+		query.setParameter("userChoice", InputSpec.USER_CHOICE);
+		query.setParameter("userMultiChoice", InputSpec.USER_MULTI_CHOICE);
+		query.setParameter("oldName", oldName);
+		query.setParameter("newName", newName);
+		query.executeUpdate();
+	}
+	
 }

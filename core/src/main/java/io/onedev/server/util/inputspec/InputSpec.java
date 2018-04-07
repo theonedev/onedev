@@ -1,6 +1,7 @@
 package io.onedev.server.util.inputspec;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,14 +203,16 @@ public abstract class InputSpec implements Serializable {
 		}
 	}
 	
-	public void onInputDelete(String inputName) {
-		if (showCondition != null && inputName.equals(showCondition.getInputName()))
-			showCondition = null;
-	}
-
 	public void onInputRename(String oldName, String newName) {
 		if (showCondition != null && oldName.equals(showCondition.getInputName()))
 			showCondition.setInputName(newName);
+	}
+	
+	public List<String> onInputDelete(String inputName) {
+		if (showCondition != null && inputName.equals(showCondition.getInputName()))
+			return Lists.newArrayList("Show Condition");
+		else
+			return new ArrayList<>();
 	}
 	
 	public static Class<?> defineClass(String className, List<InputSpec> inputs) {
@@ -243,6 +246,22 @@ public abstract class InputSpec implements Serializable {
 		return (Class<?>) GroovyUtils.evalScript(buffer.toString(), new HashMap<>());
 	}
 
+	public void onRenameUser(String oldName, String newName) {
+		
+	}
+	
+	public void onRenameGroup(String oldName, String newName) {
+		
+	}
+
+	public List<String> onDeleteUser(String userName) {
+		return new ArrayList<>();
+	}
+	
+	public List<String> onDeleteGroup(String groupName) {
+		return new ArrayList<>();
+	}
+	
 	public abstract List<String> convertToStrings(Object object);
 
 	/**

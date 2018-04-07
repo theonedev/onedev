@@ -27,7 +27,9 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -145,7 +147,12 @@ public class UserListPage extends LayoutPage {
 
 					@Override
 					public void onClick() {
-						OneDev.getInstance(UserManager.class).delete(rowModel.getObject());
+						try {
+							OneDev.getInstance(UserManager.class).delete(rowModel.getObject());
+							setResponsePage(UserListPage.class);
+						} catch (InUseException e) {
+							usersTable.error(e.getNotificationMessage()	);
+						}
 					}
 
 					@Override
@@ -207,6 +214,7 @@ public class UserListPage extends LayoutPage {
 		
 		add(usersTable = new HistoryAwareDataTable<User, Void>("users", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
+		add(new NotificationPanel("feedback", usersTable));
 	}
 
 	@Override

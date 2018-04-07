@@ -1,7 +1,7 @@
 package io.onedev.server.security.authenticator;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.shiro.authc.AuthenticationException;
@@ -9,6 +9,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.GroupChoice;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable
 public abstract class Authenticator implements Serializable {
@@ -39,24 +40,17 @@ public abstract class Authenticator implements Serializable {
 		this.defaultGroupNames = defaultGroupNames;
 	}
 
-	public boolean onGroupRename(String oldName, String newName) {
-		if (defaultGroupNames.contains(oldName)) {
-			defaultGroupNames.remove(oldName);
-			defaultGroupNames.add(newName);
-			return true;
-		} else {
-			return false;
-		}
+	public void onRenameGroup(String oldName, String newName) {
+		int index = defaultGroupNames.indexOf(oldName);
+		if (index != -1)
+			defaultGroupNames.set(index, newName);
 	}
 	
-	public boolean onGroupDelete(String groupName) {
-		for (Iterator<String> it = defaultGroupNames.iterator(); it.hasNext();) {
-			if (it.next().equals(groupName)) {
-				it.remove();
-				return true;
-			}
-		}
-		return false;
+	public List<String> onDeleteGroup(String groupName) {
+		if (defaultGroupNames.contains(groupName))
+			return Lists.newArrayList("Default Group Names");
+		else
+			return new ArrayList<>();
 	}
 	
 	public abstract Authenticated authenticate(UsernamePasswordToken token) throws AuthenticationException;

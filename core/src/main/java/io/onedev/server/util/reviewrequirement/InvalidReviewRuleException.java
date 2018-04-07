@@ -1,6 +1,6 @@
 package io.onedev.server.util.reviewrequirement;
 
-import io.onedev.server.util.OneException;
+import io.onedev.server.exception.OneException;
 
 public class InvalidReviewRuleException extends OneException {
 

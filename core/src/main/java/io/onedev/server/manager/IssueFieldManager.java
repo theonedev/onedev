@@ -23,4 +23,7 @@ public interface IssueFieldManager extends EntityManager<IssueField> {
 	
 	Set<String> getExcludedFields(Project project, String state);
 	
+	void onRenameUser(String oldName, String newName);
+	
+	void onRenameGroup(String oldName, String newName);
 }

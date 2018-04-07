@@ -1,15 +1,19 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.model.support.ifsubmittedby.Anyone;
+import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedGroup;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
-import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.TagPattern;
 
@@ -87,7 +91,7 @@ public class TagProtection implements Serializable {
 		this.noCreation = noCreation;
 	}
 
-	public void onGroupRename(String oldName, String newName) {
+	public void onRenameGroup(String oldName, String newName) {
 		if (getSubmitter() instanceof SpecifiedGroup) {
 			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
 			if (specifiedGroup.getGroupName().equals(oldName))
@@ -95,16 +99,16 @@ public class TagProtection implements Serializable {
 		}
 	}
 	
-	public boolean onGroupDelete(String groupName) {
+	public List<String> onDeleteGroup(String groupName) {
 		if (getSubmitter() instanceof SpecifiedGroup) {
 			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
 			if (specifiedGroup.getGroupName().equals(groupName))
-				return true;
+				return Lists.newArrayList("If Performed By");
 		}
-		return false;
+		return new ArrayList<>();
 	}
 	
-	public void onUserRename(String oldName, String newName) {
+	public void onRenameUser(String oldName, String newName) {
 		if (getSubmitter() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(oldName))
@@ -112,16 +116,16 @@ public class TagProtection implements Serializable {
 		}
 	}
 	
-	public boolean onUserDelete(String userName) {
+	public List<String> onDeleteUser(String userName) {
 		if (getSubmitter() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(userName))
-				return true;
+				return Lists.newArrayList("If Performed By");
 		}
-		return false;
+		return new ArrayList<>();
 	}
 
-	public boolean onTagDelete(String tagName) {
+	public boolean onTagDeleted(String tagName) {
 		return tagName.equals(getTag());
 	}
 	
