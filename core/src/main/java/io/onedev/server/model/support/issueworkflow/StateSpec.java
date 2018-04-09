@@ -8,6 +8,7 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
+import io.onedev.server.util.editable.annotation.Color;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -25,6 +26,8 @@ public class StateSpec implements Serializable {
 	private String description;
 	
 	private boolean closed;
+	
+	private String color = "#777";
 	
 	private List<String> fields = new ArrayList<>();
 	
@@ -56,6 +59,16 @@ public class StateSpec implements Serializable {
 
 	public void setClosed(boolean closed) {
 		this.closed = closed;
+	}
+
+	@Editable(order=400, description="Specify color of the state for displaying purpose")
+	@Color
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
 	}
 
 	@Editable(order=500, name="Required Fields", description="Select issue fields required by this state. "

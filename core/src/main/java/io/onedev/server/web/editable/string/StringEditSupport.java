@@ -6,6 +6,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.util.editable.annotation.BranchPattern;
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
+import io.onedev.server.util.editable.annotation.Color;
 import io.onedev.server.util.editable.annotation.Script;
 import io.onedev.server.util.editable.annotation.GroupChoice;
 import io.onedev.server.util.editable.annotation.Markdown;
@@ -35,6 +36,7 @@ public class StringEditSupport implements EditSupport {
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(Script.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(Color.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(Password.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(BranchPattern.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(TagPattern.class) == null

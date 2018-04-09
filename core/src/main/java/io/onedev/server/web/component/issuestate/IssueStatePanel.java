@@ -4,6 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -12,11 +13,13 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.issueworkflow.StateSpec;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
@@ -39,7 +42,19 @@ public abstract class IssueStatePanel extends GenericPanel<Issue> {
 				return getIssue().getState();
 			}
 			
-		}));
+		}).add(AttributeAppender.append("style", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				StateSpec stateSpec = getIssue().getProject().getIssueWorkflow().getState(getIssue().getState());
+				if (stateSpec != null)
+					return "background: " + stateSpec.getColor() + ";";
+				else
+					return "background: #777;";
+			}
+			
+		})));
+		
 		add(new ModalLink("undefined") {
 
 			@Override
