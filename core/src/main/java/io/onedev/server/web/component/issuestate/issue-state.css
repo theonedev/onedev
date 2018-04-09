@@ -1,0 +1,6 @@
+.issue-state {
+	white-space: nowrap;
+}
+.issue-state>a {
+	color: #f0ad4e;
+}

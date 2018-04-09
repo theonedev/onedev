@@ -12,6 +12,9 @@ body.error .center-box>div {
 body.error .center-box>.title {
 	font-size: 20px;
 	font-weight: bold;
+	border: none;
+	background: none;
+	font-family: inherit;
 }
 
 body.error .center-box .detail>.head {

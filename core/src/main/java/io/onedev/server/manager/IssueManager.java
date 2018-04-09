@@ -15,4 +15,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	List<Issue> query(@Nullable Project project, User user);
 	
 	void save(Issue issue, Serializable fieldBean);
+	
+	void renameState(Project project, String oldState, String newState);
+	
 }

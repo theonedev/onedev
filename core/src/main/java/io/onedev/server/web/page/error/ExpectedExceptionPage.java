@@ -5,7 +5,8 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.util.string.Strings;
+
+import com.google.common.base.Throwables;
 
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -20,7 +21,7 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 	
 	public ExpectedExceptionPage(Exception exception) {
 		title = exception.getMessage();
-		detailMessage = Strings.toString(exception);
+		detailMessage = Throwables.getStackTraceAsString(exception);
 	}
 	
 	@Override

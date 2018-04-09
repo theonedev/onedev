@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.Query;
 
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
@@ -42,6 +43,16 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	public void save(Issue issue, Serializable fieldBean) {
 		save(issue);
 		issueFieldManager.saveFields(issue, fieldBean);
+	}
+
+	@Transactional
+	@Override
+	public void renameState(Project project, String oldState, String newState) {
+		Query query = getSession().createQuery("update Issue set state=:newState where state=:oldState and project=:project");
+		query.setParameter("project", project);
+		query.setParameter("oldState", oldState);
+		query.setParameter("newState", newState);
+		query.executeUpdate();
 	}
 
 }

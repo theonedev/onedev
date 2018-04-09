@@ -150,5 +150,89 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 		query.setParameter("newName", newName);
 		query.executeUpdate();
 	}
+
+	@Transactional
+	@Override
+	public void renameField(Issue issue, String oldName, String newName) {
+		Query query = getSession().createQuery("update IssueField set name=:newName where issue=:issue and name=:oldName");
+		query.setParameter("issue", issue);
+		query.setParameter("oldName", oldName);
+		query.setParameter("newName", newName);
+		query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void renameField(Project project, String oldName, String newName) {
+		Query query = getSession().createQuery("update IssueField set name=:newName where "
+				+ "name=:oldName and issue.id in (select id from Issue where project=:project)");
+		query.setParameter("project", project);
+		query.setParameter("oldName", oldName);
+		query.setParameter("newName", newName);
+		query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void deleteField(Issue issue, String fieldName) {
+		Query query = getSession().createQuery("delete IssueField where issue=:issue and name=:fieldName");
+		query.setParameter("issue", issue);
+		query.setParameter("fieldName", fieldName);
+		query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void deleteField(Project project, String fieldName) {
+		Query query = getSession().createQuery("delete IssueField where name=:fieldName and "
+				+ "issue.id in (select id from Issue where project=:project)");
+		query.setParameter("project", project);
+		query.setParameter("fieldName", fieldName);
+		query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void renameFieldValue(Issue issue, String fieldName, String oldValue, String newValue) {
+		Query query = getSession().createQuery("update IssueField set value=:newValue where issue=:issue and name=:fieldName and value=:oldValue");
+		query.setParameter("issue", issue);
+		query.setParameter("fieldName", fieldName);
+		query.setParameter("oldValue", oldValue);
+		query.setParameter("newValue", newValue);
+		query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void renameFieldValue(Project project, String fieldName, String oldValue, String newValue) {
+		Query query = getSession().createQuery("update IssueField set value=:newValue where "
+				+ "name=:fieldName and value=:oldValue and issue.id in (select id from Issue where project=:project)");
+		query.setParameter("project", project);
+		query.setParameter("fieldName", fieldName);
+		query.setParameter("oldValue", oldValue);
+		query.setParameter("newValue", newValue);
+		query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void deleteFieldValue(Issue issue, String fieldName, String fieldValue) {
+		Query query = getSession().createQuery("delete IssueField where issue=:issue and name=:fieldName and value=:fieldValue");
+		query.setParameter("issue", issue);
+		query.setParameter("fieldName", fieldName);
+		query.setParameter("fieldValue", fieldValue);
+		query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void deleteFieldValue(Project project, String fieldName, String fieldValue) {
+		Query query = getSession().createQuery("delete IssueField where name=:fieldName and "
+				+ "value=:fieldValue and issue.id in (select id from Issue where project=:project)");
+		query.setParameter("project", project);
+		query.setParameter("fieldName", fieldName);
+		query.setParameter("fieldValue", fieldValue);
+		query.executeUpdate();
+	}
 	
 }

@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.issues.issuelist;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -26,6 +27,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.issuestate.IssueStatePanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
@@ -71,7 +73,14 @@ public class IssueListPage extends ProjectPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId, IModel<Issue> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getState()));
+				cellItem.add(new IssueStatePanel(componentId, rowModel) {
+
+					@Override
+					protected void onFixed(AjaxRequestTarget target) {
+						setResponsePage(IssueListPage.this);
+					}
+					
+				});
 			}
 		});		
 		

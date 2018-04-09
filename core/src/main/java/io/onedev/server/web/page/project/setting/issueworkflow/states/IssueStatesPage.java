@@ -189,7 +189,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "issue-state"));
+							add(AttributeAppender.append("class", "state-spec"));
 						}
 
 						@Override

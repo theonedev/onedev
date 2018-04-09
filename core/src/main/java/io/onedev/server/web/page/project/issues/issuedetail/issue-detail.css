@@ -1,5 +1,5 @@
 #issue-detail>.primary {
-	width: 73%;
+	width: 70%;
 }
 #issue-detail>.primary>div {
 	margin-bottom: 20px;
@@ -8,7 +8,7 @@
 	font-size: 18px;
 	font-weight: bold;
 }
-#issue-detail>.primary>.state-reporter-actions>.state {
+#issue-detail>.primary>.state-reporter-actions .issue-state {
 	font-size: 16px;  
 }
 #issue-detail>.primary>.state-reporter-actions>span {
@@ -19,23 +19,38 @@
 	padding-top: 20px;
 }
 #issue-detail>.additional {
-	width: 24%;
+	width: 28%;
 	border: 1px solid #E0E0E0;
 	padding: 20px;
 	background: #F9F9F9;
 	border-radius: 4px;
+	overflow: auto;
 }
 #issue-detail>.additional>div {
 	margin-bottom: 20px;
 }
 #issue-detail>.additional .fields td {
-	padding: 4px 8px;
+	padding-bottom: 10px;
 }
 #issue-detail>.additional .fields .name {
 	font-weight: bold;
 	font-size: 13px;
-	line-height: 22px;
+	line-height: 20px;
+	white-space: nowrap;
+	padding-right: 20px;
 }
-#issue-detail>.additional .fields .avatar {
-	margin-right: 4px;
+#issue-detail>.additional .fields .name a {
+	color: #f0ad4e;
+	margin-left: 4px;
+}
+#issue-detail>.additional .fields .values .value {
+	white-space: nowrap;
+	margin-bottom: 8px;
+}
+#issue-detail>.additional .fields .values .value:last-child {
+	margin-bottom: 0;
+}
+#issue-detail>.additional .fields .values .value .invalid-value {
+	color: #f0ad4e;
+	margin-left: 4px;
 }

@@ -40,7 +40,6 @@ import io.onedev.server.util.editable.annotation.Vertical;
 import io.onedev.server.web.editable.PathSegment.Property;
 import io.onedev.server.web.editable.bean.BeanPropertyEditor;
 import io.onedev.server.web.editable.polymorphic.PolymorphicPropertyEditor;
-import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ReflectionUtils;
 import io.onedev.utils.StringUtils;
 
@@ -167,7 +166,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 				Serializable propertyValue;		
 				
-				OneContext context = new ComponentContext(this);
+				OneContext context = new OneContext(this);
 				
 				OneContext.push(context);
 				try {

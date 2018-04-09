@@ -26,4 +26,21 @@ public interface IssueFieldManager extends EntityManager<IssueField> {
 	void onRenameUser(String oldName, String newName);
 	
 	void onRenameGroup(String oldName, String newName);
+	
+	void renameField(Issue issue, String oldName, String newName);
+	
+	void renameField(Project project, String oldName, String newName);
+
+	void deleteField(Issue issue, String fieldName);
+	
+	void deleteField(Project project, String fieldName);
+	
+	void renameFieldValue(Issue issue, String fieldName, String oldValue, String newValue);
+	
+	void renameFieldValue(Project project, String fieldName, String oldValue, String newValue);
+	
+	void deleteFieldValue(Issue issue, String fieldName, String fieldValue);
+	
+	void deleteFieldValue(Project project, String fieldName, String fieldValue);
+	
 }

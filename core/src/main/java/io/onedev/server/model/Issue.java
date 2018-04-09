@@ -154,7 +154,7 @@ public class Issue extends AbstractEntity {
 	public Map<String, MultiValueIssueField> getMultiValueFields() {
 		if (multiValueFields == null) {
 			multiValueFields = new LinkedHashMap<>();
-			
+
 			Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
 			for (IssueField field: getFields()) {
 				List<IssueField> fieldsOfName = fieldMap.get(field.getName());
