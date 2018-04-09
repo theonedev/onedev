@@ -10,6 +10,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class EnumEditSupport implements EditSupport {
@@ -28,7 +29,7 @@ public class EnumEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 					        if (model.getObject() != null)
-					            return new Label(id, model.getObject().toString());
+					            return new Label(id, StringUtils.capitalize(model.getObject().name().replace('_', ' ').toLowerCase()));
 					        else 
 								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						}

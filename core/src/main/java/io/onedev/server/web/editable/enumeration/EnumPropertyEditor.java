@@ -7,10 +7,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -50,9 +52,8 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 		List<String> choices = new ArrayList<>();
         for (Iterator<?> it = enumSet.iterator(); it.hasNext();) {
             Enum<?> value = (Enum<?>) it.next();
-            if (!excludeValues.contains(value.name())) {
+            if (!excludeValues.contains(value.name()))
                 choices.add(value.toString());
-            }
         }
 
         String stringValue;
@@ -60,7 +61,26 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
         	stringValue = getModelObject().toString();
         else
         	stringValue = null;
-        input = new DropDownChoice<String>("input", Model.of(stringValue), choices);
+        
+        IChoiceRenderer<String> choiceRenderer = new IChoiceRenderer<String>() {
+
+			@Override
+			public Object getDisplayValue(String object) {
+				return StringUtils.capitalize(object.replace('_', ' ').toLowerCase());
+			}
+
+			@Override
+			public String getIdValue(String object, int index) {
+				return object;
+			}
+
+			@Override
+			public String getObject(String id, IModel<? extends List<? extends String>> choices) {
+				return id;
+			}
+			
+		};
+        input = new DropDownChoice<String>("input", Model.of(stringValue), choices, choiceRenderer);
 
         input.setNullValid(!getPropertyDescriptor().isPropertyRequired());	
 		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));

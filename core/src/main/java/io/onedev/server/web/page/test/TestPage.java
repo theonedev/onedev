@@ -18,6 +18,7 @@ public class TestPage extends BasePage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
+				System.out.println(bean.getType());
 			}
 			
 		};
