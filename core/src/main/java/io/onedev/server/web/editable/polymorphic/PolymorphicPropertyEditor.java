@@ -171,6 +171,11 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	}
 	
 	@Override
+	protected String getErrorClass() {
+		return null;
+	}
+
+	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		

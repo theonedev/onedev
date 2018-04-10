@@ -5,13 +5,11 @@ import java.lang.reflect.Method;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -61,18 +59,6 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		
 		if (getter.getAnnotation(OmitName.class) != null)
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(getter)));
-		
-		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				if (hasErrors(true))
-					return " has-error";
-				else
-					return "";
-			}
-			
-		}));
 	}
 
 	@Override

@@ -39,7 +39,7 @@ onedev.server.revisionDiff = {
 					if ($(window).scrollTop() <= detailOffset) {
 						$(window).scrollTop(detailOffset);
 					} 
-					$anchor.closest(".code-comment").parent().scrollIntoView($anchor);
+					$anchor.closest(".code-comment").parent().jumpIntoView($anchor);
 				}, 100);
 			}
 		} 

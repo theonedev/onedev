@@ -1,13 +1,11 @@
 package io.onedev.server.web.editable.script;
 
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -35,18 +33,6 @@ public class ScriptPropertyEditor extends PropertyEditor<String> {
 		container.add(input = new TextArea<String>("input", Model.of(getModelObject())));
 		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));		
 		input.setOutputMarkupId(true);
-		
-		container.add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				if (hasErrors(true))
-					return " has-error";
-				else
-					return "";
-			}
-			
-		}));
 	}
 
 	@Override

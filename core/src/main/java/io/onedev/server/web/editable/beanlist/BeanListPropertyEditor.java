@@ -124,6 +124,11 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	}
 
 	@Override
+	protected String getErrorClass() {
+		return null;
+	}
+
+	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		

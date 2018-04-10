@@ -248,7 +248,7 @@ onedev.server.sourceView = {
 	syncOutline: function(symbolId) {
 		var $symbol = $("#" + symbolId);
 		var $body = $(".source-view>.outline>.content>.body");
-		$body.scrollIntoView($symbol, 20, 20);
+		$body.jumpIntoView($symbol, 20, 20);
 		$body.find(".tree-content").removeClass("active");
 		$symbol.addClass("active");
 		
@@ -615,7 +615,7 @@ onedev.server.sourceView = {
 				var $prev = $selectables.eq(index);
 				$active.removeClass("active");
 				$prev.addClass("active");
-				$result.scrollIntoView("a.active", 36, 36);
+				$result.jumpIntoView("a.active", 36, 36);
 			}
 		};
 		
@@ -630,7 +630,7 @@ onedev.server.sourceView = {
 				var $next = $selectables.eq(index);
 				$active.removeClass("active");
 				$next.addClass("active");
-				$result.scrollIntoView("a.active", 36, 36);
+				$result.jumpIntoView("a.active", 36, 36);
 			}
 		};
 		

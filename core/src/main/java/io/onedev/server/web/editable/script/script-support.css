@@ -3,7 +3,7 @@
 	border-radius: 4px;
 	padding: 1px;
 }
-.script-support.has-error {
+.has-error .script-support {
 	border-color: #a94442;
 }
 .script-support .CodeMirror {

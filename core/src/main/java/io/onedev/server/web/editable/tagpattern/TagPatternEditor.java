@@ -1,10 +1,8 @@
 package io.onedev.server.web.editable.tagpattern;
 
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -42,19 +40,6 @@ public class TagPatternEditor extends PropertyEditor<String> {
     	}));
         
         add(input);
-        
-		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				if (hasErrors(true))
-					return " has-error";
-				else
-					return "";
-			}
-			
-		}));
-        
 	}
 
 	@Override

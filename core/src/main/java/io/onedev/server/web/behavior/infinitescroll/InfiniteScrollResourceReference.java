@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
+import io.onedev.server.web.asset.jumpintoview.JumpIntoViewResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class InfiniteScrollResourceReference extends BaseDependentResourceReference {
@@ -19,7 +19,7 @@ public class InfiniteScrollResourceReference extends BaseDependentResourceRefere
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> items = super.getDependencies();
-		items.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
+		items.add(JavaScriptHeaderItem.forReference(new JumpIntoViewResourceReference()));
 		return items;
 	}
 

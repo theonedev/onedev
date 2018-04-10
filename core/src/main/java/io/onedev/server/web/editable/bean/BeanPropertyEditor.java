@@ -114,6 +114,11 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 	}
 
 	@Override
+	protected String getErrorClass() {
+		return null;
+	}
+
+	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
 		Component beanEditor = get(BEAN_EDITOR_ID);
 		if (beanEditor.isVisible())

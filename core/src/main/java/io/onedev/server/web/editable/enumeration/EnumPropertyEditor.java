@@ -10,11 +10,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -95,19 +93,6 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 		});
         
         add(input);
-        
-		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				if (hasErrors(true))
-					return " has-error";
-				else
-					return "";
-			}
-			
-		}));
-        
     }
 
 	@Override

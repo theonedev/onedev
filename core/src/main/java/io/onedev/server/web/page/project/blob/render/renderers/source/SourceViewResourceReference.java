@@ -13,7 +13,7 @@ import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
-import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
+import io.onedev.server.web.asset.jumpintoview.JumpIntoViewResourceReference;
 import io.onedev.server.web.asset.selectionpopover.SelectionPopoverResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
@@ -32,7 +32,7 @@ public class SourceViewResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JumpIntoViewResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));

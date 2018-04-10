@@ -292,22 +292,27 @@ onedev.server = {
 			 * via Wicket
 			 */
 			setTimeout(function() {
-				var selector = ".has-error:visible:first .autofocus";
-				var $inError = $containers.find(selector).addBack(selector);
-				if ($inError.length != 0 && $inError.closest(".no-autofocus").length == 0) {
-					if ($inError.children(".CodeMirror").length != 0) {
-						$inError.children(".CodeMirror")[0].CodeMirror.focus();					
-					} else if (!$inError.hasClass("select2-input") && !$inError.hasClass("select2-offscreen")) {
-						$inError.focus();
+				var focusibleSelector = "input[type=text]:visible, input:not([type]):visible, textarea:visible, .CodeMirror:visible";
+				
+				var inErrorSelector = ".has-error:visible:first";
+				var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+				if ($inError.length != 0) {
+					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector);
+					if ($focusable.hasClass("CodeMirror")) {
+						$focusable[0].CodeMirror.focus();					
+					} else if ($focusable.length != 0) {
+						$focusable.focus();
+					} else {
+						$focusable.scrollIntoView();
 					}
 				} else {
-					selector = ".autofocus:visible";
-					$containers.find(selector).addBack(selector).each(function() {
+					$containers.find(focusibleSelector).addBack(focusibleSelector).each(function() {
 						var $this = $(this);
+						console.log($this[0]);
 						if ($this.closest(".no-autofocus").length == 0) {
-							if ($this.children(".CodeMirror").length != 0) {
-								$this.children(".CodeMirror")[0].CodeMirror.focus();					
-							} else if (!$this.hasClass("select2-input") && !$this.hasClass("select2-offscreen")) {
+							if ($this.hasClass("CodeMirror")) {
+								$this[0].CodeMirror.focus();					
+							} else {
 								$this.focus();
 							}
 							return false;

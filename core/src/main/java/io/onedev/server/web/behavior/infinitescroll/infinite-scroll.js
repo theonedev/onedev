@@ -36,7 +36,7 @@ onedev.infiniteScroll = {
 				var colspan = $lastItem.children().length;
 				$lastItem.parent().append("<tr class='loading-indicator'><td colspan='" + colspan + "'><img src='/img/ajax-indicator.gif'></img></td></tr>");
 			}
-			$container.scrollIntoView(".loading-indicator");
+			$container.jumpIntoView(".loading-indicator");
 			$container.data("callback")(page);
 		}
 	}

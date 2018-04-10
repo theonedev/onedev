@@ -5,6 +5,7 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -116,6 +117,9 @@ public abstract class BlobEditPanel extends Panel {
 			}
 			
 		});
+		
+		if (context.getMode() == Mode.ADD)
+			add(AttributeAppender.append("class", "no-autofocus"));
 		
 		setOutputMarkupId(true);
 	}

@@ -138,6 +138,11 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		add(newListEditor(list));
 	}
 
+	@Override
+	protected String getErrorClass() {
+		return null;
+	}
+
 	private Component newListEditor(List<Serializable> list) {
 		final WebMarkupContainer table = new WebMarkupContainer("listEditor");
 		if (horizontal)

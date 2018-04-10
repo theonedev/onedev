@@ -81,8 +81,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 			}
 			
 		});
-		
-        add(input);
+		add(input);
 	}
 
 	@Override

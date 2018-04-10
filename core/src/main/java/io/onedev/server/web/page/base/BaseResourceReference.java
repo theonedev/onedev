@@ -14,6 +14,7 @@ import io.onedev.server.web.asset.areyousure.AreYouSureResourceReference;
 import io.onedev.server.web.asset.autosize.AutoSizeResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.perfectscrollbar.PerfectScrollbarResourceReference;
+import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
 
 public class BaseResourceReference extends JavaScriptResourceReference {
 
@@ -34,6 +35,7 @@ public class BaseResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new AreYouSureResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new PerfectScrollbarResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		
 		dependencies.add(CssHeaderItem.forReference(new BaseCssResourceReference()));
 		

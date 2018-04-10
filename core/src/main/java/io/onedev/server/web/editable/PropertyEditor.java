@@ -2,6 +2,7 @@ package io.onedev.server.web.editable;
 
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -9,6 +10,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 
@@ -47,7 +49,23 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 			
 		});
 		
-		add(new AttributeAppender("class", " property editor editable"));
+		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				String classes = "property editor editable ";
+				if (hasErrors(true) && getErrorClass() != null)
+					classes += getErrorClass();
+				return classes;
+			}
+			
+		}));
+		
+	}
+	
+	@Nullable
+	protected String getErrorClass() {
+		return "has-error";
 	}
 	
 	protected void onPropertyUpdating(IPartialPageRequestHandler target) {

@@ -54,9 +54,8 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 		});
 		
-		if (context.getMode() != Mode.EDIT) {
+		if (context.getMode() != Mode.EDIT)
 			input.add(AttributeAppender.append("class", "no-autofocus"));
-		}
 		input.setOutputMarkupId(true);
 	}
 
