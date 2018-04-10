@@ -1,8 +1,6 @@
 package io.onedev.server.util.inputspec.choiceprovider;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -16,7 +14,7 @@ import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.editable.annotation.Script;
 
 @Editable(order=300, name="Evaluate script to get choices")
-public class ScriptingChoices implements ChoiceProvider {
+public class ScriptingChoices extends ChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -24,7 +22,9 @@ public class ScriptingChoices implements ChoiceProvider {
 
 	private String script;
 
-	@Editable(description="Groovy script to be evaluated. The return value should be a list of string to be used as choices. "
+	@Editable(description="Groovy script to be evaluated. The return value should be a value to color map, "
+			+ "for instance:<br>"
+			+ "<code>return [\"Successful\":\"#00ff00\", \"Failed\":\"#ff0000\"]</code>, "
 			+ "Check <a href='$onedev.docLink/scripting.md' target='_blank'>scripting help</a> for details")
 	@NotEmpty
 	@Script
@@ -40,15 +40,15 @@ public class ScriptingChoices implements ChoiceProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<String> getChoices(boolean allPossible) {
+	public Map<String, String> getChoices(boolean allPossible) {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("allPossible", allPossible);
 		try {
-			return (List<String>) GroovyUtils.evalScript(getScript(), variables);
+			return (Map<String, String>) GroovyUtils.evalScript(getScript(), variables);
 		} catch (RuntimeException e) {
 			if (allPossible) {
 				logger.error("Error getting all possible choices", e);
-				return new ArrayList<>();
+				return new HashMap<>();
 			} else {
 				throw e;
 			}

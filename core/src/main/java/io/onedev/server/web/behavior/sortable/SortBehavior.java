@@ -132,10 +132,12 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 					target.appendJavaScript(getSortScript());
 					break;
 				}
-				MarkupContainer container = (MarkupContainer) each;
-				if (container.contains(getComponent(), true)) {
-					target.appendJavaScript(getSortScript());
-					break;
+				if (each instanceof MarkupContainer) {
+					MarkupContainer container = (MarkupContainer) each;
+					if (container.contains(getComponent(), true)) {
+						target.appendJavaScript(getSortScript());
+						break;
+					}
 				}
 			}
 		}

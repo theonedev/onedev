@@ -1,12 +1,11 @@
 package io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Validator;
 
 import org.hibernate.validator.constraints.NotEmpty;
-
-import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
@@ -41,10 +40,10 @@ public class SpecifiedDefaultValue implements DefaultValueProvider {
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
 		ChoiceProvider choiceProvider = (ChoiceProvider) OneContext.get().getEditContext(1).getInputValue("choiceProvider");
-		if (choiceProvider != null && OneDev.getInstance(Validator.class).validate(choiceProvider).isEmpty())
-			return choiceProvider.getChoices(true);
+		if (choiceProvider != null && OneDev.getInstance(Validator.class).validate(choiceProvider).isEmpty()) 
+			return new ArrayList<>(choiceProvider.getChoices(true).keySet());
 		else
-			return Lists.newArrayList();
+			return new ArrayList<>();
 	}
 	
 }

@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.issues.issuedetail;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -77,9 +78,9 @@ public class FieldValueFixOption implements Serializable {
 			MultiValueIssueField fixField = fieldValueFixPanel.getField();
 			InputSpec fieldSpec = Preconditions.checkNotNull(OneContext.get().getProject().getIssueWorkflow().getField(fixField.getName()));
 			if (fieldSpec instanceof ChoiceInput)
-				return ((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(false);
+				return new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(false).keySet());
 			else
-				return ((MultiChoiceInput)fieldSpec).getChoiceProvider().getChoices(false);
+				return new ArrayList<>(((MultiChoiceInput)fieldSpec).getChoiceProvider().getChoices(false).keySet());
 		} finally {
 			OneContext.pop();
 		}

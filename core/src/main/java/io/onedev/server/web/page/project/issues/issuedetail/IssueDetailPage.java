@@ -16,6 +16,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -55,6 +56,7 @@ import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -353,7 +355,27 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 						fragment.add(new UserLink("name", user));
 						valueContainer.add(fragment);
 					} else {
-						valueContainer.add(new Label("value", value));
+						Label valueLabel = new Label("value", value);
+						valueContainer.add(valueLabel);
+						InputSpec fieldSpec = getProject().getIssueWorkflow().getField(field.getName());
+						ChoiceProvider choiceProvider = null;
+						if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
+							choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
+						} else if (fieldSpec != null && fieldSpec instanceof MultiChoiceInput) {
+							choiceProvider = ((MultiChoiceInput)fieldSpec).getChoiceProvider();
+						} 
+						if (choiceProvider != null) {
+							OneContext.push(new ComponentContext(valueContainer));
+							try {
+								String color = choiceProvider.getChoices(false).get(value);
+								String style = "padding: 0 4px; border-radius: 3px;";
+								if (color != null && !color.toLowerCase().equals("#fff"))
+									style += "background: " + color + "; color: white;";
+								valueLabel.add(AttributeAppender.append("style", style));
+							} finally {
+								OneContext.pop();
+							}
+						}
 					}
 					valueContainer.add(new ModalLink("fixInvalidValue") {
 
@@ -405,9 +427,9 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 								if (fieldSpec != null && EditableUtils.getDisplayName(fieldSpec.getClass()).equals(field.getType())) { 
 									List<String> possibleValues;
 									if (fieldSpec instanceof ChoiceInput) 
-										possibleValues = ((ChoiceInput) fieldSpec).getChoiceProvider().getChoices(false);
+										possibleValues = new ArrayList<>(((ChoiceInput) fieldSpec).getChoiceProvider().getChoices(false).keySet());
 									else if (fieldSpec instanceof MultiChoiceInput) 
-										possibleValues = ((MultiChoiceInput) fieldSpec).getChoiceProvider().getChoices(false);
+										possibleValues = new ArrayList<>(((MultiChoiceInput) fieldSpec).getChoiceProvider().getChoices(false).keySet());
 									else 
 										possibleValues = null;
 									if (possibleValues != null)
@@ -493,7 +515,7 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 		@Override
 		public Object getInputValue(String name) {
 			MultiValueIssueField field = getIssue().getMultiValueFields().get(name);
-			InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getField(field.getName());
+			InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getField(name);
 			if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
 				return fieldSpec.convertToObject(field.getValues());
 			} else {

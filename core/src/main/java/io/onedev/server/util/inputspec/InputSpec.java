@@ -189,7 +189,7 @@ public abstract class InputSpec implements Serializable {
 		if (choiceProvider != null) {
 			buffer.append("    private static List getInput" + index + "Choices() {\n");
 			String literalBytes = getLiteral(SerializationUtils.serialize(choiceProvider));
-			buffer.append("        return SerializationUtils.deserialize(" + literalBytes + ").getChoices(false);\n");
+			buffer.append("        return new ArrayList(SerializationUtils.deserialize(" + literalBytes + ").getChoices(false).keySet());\n");
 			buffer.append("    }\n");
 			buffer.append("\n");
 		}

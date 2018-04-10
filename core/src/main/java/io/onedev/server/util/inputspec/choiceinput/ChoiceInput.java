@@ -48,10 +48,10 @@ public class ChoiceInput extends InputSpec {
 
 	@Override
 	public List<String> getPossibleValues() {
+		List<String> possibleValues = new ArrayList<>();
 		if (OneDev.getInstance(Validator.class).validate(getChoiceProvider()).isEmpty())
-			return getChoiceProvider().getChoices(true);
-		else
-			return new ArrayList<>();
+			possibleValues.addAll(getChoiceProvider().getChoices(true).keySet());
+		return possibleValues;
 	}
 
 	@Override

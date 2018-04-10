@@ -1,6 +1,7 @@
 package io.onedev.server.manager.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -137,7 +138,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 						});
 						
 						try {
-							List<String> choices = ((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(false);
+							List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(false).keySet());
 							order = choices.indexOf(fieldValue);
 						} finally {
 							OneContext.pop();

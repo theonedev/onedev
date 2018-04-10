@@ -1,5 +1,6 @@
 package io.onedev.server.util.inputspec.multichoiceinput.defaultvalueprovider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Validator;
@@ -42,7 +43,7 @@ public class SpecifiedDefaultValue implements DefaultValueProvider {
 	private static List<String> getValueChoices() {
 		ChoiceProvider choiceProvider = (ChoiceProvider) OneContext.get().getEditContext(1).getInputValue("choiceProvider");
 		if (choiceProvider != null && OneDev.getInstance(Validator.class).validate(choiceProvider).isEmpty())
-			return choiceProvider.getChoices(true);
+			return new ArrayList<>(choiceProvider.getChoices(true).keySet());
 		else
 			return Lists.newArrayList();
 	}
