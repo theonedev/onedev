@@ -369,7 +369,7 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 							try {
 								String color = choiceProvider.getChoices(false).get(value);
 								String style = "padding: 0 4px; border-radius: 3px;";
-								if (color != null && !color.toLowerCase().equals("#fff"))
+								if (color != null)
 									style += "background: " + color + "; color: white;";
 								valueLabel.add(AttributeAppender.append("style", style));
 							} finally {

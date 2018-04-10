@@ -63,6 +63,7 @@ public class StateSpec implements Serializable {
 
 	@Editable(order=400, description="Specify color of the state for displaying purpose")
 	@Color
+	@NotEmpty(message="choose a color for this state")
 	public String getColor() {
 		return color;
 	}

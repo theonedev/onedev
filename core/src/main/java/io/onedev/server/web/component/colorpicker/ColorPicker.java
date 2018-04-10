@@ -9,8 +9,11 @@ import org.apache.wicket.model.IModel;
 @SuppressWarnings("serial")
 public class ColorPicker extends HiddenField<String> {
 
-	public ColorPicker(String id, IModel<String> model) {
+	private final boolean allowEmpty;
+	
+	public ColorPicker(String id, IModel<String> model, boolean allowEmpty) {
 		super(id, model);
+		this.allowEmpty = allowEmpty;
 	}
 
 	@Override
@@ -18,7 +21,8 @@ public class ColorPicker extends HiddenField<String> {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new ColorPickerResourceReference()));
 		
-		String script = String.format("onedev.server.colorPicker.onDomReady('%s');", getMarkupId(true));
+		String script = String.format("onedev.server.colorPicker.onDomReady('%s', %b);", 
+				getMarkupId(true), allowEmpty);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
