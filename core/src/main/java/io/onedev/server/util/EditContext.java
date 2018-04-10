@@ -2,6 +2,6 @@ package io.onedev.server.util;
 
 public interface EditContext {
 	
-	Object getOnScreenValue(String name);
+	Object getInputValue(String name);
 
 }

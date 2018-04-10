@@ -33,7 +33,7 @@ public class ValueIsOneOf implements ValueMatcher {
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
 		// Access on-screen value of ShowCondition.fiedName
-		String inputName = (String) OneContext.get().getEditContext(1).getOnScreenValue("inputName");
+		String inputName = (String) OneContext.get().getEditContext(1).getInputValue("inputName");
 		if (inputName != null)
 			return OneContext.get().getInputContext().getInput(inputName).getPossibleValues();
 		else

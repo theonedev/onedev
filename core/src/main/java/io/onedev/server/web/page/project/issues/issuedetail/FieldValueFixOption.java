@@ -17,6 +17,7 @@ import io.onedev.server.util.editable.annotation.ShowCondition;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
+import io.onedev.server.web.util.ComponentContext;
 
 @Editable
 public class FieldValueFixOption implements Serializable {
@@ -65,13 +66,13 @@ public class FieldValueFixOption implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static boolean isNewValueVisible() {
-		return OneContext.get().getEditContext().getOnScreenValue("fixType") == FixType.CHANGE_TO_ANOTHER_VALUE;
+		return OneContext.get().getEditContext().getInputValue("fixType") == FixType.CHANGE_TO_ANOTHER_VALUE;
 	}
 	
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
-		FieldValueFixPanel fieldValueFixPanel = OneContext.get().getComponent().findParent(FieldValueFixPanel.class); 
-		OneContext.push(new OneContext(fieldValueFixPanel));
+		FieldValueFixPanel fieldValueFixPanel = ((ComponentContext)OneContext.get()).getComponent().findParent(FieldValueFixPanel.class); 
+		OneContext.push(new ComponentContext(fieldValueFixPanel));
 		try {
 			MultiValueIssueField fixField = fieldValueFixPanel.getField();
 			InputSpec fieldSpec = Preconditions.checkNotNull(OneContext.get().getProject().getIssueWorkflow().getField(fixField.getName()));

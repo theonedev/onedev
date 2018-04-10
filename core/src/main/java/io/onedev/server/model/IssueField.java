@@ -30,6 +30,8 @@ public class IssueField extends AbstractEntity {
 	@Column(nullable=false)
 	private String type;
 	
+	private int order;
+	
 	public Issue getIssue() {
 		return issue;
 	}
@@ -60,6 +62,14 @@ public class IssueField extends AbstractEntity {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 	
 }

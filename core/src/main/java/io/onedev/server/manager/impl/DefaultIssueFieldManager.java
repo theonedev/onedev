@@ -24,9 +24,13 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.MultiValueIssueField;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.EditableUtils;
+import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
@@ -103,12 +107,52 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 			if (fieldValue != null) {
 				InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getField(propertyDescriptor.getDisplayName());
 				if (fieldSpec != null) {
+					int order;
+					
+					if (fieldSpec instanceof ChoiceInput) {
+						OneContext.push(new OneContext() {
+
+							@Override
+							public Project getProject() {
+								return issue.getProject();
+							}
+
+							@Override
+							public EditContext getEditContext(int level) {
+								return new EditContext() {
+
+									@Override
+									public Object getInputValue(String name) {
+										return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
+									}
+									
+								};
+							}
+
+							@Override
+							public InputContext getInputContext() {
+								throw new UnsupportedOperationException();
+							}
+							
+						});
+						
+						try {
+							List<String> choices = ((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(false);
+							order = choices.indexOf(fieldValue);
+						} finally {
+							OneContext.pop();
+						}
+					} else {
+						order = 0;
+					}
+					
 					for (String eachValue: fieldSpec.convertToStrings(fieldValue)) {
 						IssueField field = new IssueField();
 						field.setName(fieldSpec.getName());
 						field.setIssue(issue);
 						field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
 						field.setValue(eachValue);
+						field.setOrder(order);
 						save(field);
 					}
 				}

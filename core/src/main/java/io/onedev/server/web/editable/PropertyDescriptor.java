@@ -18,6 +18,7 @@ import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.ShowCondition;
+import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.BeanUtils;
 import io.onedev.utils.ReflectionUtils;
 
@@ -121,7 +122,7 @@ public class PropertyDescriptor implements Serializable {
 			return true;
 		checkedPropertyNames.add(getPropertyName());
 		
-		OneContext.push(new OneContext((Component) propertyContextAware));
+		OneContext.push(new ComponentContext((Component) propertyContextAware));
 		try {
 			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
 			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
@@ -157,7 +158,7 @@ public class PropertyDescriptor implements Serializable {
 	public String getDescription(Component component) {
 		String description = getDescription();
 		if (description != null) {
-			OneContext.push(new OneContext(component));
+			OneContext.push(new ComponentContext(component));
 			try {
 				description = Application.get().getResourceSettings().getLocalizer().getString(description, component, description);
 				description = GroovyUtils.evalGString(description);

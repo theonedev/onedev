@@ -86,7 +86,7 @@ public class BeanViewer extends Panel implements PropertyContextAware, EditConte
 	}
 	
 	@Override
-	public Object getOnScreenValue(String name) {
+	public Object getInputValue(String name) {
 		String propertyName = beanDescriptor.getPropertyName(name);
 		return getPropertyContext(propertyName).getPropertyValue(getDefaultModelObject());
 	}

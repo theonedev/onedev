@@ -47,7 +47,7 @@ public class TransitionPrerequisite implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getFieldValueChoices() {
-		String fieldName = (String) OneContext.get().getEditContext().getOnScreenValue("fieldName");
+		String fieldName = (String) OneContext.get().getEditContext().getInputValue("fieldName");
 		if (fieldName != null) {
 			IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
 			return page.getWorkflow().getInput(fieldName).getPossibleValues();

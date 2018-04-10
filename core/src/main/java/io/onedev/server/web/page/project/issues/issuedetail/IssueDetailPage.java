@@ -68,6 +68,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.issueedit.IssueEditPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
+import io.onedev.server.web.util.ComponentContext;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.DateUtils;
 
@@ -386,8 +387,8 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 								}
 
 								@Override
-								public Object getOnScreenValue(String name) {
-									return valueContainer.getOnScreenValue(name);
+								public Object getInputValue(String name) {
+									return valueContainer.getInputValue(name);
 								}
 								
 							};
@@ -397,7 +398,7 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 						protected void onConfigure() {
 							super.onConfigure();
 							
-							OneContext.push(new OneContext(this));
+							OneContext.push(new ComponentContext(this));
 							try {
 								MultiValueIssueField field = item.getModelObject();
 								InputSpec fieldSpec = getProject().getIssueWorkflow().getField(field.getName());
@@ -490,7 +491,7 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 		}
 		
 		@Override
-		public Object getOnScreenValue(String name) {
+		public Object getInputValue(String name) {
 			MultiValueIssueField field = getIssue().getMultiValueFields().get(name);
 			InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getField(field.getName());
 			if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {

@@ -42,7 +42,7 @@ public class SpecifiedDefaultValue implements DefaultValueProvider {
 
 	@SuppressWarnings("unused")
 	private static List<GroupFacade> getValueChoices() {
-		ChoiceProvider choiceProvider = (ChoiceProvider) OneContext.get().getEditContext(1).getOnScreenValue("choiceProvider");
+		ChoiceProvider choiceProvider = (ChoiceProvider) OneContext.get().getEditContext(1).getInputValue("choiceProvider");
 		if (choiceProvider != null && OneDev.getInstance(Validator.class).validate(choiceProvider).isEmpty())
 			return choiceProvider.getChoices(true);
 		else

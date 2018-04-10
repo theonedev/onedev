@@ -52,7 +52,7 @@ public class ShowCondition implements Serializable {
 	
 	public boolean isVisible() {
 		InputSpec input = OneContext.get().getInputContext().getInput(getInputName());
-		Object inputValue = OneContext.get().getEditContext().getOnScreenValue(getInputName());
+		Object inputValue = OneContext.get().getEditContext().getInputValue(getInputName());
 		if (inputValue != null) {
 			List<String> strings = input.convertToStrings(inputValue);
 			if (strings.isEmpty())

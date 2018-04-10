@@ -115,7 +115,7 @@ public abstract class InputSpec implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static boolean isNameOfEmptyValueVisible() {
-		return (boolean) OneContext.get().getEditContext().getOnScreenValue("allowEmpty");
+		return (boolean) OneContext.get().getEditContext().getInputValue("allowEmpty");
 	}
 	
 	public List<String> getPossibleValues() {

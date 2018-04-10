@@ -16,6 +16,7 @@ import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.ShowCondition;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
@@ -66,12 +67,12 @@ public class FieldFixOption implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static boolean isNewFieldVisible() {
-		return OneContext.get().getEditContext().getOnScreenValue("fixType") == FixType.CHANGE_TO_ANOTHER_FIELD;
+		return OneContext.get().getEditContext().getInputValue("fixType") == FixType.CHANGE_TO_ANOTHER_FIELD;
 	}
 	
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
-		MultiValueIssueField fixField = OneContext.get().getComponent().findParent(FieldFixPanel.class).getInvalidField();
+		MultiValueIssueField fixField = ((ComponentContext)OneContext.get()).getComponent().findParent(FieldFixPanel.class).getInvalidField();
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
 		List<String> fields = new ArrayList<>();
 		for (InputSpec field: page.getProject().getIssueWorkflow().getFields()) {
