@@ -1,0 +1,7 @@
+.test {
+	width: 100px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	border: 1px solid red;
+	overflow: hidden;
+}

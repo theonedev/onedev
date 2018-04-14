@@ -132,7 +132,7 @@ form .form-group ul.feedbackPanel, form td.value ul.feedbackPanel {
 	margin: 4px 0 0 -8px; 
 	padding-bottom: 0;
 }
-form .form-group li.feedbackPanelERROR, form td.value li.feedbackPanelERROR {
+form li.feedbackPanelERROR {
 	color: #AA0000;
 	list-style: disc;
 }
@@ -235,7 +235,7 @@ form>.test-feedback {
 .viewer .type-selector, .viewer .no-elements, .editor .no-elements {
 	font-style: italic;
 } 
-.editable .editor .bean.list>thead>tr>th {
+.editable .bean.list>thead>tr>th {
 	border-bottom: 1px solid #E0E0E0;
 }
 .editable .viewer .bean.list>thead>tr>th {
@@ -246,6 +246,7 @@ form>.test-feedback {
 }
 .editable table.bean.list>thead>tr>th, .editable table.bean.list>tbody>tr>td {
 	padding: 5px 10px 5px 0;
+	font-weight: normal;
 }
 .editable .editor table.bean.list tr:hover td {
 	background: #F9F9F9;
@@ -417,6 +418,13 @@ form>.actions>.btn {
 }
 div.center {
 	text-align: center;
+}
+
+div.no-records {
+	font-style: italic;
+	font-size: 16px;
+	border-top: 1px solid #F0F0F0;
+	padding-top: 10px;	
 }
 
 .middot:before {

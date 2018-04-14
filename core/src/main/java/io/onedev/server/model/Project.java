@@ -82,7 +82,8 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.IssueListCustomization;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.editable.annotation.Editable;
@@ -170,6 +171,10 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private IssueWorkflow issueWorkflow = new IssueWorkflow();
+
+	@Lob
+	@Column(nullable=false, length=65535)
+	private IssueListCustomization issueListCustomization = new IssueListCustomization();
 	
 	private transient Repository repository;
 	
@@ -792,6 +797,14 @@ public class Project extends AbstractEntity {
 
 	public void setIssueWorkflow(IssueWorkflow issueWorkflow) {
 		this.issueWorkflow = issueWorkflow;
+	}
+
+	public IssueListCustomization getIssueListCustomization() {
+		return issueListCustomization;
+	}
+
+	public void setIssueListCustomization(IssueListCustomization issueListCustomization) {
+		this.issueListCustomization = issueListCustomization;
 	}
 
 	public long getVersion() {

@@ -3,7 +3,7 @@
 		<div class="primary pull-left">
 			<div wicket:id="title" class="title"></div>
 			<div class="state-reporter-actions">
-				<span wicket:id="state"></span>
+				<span wicket:id="state" class="state label label-default"></span>
 				<span class="reporter">Opened by <a wicket:id="reporter"></a> <span wicket:id="reportDate"></span></span>
 				<span class="btn-group transitions">
 					<a wicket:id="transitions" class="btn btn-sm btn-default"><span wicket:id="label"></span></a>
@@ -22,8 +22,8 @@
 			<div class="fields">
 				<table>
 					<tr wicket:id="fields">
-						<td class="name"><span wicket:id="name"></span> <a wicket:id="fixInvalidField"><i class="fa fa-warning"></i></a></td>
-						<td class="values"><div wicket:id="values" class="value"><span wicket:id="value"></span> <a wicket:id="fixInvalidValue" title="Invalid field value, click for details" class="invalid-value"><i class="fa fa-warning"></i></a></div></td>
+						<td class="name"><span wicket:id="name"></span></td>
+						<td class="values"><div wicket:id="values"></div></td>
 					</tr>
 				</table>
 			</div>
@@ -42,5 +42,8 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="userFrag">
 		<a wicket:id="avatar"></a> <a wicket:id="name"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="nonEmptyValuesFrag">
+		<div wicket:id="values" class="value"><span wicket:id="value"></span></div>	
 	</wicket:fragment>
 </wicket:extend>

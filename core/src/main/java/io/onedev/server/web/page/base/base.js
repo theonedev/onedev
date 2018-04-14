@@ -251,7 +251,7 @@ onedev.server = {
 		});
 
 		var ongoingAjaxRequests = 0;
-		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
+		Wicket.Event.subscribe('/ajax/call/beforeSend', function(e, attributes) {
 			if (ongoingAjaxRequests == 0) {
 				var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
 				if ($ajaxLoadingIndicator[0].timer)
@@ -300,19 +300,18 @@ onedev.server = {
 					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector);
 					if ($focusable.hasClass("CodeMirror")) {
 						$focusable[0].CodeMirror.focus();					
-					} else if ($focusable.length != 0) {
+					} else if ($focusable.length != 0 && $focusable.closest(".select2-container").length == 0) {
 						$focusable.focus();
 					} else {
-						$focusable.scrollIntoView();
+						$inError.scrollIntoView();
 					}
 				} else {
 					$containers.find(focusibleSelector).addBack(focusibleSelector).each(function() {
 						var $this = $(this);
-						console.log($this[0]);
 						if ($this.closest(".no-autofocus").length == 0) {
 							if ($this.hasClass("CodeMirror")) {
 								$this[0].CodeMirror.focus();					
-							} else {
+							} else if ($this.closest(".select2-container").length == 0) {
 								$this.focus();
 							}
 							return false;

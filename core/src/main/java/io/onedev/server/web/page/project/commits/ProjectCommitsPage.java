@@ -75,7 +75,7 @@ import io.onedev.server.web.page.project.commits.CommitQueryParser.CriteriaConte
 import io.onedev.server.web.page.project.commits.CommitQueryParser.FuzzyCriteriaContext;
 import io.onedev.server.web.page.project.commits.CommitQueryParser.QueryContext;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.util.ajaxlistener.IndicateLoadingListener;
+import io.onedev.server.web.util.ajaxlistener.ShowGlobalLoadingIndicatorImmediatelyListener;
 import io.onedev.server.web.util.model.CommitRefsModel;
 import io.onedev.utils.StringUtils;
 
@@ -300,7 +300,7 @@ public class ProjectCommitsPage extends ProjectPage {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+				attributes.getAjaxCallListeners().add(new ShowGlobalLoadingIndicatorImmediatelyListener());
 			}
 
 			@Override

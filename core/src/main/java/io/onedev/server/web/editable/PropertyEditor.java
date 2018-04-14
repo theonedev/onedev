@@ -15,6 +15,8 @@ import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 
 import io.onedev.launcher.loader.AppLoader;
+import io.onedev.server.util.OneContext;
+import io.onedev.server.web.util.ComponentContext;
 
 @SuppressWarnings("serial")
 public abstract class PropertyEditor<T> extends ValueEditor<T> {
@@ -35,15 +37,20 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 
 			@Override
 			public void validate(IValidatable<T> validatable) {
-				Validator validator = AppLoader.getInstance(Validator.class);
-				Set<?> violations = validator.validateValue(
-						propertyDescriptor.getBeanClass(), 
-						propertyDescriptor.getPropertyName(), 
-						validatable.getValue());
-				
-				for (Object each: violations) {
-					ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
-					addError(violation.getMessage());
+				OneContext.push(new ComponentContext(PropertyEditor.this));
+				try {
+					Validator validator = AppLoader.getInstance(Validator.class);
+					Set<?> violations = validator.validateValue(
+							propertyDescriptor.getBeanClass(), 
+							propertyDescriptor.getPropertyName(), 
+							validatable.getValue());
+					
+					for (Object each: violations) {
+						ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
+						addError(violation.getMessage());
+					}
+				} finally {
+					OneContext.pop();
 				}
 			}
 			

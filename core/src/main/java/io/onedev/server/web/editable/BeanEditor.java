@@ -307,27 +307,32 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 			@Override
 			public void validate(IValidatable<Serializable> validatable) {
-				Validator validator = AppLoader.getInstance(Validator.class);
-				for (ConstraintViolation<Serializable> violation: validator.validate(validatable.getValue())) {
-					ValuePath valuePath = new ValuePath(violation.getPropertyPath());
-					if (!valuePath.getElements().isEmpty()) {
-						PathSegment.Property property = (Property) valuePath.getElements().iterator().next();
-						boolean found = false;
-						for (Component item: propertiesView) {
-							int propertyIndex = (int) item.getDefaultModelObject();
-							PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
-							if (propertyContext.getPropertyName().equals(property.getName()) 
-									&& propertyContext.isPropertyVisible((PropertyContextAware) item)
-									&& !propertyContext.isExcluded()) {
-								found = true;
-								break;
+				OneContext.push(new ComponentContext(BeanEditor.this));
+				try {
+					Validator validator = AppLoader.getInstance(Validator.class);
+					for (ConstraintViolation<Serializable> violation: validator.validate(validatable.getValue())) {
+						ValuePath valuePath = new ValuePath(violation.getPropertyPath());
+						if (!valuePath.getElements().isEmpty()) {
+							PathSegment.Property property = (Property) valuePath.getElements().iterator().next();
+							boolean found = false;
+							for (Component item: propertiesView) {
+								int propertyIndex = (int) item.getDefaultModelObject();
+								PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
+								if (propertyContext.getPropertyName().equals(property.getName()) 
+										&& propertyContext.isPropertyVisible((PropertyContextAware) item)
+										&& !propertyContext.isExcluded()) {
+									found = true;
+									break;
+								}
 							}
+							if (!found)
+								continue;
 						}
-						if (!found)
-							continue;
+						ErrorContext errorContext = getErrorContext(valuePath);
+						errorContext.addError(violation.getMessage());
 					}
-					ErrorContext errorContext = getErrorContext(valuePath);
-					errorContext.addError(violation.getMessage());
+				} finally {
+					OneContext.pop();
 				}
 			}
 			

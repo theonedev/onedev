@@ -66,10 +66,11 @@ public class IssueEditPage extends ProjectPage implements InputContext {
 		Issue issue = getIssue();
 		form.add(BeanContext.editBean("builtin", issue));
 
-		Serializable fieldBean = getIssueFieldManager().loadFields(issue); 
+		Serializable fieldBean = getIssueFieldManager().readFields(issue); 
 		
 		Map<String, PropertyDescriptor> propertyDescriptors = 
 				new BeanDescriptor(fieldBean.getClass()).getMapOfDisplayNameToPropertyDescriptor();
+		
 		Set<String> excludedFields = new HashSet<>();
 		for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFields()) {
 			if (!issue.getMultiValueFields().containsKey(fieldSpec.getName()))
@@ -84,7 +85,7 @@ public class IssueEditPage extends ProjectPage implements InputContext {
 			public void onSubmit() {
 				super.onSubmit();
 				new BeanDescriptor(Issue.class).copyProperties(issue, getIssue());
-				getIssueManager().save(getIssue(), fieldBean);
+				getIssueManager().save(getIssue(), fieldBean, issue.getMultiValueFields().keySet());
 				
 				setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(getIssue()));
 			}
@@ -116,6 +117,11 @@ public class IssueEditPage extends ProjectPage implements InputContext {
 	@Override
 	public InputSpec getInput(String inputName) {
 		return getProject().getIssueWorkflow().getInput(inputName);
+	}
+
+	@Override
+	public boolean isReservedName(String inputName) {
+		throw new UnsupportedOperationException();
 	}
 	
 }

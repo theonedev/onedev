@@ -8,4 +8,6 @@ public interface InputContext {
 	
 	InputSpec getInput(String inputName);
 	
+	boolean isReservedName(String inputName);
+	
 }

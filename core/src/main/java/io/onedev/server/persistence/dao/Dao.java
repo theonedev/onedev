@@ -92,7 +92,7 @@ public interface Dao {
 	 * @return
 	 * 			number of entities matching specified {@link DetachedCriteria}
 	 */
-	<T extends AbstractEntity> int count(EntityCriteria<T> detachedCriteria);
+	<T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria);
 
 	/**
 	 * Do some work after commit if there is an active transaction, or do the work immediately if there is no active 

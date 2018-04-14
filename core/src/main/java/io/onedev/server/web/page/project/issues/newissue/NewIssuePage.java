@@ -11,11 +11,14 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
@@ -52,14 +55,15 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		issue.setState(getProject().getIssueWorkflow().getInitialState().getName());
 		issue.setProject(getProject());
 		
-		Serializable fieldBean = getIssueFieldManager().loadFields(issue);
+		Serializable fieldBean = getIssueFieldManager().readFields(issue);
 		
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getIssueManager().save(issue, fieldBean);
+				StateSpec stateSpec = Preconditions.checkNotNull(getProject().getIssueWorkflow().getState(issue.getState()));
+				getIssueManager().save(issue, fieldBean, stateSpec.getFields());
 				setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(issue));
 			}
 			
@@ -88,6 +92,11 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	@Override
 	public InputSpec getInput(String inputName) {
 		return getProject().getIssueWorkflow().getInput(inputName);
+	}
+
+	@Override
+	public boolean isReservedName(String inputName) {
+		throw new UnsupportedOperationException();
 	}
 
 }

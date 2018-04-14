@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.setting.issueworkflow;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")

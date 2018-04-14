@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.web.component.verification.VerificationChoiceProvider;
 import io.onedev.server.web.component.verification.VerificationMultiChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
@@ -36,8 +35,7 @@ public class VerificationMultiChoiceEditor extends PropertyEditor<List<String>> 
 			verifications.addAll(getModelObject());
 		} 
 		
-		input = new VerificationMultiChoice("input", new Model((Serializable) verifications), 
-				new VerificationChoiceProvider());
+		input = new VerificationMultiChoice("input", new Model((Serializable) verifications));
         input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
         

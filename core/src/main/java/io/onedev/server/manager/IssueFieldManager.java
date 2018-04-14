@@ -1,6 +1,9 @@
 package io.onedev.server.manager;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -9,6 +12,9 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.InvalidFieldResolution;
+import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.UndefinedFieldValueResolution;
 
 public interface IssueFieldManager extends EntityManager<IssueField> {
 
@@ -17,30 +23,25 @@ public interface IssueFieldManager extends EntityManager<IssueField> {
 	@Nullable
 	Class<? extends Serializable> loadFieldBeanClass(String className);
 	
-	Serializable loadFields(Issue issue);
+	Serializable readFields(Issue issue);
 	
-	void saveFields(Issue issue, Serializable fieldBean);
+	void writeFields(Issue issue, Serializable fieldBean, Collection<String> fieldNames);
 	
 	Set<String> getExcludedFields(Project project, String state);
 	
 	void onRenameUser(String oldName, String newName);
 	
 	void onRenameGroup(String oldName, String newName);
+			
+	void populateFields(List<Issue> issues);
 	
-	void renameField(Issue issue, String oldName, String newName);
+	Map<String, String> getInvalidFields(Project project);
 	
-	void renameField(Project project, String oldName, String newName);
-
-	void deleteField(Issue issue, String fieldName);
+	void fixInvalidFields(Project project, Map<String, InvalidFieldResolution> resolutions);
 	
-	void deleteField(Project project, String fieldName);
+	Map<String, String> getUndefinedFieldValues(Project project);
 	
-	void renameFieldValue(Issue issue, String fieldName, String oldValue, String newValue);
+	void fixUndefinedFieldValues(Project project, Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions);
 	
-	void renameFieldValue(Project project, String fieldName, String oldValue, String newValue);
-	
-	void deleteFieldValue(Issue issue, String fieldName, String fieldValue);
-	
-	void deleteFieldValue(Project project, String fieldName, String fieldValue);
-	
+	void fixFieldValueOrders(Project project);
 }

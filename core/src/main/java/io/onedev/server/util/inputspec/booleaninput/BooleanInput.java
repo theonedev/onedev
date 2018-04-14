@@ -45,9 +45,9 @@ public class BooleanInput extends InputSpec {
 		int index = indexes.get(getName());
 		
 		StringBuffer buffer = new StringBuffer();
-		appendField(buffer, index, "boolean");
-		appendAnnotations(buffer, index, null, null, defaultValueProvider!=null);
-		appendMethods(buffer, index, "boolean", null, defaultValueProvider);
+		appendField(buffer, index, "Boolean");
+		appendAnnotations(buffer, index, "NotNull", null, defaultValueProvider!=null);
+		appendMethods(buffer, index, "Boolean", null, defaultValueProvider);
 		
 		return buffer.toString();
 	}

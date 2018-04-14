@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -26,9 +28,11 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.MultiValueIssueField;
+import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.utils.BeanUtils;
 
 @Entity
 @Table(
@@ -41,7 +45,21 @@ import io.onedev.server.util.inputspec.InputSpec;
 public class Issue extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
-
+	
+	public static final Map<String, String> BUILTIN_FIELDS = new HashMap<>();
+	
+	static {
+		for (Method getter: BeanUtils.findGetters(Issue.class)) {
+			if (BeanUtils.findSetter(getter) != null) {
+				Field field = BeanUtils.findField(getter);
+				if (field != null && field.getAnnotation(ManyToOne.class) == null 
+						&& field.getAnnotation(OneToMany.class) == null) {
+					BUILTIN_FIELDS.put(EditableUtils.getDisplayName(field), field.getName());
+				}
+			}
+		}
+	}
+	
 	@Version
 	private long version;
 	
@@ -157,12 +175,14 @@ public class Issue extends AbstractEntity {
 
 			Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
 			for (IssueField field: getFields()) {
-				List<IssueField> fieldsOfName = fieldMap.get(field.getName());
-				if (fieldsOfName == null) {
-					fieldsOfName = new ArrayList<>();
-					fieldMap.put(field.getName(), fieldsOfName);
+				if (field.isCollected()) {
+					List<IssueField> fieldsOfName = fieldMap.get(field.getName());
+					if (fieldsOfName == null) {
+						fieldsOfName = new ArrayList<>();
+						fieldMap.put(field.getName(), fieldsOfName);
+					}
+					fieldsOfName.add(field);
 				}
-				fieldsOfName.add(field);
 			}
 			
 			for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFields()) {
@@ -171,9 +191,11 @@ public class Issue extends AbstractEntity {
 				if (fields != null) {
 					String type = fields.iterator().next().getType();
 					List<String> values = new ArrayList<>();
-					for (IssueField field: fields)
-						values.add(field.getValue());
-					multiValueFields.put(fieldName, new MultiValueIssueField(fieldName, type, values));
+					for (IssueField field: fields) {
+						if (field.getValue() != null)
+							values.add(field.getValue());
+					}
+					multiValueFields.put(fieldName, new MultiValueIssueField(this, fieldName, type, values));
 				}
 			}
 		}

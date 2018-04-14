@@ -29,7 +29,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.util.UsageUtils;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -231,12 +231,14 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									List<String> usages = getWorkflow().onFieldDelete(getField().getName());
+									List<String> usages = getWorkflow().onDeleteField(getField().getName());
 									if (!usages.isEmpty()) {
 										fragment.error(UsageUtils.getNotificationMessage("Field '" + getField().getName() + "'", usages));
 										target.add(fragment);
 									} else {
+										getProject().getIssueListCustomization().onDeleteField(getField().getName());
 										getWorkflow().getFields().remove(index);
+										getWorkflow().setReconciled(false);
 										getProject().setIssueWorkflow(getWorkflow());
 										OneDev.getInstance(ProjectManager.class).save(getProject());
 										target.add(fieldsTable);

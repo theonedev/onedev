@@ -12,8 +12,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
-import io.onedev.server.model.support.issueworkflow.StateSpec;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
@@ -93,8 +93,10 @@ abstract class StateEditPanel extends Panel {
 				if (!editor.hasErrors(true)) {
 					if (stateIndex != -1) {
 						StateSpec oldState = getWorkflow().getStates().get(stateIndex);
-						if (!state.getName().equals(oldState.getName())) 
-							getWorkflow().onStateRename(oldState.getName(), state.getName());
+						if (!state.getName().equals(oldState.getName())) { 
+							getWorkflow().onRenameState(oldState.getName(), state.getName());
+							getWorkflow().setReconciled(false);
+						}
 						getWorkflow().getStates().set(stateIndex, state);
 					} else {
 						getWorkflow().getStates().add(state);

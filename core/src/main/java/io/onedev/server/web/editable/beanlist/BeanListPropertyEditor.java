@@ -97,7 +97,11 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	
 				@Override
 				public Boolean getObject() {
-					return BeanListPropertyEditor.this.get("listEditor").isVisible();
+					Component listEditor = BeanListPropertyEditor.this.get("listEditor");
+					if (listEditor != null)
+						return listEditor.isVisible();
+					else
+						return BeanListPropertyEditor.this.getModelObject() != null;
 				}
 	
 				@Override
@@ -139,12 +143,11 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	}
 	
 	private Component newListEditor(List<Serializable> list) {
-		final WebMarkupContainer table = new WebMarkupContainer("listEditor");
+		WebMarkupContainer listEditor = new WebMarkupContainer("listEditor");
 
-		table.setOutputMarkupId(true);
-		table.setOutputMarkupPlaceholderTag(true);
+		listEditor.setOutputMarkupPlaceholderTag(true);
 		
-		table.add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
+		listEditor.add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
@@ -163,14 +166,14 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		});
 		
 		RepeatingView rows = new RepeatingView("elements");
-		table.add(rows);
+		listEditor.add(rows);
 		
 		if (list != null) {
 			for (Serializable element: list) {
 				addRow(rows, element);
 			}
 		} else {
-			table.setVisible(false);
+			listEditor.setVisible(false);
 		}
 		
 		WebMarkupContainer newRow = new WebMarkupContainer("newRow");
@@ -193,7 +196,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				if (lastRow != null)
 					script += ".insertAfter('#" + lastRow.getMarkupId() + "');";
 				else
-					script += ".appendTo('#" + table.getMarkupId() + ">tbody');";
+					script += ".appendTo('#" + listEditor.getMarkupId() + ">tbody');";
 
 				target.prependJavaScript(script);
 				target.add(newRow);
@@ -203,9 +206,9 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 		}.setDefaultFormProcessing(false));
 		
-		table.add(newRow);
+		listEditor.add(newRow);
 		
-		table.add(new SortBehavior() {
+		listEditor.add(new SortBehavior() {
 
 			@SuppressWarnings("deprecation")
 			@Override
@@ -239,7 +242,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			
 		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
 
-		return table;		
+		return listEditor;		
 	}
 
 	private WebMarkupContainer addRow(RepeatingView rows, Serializable element) {

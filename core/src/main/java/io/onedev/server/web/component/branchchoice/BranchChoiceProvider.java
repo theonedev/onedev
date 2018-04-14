@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -49,17 +49,16 @@ public class BranchChoiceProvider extends ChoiceProvider<String> {
 
 	@Override
 	public void toJson(String choice, JSONWriter writer) throws JSONException {
-		String escaped = StringEscapeUtils.escapeHtml4(choice);
+		String escaped = HtmlEscape.escapeHtml5(choice);
 		writer.key("id").value(choice).key("name").value(escaped);
 	}
 
 	@Override
 	public Collection<String> toChoices(Collection<String> ids) {
-		List<String> branches = new ArrayList<>();
-		for (String each : ids)
-			branches.add(each);
-
-		return branches;
+		Collection<String> choices = new ArrayList<>();
+		for (String id: ids) 
+			choices.add(HtmlEscape.unescapeHtml(id));
+		return choices;
 	}
 
 	@Override

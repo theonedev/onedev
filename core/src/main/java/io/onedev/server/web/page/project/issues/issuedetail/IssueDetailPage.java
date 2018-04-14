@@ -12,12 +12,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -36,41 +33,33 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
-import io.onedev.server.model.support.issueworkflow.StateTransition;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.issue.workflow.StateTransition;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.MultiValueIssueField;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
-import io.onedev.server.web.component.avatar.AvatarLink;
+import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.issuestate.IssueStatePanel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issueedit.IssueEditPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
-import io.onedev.server.web.util.ComponentContext;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.DateUtils;
 
@@ -105,14 +94,8 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 		super.onInitialize();
 		
 		add(new Label("title", getIssue().getTitle()));
-		add(new IssueStatePanel("state", issueModel) {
-
-			@Override
-			protected void onFixed(AjaxRequestTarget target) {
-				setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(getIssue()));
-			}
-			
-		});
+		add(new IssueStateLabel("state", issueModel));
+		
 		add(new UserLink("reporter", User.getForDisplay(getIssue().getReporter(), getIssue().getReporterName())));
 		add(new Label("reportDate", DateUtils.formatAge(getIssue().getReportDate())));
 		
@@ -149,7 +132,7 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
-							Serializable fieldBean = getIssueFieldManager().loadFields(getIssue());
+							Serializable fieldBean = getIssueFieldManager().readFields(getIssue());
 							Set<String> excludedFields = getIssueFieldManager().getExcludedFields(getIssue().getProject(), transition.getToState());
 
 							Form<?> form = new Form<Void>("form") {
@@ -184,7 +167,8 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 								protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 									super.onSubmit(target, form);
 									getIssue().setState(transition.getToState());
-									getIssueManager().save(getIssue(), fieldBean);
+									StateSpec stateSpec = Preconditions.checkNotNull(getProject().getIssueWorkflow().getState(getIssue().getState()));
+									getIssueManager().save(getIssue(), fieldBean, stateSpec.getFields());
 									setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(getIssue()));
 								}
 								
@@ -263,10 +247,11 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 				for (IssueField field: undefinedFields) {
 					MultiValueIssueField multiValueField = multiValueFields.get(field.getName());
 					if (multiValueField == null) {
-						multiValueField = new MultiValueIssueField(field.getName(), field.getType(), new ArrayList<>());
+						multiValueField = new MultiValueIssueField(getIssue(), field.getName(), field.getType(), new ArrayList<>());
 						multiValueFields.put(field.getName(), multiValueField);
 					}
-					multiValueField.getValues().add(field.getValue());
+					if (field.getValue() != null)
+						multiValueField.getValues().add(field.getValue());
 				}
 				return new ArrayList<>(multiValueFields.values());
 			}
@@ -283,171 +268,7 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 			protected void populateItem(ListItem<MultiValueIssueField> item) {
 				MultiValueIssueField field = item.getModelObject();
 				item.add(new Label("name", field.getName()));
-				item.add(new ModalLink("fixInvalidField") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new FieldFixPanel(id) {
-
-							@Override
-							Issue getIssue() {
-								return IssueDetailPage.this.getIssue();
-							}
-
-							@Override
-							MultiValueIssueField getInvalidField() {
-								return item.getModelObject();
-							}
-
-							@Override
-							void onFixed(AjaxRequestTarget target) {
-								setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(getIssue()));
-							}
-
-							@Override
-							void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-							
-						};
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						MultiValueIssueField field = item.getModelObject();
-						InputSpec fieldSpec = getProject().getIssueWorkflow().getField(field.getName());
-						if (fieldSpec == null)
-							tag.put("title", "Field is undefined, click for details");
-						else if (!EditableUtils.getDisplayName(fieldSpec.getClass()).equals(field.getType()))
-							tag.put("title", "Incorrect field type, click for details");
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						MultiValueIssueField field = item.getModelObject();
-						InputSpec fieldSpec = getProject().getIssueWorkflow().getField(field.getName());
-						setVisible(fieldSpec == null || !EditableUtils.getDisplayName(fieldSpec.getClass()).equals(field.getType()));
-					}
-					
-				});
-				RepeatingView valuesView = new RepeatingView("values");
-				for (String value: field.getValues()) {
-					FieldValueContainer valueContainer = new FieldValueContainer(valuesView.newChildId()) {
-
-						@Override
-						Issue getIssue() {
-							return IssueDetailPage.this.getIssue();
-						}
-
-						@Override
-						MultiValueIssueField getField() {
-							return item.getModelObject();
-						}
-
-					};
-					if (field.getType().equals(InputSpec.USER_CHOICE) 
-							|| field.getType().equals(InputSpec.USER_MULTI_CHOICE)) {
-						User user = User.getForDisplay(getUserManager().findByName(value), value);
-						Fragment fragment = new Fragment("value", "userFrag", IssueDetailPage.this);
-						fragment.add(new AvatarLink("avatar", user, null));
-						fragment.add(new UserLink("name", user));
-						valueContainer.add(fragment);
-					} else {
-						Label valueLabel = new Label("value", value);
-						valueContainer.add(valueLabel);
-						InputSpec fieldSpec = getProject().getIssueWorkflow().getField(field.getName());
-						ChoiceProvider choiceProvider = null;
-						if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
-							choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
-						} else if (fieldSpec != null && fieldSpec instanceof MultiChoiceInput) {
-							choiceProvider = ((MultiChoiceInput)fieldSpec).getChoiceProvider();
-						} 
-						if (choiceProvider != null) {
-							OneContext.push(new ComponentContext(valueContainer));
-							try {
-								String color = choiceProvider.getChoices(false).get(value);
-								String style = "padding: 0 4px; border-radius: 3px;";
-								if (color != null)
-									style += "background: " + color + "; color: white;";
-								valueLabel.add(AttributeAppender.append("style", style));
-							} finally {
-								OneContext.pop();
-							}
-						}
-					}
-					valueContainer.add(new ModalLink("fixInvalidValue") {
-
-						@Override
-						protected Component newContent(String id, ModalPanel modal) {
-							return new FieldValueFixPanel(id) {
-
-								@Override
-								Issue getIssue() {
-									return valueContainer.getIssue();
-								}
-
-								@Override
-								MultiValueIssueField getField() {
-									return valueContainer.getField();
-								}
-
-								@Override
-								String getInvalidValue() {
-									return value;
-								}
-
-								@Override
-								void onFixed(AjaxRequestTarget target) {
-									setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(getIssue()));
-								}
-
-								@Override
-								void onCancel(AjaxRequestTarget target) {
-									modal.close();
-								}
-
-								@Override
-								public Object getInputValue(String name) {
-									return valueContainer.getInputValue(name);
-								}
-								
-							};
-						}
-
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							
-							OneContext.push(new ComponentContext(this));
-							try {
-								MultiValueIssueField field = item.getModelObject();
-								InputSpec fieldSpec = getProject().getIssueWorkflow().getField(field.getName());
-								if (fieldSpec != null && EditableUtils.getDisplayName(fieldSpec.getClass()).equals(field.getType())) { 
-									List<String> possibleValues;
-									if (fieldSpec instanceof ChoiceInput) 
-										possibleValues = new ArrayList<>(((ChoiceInput) fieldSpec).getChoiceProvider().getChoices(false).keySet());
-									else if (fieldSpec instanceof MultiChoiceInput) 
-										possibleValues = new ArrayList<>(((MultiChoiceInput) fieldSpec).getChoiceProvider().getChoices(false).keySet());
-									else 
-										possibleValues = null;
-									if (possibleValues != null)
-										setVisible(!possibleValues.contains(value));
-									else 
-										setVisible(false);
-								} else {
-									setVisible(false);
-								}
-							} finally {
-								OneContext.pop();
-							}
-						}
-						
-					});
-					valuesView.add(valueContainer);
-				}
-				item.add(valuesView);
+				item.add(new FieldValuesPanel("values", item.getModel()));
 			}
 			
 		});
@@ -472,10 +293,6 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 
 	private IssueFieldManager getIssueFieldManager() {
 		return OneDev.getInstance(IssueFieldManager.class);
-	}
-	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
 	}
 	
 	@Override
@@ -506,26 +323,9 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 		return getProject().getIssueWorkflow().getInput(inputName);
 	}
 	
-	private abstract static class FieldValueContainer extends WebMarkupContainer implements EditContext {
-
-		public FieldValueContainer(String id) {
-			super(id);
-		}
-		
-		@Override
-		public Object getInputValue(String name) {
-			MultiValueIssueField field = getIssue().getMultiValueFields().get(name);
-			InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getField(name);
-			if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
-				return fieldSpec.convertToObject(field.getValues());
-			} else {
-				return null;
-			}
-		}
-		
-		abstract Issue getIssue();
-		
-		abstract MultiValueIssueField getField();
-		
+	@Override
+	public boolean isReservedName(String inputName) {
+		throw new UnsupportedOperationException();
 	}
+	
 }

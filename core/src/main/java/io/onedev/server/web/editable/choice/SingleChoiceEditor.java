@@ -1,24 +1,19 @@
 package io.onedev.server.web.editable.choice;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
-import org.json.JSONException;
-import org.json.JSONWriter;
 
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.util.OneContext;
-import io.onedev.server.web.component.select2.ChoiceProvider;
-import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.Select2Choice;
+import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -58,39 +53,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			OneContext.pop();
 		}
 		
-        input = new Select2Choice<String>("input", Model.of(getModelObject()), new ChoiceProvider<String>() {
-
-			@Override
-			public void query(String term, int page, Response<String> response) {
-				response.setResults(choices);
-				response.setHasMore(false);
-			}
-
-			@Override
-			public void toJson(String choice, JSONWriter writer) throws JSONException {
-				writer.key("id").value(StringEscapeUtils.escapeHtml4(choice));
-			}
-
-			@Override
-			public Collection<String> toChoices(Collection<String> ids) {
-				return ids;
-			}
-        	
-        }) {
-
-        	@Override
-        	protected void onInitialize() {
-        		super.onInitialize();
-        		getSettings().setPlaceholder("Select below...");
-        		getSettings().setFormatResult("onedev.server.choiceFormatter.formatResult");
-        		getSettings().setFormatSelection("onedev.server.choiceFormatter.formatSelection");
-        		getSettings().setEscapeMarkup("onedev.server.choiceFormatter.escapeMarkup");
-        		
-        		setConvertEmptyInputStringToNull(true);
-        	}
-        	
-        };
-        
+		input = new StringSingleChoice("input", Model.of(getModelObject()), choices);
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

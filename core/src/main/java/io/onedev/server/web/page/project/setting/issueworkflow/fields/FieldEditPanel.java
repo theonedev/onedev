@@ -14,8 +14,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
@@ -98,9 +99,12 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 				if (!editor.hasErrors(true)) {
 					if (fieldIndex != -1) {
 						InputSpec oldField = getWorkflow().getFields().get(fieldIndex);
-						if (!field.getName().equals(oldField.getName()))
-							getWorkflow().onFieldRename(oldField.getName(), field.getName());
+						if (!field.getName().equals(oldField.getName())) {
+							getWorkflow().onRenameField(oldField.getName(), field.getName());
+							getProject().getIssueListCustomization().onRenameField(oldField.getName(), field.getName());
+						}
 						getWorkflow().getFields().set(fieldIndex, bean.getField());
+						getWorkflow().setReconciled(false);
 					} else {
 						getWorkflow().getFields().add(bean.getField());
 					}
@@ -155,4 +159,14 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	public InputSpec getInput(String inputName) {
 		return getWorkflow().getField(inputName);
 	}
+	
+	@Override
+	public boolean isReservedName(String inputName) {
+		for (String displayName: Issue.BUILTIN_FIELDS.keySet()) {
+			if (displayName.equals(inputName))
+				return true;
+		}
+		return false;
+	}
+	
 }

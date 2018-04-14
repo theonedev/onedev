@@ -21,7 +21,7 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
-import io.onedev.server.util.validation.annotation.Name;
+import io.onedev.server.util.validation.annotation.InputName;
 
 @Editable
 public abstract class InputSpec implements Serializable {
@@ -62,8 +62,8 @@ public abstract class InputSpec implements Serializable {
 	
 	private ShowCondition showCondition;
 
-	@Editable(order=10, description="Name of the custom input")
-	@Name
+	@Editable(order=10)
+	@InputName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -147,7 +147,7 @@ public abstract class InputSpec implements Serializable {
 	}
 	
 	protected void appendAnnotations(StringBuffer buffer, int index, 
-			@Nullable String notEmptyAnnotation, @Nullable String choiceAnnotation, 
+			String notEmptyAnnotation, @Nullable String choiceAnnotation, 
 			boolean hasDefaultValueProvider) {
 		if (description != null) {
 			buffer.append("    @Editable(name=\"" + escape(name) + "\", description=\"" + 
@@ -156,7 +156,7 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("    @Editable(name=\"" + escape(name) + 
 					"\", order=" + index + ")\n");
 		}
-		if (!allowEmpty && notEmptyAnnotation != null)
+		if (!allowEmpty)
 			buffer.append("    @" + notEmptyAnnotation + "\n");
 		if (showCondition != null) 
 			buffer.append("    @ShowCondition(\"isInput" + index + "Visible\")\n");
@@ -189,7 +189,11 @@ public abstract class InputSpec implements Serializable {
 		if (choiceProvider != null) {
 			buffer.append("    private static List getInput" + index + "Choices() {\n");
 			String literalBytes = getLiteral(SerializationUtils.serialize(choiceProvider));
-			buffer.append("        return new ArrayList(SerializationUtils.deserialize(" + literalBytes + ").getChoices(false).keySet());\n");
+			if (choiceProvider instanceof io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider) {
+				buffer.append("        return new ArrayList(SerializationUtils.deserialize(" + literalBytes + ").getChoices(false).keySet());\n");
+			} else {
+				buffer.append("        return SerializationUtils.deserialize(" + literalBytes + ").getChoices(false);\n");
+			}
 			buffer.append("    }\n");
 			buffer.append("\n");
 		}

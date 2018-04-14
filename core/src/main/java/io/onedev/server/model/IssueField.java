@@ -12,7 +12,8 @@ import javax.persistence.Table;
 @Table(
 		indexes={
 				@Index(columnList="g_issue_id"), @Index(columnList="name"), 
-				@Index(columnList="value"), @Index(columnList="type")})
+				@Index(columnList="value"), @Index(columnList="type"), 
+				@Index(columnList="ordinal")})
 public class IssueField extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -24,13 +25,14 @@ public class IssueField extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 
-	@Column(nullable=false)
 	private String value;
 
 	@Column(nullable=false)
 	private String type;
 	
-	private int order;
+	private boolean collected;
+	
+	private int ordinal;
 	
 	public Issue getIssue() {
 		return issue;
@@ -64,12 +66,20 @@ public class IssueField extends AbstractEntity {
 		this.type = type;
 	}
 
-	public int getOrder() {
-		return order;
+	public int getOrdinal() {
+		return ordinal;
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
+	public void setOrdinal(int ordinal) {
+		this.ordinal = ordinal;
+	}
+
+	public boolean isCollected() {
+		return collected;
+	}
+
+	public void setCollected(boolean collected) {
+		this.collected = collected;
 	}
 	
 }

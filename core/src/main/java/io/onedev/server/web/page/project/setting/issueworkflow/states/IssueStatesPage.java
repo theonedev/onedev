@@ -30,8 +30,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.model.support.issueworkflow.IssueWorkflow;
-import io.onedev.server.model.support.issueworkflow.StateSpec;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.util.UsageUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -240,6 +240,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 										target.add(fragment);
 									} else {
 										getWorkflow().getStates().remove(index);
+										getWorkflow().setReconciled(false);
 										getProject().setIssueWorkflow(getWorkflow());
 										OneDev.getInstance(ProjectManager.class).save(getProject());
 										target.add(statesTable);
