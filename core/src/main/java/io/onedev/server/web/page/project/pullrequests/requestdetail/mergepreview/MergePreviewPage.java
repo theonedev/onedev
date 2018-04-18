@@ -20,20 +20,18 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.MergePreview;
+import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
-import io.onedev.server.web.websocket.CommitIndexedRegion;
 import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public class MergePreviewPage extends RequestDetailPage {
@@ -230,12 +228,12 @@ public class MergePreviewPage extends RequestDetailPage {
 	}
 	
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> regions = super.getWebSocketObservables();
 		MergePreview preview = getPullRequest().getMergePreview();
 		if (getPullRequest().isOpen() && preview != null && preview.getMerged() != null) {
-			regions.add(new CommitIndexedRegion(ObjectId.fromString(preview.getTargetHead())));
-			regions.add(new CommitIndexedRegion(ObjectId.fromString(preview.getMerged())));
+			regions.add(CommitIndexed.getWebSocketObservable(preview.getTargetHead()));
+			regions.add(CommitIndexed.getWebSocketObservable(preview.getMerged()));
 		}		
 		return regions;
 	}

@@ -225,6 +225,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.uuid = uuid;
 	}
 
+	public static String getWebSocketObservable(Long userId) {
+		return User.class.getName() + userId;
+	}
+	
 	@Override
 	public int compareTo(AbstractEntity entity) {
 		User user = (User) entity;

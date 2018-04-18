@@ -1,8 +1,9 @@
 package io.onedev.server.web.page.test;
 
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.request.resource.CssResourceReference;
+import java.util.Date;
+
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import io.onedev.server.web.page.base.BasePage;
 
@@ -12,12 +13,14 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-	}
+		add(new Label("date", new AbstractReadOnlyModel<String>() {
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(TestPage.class, "test.css")));
+			@Override
+			public String getObject() {
+				return new Date().toString();
+			}
+			
+		}));
 	}
 
 }

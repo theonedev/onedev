@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
@@ -19,10 +20,8 @@ public class PullRequestChangeBroadcaster {
 
 	@Listen
 	public void on(PullRequestEvent event) {
-		PullRequestChangedRegion region = new PullRequestChangedRegion(event.getRequest().getId());
 		PageKey sourcePageKey = WicketUtils.getPageKey();
-			
-		webSocketManager.render(region, sourcePageKey);
+		webSocketManager.onObservableChanged(PullRequest.getWebSocketObservable(event.getRequest().getId()), sourcePageKey);
 	}
 
 }

@@ -3,8 +3,8 @@ package io.onedev.server.web.page.base;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import javax.annotation.Nullable;
 
@@ -36,6 +36,8 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.unbescape.javascript.JavaScriptEscape;
 
@@ -44,11 +46,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.page.init.ServerInitPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
-import io.onedev.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
@@ -173,9 +175,13 @@ public abstract class BasePage extends WebPage {
 			protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
 				super.onMessage(handler, message);
 				
-				if (message.getText().equals(WebSocketManager.RENDER_CALLBACK)) {
-					send(getPage(), Broadcast.BREADTH, new PageDataChanged(handler, false));
-				} else if (message.getText().equals(WebSocketManager.CONNECT_CALLBACK)) {
+				if (message.getText().startsWith(WebSocketManager.OBSERVABLE_CHANGED)) {
+					String observable = message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1);
+					for (WebSocketObserver observer: getWebSocketObservers()) {
+						if (observer.getObservables().contains(observable))
+							observer.onObservableChanged(handler, observable);
+					}
+				} else if (message.getText().equals(WebSocketManager.CONNECTION_OPENED)) {
 					/* 
 					 * re-render interesting parts upon websocket connecting after a page is opened, 
 					 * this is necessary in case some web socket render request is sent between the 
@@ -186,13 +192,32 @@ public abstract class BasePage extends WebPage {
 					 * re-render the integration preview section after connecting will make it 
 					 * displaying correctly    
 					 */
-					send(getPage(), Broadcast.BREADTH, new PageDataChanged(handler, true));
+					for (WebSocketObserver observer: getWebSocketObservers())
+						observer.onConnectionOpened(handler);
 				} 
 		 
 			}
 			
 		});
 					
+		add(new WebSocketObserver() {
+
+			@Override
+			public Collection<String> getObservables() {
+				return getWebSocketObservables();
+			}
+
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+				send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler));
+			}
+
+			@Override
+			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+				send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler, true));
+			}
+			
+		});
 	}
 	
 	public FeedbackPanel getSessionFeedback() {
@@ -220,13 +245,28 @@ public abstract class BasePage extends WebPage {
 
 	@Override
 	protected void onAfterRender() {
-		if (getWebSocketRegions() != null)
-			AppLoader.getInstance(WebSocketManager.class).onRegionChange(this);
+		AppLoader.getInstance(WebSocketManager.class).onObserverChanged(this);
 		super.onAfterRender();
 	}
+	
+	private Collection<WebSocketObserver> getWebSocketObservers() {
+		Collection<WebSocketObserver> observers = new HashSet<>();
+		visitChildren(Component.class, new IVisitor<Component, Void>() {
 
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		return new ArrayList<>();
+			@Override
+			public void component(Component object, IVisit<Void> visit) {
+				observers.addAll(object.getBehaviors(io.onedev.server.web.behavior.WebSocketObserver.class));
+			}
+
+		});
+		return observers;
+	}
+
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> observables = new HashSet<>();
+		for (WebSocketObserver observer: getWebSocketObservers())
+			observables.addAll(observer.getObservables());
+		return observables;
 	}
 
 	private void checkReady() {

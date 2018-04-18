@@ -40,6 +40,7 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.ProjectAndRevision;
+import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.TooltipBehavior;
 import io.onedev.server.web.component.commitlist.CommitListPanel;
@@ -55,10 +56,7 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
-import io.onedev.server.web.websocket.CodeCommentChangedRegion;
-import io.onedev.server.web.websocket.CommitIndexedRegion;
 import io.onedev.server.web.websocket.WebSocketManager;
-import io.onedev.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public class RevisionComparePage extends ProjectPage implements CommentSupport {
@@ -638,7 +636,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		super.onPopState(target, data);
 		
 		state = (State) data;
-		OneDev.getInstance(WebSocketManager.class).onRegionChange(this);
+		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
 		
 		newTabPanel(target);
 		target.add(tabbable);
@@ -734,7 +732,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 			state.mark = null;
 		}
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).onRegionChange(this);
+		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
 	}
 
 	@Override
@@ -753,7 +751,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).onRegionChange(this);
+		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
 	}
 
 	@Override
@@ -771,16 +769,16 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 	}
 
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> observables = super.getWebSocketObservables();
 		if (state.compareWithMergeBase) 
-			regions.add(new CommitIndexedRegion(mergeBase));
+			observables.add(CommitIndexed.getWebSocketObservable(mergeBase.name()));
 		else
-			regions.add(new CommitIndexedRegion(state.leftSide.getCommit()));
-		regions.add(new CommitIndexedRegion(state.rightSide.getCommit()));
+			observables.add(CommitIndexed.getWebSocketObservable(state.leftSide.getCommit().name()));
+		observables.add(CommitIndexed.getWebSocketObservable(state.rightSide.getCommit().name()));
 		if (state.commentId != null)
-			regions.add(new CodeCommentChangedRegion(state.commentId));
-		return regions;
+			observables.add(CodeComment.getWebSocketObservable(state.commentId));
+		return observables;
 	}
 
 }

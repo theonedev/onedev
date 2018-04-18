@@ -224,6 +224,7 @@ import io.onedev.server.web.websocket.DefaultWebSocketManager;
 import io.onedev.server.web.websocket.PullRequestChangeBroadcaster;
 import io.onedev.server.web.websocket.TaskChangeBroadcaster;
 import io.onedev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketPolicyProvider;
 import io.onedev.utils.ClassUtils;
 import io.onedev.utils.schedule.DefaultTaskScheduler;
 import io.onedev.utils.schedule.TaskScheduler;
@@ -364,7 +365,7 @@ public class CoreModule extends AbstractPluginModule {
 	private void configureWeb() {
 		bind(WicketServlet.class).to(DefaultWicketServlet.class);
 		bind(WicketFilter.class).to(DefaultWicketFilter.class);
-		bind(WebSocketPolicy.class).toInstance(WebSocketPolicy.newServerPolicy());
+		bind(WebSocketPolicy.class).toProvider(WebSocketPolicyProvider.class);
 		bind(EditSupportRegistry.class).to(DefaultEditSupportRegistry.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 

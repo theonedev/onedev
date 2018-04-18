@@ -23,4 +23,8 @@ public class CommitIndexed {
 		return commitId;
 	}
 	
+	public static String getWebSocketObservable(String commitId) {
+		return CommitIndexed.class.getName() + ":" + commitId;
+	}
+	
 }

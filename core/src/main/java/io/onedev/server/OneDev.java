@@ -119,8 +119,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void postStart() {
-		webSocketManager.stop();
-		
 		listenerRegistry.post(new SystemStarted());
 		ThreadContext.unbindSubject();
 		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");
@@ -180,6 +178,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 
 	@Override
 	public void stop() {
+		webSocketManager.stop();
+		
 		unitOfWork.begin();
 		try {
 			listenerRegistry.post(new SystemStopped());

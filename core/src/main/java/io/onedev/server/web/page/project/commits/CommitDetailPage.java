@@ -48,6 +48,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.util.Verification;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
@@ -64,8 +65,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
-import io.onedev.server.web.websocket.CommitIndexedRegion;
-import io.onedev.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public class CommitDetailPage extends ProjectPage implements CommentSupport {
@@ -558,11 +557,11 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	}
 
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(resolvedRevision));
-		regions.add(new CommitIndexedRegion(getCompareWith()));
-		return regions;
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> observables = super.getWebSocketObservables();
+		observables.add(CommitIndexed.getWebSocketObservable(resolvedRevision.name()));
+		observables.add(CommitIndexed.getWebSocketObservable(getCompareWith().name()));
+		return observables;
 	}
 
 }

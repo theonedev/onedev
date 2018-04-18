@@ -8,17 +8,17 @@ public interface WebSocketManager {
 	
 	static final String ERROR_MESSAGE = "ErrorMessage";
 	
-	static final String RENDER_CALLBACK = "RenderCallback";
+	static final String OBSERVABLE_CHANGED = "ObservableChanged";
 	
-	static final String CONNECT_CALLBACK = "ConnectCallback";
+	static final String CONNECTION_OPENED = "ConnectionOpened";
 	
 	static final String KEEP_ALIVE = "KeepAlive";
 	
-	void onRegionChange(BasePage page);
+	void onObserverChanged(BasePage page);
 	
 	void onDestroySession(String sessionId);
 	
-	void render(WebSocketRegion region, @Nullable PageKey sourcePageKey);
+	void onObservableChanged(String observable, @Nullable PageKey sourcePageKey);
 	
 	void start();
 	

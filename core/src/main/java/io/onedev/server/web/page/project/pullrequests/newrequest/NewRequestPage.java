@@ -51,6 +51,7 @@ import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.MergeStrategy;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.QualityCheckStatus;
 import io.onedev.server.util.Verification;
@@ -76,9 +77,7 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
 import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.websocket.CommitIndexedRegion;
 import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public class NewRequestPage extends ProjectPage implements CommentSupport {
@@ -759,12 +758,12 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 	}
 
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> regions = super.getWebSocketObservables();
 		PullRequest request = getPullRequest();
 		if (request != null) {
-			regions.add(new CommitIndexedRegion(request.getBaseCommit()));
-			regions.add(new CommitIndexedRegion(request.getHeadCommit()));
+			regions.add(CommitIndexed.getWebSocketObservable(request.getBaseCommit().name()));
+			regions.add(CommitIndexed.getWebSocketObservable(request.getHeadCommit().name()));
 		}
 		return regions;
 	}

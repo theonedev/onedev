@@ -5,7 +5,6 @@ import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.search.CommitIndexed;
-import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
 public class CommitIndexedBroadcaster {
@@ -19,8 +18,7 @@ public class CommitIndexedBroadcaster {
 	
 	@Listen
 	public void on(CommitIndexed event) {
-		CommitIndexedRegion region = new CommitIndexedRegion(event.getCommitId());
-		webSocketManager.render(region, null);
+		webSocketManager.onObservableChanged(CommitIndexed.class.getName() + event.getCommitId().name(), null);
 	}
 
 }

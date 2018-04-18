@@ -97,8 +97,6 @@ import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.model.EntityModel;
 import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.server.web.websocket.PullRequestChangedRegion;
-import io.onedev.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends ProjectPage {
@@ -913,10 +911,10 @@ public abstract class RequestDetailPage extends ProjectPage {
 	}
 	
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new PullRequestChangedRegion(getPullRequest().getId()));
-		return regions;
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> observables = super.getWebSocketObservables();
+		observables.add(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+		return observables;
 	}
 
 	@Override

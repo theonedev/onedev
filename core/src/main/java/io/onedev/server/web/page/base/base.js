@@ -381,7 +381,7 @@ onedev.server = {
 
 	setupWebsocketCallback: function() {
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
-			if (message == "RenderCallback") { 
+			if (message.indexOf("ObservableChanged:") != -1) { 
 				function requestToRender() {
 					if (onedev.server.ajaxRequests.count != 0) {
 						setTimeout(function() {
@@ -397,7 +397,7 @@ onedev.server = {
 			}
 		});
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
-			Wicket.WebSocket.send("ConnectCallback");
+			Wicket.WebSocket.send("ConnectionOpened");
 		});
 	},
 

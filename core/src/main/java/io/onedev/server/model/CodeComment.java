@@ -294,6 +294,10 @@ public class CodeComment extends AbstractEntity {
 		return contextChanged;
 	}
 	
+	public static String getWebSocketObservable(Long commentId) {
+		return CodeComment.class.getName() + ":" + commentId;
+	}
+	
 	public static class ComparingInfo implements Serializable {
 
 		private static final long serialVersionUID = 1L;

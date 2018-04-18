@@ -30,7 +30,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
@@ -40,6 +39,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
@@ -47,11 +47,8 @@ import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
-import io.onedev.server.web.websocket.CodeCommentChangedRegion;
-import io.onedev.server.web.websocket.CommitIndexedRegion;
 import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
-import io.onedev.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public class RequestChangesPage extends RequestDetailPage implements CommentSupport {
@@ -134,7 +131,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 	
 	private void onRegionChange() {
-		OneDev.getInstance(WebSocketManager.class).onRegionChange(this);
+		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
 	}
 	
 	@Override
@@ -556,13 +553,13 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(ObjectId.fromString(state.oldCommit)));
-		regions.add(new CommitIndexedRegion(ObjectId.fromString(state.newCommit)));
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> observables = super.getWebSocketObservables();
+		observables.add(CommitIndexed.getWebSocketObservable(state.oldCommit));
+		observables.add(CommitIndexed.getWebSocketObservable((state.newCommit)));
 		if (state.commentId != null)
-			regions.add(new CodeCommentChangedRegion(state.commentId));
-		return regions;
+			observables.add(CodeComment.getWebSocketObservable(state.commentId));
+		return observables;
 	}
 
 	public static class State implements Serializable {

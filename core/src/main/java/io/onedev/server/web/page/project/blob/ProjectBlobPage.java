@@ -99,12 +99,8 @@ import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.util.resource.RawBlobResourceReference;
-import io.onedev.server.web.websocket.CodeCommentChangedRegion;
-import io.onedev.server.web.websocket.CommitIndexedRegion;
 import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.server.web.websocket.PullRequestChangedRegion;
 import io.onedev.server.web.websocket.WebSocketManager;
-import io.onedev.server.web.websocket.WebSocketRegion;
 
 @SuppressWarnings("serial")
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
@@ -702,7 +698,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		resolvedRevision = null;
 		resolvedRevision = getProject().getObjectId(state.blobIdent.revision);
 		
-		OneDev.getInstance(WebSocketManager.class).onRegionChange(this);
+		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
 		newRevisionPicker(target);
 		target.add(revisionIndexing);
 		newBlobNavigator(target);
@@ -874,7 +870,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				newBlobOperations(target);
 				newBlobContent(target);
 				resizeWindow(target);
-				OneDev.getInstance(WebSocketManager.class).onRegionChange(this);
+				OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
 			} else if (state.mark != null) {
 				// This logic is added for performance reason, we do not want to 
 				// reload the file if go to different mark positions in same file
@@ -899,14 +895,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			state.commentId = null;
 			state.mark = null;
 		}
-		OneDev.getInstance(WebSocketManager.class).onRegionChange(this);
+		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
 		pushState(target);
 	}
 
 	@Override
 	public void onAddComment(AjaxRequestTarget target, TextRange mark) {
 		state.commentId = null;
-		OneDev.getInstance(WebSocketManager.class).onRegionChange(this);
+		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
 		state.mark = mark;
 		pushState(target);
 	}
@@ -922,15 +918,15 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 	
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		regions.add(new CommitIndexedRegion(getProject().getRevCommit(resolvedRevision)));
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> observables = super.getWebSocketObservables();
+		observables.add("CommitIndexed:" + getProject().getRevCommit(resolvedRevision).name());
 		if (state.requestId != null)
-			regions.add(new PullRequestChangedRegion(state.requestId));
+			observables.add(PullRequest.class.getName() + ":" + state.requestId);
 		if (state.commentId != null)
-			regions.add(new CodeCommentChangedRegion(state.commentId));
+			observables.add(CodeComment.class.getName() + ":" + state.commentId);
 		
-		return regions;
+		return observables;
 	}
 
 	public static class State implements Serializable {

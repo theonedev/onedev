@@ -47,8 +47,6 @@ import io.onedev.server.web.page.user.TaskListPage;
 import io.onedev.server.web.page.user.UserListPage;
 import io.onedev.server.web.page.user.UserProfilePage;
 import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.server.web.websocket.TaskChangedRegion;
-import io.onedev.server.web.websocket.WebSocketRegion;
 import io.onedev.utils.license.LicenseDetail;
 
 @SuppressWarnings("serial")
@@ -173,7 +171,6 @@ public abstract class LayoutPage extends BasePage {
 			head.add(new WebMarkupContainer("userMenuTrigger").setVisible(false));
 			head.add(new WebMarkupContainer("userMenu").setVisible(false));
 		}
-		
 		head.setOutputMarkupId(true);
 	}
 
@@ -182,12 +179,11 @@ public abstract class LayoutPage extends BasePage {
 	};
 	
 	@Override
-	public Collection<WebSocketRegion> getWebSocketRegions() {
-		Collection<WebSocketRegion> regions = super.getWebSocketRegions();
-		if (getLoginUser() != null) {
-			regions.add(new TaskChangedRegion(getLoginUser().getId()));
-		}
-		return regions;
+	public Collection<String> getWebSocketObservables() {
+		Collection<String> observables = super.getWebSocketObservables();
+		if (getLoginUser() != null)
+			observables.add(User.getWebSocketObservable(getLoginUser().getId()));
+		return observables;
 	}
 
 	@Override
