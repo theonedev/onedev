@@ -87,7 +87,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return true;
 		} else {
 			User currentUser = getUser();
-			return currentUser != null && currentUser.equals(issue.getReporter());
+			return currentUser != null && currentUser.equals(issue.getSubmitter());
 		}
 	}
 	

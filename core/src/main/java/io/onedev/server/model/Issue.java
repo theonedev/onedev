@@ -78,12 +78,12 @@ public class Issue extends AbstractEntity {
 	private Project project;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	private User reporter;
+	private User submitter;
 	
-	private String reporterName;
+	private String submitterName;
 	
 	@Column(nullable=false)
-	private Date reportDate;
+	private Date submitDate;
 	
 	private int votes;
 	
@@ -132,25 +132,25 @@ public class Issue extends AbstractEntity {
 		this.project = project;
 	}
 
-	public User getReporter() {
-		return reporter;
+	public User getSubmitter() {
+		return submitter;
 	}
 
-	public void setReporter(User reporter) {
-		this.reporter = reporter;
+	public void setSubmitter(User submitter) {
+		this.submitter = submitter;
 	}
 
 	@Nullable
-	public String getReporterName() {
-		return reporterName;
+	public String getSubmitterName() {
+		return submitterName;
 	}
 
-	public Date getReportDate() {
-		return reportDate;
+	public Date getSubmitDate() {
+		return submitDate;
 	}
 
-	public void setReportDate(Date reportDate) {
-		this.reportDate = reportDate;
+	public void setSubmitDate(Date submitDate) {
+		this.submitDate = submitDate;
 	}
 
 	public int getVotes() {

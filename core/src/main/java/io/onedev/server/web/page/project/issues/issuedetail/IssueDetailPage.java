@@ -96,8 +96,8 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 		add(new Label("title", getIssue().getTitle()));
 		add(new IssueStateLabel("state", issueModel));
 		
-		add(new UserLink("reporter", User.getForDisplay(getIssue().getReporter(), getIssue().getReporterName())));
-		add(new Label("reportDate", DateUtils.formatAge(getIssue().getReportDate())));
+		add(new UserLink("reporter", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));
+		add(new Label("reportDate", DateUtils.formatAge(getIssue().getSubmitDate())));
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 

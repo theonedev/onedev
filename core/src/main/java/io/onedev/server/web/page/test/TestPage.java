@@ -1,10 +1,9 @@
 package io.onedev.server.web.page.test;
 
-import java.util.Date;
+import org.apache.wicket.markup.html.link.Link;
 
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -13,14 +12,14 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new Label("date", new AbstractReadOnlyModel<String>() {
+		add(new Link<Void>("test") {
 
 			@Override
-			public String getObject() {
-				return new Date().toString();
+			public void onClick() {
+				OneDev.getInstance(IssueManager.class).test();
 			}
 			
-		}));
+		});
 	}
 
 }

@@ -1,10 +1,7 @@
 package io.onedev.server.web.page.project.issues.issuelist;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
@@ -31,7 +28,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.ProjectManager;
@@ -39,7 +35,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueListCustomization;
-import io.onedev.server.model.support.issue.query.IssueSort;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.MultiValueIssueField;
 import io.onedev.server.web.WebConstants;
@@ -50,7 +45,6 @@ import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.beanlist.BeanListPropertyEditor;
 import io.onedev.server.web.editable.choice.MultiChoiceEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
@@ -59,8 +53,6 @@ import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.Work
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.DateUtils;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.utils.CollectionUtils;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class IssueListPage extends ProjectPage {
@@ -181,121 +173,6 @@ public class IssueListPage extends ProjectPage {
 			
 		});
 		
-		add(new ModalLink("sorts") {
-
-			private String getDuplicateFields(List<IssueSort> sorts) {
-				List<String> sortFields = sorts.stream().map(item->item.getField()).collect(Collectors.toList());
-				Set<String> duplicates = CollectionUtils.findDuplicates(sortFields);
-				if (!duplicates.isEmpty())
-					return "Duplicate fields found: " + StringUtils.join(duplicates);
-				else
-					return null;
-			}
-			
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "sortsFrag", IssueListPage.this);
-
-				IssueListCustomization customization = getCustomization();
-				Form<?> form = new Form<Void>("form") {
-
-					@Override
-					protected void onError() {
-						super.onError();
-						RequestCycle.get().find(AjaxRequestTarget.class).add(this);
-					}
-
-				};
-				
-				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(IssueListCustomization.class, "sorts"); 
-				IModel<List<Serializable>> propertyModel = new IModel<List<Serializable>>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public List<Serializable> getObject() {
-						return (List<Serializable>) propertyDescriptor.getPropertyValue(customization);
-					}
-
-					@Override
-					public void setObject(List<Serializable> object) {
-						propertyDescriptor.setPropertyValue(customization, object);
-					}
-					
-				};
-				
-				form.add(new BeanListPropertyEditor("editor", propertyDescriptor, propertyModel));
-				form.add(new NotificationPanel("feedback", form));
-				
-				form.add(new AjaxLink<Void>("close") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				
-				form.add(new AjaxButton("save") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						String duplicates = getDuplicateFields(customization.getSorts());
-						if (duplicates != null) { 
-							error(duplicates);
-							target.add(form);
-						} else {
-							WebSession.get().setMetaData(CUSTOMIZATION_KEY, customization);
-							setResponsePage(IssueListPage.this);
-						}
-					}
-					
-				});
-				
-				form.add(new AjaxButton("saveAsDefault") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()));
-					}
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						String duplicates = getDuplicateFields(customization.getSorts());
-						if (duplicates != null) { 
-							error(duplicates);
-							target.add(form);
-						} else {
-							WebSession.get().setMetaData(CUSTOMIZATION_KEY, customization);
-							getProject().setIssueListCustomization(customization);
-							OneDev.getInstance(ProjectManager.class).save(getProject());
-							setResponsePage(IssueListPage.this);
-						}
-					}
-					
-				});
-				
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				form.setOutputMarkupId(true);
-				fragment.add(form);
-				return fragment;
-			}
-			
-		});
-		
 		IDataProvider<Issue> dataProvider = new IDataProvider<Issue>() {
 
 			private IssueManager getIssueManager() {
@@ -308,12 +185,12 @@ public class IssueListPage extends ProjectPage {
 
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
-				return getIssueManager().query(getCustomization().getQuery(), getCustomization().getSorts(), (int)first, (int)count).iterator();
+				return getIssueManager().query(getCustomization().getQuery(), (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return getIssueManager().count(getCustomization().getQuery());
+				return getIssueManager().count(getCustomization().getQuery().getCriteria());
 			}
 
 			@Override
@@ -387,8 +264,8 @@ public class IssueListPage extends ProjectPage {
 				titleFrag.add(link);
 				item.add(titleFrag);
 				
-				item.add(new UserLink("reporterName", User.getForDisplay(issue.getReporter(), issue.getReporterName())));
-				item.add(new Label("reportDate", DateUtils.formatAge(issue.getReportDate())));
+				item.add(new UserLink("reporterName", User.getForDisplay(issue.getSubmitter(), issue.getSubmitterName())));
+				item.add(new Label("reportDate", DateUtils.formatAge(issue.getSubmitDate())));
 				
 				item.add(new IssueStateLabel("state", item.getModel()));
 				

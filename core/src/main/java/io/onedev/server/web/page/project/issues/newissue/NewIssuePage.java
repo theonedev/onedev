@@ -50,8 +50,8 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		super.onInitialize();
 
 		Issue issue = new Issue();
-		issue.setReporter(getLoginUser());
-		issue.setReportDate(new Date());
+		issue.setSubmitter(getLoginUser());
+		issue.setSubmitDate(new Date());
 		issue.setState(getProject().getIssueWorkflow().getInitialState().getName());
 		issue.setProject(getProject());
 		
