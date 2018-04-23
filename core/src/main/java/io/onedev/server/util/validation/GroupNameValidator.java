@@ -1,34 +1,31 @@
 package io.onedev.server.util.validation;
 
-import java.util.regex.Pattern;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.onedev.server.util.OneContext;
 import io.onedev.server.util.validation.annotation.GroupName;
 
 public class GroupNameValidator implements ConstraintValidator<GroupName, String> {
 
-	private static Pattern pattern = Pattern.compile("^[\\w-\\.]+$");
+	private static final NameValidator NAME_VALIDATOR = new NameValidator();
 	
 	public void initialize(GroupName constaintAnnotation) {
 	}
 
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
-		if (value == null) {
-			return true;
-		} else if (!pattern.matcher(value).find()) {
-			constraintContext.disableDefaultConstraintViolation();
-			String message = "Only alphanumeric, underscore, dash, and dot are accepted";
-			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-			return false;
-		} else if (value.equals("new")) {
-			constraintContext.disableDefaultConstraintViolation();
-			String message = "'new' is reserved and can not be used as group name";
-			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-			return false;
+		boolean isValid = NAME_VALIDATOR.isValid(value, constraintContext);
+		if (isValid) {
+			if (OneContext.get().getInputContext().isReservedName(value)) {
+				constraintContext.disableDefaultConstraintViolation();
+				String message = "'" + value + "' is a reserved name";
+				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+				return false;
+			} else {
+				return true;
+			}
 		} else {
-			return true;
+			return false;
 		}
 	}
 

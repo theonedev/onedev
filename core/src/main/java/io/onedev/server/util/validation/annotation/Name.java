@@ -17,9 +17,8 @@ import io.onedev.server.util.validation.NameValidator;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=NameValidator.class) 
 public @interface Name {
-	String message() default "Name can not contain any of these characters:\n" + 
-			NameValidator.invalidChars;
-
+	String message() default "";
+	
 	Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};

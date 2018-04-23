@@ -38,8 +38,8 @@ import io.onedev.utils.BeanUtils;
 @Table(
 		indexes={
 				@Index(columnList="g_project_id"), @Index(columnList="state"), 
-				@Index(columnList="title"), @Index(columnList="g_reporter_id"), 
-				@Index(columnList="votes")})
+				@Index(columnList="title"), @Index(columnList="g_submitter_id"), 
+				@Index(columnList="submitDate"), @Index(columnList="votes")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Issue extends AbstractEntity {
