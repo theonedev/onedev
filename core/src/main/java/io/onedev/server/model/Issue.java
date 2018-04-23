@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -28,7 +30,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.MultiValueIssueField;
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -46,7 +47,7 @@ public class Issue extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final Map<String, String> BUILTIN_FIELDS = new HashMap<>();
+	public static final Set<String> BUILTIN_FIELDS = new HashSet<>();
 	
 	static {
 		for (Method getter: BeanUtils.findGetters(Issue.class)) {
@@ -54,7 +55,7 @@ public class Issue extends AbstractEntity {
 				Field field = BeanUtils.findField(getter);
 				if (field != null && field.getAnnotation(ManyToOne.class) == null 
 						&& field.getAnnotation(OneToMany.class) == null) {
-					BUILTIN_FIELDS.put(EditableUtils.getDisplayName(field), field.getName());
+					BUILTIN_FIELDS.add(field.getName());
 				}
 			}
 		}

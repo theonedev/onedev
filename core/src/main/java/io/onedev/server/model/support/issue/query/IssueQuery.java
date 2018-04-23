@@ -41,12 +41,11 @@ public class IssueQuery implements Serializable {
 
 		List<Order> orders = new ArrayList<>();
 		for (IssueSort sort: sorts) {
-			if (Issue.BUILTIN_FIELDS.containsKey(sort.getField())) {
-				String fieldName = Issue.BUILTIN_FIELDS.get(sort.getField());
+			if (Issue.BUILTIN_FIELDS.contains(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(root.get(fieldName)));
+					orders.add(builder.asc(root.get(sort.getField())));
 				else
-					orders.add(builder.desc(root.get(fieldName)));
+					orders.add(builder.desc(root.get(sort.getField())));
 			} else {
 				Join<Issue, IssueField> join = root.join("fields", JoinType.LEFT);
 				join.on(builder.equal(join.get("name"), sort.getField()));
