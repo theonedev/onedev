@@ -14,12 +14,12 @@ public class SymbolHit extends QueryHit {
 
 	private final Symbol symbol;
 	
-	private final Range matchRange;
+	private final Range match;
 	
-	public SymbolHit(String blobPath, Symbol symbol, @Nullable Range matchRange) {
+	public SymbolHit(String blobPath, Symbol symbol, @Nullable Range match) {
 		super(blobPath, symbol.getPosition());
 		this.symbol = symbol;
-		this.matchRange = matchRange;
+		this.match = match;
 	}
 
 	public Symbol getSymbol() {
@@ -33,7 +33,7 @@ public class SymbolHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		return symbol.render(componentId, matchRange);
+		return symbol.render(componentId, match);
 	}
 
 	@Override

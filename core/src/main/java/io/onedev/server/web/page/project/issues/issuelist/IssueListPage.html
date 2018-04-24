@@ -1,10 +1,36 @@
 <wicket:extend>
 	<div id="issue-list">
-		<div class="head clearfix">
-			<a wicket:id="newIssue" class="btn btn-success pull-left"><i class="fa fa-plus"></i> Create New</a>
-			<span class="pull-right">
-				<a wicket:id="fields" class="btn btn-default" title="Additional fields to display"><i class="fa fa-list-ul"></i></a>
-			</span>
+		<div class="head">
+			<div class="primary clearfix">
+				<div class="pull-left">
+					<form wicket:id="query" class="query">
+						<div class="input-group">
+							<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order issues here"></input>
+							<span class="input-group-btn">
+								<button type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+							</span>
+						</div>
+						<div wicket:id="feedback"></div>
+					</form>
+				</div>
+				<div class="pull-right">
+					<a wicket:id="newIssue" class="btn btn-success open-new"><i class="fa fa-plus"></i> Open New</a>
+					<a wicket:id="fields" class="btn btn-default" title="Additional fields to display"><i class="fa fa-list-ul"></i></a>
+				</div>
+			</div>
+			<div wicket:id="additional" class="additional">
+				<span class="label label-info">Saved Queries</span>
+				<span class="btn-group user-queries">
+					<wicket:container wicket:id="userQueries"><a wicket:id="link" class="btn btn-default btn-sm"><span wicket:id="label"></span></a></wicket:container>
+				</span>
+				<span class="btn-group project-queries">
+					<wicket:container wicket:id="projectQueries"><a wicket:id="link" class="btn btn-default btn-sm"><span wicket:id="label"></span></a></wicket:container>
+				</span>
+				<span class="btn-group actions">
+					<a wicket:id="save" class="btn btn-default btn-sm"><i class="fa fa-save"></i> Save</a>
+					<a wicket:id="edit" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit</a>
+				</span>
+			</div>
 		</div>
 		<div wicket:id="body" class="body">
 			<wicket:enclosure child="reconcile">
@@ -16,10 +42,10 @@
 				<div class="primary">
 					<div wicket:id="id" class="id"></div>
 					<div wicket:id="title" class="title"></div>
-					<div class="reporter">
-						<a wicket:id="reporterName"></a>
+					<div class="submitter">
+						<a wicket:id="submitterName"></a>
 						opened
-						<span wicket:id="reportDate"></span>
+						<span wicket:id="submitDate"></span>
 					</div>
 				</div>
 				<div class="additional">
@@ -53,23 +79,61 @@
 			</div>
 		</form>	
 	</wicket:fragment>
-	<wicket:fragment wicket:id="sortsFrag">
-		<form wicket:id="form" class="issue-table-sorts leave-confirm">
+	<wicket:fragment wicket:id="saveQueryFrag">
+		<form wicket:id="form" class="save-issue-query">
 			<div class="modal-header">
 				<button wicket:id="close" type="button" class="close">&times;</button>
 				<h4 id="modal-title" class="modal-title">
-					Sort on Specified Fields
+					Save Query
 				</h4>
 			</div>
 			<div class="modal-body">
 				<div wicket:id="editor"></div>
-				<div wicket:id="feedback"></div>
 			</div>
 			<div class="modal-footer clearfix">
-				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save"></input>
-				<a wicket:id="saveAsDefault" class="dirty-aware btn btn-primary">Save as Default</a>
+				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save as Mine"></input>
+				<a wicket:id="saveForAll" class="dirty-aware btn btn-primary">Save for All Users</a>
 				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
 			</div>
 		</form>	
+	</wicket:fragment>
+	<wicket:fragment wicket:id="editSavedFrag">
+		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
+			<h4 wicket:id="title" id="modal-title" class="modal-title"></h4>
+		</div>
+		<div class="modal-body edit-saved-issue-query">
+			<div wicket:id="content"></div>
+		</div>
+		<div class="modal-footer clearfix">
+			<a wicket:id="save" class="dirty-aware btn btn-primary">Save</a>
+			<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+		</div>
+		<wicket:fragment wicket:id="tabFrag">
+			<ul wicket:id="tab" class="nav nav-tabs"></ul>
+			<div wicket:id="tabPanel"></div>
+		</wicket:fragment>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="queryListFrag">
+		<table wicket:id="queries" class="table table-condensed">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="queries">
+					<td class="name">
+						<span class="drag-handle fa fa-arrows" title="Drag to reorder fields"></span>
+						<span wicket:id="name"></span>
+					</td>
+					<td class="actions">
+						<a wicket:id="delete"><i class="fa fa-trash"></i></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div wicket:id="noRecords" class="no-records">No saved queries</div>
 	</wicket:fragment>
 </wicket:extend>

@@ -28,9 +28,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.LineStats;
 import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Day;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class SourceLinesPage extends ProjectStatsPage {

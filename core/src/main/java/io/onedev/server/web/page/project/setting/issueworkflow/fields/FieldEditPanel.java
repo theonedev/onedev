@@ -162,7 +162,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	
 	@Override
 	public boolean isReservedName(String inputName) {
-		for (String displayName: Issue.BUILTIN_FIELDS) {
+		for (String displayName: Issue.BUILTIN_FIELDS.keySet()) {
 			if (displayName.equals(inputName))
 				return true;
 		}

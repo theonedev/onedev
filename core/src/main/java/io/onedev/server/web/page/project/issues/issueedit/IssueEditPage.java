@@ -77,7 +77,7 @@ public class IssueEditPage extends ProjectPage implements InputContext {
 				excludedFields.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
 		}
 
-		form.add(BeanContext.editBean("fields", fieldBean));
+		form.add(BeanContext.editBean("fields", fieldBean, excludedFields));
 		
 		form.add(new Button("save") {
 

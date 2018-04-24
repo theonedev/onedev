@@ -1,11 +1,15 @@
-package io.onedev.server.web.util;
+package io.onedev.server.util;
 
 import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.joda.time.DateTime;
 import org.ocpsoft.prettytime.PrettyTime;
 
-import io.onedev.server.util.Constants;
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
@@ -23,4 +27,14 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         return Constants.DATETIME_FORMATTER.print(new DateTime(date));
     }
 
+    @Nullable
+    public static Date parseRelaxed(String relaxed) {
+    	Parser parser = new Parser();
+    	List<DateGroup> groups = parser.parse(relaxed);
+    	if (!groups.isEmpty() && !groups.get(0).getDates().isEmpty())
+    		return groups.get(0).getDates().get(0);
+    	else
+    		return null;
+    }
+    
 }

@@ -9,6 +9,7 @@ import org.apache.wicket.model.IModel;
 import io.onedev.codeassist.InputCompletion;
 import io.onedev.codeassist.InputStatus;
 import io.onedev.codeassist.InputSuggestion;
+import io.onedev.codeassist.Substitution;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -39,10 +40,8 @@ public class BranchPatternAssistBehavior extends InputAssistBehavior {
 			int caret = suggestion.getCaret();
 			if (caret == -1)
 				caret = suggestion.getContent().length();
-			InputCompletion completion = new InputCompletion(0, inputStatus.getContent().length(), 
-					suggestion.getContent(), caret, suggestion.getLabel(), 
-					null, suggestion.getMatchRange());
-			completions.add(completion);
+			Substitution substitution = new Substitution(0, inputStatus.getContent().length(), suggestion.getContent());
+			completions.add(new InputCompletion(substitution, caret, null, suggestion.getMatch()));
 		}
 		return completions;
 	}

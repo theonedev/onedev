@@ -37,8 +37,8 @@ public class SuggestionUtils {
 			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			int index = branch.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(branch, null, matchRange));
+				Range match = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(branch, null, match));
 			}
 		}
 		return suggestions;
@@ -52,8 +52,8 @@ public class SuggestionUtils {
 			String tag = GitUtils.ref2tag(ref.getRef().getName());
 			int index = tag.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(tag, null, matchRange));
+				Range match = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(tag, null, match));
 			}
 		}
 		return suggestions;
@@ -67,8 +67,8 @@ public class SuggestionUtils {
 			String name = user.getName();
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(name, matchRange));
+				Range match = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(name, match));
 			}
 		}
 		return suggestions;
@@ -81,8 +81,8 @@ public class SuggestionUtils {
 			String name = group.getName();
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1) {
-				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(name, matchRange));
+				Range match = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(name, match));
 			}
 		}
 		return suggestions;
@@ -95,8 +95,8 @@ public class SuggestionUtils {
 		for (String verificationName: OneDev.getInstance(VerificationManager.class).getVerificationNames(project)) {
 			int index = verificationName.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(verificationName, matchRange));
+				Range match = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(verificationName, match));
 			}
 		}
 		return suggestions;
@@ -132,15 +132,15 @@ public class SuggestionUtils {
 			if (applied != null) 
 				allApplied.add(applied);
 		}
-		allApplied.sort((o1, o2) -> o1.getMatchRange().getFrom() - o2.getMatchRange().getFrom());
+		allApplied.sort((o1, o2) -> o1.getMatch().getFrom() - o2.getMatch().getFrom());
 
 		Map<String, Set<String>> childrenCache = new HashMap<>();
 		Map<String, Range> suggestedInputs = new LinkedHashMap<>();
 		for (PatternApplied applied: allApplied) {
-			Range matchRange = applied.getMatchRange();
-			String suffix = applied.getText().substring(matchRange.getTo());
+			Range match = applied.getMatch();
+			String suffix = applied.getText().substring(match.getTo());
 			int index = suffix.indexOf('/');
-			String suggestedInput = applied.getText().substring(0, matchRange.getTo());
+			String suggestedInput = applied.getText().substring(0, match.getTo());
 			if (index != -1) {
 				suggestedInput += suffix.substring(0, index) + "/";
 				while (true) {
@@ -162,7 +162,7 @@ public class SuggestionUtils {
 			} else {
 				suggestedInput += suffix;
 			}
-			suggestedInputs.put(suggestedInput, matchRange);
+			suggestedInputs.put(suggestedInput, match);
 			if (suggestedInputs.size() == InputAssistBehavior.MAX_SUGGESTIONS)
 				break;
 		}

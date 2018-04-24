@@ -3,9 +3,9 @@ package io.onedev.server.model.support.issue.query;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueField;
 
-public class StateCriteria extends IssueCriteria {
+public class MultiChoiceFieldCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -13,15 +13,16 @@ public class StateCriteria extends IssueCriteria {
 	
 	private final int operator;
 	
-	public StateCriteria(String value, int operator) {
+	public MultiChoiceFieldCriteria(String name, String value, int operator) {
+		super(name);
 		this.value = value;
 		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(QueryBuildContext context) {
-		Path<?> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.STATE));
-		if (operator == IssueQueryLexer.Is)
+		Path<?> attribute = context.getJoin(getFieldName()).get(IssueField.VALUE);
+		if (operator == IssueQueryLexer.Contains)
 			return context.getBuilder().equal(attribute, value);
 		else
 			return context.getBuilder().notEqual(attribute, value);

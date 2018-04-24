@@ -31,6 +31,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.avatar.AvatarLink;
@@ -38,7 +39,6 @@ import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.util.DateUtils;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")

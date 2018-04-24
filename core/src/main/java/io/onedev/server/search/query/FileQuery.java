@@ -44,14 +44,14 @@ public class FileQuery extends BlobQuery {
 		if (caseSensitive) {
 			if (WildcardUtils.matchString(fileNames, blobName) 
 					&& (excludeFileName == null || !excludeFileName.equals(blobName))) {
-				Range matchRange = WildcardUtils.rangeOfMatch(fileNames, blobName);
-				hits.add(new FileHit(blobPath, matchRange));
+				Range match = WildcardUtils.rangeOfMatch(fileNames, blobName);
+				hits.add(new FileHit(blobPath, match));
 			}
 		} else {
 			if (WildcardUtils.matchString(fileNames, blobName.toLowerCase()) 
 					&& (excludeFileName == null || !excludeFileName.equalsIgnoreCase(blobName))) {
-				Range matchRange = WildcardUtils.rangeOfMatch(fileNames, blobName.toLowerCase());
-				hits.add(new FileHit(blobPath, matchRange));
+				Range match = WildcardUtils.rangeOfMatch(fileNames, blobName.toLowerCase());
+				hits.add(new FileHit(blobPath, match));
 			}
 		}
 	}

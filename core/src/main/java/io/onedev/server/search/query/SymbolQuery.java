@@ -94,8 +94,8 @@ public class SymbolQuery extends BlobQuery {
 						if (WildcardUtils.matchString(normalizedTerm, normalizedSymbolName)
 								&& (normalizedExcludeTerm == null || !normalizedSymbolName.equals(normalizedExcludeTerm))
 								&& (excludeBlobPath == null || !excludeBlobPath.equals(blobPath))) {
-							Range matchRange = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
-							hits.add(new SymbolHit(blobPath, symbol, matchRange));
+							Range match = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
+							hits.add(new SymbolHit(blobPath, symbol, match));
 						}
 					}
 				} else {

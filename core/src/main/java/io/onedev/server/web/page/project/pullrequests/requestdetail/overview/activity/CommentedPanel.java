@@ -24,6 +24,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.link.UserLink;
@@ -31,7 +32,6 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.SinceChangesLink;
-import io.onedev.server.web.util.DateUtils;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 

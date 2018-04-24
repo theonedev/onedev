@@ -15,11 +15,11 @@ public class FileHit extends QueryHit {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Range matchRange;
+	private final Range match;
 	
-	public FileHit(String blobPath, @Nullable Range matchRange) {
+	public FileHit(String blobPath, @Nullable Range match) {
 		super(blobPath, null);
-		this.matchRange = matchRange;
+		this.match = match;
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class FileHit extends QueryHit {
 		if (fileName.contains("/")) 
 			fileName = StringUtils.substringAfterLast(fileName, "/");
 		
-		return new HighlightableLabel(componentId, fileName, matchRange);
+		return new HighlightableLabel(componentId, fileName, match);
 	}
 
 	@Override
@@ -49,8 +49,8 @@ public class FileHit extends QueryHit {
 			return null;
 	}
 
-	public Range getMatchRange() {
-		return matchRange;
+	public Range getMatch() {
+		return match;
 	}
 
 }

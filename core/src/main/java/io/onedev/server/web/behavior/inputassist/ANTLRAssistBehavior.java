@@ -20,6 +20,8 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 
+import com.google.common.base.Optional;
+
 import io.onedev.codeassist.AntlrUtils;
 import io.onedev.codeassist.CodeAssist;
 import io.onedev.codeassist.InputCompletion;
@@ -76,9 +78,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			}
 
 			@Override
-			protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, String suggestedLiteral,
-					boolean complete) {
-				return ANTLRAssistBehavior.this.wrapAsSuggestion(expectedElement, suggestedLiteral, complete);
+			protected Optional<String> describe(ParentedElement expectedElement, String suggestedLiteral) {
+				return ANTLRAssistBehavior.this.describe(expectedElement, suggestedLiteral);
 			}
 
 			@Override
@@ -228,13 +229,22 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		return new ArrayList<>();
 	}
 	
+	/**
+	 * Describe suggested literal
+	 * 
+	 * @param expectedElement
+	 * 			element of the literal
+	 * @param suggestedLiteral
+	 * 			suggested literal
+	 * @return
+	 * 			an optional containing description of the literal, or <tt>null</tt> to suppress the suggestion
+	 */
 	@Nullable
-	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
-			String suggestedLiteral, boolean complete) {
-		if (StringUtils.isNotBlank(suggestedLiteral))
-			return new InputSuggestion(suggestedLiteral, -1, complete, null, null);
-		else
-			return new InputSuggestion(suggestedLiteral, -1, complete, "space", null);
+	protected Optional<String> describe(ParentedElement expectedElement, String suggestedLiteral) {
+		if (StringUtils.isNotBlank(suggestedLiteral)) 
+			return Optional.absent();
+		else 
+			return Optional.of("space");
 	}
 	
 }

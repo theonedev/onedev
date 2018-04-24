@@ -2,9 +2,10 @@ package io.onedev.server.model.support.issue;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -14,16 +15,16 @@ public class IssueListCustomization implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<IssueQuery> presetQueries = new ArrayList<>();
+	private Map<String, String> savedQueries = new LinkedHashMap<>();
 	
 	private List<String> displayFields = new ArrayList<>();
 	
-	public List<IssueQuery> getPresetQueries() {
-		return presetQueries;
+	public Map<String, String> getSavedQueries() {
+		return savedQueries;
 	}
 
-	public void setPresetQueries(List<IssueQuery> presetQueries) {
-		this.presetQueries = presetQueries;
+	public void setSavedQueries(Map<String, String> savedQueries) {
+		this.savedQueries = savedQueries;
 	}
 
 	@ChoiceProvider("getFieldChoices")
@@ -54,12 +55,4 @@ public class IssueListCustomization implements Serializable {
 		getDisplayFields().remove(fieldName);
 	}
 
-	public IssueQuery getQuery() {
-		if (!presetQueries.isEmpty()) {
-			return presetQueries.iterator().next();
-		} else {
-			return new IssueQuery(null, new ArrayList<>());
-		}
-	}
-	
 }

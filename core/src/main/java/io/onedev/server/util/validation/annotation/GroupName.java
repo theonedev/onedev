@@ -12,7 +12,6 @@ import io.onedev.server.util.validation.GroupNameValidator;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Name
 @Constraint(validatedBy=GroupNameValidator.class) 
 public @interface GroupName {
 

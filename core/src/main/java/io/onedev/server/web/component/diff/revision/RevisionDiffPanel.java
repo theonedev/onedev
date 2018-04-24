@@ -61,6 +61,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.codeassist.InputCompletion;
 import io.onedev.codeassist.InputStatus;
 import io.onedev.codeassist.InputSuggestion;
+import io.onedev.codeassist.Substitution;
 import io.onedev.jsymbol.util.NoAntiCacheImage;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
@@ -629,15 +630,11 @@ public class RevisionDiffPanel extends Panel {
 					int caret = suggestion.getCaret();
 					if (caret == -1)
 						caret = suggestion.getContent().length();
-					InputCompletion completion;
-					if (exclude) {
-						completion = new InputCompletion(0, inputStatus.getContent().length(), 
-								"-"+suggestion.getContent(), caret+1, null, null, suggestion.getMatchRange());
-					} else {
-						completion = new InputCompletion(0, inputStatus.getContent().length(), suggestion.getContent(), 
-								caret, null, null, suggestion.getMatchRange());
-					}
-					completions.add(completion);
+					String suggestedContent = suggestion.getContent();
+					if (exclude) 
+						suggestedContent = "-" + suggestedContent;
+					Substitution substitution = new Substitution(0, inputStatus.getContent().length(), suggestedContent);
+					completions.add(new InputCompletion(substitution, caret, null, suggestion.getMatch()));
 				}
 				return completions;
 			}

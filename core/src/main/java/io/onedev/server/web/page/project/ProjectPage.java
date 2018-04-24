@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -15,6 +16,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -140,7 +142,26 @@ public abstract class ProjectPage extends LayoutPage {
 				tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
 						0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class));
 				
-				tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssueDetailPage.class, NewIssuePage.class));
+				tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssueDetailPage.class, NewIssuePage.class) {
+
+					@Override
+					public Component render(String componentId) {
+						return new ProjectTabLink(componentId, this) {
+
+							@Override
+							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+								String query = null;
+								if (getLoginUser() != null && !getLoginUser().getIssueQueries().isEmpty())
+									query = getLoginUser().getIssueQueries().values().iterator().next();
+								if (query == null && !getProject().getIssueListCustomization().getSavedQueries().isEmpty())
+									query = getProject().getIssueListCustomization().getSavedQueries().values().iterator().next();
+								return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, IssueListPage.paramsOf(getProject(), query));
+							}
+							
+						};
+					}
+					
+				});
 				
 				tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
 						0, ProjectCodeCommentsPage.class));

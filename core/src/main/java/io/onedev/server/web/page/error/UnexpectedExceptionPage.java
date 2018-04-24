@@ -37,8 +37,8 @@ import com.google.common.base.Throwables;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.model.User;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.server.web.util.DateUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
 

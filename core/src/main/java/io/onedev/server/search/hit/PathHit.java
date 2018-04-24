@@ -14,11 +14,11 @@ public class PathHit extends QueryHit {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Range matchRange;
+	private final Range match;
 	
-	public PathHit(String blobPath, @Nullable Range matchRange) {
+	public PathHit(String blobPath, @Nullable Range match) {
 		super(blobPath, null);
-		this.matchRange = matchRange;
+		this.match = match;
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class PathHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		return new HighlightableLabel(componentId, getBlobPath(), matchRange);
+		return new HighlightableLabel(componentId, getBlobPath(), match);
 	}
 
 	@Override
@@ -41,8 +41,8 @@ public class PathHit extends QueryHit {
 		return null;
 	}
 
-	public Range getMatchRange() {
-		return matchRange;
+	public Range getMatch() {
+		return match;
 	}
 
 }

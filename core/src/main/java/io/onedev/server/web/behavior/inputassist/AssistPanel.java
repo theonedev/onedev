@@ -87,12 +87,12 @@ class AssistPanel extends Panel {
 	private Component newSuggestionItem(String itemId, InputCompletion suggestion) {
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
 		WebMarkupContainer link = new WebMarkupContainer("link");
-		Range matchRange = suggestion.getMatchRange();
-		String label = suggestion.getLabel();
-		if (matchRange != null) {
-			String prefix = StringEscapeUtils.escapeHtml4(label.substring(0, matchRange.getFrom()));
-			String suffix = StringEscapeUtils.escapeHtml4(label.substring(matchRange.getTo()));
-			String matched = StringEscapeUtils.escapeHtml4(label.substring(matchRange.getFrom(), matchRange.getTo()));
+		Range match = suggestion.getMatch();
+		String label = suggestion.getSubstitution().getContent();
+		if (match != null) {
+			String prefix = StringEscapeUtils.escapeHtml4(label.substring(0, match.getFrom()));
+			String suffix = StringEscapeUtils.escapeHtml4(label.substring(match.getTo()));
+			String matched = StringEscapeUtils.escapeHtml4(label.substring(match.getFrom(), match.getTo()));
 			link.add(new Label("label", prefix + "<b>" + matched + "</b>" + suffix).setEscapeModelStrings(false));
 		} else {
 			link.add(new Label("label", label));

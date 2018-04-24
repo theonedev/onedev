@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project;
 
+import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -23,15 +24,18 @@ public class ProjectTabLink extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		ProjectPage page = (ProjectPage) getPage();
-		Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
-				tab.getMainPageClass(), ProjectPage.paramsOf(page.getProject()));
+		Link<?> link = newLink("link", tab.getMainPageClass());
 		link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
 		
 		link.add(new Label("text", tab.getTitleModel()));
 		
 		link.add(new Label("count", tab.getCount()).setVisible(tab.getCount()!=0));
 		add(link);
+	}
+	
+	protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+		ProjectPage page = (ProjectPage) getPage();
+		return new ViewStateAwarePageLink<Void>("link",pageClass, ProjectPage.paramsOf(page.getProject()));
 	}
 
 }

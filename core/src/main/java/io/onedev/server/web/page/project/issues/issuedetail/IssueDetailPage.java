@@ -47,6 +47,7 @@ import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.model.support.issue.workflow.StateTransition;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.MultiValueIssueField;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -61,7 +62,6 @@ import io.onedev.server.web.page.project.issues.issueedit.IssueEditPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.ConfirmOnClick;
-import io.onedev.server.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class IssueDetailPage extends ProjectPage implements InputContext {

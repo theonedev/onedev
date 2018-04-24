@@ -7,8 +7,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.lib.PersonIdent;
 
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class ContributorPanel extends Panel {

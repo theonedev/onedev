@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -9,6 +10,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -87,6 +89,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestTask> requestTasks = new ArrayList<>();
+    
+	@Lob
+	@Column(length=65535)
+    private LinkedHashMap<String, String> issueQueries = new LinkedHashMap<>();
 
     @Override
     public PrincipalCollection getPrincipals() {
@@ -180,6 +186,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setRequestTasks(Collection<PullRequestTask> requestTasks) {
 		this.requestTasks = requestTasks;
+	}
+
+	public LinkedHashMap<String, String> getIssueQueries() {
+		return issueQueries;
+	}
+
+	public void setIssueQueries(LinkedHashMap<String, String> issueQueries) {
+		this.issueQueries = issueQueries;
 	}
 
 	@SuppressWarnings("deprecation")

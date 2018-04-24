@@ -2,7 +2,7 @@
 	padding: 8px;
 }
 .input-assist td {
-	padding: 2px 4px;
+	padding: 4px 8px;
 }
 .input-assist a {
 	color: #333;
@@ -26,7 +26,7 @@
 .input-assist .suggestion a {
 	padding-right: 12px;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-	font-size: 13px;
+	font-size: 12px;
 }
 .input-assist .help {
 	margin-top: 8px;

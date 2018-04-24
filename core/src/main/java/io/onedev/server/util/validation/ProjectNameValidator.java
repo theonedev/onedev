@@ -1,32 +1,35 @@
 package io.onedev.server.util.validation;
 
+import java.util.regex.Pattern;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.util.OneContext;
 import io.onedev.server.util.validation.annotation.ProjectName;
 
 public class ProjectNameValidator implements ConstraintValidator<ProjectName, String> {
 
-	private static final NameValidator NAME_VALIDATOR = new NameValidator();
+	private static final Pattern PATTERN = Pattern.compile("[\\w-\\.]+");
 	
 	public void initialize(ProjectName constaintAnnotation) {
 	}
 
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
-		boolean isValid = NAME_VALIDATOR.isValid(value, constraintContext);
-		if (isValid) {
-			if (OneContext.get().getInputContext().isReservedName(value)) {
-				constraintContext.disableDefaultConstraintViolation();
-				String message = "'" + value + "' is a reserved name";
-				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-				return false;
-			} else {
-				return true;
-			}
-		} else {
+		if (value == null) {
+			return true;
+		} else if (!PATTERN.matcher(value).matches()) {
+			constraintContext.disableDefaultConstraintViolation();
+			String message = "Only alphanumeric, underscore, dash, and dot are accepted";
+			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		}
+		} else if (value.equals("new")) {
+			constraintContext.disableDefaultConstraintViolation();
+			String message = "'new' is reserved and can not be used as project name";
+			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+			return false;
+		} else {
+			return true;
+		}	
 	}
 	
 }

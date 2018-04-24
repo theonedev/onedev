@@ -1,6 +1,33 @@
 #issue-list>.head {
 	margin-bottom: 20px;
 }
+#issue-list>.head>.primary>.pull-left {
+	width: 75%;
+}
+#issue-list>.head>.primary {
+	margin-bottom: 20px;
+}
+#issue-list>.head>.primary .open-new {
+	margin-right: 8px;
+}
+#issue-list>.head .alert {
+	margin-top: 20px;
+	margin-bottom: 0;
+}
+#issue-list>.head .list-unstyled {
+	margin-bottom: 0;
+}
+#issue-list>.head>.additional>* {
+	margin-right: 8px;
+}
+#issue-list>.head>.additional .actions>a {
+	margin-right: 0;
+}
+#issue-list>.head>.additional .label {
+	font-size: 16px;
+	vertical-align: middle;
+}
+
 #issue-list .issue {
 	border-bottom: 2px solid #DDD;
 	margin-bottom: 12px;
@@ -26,7 +53,7 @@
 	font-size: 16px;
 	font-weight: bold;
 }
-#issue-list .issue .primary .reporter {
+#issue-list .issue .primary .submitter {
 	text-align: right;
 	width: 300px;
 	padding-right: 0;
@@ -62,4 +89,12 @@
 #issue-list .issue .additional>.votes {
 	text-align: right;
 	padding-right: 0;
+}
+
+.edit-saved-issue-query .actions {
+	width: 10%;
+}
+.edit-saved-issue-query .title {
+	font-size: 16px;
+	margin-bottom: 8px;
 }

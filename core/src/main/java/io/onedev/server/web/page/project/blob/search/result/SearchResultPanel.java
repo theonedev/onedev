@@ -88,9 +88,9 @@ public abstract class SearchResultPanel extends Panel {
 				blob.getHits().add(hit);
 			} else { 
 				FileHit fileHit = (FileHit) hit;
-				if (fileHit.getMatchRange() != null) {
+				if (fileHit.getMatch() != null) {
 					int index = blob.getBlobPath().lastIndexOf('/');
-					blob.setMatchRange(new Range(fileHit.getMatchRange().getFrom()+index+1, fileHit.getMatchRange().getTo()+index+1));
+					blob.setMatch(new Range(fileHit.getMatch().getFrom()+index+1, fileHit.getMatch().getTo()+index+1));
 				}
 			}
 		}
@@ -448,7 +448,7 @@ public abstract class SearchResultPanel extends Panel {
 						super.onInitialize();
 						
 						String blobPath = blobItem.getModelObject().getBlobPath();
-						add(new HighlightableLabel("label", blobPath, blobItem.getModelObject().getMatchRange()));
+						add(new HighlightableLabel("label", blobPath, blobItem.getModelObject().getMatch()));
 						
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));

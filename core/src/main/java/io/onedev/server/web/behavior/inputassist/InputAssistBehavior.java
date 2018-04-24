@@ -136,7 +136,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 				List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
 				for (Iterator<InputCompletion> it = suggestions.iterator(); it.hasNext();) {
 					InputCompletion suggestion = it.next();
-					if (inputStatus.getContentBeforeCaret().equals(suggestion.getReplaceContent())) {
+					if (inputStatus.getContentBeforeCaret().equals(suggestion.getSubstitution().getContent())) {
 						it.remove();
 					}
 				}

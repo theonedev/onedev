@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.util.reviewrequirement.ReviewRequirementSpecParser;
+import com.google.common.base.Optional;
 
 import io.onedev.codeassist.FenceAware;
 import io.onedev.codeassist.InputSuggestion;
@@ -17,6 +17,7 @@ import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.codeassist.grammar.RuleRefElementSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.ProjectPrivilege;
+import io.onedev.server.util.reviewrequirement.ReviewRequirementSpecParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -95,8 +96,7 @@ public class ReviewRequirementSpecAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, String suggestedLiteral, 
-			boolean complete) {
+	protected Optional<String> describe(ParentedElement expectedElement, String suggestedLiteral) {
 		String description;
 		switch (suggestedLiteral) {
 		case "all":
@@ -111,7 +111,7 @@ public class ReviewRequirementSpecAssistBehavior extends ANTLRAssistBehavior {
 		default:
 			description = null;
 		}
-		return new InputSuggestion(suggestedLiteral, description, null);
+		return Optional.fromNullable(description);
 	}
 
 	@Override

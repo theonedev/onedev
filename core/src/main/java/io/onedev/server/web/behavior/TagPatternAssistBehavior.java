@@ -6,15 +6,16 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.codeassist.InputCompletion;
 import io.onedev.codeassist.InputStatus;
 import io.onedev.codeassist.InputSuggestion;
+import io.onedev.codeassist.Substitution;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.utils.Range;
-
-import com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class TagPatternAssistBehavior extends InputAssistBehavior {
@@ -39,10 +40,8 @@ public class TagPatternAssistBehavior extends InputAssistBehavior {
 			int caret = suggestion.getCaret();
 			if (caret == -1)
 				caret = suggestion.getContent().length();
-			InputCompletion completion = new InputCompletion(0, inputStatus.getContent().length(), 
-					suggestion.getContent(), caret, suggestion.getLabel(), 
-					null, suggestion.getMatchRange());
-			completions.add(completion);
+			Substitution substitution = new Substitution(0, inputStatus.getContent().length(), suggestion.getContent());
+			completions.add(new InputCompletion(substitution, caret, null, suggestion.getMatch()));
 		}
 		return completions;
 	}

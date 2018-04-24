@@ -1,14 +1,106 @@
 grammar IssueQuery;
 
 query
-    : criteria* 'order by' FieldName (',' FieldName)* EOF
+    : WS* criteria WS+ OrderBy WS+ order (WS+ 'and' WS+ order)* WS* EOF
+    | WS* criteria WS* EOF
+    | WS* OrderBy WS+ order (WS+ 'and' WS+ order)* WS* EOF
+    | WS* EOF
     ;
 
 criteria
-    : 'c'
+    : Mine																			#MineCriteria
+    | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|ContainsMe|DoesNotContainMe|IsEmpty|IsNotEmpty) #UnaryCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains|DoesNotContain) WS+ criteriaValue=Quoted #ValueCriteria
+    | criteria WS+ 'and' WS+ criteria												#AndCriteria
+    | criteria WS+ 'or' WS+ criteria												#OrCriteria
+    | '(' WS* criteria WS* ')'														#BracedCriteria
     ;
 
-FieldName
-    : ~[~`!@#$%^&()=+;',/\\:*?\"|(){}<> \[\]]
+order
+	: orderField=Quoted WS* (WS+ direction=('asc'|'desc'))?
+	;
+
+Mine
+	: 'mine'
+	;
+	
+OrderBy
+    : 'order' WS+ 'by'
     ;
 
+Is
+	: 'is'
+	;
+
+IsNot
+	: 'is' WS+ 'not'
+	;
+	
+IsMe
+	: 'is' WS+  'me'
+	;
+	
+IsNotMe
+	: 'is' WS+ 'not' WS+ 'me'
+	;		
+
+Contains
+	: 'contains'
+	;
+
+DoesNotContain
+	: 'does' WS+ 'not' WS+ 'contain'
+	;
+
+ContainsMe
+	: 'contains' WS+ 'me'
+	;
+
+DoesNotContainMe
+	: 'does' WS+ 'not' WS+ 'contain' WS+ 'me'
+	;
+	
+IsGreaterThan
+	: 'is' WS+ 'greater' WS+ 'than'
+	;
+
+IsLessThan
+	: 'is' WS+ 'less' WS+ 'than'
+	;
+
+IsAfter
+	: 'is' WS+ 'after'
+	;
+
+IsBefore
+	: 'is' WS+ 'before'
+	;
+
+IsEmpty
+	: 'is' WS+ 'empty'
+	;
+
+IsNotEmpty
+	: 'is' WS+ 'not' WS+ 'empty'
+	;
+
+Quoted
+    : '"' (ESCAPE|~["\\])+? '"'
+    ;
+
+/*
+ * Use identifier to make the input "isnot" a whole token so that it becomes a "matchWith" 
+ * to provide suggestion for "is not"   
+ */
+Identifier
+	: [a-zA-Z]+
+	;
+	
+WS
+    : ' '
+    ;
+
+fragment
+ESCAPE
+    : '\\'["\\]
+    ;

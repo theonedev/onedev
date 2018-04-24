@@ -1,28 +1,31 @@
 package io.onedev.server.model.support.issue.query;
 
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 
 public class SubmitterCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String value;
+	private final User value;
 	
-	private final UserOperator operator;
+	private final int operator;
 	
-	public SubmitterCriteria(String value, UserOperator operator) {
+	public SubmitterCriteria(User value, int operator) {
 		this.value = value;
 		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(QueryBuildContext context) {
-		User user = OneDev.getInstance(UserManager.class).findByName(value);
-		return operator.getPredicate(context.getBuilder(), context.getRoot().get("submitter"), user);
+		Path<User> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.SUBMITTER));
+		if (operator == IssueQueryLexer.Is)
+			return context.getBuilder().equal(attribute, value);
+		else
+			return context.getBuilder().notEqual(attribute, value);
 	}
 
 }

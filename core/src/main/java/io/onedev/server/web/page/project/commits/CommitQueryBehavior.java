@@ -5,8 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 import io.onedev.codeassist.FenceAware;
 import io.onedev.codeassist.InputSuggestion;
@@ -34,10 +38,10 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 	
 	private static final String VALUE_CLOSE = ")";
 	
-	private static final String[] DATE_EXAMPLES = new String[]{
+	private static final List<String> DATE_EXAMPLES = Lists.newArrayList(
 			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
 			"yesterday midnight", "3 days ago", "last week", "last Monday", 
-			"4 weeks ago", "1 month 2 days ago", "1 year ago"}; 
+			"4 weeks ago", "1 month 2 days ago", "1 year ago"); 
 	
 	public CommitQueryBehavior(IModel<Project> projectModel) {
 		super(CommitQueryParser.class, "query");
@@ -85,7 +89,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 								PatternApplied applied = WildcardUtils.applyPattern(unfencedLowerCaseMatchWith, content, 
 										false);
 								if (applied != null)
-									suggestedInputs.put(applied.getText(), applied.getMatchRange());
+									suggestedInputs.put(applied.getText(), applied.getMatch());
 							}
 							
 							for (Map.Entry<String, Range> entry: suggestedInputs.entrySet()) 
@@ -93,21 +97,11 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 							break;
 						case CommitQueryParser.BEFORE:
 						case CommitQueryParser.AFTER:
-							if (!unfencedMatchWith.contains(VALUE_CLOSE)) {
-								if (unfencedMatchWith.length() != 0) {
-									String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
-									Range matchRange = new Range(0, fenced.length());
-									suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), 
-											matchRange));
-								}
-								suggestions.add(new InputSuggestion(
-										Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
-								suggestions.add(new InputSuggestion(
-										Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
-								for (String dateExample: DATE_EXAMPLES) { 
-									suggestions.add(new InputSuggestion(dateExample));
-								}
-							}
+							List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
+							candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
+							candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
+							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+							CollectionUtils.addIgnoreNull(suggestions, suggestToFence(unfencedMatchWith));
 							break;
 						case CommitQueryParser.PATH:
 							suggestions.addAll(SuggestionUtils.suggestPath(projectModel.getObject(), unfencedMatchWith));
@@ -159,8 +153,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
-			String suggestedLiteral, boolean complete) {
+	protected Optional<String> describe(ParentedElement expectedElement, String suggestedLiteral) {
 		String description;
 		switch (suggestedLiteral) {
 		case "revision":
@@ -190,7 +183,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		default:
 			description = null;
 		}
-		return new InputSuggestion(suggestedLiteral, description, null);
+		return Optional.fromNullable(description);
 	}
 
 }

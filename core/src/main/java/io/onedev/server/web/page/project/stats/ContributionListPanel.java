@@ -17,8 +17,8 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 class ContributionListPanel extends Panel {

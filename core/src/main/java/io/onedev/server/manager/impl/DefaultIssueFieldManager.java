@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +42,9 @@ import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
+import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.InvalidFieldResolution;
@@ -138,43 +141,47 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 			Object fieldValue = propertyDescriptor.getPropertyValue(fieldBean);
 			InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getField(fieldName);
 			if (fieldSpec != null) {
-				int ordinal;
+				long ordinal = -1;
 				
-				if (fieldValue != null && fieldSpec instanceof ChoiceInput) {
-					OneContext.push(new OneContext() {
+				if (fieldValue != null) {
+					if (fieldSpec instanceof ChoiceInput) {
+						OneContext.push(new OneContext() {
 
-						@Override
-						public Project getProject() {
-							return issue.getProject();
-						}
+							@Override
+							public Project getProject() {
+								return issue.getProject();
+							}
 
-						@Override
-						public EditContext getEditContext(int level) {
-							return new EditContext() {
+							@Override
+							public EditContext getEditContext(int level) {
+								return new EditContext() {
 
-								@Override
-								public Object getInputValue(String name) {
-									return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
-								}
-								
-							};
-						}
+									@Override
+									public Object getInputValue(String name) {
+										return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
+									}
+									
+								};
+							}
 
-						@Override
-						public InputContext getInputContext() {
-							throw new UnsupportedOperationException();
-						}
+							@Override
+							public InputContext getInputContext() {
+								throw new UnsupportedOperationException();
+							}
+							
+						});
 						
-					});
-					
-					try {
-						List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(false).keySet());
-						ordinal = choices.indexOf(fieldValue);
-					} finally {
-						OneContext.pop();
+						try {
+							List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(false).keySet());
+							ordinal = choices.indexOf(fieldValue);
+						} finally {
+							OneContext.pop();
+						}
+					} else if (fieldSpec instanceof NumberInput) {
+						ordinal = Long.parseLong((String)fieldValue);
+					} else if (fieldSpec instanceof DateInput) {
+						ordinal = ((Date)fieldValue).getTime();
 					}
-				} else {
-					ordinal = -1;
 				}
 
 				IssueField field = new IssueField();
@@ -405,11 +412,11 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 			for (Object[] row: (List<Object[]>)query.getResultList()) {
 				String name = (String) row[0];
 				String value = (String) row[1];
-				int ordinal = (int) row[2];
+				long ordinal = (long) row[2];
 				InputSpec fieldSpec = project.getIssueWorkflow().getField(name);
 				if (fieldSpec != null) {
 					List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-					int newOrdinal = choices.indexOf(value);
+					long newOrdinal = choices.indexOf(value);
 					if (ordinal != newOrdinal) {
 						query = getSession().createQuery("update IssueField set ordinal=:newOrdinal where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
 						query.setParameter("fieldName", name);

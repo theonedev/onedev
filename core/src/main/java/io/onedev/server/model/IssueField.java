@@ -18,6 +18,12 @@ public class IssueField extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String NAME = "name";
+	
+	public static final String VALUE = "value";
+	
+	public static final String ORDINAL = "ordinal";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Issue issue;
@@ -32,7 +38,7 @@ public class IssueField extends AbstractEntity {
 	
 	private boolean collected;
 	
-	private int ordinal;
+	private long ordinal;
 	
 	public Issue getIssue() {
 		return issue;
@@ -66,11 +72,11 @@ public class IssueField extends AbstractEntity {
 		this.type = type;
 	}
 
-	public int getOrdinal() {
+	public long getOrdinal() {
 		return ordinal;
 	}
 
-	public void setOrdinal(int ordinal) {
+	public void setOrdinal(long ordinal) {
 		this.ordinal = ordinal;
 	}
 

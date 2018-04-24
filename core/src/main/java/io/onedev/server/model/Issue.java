@@ -1,16 +1,12 @@
 package io.onedev.server.model;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -33,7 +29,6 @@ import io.onedev.server.util.MultiValueIssueField;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.utils.BeanUtils;
 
 @Entity
 @Table(
@@ -47,19 +42,32 @@ public class Issue extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final Set<String> BUILTIN_FIELDS = new HashSet<>();
+	public static final Map<String, String> BUILTIN_FIELDS = new HashMap<>();
+	
+	public static final String STATE = "State";
+	
+	public static final String TITLE = "Title";
+	
+	public static final String DESCRIPTION = "Description";
+	
+	public static final String SUBMITTER = "Submitter";
+	
+	public static final String SUBMIT_DATE = "Submit Date";
+	
+	public static final String VOTES = "Votes";
 	
 	static {
-		for (Method getter: BeanUtils.findGetters(Issue.class)) {
-			if (BeanUtils.findSetter(getter) != null) {
-				Field field = BeanUtils.findField(getter);
-				if (field != null && field.getAnnotation(ManyToOne.class) == null 
-						&& field.getAnnotation(OneToMany.class) == null) {
-					BUILTIN_FIELDS.add(field.getName());
-				}
-			}
-		}
+		BUILTIN_FIELDS.put(STATE, "state");
+		BUILTIN_FIELDS.put(TITLE, "title");
+		BUILTIN_FIELDS.put(DESCRIPTION, "description");
+		BUILTIN_FIELDS.put(SUBMITTER, "submitter");
+		BUILTIN_FIELDS.put(SUBMIT_DATE, "submitDate");
+		BUILTIN_FIELDS.put(VOTES, "votes");
 	}
+	
+	public enum BuiltinField {
+		state, title, description, submitter, submitDate, votes
+	};
 	
 	@Version
 	private long version;
@@ -84,7 +92,7 @@ public class Issue extends AbstractEntity {
 	private String submitterName;
 	
 	@Column(nullable=false)
-	private Date submitDate;
+	private long submitDate;
 	
 	private int votes;
 	
@@ -147,11 +155,11 @@ public class Issue extends AbstractEntity {
 	}
 
 	public Date getSubmitDate() {
-		return submitDate;
+		return new Date(submitDate);
 	}
 
 	public void setSubmitDate(Date submitDate) {
-		this.submitDate = submitDate;
+		this.submitDate = submitDate.getTime();
 	}
 
 	public int getVotes() {

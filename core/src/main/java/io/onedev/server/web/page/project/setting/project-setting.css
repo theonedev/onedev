@@ -18,9 +18,6 @@
 #project-setting .general-setting form .delete {
 	margin-right: 0;
 }
-#project-setting .drag-handle {
-	cursor: move;
-}
 #project-setting .panel-list .drag-handle {
 	margin-right: 8px;
 }

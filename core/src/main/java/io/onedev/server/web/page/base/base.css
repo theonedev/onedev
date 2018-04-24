@@ -7,6 +7,10 @@ body {
 .pointer {
 	cursor: pointer;
 }
+.drag-handle {
+	cursor: move;
+}
+
 
 /* TOOLTIPS */
 .tooltip-inner {
@@ -423,8 +427,6 @@ div.center {
 div.no-records {
 	font-style: italic;
 	font-size: 16px;
-	border-top: 1px solid #F0F0F0;
-	padding-top: 10px;	
 }
 
 .middot:before {

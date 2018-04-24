@@ -25,6 +25,7 @@ import io.onedev.server.model.PullRequestTask;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.EntityDataProvider;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
@@ -32,7 +33,6 @@ import io.onedev.server.web.component.datatable.SelectionColumn;
 import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
-import io.onedev.server.web.util.DateUtils;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")

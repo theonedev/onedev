@@ -12,7 +12,6 @@ import io.onedev.server.util.editable.annotation.Color;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.validation.annotation.Name;
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -27,12 +26,11 @@ public class StateSpec implements Serializable {
 	
 	private boolean closed;
 	
-	private String color = "#777";
+	private String color = "#777777";
 	
 	private List<String> fields = new ArrayList<>();
 	
 	@Editable(order=100)
-	@Name
 	@NotEmpty
 	public String getName() {
 		return name;

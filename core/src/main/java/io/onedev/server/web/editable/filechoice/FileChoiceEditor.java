@@ -11,6 +11,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.codeassist.InputCompletion;
 import io.onedev.codeassist.InputStatus;
 import io.onedev.codeassist.InputSuggestion;
+import io.onedev.codeassist.Substitution;
 import io.onedev.server.util.editable.annotation.FileChoice;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.ErrorContext;
@@ -60,10 +61,8 @@ public class FileChoiceEditor extends PropertyEditor<String> {
 					int caret = suggestion.getCaret();
 					if (caret == -1)
 						caret = suggestion.getContent().length();
-					InputCompletion completion = new InputCompletion(0, inputStatus.getContent().length(), 
-							suggestion.getContent(), caret, suggestion.getLabel(), 
-							null, suggestion.getMatchRange());
-					completions.add(completion);
+					Substitution substitution = new Substitution(0, inputStatus.getContent().length(), suggestion.getContent());
+					completions.add(new InputCompletion(substitution, caret, null, suggestion.getMatch()));
 				}
 				return completions;
 			}

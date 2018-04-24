@@ -14,7 +14,7 @@ public class MatchedBlob implements Serializable {
 	
 	private final List<QueryHit> hits;
 	
-	private Range matchRange;
+	private Range match;
 	
 	public MatchedBlob(String blobPath, List<QueryHit> hits) {
 		this.blobPath = blobPath;
@@ -29,12 +29,12 @@ public class MatchedBlob implements Serializable {
 		return hits;
 	}
 
-	public Range getMatchRange() {
-		return matchRange;
+	public Range getMatch() {
+		return match;
 	}
 
-	public void setMatchRange(Range matchRange) {
-		this.matchRange = matchRange;
+	public void setMatch(Range match) {
+		this.match = match;
 	}
 
 }
