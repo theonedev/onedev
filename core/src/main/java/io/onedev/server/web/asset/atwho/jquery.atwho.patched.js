@@ -347,6 +347,10 @@ Controller = (function() {
   Controller.prototype.insertContentFor = function($li) {
     var data, tpl;
     tpl = this.getOpt('insertTpl');
+    
+    // patched to support to use function as insert template 
+    if (typeof tpl !== "string")
+    	tpl = tpl();
     data = $.extend({}, $li.data('item-data'), {
       'atwho-at': this.at
     });
@@ -937,6 +941,11 @@ View = (function() {
     this.$el.find('ul').empty();
     $ul = this.$el.find('ul');
     tpl = this.context.getOpt('displayTpl');
+
+    // patched to support to use function as display template 
+    if (typeof tpl !== "string")
+    	tpl = tpl();
+    
     for (i = 0, len = list.length; i < len; i++) {
       item = list[i];
       item = $.extend({}, item, {

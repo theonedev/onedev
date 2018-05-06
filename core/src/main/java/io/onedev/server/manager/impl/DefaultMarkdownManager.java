@@ -27,6 +27,7 @@ import com.vladsch.flexmark.util.options.MutableDataHolder;
 import com.vladsch.flexmark.util.options.MutableDataSet;
 
 import io.onedev.server.manager.MarkdownManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.markdown.MarkdownProcessor;
 
@@ -83,10 +84,10 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	}
 
 	@Override
-	public String process(String rendered, @Nullable Object context) {
+	public String process(Project project, String rendered, @Nullable Object context) {
 		Document document = JsoupUtils.clean(rendered);
 		for (MarkdownProcessor htmlTransformer: htmlTransformers)
-			htmlTransformer.process(document, context);
+			htmlTransformer.process(project, document, context);
 		return document.body().html();
 	}
 

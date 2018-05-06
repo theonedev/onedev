@@ -38,7 +38,7 @@ onedev.server.markdown = {
 		$preview.outerHeight($rendered.outerHeight());
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, 
-			attachmentMaxSize, canMentionUser, canReferencePullRequest, autosaveKey) {
+			attachmentMaxSize, canMentionUser, canReferenceEntity, autosaveKey) {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
@@ -492,7 +492,7 @@ onedev.server.markdown = {
 
 		if (!canMentionUser)
 			$head.find(".do-mention").remove();
-		if (!canReferencePullRequest)
+		if (!canReferenceEntity)
 			$head.find(".do-hashtag").remove();
 			
 		$head.find(".do-mention, .do-hashtag").click(function() {
@@ -567,18 +567,46 @@ onedev.server.markdown = {
 		    });	
 	    } 
 
-	    if (canReferencePullRequest) {
+	    if (canReferenceEntity) {
+	    	function isReferencingPullRequest() {
+	    		var input = $input.val().substring(0, $input.caret()).toLowerCase().replace(/\s/g,'').trim();
+	    		return input.endsWith("pullrequest#");
+	    	}
+	    	function isReferencingIssue() {
+	    		var input = $input.val().substring(0, $input.caret()).toLowerCase().replace(/\s/g,'').trim();
+	    		return input.endsWith("issue#");
+	    	}
+	    	function getInsertTemplate() {
+	    		if (isReferencingPullRequest() || isReferencingIssue())
+	    			return "#${referenceNumber}";
+	    		else
+	    			return '${referenceType} #${referenceNumber}';	    		
+	    	}
+	    	function getDisplayTemplate() {
+	    		if (isReferencingPullRequest() || isReferencingIssue())
+		    		return "<li><span class='text-muted'>#${referenceNumber}</span> - ${referenceTitle}</li>";
+	    		else
+		    		return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
+	    	}
+	    	
 		    $input.atwho({
 		    	at: '#',
 		    	searchKey: "searchKey",
 		        callbacks: {
 		        	remoteFilter: function(query, renderCallback) {
-		        		$container.data("atWhoRequestRenderCallback", renderCallback);
-		            	callback("requestQuery", query);
+		        		$container.data("atWhoReferenceRenderCallback", renderCallback);
+		        		var queryType;
+		        		if (isReferencingPullRequest())
+		        			queryType = "pull request";
+		        		else if (isReferencingIssue())
+		        			queryType = "issue";
+		        		else
+		        			queryType = undefined;
+		            	callback("referenceQuery", query, queryType);
 		        	}
 		        },
-		        displayTpl: "<li><span class='text-muted'>#${requestNumber}</span> - ${requestTitle}</li>",
-		        insertTpl: '#${requestNumber}', 
+		        displayTpl: getDisplayTemplate,
+		        insertTpl: getInsertTemplate, 
 		        limit: atWhoLimit
 		    });		
 	    }

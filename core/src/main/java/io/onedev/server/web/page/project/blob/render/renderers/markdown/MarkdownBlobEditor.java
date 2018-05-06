@@ -49,7 +49,7 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			protected String renderMarkdown(String markdown) {
 				MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
 				String html = markdownManager.render(markdown);
-				return markdownManager.process(html, context);
+				return markdownManager.process(context.getProject(), html, context);
 			}
 
 		});

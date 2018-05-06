@@ -2,6 +2,8 @@ package io.onedev.server.manager;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.model.Project;
+
 public interface MarkdownManager {
 	
 	/**
@@ -15,7 +17,7 @@ public interface MarkdownManager {
 	 */
 	String render(String markdown);
 	
-	String process(String rendered, @Nullable Object context);
+	String process(Project project, String rendered, @Nullable Object context);
 
 	/**
 	 * Escape html characters in specified markdown so that the markdown plain text 

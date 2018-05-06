@@ -47,7 +47,7 @@
 	text-overflow: ellipsis;
 	padding-right: 8px;
 }
-#issue-list .issue .primary .id {
+#issue-list .issue .primary .number {
 	width: 100px;
 	font-size: 16px;
 	font-weight: bold;

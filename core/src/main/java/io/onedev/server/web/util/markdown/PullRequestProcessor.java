@@ -3,6 +3,7 @@ package io.onedev.server.web.util.markdown;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Document;
 
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.markdown.MarkdownProcessor;
 import io.onedev.server.util.markdown.PullRequestParser;
@@ -11,8 +12,8 @@ import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.Req
 public class PullRequestProcessor extends PullRequestParser implements MarkdownProcessor {
 	
 	@Override
-	public void process(Document document, Object context) {
-		parseRequests(document);
+	public void process(Project project, Document document, Object context) {
+		parseRequests(project, document);
 	}
 
 	@Override

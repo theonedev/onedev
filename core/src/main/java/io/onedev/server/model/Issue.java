@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -34,8 +35,10 @@ import io.onedev.server.util.inputspec.InputSpec;
 @Table(
 		indexes={
 				@Index(columnList="g_project_id"), @Index(columnList="state"), 
-				@Index(columnList="title"), @Index(columnList="g_submitter_id"), 
-				@Index(columnList="submitDate"), @Index(columnList="votes")})
+				@Index(columnList="title"), @Index(columnList="noSpaceTitle"),  
+				@Index(columnList="number"), @Index(columnList="numberStr"), 
+				@Index(columnList="submitDate"), @Index(columnList="g_submitter_id"),
+				@Index(columnList="votes")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Issue extends AbstractEntity {
@@ -43,6 +46,8 @@ public class Issue extends AbstractEntity {
 	private static final long serialVersionUID = 1L;
 	
 	public static final Map<String, String> BUILTIN_FIELDS = new HashMap<>();
+	
+	public static final String NUMBER = "Number";
 	
 	public static final String STATE = "State";
 	
@@ -57,6 +62,7 @@ public class Issue extends AbstractEntity {
 	public static final String VOTES = "Votes";
 	
 	static {
+		BUILTIN_FIELDS.put(NUMBER, "number");
 		BUILTIN_FIELDS.put(STATE, "state");
 		BUILTIN_FIELDS.put(TITLE, "title");
 		BUILTIN_FIELDS.put(DESCRIPTION, "description");
@@ -96,6 +102,16 @@ public class Issue extends AbstractEntity {
 	
 	private int votes;
 	
+	private long number;
+	
+	// used for number search in markdown editor
+	@Column(nullable=false)
+	private String numberStr;
+	
+	// used for title search in markdown editor
+	@Column(nullable=false)
+	private String noSpaceTitle;
+	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
 	
@@ -121,6 +137,7 @@ public class Issue extends AbstractEntity {
 
 	public void setTitle(String title) {
 		this.title = title;
+		noSpaceTitle = StringUtils.deleteWhitespace(title);
 	}
 
 	@Editable(order=200)
@@ -139,6 +156,15 @@ public class Issue extends AbstractEntity {
 
 	public void setProject(Project project) {
 		this.project = project;
+	}
+
+	public long getNumber() {
+		return number;
+	}
+
+	public void setNumber(long number) {
+		this.number = number;
+		numberStr = String.valueOf(number);
 	}
 
 	public User getSubmitter() {

@@ -20,6 +20,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.WicketUtils;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -60,7 +62,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 				if (markdown != null) {
 					MarkdownManager markdownManager = AppLoader.getInstance(MarkdownManager.class);
 					String html = markdownManager.render(markdown);
-					return markdownManager.process(html, getRenderContext());
+					ProjectPage page = (ProjectPage) getPage();
+					return markdownManager.process(page.getProject(), html, getRenderContext());
 				} else {
 					return null;
 				}

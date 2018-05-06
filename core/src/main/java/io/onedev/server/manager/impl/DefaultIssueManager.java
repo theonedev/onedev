@@ -2,9 +2,11 @@ package io.onedev.server.manager.impl;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,6 +15,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import io.onedev.server.manager.IssueFieldManager;
@@ -27,6 +30,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.UndefinedStateResolution;
 
 @Singleton
@@ -34,12 +38,23 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	private final IssueFieldManager issueFieldManager;
 	
+	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
+	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 	}
 
+	@Sessional
+	@Override
+	public Issue find(Project target, long number) {
+		EntityCriteria<Issue> criteria = newCriteria();
+		criteria.add(Restrictions.eq("project", target));
+		criteria.add(Restrictions.eq("number", number));
+		return find(criteria);
+	}
+	
 	@Transactional
 	@Override
 	public void test() {
@@ -126,10 +141,43 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Transactional
 	@Override
 	public void save(Issue issue, Serializable fieldBean, Collection<String> fieldNames) {
+		if (issue.isNew())
+			issue.setNumber(getNextNumber(issue.getProject()));
 		save(issue);
 		issueFieldManager.writeFields(issue, fieldBean, fieldNames);
 	}
 
+	private long getNextNumber(Project project) {
+		AtomicLong nextNumber;
+		synchronized (nextNumbers) {
+			nextNumber = nextNumbers.get(project.getUUID());
+		}
+		if (nextNumber == null) {
+			long maxNumber;
+			Query<?> query = getSession().createQuery("select max(number) from Issue where project=:project");
+			query.setParameter("project", project);
+			Object result = query.uniqueResult();
+			if (result != null) {
+				maxNumber = (Long)result;
+			} else {
+				maxNumber = 0;
+			}
+			
+			/*
+			 * do not put the whole method in synchronized block to avoid possible deadlocks
+			 * if there are limited connections. 
+			 */
+			synchronized (nextNumbers) {
+				nextNumber = nextNumbers.get(project.getUUID());
+				if (nextNumber == null) {
+					nextNumber = new AtomicLong(maxNumber+1);
+					nextNumbers.put(project.getUUID(), nextNumber);
+				}
+			}
+		} 
+		return nextNumber.getAndIncrement();
+	}
+	
 	@Sessional
 	@Override
 	public List<Issue> query(IssueQuery issueQuery, int firstResult, int maxResults) {

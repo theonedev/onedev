@@ -2,6 +2,7 @@ package io.onedev.server.web.component.markdown;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -48,11 +49,13 @@ import com.google.common.base.Preconditions;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.MarkdownManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.markdown.emoji.EmojiOnes;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.avatar.AvatarManager;
 
@@ -124,7 +127,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	protected String renderMarkdown(String markdown) {
 		MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
 		String rendered = markdownManager.render(markdown);
-		return markdownManager.process(rendered, blobRenderContext);
+		ProjectPage page = (ProjectPage) getPage();
+		return markdownManager.process(page.getProject(), rendered, blobRenderContext);
 	}
 	
 	@Override
@@ -286,24 +290,38 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					script = String.format("$('#%s').data('atWhoUserRenderCallback')(%s);", container.getMarkupId(), json);
 					target.appendJavaScript(script);	
 					break;
-				case "requestQuery":
-					String requestQuery = params.getParameterValue("param1").toOptionalString();
+				case "referenceQuery":
+					String referenceQuery = params.getParameterValue("param1").toOptionalString();
+					String referenceQueryType = params.getParameterValue("param2").toOptionalString();
 
-					List<Map<String, String>> requestList = new ArrayList<>();
-					for (PullRequest request: getPullRequestReferenceSupport().findRequests(requestQuery, ATWHO_LIMIT)) {
-						Map<String, String> requestMap = new HashMap<>();
-						requestMap.put("requestNumber", request.getNumberStr());
-						requestMap.put("requestTitle", request.getTitle());
-						requestMap.put("searchKey", request.getNumberStr() + " " + request.getNoSpaceTitle());
-						requestList.add(requestMap);
+					List<Map<String, String>> referenceList = new ArrayList<>();
+					if (StringUtils.isBlank(referenceQueryType) || "issue".equals(referenceQueryType)) {
+						for (Issue issue: getReferenceSupport().findIssues(referenceQuery, ATWHO_LIMIT)) {
+							Map<String, String> referenceMap = new HashMap<>();
+							referenceMap.put("referenceType", "issue");
+							referenceMap.put("referenceNumber", String.valueOf(issue.getNumber()));
+							referenceMap.put("referenceTitle", issue.getTitle());
+							referenceMap.put("searchKey", issue.getNumber() + " " + StringUtils.deleteWhitespace(issue.getTitle()));
+							referenceList.add(referenceMap);
+						}
+					}
+					if (StringUtils.isBlank(referenceQueryType) || "pull request".equals(referenceQueryType)) {
+						for (PullRequest request: getReferenceSupport().findPullRequests(referenceQuery, ATWHO_LIMIT)) {
+							Map<String, String> referenceMap = new HashMap<>();
+							referenceMap.put("referenceType", "pull request");
+							referenceMap.put("referenceNumber", String.valueOf(request.getNumber()));
+							referenceMap.put("referenceTitle", request.getTitle());
+							referenceMap.put("searchKey", request.getNumber() + " " + StringUtils.deleteWhitespace(request.getTitle()));
+							referenceList.add(referenceMap);
+						}
 					}
 					
 					try {
-						json = OneDev.getInstance(ObjectMapper.class).writeValueAsString(requestList);
+						json = OneDev.getInstance(ObjectMapper.class).writeValueAsString(referenceList);
 					} catch (JsonProcessingException e) {
 						throw new RuntimeException(e);
 					}
-					script = String.format("$('#%s').data('atWhoRequestRenderCallback')(%s);", container.getMarkupId(), json);
+					script = String.format("$('#%s').data('atWhoReferenceRenderCallback')(%s);", container.getMarkupId(), json);
 					target.appendJavaScript(script);
 					break;
 				case "selectImage":
@@ -391,7 +409,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				encodedAttachmentSupport, 
 				getAttachmentSupport()!=null?getAttachmentSupport().getAttachmentMaxSize():0,
 				getUserMentionSupport() != null,
-				getPullRequestReferenceSupport() != null, 
+				getReferenceSupport() != null, 
 				autosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
@@ -425,7 +443,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	}
 	
 	@Nullable
-	protected PullRequestReferenceSupport getPullRequestReferenceSupport() {
+	protected AtWhoReferenceSupport getReferenceSupport() {
 		return null;
 	}
 	
@@ -443,4 +461,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		return blobRenderContext;
 	}
 
+	static class ReferencedEntity implements Serializable {
+		String entityType;
+		
+		String entityTitle;
+		
+		String entityNumber;
+		
+		String searchKey;
+	}
+	
 }

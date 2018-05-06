@@ -655,7 +655,7 @@ public class IssueListPage extends ProjectPage {
 			@Override
 			protected void populateItem(Item<Issue> item) {
 				Issue issue = item.getModelObject();
-				item.add(new Label("id", "#" + issue.getId()));
+				item.add(new Label("number", "#" + issue.getNumber()));
 				Fragment titleFrag = new Fragment("title", "titleFrag", IssueListPage.this);
 				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueDetailPage.class, IssueDetailPage.paramsOf(issue));
 				link.add(new Label("label", issue.getTitle()));

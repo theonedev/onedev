@@ -5,10 +5,11 @@ import javax.annotation.Nullable;
 import org.jsoup.nodes.Document;
 
 import io.onedev.launcher.loader.ExtensionPoint;
+import io.onedev.server.model.Project;
 
 @ExtensionPoint
 public interface MarkdownProcessor {
 	
-	void process(Document rendered, @Nullable Object context);
+	void process(Project project, Document rendered, @Nullable Object context);
 	
 }

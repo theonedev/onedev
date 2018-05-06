@@ -10,6 +10,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.Dao;
@@ -18,7 +19,7 @@ import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
-import io.onedev.server.web.component.markdown.PullRequestReferenceSupport;
+import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
 import io.onedev.server.web.component.markdown.UserMentionSupport;
 import io.onedev.utils.StringUtils;
 import io.onedev.utils.matchscore.MatchScoreProvider;
@@ -60,13 +61,27 @@ public abstract class CommentInput extends MarkdownEditor {
 	}
 
 	@Override
-	protected PullRequestReferenceSupport getPullRequestReferenceSupport() {
-		return new PullRequestReferenceSupport() {
+	protected AtWhoReferenceSupport getReferenceSupport() {
+		return new AtWhoReferenceSupport() {
 
 			@Override
-			public List<PullRequest> findRequests(String query, int count) {
+			public List<PullRequest> findPullRequests(String query, int count) {
 				EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 				criteria.add(Restrictions.eq("targetProject", getProject()));
+				if (StringUtils.isNotBlank(query)) {
+					query = StringUtils.deleteWhitespace(query);
+					criteria.add(Restrictions.or(
+							Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
+							Restrictions.ilike("numberStr", query, MatchMode.START)));
+				}
+				criteria.addOrder(Order.desc("number"));
+				return OneDev.getInstance(Dao.class).findRange(criteria, 0, count);
+			}
+
+			@Override
+			public List<Issue> findIssues(String query, int count) {
+				EntityCriteria<Issue> criteria = EntityCriteria.of(Issue.class);
+				criteria.add(Restrictions.eq("project", getProject()));
 				if (StringUtils.isNotBlank(query)) {
 					query = StringUtils.deleteWhitespace(query);
 					criteria.add(Restrictions.or(

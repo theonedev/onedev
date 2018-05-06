@@ -16,6 +16,9 @@ import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.Unde
 
 public interface IssueManager extends EntityManager<Issue> {
 	
+    @Nullable
+    Issue find(Project target, long number);
+    
 	void save(Issue issue, Serializable fieldBean, Collection<String> fieldNames);
 	
 	void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions);

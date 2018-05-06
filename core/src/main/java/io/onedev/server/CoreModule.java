@@ -215,6 +215,7 @@ import io.onedev.server.web.util.avatar.AvatarManager;
 import io.onedev.server.web.util.avatar.DefaultAvatarManager;
 import io.onedev.server.web.util.commitmessagetransform.CommitMessageTransformer;
 import io.onedev.server.web.util.commitmessagetransform.PatternCommitMessageTransformer;
+import io.onedev.server.web.util.markdown.IssueProcessor;
 import io.onedev.server.web.util.markdown.MentionProcessor;
 import io.onedev.server.web.util.markdown.PullRequestProcessor;
 import io.onedev.server.web.util.markdown.RelativeUrlProcessor;
@@ -390,6 +391,7 @@ public class CoreModule extends AbstractPluginModule {
 		
 		contribute(MarkdownProcessor.class, new MentionProcessor());
 		contribute(MarkdownProcessor.class, new PullRequestProcessor());
+		contribute(MarkdownProcessor.class, new IssueProcessor());
 		contribute(MarkdownProcessor.class, new RelativeUrlProcessor());
 
 		contribute(ResourcePackScopeContribution.class, new ResourcePackScopeContribution() {

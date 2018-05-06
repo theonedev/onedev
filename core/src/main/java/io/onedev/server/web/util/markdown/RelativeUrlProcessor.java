@@ -31,11 +31,10 @@ import io.onedev.utils.UrlUtils;
 public class RelativeUrlProcessor implements MarkdownProcessor {
 
 	@Override
-	public void process(Document rendered, Object context) {
+	public void process(Project project, Document rendered, Object context) {
 		if (context instanceof BlobRenderContext) {
 			BlobRenderContext blobRenderContext = (BlobRenderContext) context;
 
-			Project project = blobRenderContext.getProject();
 			Repository repository = project.getRepository();
 			RevCommit commit;
 			try (RevWalk revWalk = new RevWalk(repository)) {

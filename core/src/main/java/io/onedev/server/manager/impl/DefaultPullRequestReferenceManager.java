@@ -45,7 +45,7 @@ public class DefaultPullRequestReferenceManager extends AbstractEntityManager<Pu
 			if (markdown != null) {
 				String rendered = markdownManager.render(markdown);
 				
-				for (PullRequest referenced: new PullRequestParser().parseRequests(rendered)) {
+				for (PullRequest referenced: new PullRequestParser().parseRequests(event.getRequest().getTargetProject(), rendered)) {
 					if (!referenced.equals(event.getRequest())) {
 						EntityCriteria<PullRequestReference> criteria = EntityCriteria.of(PullRequestReference.class);
 						criteria.add(Restrictions.eq("referenced", referenced));
