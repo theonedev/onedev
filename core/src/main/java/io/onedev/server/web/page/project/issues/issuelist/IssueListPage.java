@@ -113,6 +113,10 @@ public class IssueListPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		WebMarkupContainer head = new WebMarkupContainer("issueListHead");
+		head.setOutputMarkupId(true);
+		add(head);
+		
 		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
 		input.add(new IssueQueryBehavior(projectModel));
 		
@@ -136,112 +140,13 @@ public class IssueListPage extends ProjectPage {
 
 		};
 		form.add(input);
-		
-		form.setOutputMarkupId(true);
-		add(form);
+		head.add(form);
 		
 		form.add(new NotificationPanel("feedback", form));
 		
-		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())));
+		head.add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())));
 		
-		add(new ModalLink("fields") {
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "fieldsFrag", IssueListPage.this);
-
-				IssueListCustomization customization = getCustomization();
-				Form<?> form = new Form<Void>("form") {
-
-					@Override
-					protected void onError() {
-						super.onError();
-						RequestCycle.get().find(AjaxRequestTarget.class).add(this);
-					}
-
-				};
-				
-				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(IssueListCustomization.class, "displayFields"); 
-				IModel<List<String>> propertyModel = new IModel<List<String>>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public List<String> getObject() {
-						return (List<String>) propertyDescriptor.getPropertyValue(customization);
-					}
-
-					@Override
-					public void setObject(List<String> object) {
-						propertyDescriptor.setPropertyValue(customization, object);
-					}
-					
-				};
-				form.add(new MultiChoiceEditor("editor", propertyDescriptor, propertyModel));
-
-				form.add(new AjaxLink<Void>("close") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				
-				form.add(new AjaxButton("save") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						WebSession.get().setMetaData(CUSTOMIZATION_KEY, customization);
-						setResponsePage(IssueListPage.this);
-					}
-					
-				});
-				
-				form.add(new AjaxButton("saveAsDefault") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()));
-					}
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						WebSession.get().setMetaData(CUSTOMIZATION_KEY, customization);
-						getProject().setIssueListCustomization(customization);
-						OneDev.getInstance(ProjectManager.class).save(getProject());
-						setResponsePage(IssueListPage.this);
-					}
-					
-				});
-				
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				form.setOutputMarkupId(true);
-				fragment.add(form);
-				return fragment;
-			}
-			
-		});
-		
-		WebMarkupContainer additional = new WebMarkupContainer("additional");
-		additional.setVisible(getLoginUser() != null || !getProject().getIssueListCustomization().getSavedQueries().isEmpty());
-		additional.setOutputMarkupId(true);
-		add(additional);
-		
-		additional.add(querySave = new ModalLink("save") {
+		head.add(querySave = new ModalLink("save") {
 
 			@Override
 			protected void onConfigure() {
@@ -280,7 +185,7 @@ public class IssueListPage extends ProjectPage {
 						super.onSubmit(target, form);
 						getLoginUser().getIssueQueries().put(bean.getName(), query);
 						OneDev.getInstance(UserManager.class).save(getLoginUser());
-						target.add(additional);
+						target.add(head);
 						modal.close();
 					}
 					
@@ -292,7 +197,7 @@ public class IssueListPage extends ProjectPage {
 						super.onSubmit(target, form);
 						getProject().getIssueListCustomization().getSavedQueries().put(bean.getName(), query);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
-						target.add(additional);
+						target.add(head);
 						modal.close();
 					}
 
@@ -326,7 +231,7 @@ public class IssueListPage extends ProjectPage {
 			
 		}.setOutputMarkupId(true));
 		
-		additional.add(new ModalLink("edit") {
+		head.add(new ModalLink("edit") {
 
 			@Override
 			protected void onConfigure() {
@@ -452,7 +357,7 @@ public class IssueListPage extends ProjectPage {
 							OneDev.getInstance(ProjectManager.class).save(getProject());
 						}
 						modal.close();
-						target.add(additional);
+						target.add(head);
 					}
 					
 				});
@@ -477,17 +382,138 @@ public class IssueListPage extends ProjectPage {
 			}
 			
 		});
-		additional.add(new ListView<SavedQuery>("userQueries", new LoadableDetachableModel<List<SavedQuery>>() {
+		
+		head.add(new ModalLink("fields") {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				Fragment fragment = new Fragment(id, "fieldsFrag", IssueListPage.this);
+
+				IssueListCustomization customization = getCustomization();
+				Form<?> form = new Form<Void>("form") {
+
+					@Override
+					protected void onError() {
+						super.onError();
+						RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+					}
+
+				};
+				
+				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(IssueListCustomization.class, "displayFields"); 
+				IModel<List<String>> propertyModel = new IModel<List<String>>() {
+
+					@Override
+					public void detach() {
+					}
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public List<String> getObject() {
+						return (List<String>) propertyDescriptor.getPropertyValue(customization);
+					}
+
+					@Override
+					public void setObject(List<String> object) {
+						propertyDescriptor.setPropertyValue(customization, object);
+					}
+					
+				};
+				form.add(new MultiChoiceEditor("editor", propertyDescriptor, propertyModel));
+
+				form.add(new AjaxLink<Void>("close") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+					
+				});
+				
+				form.add(new AjaxButton("save") {
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+						WebSession.get().setMetaData(CUSTOMIZATION_KEY, customization);
+						setResponsePage(IssueListPage.this);
+					}
+					
+				});
+				
+				form.add(new AjaxButton("saveAsDefault") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canManage(getProject()));
+					}
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+						WebSession.get().setMetaData(CUSTOMIZATION_KEY, customization);
+						getProject().setIssueListCustomization(customization);
+						OneDev.getInstance(ProjectManager.class).save(getProject());
+						setResponsePage(IssueListPage.this);
+					}
+					
+				});
+				
+				form.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+					
+				});
+				form.setOutputMarkupId(true);
+				fragment.add(form);
+				return fragment;
+			}
+			
+		});
+		
+		IModel<List<SavedQuery>> userQueriesModel = new LoadableDetachableModel<List<SavedQuery>>() {
 
 			@Override
 			protected List<SavedQuery> load() {
 				List<SavedQuery> savedQueries = new ArrayList<>();
-				for (Map.Entry<String, String> entry: getLoginUser().getIssueQueries().entrySet())
+				if (getLoginUser() != null) {
+					for (Map.Entry<String, String> entry: getLoginUser().getIssueQueries().entrySet())
+						savedQueries.add(new SavedQuery(entry.getKey(), entry.getValue()));
+				}
+				return savedQueries;
+			}
+			
+		};
+		
+		IModel<List<SavedQuery>> projectQueriesModel = new LoadableDetachableModel<List<SavedQuery>>() {
+
+			@Override
+			protected List<SavedQuery> load() {
+				List<SavedQuery> savedQueries = new ArrayList<>();
+				for (Map.Entry<String, String> entry: getProject().getIssueListCustomization().getSavedQueries().entrySet())
 					savedQueries.add(new SavedQuery(entry.getKey(), entry.getValue()));
 				return savedQueries;
 			}
 			
-		}) {
+		};
+
+		WebMarkupContainer presetQueries = new WebMarkupContainer("presetQueries") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!userQueriesModel.getObject().isEmpty() 
+						|| !projectQueriesModel.getObject().isEmpty());
+			}
+			
+		};
+		head.add(presetQueries);
+		
+		presetQueries.add(new ListView<SavedQuery>("userQueries", userQueriesModel) {
 
 			@Override
 			protected void populateItem(ListItem<SavedQuery> item) {
@@ -500,22 +526,12 @@ public class IssueListPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getLoginUser() != null);
+				setVisible(!getModelObject().isEmpty());
 			}
-			
+
 		});
 		
-		additional.add(new ListView<SavedQuery>("projectQueries", new LoadableDetachableModel<List<SavedQuery>>() {
-
-			@Override
-			protected List<SavedQuery> load() {
-				List<SavedQuery> savedQueries = new ArrayList<>();
-				for (Map.Entry<String, String> entry: getProject().getIssueListCustomization().getSavedQueries().entrySet())
-					savedQueries.add(new SavedQuery(entry.getKey(), entry.getValue()));
-				return savedQueries;
-			}
-			
-		}) {
+		presetQueries.add(new ListView<SavedQuery>("projectQueries", projectQueriesModel) {
 
 			@Override
 			protected void populateItem(ListItem<SavedQuery> item) {
@@ -523,6 +539,12 @@ public class IssueListPage extends ProjectPage {
 				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueListPage.class, IssueListPage.paramsOf(getProject(), savedQuery.query));
 				link.add(new Label("label", savedQuery.name));
 				item.add(link);
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getModelObject().isEmpty());
 			}
 			
 		});

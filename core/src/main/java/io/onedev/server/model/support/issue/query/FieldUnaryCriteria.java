@@ -25,7 +25,7 @@ public class FieldUnaryCriteria extends FieldCriteria {
 		else if (operator == IssueQueryLexer.IsNotEmpty)
 			return context.getBuilder().isNotNull(attribute);
 		else if (operator == IssueQueryLexer.IsMe || operator == IssueQueryLexer.ContainsMe)
-			return context.getBuilder().equal(attribute, SecurityUtils.getUser());
+			return context.getBuilder().equal(attribute, SecurityUtils.getUser().getName());
 		else 
 			return context.getBuilder().notEqual(attribute, SecurityUtils.getUser());
 	}

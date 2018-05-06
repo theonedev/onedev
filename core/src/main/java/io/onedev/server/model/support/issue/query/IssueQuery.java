@@ -11,6 +11,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -102,9 +103,11 @@ public class IssueQuery implements Serializable {
 			}
 		}
 
+		Path<String> idPath = root.get("id");
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get("id")));
+			orders.add(builder.desc(idPath));
 		query.orderBy(orders);
+		query.groupBy(idPath);
 		
 		return query;
 	}
