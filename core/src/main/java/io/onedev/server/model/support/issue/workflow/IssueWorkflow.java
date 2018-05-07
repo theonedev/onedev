@@ -78,14 +78,17 @@ public class IssueWorkflow implements Serializable, InputContext {
 		
 		Choice minor = new Choice();
 		minor.setValue("Minor");
+		minor.setColor("#d9ead3");
 		choices.add(minor);
 
 		Choice normal = new Choice();
 		normal.setValue("Normal");
+		normal.setColor("#f4cccc");
 		choices.add(normal);
 
 		Choice major = new Choice();
 		major.setValue("Major");
+		major.setColor("#cc0000");
 		choices.add(major);
 		
 		specifiedChoices.setChoices(choices);
@@ -101,17 +104,20 @@ public class IssueWorkflow implements Serializable, InputContext {
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
+		open.setColor("#f1c232");
 		open.setFields(Lists.newArrayList("Type", "Severity"));
 		
 		states.add(open);
 		
 		StateSpec assigned = new StateSpec();
 		assigned.setName("Assigned");
+		assigned.setColor("#5d9d41");
 		assigned.setFields(Lists.newArrayList("Assignee"));
 		
 		states.add(assigned);
 		
 		StateSpec closed = new StateSpec();
+		closed.setColor("#cccccc");
 		closed.setName("Closed");
 		
 		states.add(closed);

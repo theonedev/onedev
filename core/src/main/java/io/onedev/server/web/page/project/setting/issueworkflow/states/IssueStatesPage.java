@@ -41,6 +41,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
+import io.onedev.utils.ColorUtils;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
@@ -89,7 +90,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().getName(), true));
+				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().getName(), rowModel.getObject().getColor()));
 			}
 		});		
 		
@@ -97,7 +98,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().getDescription(), false));
+				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().getDescription(), null));
 			}
 			
 		});		
@@ -146,17 +147,17 @@ public class IssueStatesPage extends IssueWorkflowPage {
 
 	private class ColumnFragment extends Fragment {
 
-		private final boolean nameColumn;
-		
 		private final int index;
 		
 		private final String label;
 		
-		public ColumnFragment(String id, IModel<StateSpec> model, String label, boolean nameColumn) {
-			super(id, nameColumn?"nameColumnFrag":"otherColumnFrag", IssueStatesPage.this, model);
-			this.nameColumn = nameColumn;
+		private final String color;
+		
+		public ColumnFragment(String id, IModel<StateSpec> model, String label, String color) {
+			super(id, color!=null?"nameColumnFrag":"otherColumnFrag", IssueStatesPage.this, model);
 			this.index = getWorkflow().getStateIndex(getState().getName());
 			this.label = label;
+			this.color = color;
 		}
 		
 		private StateSpec getState() {
@@ -251,11 +252,26 @@ public class IssueStatesPage extends IssueWorkflowPage {
 				}
 				
 			};
-			if (label != null)
-				link.add(new Label("label", label));
-			else
+			if (label != null) {
+				link.add(new Label("label", label) {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						if (color != null) {
+							String fontColor = ColorUtils.isLight(color)?"black":"white"; 
+							String style = String.format(
+									"background-color: %s; color: %s;", 
+									color, fontColor);
+							add(AttributeAppender.append("style", style));
+						}
+					}
+					
+				});
+			} else {
 				link.add(new Label("label", "&nbsp;").setEscapeModelStrings(false));
-			if (nameColumn)
+			}
+			if (color != null)
 				link.add(new WebMarkupContainer("initial").setVisible(index==0));
 			add(link);
 		}

@@ -18,6 +18,11 @@
 	position: absolute;
 	top: 8px;
 }
+#project-setting .issue-states table>tbody>tr>td:first-child a span {
+	border-radius: 3px;
+	padding: 2px 6px;
+	margin-right: 8px;
+}
 #project-setting .issue-states table>tbody>tr>td:first-child>div>a {
 	margin-left: 16px;
 }
