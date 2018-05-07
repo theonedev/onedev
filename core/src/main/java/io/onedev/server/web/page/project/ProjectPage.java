@@ -151,8 +151,14 @@ public abstract class ProjectPage extends LayoutPage {
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 								String query = null;
-								if (getLoginUser() != null && !getLoginUser().getIssueQueries().isEmpty())
-									query = getLoginUser().getIssueQueries().values().iterator().next();
+								Map<String, String> issueQueries = null;
+								if (getLoginUser() != null)
+									issueQueries = getLoginUser().getIssueQueries().get(getProject().getName());
+								if (issueQueries == null)
+									issueQueries = new HashMap<>();
+								
+								if (!issueQueries.isEmpty())
+									query = issueQueries.values().iterator().next();
 								if (query == null && !getProject().getIssueListCustomization().getSavedQueries().isEmpty())
 									query = getProject().getIssueListCustomization().getSavedQueries().values().iterator().next();
 								return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, IssueListPage.paramsOf(getProject(), query));

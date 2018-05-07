@@ -102,15 +102,6 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Issue Closed")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().isClosed()?"Yes":"No", false));
-			}
-			
-		});		
-		
 		IDataProvider<StateSpec> dataProvider = new ListDataProvider<StateSpec>() {
 
 			@Override

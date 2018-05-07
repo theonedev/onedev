@@ -9,10 +9,23 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.exception.OneException;
+import io.onedev.server.model.support.authorized.ProjectWriters;
+import io.onedev.server.model.support.issue.workflow.action.PressButton;
+import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
+import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsNotSet;
+import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsSet;
+import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueSpecification;
 import io.onedev.server.util.UsageUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.util.inputspec.choiceprovider.Choice;
+import io.onedev.server.util.inputspec.choiceprovider.SpecifiedChoices;
+import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.util.inputspec.userchoiceprovider.ProjectReaders;
 
 public class IssueWorkflow implements Serializable, InputContext {
 	
@@ -29,6 +42,130 @@ public class IssueWorkflow implements Serializable, InputContext {
 	private boolean reconciled = true;
 	
 	private transient Map<String, InputSpec> fieldMap;
+	
+	public IssueWorkflow() {
+		ChoiceInput type = new ChoiceInput();
+		type.setName("Type");
+		SpecifiedChoices specifiedChoices = new SpecifiedChoices();
+
+		List<Choice> choices = new ArrayList<>(); 
+		Choice newFeature = new Choice();
+		newFeature.setValue("New Feature");
+		choices.add(newFeature);
+		
+		Choice improvement = new Choice();
+		improvement.setValue("Improvement");
+		choices.add(improvement);
+
+		Choice bug = new Choice();
+		bug.setValue("Bug");
+		choices.add(bug);
+
+		Choice task = new Choice();
+		task.setValue("Task");
+		choices.add(task);
+
+		specifiedChoices.setChoices(choices);
+		type.setChoiceProvider(specifiedChoices);
+		
+		fields.add(type);
+		
+		ChoiceInput severity = new ChoiceInput();
+		severity.setName("Severity");
+		specifiedChoices = new SpecifiedChoices();
+
+		choices = new ArrayList<>(); 
+		
+		Choice minor = new Choice();
+		minor.setValue("Minor");
+		choices.add(minor);
+
+		Choice normal = new Choice();
+		normal.setValue("Normal");
+		choices.add(normal);
+
+		Choice major = new Choice();
+		major.setValue("Major");
+		choices.add(major);
+		
+		specifiedChoices.setChoices(choices);
+		severity.setChoiceProvider(specifiedChoices);
+		
+		fields.add(severity);
+
+		UserChoiceInput assignee = new UserChoiceInput();
+		assignee.setChoiceProvider(new ProjectReaders());
+		assignee.setName("Assignee");
+		
+		fields.add(assignee);
+		
+		StateSpec open = new StateSpec();
+		open.setName("Open");
+		open.setFields(Lists.newArrayList("Type", "Severity"));
+		
+		states.add(open);
+		
+		StateSpec assigned = new StateSpec();
+		assigned.setName("Assigned");
+		assigned.setFields(Lists.newArrayList("Assignee"));
+		
+		states.add(assigned);
+		
+		StateSpec closed = new StateSpec();
+		closed.setName("Closed");
+		
+		states.add(closed);
+		
+		StateTransition transition = new StateTransition();
+		transition.setFromStates(Lists.newArrayList("Open", "Assigned"));
+		transition.setToState("Closed");
+		PressButton pressButton = new PressButton();
+		pressButton.setName("Close");
+		pressButton.setAuthorized(new ProjectWriters());
+		transition.setOnAction(pressButton);
+		
+		stateTransitions.add(transition);
+		
+		transition = new StateTransition();
+		transition.setFromStates(Lists.newArrayList("Open"));
+		transition.setToState("Assigned");
+		pressButton = new PressButton();
+		pressButton.setName("Assign");
+		pressButton.setAuthorized(new ProjectWriters());
+		transition.setOnAction(pressButton);
+		
+		stateTransitions.add(transition);
+		
+		transition = new StateTransition();
+		transition.setFromStates(Lists.newArrayList("Closed"));
+		transition.setToState("Open");
+		TransitionPrerequisite prerequisite = new TransitionPrerequisite();
+		prerequisite.setFieldName("Assignee");
+		ValueSpecification specification = new ValueIsNotSet();
+		prerequisite.setValueSpecification(specification);
+		transition.setPrerequisite(prerequisite);
+		pressButton = new PressButton();
+		pressButton.setName("Reopen");
+		pressButton.setAuthorized(new ProjectWriters());
+		transition.setOnAction(pressButton);
+		
+		stateTransitions.add(transition);
+		
+		transition = new StateTransition();
+		transition.setFromStates(Lists.newArrayList("Closed"));
+		transition.setToState("Assigned");
+		prerequisite = new TransitionPrerequisite();
+		prerequisite.setFieldName("Assignee");
+		specification = new ValueIsSet();
+		prerequisite.setValueSpecification(specification);
+		transition.setPrerequisite(prerequisite);
+		pressButton = new PressButton();
+		pressButton.setName("Reopen");
+		pressButton.setAuthorized(new ProjectWriters());
+		transition.setOnAction(pressButton);
+		
+		stateTransitions.add(transition);
+	}
 	
 	public List<StateSpec> getStates() {
 		return states;

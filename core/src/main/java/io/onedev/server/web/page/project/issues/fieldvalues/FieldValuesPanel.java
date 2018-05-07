@@ -13,7 +13,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.MultiValueIssueField;
+import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -25,9 +25,9 @@ import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ColorUtils;
 
 @SuppressWarnings("serial")
-public class FieldValuesPanel extends GenericPanel<MultiValueIssueField> implements EditContext {
+public class FieldValuesPanel extends GenericPanel<PromptedField> implements EditContext {
 
-	public FieldValuesPanel(String id, IModel<MultiValueIssueField> model) {
+	public FieldValuesPanel(String id, IModel<PromptedField> model) {
 		super(id, model);
 	}
 
@@ -95,7 +95,7 @@ public class FieldValuesPanel extends GenericPanel<MultiValueIssueField> impleme
 
 	@Override
 	public Object getInputValue(String name) {
-		MultiValueIssueField field = getField().getIssue().getMultiValueFields().get(name);
+		PromptedField field = getField().getIssue().getPromptedFields().get(name);
 		InputSpec fieldSpec = getField().getIssue().getProject().getIssueWorkflow().getField(name);
 		if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
 			return fieldSpec.convertToObject(field.getValues());
@@ -104,7 +104,7 @@ public class FieldValuesPanel extends GenericPanel<MultiValueIssueField> impleme
 		}
 	}
 
-	private MultiValueIssueField getField() {
+	private PromptedField getField() {
 		return getModelObject();
 	}
 	

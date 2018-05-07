@@ -145,9 +145,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     		userAuthorizationManager.save(authorization);
     	}
     	
-    	if (oldName != null && !project.getName().equals(oldName)) {
+    	if (oldName != null && !project.getName().equals(oldName))
     		listenerRegistry.post(new ProjectRenamed(project, oldName));
-    	}
     	
     	File gitDir = project.getGitDir();
     	

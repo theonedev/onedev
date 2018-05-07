@@ -140,11 +140,11 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Transactional
 	@Override
-	public void save(Issue issue, Serializable fieldBean, Collection<String> fieldNames) {
+	public void save(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {
 		if (issue.isNew())
 			issue.setNumber(getNextNumber(issue.getProject()));
 		save(issue);
-		issueFieldManager.writeFields(issue, fieldBean, fieldNames);
+		issueFieldManager.writeFields(issue, fieldBean, promptedFields);
 	}
 
 	private long getNextNumber(Project project) {

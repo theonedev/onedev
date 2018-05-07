@@ -156,6 +156,9 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="sourceProject")
 	private Collection<PullRequest> outgoingRequests = new ArrayList<>();
 	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<Issue> issues = new ArrayList<>();
+	
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Project> forks = new ArrayList<>();
     

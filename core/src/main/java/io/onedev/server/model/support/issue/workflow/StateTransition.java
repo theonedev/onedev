@@ -13,6 +13,7 @@ import io.onedev.server.model.support.authorized.SpecifiedGroup;
 import io.onedev.server.model.support.authorized.SpecifiedUser;
 import io.onedev.server.model.support.issue.workflow.action.IssueAction;
 import io.onedev.server.model.support.issue.workflow.action.PressButton;
+import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;

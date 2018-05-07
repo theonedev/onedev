@@ -18,6 +18,15 @@ public class IssueListCustomization implements Serializable {
 	private Map<String, String> savedQueries = new LinkedHashMap<>();
 	
 	private List<String> displayFields = new ArrayList<>();
+
+	public IssueListCustomization() {
+		displayFields.add("Type");
+		displayFields.add("Severity");
+		displayFields.add("Assignee");
+		
+		savedQueries.put("Outstanding", "\"State\" is not \"Closed\"");
+		savedQueries.put("Closed", "\"State\" is \"Closed\"");
+	}
 	
 	public Map<String, String> getSavedQueries() {
 		return savedQueries;

@@ -274,6 +274,8 @@ public class IssueQuery implements Serializable {
 								return new StateCriteria(value, operator);
 							} else if (fieldName.equals(Issue.VOTES)) {
 								return new VoteCriteria(getIntValue(value), operator);
+							} else if (fieldName.equals(Issue.NUMBER)) {
+								return new NumberCriteria(getIntValue(value), operator);
 							} else if (fieldName.equals(Issue.SUBMITTER)) {
 								User user = OneDev.getInstance(UserManager.class).findByName(value);
 								if (user == null)
@@ -297,6 +299,8 @@ public class IssueQuery implements Serializable {
 						case IssueQueryLexer.IsGreaterThan:
 							if (fieldName.equals(Issue.VOTES)) {
 								return new VoteCriteria(getIntValue(value), operator);
+							} else if (fieldName.equals(Issue.NUMBER)) {
+								return new NumberCriteria(getIntValue(value), operator);
 							} else {
 								InputSpec field = project.getIssueWorkflow().getField(fieldName);
 								if (field instanceof NumberInput)
@@ -333,7 +337,7 @@ public class IssueQuery implements Serializable {
 			List<IssueSort> issueSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.VOTES)) {
+				if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.VOTES) && !fieldName.equals(Issue.NUMBER)) {
 					InputSpec field = project.getIssueWorkflow().getField(fieldName);
 					if (!(field instanceof ChoiceInput) && !(field instanceof DateInput) 
 							&& !(field instanceof NumberInput)) {
@@ -405,6 +409,7 @@ public class IssueQuery implements Serializable {
 			if (!fieldName.equals(Issue.STATE) 
 					&& !fieldName.equals(Issue.VOTES) 
 					&& !fieldName.equals(Issue.SUBMITTER)
+					&& !fieldName.equals(Issue.NUMBER)
 					&& !(field instanceof NumberInput) 
 					&& !(field instanceof ChoiceInput) 
 					&& !(field instanceof UserChoiceInput)
@@ -415,7 +420,8 @@ public class IssueQuery implements Serializable {
 			break;
 		case IssueQueryLexer.IsLessThan:
 		case IssueQueryLexer.IsGreaterThan:
-			if (!fieldName.equals(Issue.VOTES) 
+			if (!fieldName.equals(Issue.VOTES)
+					&& !fieldName.equals(Issue.NUMBER)
 					&& !(field instanceof NumberInput) 
 					&& !(field instanceof ChoiceInput))
 				throw newOperatorException(fieldName, operator);

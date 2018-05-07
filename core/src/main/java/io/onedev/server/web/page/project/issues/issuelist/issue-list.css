@@ -24,10 +24,6 @@
 #issue-list>.head .list-unstyled {
 	margin-bottom: 0;
 }
-#issue-list>.head>.preset-queries>.label {
-	font-size: 17px;
-	vertical-align: middle;
-}
 #issue-list>.head>.preset-queries>* {
 	margin-right: 8px;
 }

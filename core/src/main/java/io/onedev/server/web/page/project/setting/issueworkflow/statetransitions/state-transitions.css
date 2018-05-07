@@ -28,3 +28,7 @@
 .floating.state-transition .property-authorized .value {
 	white-space: nowrap;
 } 
+.floating.state-transition .property-prerequisite .property-fieldName td.name {
+	font-weight: normal;
+	border-right: none;
+}

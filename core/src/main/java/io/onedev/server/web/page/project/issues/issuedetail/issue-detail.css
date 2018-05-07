@@ -8,10 +8,10 @@
 	font-size: 18px;
 	font-weight: bold;
 }
-#issue-detail>.primary>.state-reporter-actions .state {
+#issue-detail>.primary>.state-submitter-actions .state {
 	font-size: 16px;  
 }
-#issue-detail>.primary>.state-reporter-actions>span {
+#issue-detail>.primary>.state-submitter-actions>span {
 	margin-right: 8px;
 }
 #issue-detail>.primary>.description {

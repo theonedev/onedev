@@ -56,7 +56,7 @@ import io.onedev.server.model.support.issue.IssueListCustomization;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.MultiValueIssueField;
+import io.onedev.server.util.PromptedField;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
@@ -107,6 +107,16 @@ public class IssueListPage extends ProjectPage {
 		if (customization == null)
 			customization = getProject().getIssueListCustomization();
 		return customization;
+	}
+	
+	private Map<String, String> getUserQueries() {
+		LinkedHashMap<String, String> issueQueries = getLoginUser().getIssueQueries().get(getProject().getName());
+		if (issueQueries == null) {
+			issueQueries = new LinkedHashMap<>();
+			getLoginUser().getIssueQueries().put(getProject().getName(), issueQueries);
+		}
+		return issueQueries;
+		
 	}
 	
 	@Override
@@ -183,7 +193,7 @@ public class IssueListPage extends ProjectPage {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						getLoginUser().getIssueQueries().put(bean.getName(), query);
+						getUserQueries().put(bean.getName(), query);
 						OneDev.getInstance(UserManager.class).save(getLoginUser());
 						target.add(head);
 						modal.close();
@@ -237,10 +247,10 @@ public class IssueListPage extends ProjectPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				if (SecurityUtils.canManage(getProject())) {
-					setVisible(!getLoginUser().getIssueQueries().isEmpty() 
+					setVisible(!getUserQueries().isEmpty() 
 							|| !getProject().getIssueListCustomization().getSavedQueries().isEmpty());
 				} else {
-					setVisible(getLoginUser() != null && !getLoginUser().getIssueQueries().isEmpty());
+					setVisible(getLoginUser() != null && !getUserQueries().isEmpty());
 				}
 			}
 			
@@ -299,7 +309,7 @@ public class IssueListPage extends ProjectPage {
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "editSavedFrag", IssueListPage.this);
-				List<String> userQueries = new ArrayList<>(getLoginUser().getIssueQueries().keySet());
+				List<String> userQueries = new ArrayList<>(getUserQueries().keySet());
 				List<String> projectQueries = new ArrayList<>();
 				if (SecurityUtils.canManage(getProject())) 
 					projectQueries.addAll(getProject().getIssueListCustomization().getSavedQueries().keySet());
@@ -345,8 +355,8 @@ public class IssueListPage extends ProjectPage {
 					public void onClick(AjaxRequestTarget target) {
 						LinkedHashMap<String, String> queryMap = new LinkedHashMap<>();
 						for (String query: userQueries)
-							queryMap.put(query, getLoginUser().getIssueQueries().get(query));
-						getLoginUser().setIssueQueries(queryMap);
+							queryMap.put(query, getUserQueries().get(query));
+						getLoginUser().getIssueQueries().put(getProject().getName(), queryMap);
 						OneDev.getInstance(UserManager.class).save(getLoginUser());
 						
 						if (SecurityUtils.canManage(getProject())) {
@@ -475,45 +485,19 @@ public class IssueListPage extends ProjectPage {
 			
 		});
 		
-		IModel<List<SavedQuery>> userQueriesModel = new LoadableDetachableModel<List<SavedQuery>>() {
+		head.add(new ListView<SavedQuery>("userQueries", new LoadableDetachableModel<List<SavedQuery>>() {
 
 			@Override
 			protected List<SavedQuery> load() {
 				List<SavedQuery> savedQueries = new ArrayList<>();
 				if (getLoginUser() != null) {
-					for (Map.Entry<String, String> entry: getLoginUser().getIssueQueries().entrySet())
+					for (Map.Entry<String, String> entry: getUserQueries().entrySet())
 						savedQueries.add(new SavedQuery(entry.getKey(), entry.getValue()));
 				}
 				return savedQueries;
 			}
 			
-		};
-		
-		IModel<List<SavedQuery>> projectQueriesModel = new LoadableDetachableModel<List<SavedQuery>>() {
-
-			@Override
-			protected List<SavedQuery> load() {
-				List<SavedQuery> savedQueries = new ArrayList<>();
-				for (Map.Entry<String, String> entry: getProject().getIssueListCustomization().getSavedQueries().entrySet())
-					savedQueries.add(new SavedQuery(entry.getKey(), entry.getValue()));
-				return savedQueries;
-			}
-			
-		};
-
-		WebMarkupContainer presetQueries = new WebMarkupContainer("presetQueries") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!userQueriesModel.getObject().isEmpty() 
-						|| !projectQueriesModel.getObject().isEmpty());
-			}
-			
-		};
-		head.add(presetQueries);
-		
-		presetQueries.add(new ListView<SavedQuery>("userQueries", userQueriesModel) {
+		}) {
 
 			@Override
 			protected void populateItem(ListItem<SavedQuery> item) {
@@ -531,7 +515,17 @@ public class IssueListPage extends ProjectPage {
 
 		});
 		
-		presetQueries.add(new ListView<SavedQuery>("projectQueries", projectQueriesModel) {
+		head.add(new ListView<SavedQuery>("projectQueries", new LoadableDetachableModel<List<SavedQuery>>() {
+
+			@Override
+			protected List<SavedQuery> load() {
+				List<SavedQuery> savedQueries = new ArrayList<>();
+				for (Map.Entry<String, String> entry: getProject().getIssueListCustomization().getSavedQueries().entrySet())
+					savedQueries.add(new SavedQuery(entry.getKey(), entry.getValue()));
+				return savedQueries;
+			}
+			
+		}) {
 
 			@Override
 			protected void populateItem(ListItem<SavedQuery> item) {
@@ -669,11 +663,11 @@ public class IssueListPage extends ProjectPage {
 				
 				RepeatingView fieldsView = new RepeatingView("fields");
 				for (String fieldName: getCustomization().getDisplayFields()) {
-					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), new AbstractReadOnlyModel<MultiValueIssueField>() {
+					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), new AbstractReadOnlyModel<PromptedField>() {
 
 						@Override
-						public MultiValueIssueField getObject() {
-							return item.getModelObject().getMultiValueFields().get(fieldName);
+						public PromptedField getObject() {
+							return item.getModelObject().getPromptedFields().get(fieldName);
 						}
 						
 					}).add(AttributeAppender.append("title", fieldName)));

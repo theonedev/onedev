@@ -36,7 +36,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.MultiValueIssueField;
+import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputContext;
@@ -93,7 +93,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 			
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 		
-		for (Map.Entry<String, MultiValueIssueField> entry: issue.getMultiValueFields().entrySet()) {
+		for (Map.Entry<String, PromptedField> entry: issue.getPromptedFields().entrySet()) {
 			List<String> strings = entry.getValue().getValues();
 			Collections.sort(strings);
 			
@@ -118,21 +118,10 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 
 	@Transactional
 	@Override
-	public void writeFields(Issue issue, Serializable fieldBean, Collection<String> fieldNames) {
-		if (!fieldNames.isEmpty()) {
-			CriteriaBuilder builder = getSession().getCriteriaBuilder();
-			CriteriaDelete<IssueField> criteriaDelete = builder.createCriteriaDelete(IssueField.class);
-			Root<IssueField> root = criteriaDelete.from(IssueField.class);
-			Predicate issuePredicate = builder.equal(root.get("issue"), issue);
-			Predicate namePredicate = root.get("name").in(fieldNames);
-			criteriaDelete.where(builder.and(issuePredicate, namePredicate));
-			
-			getSession().createQuery(criteriaDelete).executeUpdate();
-			
-			Query query = getSession().createQuery("delete from IssueField where issue = :issue");
-			query.setParameter("issue", issue);
-			query.executeUpdate();
-		}
+	public void writeFields(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {
+		Query query = getSession().createQuery("delete from IssueField where issue = :issue");
+		query.setParameter("issue", issue);
+		query.executeUpdate();
 		
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
 
@@ -189,7 +178,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 				field.setName(fieldName);
 				field.setOrdinal(ordinal);
 				field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
-				field.setCollected(fieldNames.contains(fieldName));
+				field.setPrompted(promptedFields.contains(fieldName));
 				
 				if (fieldValue != null) {
 					List<String> strings = fieldSpec.convertToStrings(fieldValue);

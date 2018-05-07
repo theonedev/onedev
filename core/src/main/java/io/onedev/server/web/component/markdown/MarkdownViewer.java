@@ -21,7 +21,6 @@ import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")

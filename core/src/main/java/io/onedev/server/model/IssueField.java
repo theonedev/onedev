@@ -36,7 +36,7 @@ public class IssueField extends AbstractEntity {
 	@Column(nullable=false)
 	private String type;
 	
-	private boolean collected;
+	private boolean prompted;
 	
 	private long ordinal;
 	
@@ -80,12 +80,12 @@ public class IssueField extends AbstractEntity {
 		this.ordinal = ordinal;
 	}
 
-	public boolean isCollected() {
-		return collected;
+	public boolean isPrompted() {
+		return prompted;
 	}
 
-	public void setCollected(boolean collected) {
-		this.collected = collected;
+	public void setPrompted(boolean prompted) {
+		this.prompted = prompted;
 	}
 	
 }

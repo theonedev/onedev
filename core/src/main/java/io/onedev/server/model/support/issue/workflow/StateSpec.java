@@ -24,8 +24,6 @@ public class StateSpec implements Serializable {
 	
 	private String description;
 	
-	private boolean closed;
-	
 	private String color = "#777777";
 	
 	private List<String> fields = new ArrayList<>();
@@ -48,15 +46,6 @@ public class StateSpec implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	@Editable(order=300, name="Issue Closed", description="Enable if issue with this state is considered closed")
-	public boolean isClosed() {
-		return closed;
-	}
-
-	public void setClosed(boolean closed) {
-		this.closed = closed;
 	}
 
 	@Editable(order=400, description="Specify color of the state for displaying purpose")

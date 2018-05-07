@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.persistence.EntityNotFoundException;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -40,7 +40,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
@@ -48,7 +47,7 @@ import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.model.support.issue.workflow.StateTransition;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.MultiValueIssueField;
+import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.IssueStateLabel;
@@ -79,7 +78,11 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 
 			@Override
 			protected Issue load() {
-				return getIssueManager().load(params.get(PARAM_ISSUE).toLong());
+				Long issueNumber = params.get(PARAM_ISSUE).toLong();
+				Issue issue = OneDev.getInstance(IssueManager.class).find(getProject(), issueNumber);
+				if (issue == null)
+					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
+				return issue;
 			}
 
 		};
@@ -96,8 +99,8 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 		add(new Label("title", getIssue().getTitle()));
 		add(new IssueStateLabel("state", issueModel));
 		
-		add(new UserLink("reporter", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));
-		add(new Label("reportDate", DateUtils.formatAge(getIssue().getSubmitDate())));
+		add(new UserLink("submitter", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));
+		add(new Label("submitDate", DateUtils.formatAge(getIssue().getSubmitDate())));
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 
@@ -120,8 +123,13 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 				if (transition.getPrerequisite() == null) {
 					applicable = true;
 				} else {
-					MultiValueIssueField field = getIssue().getMultiValueFields().get(transition.getPrerequisite().getFieldName());
-					if (field != null && transition.getPrerequisite().getFieldValues().containsAll(field.getValues()))
+					PromptedField field = getIssue().getPromptedFields().get(transition.getPrerequisite().getFieldName());
+					List<String> fieldValues;
+					if (field != null)
+						fieldValues = field.getValues();
+					else
+						fieldValues = new ArrayList<>();
+					if (transition.getPrerequisite().getValueSpecification().matches(fieldValues))
 						applicable = true;
 				}
 				if (applicable) {
@@ -168,7 +176,9 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 									super.onSubmit(target, form);
 									getIssue().setState(transition.getToState());
 									StateSpec stateSpec = Preconditions.checkNotNull(getProject().getIssueWorkflow().getState(getIssue().getState()));
-									getIssueManager().save(getIssue(), fieldBean, stateSpec.getFields());
+									Set<String> promptedFields = new HashSet<>(getIssue().getPromptedFields().keySet());
+									promptedFields.addAll(stateSpec.getFields());
+									getIssueManager().save(getIssue(), fieldBean, promptedFields);
 									setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(getIssue()));
 								}
 								
@@ -226,34 +236,11 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 		
 		add(new MarkdownViewer("description", Model.of(getIssue().getDescription()), null));
 
-		add(new ListView<MultiValueIssueField>("fields", new LoadableDetachableModel<List<MultiValueIssueField>>() {
+		add(new ListView<PromptedField>("fields", new LoadableDetachableModel<List<PromptedField>>() {
 
 			@Override
-			protected List<MultiValueIssueField> load() {
-				Map<String, MultiValueIssueField> multiValueFields = getIssue().getMultiValueFields();
-				List<IssueField> undefinedFields = new ArrayList<>(getIssue().getFields());
-				for (Iterator<IssueField> it = undefinedFields.iterator(); it.hasNext();) {
-					if (multiValueFields.containsKey(it.next().getName()))
-						it.remove();
-				}
-				Collections.sort(undefinedFields, new Comparator<IssueField>() {
-
-					@Override
-					public int compare(IssueField o1, IssueField o2) {
-						return o1.getName().compareTo(o2.getName());
-					}
-					
-				});
-				for (IssueField field: undefinedFields) {
-					MultiValueIssueField multiValueField = multiValueFields.get(field.getName());
-					if (multiValueField == null) {
-						multiValueField = new MultiValueIssueField(getIssue(), field.getName(), field.getType(), new ArrayList<>());
-						multiValueFields.put(field.getName(), multiValueField);
-					}
-					if (field.getValue() != null)
-						multiValueField.getValues().add(field.getValue());
-				}
-				return new ArrayList<>(multiValueFields.values());
+			protected List<PromptedField> load() {
+				return new ArrayList<>(getIssue().getPromptedFields().values());
 			}
 			
 		}) {
@@ -265,8 +252,8 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 			}
 
 			@Override
-			protected void populateItem(ListItem<MultiValueIssueField> item) {
-				MultiValueIssueField field = item.getModelObject();
+			protected void populateItem(ListItem<PromptedField> item) {
+				PromptedField field = item.getModelObject();
 				item.add(new Label("name", field.getName()));
 				item.add(new FieldValuesPanel("values", item.getModel()));
 			}
@@ -309,7 +296,7 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 
 	public static PageParameters paramsOf(Issue issue) {
 		PageParameters params = ProjectPage.paramsOf(issue.getProject());
-		params.set(PARAM_ISSUE, issue.getId());
+		params.set(PARAM_ISSUE, issue.getNumber());
 		return params;
 	}
 

@@ -73,7 +73,7 @@ public class IssueEditPage extends ProjectPage implements InputContext {
 		
 		Set<String> excludedFields = new HashSet<>();
 		for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFields()) {
-			if (!issue.getMultiValueFields().containsKey(fieldSpec.getName()))
+			if (!issue.getPromptedFields().containsKey(fieldSpec.getName()))
 				excludedFields.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
 		}
 
@@ -85,7 +85,7 @@ public class IssueEditPage extends ProjectPage implements InputContext {
 			public void onSubmit() {
 				super.onSubmit();
 				new BeanDescriptor(Issue.class).copyProperties(issue, getIssue());
-				getIssueManager().save(getIssue(), fieldBean, issue.getMultiValueFields().keySet());
+				getIssueManager().save(getIssue(), fieldBean, issue.getPromptedFields().keySet());
 				
 				setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(getIssue()));
 			}

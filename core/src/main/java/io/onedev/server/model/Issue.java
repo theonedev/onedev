@@ -26,7 +26,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.MultiValueIssueField;
+import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -115,7 +115,7 @@ public class Issue extends AbstractEntity {
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
 	
-	private transient Map<String, MultiValueIssueField> multiValueFields;
+	private transient Map<String, PromptedField> promptedFields;
 	
 	public long getVersion() {
 		return version;
@@ -204,13 +204,13 @@ public class Issue extends AbstractEntity {
 		this.fields = fields;
 	}
 	
-	public Map<String, MultiValueIssueField> getMultiValueFields() {
-		if (multiValueFields == null) {
-			multiValueFields = new LinkedHashMap<>();
+	public Map<String, PromptedField> getPromptedFields() {
+		if (promptedFields == null) {
+			promptedFields = new LinkedHashMap<>();
 
 			Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
 			for (IssueField field: getFields()) {
-				if (field.isCollected()) {
+				if (field.isPrompted()) {
 					List<IssueField> fieldsOfName = fieldMap.get(field.getName());
 					if (fieldsOfName == null) {
 						fieldsOfName = new ArrayList<>();
@@ -230,11 +230,11 @@ public class Issue extends AbstractEntity {
 						if (field.getValue() != null)
 							values.add(field.getValue());
 					}
-					multiValueFields.put(fieldName, new MultiValueIssueField(this, fieldName, type, values));
+					promptedFields.put(fieldName, new PromptedField(this, fieldName, type, values));
 				}
 			}
 		}
-		return multiValueFields;
+		return promptedFields;
 	}
 	
 }

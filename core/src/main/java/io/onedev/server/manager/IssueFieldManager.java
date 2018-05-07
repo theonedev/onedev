@@ -25,7 +25,7 @@ public interface IssueFieldManager extends EntityManager<IssueField> {
 	
 	Serializable readFields(Issue issue);
 	
-	void writeFields(Issue issue, Serializable fieldBean, Collection<String> fieldNames);
+	void writeFields(Issue issue, Serializable fieldBean, Collection<String> promptedFields);
 	
 	Set<String> getExcludedFields(Project project, String state);
 	

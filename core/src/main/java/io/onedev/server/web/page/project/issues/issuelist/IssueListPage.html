@@ -22,18 +22,21 @@
 					<a wicket:id="newIssue" class="btn btn-success open-new"><i class="fa fa-plus"></i> Open New</a>
 				</div>
 			</div>
-			<div wicket:id="presetQueries" class="preset-queries">
-				<span class="label label-warning">Preset Queries:</span>
+			<div class="preset-queries">
+				<wicket:enclosure child="userQueries">
 				<span class="btn-group user-queries">
 					<wicket:container wicket:id="userQueries">
 					<a wicket:id="link" class="btn btn-default btn-sm"><span wicket:id="label"></span></a>
 					</wicket:container>
 				</span>
+				</wicket:enclosure>
+				<wicket:enclosure child="projectQueries">
 				<span class="btn-group project-queries">
 					<wicket:container wicket:id="projectQueries">
 					<a wicket:id="link" class="btn btn-default btn-sm"><span wicket:id="label"></span></a>
 					</wicket:container>
 				</span>
+				</wicket:enclosure>
 			</div>
 		</div>
 		<div wicket:id="body" class="body">

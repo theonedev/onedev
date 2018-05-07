@@ -103,7 +103,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								candidates.add(field.getName());
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = Lists.newArrayList(Issue.VOTES, Issue.SUBMIT_DATE);
+							List<String> candidates = Lists.newArrayList(Issue.VOTES, Issue.NUMBER, Issue.SUBMIT_DATE);
 							for (InputSpec field: project.getIssueWorkflow().getFields()) {
 								if (field instanceof NumberInput || field instanceof ChoiceInput || field instanceof DateInput) 
 									candidates.add(field.getName());
@@ -161,8 +161,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										OneContext.pop();
 									}								
 								} else if (fieldName.equals(Issue.TITLE) || fieldName.equals(Issue.DESCRIPTION) 
-										|| fieldName.equals(Issue.VOTES) || field instanceof NumberInput 
-										|| field instanceof TextInput) {
+										|| fieldName.equals(Issue.VOTES) || fieldName.equals(Issue.NUMBER)
+										|| field instanceof NumberInput || field instanceof TextInput) {
 									return null;
 								}
 							} catch (OneException ex) {

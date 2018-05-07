@@ -4,7 +4,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.User;
 
 public class TitleCriteria extends IssueCriteria {
 

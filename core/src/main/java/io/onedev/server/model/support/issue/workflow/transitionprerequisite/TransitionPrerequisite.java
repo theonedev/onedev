@@ -1,12 +1,13 @@
-package io.onedev.server.model.support.issue.workflow;
+package io.onedev.server.model.support.issue.workflow.transitionprerequisite;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
-import io.onedev.server.util.OneContext;
+import javax.validation.constraints.NotNull;
+
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -17,8 +18,8 @@ public class TransitionPrerequisite implements Serializable {
 
 	private String fieldName;
 	
-	private List<String> fieldValues;
-
+	private ValueSpecification valueSpecification;
+	
 	@Editable(order=100, name="When field")
 	@ChoiceProvider("getFieldNameChoices")
 	public String getFieldName() {
@@ -29,31 +30,21 @@ public class TransitionPrerequisite implements Serializable {
 		this.fieldName = fieldName;
 	}
 
-	@Editable(order=200, name="Is set to")
-	@ChoiceProvider("getFieldValueChoices")
-	public List<String> getFieldValues() {
-		return fieldValues;
+	@Editable(order=200)
+	@NotNull
+	@OmitName
+	public ValueSpecification getValueSpecification() {
+		return valueSpecification;
 	}
 
-	public void setFieldValues(List<String> fieldValues) {
-		this.fieldValues = fieldValues;
+	public void setValueSpecification(ValueSpecification valueSpecification) {
+		this.valueSpecification = valueSpecification;
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static List<String> getFieldNameChoices() {
 		IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
 		return page.getWorkflow().getInputNames();
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<String> getFieldValueChoices() {
-		String fieldName = (String) OneContext.get().getEditContext().getInputValue("fieldName");
-		if (fieldName != null) {
-			IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
-			return page.getWorkflow().getInput(fieldName).getPossibleValues();
-		} else {
-			return new ArrayList<>();
-		}
 	}
 	
 }

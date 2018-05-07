@@ -92,7 +92,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
 	@Lob
 	@Column(length=65535)
-    private LinkedHashMap<String, String> issueQueries = new LinkedHashMap<>();
+    private LinkedHashMap<String, LinkedHashMap<String, String>> issueQueries = new LinkedHashMap<>();
 
     @Override
     public PrincipalCollection getPrincipals() {
@@ -188,12 +188,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.requestTasks = requestTasks;
 	}
 
-	public LinkedHashMap<String, String> getIssueQueries() {
+	public LinkedHashMap<String, LinkedHashMap<String, String>> getIssueQueries() {
 		return issueQueries;
-	}
-
-	public void setIssueQueries(LinkedHashMap<String, String> issueQueries) {
-		this.issueQueries = issueQueries;
 	}
 
 	@SuppressWarnings("deprecation")

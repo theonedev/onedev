@@ -5,7 +5,7 @@ import java.util.List;
 
 import io.onedev.server.model.Issue;
 
-public class MultiValueIssueField implements Serializable {
+public class PromptedField implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,7 @@ public class MultiValueIssueField implements Serializable {
 	
 	private final List<String> values;
 	
-	public MultiValueIssueField(Issue issue, String name, String type, List<String> values) {
+	public PromptedField(Issue issue, String name, String type, List<String> values) {
 		this.issue = issue;
 		this.name = name;
 		this.type = type;
