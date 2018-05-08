@@ -1,23 +1,32 @@
 <wicket:extend>
 	<div id="issue-detail" class="clearfix">
 		<div class="primary pull-left">
-			<div wicket:id="title" class="title"></div>
-			<div class="state-submitter-actions">
-				<span wicket:id="state" class="state label label-default"></span>
-				<span class="submitter">Opened by <a wicket:id="submitter"></a> <span wicket:id="submitDate"></span></span>
-				<span class="btn-group transitions">
-					<a wicket:id="transitions" class="btn btn-sm btn-default"><span wicket:id="label"></span></a>
-				</span>
-				<span class="btn-group">
-					<a wicket:id="edit" class="btn btn-sm btn-default"><i class="fa fa-pencil"></i> Edit</a>
-					<a wicket:id="delete" class="btn btn-sm btn-default"><i class="fa fa-trash"></i> Delete</a>
-				</span>
-				<a wicket:id="newIssue" class="new-issue btn btn-sm btn-success"><i class="fa fa-plus"></i> New Issue</a>
+			<div class="number-and-title">
+				<span wicket:id="number"></span>
+				<span wicket:id="title"></span>
+			</div>
+			<div class="state-and-actions clearfix">
+				<span wicket:id="state" class="state label pull-left"></span>
+				<div class="actions pull-left">
+					<wicket:enclosure child="transitions">
+					<span class="btn-group">
+						<a wicket:id="transitions" class="btn btn-default btn-sm"><span wicket:id="label"></span></a>
+					</span>
+					</wicket:enclosure>
+					<span class="btn-group">
+						<a wicket:id="edit" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit</a>
+						<a wicket:id="delete" class="btn btn-default btn-sm"><i class="fa fa-trash"></i> Delete</a>
+					</span>
+					<a wicket:id="newIssue" class="btn btn-success btn-sm"><i class="fa fa-plus"></i> New Issue</a>
+				</div>
 			</div>
 			<div wicket:id="actionOptions" class="action-options"></div>
 			<div wicket:id="description" class="description"></div>
 		</div>
 		<div class="additional pull-right">
+			<div class="submitter">
+				Opened by <a wicket:id="submitter"></a> <span wicket:id="submitDate"></span>
+			</div>
 			<wicket:enclosure child="fields">
 			<div class="fields">
 				<table>
@@ -28,6 +37,20 @@
 				</table>
 			</div>
 			</wicket:enclosure>
+			<div wicket:id="relations" class="relations">
+				<label>Related Issues</label>
+				<wicket:enclosure child="relations">
+				<table class="table table-condensed">
+					<tr wicket:id="relations">
+						<td class="number-and-title"><a wicket:id="link"><span wicket:id="label"></span></a></td>
+						<td class="state"><span wicket:id="state" class="state label"></span></td>
+						<td class="actions"><a wicket:id="remove" title="Remove"><i class="fa fa-trash"></i></a></td>
+					</tr>
+				</table>
+				</wicket:enclosure>
+				<div wicket:id="feedback"></div>
+			</div>
+			<input wicket:id="addRelation" class="add-relation" type="hidden"></input>				
 		</div>
 	</div>
 	<wicket:fragment wicket:id="transitionFrag">

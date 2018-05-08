@@ -23,20 +23,12 @@
 				</div>
 			</div>
 			<div class="preset-queries">
-				<wicket:enclosure child="userQueries">
-				<span class="btn-group user-queries">
-					<wicket:container wicket:id="userQueries">
-					<a wicket:id="link" class="btn btn-default btn-sm"><span wicket:id="label"></span></a>
-					</wicket:container>
-				</span>
-				</wicket:enclosure>
-				<wicket:enclosure child="projectQueries">
-				<span class="btn-group project-queries">
-					<wicket:container wicket:id="projectQueries">
-					<a wicket:id="link" class="btn btn-default btn-sm"><span wicket:id="label"></span></a>
-					</wicket:container>
-				</span>
-				</wicket:enclosure>
+				<wicket:container wicket:id="userQueries">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+				</wicket:container>
+				<wicket:container wicket:id="projectQueries">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+				</wicket:container>
 			</div>
 		</div>
 		<div wicket:id="body" class="body">

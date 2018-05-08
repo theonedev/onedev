@@ -13,6 +13,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -26,6 +27,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -36,10 +38,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.IssueRelationManager;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueRelation;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
@@ -52,6 +57,7 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.issuechoice.SelectToAddIssue;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.editable.BeanContext;
@@ -61,6 +67,7 @@ import io.onedev.server.web.page.project.issues.issueedit.IssueEditPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
 public class IssueDetailPage extends ProjectPage implements InputContext {
@@ -96,8 +103,9 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("title", getIssue().getTitle()));
 		add(new IssueStateLabel("state", issueModel));
+		add(new Label("number", "#" + getIssue().getNumber()));
+		add(new Label("title", getIssue().getTitle()));
 		
 		add(new UserLink("submitter", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));
 		add(new Label("submitDate", DateUtils.formatAge(getIssue().getSubmitDate())));
@@ -230,7 +238,15 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 		deleteLink.setVisible(SecurityUtils.canModify(getIssue()));
 		add(deleteLink);
 		
-		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())));
+		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canRead(getProject()));
+			}
+			
+		});
 		
 		newEmptyActionOptions(null);
 		
@@ -259,9 +275,144 @@ public class IssueDetailPage extends ProjectPage implements InputContext {
 			}
 			
 		});
-		
-	}
 
+		WebMarkupContainer relations = new WebMarkupContainer("relations") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getIssue().getRelationsByCurrent().isEmpty() || SecurityUtils.canWrite(getProject()));
+			}
+			
+		};
+		
+		relations.setOutputMarkupId(true);
+		add(relations);
+		
+		IModel<List<Issue>> relationsModel = new LoadableDetachableModel<List<Issue>>() {
+
+			@Override
+			protected List<Issue> load() {
+				Set<Issue> set = new HashSet<>();
+				for (IssueRelation relation: getIssue().getRelationsByCurrent())
+					set.add(relation.getOther());
+				for (IssueRelation relation: getIssue().getRelationsByOther())
+					set.add(relation.getCurrent());
+				List<Issue> list = new ArrayList<>(set);
+				Collections.sort(list, new Comparator<Issue>() {
+
+					@Override
+					public int compare(Issue o1, Issue o2) {
+						return (int) (o2.getNumber() - o1.getNumber());
+					}
+					
+				});
+				return list;
+			}
+			
+		};
+		
+		relations.add(new ListView<Issue>("relations", relationsModel) {
+
+			@Override
+			protected void populateItem(ListItem<Issue> item) {
+				Issue issue = item.getModelObject();
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueDetailPage.class, IssueDetailPage.paramsOf(issue));
+				link.add(new Label("label", "#" + issue.getNumber()));
+				item.add(link);
+				
+				item.add(new IssueStateLabel("state", item.getModel()));
+				
+				item.add(new AjaxLink<Void>("remove") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmListener("Really want to remove this relation?"));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						IssueRelationManager issueRelationManager = OneDev.getInstance(IssueRelationManager.class);
+						IssueRelation relation = issueRelationManager.find(getIssue(), item.getModelObject());
+						if (relation != null) {
+							issueRelationManager.delete(relation);
+							getIssue().getRelationsByCurrent().remove(relation);
+						}
+						
+						relation = issueRelationManager.find(item.getModelObject(), getIssue());
+						if (relation != null) {
+							issueRelationManager.delete(relation);
+							getIssue().getRelationsByOther().remove(relation);
+						}
+						
+						relationsModel.detach();
+						
+						target.add(relations);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canWrite(getProject()));
+					}
+					
+				});
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getModelObject().isEmpty());
+			}
+			
+		});
+		
+		relations.add(new NotificationPanel("feedback", relations));
+		
+		add(new SelectToAddIssue("addRelation", new AbstractReadOnlyModel<Project>() {
+
+			@Override
+			public Project getObject() {
+				return getProject();
+			}
+			
+		}) {
+			
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				getSettings().setPlaceholder("Add related issue...");
+			}
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, Issue selection) {
+				if (selection.equals(getIssue())) {
+					relations.error("Can not add self as related issue");
+				} else {
+					IssueRelationManager issueRelationManager = OneDev.getInstance(IssueRelationManager.class);
+					IssueRelation relationByCurrent = issueRelationManager.find(getIssue(), selection);
+					IssueRelation relationByOther = issueRelationManager.find(selection, getIssue());
+					if (relationByCurrent == null && relationByOther == null) {
+						relationByCurrent = new IssueRelation();
+						relationByCurrent.setCurrent(getIssue());
+						relationByCurrent.setOther(selection);
+						getIssue().getRelationsByCurrent().add(relationByCurrent);
+						issueRelationManager.save(relationByCurrent);
+					}
+				}
+				target.add(relations);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canWrite(getProject()));
+			}
+			
+		});
+	}
+	
 	private void newEmptyActionOptions(@Nullable AjaxRequestTarget target) {
 		WebMarkupContainer actionOptions = new WebMarkupContainer(ACTION_OPTIONS_ID);
 		actionOptions.setOutputMarkupPlaceholderTag(true);

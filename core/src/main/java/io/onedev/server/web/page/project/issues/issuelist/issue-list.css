@@ -48,9 +48,10 @@
 	font-size: 16px;
 	font-weight: bold;
 }
-#issue-list .issue .primary .title {
+#issue-list .issue .primary .title a {
 	font-size: 16px;
 	font-weight: bold;
+	color: #444;
 }
 #issue-list .issue .primary .submitter {
 	text-align: right;
@@ -81,10 +82,13 @@
 #issue-list .issue .additional .state>div, 
 #issue-list .issue .additional .field-values .value>div, 
 #issue-list .issue .additional .field-values i {
-	display: inline;
-	padding: 0 4px;
+	display: table-cell;
+	padding: 3px 6px;
 	border-radius: 3px;
 }
+#issue-list .issue .additional .state>div {
+	font-weight: bold;
+} 
 #issue-list .issue .additional>.votes {
 	text-align: right;
 	padding-right: 0;

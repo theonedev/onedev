@@ -154,7 +154,15 @@ public class IssueListPage extends ProjectPage {
 		
 		form.add(new NotificationPanel("feedback", form));
 		
-		head.add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())));
+		head.add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canRead(getProject()));
+			}
+			
+		});
 		
 		head.add(querySave = new ModalLink("save") {
 
@@ -635,6 +643,12 @@ public class IssueListPage extends ProjectPage {
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
 					tag.setName("span");
+				}
+				
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!getProject().getIssueWorkflow().isReconciled());
 				}
 				
 			});

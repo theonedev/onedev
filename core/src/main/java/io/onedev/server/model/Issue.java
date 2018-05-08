@@ -29,6 +29,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
+import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 
 @Entity
@@ -71,10 +72,6 @@ public class Issue extends AbstractEntity {
 		BUILTIN_FIELDS.put(VOTES, "votes");
 	}
 	
-	public enum BuiltinField {
-		state, title, description, submitter, submitDate, votes
-	};
-	
 	@Version
 	private long version;
 	
@@ -114,6 +111,12 @@ public class Issue extends AbstractEntity {
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
+	
+	@OneToMany(mappedBy="current", cascade=CascadeType.REMOVE)
+	private Collection<IssueRelation> relationsByCurrent = new ArrayList<>();
+	
+	@OneToMany(mappedBy="other", cascade=CascadeType.REMOVE)
+	private Collection<IssueRelation> relationsByOther = new ArrayList<>();
 	
 	private transient Map<String, PromptedField> promptedFields;
 	
@@ -237,4 +240,24 @@ public class Issue extends AbstractEntity {
 		return promptedFields;
 	}
 	
+	public IssueFacade getFacade() {
+		return new IssueFacade(this);
+	}
+
+	public Collection<IssueRelation> getRelationsByCurrent() {
+		return relationsByCurrent;
+	}
+
+	public void setRelationsByCurrent(Collection<IssueRelation> relationsByCurrent) {
+		this.relationsByCurrent = relationsByCurrent;
+	}
+
+	public Collection<IssueRelation> getRelationsByOther() {
+		return relationsByOther;
+	}
+
+	public void setRelationsByOther(Collection<IssueRelation> relationsByOther) {
+		this.relationsByOther = relationsByOther;
+	}
+
 }

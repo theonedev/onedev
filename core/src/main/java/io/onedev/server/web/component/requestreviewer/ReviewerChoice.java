@@ -17,7 +17,7 @@ import io.onedev.server.web.component.select2.SelectToAddChoice;
 import io.onedev.server.web.component.userchoice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
-public abstract class ReviewerChoice extends SelectToAddChoice<UserFacade> {
+public class ReviewerChoice extends SelectToAddChoice<UserFacade> {
 
 	private final IModel<PullRequest> requestModel;
 	

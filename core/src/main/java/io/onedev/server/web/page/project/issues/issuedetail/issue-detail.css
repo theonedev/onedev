@@ -1,25 +1,25 @@
 #issue-detail>.primary {
-	width: 70%;
+	width: 69%;
 }
 #issue-detail>.primary>div {
 	margin-bottom: 20px;
 }
-#issue-detail>.primary>.title {
-	font-size: 18px;
+#issue-detail>.primary>.number-and-title {
+	font-size: 20px;
 	font-weight: bold;
 }
-#issue-detail>.primary>.state-submitter-actions .state {
-	font-size: 16px;  
+#issue-detail>.primary>.state-and-actions>.state {
+	font-size: 20px;
+	font-weight: normal;
+	margin-right: 20px;
 }
-#issue-detail>.primary>.state-submitter-actions>span {
+
+#issue-detail>.primary>.state-and-actions>.actions>* {
 	margin-right: 8px;
 }
-#issue-detail>.primary>.description {
-	border-top: 1px solid #E0E0E0;
-	padding-top: 20px;
-}
+
 #issue-detail>.additional {
-	width: 28%;
+	width: 30%;
 	border: 1px solid #E0E0E0;
 	padding: 20px;
 	background: #F9F9F9;
@@ -28,29 +28,53 @@
 }
 #issue-detail>.additional>div {
 	margin-bottom: 20px;
+	border-top: 1px solid #E8E8E8;
+	padding-top: 20px;
 }
+#issue-detail>.additional>div:first-child,
+#issue-detail>.additional>.add-relation {
+	padding-top: 0;
+	border-top: none;
+	margin-top: -10px;
+}
+
 #issue-detail>.additional .fields td {
 	padding-bottom: 10px;
 }
+#issue-detail>.additional .fields tr:last-child td {
+	padding-bottom: 0;
+}
 #issue-detail>.additional .fields .name {
 	font-weight: bold;
-	font-size: 13px;
 	line-height: 20px;
 	white-space: nowrap;
 	padding-right: 20px;
 }
-#issue-detail>.additional .fields .name a {
-	color: #f0ad4e;
-	margin-left: 4px;
+#issue-detail>.additional .fields .values .value div {
+	display: table-cell;
+	border-radius: 3px;
+	padding: 3px 6px;
 }
-#issue-detail>.additional .fields .values .value {
+
+#issue-detail>.additional .relations label {
+	margin-bottom: 10px;
+}
+#issue-detail>.additional .relations table {
+	table-layout: fixed;
+}
+#issue-detail>.additional .relations td.number-and-title {
 	white-space: nowrap;
-	margin-bottom: 8px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
-#issue-detail>.additional .fields .values .value:last-child {
-	margin-bottom: 0;
+#issue-detail>.additional .relations td.state {
+	text-align: right;
 }
-#issue-detail>.additional .fields .values .value .invalid-value {
-	color: #f0ad4e;
-	margin-left: 4px;
+#issue-detail>.additional .relations td.actions {
+	width: 32px;
+	text-align: right;
+}
+
+#issue-detail>.additional .select2-container {
+	width: 100%;
 }
