@@ -44,7 +44,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -132,14 +131,14 @@ public class ProjectCommitsPage extends ProjectPage {
 					for (CriteriaContext criteria: queryContext.criteria()) {
 						if (criteria.authorCriteria() != null) {
 							String value = criteria.authorCriteria().Value().getText();
-							value = StringUtils.replace(JavaEscape.unescapeJava(removeParens(value)), "*", ".*");
+							value = StringUtils.replace(unescape(removeParens(value)), "*", ".*");
 							command.authors().add(value);
 						} else if (criteria.committerCriteria() != null) {
 							String value = criteria.committerCriteria().Value().getText();
-							value = StringUtils.replace(JavaEscape.unescapeJava(removeParens(value)), "*", ".*");
+							value = StringUtils.replace(unescape(removeParens(value)), "*", ".*");
 							command.committers().add(value);
 						} else if (criteria.pathCriteria() != null) {
-							command.paths().add(removeParens(criteria.pathCriteria().Value().getText()));
+							command.paths().add(unescape(removeParens(criteria.pathCriteria().Value().getText())));
 						} else if (criteria.beforeCriteria() != null) {
 							command.before(removeParens(criteria.beforeCriteria().Value().getText()));
 						} else if (criteria.afterCriteria() != null) {
@@ -221,6 +220,10 @@ public class ProjectCommitsPage extends ProjectPage {
 		Integer page = params.get(PARAM_CURRENT_PAGE).toOptionalInteger();
 		if (page != null)
 			state.page = page.intValue();		
+	}
+
+	private String unescape(String text) {
+		return text.replace("\\(", "(").replace("\\)", ")").replace("\\\\", "\\");
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -627,7 +630,7 @@ public class ProjectCommitsPage extends ProjectPage {
 		List<String> fuzzyMessages = new ArrayList<>();
 		for (CriteriaContext criteria: queryContext.criteria()) {
 			if (criteria.messageCriteria() != null) {
-				String message = JavaEscape.unescapeJava(removeParens(criteria.messageCriteria().Value().getText()));
+				String message = unescape(removeParens(criteria.messageCriteria().Value().getText()));
 				messages.add(StringUtils.replace(message, "*", ".*"));
 			} else {
 				FuzzyCriteriaContext fuzzyCriteria = criteria.fuzzyCriteria();
@@ -648,7 +651,7 @@ public class ProjectCommitsPage extends ProjectPage {
 		for (CriteriaContext criteria: queryContext.criteria()) {
 			if (criteria.revisionCriteria() != null) {
 				Revision revision = new Revision();
-				revision.value = removeParens(criteria.revisionCriteria().Value().getText());
+				revision.value = unescape(removeParens(criteria.revisionCriteria().Value().getText()));
 				if (criteria.revisionCriteria().SINCE() != null)
 					revision.since = true;
 				else if (criteria.revisionCriteria().UNTIL() != null)

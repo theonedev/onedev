@@ -38,6 +38,8 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 	
 	private static final String VALUE_CLOSE = ")";
 	
+	private static final String ESCAPE_CHARS = "\\()";
+	
 	private static final List<String> DATE_EXAMPLES = Lists.newArrayList(
 			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
 			"yesterday midnight", "3 days ago", "last week", "last Monday", 
@@ -69,10 +71,10 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 						Project project = projectModel.getObject();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							suggestions.addAll(SuggestionUtils.suggestBranch(project, unfencedMatchWith));
+							suggestions.addAll(SuggestionUtils.suggestBranch(project, unfencedMatchWith, ESCAPE_CHARS));
 							break;
 						case CommitQueryParser.TAG:
-							suggestions.addAll(SuggestionUtils.suggestTag(project, unfencedMatchWith));
+							suggestions.addAll(SuggestionUtils.suggestTag(project, unfencedMatchWith, ESCAPE_CHARS));
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
@@ -93,18 +95,18 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 							}
 							
 							for (Map.Entry<String, Range> entry: suggestedInputs.entrySet()) 
-								suggestions.add(new InputSuggestion(entry.getKey(), -1, true, null, entry.getValue()));
+								suggestions.add(new InputSuggestion(entry.getKey(), -1, true, null, entry.getValue()).escape(ESCAPE_CHARS));
 							break;
 						case CommitQueryParser.BEFORE:
 						case CommitQueryParser.AFTER:
 							List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
 							candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
 							candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
-							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, null));
 							CollectionUtils.addIgnoreNull(suggestions, suggestToFence(unfencedMatchWith));
 							break;
 						case CommitQueryParser.PATH:
-							suggestions.addAll(SuggestionUtils.suggestPath(projectModel.getObject(), unfencedMatchWith));
+							suggestions.addAll(SuggestionUtils.suggestPath(projectModel.getObject(), unfencedMatchWith, ESCAPE_CHARS));
 							break;
 						} 
 						return suggestions;

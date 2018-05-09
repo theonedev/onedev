@@ -29,13 +29,13 @@ class AssistPanel extends Panel {
 
 	private final List<InputCompletion> suggestions;
 	
-	public AssistPanel(String id, Component input, InputStatus inputStatus, List<InputCompletion> suggestions, 
-			List<String> hints) {
+	public AssistPanel(String id, Component input, InputStatus inputStatus, 
+			List<InputCompletion> suggestions, List<String> hints) {
 		super(id);
 		this.input = input;
 		this.inputStatus = inputStatus;
-		this.hints = hints;
 		this.suggestions = suggestions;
+		this.hints = hints;
 	}
 
 	@Override
@@ -102,7 +102,8 @@ class AssistPanel extends Panel {
 			item.add(new Label("description", suggestion.getDescription()));
 		else
 			item.add(new Label("description").setVisible(false));
-		item.add(AttributeAppender.append("data-content", suggestion.complete(inputStatus).getContent()));
+		String content = suggestion.complete(inputStatus).getContent();
+		item.add(AttributeAppender.append("data-content", content));
 		item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));
 		item.setOutputMarkupId(true);
 		return item;

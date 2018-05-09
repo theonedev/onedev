@@ -105,14 +105,14 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							List<String> candidates = new ArrayList<>(Issue.BUILTIN_FIELDS.keySet());
 							for (InputSpec field: project.getIssueWorkflow().getFields())
 								candidates.add(field.getName());
-							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = Lists.newArrayList(Issue.VOTES, Issue.NUMBER, Issue.SUBMIT_DATE);
 							for (InputSpec field: project.getIssueWorkflow().getFields()) {
 								if (field instanceof NumberInput || field instanceof ChoiceInput || field instanceof DateInput) 
 									candidates.add(field.getName());
 							}
-							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = expectedElement.getParent().findChildrenByLabel("criteriaField", true);
 							Preconditions.checkState(fieldElements.size() == 1);
@@ -128,7 +128,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
 									candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
 									candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
-									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, null));
 									CollectionUtils.addIgnoreNull(suggestions, suggestToFence(unfencedMatchWith));
 								} else if (fieldName.equals(Issue.SUBMITTER) || field instanceof UserChoiceInput) {
 									for (User user: OneDev.getInstance(UserManager.class).findAll()) {
@@ -139,7 +139,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 												description = user.getDisplayName();
 											else
 												description = null;
-											suggestions.add(new InputSuggestion(user.getName(), description, match));
+											suggestions.add(new InputSuggestion(user.getName(), description, match).escape("\"\\"));
 										}
 									}
 								} else if (field instanceof IssueChoiceInput) {
@@ -149,18 +149,18 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										suggestions.add(suggestion);
 									}
 								} else if (field instanceof BooleanInput) {
-									suggestions.addAll(getSuggestions(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith));
+									suggestions.addAll(getSuggestions(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith, null));
 								} else if (field instanceof GroupChoiceInput) {
 									List<String> candidates = OneDev.getInstance(GroupManager.class).findAll().stream().map(it->it.getName()).collect(Collectors.toList());
-									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 								} else if (fieldName.equals(Issue.STATE)) {
 									List<String> candidates = project.getIssueWorkflow().getStates().stream().map(it->it.getName()).collect(Collectors.toList());
-									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 								} else if (field instanceof ChoiceInput) {
 									OneContext.push(newOneContext());
 									try {
 										List<String> candidates = new ArrayList<>(((ChoiceInput)field).getChoiceProvider().getChoices(true).keySet());
-										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 									} finally {
 										OneContext.pop();
 									}								
@@ -168,7 +168,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									OneContext.push(newOneContext());
 									try {
 										List<String> candidates = new ArrayList<>(((MultiChoiceInput)field).getChoiceProvider().getChoices(true).keySet());
-										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
+										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 									} finally {
 										OneContext.pop();
 									}								

@@ -626,7 +626,7 @@ public class RevisionDiffPanel extends Panel {
 					exclude = true;
 				}
 				
-				for (InputSuggestion suggestion: SuggestionUtils.suggestPath(listOfInvolvedPaths, matchWith)) {
+				for (InputSuggestion suggestion: SuggestionUtils.suggestPath(listOfInvolvedPaths, matchWith, null)) {
 					int caret = suggestion.getCaret();
 					if (caret == -1)
 						caret = suggestion.getContent().length();

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import io.onedev.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
@@ -29,7 +31,7 @@ import com.google.common.base.Preconditions;
 
 public class SuggestionUtils {
 	
-	public static List<InputSuggestion> suggestBranch(Project project, String matchWith) {
+	public static List<InputSuggestion> suggestBranch(Project project, String matchWith, @Nullable String escapeChars) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
@@ -38,13 +40,15 @@ public class SuggestionUtils {
 			int index = branch.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				Range match = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(branch, null, match));
+				InputSuggestion suggestion = new InputSuggestion(branch, match);
+				if (escapeChars != null)
+					suggestions.add(suggestion.escape(escapeChars));
 			}
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestTag(Project project, String matchWith) {
+	public static List<InputSuggestion> suggestTag(Project project, String matchWith, @Nullable String escapeChars) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
@@ -53,13 +57,16 @@ public class SuggestionUtils {
 			int index = tag.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				Range match = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(tag, null, match));
+				InputSuggestion suggestion = new InputSuggestion(tag, match); 
+				if (escapeChars != null)
+					suggestions.add(suggestion.escape(escapeChars));
+				suggestions.add(suggestion);
 			}
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestUser(Project project, ProjectPrivilege privilege, String matchWith) {
+	public static List<InputSuggestion> suggestUser(Project project, ProjectPrivilege privilege, String matchWith, @Nullable String escapeChars) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
@@ -68,13 +75,16 @@ public class SuggestionUtils {
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				Range match = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(name, match));
+				InputSuggestion suggestion = new InputSuggestion(name, match); 
+				if (escapeChars != null)
+					suggestion = suggestion.escape(escapeChars);
+				suggestions.add(suggestion);
 			}
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestGroup(String matchWith) {
+	public static List<InputSuggestion> suggestGroup(String matchWith, @Nullable String escapeChars) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Group group: OneDev.getInstance(GroupManager.class).findAll()) {
@@ -82,13 +92,16 @@ public class SuggestionUtils {
 			int index = name.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1) {
 				Range match = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(name, match));
+				InputSuggestion suggestion = new InputSuggestion(name, match);
+				if (escapeChars != null)
+					suggestion = suggestion.escape(escapeChars);
+				suggestions.add(suggestion);
 			}
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestVerifications(Project project, String matchWith) {
+	public static List<InputSuggestion> suggestVerifications(Project project, String matchWith, @Nullable String escapeChars) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
@@ -96,15 +109,18 @@ public class SuggestionUtils {
 			int index = verificationName.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				Range match = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(verificationName, match));
+				InputSuggestion suggestion = new InputSuggestion(verificationName, match); 
+				if (escapeChars != null)
+					suggestion = suggestion.escape(escapeChars);
+				suggestions.add(suggestion);
 			}
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestPath(Project project, String matchWith) {
+	public static List<InputSuggestion> suggestPath(Project project, String matchWith, @Nullable String escapeChars) {
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-		return suggestPath(commitInfoManager.getFiles(project), matchWith);
+		return suggestPath(commitInfoManager.getFiles(project), matchWith, escapeChars);
 	}
 	
 	private static Set<String> getChildren(List<PatternApplied> allApplied, String path) {
@@ -122,7 +138,7 @@ public class SuggestionUtils {
 		return children;
 	}
 	
-	public static List<InputSuggestion> suggestPath(List<String> files, String matchWith) {
+	public static List<InputSuggestion> suggestPath(List<String> files, String matchWith, @Nullable String escapeChars) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
@@ -174,7 +190,10 @@ public class SuggestionUtils {
 				caret = text.length();
 			else
 				caret = -1;
-			suggestions.add(new InputSuggestion(text, caret, true, null, entry.getValue()));
+			InputSuggestion suggestion = new InputSuggestion(text, caret, true, null, entry.getValue()); 
+			if (escapeChars != null)
+				suggestion = suggestion.escape(escapeChars);
+			suggestions.add(suggestion);
 		}
 		
 		return suggestions;		

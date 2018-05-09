@@ -19,6 +19,8 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 
 import io.onedev.codeassist.InputCompletion;
 import io.onedev.codeassist.InputStatus;
@@ -31,9 +33,6 @@ import io.onedev.server.web.component.floating.ComponentTarget;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.utils.Range;
 import io.onedev.utils.RangeUtils;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 
 @SuppressWarnings("serial")
 public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {

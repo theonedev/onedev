@@ -30,6 +30,8 @@ public class ReviewRequirementSpecAssistBehavior extends ANTLRAssistBehavior {
 	
 	private static final String VALUE_CLOSE = ")";
 	
+	private static final String ESCAPE_CHARS = "\\()";
+	
 	public ReviewRequirementSpecAssistBehavior(IModel<Project> projectModel) {
 		super(ReviewRequirementSpecParser.class, "spec");
 		this.projectModel = projectModel;
@@ -52,9 +54,9 @@ public class ReviewRequirementSpecAssistBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
 						if (expectedElement.findParentByRule("userCriteria") != null) {
 							return SuggestionUtils.suggestUser(projectModel.getObject(), ProjectPrivilege.READ, 
-									unfencedMatchWith);
+									unfencedMatchWith, ESCAPE_CHARS);
 						} else {
-							return SuggestionUtils.suggestGroup(unfencedMatchWith);
+							return SuggestionUtils.suggestGroup(unfencedMatchWith, ESCAPE_CHARS);
 						}
 					}
 

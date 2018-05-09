@@ -36,7 +36,7 @@ public class PathPatternAssistBehavior extends InputAssistBehavior {
 	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 		List<InputCompletion> completions = new ArrayList<>();
 		for (InputSuggestion suggestion: SuggestionUtils.suggestPath(projectModel.getObject(), 
-				inputStatus.getContentBeforeCaret().trim())) {
+				inputStatus.getContentBeforeCaret().trim(), null)) {
 			int caret = suggestion.getCaret();
 			if (caret == -1)
 				caret = suggestion.getContent().length();
