@@ -63,7 +63,12 @@ public class UserChoiceInput extends InputSpec {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "String");
-		appendAnnotations(buffer, index, "NotEmpty", "UserChoice", defaultValueProvider!=null);
+		appendCommonAnnotations(buffer, index);
+		if (!isAllowEmpty())
+			buffer.append("    @NotEmpty\n");
+		appendChoiceProvider(buffer, index, "@UserChoice");
+		if (defaultValueProvider != null)
+			appendDefaultValueProvider(buffer, index);
 		appendMethods(buffer, index, "String", choiceProvider, defaultValueProvider);
 		
 		return buffer.toString();

@@ -397,9 +397,6 @@ a.fa {
 table {
 	width: 100%;
 }
-table>tbody>tr>td {
-	vertical-align: top;
-}
 table.table>thead>tr>th>a {
 	color: black;
 	text-decoration: underline;

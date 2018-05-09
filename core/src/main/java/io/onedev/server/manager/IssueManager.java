@@ -31,4 +31,6 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	long count(@Nullable IssueCriteria issueCriteria);
 	
+	List<Issue> query(Project project, @Nullable String term, int count);
+	
 }

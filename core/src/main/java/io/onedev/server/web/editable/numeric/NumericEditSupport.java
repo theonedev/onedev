@@ -1,9 +1,12 @@
 package io.onedev.server.web.editable.numeric;
 
+import java.lang.reflect.Method;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.util.editable.annotation.IssueChoice;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -18,9 +21,11 @@ public class NumericEditSupport implements EditSupport {
 	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
 
-		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
-		if (propertyClass == int.class || propertyClass == long.class 
-				|| propertyClass == Integer.class || propertyClass == Long.class) {
+		Method propertyGetter = propertyDescriptor.getPropertyGetter();
+		Class<?> propertyClass = propertyGetter.getReturnType();
+		if ((propertyClass == int.class || propertyClass == long.class 
+				|| propertyClass == Integer.class || propertyClass == Long.class) 
+				&& propertyGetter.getAnnotation(IssueChoice.class) == null) {
 			return new PropertyContext<Number>(propertyDescriptor) {
 
 				@Override

@@ -35,7 +35,11 @@ public class DateInput extends InputSpec {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "Date");
-		appendAnnotations(buffer, index, "NotNull", null, defaultValueProvider!=null);
+		appendCommonAnnotations(buffer, index);
+		if (!isAllowEmpty())
+			buffer.append("    @NotNull\n");
+		if (defaultValueProvider != null)
+			appendDefaultValueProvider(buffer, index);
 		appendMethods(buffer, index, "Date", null, defaultValueProvider);
 		
 		return buffer.toString();

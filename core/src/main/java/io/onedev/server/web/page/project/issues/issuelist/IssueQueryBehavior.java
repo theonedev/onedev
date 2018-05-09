@@ -23,6 +23,7 @@ import io.onedev.codeassist.parser.Element;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -35,16 +36,17 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
-import io.onedev.server.util.inputspec.groupmultichoiceinput.GroupMultiChoiceInput;
+import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
-import io.onedev.server.util.inputspec.usermultichoiceinput.UserMultiChoiceInput;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.utils.Range;
 
 @SuppressWarnings("serial")
@@ -60,6 +62,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
 			"yesterday midnight", "3 days ago", "last week", "last Monday", 
 			"4 weeks ago", "1 month 2 days ago", "1 year ago"); 
+	
+	private static final int MAX_ISSUE_TITLE_LEN = 75;
 	
 	public IssueQueryBehavior(IModel<Project> projectModel) {
 		super(IssueQueryParser.class, "query");
@@ -126,9 +130,9 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
 									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
 									CollectionUtils.addIgnoreNull(suggestions, suggestToFence(unfencedMatchWith));
-								} else if (fieldName.equals(Issue.SUBMITTER) || field instanceof UserChoiceInput || field instanceof UserMultiChoiceInput) {
+								} else if (fieldName.equals(Issue.SUBMITTER) || field instanceof UserChoiceInput) {
 									for (User user: OneDev.getInstance(UserManager.class).findAll()) {
-										Range match = Range.matchStart(user.getName(), unfencedLowerCaseMatchWith, false, true);
+										Range match = Range.match(user.getName(), unfencedLowerCaseMatchWith, true, false, true);
 										if (match != null) {
 											String description;
 											if (!user.getDisplayName().equals(user.getName()))
@@ -138,7 +142,15 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											suggestions.add(new InputSuggestion(user.getName(), description, match));
 										}
 									}
-								} else if (field instanceof GroupChoiceInput || field instanceof GroupMultiChoiceInput) {
+								} else if (field instanceof IssueChoiceInput) {
+									List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
+									for (Issue issue: issues) {
+										InputSuggestion suggestion = new InputSuggestion("#" + issue.getNumber(), StringUtils.abbreviate(issue.getTitle(), MAX_ISSUE_TITLE_LEN), null);
+										suggestions.add(suggestion);
+									}
+								} else if (field instanceof BooleanInput) {
+									suggestions.addAll(getSuggestions(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith));
+								} else if (field instanceof GroupChoiceInput) {
 									List<String> candidates = OneDev.getInstance(GroupManager.class).findAll().stream().map(it->it.getName()).collect(Collectors.toList());
 									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith));
 								} else if (fieldName.equals(Issue.STATE)) {
@@ -167,7 +179,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								}
 							} catch (OneException ex) {
 							}
-							
 						}
 						return suggestions;
 					}

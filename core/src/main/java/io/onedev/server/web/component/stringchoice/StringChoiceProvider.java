@@ -42,7 +42,7 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 	public void query(String term, int page, Response<String> response) {
 		List<String> matched;
 		if (StringUtils.isNotBlank(term)) {
-			matched = new ArrayList<>(values);
+			matched = new ArrayList<>();
 			for (String each: values) {
 				if (each.toLowerCase().startsWith(term))
 					matched.add(each);

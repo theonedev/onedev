@@ -46,7 +46,12 @@ public class MultiChoiceInput extends InputSpec {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "List<String>");
-		appendAnnotations(buffer, index, "Size(min=1, max=100)", "ChoiceProvider", defaultValueProvider!=null);
+		appendCommonAnnotations(buffer, index);
+		if (!isAllowEmpty())
+			buffer.append("    @Size(min=1, max=100)\n");
+		appendChoiceProvider(buffer, index, "@ChoiceProvider");
+		if (defaultValueProvider != null)
+			appendDefaultValueProvider(buffer, index);
 		appendMethods(buffer, index, "List<String>", choiceProvider, defaultValueProvider);
 		
 		return buffer.toString();

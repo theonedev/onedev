@@ -46,7 +46,10 @@ public class BooleanInput extends InputSpec {
 		
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "Boolean");
-		appendAnnotations(buffer, index, "NotNull", null, defaultValueProvider!=null);
+		appendCommonAnnotations(buffer, index);
+		buffer.append("    @NotNull\n");
+		if (defaultValueProvider != null)
+			appendDefaultValueProvider(buffer, index);
 		appendMethods(buffer, index, "Boolean", null, defaultValueProvider);
 		
 		return buffer.toString();

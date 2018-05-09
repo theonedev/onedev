@@ -1,6 +1,6 @@
 onedev.server.issueChoiceFormatter = {
 	formatSelection: function(issue) {
-		return issue.number;
+		return "#" + issue.number + " - " + issue.title;
 	},
 	
 	formatResult: function(issue) {

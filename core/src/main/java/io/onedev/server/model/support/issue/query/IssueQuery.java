@@ -48,15 +48,15 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
-import io.onedev.server.util.inputspec.groupmultichoiceinput.GroupMultiChoiceInput;
+import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
-import io.onedev.server.util.inputspec.usermultichoiceinput.UserMultiChoiceInput;
 import io.onedev.utils.WordUtils;
 
 public class IssueQuery implements Serializable {
@@ -131,6 +131,15 @@ public class IssueQuery implements Serializable {
 		} catch (NumberFormatException e) {
 			throw new OneException("Invalid number: " + value);
 		}
+	}
+	
+	public static boolean getBooleanValue(String value) {
+		if (value.equals("true"))
+			return true;
+		else if (value.equals("false"))
+			return false;
+		else
+			throw new OneException("Invalid boolean: " + value);
 	}
 	
 	public static IssueQuery parse(Project project, @Nullable String queryString) {
@@ -208,11 +217,7 @@ public class IssueQuery implements Serializable {
 								IssueCriteria fieldCriteria = new ChoiceFieldCriteria(field.getName(), 
 										SecurityUtils.getUser().getName(), -1, IssueQueryLexer.Is);
 								fieldCriterias.add(fieldCriteria);
-							} else if (field instanceof UserMultiChoiceInput) {
-								IssueCriteria fieldCriteria = new MultiChoiceFieldCriteria(field.getName(), 
-										SecurityUtils.getUser().getName(), IssueQueryLexer.Contains);
-								fieldCriterias.add(fieldCriteria);
-							}
+							} 
 						}
 						if (!fieldCriterias.isEmpty()) {
 							fieldCriterias.add(0, submitterCriteria);
@@ -283,7 +288,14 @@ public class IssueQuery implements Serializable {
 								return new SubmitterCriteria(user, operator);
 							} else {
 								InputSpec field = project.getIssueWorkflow().getField(fieldName);
-								if (field instanceof NumberInput) {
+								if (field instanceof IssueChoiceInput) {
+									value = value.trim();
+									if (value.startsWith("#"))
+										value = value.substring(1);
+									return new IssueFieldCriteria(fieldName, getIntValue(value), operator);
+								} else if (field instanceof BooleanInput) {
+									return new BooleanFieldCriteria(fieldName, getBooleanValue(value), operator);
+								} else if (field instanceof NumberInput) {
 									return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
 								} else if (field instanceof ChoiceInput) { 
 									long ordinal = getValueOrdinal((ChoiceInput) field, value);
@@ -381,13 +393,6 @@ public class IssueQuery implements Serializable {
 			else if (SecurityUtils.getUser() == null)
 				throw new OneException("Please login to perform this query");
 			break;
-		case IssueQueryLexer.ContainsMe:
-		case IssueQueryLexer.DoesNotContainMe:
-			if (!(field instanceof UserMultiChoiceInput))
-				throw newOperatorException(fieldName, operator);
-			else if (SecurityUtils.getUser() == null)
-				throw new OneException("Please login to perform this query");
-			break;
 		case IssueQueryLexer.IsBefore:
 		case IssueQueryLexer.IsAfter:
 			if (!fieldName.equals(Issue.SUBMIT_DATE) && !(field instanceof DateInput))
@@ -398,9 +403,7 @@ public class IssueQuery implements Serializable {
 			if (!fieldName.equals(Issue.TITLE) 
 					&& !fieldName.equals(Issue.DESCRIPTION)
 					&& !(field instanceof TextInput) 
-					&& !(field instanceof MultiChoiceInput)
-					&& !(field instanceof UserMultiChoiceInput) 
-					&& !(field instanceof GroupMultiChoiceInput)) {
+					&& !(field instanceof MultiChoiceInput)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -410,6 +413,8 @@ public class IssueQuery implements Serializable {
 					&& !fieldName.equals(Issue.VOTES) 
 					&& !fieldName.equals(Issue.SUBMITTER)
 					&& !fieldName.equals(Issue.NUMBER)
+					&& !(field instanceof IssueChoiceInput)
+					&& !(field instanceof BooleanInput)
 					&& !(field instanceof NumberInput) 
 					&& !(field instanceof ChoiceInput) 
 					&& !(field instanceof UserChoiceInput)

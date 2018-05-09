@@ -24,6 +24,9 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceprovider.Choice;
 import io.onedev.server.util.inputspec.choiceprovider.SpecifiedChoices;
+import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
+import io.onedev.server.util.inputspec.showcondition.ShowCondition;
+import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.util.inputspec.userchoiceprovider.ProjectReaders;
 
@@ -102,6 +105,39 @@ public class IssueWorkflow implements Serializable, InputContext {
 		
 		fields.add(assignee);
 		
+		ChoiceInput resolution = new ChoiceInput();
+		resolution.setName("Resolution");
+		specifiedChoices = new SpecifiedChoices();
+
+		choices = new ArrayList<>(); 
+		
+		Choice fixed = new Choice();
+		fixed.setValue("Fixed");
+		choices.add(fixed);
+
+		Choice wontFix = new Choice();
+		wontFix.setValue("Won't Fix");
+		choices.add(wontFix);
+
+		Choice duplicated = new Choice();
+		duplicated.setValue("Duplicated");
+		choices.add(duplicated);
+		
+		specifiedChoices.setChoices(choices);
+		resolution.setChoiceProvider(specifiedChoices);
+		
+		fields.add(resolution);
+
+		IssueChoiceInput duplicateIssue = new IssueChoiceInput();
+		duplicateIssue.setName("Duplicate With");
+		ShowCondition showCondition = new ShowCondition();
+		showCondition.setInputName("Resolution");
+		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
+		valueIsOneOf.setValues(Lists.newArrayList("Duplicated"));
+		showCondition.setValueMatcher(valueIsOneOf);
+		duplicateIssue.setShowCondition(showCondition);
+		fields.add(duplicateIssue);
+		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
 		open.setColor("#f1c232");
@@ -119,6 +155,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 		StateSpec closed = new StateSpec();
 		closed.setColor("#cccccc");
 		closed.setName("Closed");
+		closed.setFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		
 		states.add(closed);
 		

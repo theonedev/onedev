@@ -46,11 +46,9 @@ public abstract class InputSpec implements Serializable {
 	
 	public static final String USER_CHOICE = "User choice";
 	
-	public static final String USER_MULTI_CHOICE = "User multi-choice";
-	
 	public static final String GROUP_CHOICE = "Group choice";
 	
-	public static final String GROUP_MULTI_CHOICE = "Group multi-choice";
+	public static final String ISSUE_CHOICE = "Issue choice";
 	
 	private String name;
 
@@ -146,9 +144,11 @@ public abstract class InputSpec implements Serializable {
 		buffer.append("\n");
 	}
 	
-	protected void appendAnnotations(StringBuffer buffer, int index, 
-			String notEmptyAnnotation, @Nullable String choiceAnnotation, 
-			boolean hasDefaultValueProvider) {
+	protected void appendChoiceProvider(StringBuffer buffer, int index, String annotation) {
+		buffer.append("    " + annotation + "(\"getInput" + index + "Choices\")\n");		
+	}
+	
+	protected void appendCommonAnnotations(StringBuffer buffer, int index) {
 		if (description != null) {
 			buffer.append("    @Editable(name=\"" + escape(name) + "\", description=\"" + 
 					escape(description) + "\", order=" + index + ")\n");
@@ -156,14 +156,12 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("    @Editable(name=\"" + escape(name) + 
 					"\", order=" + index + ")\n");
 		}
-		if (!allowEmpty)
-			buffer.append("    @" + notEmptyAnnotation + "\n");
 		if (showCondition != null) 
 			buffer.append("    @ShowCondition(\"isInput" + index + "Visible\")\n");
-		if (choiceAnnotation != null) 
-			buffer.append("    @" + choiceAnnotation + "(\"getInput" + index + "Choices\")\n");
-		if (hasDefaultValueProvider)
-			buffer.append("    @DefaultValueProvider(\"getDefaultInput" + index + "\")\n");
+	}
+	
+	protected void appendDefaultValueProvider(StringBuffer buffer, int index) {
+		buffer.append("    @DefaultValueProvider(\"getDefaultInput" + index + "\")\n");
 	}
 	
 	protected void appendMethods(StringBuffer buffer, int index, String type, 

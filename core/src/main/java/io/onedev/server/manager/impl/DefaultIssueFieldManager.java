@@ -15,10 +15,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -36,13 +34,14 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
+import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -167,7 +166,9 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 							OneContext.pop();
 						}
 					} else if (fieldSpec instanceof NumberInput) {
-						ordinal = Long.parseLong((String)fieldValue);
+						ordinal = (Integer) fieldValue;
+					} else if (fieldSpec instanceof IssueChoiceInput) {
+						ordinal = (Long) fieldValue;
 					} else if (fieldSpec instanceof DateInput) {
 						ordinal = ((Date)fieldValue).getTime();
 					}
@@ -215,9 +216,8 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	@Transactional
 	@Override
 	public void onRenameGroup(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueField set value=:newName where (type=:groupChoice or type=:groupMultiChoice) and value=:oldName");
+		Query query = getSession().createQuery("update IssueField set value=:newName where type=:groupChoice and value=:oldName");
 		query.setParameter("groupChoice", InputSpec.GROUP_CHOICE);
-		query.setParameter("groupMultiChoice", InputSpec.GROUP_MULTI_CHOICE);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
 		query.executeUpdate();
@@ -226,9 +226,8 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	@Transactional
 	@Override
 	public void onRenameUser(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueField set value=:newName where (type=:userChoice or type=:userMultiChoice) and value=:oldName");
+		Query query = getSession().createQuery("update IssueField set value=:newName where type=:userChoice and value=:oldName");
 		query.setParameter("userChoice", InputSpec.USER_CHOICE);
-		query.setParameter("userMultiChoice", InputSpec.USER_MULTI_CHOICE);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
 		query.executeUpdate();

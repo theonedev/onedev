@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -12,7 +15,6 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.util.OneContext;
-import io.onedev.server.web.component.select2.Select2Choice;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
@@ -24,9 +26,11 @@ import io.onedev.utils.ReflectionUtils;
 @SuppressWarnings("serial")
 public class SingleChoiceEditor extends PropertyEditor<String> {
 
+	private static final int SELECT2_THRESHOLD = 10;
+	
 	private List<String> choices = new ArrayList<>();
 	
-	private Select2Choice<String> input;
+	private FormComponent<String> input;
 	
 	public SingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
@@ -52,8 +56,21 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		} finally {
 			OneContext.pop();
 		}
-		
-		input = new StringSingleChoice("input", Model.of(getModelObject()), choices);
+
+		if (choices.size() > SELECT2_THRESHOLD) {
+			input = new StringSingleChoice("input", Model.of(getModelObject()), choices);
+		} else {
+			input = new DropDownChoice<String>("input", Model.of(getModelObject()), choices) {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					tag.setName("select");
+					tag.remove("type");
+					super.onComponentTag(tag);
+				}
+				
+			};
+		}
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

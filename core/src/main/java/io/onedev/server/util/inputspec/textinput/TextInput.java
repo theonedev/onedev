@@ -54,7 +54,11 @@ public class TextInput extends InputSpec {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "String");
-		appendAnnotations(buffer, index, "NotEmpty", null, defaultValueProvider!=null);
+		appendCommonAnnotations(buffer, index);
+		if (!isAllowEmpty())
+			buffer.append("    @NotEmpty\n");
+		if (defaultValueProvider != null)
+			appendDefaultValueProvider(buffer, index);
 		if (isMultiline())
 			buffer.append("    @Multiline\n");
 		if (getPattern() != null)

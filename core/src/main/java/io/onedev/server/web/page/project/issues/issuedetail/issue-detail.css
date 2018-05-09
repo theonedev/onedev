@@ -50,10 +50,10 @@
 	white-space: nowrap;
 	padding-right: 20px;
 }
-#issue-detail>.additional .fields .values .value div {
+#issue-detail>.additional .fields .values .value>div {
 	display: table-cell;
 	border-radius: 3px;
-	padding: 3px 6px;
+	padding: 3px 6px 3px 0;
 }
 
 #issue-detail>.additional .relations label {

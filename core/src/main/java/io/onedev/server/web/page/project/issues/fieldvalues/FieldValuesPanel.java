@@ -1,26 +1,37 @@
 package io.onedev.server.web.page.project.issues.fieldvalues;
 
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
+import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ColorUtils;
 
@@ -35,18 +46,32 @@ public class FieldValuesPanel extends GenericPanel<PromptedField> implements Edi
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		Project project = ((ProjectPage) getPage()).getProject();
+		
 		if (getField() != null && !getField().getValues().isEmpty()) {
 			UserManager userManager = OneDev.getInstance(UserManager.class);
+			IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 			Fragment fragment = new Fragment("values", "nonEmptyValuesFrag", this);
 			RepeatingView valuesView = new RepeatingView("values");
 			for (String value: getField().getValues()) {
 				WebMarkupContainer item = new WebMarkupContainer(valuesView.newChildId());
-				if (getField().getType().equals(InputSpec.USER_CHOICE) 
-						|| getField().getType().equals(InputSpec.USER_MULTI_CHOICE)) {
+				if (getField().getType().equals(InputSpec.USER_CHOICE)) {
 					User user = User.getForDisplay(userManager.findByName(value), value);
 					Fragment userFrag = new Fragment("value", "userFrag", this);
 					userFrag.add(new UserLink("name", user));
 					item.add(userFrag);
+				} else if (getField().getType().equals(InputSpec.ISSUE_CHOICE)) {
+					Issue issue = issueManager.find(project, Long.valueOf(value));
+					if (issue != null) {
+						Fragment issueFrag = new Fragment("value", "issueFrag", this);
+						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueDetailPage.class, IssueDetailPage.paramsOf(issue));
+						link.add(new Label("label", "#" + issue.getNumber()));
+						issueFrag.add(link);
+						issueFrag.add(new IssueStateLabel("state", Model.of(issue)));
+						item.add(issueFrag);
+					} else {
+						item.add(new Label("value", "#" + value));
+					}
 				} else {
 					Label label = new Label("value", value);
 					InputSpec fieldSpec = getField().getIssue().getProject().getIssueWorkflow().getField(getField().getName());
@@ -106,6 +131,12 @@ public class FieldValuesPanel extends GenericPanel<PromptedField> implements Edi
 
 	private PromptedField getField() {
 		return getModelObject();
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new FieldValuesResourceReference()));
 	}
 	
 }

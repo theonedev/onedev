@@ -29,7 +29,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
-import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 
 @Entity
@@ -240,10 +239,6 @@ public class Issue extends AbstractEntity {
 		return promptedFields;
 	}
 	
-	public IssueFacade getFacade() {
-		return new IssueFacade(this);
-	}
-
 	public Collection<IssueRelation> getRelationsByCurrent() {
 		return relationsByCurrent;
 	}

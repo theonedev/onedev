@@ -1,6 +1,7 @@
 package io.onedev.server.manager.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,9 +16,12 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
@@ -231,6 +235,47 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			query.setParameter("newState", entry.getValue().getNewState());
 			query.executeUpdate();
 		}
+	}
+
+	@Sessional
+	@Override
+	public List<Issue> query(Project project, String term, int count) {
+		List<Issue> issues = new ArrayList<>();
+		
+		Long number = null;
+		String numberStr = term;
+		if (numberStr != null) {
+			numberStr = numberStr.trim();
+			if (numberStr.startsWith("#"))
+				numberStr = numberStr.substring(1);
+			if (StringUtils.isNumeric(numberStr))
+				number = Long.valueOf(numberStr);
+		}
+		
+		if (number != null) {
+			Issue issue = OneDev.getInstance(IssueManager.class).find(project, number);
+			if (issue != null)
+				issues.add(issue);
+			EntityCriteria<Issue> criteria = EntityCriteria.of(Issue.class);
+			criteria.add(Restrictions.eq("project", project));
+			criteria.add(Restrictions.and(
+					Restrictions.or(Restrictions.ilike("noSpaceTitle", "%" + term + "%"), Restrictions.ilike("numberStr", term + "%")), 
+					Restrictions.ne("number", number)
+				));
+			criteria.addOrder(Order.desc("number"));
+			issues.addAll(OneDev.getInstance(IssueManager.class).findRange(criteria, 0, count-issues.size()));
+		} else {
+			EntityCriteria<Issue> criteria = EntityCriteria.of(Issue.class);
+			criteria.add(Restrictions.eq("project", project));
+			if (StringUtils.isNotBlank(term)) {
+				criteria.add(Restrictions.or(
+						Restrictions.ilike("noSpaceTitle", "%" + term + "%"), 
+						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
+			}
+			criteria.addOrder(Order.desc("number"));
+			issues.addAll(OneDev.getInstance(IssueManager.class).findRange(criteria, 0, count));
+		} 
+		return issues;
 	}
 	
 }
