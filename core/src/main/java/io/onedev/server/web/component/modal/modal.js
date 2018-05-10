@@ -7,6 +7,7 @@ onedev.server.modal = {
 			if (e.keyCode == 27 
 					&& $(".select2-drop:visible").length == 0 
 					&& $("body>.floating").length == 0 
+					&& $(".sp-container:visible").length == 0
 					&& $(".atwho-view:visible").length == 0
 					&& $modal.nextAll(".modal").length == 0) {
 				if ($modal.find(".leave-confirm.dirty").length != 0) {
