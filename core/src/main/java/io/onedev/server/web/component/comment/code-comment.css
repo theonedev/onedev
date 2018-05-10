@@ -11,6 +11,8 @@
 }
 .code-comments td.result {
 	border: 2px solid #E0E0E0;
+	vertical-align: top;
+	text-align: left;
 }
 .code-comments td.comment {
 	padding: 20px 20px 0 20px;
@@ -51,7 +53,6 @@
 .code-comments td.result .norecords-td {
 	padding: 20px;
 	font-size: 20px;
-	text-align: center;
 }
 .code-comments .alert {
 	border-radius: 0;

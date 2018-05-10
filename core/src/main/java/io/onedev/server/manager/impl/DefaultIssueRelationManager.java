@@ -13,11 +13,11 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
-public class DefaultIssueDuplicationManager extends AbstractEntityManager<IssueRelation>
+public class DefaultIssueRelationManager extends AbstractEntityManager<IssueRelation>
 		implements IssueRelationManager {
 
 	@Inject
-	public DefaultIssueDuplicationManager(Dao dao) {
+	public DefaultIssueRelationManager(Dao dao) {
 		super(dao);
 	}
 
