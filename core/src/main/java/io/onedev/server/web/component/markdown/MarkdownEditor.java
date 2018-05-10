@@ -98,11 +98,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(cookieKey);
-		if (cookie!=null && "true".equals(cookie.getValue())) {
-			initialSplit = true;
-		} else {
-			initialSplit = !compactMode;
-		}
+		initialSplit = cookie!=null && "true".equals(cookie.getValue());
 		
 		this.blobRenderContext = blobRenderContext;
 	}
