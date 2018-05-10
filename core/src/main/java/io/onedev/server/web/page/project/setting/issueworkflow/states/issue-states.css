@@ -26,7 +26,12 @@
 #project-setting .issue-states table>tbody>tr>td:first-child>div>a {
 	margin-left: 16px;
 }
-
+#project-setting .issue-states table .color span {
+	display: block;
+	width: 24px;
+	height: 24px;
+	border-radius: 3px;
+}
 .floating.state-spec .actions {
 	margin-bottom: 12px;
 }

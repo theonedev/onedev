@@ -41,7 +41,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
-import io.onedev.utils.ColorUtils;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
@@ -90,15 +89,65 @@ public class IssueStatesPage extends IssueWorkflowPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().getName(), rowModel.getObject().getColor()));
+				Fragment fragment = new Fragment(componentId, "nameColumnFrag", IssueStatesPage.this);
+				StateSpec state = rowModel.getObject();
+				int index = getWorkflow().getStateIndex(state.getName());				
+				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						newStateDetail(target, index);
+					}
+					
+				};
+				link.add(new Label("label", state.getName()));
+				link.add(new WebMarkupContainer("initial").setVisible(index == 0));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
+		});		
+		
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Color")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
+				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStatesPage.this);
+				StateSpec state = rowModel.getObject();
+				int index = getWorkflow().getStateIndex(state.getName());				
+				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						newStateDetail(target, index);
+					}
+					
+				};
+				link.add(new Label("label").add(AttributeAppender.append("style", "background: " + state.getColor() + ";")));
+				fragment.add(AttributeAppender.append("class", "color"));
+				fragment.add(link);
+				cellItem.add(fragment);
+			}
+			
 		});		
 		
 		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Description")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().getDescription(), null));
+				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStatesPage.this);
+				StateSpec state = rowModel.getObject();
+				int index = getWorkflow().getStateIndex(state.getName());				
+				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						newStateDetail(target, index);
+					}
+					
+				};
+				link.add(new Label("label", state.getDescription()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 			
 		});		
@@ -145,136 +194,89 @@ public class IssueStatesPage extends IssueWorkflowPage {
 		response.render(CssHeaderItem.forReference(new IssueStatesResourceReference()));
 	}
 
-	private class ColumnFragment extends Fragment {
+	private void newStateDetail(AjaxRequestTarget target, int index) {
+		new SideFloating(target, SideFloating.Placement.RIGHT) {
 
-		private final int index;
-		
-		private final String label;
-		
-		private final String color;
-		
-		public ColumnFragment(String id, IModel<StateSpec> model, String label, String color) {
-			super(id, color!=null?"nameColumnFrag":"otherColumnFrag", IssueStatesPage.this, model);
-			this.index = getWorkflow().getStateIndex(getState().getName());
-			this.label = label;
-			this.color = color;
-		}
-		
-		private StateSpec getState() {
-			return (StateSpec) getDefaultModelObject();
-		}
-
-		@Override
-		protected void onInitialize() {
-			super.onInitialize();
-			AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, SideFloating.Placement.RIGHT) {
-
-						@Override
-						protected String getTitle() {
-							return getState().getName();
-						}
-
-						@Override
-						protected void onInitialize() {
-							super.onInitialize();
-							add(AttributeAppender.append("class", "state-spec"));
-						}
-
-						@Override
-						protected Component newBody(String id) {
-							SideFloating sideFloating = this;
-							Fragment fragment = new Fragment(id, "viewStateFrag", IssueStatesPage.this);
-							fragment.add(BeanContext.viewBean("viewer", getState(), Sets.newHashSet("name")));
-							fragment.add(new ModalLink("edit") {
-
-								@Override
-								protected Component newContent(String id, ModalPanel modal) {
-									sideFloating.close();
-									return new StateEditPanel(id, index) {
-
-										@Override
-										protected void onSave(AjaxRequestTarget target) {
-											target.add(statesTable);
-											modal.close();
-										}
-
-										@Override
-										protected void onCancel(AjaxRequestTarget target) {
-											modal.close();
-										}
-
-										@Override
-										protected IssueWorkflow getWorkflow() {
-											return IssueStatesPage.this.getWorkflow();
-										}
-
-									};
-								}
-								
-							});
-							fragment.add(new AjaxLink<Void>("delete") {
-
-								@Override
-								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-									super.updateAjaxAttributes(attributes);
-									attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this state?"));
-								}
-
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									List<String> usages = getWorkflow().onDeleteState(getState().getName());
-									if (!usages.isEmpty()) {
-										fragment.error(UsageUtils.getNotificationMessage("State '" + getState().getName() + "'", usages));
-										target.add(fragment);
-									} else {
-										getWorkflow().getStates().remove(index);
-										getWorkflow().setReconciled(false);
-										getProject().setIssueWorkflow(getWorkflow());
-										OneDev.getInstance(ProjectManager.class).save(getProject());
-										target.add(statesTable);
-										close();
-									}
-								}
-								
-							});
-							
-							fragment.add(new NotificationPanel("feedback", fragment));
-							fragment.setOutputMarkupId(true);
-							
-							return fragment;
-						}
-
-					};
-				}
+			private StateSpec getState() {
+				return getWorkflow().getStates().get(index);
 				
-			};
-			if (label != null) {
-				link.add(new Label("label", label) {
+			}
+			@Override
+			protected String getTitle() {
+				return getState().getName();
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(AttributeAppender.append("class", "state-spec"));
+			}
+
+			@Override
+			protected Component newBody(String id) {
+				SideFloating sideFloating = this;
+				Fragment fragment = new Fragment(id, "viewStateFrag", IssueStatesPage.this);
+				fragment.add(BeanContext.viewBean("viewer", getState(), Sets.newHashSet("name")));
+				fragment.add(new ModalLink("edit") {
 
 					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						if (color != null) {
-							String fontColor = ColorUtils.isLight(color)?"black":"white"; 
-							String style = String.format(
-									"background-color: %s; color: %s;", 
-									color, fontColor);
-							add(AttributeAppender.append("style", style));
+					protected Component newContent(String id, ModalPanel modal) {
+						sideFloating.close();
+						return new StateEditPanel(id, index) {
+
+							@Override
+							protected void onSave(AjaxRequestTarget target) {
+								target.add(statesTable);
+								modal.close();
+							}
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								modal.close();
+							}
+
+							@Override
+							protected IssueWorkflow getWorkflow() {
+								return IssueStatesPage.this.getWorkflow();
+							}
+
+						};
+					}
+					
+				});
+				fragment.add(new AjaxLink<Void>("delete") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this state?"));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						List<String> usages = getWorkflow().onDeleteState(getState().getName());
+						if (!usages.isEmpty()) {
+							fragment.error(UsageUtils.getNotificationMessage("State '" + getState().getName() + "'", usages));
+							target.add(fragment);
+						} else {
+							getWorkflow().getStates().remove(index);
+							getWorkflow().setReconciled(false);
+							getProject().setIssueWorkflow(getWorkflow());
+							OneDev.getInstance(ProjectManager.class).save(getProject());
+							target.add(statesTable);
+							close();
 						}
 					}
 					
 				});
-			} else {
-				link.add(new Label("label", "&nbsp;").setEscapeModelStrings(false));
+				
+				fragment.add(new NotificationPanel("feedback", fragment));
+				fragment.setOutputMarkupId(true);
+				
+				return fragment;
 			}
-			if (color != null)
-				link.add(new WebMarkupContainer("initial").setVisible(index==0));
-			add(link);
-		}
-		
+
+		};		
 	}
+	
 }
