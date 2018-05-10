@@ -50,7 +50,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	public void onObserverChanged(BasePage page) {
 		String sessionId = page.getSession().getId();
 		if (sessionId != null) {
-			observables.put(new PageKey(sessionId, new PageIdKey(page.getPageId())), page.getWebSocketObservables());
+			observables.put(new PageKey(sessionId, new PageIdKey(page.getPageId())), page.findWebSocketObservables());
 		}
 	}
 	

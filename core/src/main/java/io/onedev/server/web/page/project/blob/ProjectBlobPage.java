@@ -70,6 +70,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TextRange;
 import io.onedev.server.persistence.UnitOfWork;
+import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.search.IndexManager;
 import io.onedev.server.search.SearchManager;
 import io.onedev.server.search.hit.QueryHit;
@@ -920,11 +921,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	@Override
 	public Collection<String> getWebSocketObservables() {
 		Collection<String> observables = super.getWebSocketObservables();
-		observables.add("CommitIndexed:" + getProject().getRevCommit(resolvedRevision).name());
+		observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision).name()));
 		if (state.requestId != null)
-			observables.add(PullRequest.class.getName() + ":" + state.requestId);
+			observables.add(PullRequest.getWebSocketObservable(state.requestId));
 		if (state.commentId != null)
-			observables.add(CodeComment.class.getName() + ":" + state.commentId);
+			observables.add(CodeComment.getWebSocketObservable(state.commentId));
 		
 		return observables;
 	}

@@ -177,7 +177,7 @@ public abstract class BasePage extends WebPage {
 				
 				if (message.getText().startsWith(WebSocketManager.OBSERVABLE_CHANGED)) {
 					String observable = message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1);
-					for (WebSocketObserver observer: getWebSocketObservers()) {
+					for (WebSocketObserver observer: findWebSocketObservers()) {
 						if (observer.getObservables().contains(observable))
 							observer.onObservableChanged(handler, observable);
 					}
@@ -192,7 +192,7 @@ public abstract class BasePage extends WebPage {
 					 * re-render the integration preview section after connecting will make it 
 					 * displaying correctly    
 					 */
-					for (WebSocketObserver observer: getWebSocketObservers())
+					for (WebSocketObserver observer: findWebSocketObservers())
 						observer.onConnectionOpened(handler);
 				} 
 		 
@@ -249,8 +249,9 @@ public abstract class BasePage extends WebPage {
 		super.onAfterRender();
 	}
 	
-	private Collection<WebSocketObserver> getWebSocketObservers() {
+	private Collection<WebSocketObserver> findWebSocketObservers() {
 		Collection<WebSocketObserver> observers = new HashSet<>();
+		observers.addAll(getBehaviors(io.onedev.server.web.behavior.WebSocketObserver.class));
 		visitChildren(Component.class, new IVisitor<Component, Void>() {
 
 			@Override
@@ -262,13 +263,17 @@ public abstract class BasePage extends WebPage {
 		return observers;
 	}
 
-	public Collection<String> getWebSocketObservables() {
+	public final Collection<String> findWebSocketObservables() {
 		Collection<String> observables = new HashSet<>();
-		for (WebSocketObserver observer: getWebSocketObservers())
+		for (WebSocketObserver observer: findWebSocketObservers())
 			observables.addAll(observer.getObservables());
 		return observables;
 	}
 
+	public Collection<String> getWebSocketObservables() {
+		return new HashSet<>();
+	}
+	
 	private void checkReady() {
 		if (!OneDev.getInstance().isReady() && getClass() != ServerInitPage.class)
 			throw new RestartResponseAtInterceptPageException(ServerInitPage.class);
