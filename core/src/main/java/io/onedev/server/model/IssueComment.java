@@ -3,12 +3,18 @@ package io.onedev.server.model;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Version;
 
+@Entity
+@Table(indexes={
+		@Index(columnList="g_issue_id"), @Index(columnList="g_user_id")})
 public class IssueComment extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -16,9 +22,9 @@ public class IssueComment extends AbstractEntity {
 	@Version
 	private long version;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(nullable=false)
-	private Project project;
+	private Issue issue;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
@@ -26,23 +32,27 @@ public class IssueComment extends AbstractEntity {
 	
 	private String userName;
 	
+	@Column(nullable=false)
+	private Date date;
+	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private String content;
-	
-	@Column(nullable=false)
-	private Date date = new Date();
 
 	public long getVersion() {
 		return version;
 	}
 
-	public Project getProject() {
-		return project;
+	public void setVersion(long version) {
+		this.version = version;
 	}
 
-	public void setProject(Project project) {
-		this.project = project;
+	public Issue getIssue() {
+		return issue;
+	}
+
+	public void setIssue(Issue issue) {
+		this.issue = issue;
 	}
 
 	public User getUser() {
@@ -61,6 +71,14 @@ public class IssueComment extends AbstractEntity {
 		this.userName = userName;
 	}
 
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
 	public String getContent() {
 		return content;
 	}
@@ -69,12 +87,8 @@ public class IssueComment extends AbstractEntity {
 		this.content = content;
 	}
 
-	public Date getDate() {
-		return date;
+	public String getAnchor() {
+		return getClass().getSimpleName() + "-" + getId();
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
-	}
-	
 }

@@ -34,6 +34,7 @@ public class ReferencedActivity implements PullRequestActivity {
 	private PullRequestReference getReference() {
 		return OneDev.getInstance(PullRequestReferenceManager.class).load(referenceId);
 	}
+	
 	@Override
 	public Date getDate() {
 		return getReference().getDate();

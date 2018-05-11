@@ -92,7 +92,7 @@ import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.DataManager;
 import io.onedev.server.manager.GroupAuthorizationManager;
 import io.onedev.server.manager.GroupManager;
-import io.onedev.server.manager.IssueActivityManager;
+import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.manager.IssueRelationManager;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
@@ -130,7 +130,7 @@ import io.onedev.server.manager.impl.DefaultConfigManager;
 import io.onedev.server.manager.impl.DefaultDataManager;
 import io.onedev.server.manager.impl.DefaultGroupAuthorizationManager;
 import io.onedev.server.manager.impl.DefaultGroupManager;
-import io.onedev.server.manager.impl.DefaultIssueActivityManager;
+import io.onedev.server.manager.impl.DefaultIssueCommentManager;
 import io.onedev.server.manager.impl.DefaultIssueRelationManager;
 import io.onedev.server.manager.impl.DefaultIssueFieldManager;
 import io.onedev.server.manager.impl.DefaultIssueManager;
@@ -315,7 +315,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(EntityManager.class).toProvider(SessionProvider.class);
 		bind(SessionFactory.class).toProvider(SessionFactoryProvider.class);
 		bind(EntityManagerFactory.class).toProvider(SessionFactoryProvider.class);
-		bind(IssueActivityManager.class).to(DefaultIssueActivityManager.class);
+		bind(IssueCommentManager.class).to(DefaultIssueCommentManager.class);
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);

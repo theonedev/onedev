@@ -113,23 +113,23 @@ public class PropertyDescriptor implements Serializable {
 				|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
 	}
 
-	public boolean isPropertyVisible(PropertyContextAware propertyContextAware) {
-		return isPropertyVisible(propertyContextAware, new HashSet<>());
+	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor) {
+		return isPropertyVisible(oneContext, beanDescriptor, new HashSet<>());
 	}
 	
-	public boolean isPropertyVisible(PropertyContextAware propertyContextAware, Set<String> checkedPropertyNames) {
+	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
 		if (checkedPropertyNames.contains(getPropertyName()))
 			return true;
 		checkedPropertyNames.add(getPropertyName());
 		
-		OneContext.push(new ComponentContext((Component) propertyContextAware));
+		OneContext.push(oneContext);
 		try {
 			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
 			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
 				return false;
 			for (String propertyName: getDependencyPropertyNames()) {
-				PropertyContext<?> propertyContext = propertyContextAware.getPropertyContext(propertyName);
-				if (!propertyContext.isPropertyVisible(propertyContextAware, checkedPropertyNames))
+				PropertyDescriptor propertyDescriptor = beanDescriptor.getPropertyDescriptor(propertyName);
+				if (!propertyDescriptor.isPropertyVisible(oneContext, beanDescriptor, checkedPropertyNames))
 					return false;
 			}
 			return true;

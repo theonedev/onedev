@@ -260,12 +260,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(propertyContext.isPropertyVisible(this) && !propertyContext.isExcluded());
-			}
-
-			@Override
-			public PropertyContext<?> getPropertyContext(String propertyName) {
-				return BeanEditor.this.getPropertyContext(propertyName);
+				setVisible(propertyContext.isPropertyVisible(new ComponentContext(this), beanDescriptor) && !propertyContext.isExcluded());
 			}
 
 		};
@@ -273,8 +268,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		return item;
 	}
 
-	public PropertyContext<?> getPropertyContext(String propertyName) {
-		for (PropertyContext<?> propertyContext: propertyContexts) {
+	public PropertyContext<Serializable> getPropertyContext(String propertyName) {
+		for (PropertyContext<Serializable> propertyContext: propertyContexts) {
 			if (propertyContext.getPropertyName().equals(propertyName))
 				return propertyContext;
 		}
@@ -319,7 +314,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 								int propertyIndex = (int) item.getDefaultModelObject();
 								PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
 								if (propertyContext.getPropertyName().equals(property.getName()) 
-										&& propertyContext.isPropertyVisible((PropertyContextAware) item)
+										&& propertyContext.isPropertyVisible(new ComponentContext(item), beanDescriptor)
 										&& !propertyContext.isExcluded()) {
 									found = true;
 									break;
@@ -347,6 +342,20 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		return beanDescriptor;
 	}
 
+	public List<PropertyContext<Serializable>> getPropertyContexts() {
+		return propertyContexts;
+	}
+	
+	public OneContext getOneContext(String propertyName) {
+		for (Component item: propertiesView) {
+			int propertyIndex = (int) item.getDefaultModelObject();
+			PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
+			if (propertyContext.getPropertyName().equals(propertyName)) 
+				return new ComponentContext(item);
+		}
+		throw new RuntimeException("Property not found: " + propertyName);
+	}
+	
 	@Override
 	public ErrorContext getErrorContext(PathSegment pathSegment) {
 		final PathSegment.Property property = (Property) pathSegment;
@@ -381,7 +390,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		return bean;
 	}
 	
-	private abstract class PropertyContainer extends WebMarkupContainer implements EditContext, PropertyContextAware {
+	private abstract class PropertyContainer extends WebMarkupContainer implements EditContext {
 
 		public PropertyContainer(String id, int propertyIndex) {
 			super(id, Model.of(propertyIndex));

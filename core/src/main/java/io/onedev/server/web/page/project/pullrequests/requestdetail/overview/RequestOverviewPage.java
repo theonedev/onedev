@@ -367,6 +367,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
 				super.onError(target, form);
 				target.add(form);
+				target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 			}
 
 		});

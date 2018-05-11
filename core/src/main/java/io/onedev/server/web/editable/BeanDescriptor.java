@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Sets;
 
 import io.onedev.server.exception.OneException;
@@ -73,6 +75,15 @@ public class BeanDescriptor implements Serializable {
 			if (!propertyDescriptor.isExcluded())
 				propertyDescriptor.copyProperty(from, to);
 		}
+	}
+	
+	@Nullable
+	public PropertyDescriptor getPropertyDescriptor(String propertyName) {
+		for (PropertyDescriptor propertyDescriptor: getPropertyDescriptors()) {
+			if (propertyDescriptor.getPropertyName().equals(propertyName))
+				return propertyDescriptor;
+		}
+		return null;
 	}
 
 	public Object newBeanInstance() {

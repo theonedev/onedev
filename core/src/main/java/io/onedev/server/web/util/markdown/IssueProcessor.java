@@ -13,7 +13,7 @@ public class IssueProcessor extends IssueParser implements MarkdownProcessor {
 	
 	@Override
 	public void process(Project project, Document document, Object context) {
-		parseIssues(project, document);
+		parseReferences(project, document);
 	}
 
 	@Override

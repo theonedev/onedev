@@ -15,6 +15,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
@@ -127,7 +128,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (currentUser == null) {
 			return false;
 		} else {
-			return currentUser.equals(comment.getUser()) || canModify(comment.getRequest());
+			return currentUser.equals(comment.getUser()) || canManage(comment.getRequest().getTargetProject());
+		}
+	}
+	
+	public static boolean canModify(IssueComment comment) {
+		User currentUser = getUser();
+		if (currentUser == null) {
+			return false;
+		} else {
+			return currentUser.equals(comment.getUser()) || canManage(comment.getIssue().getProject());
 		}
 	}
 	

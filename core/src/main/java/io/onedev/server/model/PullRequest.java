@@ -52,6 +52,7 @@ import io.onedev.server.model.support.LastEvent;
 import io.onedev.server.model.support.MergePreview;
 import io.onedev.server.model.support.MergeStrategy;
 import io.onedev.server.model.support.ProjectAndBranch;
+import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.QualityCheckStatus;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -75,7 +76,7 @@ import io.onedev.server.util.jackson.RestView;
 				@Index(columnList="closeDate"), @Index(columnList="closeStatus"), 
 				@Index(columnList="g_closedBy_id"), @Index(columnList="closedByName")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetProject_id", "number"})})
-public class PullRequest extends AbstractEntity {
+public class PullRequest extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -651,7 +652,8 @@ public class PullRequest extends AbstractEntity {
 	public void setUUID(String uuid) {
 		this.uuid = uuid;
 	}
-
+	
+	@Override
 	public long getNumber() {
 		return number;
 	}

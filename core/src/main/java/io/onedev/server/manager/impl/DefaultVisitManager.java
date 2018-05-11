@@ -15,6 +15,7 @@ import io.onedev.server.event.pullrequest.PullRequestStatusChangeEvent;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -30,7 +31,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 @Singleton
 public class DefaultVisitManager extends AbstractEnvironmentManager implements VisitManager {
 
-	private static final int INFO_VERSION = 4;
+	private static final int INFO_VERSION = 5;
 	
 	private static final String INFO_DIR = "visit";
 	
@@ -40,6 +41,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	
 	private static final String CODE_COMMENT_STORE = "codeComment";
 
+	private static final String ISSUE_STORE = "issue";
+	
 	private final StorageManager storageManager;
 	
 	@Inject
@@ -47,6 +50,21 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 		this.storageManager = storageManager;
 	}
 	
+	@Override
+	public void visitIssue(User user, Issue issue) {
+		Environment env = getEnv(issue.getProject().getId().toString());
+		Store store = getStore(env, ISSUE_STORE);
+		env.executeInTransaction(new TransactionalExecutable() {
+			
+			@Override
+			public void execute(Transaction txn) {
+				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), 
+						System.currentTimeMillis()+1000L);
+			}
+			
+		});
+	}
+
 	@Override
 	public void visitPullRequest(User user, PullRequest request) {
 		Environment env = getEnv(request.getTargetProject().getId().toString());
@@ -61,7 +79,7 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			
 		});
 	}
-
+	
 	@Override
 	public void visitPullRequestCodeComments(User user, PullRequest request) {
 		Environment env = getEnv(request.getTargetProject().getId().toString());
@@ -110,6 +128,24 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 		});
 	}
 
+	@Override
+	public Date getIssueVisitDate(User user, Issue issue) {
+		Environment env = getEnv(issue.getProject().getId().toString());
+		Store store = getStore(env, ISSUE_STORE);
+		return env.computeInTransaction(new TransactionalComputable<Date>() {
+			
+			@Override
+			public Date compute(Transaction txn) {
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), -1);
+				if (millis != -1)
+					return new Date(millis);
+				else
+					return null;
+			}
+			
+		});
+	}
+	
 	@Override
 	public Date getPullRequestCodeCommentsVisitDate(User user, PullRequest request) {
 		Environment env = getEnv(request.getTargetProject().getId().toString());

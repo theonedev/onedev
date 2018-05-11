@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -26,6 +27,10 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.VisitManager;
+import io.onedev.server.model.support.Referenceable;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
@@ -41,7 +46,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 				@Index(columnList="votes")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class Issue extends AbstractEntity {
+public class Issue extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -98,6 +103,9 @@ public class Issue extends AbstractEntity {
 	
 	private int votes;
 	
+	@Column(nullable=false)
+	private String uuid = UUID.randomUUID().toString();
+
 	private long number;
 	
 	// used for number search in markdown editor
@@ -116,6 +124,9 @@ public class Issue extends AbstractEntity {
 	
 	@OneToMany(mappedBy="other", cascade=CascadeType.REMOVE)
 	private Collection<IssueRelation> relationsByOther = new ArrayList<>();
+	
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueComment> comments = new ArrayList<>();
 	
 	private transient Map<String, PromptedField> promptedFields;
 	
@@ -160,6 +171,15 @@ public class Issue extends AbstractEntity {
 		this.project = project;
 	}
 
+	public String getUUID() {
+		return uuid;
+	}
+
+	public void setUUID(String uuid) {
+		this.uuid = uuid;
+	}
+
+	@Override
 	public long getNumber() {
 		return number;
 	}
@@ -190,6 +210,14 @@ public class Issue extends AbstractEntity {
 		this.submitDate = submitDate.getTime();
 	}
 
+	public Collection<IssueComment> getComments() {
+		return comments;
+	}
+
+	public void setComments(Collection<IssueComment> comments) {
+		this.comments = comments;
+	}
+
 	public int getVotes() {
 		return votes;
 	}
@@ -204,6 +232,16 @@ public class Issue extends AbstractEntity {
 
 	public void setFields(Collection<IssueField> fields) {
 		this.fields = fields;
+	}
+	
+	public boolean isVisitedAfter(Date date) {
+		User user = SecurityUtils.getUser();
+		if (user != null) {
+			Date visitDate = OneDev.getInstance(VisitManager.class).getIssueVisitDate(user, this);
+			return visitDate != null && visitDate.getTime()>date.getTime();
+		} else {
+			return true;
+		}
 	}
 	
 	public Map<String, PromptedField> getPromptedFields() {

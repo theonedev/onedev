@@ -17,9 +17,10 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.web.util.ComponentContext;
 
 @SuppressWarnings("serial")
-public class BeanViewer extends Panel implements PropertyContextAware, EditContext {
+public class BeanViewer extends Panel implements EditContext {
 
 	private final BeanDescriptor beanDescriptor;
 	
@@ -66,7 +67,7 @@ public class BeanViewer extends Panel implements PropertyContextAware, EditConte
 				Serializable propertyValue = (Serializable) propertyContext.getPropertyValue(bean);
 				valueTd.add(propertyContext.renderForView("content", Model.of(propertyValue)));
 				
-				item.setVisible(propertyContext.isPropertyVisible(BeanViewer.this) && !propertyContext.isExcluded());
+				item.setVisible(propertyContext.isPropertyVisible(new ComponentContext(BeanViewer.this), beanDescriptor) && !propertyContext.isExcluded());
 				
 				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 			}
@@ -77,18 +78,13 @@ public class BeanViewer extends Panel implements PropertyContextAware, EditConte
 	}
 
 	@Override
-	public PropertyContext<?> getPropertyContext(String propertyName) {
-		for (PropertyContext<?> propertyContext: propertyContexts) {
-			if (propertyContext.getPropertyName().equals(propertyName))
-				return propertyContext;
-		}
-		throw new RuntimeException("Property not found: " + propertyName);
-	}
-	
-	@Override
 	public Object getInputValue(String name) {
 		String propertyName = beanDescriptor.getPropertyName(name);
-		return getPropertyContext(propertyName).getPropertyValue(getDefaultModelObject());
+		for (PropertyContext<?> propertyContext: propertyContexts) {
+			if (propertyContext.getPropertyName().equals(propertyName))
+				return propertyContext.getPropertyValue(getDefaultModelObject());
+		}
+		throw new RuntimeException("Property not found: " + propertyName);
 	}
 
 }

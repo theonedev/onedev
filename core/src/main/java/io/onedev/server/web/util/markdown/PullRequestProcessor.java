@@ -13,7 +13,7 @@ public class PullRequestProcessor extends PullRequestParser implements MarkdownP
 	
 	@Override
 	public void process(Project project, Document document, Object context) {
-		parseRequests(project, document);
+		parseReferences(project, document);
 	}
 
 	@Override

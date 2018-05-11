@@ -14,7 +14,6 @@
 }
 #request-list td.result {
 	border: 2px solid #E0E0E0;
-	vertical-align: top;
 }
 #request-list td.request {
 	color: #888;

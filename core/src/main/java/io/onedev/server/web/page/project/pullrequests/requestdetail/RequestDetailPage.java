@@ -140,15 +140,15 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 		PullRequest request = getPullRequest();
 
-		WebMarkupContainer requestTitle = new WebMarkupContainer("requestHead");
-		requestTitle.setOutputMarkupId(true);
-		add(requestTitle);
+		WebMarkupContainer requestHead = new WebMarkupContainer("requestHead");
+		requestHead.setOutputMarkupId(true);
+		add(requestHead);
 		
-		requestTitle.add(new Label("title", new AbstractReadOnlyModel<String>() {
+		requestHead.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getPullRequest().getTitle();
+				return "#" + getPullRequest().getNumber() + " - " + getPullRequest().getTitle();
 			}
 			
 		}) {
@@ -161,23 +161,13 @@ public abstract class RequestDetailPage extends ProjectPage {
 			
 		});
 		
-		requestTitle.add(new Label("number", "#" + request.getNumber()) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!editingTitle);
-			}
-			
-		});
-		
-		requestTitle.add(new AjaxLink<Void>("editLink") {
+		requestHead.add(new AjaxLink<Void>("editLink") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				editingTitle = true;
 				
-				target.add(requestTitle);
+				target.add(requestHead);
 			}
 
 			@Override
@@ -198,7 +188,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 			}
 			
 		};
-		requestTitle.add(form);
+		requestHead.add(form);
 		
 		form.add(new TextField<String>("title", new IModel<String>() {
 
@@ -232,7 +222,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 					editingTitle = false;
 				}
 
-				target.add(requestTitle);
+				target.add(requestHead);
 				target.appendJavaScript("$(window).resize();");
 			}
 			
@@ -243,7 +233,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				editingTitle = false;
-				target.add(requestTitle);
+				target.add(requestHead);
 				target.appendJavaScript("$(window).resize();");
 			}
 			
