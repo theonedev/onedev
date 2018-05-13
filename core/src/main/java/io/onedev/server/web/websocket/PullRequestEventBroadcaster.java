@@ -9,12 +9,12 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
-public class PullRequestChangeBroadcaster {
+public class PullRequestEventBroadcaster {
 	
 	private final WebSocketManager webSocketManager;
 	
 	@Inject
-	public PullRequestChangeBroadcaster(WebSocketManager webSocketManager) {
+	public PullRequestEventBroadcaster(WebSocketManager webSocketManager) {
 		this.webSocketManager = webSocketManager;
 	}
 

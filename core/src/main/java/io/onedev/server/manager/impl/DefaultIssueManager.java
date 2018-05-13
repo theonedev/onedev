@@ -21,7 +21,9 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
+import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
+import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
@@ -42,12 +44,15 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	private final IssueFieldManager issueFieldManager;
 	
+	private final ListenerRegistry listenerRegistry;
+	
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@Inject
-	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager) {
+	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	@Sessional
@@ -145,10 +150,14 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Transactional
 	@Override
 	public void save(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {
-		if (issue.isNew())
+		boolean isNew = issue.isNew();
+		if (isNew)
 			issue.setNumber(getNextNumber(issue.getProject()));
 		save(issue);
 		issueFieldManager.writeFields(issue, fieldBean, promptedFields);
+
+		if (isNew)
+			listenerRegistry.post(new IssueOpened(issue));
 	}
 
 	private long getNextNumber(Project project) {
@@ -277,5 +286,5 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		} 
 		return issues;
 	}
-	
+
 }

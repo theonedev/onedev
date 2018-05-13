@@ -1,0 +1,24 @@
+#issue-detail>.changes>tbody>tr>td {
+	border-bottom: 1px solid #EEE;
+	padding: 16px 0;
+}
+#issue-detail>.changes>tbody>tr:last-child>td {
+	border-bottom: none;
+}
+#issue-detail>.changes>tbody>tr>td.avatar {
+	width: 40px;
+	padding-left: 16px;
+}
+#issue-detail>.changes>tbody>tr>td.avatar .avatar {
+	width: 40px;
+	height: 40px;
+}
+#issue-detail>.changes>tbody>tr>td.content {
+	padding-left: 20px;
+}
+#issue-detail>.changes>tbody>tr>td.content>.head {
+	color: #888;
+}
+#issue-detail>.changes>tbody>tr>td.content>.body {
+	margin-top: 8px;
+}

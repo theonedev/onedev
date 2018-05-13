@@ -23,10 +23,10 @@ import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommented;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
-import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
+import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
@@ -303,12 +303,12 @@ public class DefaultNotificationManager implements NotificationManager {
 				mentionUsers.addAll(new MentionParser().parseMentions(rendered));
 				if (!mentionUsers.isEmpty()) {
 					String url;
-					if (event instanceof PullRequestCommentCreated)
-						url = urlManager.urlFor(((PullRequestCommentCreated)event).getComment());
+					if (event instanceof PullRequestCommented)
+						url = urlManager.urlFor(((PullRequestCommented)event).getComment());
 					else if (event instanceof PullRequestStatusChangeEvent) 
 						url = urlManager.urlFor(((PullRequestStatusChangeEvent)event).getStatusChange());
-					else if (event instanceof PullRequestCodeCommentCreated)
-						url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment(), request);
+					else if (event instanceof PullRequestCodeCommented)
+						url = urlManager.urlFor(((PullRequestCodeCommented)event).getComment(), request);
 					else if (event instanceof PullRequestCodeCommentReplied)
 						url = urlManager.urlFor(((PullRequestCodeCommentReplied)event).getReply(), request);
 					else 

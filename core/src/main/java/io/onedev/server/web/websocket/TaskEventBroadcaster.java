@@ -10,12 +10,12 @@ import io.onedev.server.persistence.dao.EntityPersisted;
 import io.onedev.server.persistence.dao.EntityRemoved;
 
 @Singleton
-public class TaskChangeBroadcaster {
+public class TaskEventBroadcaster {
 	
 	private final WebSocketManager webSocketManager;
 	
 	@Inject
-	public TaskChangeBroadcaster(WebSocketManager webSocketManager) {
+	public TaskEventBroadcaster(WebSocketManager webSocketManager) {
 		this.webSocketManager = webSocketManager;
 	}
 

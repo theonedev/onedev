@@ -1,62 +1,20 @@
 <wicket:extend>
-	<div id="issue-detail" class="clearfix">
-		<div class="primary pull-left">
-			<div wicket:id="title" class="title clearfix">
-				<span wicket:id="title"></span>
-				<a wicket:id="edit" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
-				<form wicket:id="form" class="pull-left form-inline">
-					<input wicket:id="title" type="text" placeholder="Input title" class="form-control"></input>
-					<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
-					<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
-				</form>
-			</div>
-			<div class="state-and-actions clearfix">
-				<span wicket:id="state" class="state label pull-left"></span>
-				<div class="transition-actions pull-left">
-					<wicket:enclosure child="transitions">
-					<span class="btn-group">
-						<a wicket:id="transitions" class="btn btn-default btn-sm"><span wicket:id="label"></span></a>
-					</span>
-					</wicket:enclosure>
-				</div>
-				<a wicket:id="newIssue" class="new-issue pull-right btn btn-success btn-sm"><i class="fa fa-plus"></i> New Issue</a>
-			</div>
-			<div wicket:id="actionOptions" class="action-options"></div>
-			<table class="activities">
-				<tr wicket:id="activities">
-					<td wicket:id="avatar" class="avatar"><a wicket:id="avatar"></a></td>
-					<td class="spacer"></td>
-					<td wicket:id="content" class="content"></td>
-				</tr>
-			</table>
-			<div wicket:id="addComment"></div>
-		</div>
-		<div class="additional pull-right">
-			<div wicket:id="fields" class="fields">
-				<table>
-					<tr wicket:id="fields">
-						<td class="name"><span wicket:id="name"></span></td>
-						<td class="values"><div wicket:id="values"></div></td>
-					</tr>
-				</table>
-				<a wicket:id="editFields" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit</a>
-			</div>
-			<div wicket:id="relations" class="relations">
-				<label>Related Issues</label>
-				<wicket:enclosure child="relations">
-				<table class="table table-condensed">
-					<tr wicket:id="relations">
-						<td class="number-and-title"><a wicket:id="link"><span wicket:id="label"></span></a></td>
-						<td class="state"><span wicket:id="state" class="state label"></span></td>
-						<td class="actions"><a wicket:id="remove" title="Remove"><i class="fa fa-trash"></i></a></td>
-					</tr>
-				</table>
+	<div id="issue-detail">
+		<div wicket:id="title" class="title"></div>
+		<div class="state-and-actions clearfix">
+			<span wicket:id="state" class="state label pull-left"></span>
+			<div class="transition-actions pull-left">
+				<wicket:enclosure child="transitions">
+				<span class="btn-group">
+					<a wicket:id="transitions" class="btn btn-default btn-sm"><span wicket:id="label"></span></a>
+				</span>
 				</wicket:enclosure>
-				<div wicket:id="feedback"></div>
 			</div>
-			<input wicket:id="addRelation" class="add-relation" type="hidden"></input>				
-			<a wicket:id="delete" class="delete btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</a>
+			<a wicket:id="newIssue" class="new-issue pull-left btn btn-success btn-sm"><i class="fa fa-plus"></i> New Issue</a>
 		</div>
+		<div wicket:id="actionOptions" class="action-options"></div>
+		<ul wicket:id="issueTabs" class="tabs nav nav-tabs"></ul>
+		<wicket:child></wicket:child>
 	</div>
 	<wicket:fragment wicket:id="transitionFrag">
 		<form wicket:id="form" class="state-transition leave-confirm">
@@ -68,41 +26,16 @@
 			</div>
 		</form>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="userFrag">
-		<a wicket:id="avatar"></a> <a wicket:id="name"></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="nonEmptyValuesFrag">
-		<div wicket:id="values" class="value"><span wicket:id="value"></span></div>	
-	</wicket:fragment>
-	<wicket:fragment wicket:id="loginToCommentFrag">
-		<div class="login-to-comment">
-			<a wicket:id="login">Login to comment</a>
-		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="addCommentFrag">
-		<form wicket:id="form" class="add-comment leave-confirm no-autofocus">
-			<div wicket:id="feedback"></div>
-			<div wicket:id="comment" placeholder="Leave a comment"></div>
-			<div class="actions">
-				<a wicket:id="save" class="btn btn-primary dirty-aware">Comment</a>
-			</div>
+	<wicket:fragment wicket:id="titleEditFrag">
+		<div wicket:id="feedback"></div>
+		<form wicket:id="form" class="form-inline">
+			<input wicket:id="title" type="text" placeholder="Input title" class="form-control"></input>
+			<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
+			<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
 		</form>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="fieldEditFrag">
-		<form wicket:id="form" class="field-edit leave-confirm">
-			<div class="modal-header">
-				<button wicket:id="close" type="button" class="close">&times;</button>
-				<h4 id="modal-title" class="modal-title">
-					Edit Fields
-				</h4>
-			</div>
-			<div class="modal-body">
-				<div wicket:id="editor"></div>
-			</div>
-			<div class="modal-footer">
-				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save"></input>
-				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
-			</div>
-		</form>
+	<wicket:fragment wicket:id="titleViewFrag">
+		<span wicket:id="title"></span>
+		<a wicket:id="edit" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
 	</wicket:fragment>
 </wicket:extend>

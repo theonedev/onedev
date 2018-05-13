@@ -1,23 +1,23 @@
-package io.onedev.server.event.pullrequest;
+package io.onedev.server.event.issue;
 
 import java.util.Date;
 
 import io.onedev.server.event.MarkdownAware;
-import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.User;
 import io.onedev.server.util.editable.annotation.Editable;
 
 @Editable(name="commented")
-public class PullRequestCommentCreated extends PullRequestEvent implements MarkdownAware {
+public class IssueCommented extends IssueEvent implements MarkdownAware {
 
-	private final PullRequestComment comment;
+	private final IssueComment comment;
 	
-	public PullRequestCommentCreated(PullRequestComment comment) {
-		super(comment.getRequest());
+	public IssueCommented(IssueComment comment) {
+		super(comment.getIssue());
 		this.comment = comment;
 	}
 
-	public PullRequestComment getComment() {
+	public IssueComment getComment() {
 		return comment;
 	}
 

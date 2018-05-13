@@ -1,124 +1,27 @@
-#issue-detail>.primary {
-	width: 69%;
-}
-#issue-detail>.primary>div {
+#issue-detail>div {
 	margin-bottom: 20px;
 }
-#issue-detail>.primary>.title {
+#issue-detail>.title {
 	font-size: 20px;
 	font-weight: bold;
 	color: #444;
 	position: relative;
 }
-#issue-detail>.primary>.title a {
+#issue-detail>.title a {
 	color: #999;
 }
-#issue-detail>.primary>.title input[type=text] {
+#issue-detail>.title input[type=text] {
 	width: 600px;
 	font-weight: normal;
 }
-#issue-detail>.primary>.state-and-actions>.state {
+#issue-detail>.title .alert {
+	font-weight: normal;
+	font-size: 14px;
+}
+#issue-detail>.state-and-actions>.state {
 	font-size: 20px;
 	font-weight: normal;
+}
+#issue-detail>.state-and-actions>* {
 	margin-right: 20px;
-}
-#issue-detail>.primary .activities>tbody>tr>td {
-	border-top: 1px solid #EEE;
-	padding: 16px 0;
-}
-#issue-detail>.primary .activities>tbody>tr>td.avatar {
-	width: 40px;
-}
-#issue-detail>.primary .activities>tbody>tr>td.avatar .avatar {
-	width: 40px;
-	height: 40px;
-}
-#issue-detail>.primary .activities>tbody>tr>td.spacer {
-	width: 20px;
-}
-#issue-detail>.primary .activities .activity>.head {
-	color: #888;
-}
-#issue-detail>.primary .activities .activity>.body {
-	margin-top: 8px;
-}
-#issue-detail>.primary .activities .activity>.body>.actions {
-	margin-top: 8px;
-}
-#issue-detail>.primary .activities .activity>.body>.actions a {
-	color: #888;
-}
-#issue-detail>.primary .login-to-comment {
-	border: 1px solid #EEE;
-	vertical-align: center;
-	text-align: center;
-	padding: 20px;
-	font-size: 20px;
-	background: #F9F9F9;
-	border-radius: 4px;	
-}
-
-#issue-detail>.additional {
-	width: 30%;
-	border: 1px solid #E0E0E0;
-	padding: 20px;
-	background: #F9F9F9;
-	border-radius: 4px;
-	overflow: auto;
-}
-#issue-detail>.additional>div {
-	margin-bottom: 20px;
-	border-top: 1px solid #E8E8E8;
-	padding-top: 20px;
-}
-#issue-detail>.additional>div:first-child,
-#issue-detail>.additional>.add-relation {
-	padding-top: 0;
-	border-top: none;
-	margin-top: -10px;
-}
-
-#issue-detail>.additional .fields td {
-	padding-bottom: 10px;
-	vertical-align: middle;
-}
-#issue-detail>.additional .fields tr:last-child td {
-	padding-bottom: 0;
-}
-#issue-detail>.additional .fields .name {
-	font-weight: bold;
-	line-height: 20px;
-	white-space: nowrap;
-	padding-right: 20px;
-}
-#issue-detail>.additional .fields .values .value>div {
-	display: table-cell;
-	border-radius: 3px;
-	padding: 3px 6px 3px 0;
-}
-#issue-detail>.additional .fields>a {
-	margin-top: 12px;
-}
-
-#issue-detail>.additional .relations label {
-	margin-bottom: 10px;
-}
-#issue-detail>.additional .relations table {
-	table-layout: fixed;
-}
-#issue-detail>.additional .relations td.number-and-title {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-#issue-detail>.additional .relations td.state {
-	text-align: right;
-}
-#issue-detail>.additional .relations td.actions {
-	width: 32px;
-	text-align: right;
-}
-
-#issue-detail>.additional .select2-container {
-	width: 100%;
 }

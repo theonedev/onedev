@@ -1,0 +1,108 @@
+#issue-detail>.overview {
+	display: table;
+	width: 100%;
+}
+#issue-detail>.overview>div {
+	display: table-cell;
+	vertical-align: top;
+}
+#issue-detail>.overview>.activities {
+	width: 75%;
+	padding-right: 20px;
+}
+#issue-detail>.overview>.activities tr.activity.new>.avatar {
+	border-left-color: #4667EE;
+}
+
+#issue-detail>.overview>.activities>table>tbody>tr>td {
+	border-bottom: 1px solid #EEE;
+	padding: 16px 0;
+}
+#issue-detail>.overview>.activities>table>tbody>tr:last-child>td {
+	border-bottom: none;
+}
+#issue-detail>.overview>.activities>table>tbody>tr>td.avatar {
+	width: 40px;
+	border-left: 4px solid white;
+	padding-left: 12px;
+}
+#issue-detail>.overview>.activities>table>tbody>tr>td.avatar .avatar {
+	width: 40px;
+	height: 40px;
+}
+#issue-detail>.overview>.activities>table>tbody>tr>td.content {
+	padding-left: 20px;
+}
+#issue-detail>.overview>.activities .activity>.head {
+	color: #888;
+}
+#issue-detail>.overview>.activities .activity>.body {
+	margin-top: 8px;
+}
+#issue-detail>.overview>.activities .activity>.body>.actions {
+	margin-top: 8px;
+}
+#issue-detail>.overview>.activities .activity>.body>.actions a {
+	color: #888;
+}
+#issue-detail>.overview>.activities .activity>.head a {
+	color: #999;
+	margin-left: 8px;
+}
+#issue-detail>.overview>.activities .login-to-comment {
+	border: 1px solid #EEE;
+	vertical-align: center;
+	text-align: center;
+	padding: 20px;
+	font-size: 20px;
+	background: #F9F9F9;
+	border-radius: 4px;	
+}
+
+#issue-detail>.overview>.side-info {
+	border: 1px solid #E0E0E0;
+	padding: 20px;
+	background: #F9F9F9;
+	border-radius: 4px;
+	overflow: auto;
+}
+#issue-detail>.overview>.side-info>* {
+	margin-bottom: 20px;
+	border-top: 1px solid #E8E8E8;
+	padding-top: 20px;
+}
+#issue-detail>.overview>.side-info>div:first-child,
+#issue-detail>.overview>.side-info>.add-relation {
+	padding-top: 0;
+	border-top: none;
+	margin-top: -10px;
+}
+
+#issue-detail>.overview>.side-info .fields td {
+	padding-bottom: 10px;
+	vertical-align: middle;
+}
+#issue-detail>.overview>.side-info .fields tr:last-child td {
+	padding-bottom: 0;
+}
+#issue-detail>.overview>.side-info .fields .name {
+	font-weight: bold;
+	line-height: 20px;
+	white-space: nowrap;
+	padding-right: 20px;
+}
+#issue-detail>.overview>.side-info .fields .values .value>div {
+	display: table-cell;
+	border-radius: 3px;
+	padding: 3px 6px;
+}
+#issue-detail>.overview>.side-info .fields>a {
+	margin-top: 12px;
+}
+
+.diff.floating {
+	max-width: 600px;
+}
+.diff.floating table {
+	border: none;
+}

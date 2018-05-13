@@ -9,9 +9,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.editable.annotation.Editable;
 
 @Editable(name="added code comment")
-public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent implements MarkdownAware {
+public class PullRequestCodeCommented extends PullRequestCodeCommentEvent implements MarkdownAware {
 
-	public PullRequestCodeCommentCreated(PullRequest request, CodeComment comment, boolean passive) {
+	public PullRequestCodeCommented(PullRequest request, CodeComment comment, boolean passive) {
 		super(request, comment, passive);
 	}
 

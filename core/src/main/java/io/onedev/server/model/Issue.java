@@ -30,8 +30,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.support.Referenceable;
+import io.onedev.server.model.support.issue.PromptedField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.PromptedField;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -128,6 +128,9 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueComment> comments = new ArrayList<>();
 	
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueChange> changes = new ArrayList<>();
+	
 	private transient Map<String, PromptedField> promptedFields;
 	
 	public long getVersion() {
@@ -218,6 +221,14 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.comments = comments;
 	}
 
+	public Collection<IssueChange> getChanges() {
+		return changes;
+	}
+
+	public void setChanges(Collection<IssueChange> changes) {
+		this.changes = changes;
+	}
+
 	public int getVotes() {
 		return votes;
 	}
@@ -232,6 +243,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	public void setFields(Collection<IssueField> fields) {
 		this.fields = fields;
+		promptedFields = null;
 	}
 	
 	public boolean isVisitedAfter(Date date) {
@@ -293,4 +305,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.relationsByOther = relationsByOther;
 	}
 
+	public static String getWebSocketObservable(Long issueId) {
+		return Issue.class.getName() + ":" + issueId;
+	}
+	
 }

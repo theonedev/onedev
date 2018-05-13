@@ -1,7 +1,9 @@
-package io.onedev.server.util;
+package io.onedev.server.model.support.issue;
 
 import java.io.Serializable;
 import java.util.List;
+
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import io.onedev.server.model.Issue;
 
@@ -9,10 +11,12 @@ public class PromptedField implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@XStreamOmitField
 	private final Issue issue;
 	
 	private final String name;
 	
+	@XStreamOmitField
 	private final String type;
 	
 	private final List<String> values;

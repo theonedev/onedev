@@ -160,7 +160,7 @@ public class OneWebApplication extends WebApplication {
 			for (ResourcePackScopeContribution contribution: AppLoader.getExtensions(ResourcePackScopeContribution.class)) {
 				resourcePackScopes.addAll(contribution.getResourcePackScopes());
 			}
-			new ResourceBundleReferences(WebModule.class, resourcePackScopes.toArray(new Class<?>[resourcePackScopes.size()])).installInto(this);
+			new ResourceBundleReferences(OneWebApplication.class, resourcePackScopes.toArray(new Class<?>[resourcePackScopes.size()])).installInto(this);
 		}
 		
 		setRequestCycleProvider(new IRequestCycleProvider() {

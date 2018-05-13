@@ -32,7 +32,8 @@ import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.issuedetail.changes.IssueChangesPage;
+import io.onedev.server.web.page.project.issues.issuedetail.overview.IssueOverviewPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
@@ -197,7 +198,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/pulls/${request}/invalid", InvalidRequestPage.class));
 
 		add(new OnePageMapper("projects/${project}/issues", IssueListPage.class));
-		add(new OnePageMapper("projects/${project}/issues/${issue}", IssueDetailPage.class));
+		add(new OnePageMapper("projects/${project}/issues/${issue}/overview", IssueOverviewPage.class));
+		add(new OnePageMapper("projects/${project}/issues/${issue}/changes", IssueChangesPage.class));
 		add(new OnePageMapper("projects/${project}/issues/new", NewIssuePage.class));
 		
 		add(new OnePageMapper("projects/${project}/settings/general", GeneralSettingPage.class));

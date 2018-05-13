@@ -9,7 +9,7 @@ import javax.inject.Singleton;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
-import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
+import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.pullrequest.PullRequestStatusChangeEvent;
 import io.onedev.server.manager.StorageManager;
@@ -188,7 +188,7 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	}
 
 	@Listen
-	public void on(PullRequestCommentCreated event) {
+	public void on(PullRequestCommented event) {
 		visitPullRequest(event.getUser(), event.getRequest());
 	}
 	

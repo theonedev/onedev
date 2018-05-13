@@ -9,7 +9,7 @@ import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommented;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
 import io.onedev.server.manager.CodeCommentRelationManager;
 import io.onedev.server.manager.PullRequestManager;
@@ -50,7 +50,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 		CodeComment comment = relation.getComment();
 		PullRequest request = relation.getRequest();
 		if (request.getLastEvent() == null || comment.getDate().after(request.getLastEvent().getDate())) {
-			PullRequestCodeCommentCreated event = new PullRequestCodeCommentCreated(request, comment, passive); 
+			PullRequestCodeCommented event = new PullRequestCodeCommented(request, comment, passive); 
 			listenerRegistry.post(event);
 			request.setLastEvent(event);
 			pullRequestManager.save(request);

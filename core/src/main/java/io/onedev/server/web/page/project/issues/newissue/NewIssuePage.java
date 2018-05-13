@@ -23,7 +23,7 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.issuedetail.overview.IssueOverviewPage;
 import io.onedev.server.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
@@ -64,7 +64,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 				super.onSubmit();
 				StateSpec stateSpec = Preconditions.checkNotNull(getProject().getIssueWorkflow().getState(issue.getState()));
 				getIssueManager().save(issue, fieldBean, stateSpec.getFields());
-				setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(issue));
+				setResponsePage(IssueOverviewPage.class, IssueOverviewPage.paramsOf(issue));
 			}
 			
 		};

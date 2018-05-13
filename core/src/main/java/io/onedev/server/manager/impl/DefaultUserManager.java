@@ -152,6 +152,21 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
+    	query = getSession().createQuery("update Issue set submitter=null, submitterName=:submitterName where submitter=:submitter");
+    	query.setParameter("submitter", user);
+    	query.setParameter("submitterName", user.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update IssueComment set user=null, userName=:userName where user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("userName", user.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update IssueChange set user=null, userName=:userName where user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("userName", user.getDisplayName());
+    	query.executeUpdate();
+    	
 		dao.remove(user);
 
 		List<String> usages = new ArrayList<>();

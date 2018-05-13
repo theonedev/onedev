@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.issuedetail.activity;
+package io.onedev.server.web.page.project.issues.issuedetail.overview.activity;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 

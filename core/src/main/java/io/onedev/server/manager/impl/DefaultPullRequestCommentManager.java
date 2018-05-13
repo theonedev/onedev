@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
+import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.manager.PullRequestCommentManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.PullRequestComment;
@@ -34,16 +34,10 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 	@Transactional
 	@Override
 	public void save(PullRequestComment comment) {
-		save(comment, true);
-	}
-
-	@Transactional
-	@Override
-	public void save(PullRequestComment comment, boolean notifyListeners) {
 		boolean isNew = comment.isNew();
 		dao.persist(comment);
-		if (notifyListeners && isNew) {
-			PullRequestCommentCreated event = new PullRequestCommentCreated(comment);
+		if (isNew) {
+			PullRequestCommented event = new PullRequestCommented(comment);
 			listenerRegistry.post(event);
 			
 			LastEvent lastEvent = new LastEvent();

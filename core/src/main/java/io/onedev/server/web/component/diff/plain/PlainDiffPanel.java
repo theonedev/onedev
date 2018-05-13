@@ -42,7 +42,7 @@ public class PlainDiffPanel extends Panel {
 	
 	public PlainDiffPanel(String id, List<String> oldLines, List<String> newLines) {
 		super(id);
-		diffBlocks = DiffUtils.diff(oldLines, null, newLines, null, WhitespaceOption.IGNORE_CHANGE);
+		diffBlocks = DiffUtils.diff(oldLines, null, newLines, null, WhitespaceOption.DO_NOT_IGNORE);
 	}
 
 	@Override

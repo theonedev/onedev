@@ -92,10 +92,11 @@ import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.DataManager;
 import io.onedev.server.manager.GroupAuthorizationManager;
 import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueCommentManager;
-import io.onedev.server.manager.IssueRelationManager;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.IssueRelationManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.MembershipManager;
@@ -130,10 +131,11 @@ import io.onedev.server.manager.impl.DefaultConfigManager;
 import io.onedev.server.manager.impl.DefaultDataManager;
 import io.onedev.server.manager.impl.DefaultGroupAuthorizationManager;
 import io.onedev.server.manager.impl.DefaultGroupManager;
+import io.onedev.server.manager.impl.DefaultIssueChangeManager;
 import io.onedev.server.manager.impl.DefaultIssueCommentManager;
-import io.onedev.server.manager.impl.DefaultIssueRelationManager;
 import io.onedev.server.manager.impl.DefaultIssueFieldManager;
 import io.onedev.server.manager.impl.DefaultIssueManager;
+import io.onedev.server.manager.impl.DefaultIssueRelationManager;
 import io.onedev.server.manager.impl.DefaultMailManager;
 import io.onedev.server.manager.impl.DefaultMarkdownManager;
 import io.onedev.server.manager.impl.DefaultMembershipManager;
@@ -206,7 +208,6 @@ import io.onedev.server.web.DefaultWicketServlet;
 import io.onedev.server.web.ExpectedExceptionContribution;
 import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.ResourcePackScopeContribution;
-import io.onedev.server.web.WebModule;
 import io.onedev.server.web.component.diff.DiffRenderer;
 import io.onedev.server.web.component.markdown.SourcePositionTrackExtension;
 import io.onedev.server.web.component.markdown.emoji.EmojiExtension;
@@ -223,11 +224,12 @@ import io.onedev.server.web.util.markdown.IssueProcessor;
 import io.onedev.server.web.util.markdown.MentionProcessor;
 import io.onedev.server.web.util.markdown.PullRequestProcessor;
 import io.onedev.server.web.util.markdown.RelativeUrlProcessor;
-import io.onedev.server.web.websocket.CodeCommentChangeBroadcaster;
+import io.onedev.server.web.websocket.CodeCommentEventBroadcaster;
 import io.onedev.server.web.websocket.CommitIndexedBroadcaster;
 import io.onedev.server.web.websocket.DefaultWebSocketManager;
-import io.onedev.server.web.websocket.PullRequestChangeBroadcaster;
-import io.onedev.server.web.websocket.TaskChangeBroadcaster;
+import io.onedev.server.web.websocket.IssueEventBroadcaster;
+import io.onedev.server.web.websocket.PullRequestEventBroadcaster;
+import io.onedev.server.web.websocket.TaskEventBroadcaster;
 import io.onedev.server.web.websocket.WebSocketManager;
 import io.onedev.server.web.websocket.WebSocketPolicyProvider;
 import io.onedev.utils.ClassUtils;
@@ -308,6 +310,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestReferenceManager.class).to(DefaultPullRequestReferenceManager.class);
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
 		bind(NotificationManager.class).to(DefaultNotificationManager.class);
+		bind(IssueChangeManager.class).to(DefaultIssueChangeManager.class);
 		bind(IssueRelationManager.class).to(DefaultIssueRelationManager.class);
 		bind(CacheManager.class).to(DefaultCacheManager.class);
 		bind(VerificationManager.class).to(DefaultVerificationManager.class);
@@ -404,7 +407,7 @@ public class CoreModule extends AbstractPluginModule {
 			
 			@Override
 			public Collection<Class<?>> getResourcePackScopes() {
-				return Lists.newArrayList(WebModule.class);
+				return Lists.newArrayList(OneWebApplication.class);
 			}
 			
 		});
@@ -421,9 +424,10 @@ public class CoreModule extends AbstractPluginModule {
 		});
 
 		bind(UrlManager.class).to(DefaultUrlManager.class);
-		bind(CodeCommentChangeBroadcaster.class);
-		bind(PullRequestChangeBroadcaster.class);
-		bind(TaskChangeBroadcaster.class);
+		bind(CodeCommentEventBroadcaster.class);
+		bind(PullRequestEventBroadcaster.class);
+		bind(IssueEventBroadcaster.class);
+		bind(TaskEventBroadcaster.class);
 	}
 	
 	private void configurePersistence() {

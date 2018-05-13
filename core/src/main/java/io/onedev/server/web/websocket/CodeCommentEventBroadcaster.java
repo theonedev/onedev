@@ -9,12 +9,12 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
-public class CodeCommentChangeBroadcaster {
+public class CodeCommentEventBroadcaster {
 	
 	private final WebSocketManager webSocketManager;
 	
 	@Inject
-	public CodeCommentChangeBroadcaster(WebSocketManager webSocketManager) {
+	public CodeCommentEventBroadcaster(WebSocketManager webSocketManager) {
 		this.webSocketManager = webSocketManager;
 	}
 	
