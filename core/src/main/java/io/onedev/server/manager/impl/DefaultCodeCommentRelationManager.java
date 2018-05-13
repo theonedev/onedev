@@ -49,10 +49,10 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 		super.save(relation);
 		CodeComment comment = relation.getComment();
 		PullRequest request = relation.getRequest();
-		if (request.getLastEvent() == null || comment.getDate().after(request.getLastEvent().getDate())) {
+		if (request.getLastActivity() == null || comment.getDate().after(request.getLastActivity().getDate())) {
 			PullRequestCodeCommented event = new PullRequestCodeCommented(request, comment, passive); 
 			listenerRegistry.post(event);
-			request.setLastEvent(event);
+			request.setLastActivity(event);
 			pullRequestManager.save(request);
 		}
 	}
@@ -81,7 +81,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 			PullRequestCodeCommentReplied pullRequestCodeCommentReplied = new PullRequestCodeCommentReplied(
 					relation.getRequest(), event.getReply(), !relation.getRequest().equals(event.getRequest())); 
 			listenerRegistry.post(pullRequestCodeCommentReplied);
-			relation.getRequest().setLastEvent(pullRequestCodeCommentReplied);
+			relation.getRequest().setLastActivity(pullRequestCodeCommentReplied);
 			pullRequestManager.save(relation.getRequest());
 		}
 	}

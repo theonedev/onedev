@@ -940,8 +940,8 @@ public abstract class RequestDetailPage extends ProjectPage {
 					@Override
 					protected String load() {
 						PullRequest request = getPullRequest();
-						if (request.getLastCodeCommentEventDate() != null 
-								&& !request.isCodeCommentsVisitedAfter(request.getLastCodeCommentEventDate())) {
+						if (request.getLastCodeCommentActivityDate() != null 
+								&& !request.isCodeCommentsVisitedAfter(request.getLastCodeCommentActivityDate())) {
 							return "new";
 						} else {
 							return "";

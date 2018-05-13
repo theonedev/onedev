@@ -23,7 +23,7 @@ public class IssueSort implements Serializable {
 	
 	public enum Direction {ASCENDING, DESCENDING};
 	
-	private static List<String> BUILTIN_FIELDS = Lists.newArrayList("State", "Submit Date", "Votes");
+	private static List<String> BUILTIN_FIELDS = Lists.newArrayList("State", "Submit Date", "Votes", "Comments");
 	
 	private String field;
 	

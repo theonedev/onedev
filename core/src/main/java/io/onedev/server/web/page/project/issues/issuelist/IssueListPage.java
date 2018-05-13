@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.issues.issuelist;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -669,9 +670,11 @@ public class IssueListPage extends ProjectPage {
 				link.add(new Label("label", issue.getTitle()));
 				titleFrag.add(link);
 				item.add(titleFrag);
-				
-				item.add(new UserLink("submitterName", User.getForDisplay(issue.getSubmitter(), issue.getSubmitterName())));
-				item.add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate())));
+
+				item.add(new UserLink("user", 
+						User.getForDisplay(issue.getLastActivity().getUser(), issue.getLastActivity().getUserName())));
+				item.add(new Label("action", issue.getLastActivity().getAction()));
+				item.add(new Label("date", DateUtils.formatAge(issue.getLastActivity().getDate())));
 				
 				item.add(new IssueStateLabel("state", item.getModel()));
 				
@@ -688,7 +691,16 @@ public class IssueListPage extends ProjectPage {
 				}
 				
 				item.add(fieldsView);
-				item.add(new Label("votes", issue.getVotes()));
+				item.add(new Label("votes", issue.getNumOfVotes()));
+				item.add(new Label("comments", issue.getNumOfComments()));
+				
+				Date lastActivityDate;
+				if (issue.getLastActivity() != null)
+					lastActivityDate = issue.getLastActivity().getDate();
+				else
+					lastActivityDate = issue.getSubmitDate();
+				item.add(AttributeAppender.append("class", 
+						issue.isVisitedAfter(lastActivityDate)?"issue":"issue new"));
 			}
 			
 		};

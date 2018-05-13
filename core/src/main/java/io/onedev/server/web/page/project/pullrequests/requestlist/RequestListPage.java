@@ -300,31 +300,31 @@ public class RequestListPage extends ProjectPage {
 					});
 				}
 					
-				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
-				if (request.getLastEvent() != null) {
-					String description = request.getLastEvent().getType();
-					if (description.startsWith("there are")) {
-						lastEventContainer.add(new WebMarkupContainer("user").setVisible(false));
+				WebMarkupContainer lastActivityContainer = new WebMarkupContainer("lastActivity");
+				if (request.getLastActivity() != null) {
+					String action = request.getLastActivity().getAction();
+					if (action.startsWith("there are")) {
+						lastActivityContainer.add(new WebMarkupContainer("user").setVisible(false));
 					} else {
-						userForDisplay = User.getForDisplay(request.getLastEvent().getUser(), 
-								request.getLastEvent().getUserName());
-						lastEventContainer.add(new UserLink("user", userForDisplay));
+						userForDisplay = User.getForDisplay(request.getLastActivity().getUser(), 
+								request.getLastActivity().getUserName());
+						lastActivityContainer.add(new UserLink("user", userForDisplay));
 					}
-					lastEventContainer.add(new Label("description", description));
-					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getLastEvent().getDate())));
+					lastActivityContainer.add(new Label("action", action));
+					lastActivityContainer.add(new Label("date", DateUtils.formatAge(request.getLastActivity().getDate())));
 				} else {
-					lastEventContainer.add(new UserLink("user", User.getForDisplay(request.getSubmitter(), 
+					lastActivityContainer.add(new UserLink("user", User.getForDisplay(request.getSubmitter(), 
 							request.getSubmitterName())));
-					lastEventContainer.add(new Label("description", "submitted"));
-					lastEventContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
+					lastActivityContainer.add(new Label("action", "submitted"));
+					lastActivityContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 				}
-				fragment.add(lastEventContainer);
+				fragment.add(lastActivityContainer);
 				
 				cellItem.add(fragment);
 
 				Date lastActivityDate;
-				if (request.getLastEvent() != null)
-					lastActivityDate = request.getLastEvent().getDate();
+				if (request.getLastActivity() != null)
+					lastActivityDate = request.getLastActivity().getDate();
 				else
 					lastActivityDate = request.getSubmitDate();
 				cellItem.add(AttributeAppender.append("class", 

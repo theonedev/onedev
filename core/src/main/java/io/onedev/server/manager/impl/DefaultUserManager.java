@@ -115,10 +115,10 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("closedByName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set lastEvent.user=null, "
-    			+ "lastEvent.userName=:lastEventUserName where lastEvent.user=:lastEventUser");
-    	query.setParameter("lastEventUser", user);
-    	query.setParameter("lastEventUserName", user.getDisplayName());
+    	query = getSession().createQuery("update PullRequest set lastActivity.user=null, "
+    			+ "lastActivity.userName=:lastActivityUserName where lastActivity.user=:lastActivityUser");
+    	query.setParameter("lastActivityUser", user);
+    	query.setParameter("lastActivityUserName", user.getDisplayName());
     	query.executeUpdate();
 
     	query = getSession().createQuery("update PullRequestStatusChange set user=null, userName=:userName where user=:user");
@@ -141,10 +141,10 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeComment set lastEvent.user=null, "
-    			+ "lastEvent.userName=:lastEventUserName where lastEvent.user=:lastEventUser");
-    	query.setParameter("lastEventUser", user);
-    	query.setParameter("lastEventUserName", user.getDisplayName());
+    	query = getSession().createQuery("update CodeComment set lastActivity.user=null, "
+    			+ "lastActivity.userName=:lastActivityUserName where lastActivity.user=:lastActivityUser");
+    	query.setParameter("lastActivityUser", user);
+    	query.setParameter("lastActivityUserName", user.getDisplayName());
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update CodeCommentReply set user=null, userName=:userName where user=:user");

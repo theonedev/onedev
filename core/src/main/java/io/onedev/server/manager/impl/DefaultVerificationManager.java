@@ -128,7 +128,7 @@ public class DefaultVerificationManager extends AbstractEnvironmentManager imple
 			
 			listenerRegistry.post(event);
 			
-			request.setLastEvent(event);
+			request.setLastActivity(event);
 			pullRequestManager.save(request);
 		}
 		

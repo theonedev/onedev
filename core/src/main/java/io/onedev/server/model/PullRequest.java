@@ -48,7 +48,7 @@ import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.support.CloseInfo;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.LastEvent;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.MergePreview;
 import io.onedev.server.model.support.MergeStrategy;
 import io.onedev.server.model.support.ProjectAndBranch;
@@ -120,10 +120,10 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	private String headCommitHash;
 	
 	@Embedded
-	private LastEvent lastEvent;
+	private LastActivity lastActivity;
 	
 	@Column(nullable=true)
-	private Date lastCodeCommentEventDate;
+	private Date lastCodeCommentActivityDate;
 
 	// used for number search in markdown editor
 	@Column(nullable=false)
@@ -685,20 +685,20 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		}
 	}
 	
-	public LastEvent getLastEvent() {
-		return lastEvent;
+	public LastActivity getLastActivity() {
+		return lastActivity;
 	}
 
-	public void setLastEvent(LastEvent lastEvent) {
-		this.lastEvent = lastEvent;
+	public void setLastActivity(LastActivity lastActivity) {
+		this.lastActivity = lastActivity;
 	}
 
-	public Date getLastCodeCommentEventDate() {
-		return lastCodeCommentEventDate;
+	public Date getLastCodeCommentActivityDate() {
+		return lastCodeCommentActivityDate;
 	}
 
-	public void setLastCodeCommentEventDate(Date lastCodeCommentEventDate) {
-		this.lastCodeCommentEventDate = lastCodeCommentEventDate;
+	public void setLastCodeCommentActivityDate(Date lastCodeCommentActivityDate) {
+		this.lastCodeCommentActivityDate = lastCodeCommentActivityDate;
 	}
 
 	public boolean isVisitedAfter(Date date) {
@@ -737,29 +737,29 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		return mergedIntoTarget;
 	}
 	
-	public void setLastEvent(PullRequestStatusChange statusChange) {
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(statusChange.getDate());
-		lastEvent.setType(statusChange.getType().getName());
-		lastEvent.setUser(statusChange.getUser());
-		setLastEvent(lastEvent);
+	public void setLastActivity(PullRequestStatusChange statusChange) {
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setDate(statusChange.getDate());
+		lastActivity.setAction(statusChange.getType().getName());
+		lastActivity.setUser(statusChange.getUser());
+		setLastActivity(lastActivity);
 	}
 	
-	public void setLastEvent(PullRequestCodeCommentEvent event) {
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(event.getDate());
-		lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
-		lastEvent.setUser(event.getUser());
-		setLastEvent(lastEvent);
-		setLastCodeCommentEventDate(event.getDate());
+	public void setLastActivity(PullRequestCodeCommentEvent event) {
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setDate(event.getDate());
+		lastActivity.setAction(EditableUtils.getDisplayName(event.getClass()));
+		lastActivity.setUser(event.getUser());
+		setLastActivity(lastActivity);
+		setLastCodeCommentActivityDate(event.getDate());
 	}
 
-	public void setLastEvent(PullRequestVerificationEvent event) {
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(event.getDate());
-		lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
-		lastEvent.setUser(event.getUser());
-		setLastEvent(lastEvent);
+	public void setLastActivity(PullRequestVerificationEvent event) {
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setDate(event.getDate());
+		lastActivity.setAction(EditableUtils.getDisplayName(event.getClass()));
+		lastActivity.setUser(event.getUser());
+		setLastActivity(lastActivity);
 	}
 	
 	@Nullable

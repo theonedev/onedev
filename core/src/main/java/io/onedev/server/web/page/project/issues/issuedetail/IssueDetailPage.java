@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -65,7 +66,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.issuedetail.changes.IssueChangesPage;
 import io.onedev.server.web.page.project.issues.issuedetail.overview.IssueOverviewPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 
@@ -118,7 +118,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				
 				String prevTitle = getIssue().getTitle();
 				getIssue().setTitle(titleInput.getModelObject());
-				getIssueEditManager().changeTitle(getIssue(), prevTitle);
+				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), prevTitle);
 				
 				Fragment titleViewer = newTitleViewer();
 				titleEditor.replaceWith(titleViewer);
@@ -233,6 +233,9 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						public void onClick(AjaxRequestTarget target) {
 							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
 							Serializable fieldBean = getIssueFieldManager().readFields(getIssue());
+							String prevState = getIssue().getState();
+							Map<String, PromptedField> prevFields = getIssue().getPromptedFields();
+							
 							Set<String> excludedFields = getIssueFieldManager().getExcludedFields(getIssue().getProject(), transition.getToState());
 
 							Form<?> form = new Form<Void>("form") {
@@ -278,7 +281,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 												promptedFields.remove(propertyContext.getDisplayName());
 										}
 									}
-									getIssueManager().save(getIssue(), fieldBean, promptedFields);
+									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevState, prevFields, promptedFields);
+									
 									setResponsePage(IssueOverviewPage.class, IssueOverviewPage.paramsOf(getIssue()));
 								}
 								
@@ -322,7 +326,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new IssueTab("Overview", IssueOverviewPage.class));
-		tabs.add(new IssueTab("Change History", IssueChangesPage.class));
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		
@@ -383,16 +386,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		}
 	}
 
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
+	private IssueChangeManager getIssueChangeManager() {
+		return OneDev.getInstance(IssueChangeManager.class);
 	}
 
 	private IssueFieldManager getIssueFieldManager() {
 		return OneDev.getInstance(IssueFieldManager.class);
-	}
-	
-	private IssueChangeManager getIssueEditManager() {
-		return OneDev.getInstance(IssueChangeManager.class);
 	}
 	
 	@Override

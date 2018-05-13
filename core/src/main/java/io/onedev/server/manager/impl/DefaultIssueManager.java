@@ -29,6 +29,7 @@ import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.query.QueryBuildContext;
@@ -149,15 +150,16 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Transactional
 	@Override
-	public void save(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {
-		boolean isNew = issue.isNew();
-		if (isNew)
-			issue.setNumber(getNextNumber(issue.getProject()));
+	public void open(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setAction("submitted");
+		lastActivity.setUser(issue.getSubmitter());
+		lastActivity.setDate(issue.getSubmitDate());
+		issue.setLastActivity(lastActivity);
+		issue.setNumber(getNextNumber(issue.getProject()));
 		save(issue);
 		issueFieldManager.writeFields(issue, fieldBean, promptedFields);
-
-		if (isNew)
-			listenerRegistry.post(new IssueOpened(issue));
+		listenerRegistry.post(new IssueOpened(issue));
 	}
 
 	private long getNextNumber(Project project) {

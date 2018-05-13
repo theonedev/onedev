@@ -13,29 +13,29 @@ import javax.persistence.ManyToOne;
 import io.onedev.server.model.User;
 
 @Embeddable
-public class LastEvent implements Serializable {
+public class LastActivity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="LAST_EVENT_USER")
+	@JoinColumn(name="LAST_ACT_USER")
 	private User user;
 	
-	@Column(name="LAST_EVENT_USER_NAME")
+	@Column(name="LAST_ACT_USER_NAME")
 	private String userName;
 
-	@Column(name="LAST_EVENT_TYPE")
-	private String type;
+	@Column(name="LAST_ACT_ACTION")
+	private String action;
 
-	@Column(name="LAST_EVENT_DATE")
+	@Column(name="LAST_ACT_DATE")
 	private Date date;
 
-	public String getType() {
-		return type;
+	public String getAction() {
+		return action;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setAction(String action) {
+		this.action = action;
 	}
 
 	public Date getDate() {

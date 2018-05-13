@@ -37,20 +37,23 @@
 			cause issue working improperly, please 
 			<a wicket:id="reconcile">reconcile</a> existing issues with the change</div>
 			</wicket:enclosure>
-			<div wicket:id="issues" class="issue">
+			<div wicket:id="issues">
 				<div class="primary">
 					<div wicket:id="number" class="number"></div>
 					<div wicket:id="title" class="title"></div>
-					<div class="submitter">
-						<a wicket:id="submitterName"></a>
-						opened
-						<span wicket:id="submitDate"></span>
+					<div class="last-activity">
+						<a wicket:id="user"></a>
+						<span wicket:id="action"></span>
+						<span wicket:id="date"></span>
 					</div>
 				</div>
 				<div class="additional">
 					<div class="state"><div wicket:id="state"></div></div>
 					<div wicket:id="fields"></div>
-					<div title="Votes" class="votes"><i class="fa fa-thumbs-o-up"></i> <span wicket:id="votes" class="votes"></span></div>
+					<div class="votes-and-comments">
+						<span title="Votes"><i class="fa fa-thumbs-o-up"></i> <span wicket:id="votes" class="votes"></span></span>
+						<span title="Comments"><i class="fa fa-comments"></i> <span wicket:id="comments" class="comments"></span></span>
+					</div>
 				</div>
 			</div>
 			<div class="center"><ul wicket:id="issuesPageNav"></ul></div>

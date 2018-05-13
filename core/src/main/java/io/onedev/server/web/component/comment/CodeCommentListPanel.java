@@ -199,28 +199,28 @@ public abstract class CodeCommentListPanel extends Panel {
 					
 				}, contentVersionSupport));
 				
-				WebMarkupContainer lastEventContainer = new WebMarkupContainer("lastEvent");
-				if (comment.getLastEvent() != null) {
-					String description = comment.getLastEvent().getType();
-					lastEventContainer.add(new Label("description", description));
+				WebMarkupContainer lastActivityContainer = new WebMarkupContainer("lastActivity");
+				if (comment.getLastActivity() != null) {
+					String action = comment.getLastActivity().getAction();
+					lastActivityContainer.add(new Label("action", action));
 					
-					userForDisplay = User.getForDisplay(comment.getLastEvent().getUser(), 
-							comment.getLastEvent().getUserName());
-					lastEventContainer.add(new UserLink("user", userForDisplay));
-					lastEventContainer.add(new Label("date", DateUtils.formatAge(comment.getLastEvent().getDate())));
+					userForDisplay = User.getForDisplay(comment.getLastActivity().getUser(), 
+							comment.getLastActivity().getUserName());
+					lastActivityContainer.add(new UserLink("user", userForDisplay));
+					lastActivityContainer.add(new Label("date", DateUtils.formatAge(comment.getLastActivity().getDate())));
 				} else {
-					lastEventContainer.add(new WebMarkupContainer("description"));
-					lastEventContainer.add(new WebMarkupContainer("user"));
-					lastEventContainer.add(new WebMarkupContainer("date"));
-					lastEventContainer.setVisible(false);
+					lastActivityContainer.add(new WebMarkupContainer("action"));
+					lastActivityContainer.add(new WebMarkupContainer("user"));
+					lastActivityContainer.add(new WebMarkupContainer("date"));
+					lastActivityContainer.setVisible(false);
 				}
-				fragment.add(lastEventContainer);
+				fragment.add(lastActivityContainer);
 				
 				cellItem.add(fragment);
 				
 				Date lastUpdateDate;
-				if (comment.getLastEvent() != null)
-					lastUpdateDate = comment.getLastEvent().getDate();
+				if (comment.getLastActivity() != null)
+					lastUpdateDate = comment.getLastActivity().getDate();
 				else
 					lastUpdateDate = comment.getDate();
 				cellItem.add(AttributeAppender.append("class", 

@@ -41,11 +41,11 @@
 .code-comments td.comment>div>.content {
 	margin-left: 30px;
 }
-.code-comments td.comment>div>.last-event {
+.code-comments td.comment>div>.last-activity {
 	color: #888;
 	margin-left: 20px;
 }
-.code-comments td.comment>div>.title a, .code-comments td.comment>div>.last-event a {
+.code-comments td.comment>div>.title a, .code-comments td.comment>div>.last-activity a {
 	color: #444;
 }
 

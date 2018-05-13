@@ -61,7 +61,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 		statusChange.setUser(review.getUser());
 		pullRequestStatusChangeManager.save(statusChange);
 		
-		review.getRequest().setLastEvent(statusChange);
+		review.getRequest().setLastActivity(statusChange);
 		pullRequestManager.save(review.getRequest());
 	}
 
@@ -93,7 +93,7 @@ public class DefaultReviewManager extends AbstractEntityManager<Review> implemen
 		statusChange.setUser(userManager.getCurrent());
 		pullRequestStatusChangeManager.save(statusChange);
 		
-		request.setLastEvent(statusChange);
+		request.setLastActivity(statusChange);
 		pullRequestManager.save(request);
 	}
 

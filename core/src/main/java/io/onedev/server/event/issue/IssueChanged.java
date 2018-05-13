@@ -6,7 +6,7 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.editable.annotation.Editable;
 
-@Editable(name="opened")
+@Editable(name="commented")
 public class IssueChanged extends IssueEvent {
 
 	private final IssueChange change;
@@ -22,7 +22,7 @@ public class IssueChanged extends IssueEvent {
 
 	@Override
 	public User getUser() {
-		return User.getForDisplay(change.getUser(), change.getUserName());
+		return change.getUser();
 	}
 
 	@Override

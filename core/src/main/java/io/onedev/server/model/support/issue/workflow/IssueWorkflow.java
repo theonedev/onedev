@@ -147,7 +147,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 		
 		StateSpec assigned = new StateSpec();
 		assigned.setName("Assigned");
-		assigned.setColor("#5d9d41");
+		assigned.setColor("#9900ff");
 		assigned.setFields(Lists.newArrayList("Assignee"));
 		
 		states.add(assigned);

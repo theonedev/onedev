@@ -278,7 +278,9 @@ public class IssueQuery implements Serializable {
 							if (fieldName.equals(Issue.STATE)) {
 								return new StateCriteria(value, operator);
 							} else if (fieldName.equals(Issue.VOTES)) {
-								return new VoteCriteria(getIntValue(value), operator);
+								return new VotesCriteria(getIntValue(value), operator);
+							} else if (fieldName.equals(Issue.COMMENTS)) {
+								return new CommentsCriteria(getIntValue(value), operator);
 							} else if (fieldName.equals(Issue.NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else if (fieldName.equals(Issue.SUBMITTER)) {
@@ -310,7 +312,9 @@ public class IssueQuery implements Serializable {
 						case IssueQueryLexer.IsLessThan:
 						case IssueQueryLexer.IsGreaterThan:
 							if (fieldName.equals(Issue.VOTES)) {
-								return new VoteCriteria(getIntValue(value), operator);
+								return new VotesCriteria(getIntValue(value), operator);
+							} else if (fieldName.equals(Issue.COMMENTS)) {
+								return new CommentsCriteria(getIntValue(value), operator);
 							} else if (fieldName.equals(Issue.NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
@@ -349,7 +353,8 @@ public class IssueQuery implements Serializable {
 			List<IssueSort> issueSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.VOTES) && !fieldName.equals(Issue.NUMBER)) {
+				if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.VOTES) 
+						&& !fieldName.equals(Issue.COMMENTS) && !fieldName.equals(Issue.NUMBER)) {
 					InputSpec field = project.getIssueWorkflow().getField(fieldName);
 					if (!(field instanceof ChoiceInput) && !(field instanceof DateInput) 
 							&& !(field instanceof NumberInput)) {
@@ -411,6 +416,7 @@ public class IssueQuery implements Serializable {
 		case IssueQueryLexer.IsNot:
 			if (!fieldName.equals(Issue.STATE) 
 					&& !fieldName.equals(Issue.VOTES) 
+					&& !fieldName.equals(Issue.COMMENTS) 
 					&& !fieldName.equals(Issue.SUBMITTER)
 					&& !fieldName.equals(Issue.NUMBER)
 					&& !(field instanceof IssueChoiceInput)
@@ -426,6 +432,7 @@ public class IssueQuery implements Serializable {
 		case IssueQueryLexer.IsLessThan:
 		case IssueQueryLexer.IsGreaterThan:
 			if (!fieldName.equals(Issue.VOTES)
+					&& !fieldName.equals(Issue.COMMENTS)
 					&& !fieldName.equals(Issue.NUMBER)
 					&& !(field instanceof NumberInput) 
 					&& !(field instanceof ChoiceInput))

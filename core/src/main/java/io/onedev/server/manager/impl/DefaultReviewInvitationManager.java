@@ -55,7 +55,7 @@ public class DefaultReviewInvitationManager extends AbstractEntityManager<Review
 			statusChange.setNote("User '" + reviewer.getDisplayName() + "' is removed from reviewer list");
 			pullRequestStatusChangeManager.save(statusChange, invitation);
 			
-			request.setLastEvent(statusChange);
+			request.setLastActivity(statusChange);
 			pullRequestManager.save(request);
 			return true;
 		}
@@ -76,7 +76,7 @@ public class DefaultReviewInvitationManager extends AbstractEntityManager<Review
 		statusChange.setUser(SecurityUtils.getUser());
 		pullRequestStatusChangeManager.save(statusChange, invitation);
 		
-		request.setLastEvent(statusChange);
+		request.setLastActivity(statusChange);
 		pullRequestManager.save(request);
 	}
 	

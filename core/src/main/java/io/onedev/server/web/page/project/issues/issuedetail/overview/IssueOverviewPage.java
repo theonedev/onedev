@@ -42,6 +42,7 @@ import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -60,6 +61,7 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.ChangedActivity;
 import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.CommentedActivity;
 import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.IssueActivity;
 import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.IssueCommentDeleted;
@@ -84,6 +86,9 @@ public class IssueOverviewPage extends IssueDetailPage {
 
 		for (IssueComment comment: getIssue().getComments())  
 			activities.add(new CommentedActivity(comment));
+		
+		for (IssueChange change: getIssue().getChanges())
+			activities.add(new ChangedActivity(change));
 		
 		activities.sort((o1, o2) -> {
 			if (o1.getDate().getTime()<o2.getDate().getTime())
@@ -235,16 +240,6 @@ public class IssueOverviewPage extends IssueDetailPage {
 					input.setModelObject("");
 
 					target.add(fragment);
-					
-					@SuppressWarnings("deprecation")
-					Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-					Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentedActivity(comment)); 
-					activitiesView.add(newActivityRow);
-					
-					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
-					target.prependJavaScript(script);
-					target.add(newActivityRow);
 					target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 				}
 

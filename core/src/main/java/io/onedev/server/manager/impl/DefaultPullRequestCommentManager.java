@@ -8,7 +8,7 @@ import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.manager.PullRequestCommentManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.support.LastEvent;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -40,11 +40,11 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 			PullRequestCommented event = new PullRequestCommented(comment);
 			listenerRegistry.post(event);
 			
-			LastEvent lastEvent = new LastEvent();
+			LastActivity lastEvent = new LastActivity();
 			lastEvent.setDate(event.getDate());
-			lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
+			lastEvent.setAction(EditableUtils.getDisplayName(event.getClass()));
 			lastEvent.setUser(event.getUser());
-			comment.getRequest().setLastEvent(lastEvent);
+			comment.getRequest().setLastActivity(lastEvent);
 			pullRequestManager.save(event.getRequest());
 		}
 	}

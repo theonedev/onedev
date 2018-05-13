@@ -22,7 +22,7 @@ import io.onedev.server.manager.PullRequestUpdateManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.support.LastEvent;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -90,10 +90,10 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			PullRequestUpdated event = new PullRequestUpdated(update);
 			listenerRegistry.post(event);
 			
-			LastEvent lastEvent = new LastEvent();
+			LastActivity lastEvent = new LastActivity();
 			lastEvent.setDate(event.getDate());
-			lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
-			request.setLastEvent(lastEvent);
+			lastEvent.setAction(EditableUtils.getDisplayName(event.getClass()));
+			request.setLastActivity(lastEvent);
 		}
 	}
 

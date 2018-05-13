@@ -39,7 +39,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.LastEvent;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.TextRange;
 import io.onedev.server.security.SecurityUtils;
@@ -82,7 +82,7 @@ public class CodeComment extends AbstractEntity {
 	private Date date = new Date();
 
 	@Embedded
-	private LastEvent lastEvent;
+	private LastActivity lastActivity;
 
 	@Embedded
 	private MarkPos markPos;
@@ -187,20 +187,20 @@ public class CodeComment extends AbstractEntity {
 		this.compareContext = compareContext;
 	}
 
-	public LastEvent getLastEvent() {
-		return lastEvent;
+	public LastActivity getLastActivity() {
+		return lastActivity;
 	}
 
-	public void setLastEvent(LastEvent lastEvent) {
-		this.lastEvent = lastEvent;
+	public void setLastActivity(LastActivity lastActivity) {
+		this.lastActivity = lastActivity;
 	}
 	
-	public void setLastEvent(CodeCommentEvent event) {
-		LastEvent lastEvent = new LastEvent();
-		lastEvent.setDate(event.getDate());
-		lastEvent.setType(EditableUtils.getDisplayName(event.getClass()));
-		lastEvent.setUser(event.getUser());
-		setLastEvent(lastEvent);
+	public void setLastActivity(CodeCommentEvent event) {
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setDate(event.getDate());
+		lastActivity.setAction(EditableUtils.getDisplayName(event.getClass()));
+		lastActivity.setUser(event.getUser());
+		setLastActivity(lastActivity);
 	}
 
 	public boolean isVisitedAfter(Date date) {

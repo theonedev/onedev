@@ -89,11 +89,20 @@
 #issue-list .issue .additional .state>div {
 	font-weight: bold;
 } 
-#issue-list .issue .additional>.votes {
+#issue-list .issue .additional>.votes-and-comments {
 	text-align: right;
 	padding-right: 0;
 }
-
+#issue-list .issue .additional>.votes-and-comments>span:first-child {
+	margin-right: 8px;
+}
+#issue-list .issue {
+	border-left: 4px solid white;
+	padding-left: 8px;
+}
+#issue-list .new.issue {
+	border-left-color: #4667EE;
+}
 .edit-saved-issue-query .actions {
 	width: 10%;
 }

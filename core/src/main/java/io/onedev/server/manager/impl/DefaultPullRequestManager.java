@@ -162,7 +162,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			statusChange.setUser(userManager.getCurrent());
 			pullRequestStatusChangeManager.save(statusChange);
 			
-			request.setLastEvent(statusChange);
+			request.setLastActivity(statusChange);
 			save(request);
 		}
 	}
@@ -183,7 +183,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			statusChange.setUser(userManager.getCurrent());
 			pullRequestStatusChangeManager.save(statusChange);
 			
-			request.setLastEvent(statusChange);
+			request.setLastActivity(statusChange);
 			save(request);
 		}
 	}
@@ -202,7 +202,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		statusChange.setUser(user);
 		pullRequestStatusChangeManager.save(statusChange);
 
-		request.setLastEvent(statusChange);
+		request.setLastActivity(statusChange);
 		save(request);
 		checkAsync(request);
 	}
@@ -227,7 +227,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		statusChange.setUser(user);
 		pullRequestStatusChangeManager.save(statusChange);
 
-		request.setLastEvent(statusChange);
+		request.setLastActivity(statusChange);
 		save(request);
 	}
 	
@@ -378,7 +378,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		statusChange.setRequest(request);
 		statusChange.setType(Type.MERGED);
 		pullRequestStatusChangeManager.save(statusChange);
-		request.setLastEvent(statusChange);
+		request.setLastActivity(statusChange);
 		
 		save(request);
 	}
@@ -702,7 +702,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		pullRequestStatusChangeManager.save(statusChange);
 		
-		request.setLastEvent(statusChange);
+		request.setLastActivity(statusChange);
 		
 		save(request);
 	}

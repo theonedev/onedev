@@ -384,12 +384,12 @@ public class DefaultNotificationManager implements NotificationManager {
 				if (!watch.isIgnore() && !watch.getUser().equals(event.getUser()) 
 						&& (!(event instanceof PullRequestUpdated) 
 								|| !watch.getUser().equals(request.getSubmitter()))) { 
-					if (request.getLastEvent() == null) {
+					if (request.getLastActivity() == null) {
 						usersToNotify.add(watch.getUser());
 					} else {
 						Date visitDate = visitInfoManager.getPullRequestVisitDate(watch.getUser(), request);
-						if (visitDate == null || visitDate.getTime()<request.getLastEvent().getDate().getTime()) {
-							if (!request.getLastEvent().getType().equals(eventType)) { 
+						if (visitDate == null || visitDate.getTime()<request.getLastActivity().getDate().getTime()) {
+							if (!request.getLastActivity().getAction().equals(eventType)) { 
 								usersToNotify.add(watch.getUser());
 							} 
 						} else {

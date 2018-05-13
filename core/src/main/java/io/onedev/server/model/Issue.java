@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -29,6 +30,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.VisitManager;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.PromptedField;
 import io.onedev.server.security.SecurityUtils;
@@ -36,6 +38,10 @@ import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.inputspec.InputSpec;
 
+/**
+ * @author robin
+ *
+ */
 @Entity
 @Table(
 		indexes={
@@ -43,7 +49,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 				@Index(columnList="title"), @Index(columnList="noSpaceTitle"),  
 				@Index(columnList="number"), @Index(columnList="numberStr"), 
 				@Index(columnList="submitDate"), @Index(columnList="g_submitter_id"),
-				@Index(columnList="votes")})
+				@Index(columnList="numOfVotes"), @Index(columnList="numOfComments")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Issue extends AbstractEntity implements Referenceable {
@@ -66,6 +72,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 	
 	public static final String VOTES = "Votes";
 	
+	public static final String COMMENTS = "Comments";
+	
 	static {
 		BUILTIN_FIELDS.put(NUMBER, "number");
 		BUILTIN_FIELDS.put(STATE, "state");
@@ -73,7 +81,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 		BUILTIN_FIELDS.put(DESCRIPTION, "description");
 		BUILTIN_FIELDS.put(SUBMITTER, "submitter");
 		BUILTIN_FIELDS.put(SUBMIT_DATE, "submitDate");
-		BUILTIN_FIELDS.put(VOTES, "votes");
+		BUILTIN_FIELDS.put(VOTES, "numOfVotes");
+		BUILTIN_FIELDS.put(COMMENTS, "numOfComments");
 	}
 	
 	@Version
@@ -101,7 +110,9 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private long submitDate;
 	
-	private int votes;
+	private int numOfVotes;
+	
+	private int numOfComments;
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -115,6 +126,9 @@ public class Issue extends AbstractEntity implements Referenceable {
 	// used for title search in markdown editor
 	@Column(nullable=false)
 	private String noSpaceTitle;
+	
+	@Embedded
+	private LastActivity lastActivity;
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
@@ -229,12 +243,20 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.changes = changes;
 	}
 
-	public int getVotes() {
-		return votes;
+	public int getNumOfVotes() {
+		return numOfVotes;
 	}
 
-	public void setVotes(int votes) {
-		this.votes = votes;
+	public void setNumOfVotes(int numOfVotes) {
+		this.numOfVotes = numOfVotes;
+	}
+
+	public int getNumOfComments() {
+		return numOfComments;
+	}
+
+	public void setNumOfComments(int numOfComments) {
+		this.numOfComments = numOfComments;
 	}
 
 	public Collection<IssueField> getFields() {
@@ -246,6 +268,14 @@ public class Issue extends AbstractEntity implements Referenceable {
 		promptedFields = null;
 	}
 	
+	public LastActivity getLastActivity() {
+		return lastActivity;
+	}
+
+	public void setLastActivity(LastActivity lastActivity) {
+		this.lastActivity = lastActivity;
+	}
+
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {

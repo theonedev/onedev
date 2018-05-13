@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.support.issue.PromptedField;
@@ -15,6 +17,9 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void changeDescription(Issue issue, String oldDescription);
 	
-	void changeFields(Issue issue, Serializable fieldBean, Map<String, PromptedField> prevFields, Collection<String> promptedFields);
+	void changeFields(Issue issue, Serializable fieldBean, 
+			Map<String, PromptedField> prevFields, Collection<String> promptedFields);
 	
+	void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent, 
+			String prevState, Map<String, PromptedField> prevFields, Collection<String> promptedFields);
 }

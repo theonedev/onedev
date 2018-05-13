@@ -49,6 +49,9 @@
 	color: #999;
 	margin-left: 8px;
 }
+#issue-detail>.overview>.activities .add-comment {
+	margin-top: 16px;
+}
 #issue-detail>.overview>.activities .login-to-comment {
 	border: 1px solid #EEE;
 	vertical-align: center;

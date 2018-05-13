@@ -5,7 +5,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 
-public class VoteCriteria extends IssueCriteria {
+public class CommentsCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -13,14 +13,14 @@ public class VoteCriteria extends IssueCriteria {
 	
 	private final int value;
 	
-	public VoteCriteria(int value, int operator) {
+	public CommentsCriteria(int value, int operator) {
 		this.operator = operator;
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(QueryBuildContext context) {
-		Path<Integer> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.VOTES));
+		Path<Integer> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.COMMENTS));
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsNot)
