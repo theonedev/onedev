@@ -327,7 +327,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 				String name = (String) row[0];
 				String value = (String) row[1];
 				InputSpec fieldSpec = project.getIssueWorkflow().getField(name);
-				if (fieldSpec != null) {
+				if (fieldSpec != null && value != null) {
 					List<String> choices;
 					if (fieldSpec instanceof ChoiceInput)
 						choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());

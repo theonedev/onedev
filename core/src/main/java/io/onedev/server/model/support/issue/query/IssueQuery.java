@@ -107,7 +107,6 @@ public class IssueQuery implements Serializable {
 		if (orders.isEmpty())
 			orders.add(builder.desc(idPath));
 		query.orderBy(orders);
-		query.groupBy(idPath);
 		
 		return query;
 	}
