@@ -1,16 +1,7 @@
-#issue-detail {
-	display: table;
-	width: 100%;
-}
-#issue-detail>div {
-	display: table-cell;
-	vertical-align: top;
-}
 #issue-detail>.main {
-	width: 75%;
-	padding-right: 20px;
+	margin-right: 360px;
+	pading-right: 20px;
 }
-
 #issue-detail>.main>div {
 	margin-bottom: 20px;
 }
@@ -40,10 +31,14 @@
 }
 
 #issue-detail>.side {
-	border: 1px solid #E0E0E0;
+	position: fixed;
+	top: 48px;
+	right: 0;
+	bottom: 0;
+	width: 360px;
+	border-left: 2px solid #E0E0E0;
 	padding: 20px;
 	background: #F9F9F9;
-	border-radius: 4px;
 	overflow: auto;
 }
 #issue-detail>.side>* {
@@ -52,8 +47,8 @@
 	padding-top: 20px;
 }
 #issue-detail>.side>div:first-child {
-	padding-top: 0;
 	border-top: none;
+	padding-top: 0;
 }
 
 #issue-detail>.side .fields td {

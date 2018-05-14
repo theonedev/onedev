@@ -98,7 +98,7 @@ import io.onedev.utils.StringUtils;
 
 @Entity
 @Table(indexes={@Index(columnList="g_forkedFrom_id")})
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+//@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
 @Editable
 public class Project extends AbstractEntity {

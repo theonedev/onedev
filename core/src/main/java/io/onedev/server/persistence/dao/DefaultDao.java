@@ -82,7 +82,7 @@ public class DefaultDao implements Dao, Serializable {
 		return findRange(entityCriteria, 0, Integer.MAX_VALUE);
 	}
 
-	@Sessional
+	@Transactional
 	@Override
 	public <T extends AbstractEntity> T find(EntityCriteria<T> entityCriteria) {
 		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
@@ -102,7 +102,7 @@ public class DefaultDao implements Dao, Serializable {
 		return new ManagedSerializedForm(Dao.class);
 	}
 
-	@Sessional
+	@Transactional
 	@Override
 	public <T extends AbstractEntity> List<T> findAll(Class<T> entityClass) {
 		return findRange(EntityCriteria.of(entityClass), 0, Integer.MAX_VALUE);

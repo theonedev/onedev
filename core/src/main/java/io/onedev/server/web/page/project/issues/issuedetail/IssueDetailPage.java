@@ -20,6 +20,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -522,6 +523,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new IssueDetailResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueDetail.onDomReady();"));
 	}
 
 	@Override
