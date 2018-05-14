@@ -1,11 +1,11 @@
-package io.onedev.server.web.page.project.issues.issuedetail.overview.activity;
+package io.onedev.server.web.page.project.issues.issuedetail.activities.activity;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -17,9 +17,8 @@ import org.hibernate.StaleStateException;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.model.Issue;
+import io.onedev.server.manager.IssueCommentManager;
+import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -31,110 +30,110 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
-class OpenedPanel extends GenericPanel<Issue> {
+class CommentedPanel extends GenericPanel<IssueComment> {
 
-	private static final String BODY_ID = "body";
-	
-	public OpenedPanel(String id, IModel<Issue> model) {
+	public CommentedPanel(String id, IModel<IssueComment> model) {
 		super(id, model);
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+
+		add(new UserLink("user", User.getForDisplay(getComment().getUser(), getComment().getUserName())));
+		add(new Label("age", DateUtils.formatAge(getComment().getDate())));
+		
+		add(newViewer());
+
+		setOutputMarkupId(true);
 	}
 	
 	private Component newViewer() {
-		Fragment viewer = new Fragment(BODY_ID, "viewFrag", this);
+		Fragment viewer = new Fragment("body", "viewFrag", this);
 		
-		String description = getIssue().getDescription();
-		if (StringUtils.isNotBlank(description)) {
-			ContentVersionSupport contentVersionSupport;
-			if (SecurityUtils.canModify(getIssue())) {
-				contentVersionSupport = new ContentVersionSupport() {
-
-					@Override
-					public long getVersion() {
-						return getIssue().getVersion();
-					}
-					
-				};
-			} else {
-				contentVersionSupport = null;
-			}
-			viewer.add(new MarkdownViewer("content", new IModel<String>() {
+		ContentVersionSupport contentVersionSuppport;
+		if (SecurityUtils.canModify(getComment())) {
+			contentVersionSuppport = new ContentVersionSupport() {
 
 				@Override
-				public String getObject() {
-					return getIssue().getDescription();
+				public long getVersion() {
+					return getComment().getVersion();
 				}
-
-				@Override
-				public void detach() {
-				}
-
-				@Override
-				public void setObject(String object) {
-					getIssue().setDescription(object);
-					OneDev.getInstance(IssueManager.class).save(getIssue());				
-				}
-
-			}, contentVersionSupport));
+				
+			};
 		} else {
-			viewer.add(new Label("content", "<i>No description</i>").setEscapeModelStrings(false));
+			contentVersionSuppport = null;
 		}
+		viewer.add(new MarkdownViewer("content", new IModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getComment().getContent();
+			}
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public void setObject(String object) {
+				getComment().setContent(object);
+				OneDev.getInstance(IssueCommentManager.class).save(getComment());				
+			}
+			
+		}, contentVersionSuppport));
 		
 		WebMarkupContainer actions = new WebMarkupContainer("actions");
-		actions.setVisible(SecurityUtils.canModify(getIssue()));
+		actions.setVisible(SecurityUtils.canModify(getComment()));
+		
 		actions.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment editor = new Fragment(BODY_ID, "editFrag", OpenedPanel.this);
-				
+				Fragment editor = new Fragment("body", "editFrag", CommentedPanel.this);
+
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				editor.add(form);
-				
-				NotificationPanel feedback = new NotificationPanel("feedback", form);
+				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
-				
-				String autosaveKey = "autosave:editIssueDescription:" + getIssue().getId(); 
-				long lastVersion = getIssue().getVersion();
-				CommentInput input = new CommentInput("input", Model.of(getIssue().getDescription()), false) {
+				String autosaveKey = "autosave:editIssueComment:" + getComment().getId();
+				CommentInput input = new CommentInput("input", Model.of(getComment().getContent()), false) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new ProjectAttachmentSupport(getIssue().getProject(), getIssue().getUUID());
+						return new ProjectAttachmentSupport(getProject(), getComment().getIssue().getUUID());
 					}
 
 					@Override
 					protected String getAutosaveKey() {
 						return autosaveKey;
 					}
-
+					
 					@Override
 					protected Project getProject() {
-						return getIssue().getProject();
+						return getComment().getIssue().getProject();
 					}
 					
 				};
+				input.setRequired(true).setLabel(Model.of("Comment"));
 				form.add(input);
-				
-				form.add(new AjaxButton("save") {
 
-					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
-						target.add(feedback);
-					}
+				final long lastVersion = getComment().getVersion();
+				form.add(new AjaxSubmitLink("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						IssueComment comment = getComment();
 						try {
-							if (getIssue().getVersion() != lastVersion)
+							if (comment.getVersion() != lastVersion)
 								throw new StaleStateException("");
-							String prevDescription = getIssue().getDescription();
-							getIssue().setDescription(input.getModelObject());
-							OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), prevDescription);
+							comment.setContent(input.getModelObject());
+							OneDev.getInstance(IssueCommentManager.class).save(comment);
 	
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);
@@ -146,6 +145,12 @@ class OpenedPanel extends GenericPanel<Issue> {
 						}
 					}
 					
+					@Override
+					protected void onError(AjaxRequestTarget target, Form<?> form) {
+						super.onError(target, form);
+						target.add(feedback);
+					}
+					
 				});
 				
 				form.add(new AjaxLink<Void>("cancel") {
@@ -155,7 +160,7 @@ class OpenedPanel extends GenericPanel<Issue> {
 						super.updateAjaxAttributes(attributes);
 						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
 					}
-					
+
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Component viewer = newViewer();
@@ -171,25 +176,30 @@ class OpenedPanel extends GenericPanel<Issue> {
 			}
 
 		});
-
-		viewer.add(actions);
 		
+		actions.add(new AjaxLink<Void>("delete") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				OneDev.getInstance(IssueCommentManager.class).delete(getComment());
+				send(CommentedPanel.this, Broadcast.BUBBLE, new IssueCommentDeleted(target));
+			}
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this comment?"));
+			}
+
+		});
+				
+		viewer.add(actions);
 		viewer.setOutputMarkupId(true);
+		
 		return viewer;
 	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		Issue issue = getIssue();
-		add(new UserLink("user", User.getForDisplay(issue.getSubmitter(), issue.getSubmitterName())));
-		add(new Label("age", DateUtils.formatAge(issue.getSubmitDate())));
-		
-		add(newViewer());
-	}
-
-	private Issue getIssue() {
+	
+	private IssueComment getComment() {
 		return getModelObject();
 	}
 	

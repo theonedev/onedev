@@ -76,7 +76,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.choice.MultiChoiceEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.page.project.issues.issuedetail.overview.IssueOverviewPage;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.WorkflowReconcilePanel;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -666,7 +666,7 @@ public class IssueListPage extends ProjectPage {
 				Issue issue = item.getModelObject();
 				item.add(new Label("number", "#" + issue.getNumber()));
 				Fragment titleFrag = new Fragment("title", "titleFrag", IssueListPage.this);
-				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueOverviewPage.class, IssueOverviewPage.paramsOf(issue));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
 				link.add(new Label("label", issue.getTitle()));
 				titleFrag.add(link);
 				item.add(titleFrag);

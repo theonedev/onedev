@@ -31,7 +31,7 @@ import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.issuedetail.overview.IssueOverviewPage;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ColorUtils;
 
@@ -64,7 +64,7 @@ public class FieldValuesPanel extends GenericPanel<PromptedField> implements Edi
 					Issue issue = issueManager.find(project, Long.valueOf(value));
 					if (issue != null) {
 						Fragment issueFrag = new Fragment("value", "issueFrag", this);
-						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueOverviewPage.class, IssueOverviewPage.paramsOf(issue));
+						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
 						link.add(new Label("label", "#" + issue.getNumber()));
 						issueFrag.add(link);
 						issueFrag.add(new IssueStateLabel("state", Model.of(issue)));

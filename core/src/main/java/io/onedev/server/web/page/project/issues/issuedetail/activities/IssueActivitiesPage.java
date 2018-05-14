@@ -1,20 +1,14 @@
-package io.onedev.server.web.page.project.issues.issuedetail.overview;
+package io.onedev.server.web.page.project.issues.issuedetail.activities;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -22,14 +16,10 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -37,45 +27,31 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueCommentManager;
-import io.onedev.server.manager.IssueFieldManager;
-import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.PromptedField;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
-import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.ChangedActivity;
-import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.CommentedActivity;
-import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.IssueActivity;
-import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.IssueCommentDeleted;
-import io.onedev.server.web.page.project.issues.issuedetail.overview.activity.OpenedActivity;
-import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ChangedActivity;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.CommentedActivity;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.IssueActivity;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.IssueCommentDeleted;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.OpenedActivity;
 import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
-public class IssueOverviewPage extends IssueDetailPage {
+public class IssueActivitiesPage extends IssueDetailPage {
 
 	private RepeatingView activitiesView;
 	
-	public IssueOverviewPage(PageParameters params) {
+	public IssueActivitiesPage(PageParameters params) {
 		super(params);
 	}
 
@@ -205,7 +181,7 @@ public class IssueOverviewPage extends IssueDetailPage {
 
 				@Override
 				protected Project getProject() {
-					return IssueOverviewPage.this.getProject();
+					return IssueActivitiesPage.this.getProject();
 				}
 				
 				@Override
@@ -266,126 +242,12 @@ public class IssueOverviewPage extends IssueDetailPage {
 			});
 			add(fragment);
 		}
-
-		WebMarkupContainer fieldsContainer = new WebMarkupContainer("fields") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getIssue().getFields().isEmpty());
-			}
-			
-		};
-		fieldsContainer.setOutputMarkupId(true);
-		
-		fieldsContainer.add(new ListView<PromptedField>("fields", new LoadableDetachableModel<List<PromptedField>>() {
-
-			@Override
-			protected List<PromptedField> load() {
-				return new ArrayList<>(getIssue().getPromptedFields().values());
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<PromptedField> item) {
-				PromptedField field = item.getModelObject();
-				item.add(new Label("name", field.getName()));
-				item.add(new FieldValuesPanel("values", item.getModel()));
-			}
-			
-		});
-		
-		fieldsContainer.add(new ModalLink("editFields") {
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "fieldEditFrag", IssueOverviewPage.this);
-				Form<?> form = new Form<Void>("form");
-
-				Serializable fieldBean = OneDev.getInstance(IssueFieldManager.class).readFields(getIssue()); 
-				Map<String, PromptedField> prevFields = getIssue().getPromptedFields();
-				
-				Map<String, PropertyDescriptor> propertyDescriptors = 
-						new BeanDescriptor(fieldBean.getClass()).getMapOfDisplayNameToPropertyDescriptor();
-				
-				Set<String> excludedFields = new HashSet<>();
-				for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFields()) {
-					if (!getIssue().getPromptedFields().containsKey(fieldSpec.getName()))
-						excludedFields.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
-				}
-
-				form.add(BeanContext.editBean("editor", fieldBean, excludedFields));
-				
-				form.add(new AjaxButton("save") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						OneDev.getInstance(IssueChangeManager.class).changeFields(
-								getIssue(), fieldBean, prevFields, getIssue().getPromptedFields().keySet());
-						modal.close();
-						target.add(fieldsContainer);
-					}
-
-					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
-						target.add(form);
-					}
-					
-				});
-				
-				form.add(new AjaxLink<Void>("close") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				form.setOutputMarkupId(true);
-				fragment.add(form);
-				
-				return fragment;
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getIssue()));
-			}
-			
-		});
-		
-		add(fieldsContainer);
-		
-		Link<Void> deleteLink = new Link<Void>("delete") {
-
-			@Override
-			public void onClick() {
-				OneDev.getInstance(IssueManager.class).delete(getIssue());
-				setResponsePage(IssueListPage.class, IssueListPage.paramsOf(getProject()));
-			}
-			
-		};
-		deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
-		deleteLink.setVisible(SecurityUtils.canModify(getIssue()));
-		add(deleteLink);
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new IssueOverviewResourceReference()));
+		response.render(CssHeaderItem.forReference(new IssueActivitiesResourceReference()));
 	}
 
 }
