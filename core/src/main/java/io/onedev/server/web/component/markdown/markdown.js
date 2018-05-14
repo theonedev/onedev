@@ -578,18 +578,6 @@ onedev.server.markdown = {
 	    		var input = $input.val().substring(0, $input.caret()).toLowerCase().replace(/\s/g,'').trim();
 	    		return input.endsWith("issue#");
 	    	}
-	    	function getInsertTemplate() {
-	    		if (isReferencingPullRequest() || isReferencingIssue())
-	    			return "#${referenceNumber}";
-	    		else
-	    			return '${referenceType} #${referenceNumber}';	    		
-	    	}
-	    	function getDisplayTemplate() {
-	    		if (isReferencingPullRequest() || isReferencingIssue())
-		    		return "<li><span class='text-muted'>#${referenceNumber}</span> - ${referenceTitle}</li>";
-	    		else
-		    		return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
-	    	}
 	    	
 		    $input.atwho({
 		    	at: '#',
@@ -607,8 +595,18 @@ onedev.server.markdown = {
 		            	callback("referenceQuery", query, queryType);
 		        	}
 		        },
-		        displayTpl: getDisplayTemplate,
-		        insertTpl: getInsertTemplate, 
+		        displayTpl: function() {
+		    		if (isReferencingPullRequest() || isReferencingIssue())
+			    		return "<li><span class='text-muted'>#${referenceNumber}</span> - ${referenceTitle}</li>";
+		    		else
+			    		return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
+		        },
+		        insertTpl: function() {
+		    		if (isReferencingPullRequest() || isReferencingIssue())
+		    			return "#${referenceNumber}";
+		    		else
+		    			return '${referenceType} #${referenceNumber}';	    		
+		        }, 
 		        limit: atWhoLimit
 		    });		
 	    }

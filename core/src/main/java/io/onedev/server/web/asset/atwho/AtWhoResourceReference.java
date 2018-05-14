@@ -15,7 +15,7 @@ public class AtWhoResourceReference extends JavaScriptResourceReference {
 	private static final long serialVersionUID = 1L;
 
 	public AtWhoResourceReference() {
-		super(AtWhoResourceReference.class, "jquery.atwho.patched.js");
+		super(AtWhoResourceReference.class, "jquery.atwho.js");
 	}
 
 	@Override
