@@ -80,6 +80,7 @@ import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActi
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.WorkflowReconcilePanel;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QueryPosition;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -118,6 +119,10 @@ public class IssueListPage extends ProjectPage {
 		}
 		return issueQueries;
 		
+	}
+	
+	private IssueManager getIssueManager() {
+		return OneDev.getInstance(IssueManager.class);
 	}
 	
 	@Override
@@ -563,12 +568,14 @@ public class IssueListPage extends ProjectPage {
 				form.error("Malformed issue query");
 		}
 		
+		int count;
+		if (parsedQuery.get() != null)
+			count = getIssueManager().count(parsedQuery.get().getCriteria());
+		else
+			count = 0;
+		
 		IDataProvider<Issue> dataProvider = new IDataProvider<Issue>() {
 
-			private IssueManager getIssueManager() {
-				return OneDev.getInstance(IssueManager.class);
-			}
-			
 			@Override
 			public void detach() {
 			}
@@ -580,7 +587,7 @@ public class IssueListPage extends ProjectPage {
 
 			@Override
 			public long size() {
-				return getIssueManager().count(parsedQuery.get().getCriteria());
+				return count;
 			}
 
 			@Override
@@ -666,7 +673,9 @@ public class IssueListPage extends ProjectPage {
 				Issue issue = item.getModelObject();
 				item.add(new Label("number", "#" + issue.getNumber()));
 				Fragment titleFrag = new Fragment("title", "titleFrag", IssueListPage.this);
-				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
+				QueryPosition position = new QueryPosition(query, count, (int)getCurrentPage() * WebConstants.PAGE_SIZE + item.getIndex());
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
+						IssueActivitiesPage.paramsOf(issue, position));
 				link.add(new Label("label", issue.getTitle()));
 				titleFrag.add(link);
 				item.add(titleFrag);

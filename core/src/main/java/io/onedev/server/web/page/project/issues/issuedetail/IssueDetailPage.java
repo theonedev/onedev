@@ -18,6 +18,7 @@ import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -36,6 +37,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
@@ -53,6 +55,7 @@ import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.StateTransition;
 import io.onedev.server.security.SecurityUtils;
@@ -78,6 +81,7 @@ import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActi
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
 public abstract class IssueDetailPage extends ProjectPage implements InputContext {
@@ -88,7 +92,11 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	
 	private static final String TITLE_ID = "title";
 	
+	private static final String NAV_ID = "nav";
+	
 	private final IModel<Issue> issueModel;
+	
+	private final QueryPosition position;
 	
 	public IssueDetailPage(PageParameters params) {
 		super(params);
@@ -105,6 +113,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			}
 
 		};
+	
+		position = QueryPosition.from(params);
 	}
 	
 	protected Issue getIssue() {
@@ -293,7 +303,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 									}
 									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevState, prevFields, promptedFields);
 									
-									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue()));
+									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
 								}
 								
 							});
@@ -382,7 +392,104 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			}
 			
 		});	
-		
+
+		if (position != null) {
+			/*
+			 * When calculating previous or next issues, we consider the case that we may edit current 
+			 * issue to cause it no longer matches the query. We will also decrease issue count 
+			 * matching the query in this case  
+			 */
+			Fragment fragment = new Fragment(NAV_ID, "navFrag", this);
+			fragment.add(new Link<Void>("prev") {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setEnabled(position.getOffset()>0);
+				}
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					if (position.getOffset() <= 0)
+						tag.put("disabled", "disabled");
+				}
+
+				@Override
+				public void onClick() {
+					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery());
+					List<Issue> issues = getIssueManager().query(query, position.getOffset()-1, 2);
+					if (issues.size() == 2) {
+						if (issues.get(1).equals(getIssue())) {
+							QueryPosition prevPosition = new QueryPosition(position.getQuery(), 
+									position.getCount(), position.getOffset()-1);
+							PageParameters params = IssueDetailPage.paramsOf(issues.get(0), prevPosition);
+							setResponsePage(getPageClass(), params);
+						} else {
+							QueryPosition prevPosition = new QueryPosition(position.getQuery(), 
+									position.getCount()-1, position.getOffset()-1);
+							PageParameters params = IssueDetailPage.paramsOf(issues.get(0), prevPosition);
+							setResponsePage(getPageClass(), params);
+						}
+					} else if (issues.size() == 1) {
+						QueryPosition prevPosition = new QueryPosition(position.getQuery(), 
+								position.getCount()-1, position.getOffset()-1);
+						PageParameters params = IssueDetailPage.paramsOf(issues.get(0), prevPosition);
+						setResponsePage(getPageClass(), params);
+					} else {
+						WebSession.get().warn("No more issues");
+					}
+				}
+				
+			});
+			fragment.add(new Link<Void>("next") {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setEnabled(position.getOffset()<position.getCount()-1);
+				}
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					if (position.getOffset() >= position.getCount()-1)
+						tag.put("disabled", "disabled");
+				}
+
+				@Override
+				public void onClick() {
+					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery());
+					List<Issue> issues = getIssueManager().query(query, position.getOffset(), 2);
+					if (!issues.isEmpty()) {
+						if (issues.get(0).equals(getIssue())) {
+							if (issues.size() == 2) {
+								QueryPosition nextPosition = new QueryPosition(position.getQuery(), 
+										position.getCount(), position.getOffset()+1);
+								PageParameters params = IssueDetailPage.paramsOf(issues.get(1), nextPosition);
+								setResponsePage(getPageClass(), params);
+							} else {
+								WebSession.get().warn("No more issues");
+							}
+						} else {
+							QueryPosition nextPosition = new QueryPosition(position.getQuery(), 
+									position.getCount()-1, position.getOffset());
+							PageParameters params = IssueDetailPage.paramsOf(issues.get(0), nextPosition);
+							setResponsePage(getPageClass(), params);
+						}
+					} else {
+						WebSession.get().warn("No more issues");
+					}
+				}
+				
+			});
+			
+			fragment.add(new Label("current", "issue " + (position.getOffset()+1) + " of " + position.getCount()));
+			
+			add(fragment);
+		} else {
+			add(new WebMarkupContainer(NAV_ID).setVisible(false));
+		}
 
 		WebMarkupContainer fieldsContainer = new WebMarkupContainer("fields") {
 
@@ -519,6 +626,10 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		return OneDev.getInstance(IssueFieldManager.class);
 	}
 	
+	private IssueManager getIssueManager() {
+		return OneDev.getInstance(IssueManager.class);
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -532,9 +643,11 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(Issue issue) {
+	public static PageParameters paramsOf(Issue issue, @Nullable QueryPosition position) {
 		PageParameters params = ProjectPage.paramsOf(issue.getProject());
-		params.set(PARAM_ISSUE, issue.getNumber());
+		params.add(PARAM_ISSUE, issue.getNumber());
+		if (position != null)
+			position.fill(params);
 		return params;
 	}
 
@@ -565,7 +678,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue()));
+					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue(), position));
 				}
 				
 			};

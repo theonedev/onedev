@@ -29,7 +29,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	List<Issue> query(IssueQuery issueQuery, int firstResult, int maxResults);
 	
-	long count(@Nullable IssueCriteria issueCriteria);
+	int count(@Nullable IssueCriteria issueCriteria);
 	
 	List<Issue> query(Project project, @Nullable String term, int count);
 	

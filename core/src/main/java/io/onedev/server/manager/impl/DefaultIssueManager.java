@@ -210,7 +210,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	@Sessional
 	@Override
-	public long count(IssueCriteria issueCriteria) {
+	public int count(IssueCriteria issueCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
@@ -218,7 +218,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		if (issueCriteria != null)
 			criteriaQuery.where(issueCriteria.getPredicate(new QueryBuildContext(root, builder)));
 		criteriaQuery.select(builder.count(root));
-		return getSession().createQuery(criteriaQuery).uniqueResult();
+		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
 	@Sessional

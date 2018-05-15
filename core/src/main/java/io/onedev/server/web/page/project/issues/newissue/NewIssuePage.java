@@ -64,7 +64,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 				super.onSubmit();
 				StateSpec stateSpec = Preconditions.checkNotNull(getProject().getIssueWorkflow().getState(issue.getState()));
 				getIssueManager().open(issue, fieldBean, stateSpec.getFields());
-				setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
+				setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null));
 			}
 			
 		};

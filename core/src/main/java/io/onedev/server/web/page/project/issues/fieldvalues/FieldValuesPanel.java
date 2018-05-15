@@ -64,7 +64,7 @@ public class FieldValuesPanel extends GenericPanel<PromptedField> implements Edi
 					Issue issue = issueManager.find(project, Long.valueOf(value));
 					if (issue != null) {
 						Fragment issueFrag = new Fragment("value", "issueFrag", this);
-						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
+						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null));
 						link.add(new Label("label", "#" + issue.getNumber()));
 						issueFrag.add(link);
 						issueFrag.add(new IssueStateLabel("state", Model.of(issue)));

@@ -197,7 +197,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/pulls/${request}/invalid", InvalidRequestPage.class));
 
 		add(new OnePageMapper("projects/${project}/issues", IssueListPage.class));
-		add(new OnePageMapper("projects/${project}/issues/${issue}/overview", IssueActivitiesPage.class));
+		add(new OnePageMapper("projects/${project}/issues/${issue}/activities", IssueActivitiesPage.class));
 		add(new OnePageMapper("projects/${project}/issues/new", NewIssuePage.class));
 		
 		add(new OnePageMapper("projects/${project}/settings/general", GeneralSettingPage.class));

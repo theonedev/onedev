@@ -19,7 +19,7 @@ public class IssueProcessor extends IssueParser implements MarkdownProcessor {
 	@Override
 	protected String toHtml(Issue issue) {
 		CharSequence url = RequestCycle.get().urlFor(
-				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)); 
+				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null)); 
 		return String.format("<a href='%s' class='issue'>#%d</a>", url, issue.getNumber());
 	}
 	
