@@ -19,7 +19,7 @@ public class OpenedActivity implements IssueActivity {
 	}
 	
 	@Override
-	public Panel render(String panelId) {
+	public Panel render(String panelId, ActivityCallback callback) {
 		return new OpenedPanel(panelId, new LoadableDetachableModel<Issue>() {
 
 			@Override

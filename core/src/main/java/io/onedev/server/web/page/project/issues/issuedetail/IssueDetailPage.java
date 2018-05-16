@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -51,9 +53,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueVote;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.PromptedField;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
@@ -62,6 +67,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.IssueStateLabel;
+import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -80,19 +86,22 @@ import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
+import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
 public abstract class IssueDetailPage extends ProjectPage implements InputContext {
 
+	private static final int MAX_DISPLAY_VOTERS = 20;
+	
 	public static final String PARAM_ISSUE = "issue";
 	
 	private static final String ACTION_OPTIONS_ID = "actionOptions";
 	
 	private static final String TITLE_ID = "title";
 	
-	private static final String NAV_ID = "nav";
+	private static final String NAV_ID = "issueNav";
 	
 	private final IModel<Issue> issueModel;
 	
@@ -399,7 +408,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			 * issue to cause it no longer matches the query. We will also decrease issue count 
 			 * matching the query in this case  
 			 */
-			Fragment fragment = new Fragment(NAV_ID, "navFrag", this);
+			Fragment fragment = new Fragment(NAV_ID, "issueNavFrag", this);
 			fragment.add(new Link<Void>("prev") {
 
 				@Override
@@ -591,6 +600,111 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		});
 		
 		add(fieldsContainer);
+		
+		WebMarkupContainer votesContainer = new WebMarkupContainer("votes");
+		votesContainer.setOutputMarkupId(true);
+
+		votesContainer.add(new Label("count", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return String.valueOf(getIssue().getNumOfVotes());
+			}
+			
+		}));
+		
+		AjaxLink<Void> voteLink = new AjaxLink<Void>("vote") {
+
+			private IssueVote getVote(User user) {
+				for (IssueVote vote: getIssue().getVotes()) {
+					if (user.equals(vote.getUser())) 
+						return vote;
+				}
+				return null;
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				if (getLoginUser() != null) {
+					IssueVote vote = getVote(getLoginUser());
+					if (vote == null) {
+						vote = new IssueVote();
+						vote.setIssue(getIssue());
+						vote.setUser(getLoginUser());
+						vote.setDate(new Date());
+						OneDev.getInstance(IssueVoteManager.class).save(vote);
+						getIssue().getVotes().add(vote);
+					} else {
+						getIssue().getVotes().remove(vote);
+						OneDev.getInstance(IssueVoteManager.class).delete(vote);
+					}
+					target.add(votesContainer);
+				} else {
+					throw new RestartResponseAtInterceptPageException(LoginPage.class);
+				}
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("label", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						if (getLoginUser() != null) {
+							if (getVote(getLoginUser()) != null)
+								return "Unvote";
+							else
+								return "Vote";
+						} else {
+							return "Login to vote";
+						}
+					}
+					
+				}));
+			}
+			
+		};
+		votesContainer.add(voteLink);
+
+		votesContainer.add(new ListView<IssueVote>("voters", new LoadableDetachableModel<List<IssueVote>>() {
+
+			@Override
+			protected List<IssueVote> load() {
+				List<IssueVote> votes = new ArrayList<>(getIssue().getVotes());
+				Collections.sort(votes, new Comparator<IssueVote>() {
+
+					@Override
+					public int compare(IssueVote o1, IssueVote o2) {
+						return o2.getId().compareTo(o1.getId());
+					}
+					
+				});
+				if (votes.size() > MAX_DISPLAY_VOTERS)
+					votes = votes.subList(0, MAX_DISPLAY_VOTERS);
+				return votes;
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<IssueVote> item) {
+				item.add(new AvatarLink("voter", item.getModelObject().getUser()));
+			}
+			
+		});
+		
+		votesContainer.add(new WebMarkupContainer("more") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getIssue().getVotes().size() > MAX_DISPLAY_VOTERS);
+			}
+			
+		});
+		
+		add(votesContainer);
 		
 		Link<Void> deleteLink = new Link<Void>("delete") {
 

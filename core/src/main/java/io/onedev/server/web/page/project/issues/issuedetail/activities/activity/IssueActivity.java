@@ -11,7 +11,7 @@ public interface IssueActivity extends Serializable {
 	
 	Date getDate();
 	
-	Panel render(String panelId);
+	Panel render(String panelId, ActivityCallback callback);
 	
 	@Nullable
 	String getAnchor();

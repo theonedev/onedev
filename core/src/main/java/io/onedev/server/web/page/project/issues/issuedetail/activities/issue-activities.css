@@ -24,6 +24,10 @@
 #issue-detail>.main>.activities .activity>.head {
 	color: #888;
 }
+#issue-detail>.main>.activities .activity.VotedActivity .head {
+	margin-top: 8px;
+}
+
 #issue-detail>.main>.activities .activity>.body {
 	margin-top: 8px;
 }

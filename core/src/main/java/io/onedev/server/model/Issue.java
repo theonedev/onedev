@@ -145,6 +145,9 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueChange> changes = new ArrayList<>();
 	
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueVote> votes = new ArrayList<>();
+	
 	private transient Map<String, PromptedField> promptedFields;
 	
 	public long getVersion() {
@@ -241,6 +244,14 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	public void setChanges(Collection<IssueChange> changes) {
 		this.changes = changes;
+	}
+
+	public Collection<IssueVote> getVotes() {
+		return votes;
+	}
+
+	public void setVotes(Collection<IssueVote> votes) {
+		this.votes = votes;
 	}
 
 	public int getNumOfVotes() {

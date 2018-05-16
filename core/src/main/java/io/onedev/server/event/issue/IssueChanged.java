@@ -6,7 +6,7 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.editable.annotation.Editable;
 
-@Editable(name="commented")
+@Editable(name="changed")
 public class IssueChanged extends IssueEvent {
 
 	private final IssueChange change;

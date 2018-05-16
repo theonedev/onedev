@@ -12,7 +12,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -39,10 +38,10 @@ import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ActivityCallback;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ChangedActivity;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.CommentedActivity;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.IssueActivity;
-import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.IssueCommentDeleted;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.OpenedActivity;
 import io.onedev.server.web.page.security.LoginPage;
 
@@ -79,27 +78,23 @@ public class IssueActivitiesPage extends IssueDetailPage {
 	}
 	
 	private Component newActivityRow(String id, IssueActivity activity) {
-		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity)) {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				
-				if (event.getPayload() instanceof IssueCommentDeleted) {
-					IssueCommentDeleted commentRemoved = (IssueCommentDeleted) event.getPayload();
-					remove();
-					commentRemoved.getHandler().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
-				} 
-			}
-			
-		};
+		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity));
 		row.setOutputMarkupId(true);
 		String anchor = activity.getAnchor();
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		if (row.get("content") == null) 
-			row.add(activity.render("content"));
+		if (row.get("content") == null) {
+			row.add(activity.render("content", new ActivityCallback() {
+
+				@Override
+				public void onDelete(AjaxRequestTarget target) {
+					row.remove();
+					target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
+				}
+				
+			}));
+		}
 		
 		row.add(new AvatarLink("avatar", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));
 
@@ -215,6 +210,16 @@ public class IssueActivitiesPage extends IssueDetailPage {
 					
 					input.setModelObject("");
 
+					@SuppressWarnings("deprecation")
+					Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
+					Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentedActivity(comment)); 
+					activitiesView.add(newActivityRow);
+					
+					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+							newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
+					target.prependJavaScript(script);
+					target.add(newActivityRow);
+					
 					target.add(fragment);
 					target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 				}

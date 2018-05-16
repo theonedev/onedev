@@ -53,7 +53,15 @@
 #issue-detail>.side>.nav .next {
 	right: 0;
 }
-
+#issue-detail>.side>.votes>.head a {
+	margin-left: 8px;
+}
+#issue-detail>.side>.votes>.body {
+	margin-top: 12px;
+}
+#issue-detail>.side>.votes>.body>* {
+	margin-right: 8px;
+}
 
 #issue-detail>.side {
 	position: fixed;
@@ -84,7 +92,6 @@
 	padding-bottom: 0;
 }
 #issue-detail>.side .fields .name {
-	font-weight: bold;
 	line-height: 20px;
 	white-space: nowrap;
 	padding-right: 20px;
@@ -95,5 +102,6 @@
 	padding: 3px 6px;
 }
 #issue-detail>.side .fields>a {
+	display: block;
 	margin-top: 12px;
 }

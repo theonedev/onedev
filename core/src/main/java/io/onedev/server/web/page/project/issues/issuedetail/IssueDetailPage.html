@@ -18,7 +18,7 @@
 			<wicket:child></wicket:child>
 		</div>
 		<div class="side">
-			<div wicket:id="nav" class="nav"></div>
+			<div wicket:id="issueNav" class="nav"></div>
 			<div wicket:id="fields" class="fields">
 				<table>
 					<tr wicket:id="fields">
@@ -26,7 +26,16 @@
 						<td class="values"><div wicket:id="values"></div></td>
 					</tr>
 				</table>
-				<a wicket:id="editFields" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit</a>
+				<a wicket:id="editFields"><i class="fa fa-pencil"></i> Edit</a>
+			</div>
+			<div wicket:id="votes" class="votes">
+				<div class="head">
+					<i class="fa fa-thumbs-o-up"></i> <span wicket:id="count"></span> 
+					<a wicket:id="vote" class="vote"><span wicket:id="label"></span></a>
+				</div>
+				<div class="body">
+					<span wicket:id="voters"><a wicket:id="voter"></a></span> <span wicket:id="more">and more</span>
+				</div>
 			</div>
 			<wicket:enclosure child="delete">
 			<div>
@@ -57,7 +66,7 @@
 		<span wicket:id="title"></span>
 		<a wicket:id="edit" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="navFrag">
+	<wicket:fragment wicket:id="issueNavFrag">
 		<a wicket:id="prev" title="Previous issue" class="prev"><i class="fa fa-arrow-left"></i></a>
 		<span wicket:id="current"></span>
 		<a wicket:id="next" title="Next issue" class="next"><i class="fa fa-arrow-right"></i></a>

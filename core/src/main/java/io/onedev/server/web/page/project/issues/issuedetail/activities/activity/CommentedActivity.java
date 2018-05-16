@@ -19,7 +19,7 @@ public class CommentedActivity implements IssueActivity {
 	}
 	
 	@Override
-	public Panel render(String panelId) {
+	public Panel render(String panelId, ActivityCallback callback) {
 		return new CommentedPanel(panelId, new LoadableDetachableModel<IssueComment>() {
 
 			@Override
@@ -27,7 +27,11 @@ public class CommentedActivity implements IssueActivity {
 				return getComment();
 			}
 			
-		});
+		}, callback);
+	}
+	
+	public Long getCommentId() {
+		return commentId;
 	}
 	
 	public IssueComment getComment() {

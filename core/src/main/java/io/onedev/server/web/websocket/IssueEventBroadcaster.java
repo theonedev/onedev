@@ -6,6 +6,7 @@ import javax.inject.Singleton;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.model.Issue;
+import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class IssueEventBroadcaster {
@@ -19,7 +20,7 @@ public class IssueEventBroadcaster {
 
 	@Listen
 	public void on(IssueEvent event) {
-		webSocketManager.onObservableChanged(Issue.getWebSocketObservable(event.getIssue().getId()), null);
+		webSocketManager.onObservableChanged(Issue.getWebSocketObservable(event.getIssue().getId()), WicketUtils.getPageKey());
 	}
 
 }

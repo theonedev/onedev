@@ -88,6 +88,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<IssueWatch> issueWatches = new ArrayList<>();
+    
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestTask> requestTasks = new ArrayList<>();
     
 	@Lob

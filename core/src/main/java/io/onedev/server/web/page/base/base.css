@@ -319,7 +319,8 @@ form>.test-feedback {
     
 /* WEB SOCKET ERROR */
 #websocket-error {
-	display: none; 
+	z-index: 1000;
+	display: none;
 	position: fixed; 
 	left: 50%; 
 	top: 0; 
