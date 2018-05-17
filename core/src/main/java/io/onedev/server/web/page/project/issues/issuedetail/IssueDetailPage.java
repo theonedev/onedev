@@ -54,9 +54,11 @@ import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
+import io.onedev.server.manager.IssueWatchManager;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueVote;
+import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.PromptedField;
@@ -76,6 +78,8 @@ import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.component.watchstatus.WatchStatus;
+import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
@@ -93,7 +97,7 @@ import io.onedev.server.web.util.QueryPosition;
 @SuppressWarnings("serial")
 public abstract class IssueDetailPage extends ProjectPage implements InputContext {
 
-	private static final int MAX_DISPLAY_VOTERS = 20;
+	private static final int MAX_DISPLAY_AVATARS = 20;
 	
 	public static final String PARAM_ISSUE = "issue";
 	
@@ -402,6 +406,26 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		});	
 
+		add(newNavContainer());
+		add(newFieldsContainer());
+		add(newVotesContainer());
+		add(newWatchesContainer());
+		
+		Link<Void> deleteLink = new Link<Void>("delete") {
+
+			@Override
+			public void onClick() {
+				OneDev.getInstance(IssueManager.class).delete(getIssue());
+				setResponsePage(IssueListPage.class, IssueListPage.paramsOf(getProject()));
+			}
+			
+		};
+		deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
+		deleteLink.setVisible(SecurityUtils.canModify(getIssue()));
+		add(deleteLink);		
+	}
+	
+	private Component newNavContainer() {
 		if (position != null) {
 			/*
 			 * When calculating previous or next issues, we consider the case that we may edit current 
@@ -495,11 +519,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 			fragment.add(new Label("current", "issue " + (position.getOffset()+1) + " of " + position.getCount()));
 			
-			add(fragment);
+			return fragment;
 		} else {
-			add(new WebMarkupContainer(NAV_ID).setVisible(false));
+			return new WebMarkupContainer(NAV_ID).setVisible(false);
 		}
-
+	}
+	
+	private Component newFieldsContainer() {
 		WebMarkupContainer fieldsContainer = new WebMarkupContainer("fields") {
 
 			@Override
@@ -529,7 +555,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		});
 		
-		fieldsContainer.add(new ModalLink("editFields") {
+		fieldsContainer.add(new ModalLink("edit") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -597,10 +623,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				setVisible(SecurityUtils.canModify(getIssue()));
 			}
 			
-		});
+		});		
 		
-		add(fieldsContainer);
-		
+		return fieldsContainer;
+	}
+	
+	private Component newVotesContainer() {
 		WebMarkupContainer votesContainer = new WebMarkupContainer("votes");
 		votesContainer.setOutputMarkupId(true);
 
@@ -612,6 +640,49 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			}
 			
 		}));
+
+		votesContainer.add(new ListView<IssueVote>("voters", new LoadableDetachableModel<List<IssueVote>>() {
+
+			@Override
+			protected List<IssueVote> load() {
+				List<IssueVote> votes = new ArrayList<>(getIssue().getVotes());
+				Collections.sort(votes, new Comparator<IssueVote>() {
+
+					@Override
+					public int compare(IssueVote o1, IssueVote o2) {
+						return o2.getId().compareTo(o1.getId());
+					}
+					
+				});
+				if (votes.size() > MAX_DISPLAY_AVATARS)
+					votes = votes.subList(0, MAX_DISPLAY_AVATARS);
+				return votes;
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<IssueVote> item) {
+				item.add(new AvatarLink("voter", item.getModelObject().getUser()));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getIssue().getVotes().isEmpty());
+			}
+			
+		});
+		
+		votesContainer.add(new WebMarkupContainer("more") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getIssue().getVotes().size() > MAX_DISPLAY_AVATARS);
+			}
+			
+		});
 		
 		AjaxLink<Void> voteLink = new AjaxLink<Void>("vote") {
 
@@ -666,58 +737,131 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		};
 		votesContainer.add(voteLink);
-
-		votesContainer.add(new ListView<IssueVote>("voters", new LoadableDetachableModel<List<IssueVote>>() {
+		
+		return votesContainer;
+	}
+	
+	private IssueWatch getWatch(User user) {
+		for (IssueWatch watch: getIssue().getWatches()) {
+			if (user.equals(watch.getUser())) 
+				return watch;
+		}
+		return null;
+	}
+	
+	private List<IssueWatch> getEffectWatches() {
+		List<IssueWatch> watches = new ArrayList<>();
+		for (IssueWatch watch: getIssue().getWatches()) {
+			if (!watch.isIgnore())
+				watches.add(watch);
+		}
+		Collections.sort(watches, new Comparator<IssueWatch>() {
 
 			@Override
-			protected List<IssueVote> load() {
-				List<IssueVote> votes = new ArrayList<>(getIssue().getVotes());
-				Collections.sort(votes, new Comparator<IssueVote>() {
+			public int compare(IssueWatch o1, IssueWatch o2) {
+				return o2.getId().compareTo(o1.getId());
+			}
+			
+		});
+		return watches;
+	}
+	
+	private Component newWatchesContainer() {
+		WebMarkupContainer watchesContainer = new WebMarkupContainer("watches");
+		watchesContainer.setOutputMarkupId(true);
 
-					@Override
-					public int compare(IssueVote o1, IssueVote o2) {
-						return o2.getId().compareTo(o1.getId());
-					}
-					
-				});
-				if (votes.size() > MAX_DISPLAY_VOTERS)
-					votes = votes.subList(0, MAX_DISPLAY_VOTERS);
-				return votes;
+		watchesContainer.add(new Label("count", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return String.valueOf(getEffectWatches().size());
+			}
+			
+		}));
+		
+		watchesContainer.add(new ListView<IssueWatch>("watchers", new LoadableDetachableModel<List<IssueWatch>>() {
+
+			@Override
+			protected List<IssueWatch> load() {
+				List<IssueWatch> watches = getEffectWatches();
+				if (watches.size() > MAX_DISPLAY_AVATARS)
+					watches = watches.subList(0, MAX_DISPLAY_AVATARS);
+				return watches;
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<IssueVote> item) {
-				item.add(new AvatarLink("voter", item.getModelObject().getUser()));
+			protected void populateItem(ListItem<IssueWatch> item) {
+				item.add(new AvatarLink("watcher", item.getModelObject().getUser()));
 			}
 			
 		});
 		
-		votesContainer.add(new WebMarkupContainer("more") {
+		watchesContainer.add(new WebMarkupContainer("more") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getIssue().getVotes().size() > MAX_DISPLAY_VOTERS);
+				setVisible(getEffectWatches().size() > MAX_DISPLAY_AVATARS);
 			}
 			
 		});
 		
-		add(votesContainer);
-		
-		Link<Void> deleteLink = new Link<Void>("delete") {
+		watchesContainer.add(new WatchStatusLink("watch") {
 
 			@Override
-			public void onClick() {
-				OneDev.getInstance(IssueManager.class).delete(getIssue());
-				setResponsePage(IssueListPage.class, IssueListPage.paramsOf(getProject()));
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getLoginUser() != null);
+			}
+
+			@Override
+			protected WatchStatus getWatchStatus() {
+				IssueWatch issueWatch = getWatch(getLoginUser());
+				if (issueWatch != null && issueWatch.isIgnore())
+					return WatchStatus.IGNORE;
+				else if (issueWatch != null && !issueWatch.isIgnore())
+					return WatchStatus.WATCHING;
+				else
+					return WatchStatus.NOT_WATCHING;
+			}
+
+			@Override
+			protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+				if (watchStatus == WatchStatus.IGNORE) {
+					IssueWatch issueWatch = getWatch(getLoginUser());
+					if (issueWatch == null) {
+						issueWatch = new IssueWatch();
+						issueWatch.setIssue(getIssue());
+						issueWatch.setUser(getLoginUser());
+						getIssue().getWatches().add(issueWatch);
+					}
+					issueWatch.setIgnore(true);
+					OneDev.getInstance(IssueWatchManager.class).save(issueWatch);
+				} else if (watchStatus == WatchStatus.WATCHING) {
+					IssueWatch issueWatch = getWatch(getLoginUser());
+					if (issueWatch == null) {
+						issueWatch = new IssueWatch();
+						issueWatch.setIssue(getIssue());
+						issueWatch.setUser(getLoginUser());
+						getIssue().getWatches().add(issueWatch);
+					}
+					issueWatch.setIgnore(false);
+					OneDev.getInstance(IssueWatchManager.class).save(issueWatch);
+				} else {
+					IssueWatch issueWatch = getWatch(getLoginUser());
+					if (issueWatch != null) {
+						getIssue().getWatches().remove(issueWatch);
+						OneDev.getInstance(IssueWatchManager.class).delete(issueWatch);
+					}
+				}
+				target.add(watchesContainer);
 			}
 			
-		};
-		deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
-		deleteLink.setVisible(SecurityUtils.canModify(getIssue()));
-		add(deleteLink);		
+		});
+
+		return watchesContainer;
 	}
 	
 	private void newEmptyActionOptions(@Nullable AjaxRequestTarget target) {

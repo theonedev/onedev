@@ -56,6 +56,7 @@ import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.requestreviewer.ReviewerListPanel;
 import io.onedev.server.web.component.verification.RequiredVerificationsPanel;
+import io.onedev.server.web.component.watchstatus.WatchStatus;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.activity.CommentedActivity;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.activity.OpenedActivity;
@@ -69,24 +70,6 @@ import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public class RequestOverviewPage extends RequestDetailPage {
-	
-	private enum WatchStatus {
-		WATCHING("Watching"), 
-		NOT_WATCHING("Not Watching"), 
-		IGNORE("Ignore");
-		
-		private final String displayName;
-		
-		WatchStatus(String displayName) {
-			this.displayName = displayName;
-		}
-		
-		@Override
-		public String toString() {
-			return displayName;
-		}
-		
-	};
 	
 	private RepeatingView activitiesView;
 	

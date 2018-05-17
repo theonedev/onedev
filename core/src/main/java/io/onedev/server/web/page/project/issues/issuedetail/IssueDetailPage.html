@@ -20,21 +20,39 @@
 		<div class="side">
 			<div wicket:id="issueNav" class="nav"></div>
 			<div wicket:id="fields" class="fields">
-				<table>
-					<tr wicket:id="fields">
-						<td class="name"><span wicket:id="name"></span></td>
-						<td class="values"><div wicket:id="values"></div></td>
-					</tr>
-				</table>
-				<a wicket:id="editFields"><i class="fa fa-pencil"></i> Edit</a>
+				<div class="head">Custom Fields</div>
+				<div class="body">
+					<table>
+						<tr wicket:id="fields">
+							<td class="name"><span wicket:id="name"></span></td>
+							<td class="values"><div wicket:id="values"></div></td>
+						</tr>
+					</table>
+					<a wicket:id="edit" class="edit btn btn-default btn-sm"><i class="fa fa-pencil"></i> Edit</a>
+				</div>
 			</div>
 			<div wicket:id="votes" class="votes">
 				<div class="head">
-					<i class="fa fa-thumbs-o-up"></i> <span wicket:id="count"></span> 
-					<a wicket:id="vote" class="vote"><span wicket:id="label"></span></a>
+					Issue Votes (<span wicket:id="count"></span>) 
 				</div>
 				<div class="body">
-					<span wicket:id="voters"><a wicket:id="voter"></a></span> <span wicket:id="more">and more</span>
+					<wicket:enclosure child="voters">
+					<div class="voters">
+						<span wicket:id="voters"><a wicket:id="voter" class="avatar"></a></span> <span wicket:id="more">and more</span>
+					</div>
+					</wicket:enclosure>
+					<a wicket:id="vote" class="btn btn-default btn-sm vote"><i class="fa fa-thumbs-o-up"></i> <span wicket:id="label"></span></a>
+				</div>
+			</div>
+			<div wicket:id="watches" class="watch">
+				<div class="head">
+					Issue Watchers (<span wicket:id="count"></span>)
+				</div>
+				<div class="body">
+					<div class="watchers">
+						<span wicket:id="watchers"><a wicket:id="watcher" class="avatar"></a></span> <span wicket:id="more">and more</span>
+					</div>
+					<a wicket:id="watch" class="watch-status btn btn-sm btn-default"></a>
 				</div>
 			</div>
 			<wicket:enclosure child="delete">

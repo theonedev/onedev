@@ -1,0 +1,53 @@
+.watch-status.not-watching:BEFORE {
+	font-family: "FontAwesome";
+	content: "\f10c";
+	margin-right: 4px;
+}
+.watch-status.not-watching:AFTER {
+	content: "Not watching";
+}
+.watch-status.watching:BEFORE {
+	font-family: "FontAwesome";
+	content: "\f0a2";
+	margin-right: 4px;
+}
+.watch-status.watching:AFTER {
+	content: "Watching";
+}
+.watch-status.ignore:BEFORE {
+	font-family: "FontAwesome";
+	content: "\f1f7";
+	margin-right: 4px;
+}
+.watch-status.ignore:AFTER {
+	content: "Ignore";
+}
+
+.floating .watch-status {
+	padding: 16px 0;
+}
+.floating .watch-status a {
+	display: block;
+	color: #333;
+	padding: 8px 8px 8px 28px;
+	text-decoration: none;
+	position: relative;
+}
+.floating .watch-status a.active:before {
+	font-family: "FontAwesome";
+	content: "\f00c";
+	position: absolute;
+	left: 8px;
+}
+.floating .watch-status a .title {
+	font-weight: bold;
+}
+.floating .watch-status a .description {
+	font-size: 13px;
+	color: #666;
+	margin-top: 4px;
+}
+
+.floating .watch-status a:hover {
+	background: #F5F5F5;
+}

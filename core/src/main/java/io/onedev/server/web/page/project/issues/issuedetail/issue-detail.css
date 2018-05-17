@@ -53,14 +53,18 @@
 #issue-detail>.side>.nav .next {
 	right: 0;
 }
-#issue-detail>.side>.votes>.head a {
-	margin-left: 8px;
+
+#issue-detail>.side>div>.head {
+	font-weight: bold;
 }
-#issue-detail>.side>.votes>.body {
+#issue-detail>.side>div>.body {
 	margin-top: 12px;
 }
-#issue-detail>.side>.votes>.body>* {
+#issue-detail>.side>div>.body a.avatar {
 	margin-right: 8px;
+}
+#issue-detail>.side>div>.body>a {
+	margin-top: 12px;
 }
 
 #issue-detail>.side {
@@ -105,3 +109,4 @@
 	display: block;
 	margin-top: 12px;
 }
+

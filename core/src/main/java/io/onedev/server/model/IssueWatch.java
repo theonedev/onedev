@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import javax.annotation.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -26,8 +25,6 @@ public class IssueWatch extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	private String reason;
-	
 	private boolean ignore;
 	
 	public Issue getIssue() {
@@ -44,15 +41,6 @@ public class IssueWatch extends AbstractEntity {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	@Nullable
-	public String getReason() {
-		return reason;
-	}
-
-	public void setReason(String reason) {
-		this.reason = reason;
 	}
 
 	public boolean isIgnore() {
