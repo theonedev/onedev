@@ -25,8 +25,6 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	Collection<String> getUndefinedStates(Project project);
 	
-	void test();
-	
 	List<Issue> query(IssueQuery issueQuery, int firstResult, int maxResults);
 	
 	int count(@Nullable IssueCriteria issueCriteria);

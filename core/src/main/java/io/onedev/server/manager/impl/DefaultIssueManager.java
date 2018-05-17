@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +26,6 @@ import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
@@ -65,89 +63,6 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		return find(criteria);
 	}
 	
-	@Transactional
-	@Override
-	public void test() {
-		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Issue> query = builder.createQuery(Issue.class);
-		Root<Issue> root = query.from(Issue.class);
-		Join<Issue, IssueField> join = root.join("fields");
-		join.on(builder.equal(join.get("name"), "Type"));
-		query.where(builder.or(builder.equal(join.get("value"), "Bug"), builder.equal(join.get("value"), "New Feature")));
-		query.orderBy(builder.asc(join.get("ordinal")));
-		Query<Issue> underlyingQuery = getSession().createQuery(query);
-		underlyingQuery.setMaxResults(10);
-		for (Issue issue: underlyingQuery.getResultList()) {
-			System.out.println(issue.getId());
-		}
-		
-		/*
-		Project project = OneDev.getInstance(ProjectManager.class).load(1L);
-		User user = OneDev.getInstance(UserManager.class).load(1L);
-		IssueFieldManager issueFieldManager = OneDev.getInstance(IssueFieldManager.class);
-		for (int i=1; i<=100000; i++) {
-			Issue issue = new Issue();
-			issue.setProject(project);
-			issue.setTitle("issue " + i);
-			issue.setReportDate(new Date());
-			issue.setState("Open");
-			issue.setReporter(user);
-			issue.setVotes(0);
-			save(issue);
-			
-			if (i % 3 == 0) {
-				IssueField field = new IssueField();
-				field.setIssue(issue);
-				field.setName("Type");
-				field.setOrdinal(0);
-				field.setType("Choice");
-				field.setValue("Feature");
-				issueFieldManager.save(field);
-				
-				field = new IssueField();
-				field.setIssue(issue);
-				field.setName("Severity");
-				field.setOrdinal(0);
-				field.setType("Choice");
-				field.setValue("Major");
-				issueFieldManager.save(field);
-			} else if (i % 3 == 1) {
-				IssueField field = new IssueField();
-				field.setIssue(issue);
-				field.setName("Type");
-				field.setOrdinal(1);
-				field.setType("Choice");
-				field.setValue("Bug");
-				issueFieldManager.save(field);
-				
-				field = new IssueField();
-				field.setIssue(issue);
-				field.setName("Severity");
-				field.setOrdinal(1);
-				field.setType("Choice");
-				field.setValue("Normal");
-				issueFieldManager.save(field);
-			} else {
-				IssueField field = new IssueField();
-				field.setIssue(issue);
-				field.setName("Type");
-				field.setOrdinal(2);
-				field.setType("Choice");
-				field.setValue("Task");
-				issueFieldManager.save(field);
-				
-				field = new IssueField();
-				field.setIssue(issue);
-				field.setName("Severity");
-				field.setOrdinal(2);
-				field.setType("Choice");
-				field.setValue("Minor");
-				issueFieldManager.save(field);
-			}
-		}
-		*/
-	}
-
 	@Transactional
 	@Override
 	public void open(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {

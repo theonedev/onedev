@@ -257,6 +257,8 @@ public class IssueQuery implements Serializable {
 								throw new OneException("Unrecognized date: " + value);
 							if (fieldName.equals(Issue.SUBMIT_DATE)) 
 								return new SubmitDateCriteria(dateValue, operator);
+							else if (fieldName.equals(Issue.UPDATE_DATE))
+								return new UpdateDateCriteria(dateValue, operator);
 							else 
 								return new DateFieldCriteria(fieldName, dateValue, operator);
 						case IssueQueryLexer.Contains:
@@ -352,8 +354,9 @@ public class IssueQuery implements Serializable {
 			List<IssueSort> issueSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.VOTES) 
-						&& !fieldName.equals(Issue.COMMENTS) && !fieldName.equals(Issue.NUMBER)) {
+				if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.UPDATE_DATE) 
+						&& !fieldName.equals(Issue.VOTES) && !fieldName.equals(Issue.COMMENTS) 
+						&& !fieldName.equals(Issue.NUMBER)) {
 					InputSpec field = project.getIssueWorkflow().getField(fieldName);
 					if (!(field instanceof ChoiceInput) && !(field instanceof DateInput) 
 							&& !(field instanceof NumberInput)) {
@@ -399,7 +402,7 @@ public class IssueQuery implements Serializable {
 			break;
 		case IssueQueryLexer.IsBefore:
 		case IssueQueryLexer.IsAfter:
-			if (!fieldName.equals(Issue.SUBMIT_DATE) && !(field instanceof DateInput))
+			if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.UPDATE_DATE) && !(field instanceof DateInput))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.Contains:

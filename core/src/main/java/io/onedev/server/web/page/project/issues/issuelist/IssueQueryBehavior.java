@@ -107,7 +107,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								candidates.add(field.getName());
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = Lists.newArrayList(Issue.VOTES, Issue.COMMENTS, Issue.NUMBER, Issue.SUBMIT_DATE);
+							List<String> candidates = Lists.newArrayList(Issue.VOTES, Issue.COMMENTS, Issue.NUMBER, 
+									Issue.SUBMIT_DATE, Issue.UPDATE_DATE);
 							for (InputSpec field: project.getIssueWorkflow().getFields()) {
 								if (field instanceof NumberInput || field instanceof ChoiceInput || field instanceof DateInput) 
 									candidates.add(field.getName());
@@ -124,7 +125,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							try {
 								IssueQuery.checkField(project, fieldName, IssueQuery.getOperator(operatorName));
 								InputSpec field = project.getIssueWorkflow().getField(fieldName);
-								if (field instanceof DateInput || fieldName.equals(Issue.SUBMIT_DATE)) {
+								if (field instanceof DateInput || fieldName.equals(Issue.SUBMIT_DATE) 
+										|| fieldName.equals(Issue.UPDATE_DATE)) {
 									List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
 									candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
 									candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));

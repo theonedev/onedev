@@ -56,7 +56,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final Map<String, String> BUILTIN_FIELDS = new HashMap<>();
+	public static final Map<String, String> BUILTIN_FIELDS = new LinkedHashMap<>();
 	
 	public static final String NUMBER = "Number";
 	
@@ -74,6 +74,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 	
 	public static final String COMMENTS = "Comments";
 	
+	public static final String UPDATE_DATE = "Update Date";
+	
 	static {
 		BUILTIN_FIELDS.put(NUMBER, "number");
 		BUILTIN_FIELDS.put(STATE, "state");
@@ -81,6 +83,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		BUILTIN_FIELDS.put(DESCRIPTION, "description");
 		BUILTIN_FIELDS.put(SUBMITTER, "submitter");
 		BUILTIN_FIELDS.put(SUBMIT_DATE, "submitDate");
+		BUILTIN_FIELDS.put(UPDATE_DATE, "lastActivity.date");
 		BUILTIN_FIELDS.put(VOTES, "numOfVotes");
 		BUILTIN_FIELDS.put(COMMENTS, "numOfComments");
 	}
