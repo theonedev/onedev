@@ -605,16 +605,13 @@ onedev.server = {
 		}
 	},
 	
-	onDomReady: function(autosaveKeyToClear, minWindowWidth) {
+	onDomReady: function() {
 		onedev.server.setupAjaxLoadingIndicator();
 		onedev.server.form.setupDirtyCheck();
 		onedev.server.focus.setupAutoFocus();
 		onedev.server.setupWebsocketCallback();
 		onedev.server.mouseState.track();
 		onedev.server.ajaxRequests.track();
-		
-		if (autosaveKeyToClear)
-			localStorage.removeItem(autosaveKeyToClear);
 		
 		$(document).keydown(function(e) {
 			if (e.keyCode == 27)

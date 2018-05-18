@@ -1,5 +1,6 @@
 package io.onedev.server.util.inputspec.dateinput;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.util.Constants;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -53,6 +55,14 @@ public class DateInput extends InputSpec {
 	@Override
 	public List<String> convertToStrings(Object value) {
 		return Lists.newArrayList(Constants.DATE_FORMATTER.print(new DateTime(value)));
+	}
+
+	@Override
+	public long getOrdinal(OneContext context, Object fieldValue) {
+		if (fieldValue != null) 
+			return ((Date)fieldValue).getTime();
+		else
+			return super.getOrdinal(context, fieldValue);
 	}
 
 }

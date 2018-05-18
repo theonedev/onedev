@@ -115,7 +115,7 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 
 			@Override
 			protected List<InputSpec> getData() {
-				return getWorkflow().getFields();
+				return getWorkflow().getFieldSpecs();
 			}
 
 		};
@@ -133,10 +133,10 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(getWorkflow().getFields(), fromIndex+i, fromIndex+i+1);
+						Collections.swap(getWorkflow().getFieldSpecs(), fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(getWorkflow().getFields(), fromIndex-i, fromIndex-i-1);
+						Collections.swap(getWorkflow().getFieldSpecs(), fromIndex-i, fromIndex-i-1);
 				}
 				
 				getProject().setIssueWorkflow(getWorkflow());
@@ -236,8 +236,7 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 										fragment.error(UsageUtils.getNotificationMessage("Field '" + getField().getName() + "'", usages));
 										target.add(fragment);
 									} else {
-										getProject().getIssueListCustomization().onDeleteField(getField().getName());
-										getWorkflow().getFields().remove(index);
+										getWorkflow().getFieldSpecs().remove(index);
 										getWorkflow().setReconciled(false);
 										getProject().setIssueWorkflow(getWorkflow());
 										OneDev.getInstance(ProjectManager.class).save(getProject());

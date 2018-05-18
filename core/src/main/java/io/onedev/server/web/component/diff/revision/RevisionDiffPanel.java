@@ -820,8 +820,6 @@ public class RevisionDiffPanel extends Panel {
 							
 							String uuid = UUID.randomUUID().toString();
 							
-							String autosaveKey = "autosave:addCodeCommentOnDiff:" + projectModel.getObject().getId() 
-									+ ":" + change.getPath();
 							CommentInput contentInput;
 							
 							StringBuilder mentions = new StringBuilder();
@@ -849,11 +847,6 @@ public class RevisionDiffPanel extends Panel {
 								@Override
 								protected Project getProject() {
 									return projectModel.getObject();
-								}
-								
-								@Override
-								protected String getAutosaveKey() {
-									return autosaveKey;
 								}
 								
 							});
@@ -942,10 +935,7 @@ public class RevisionDiffPanel extends Panel {
 										sourceAware.onCommentAdded(target, comment);
 
 									((CommentSupport)commentSupport).onCommentOpened(target, comment);
-									target.appendJavaScript(String.format(""
-											+ "onedev.server.revisionDiff.reposition();"
-											+ "localStorage.removeItem('%s');", 
-											autosaveKey));							
+									target.appendJavaScript(String.format("onedev.server.revisionDiff.reposition();"));							
 								}
 
 							});

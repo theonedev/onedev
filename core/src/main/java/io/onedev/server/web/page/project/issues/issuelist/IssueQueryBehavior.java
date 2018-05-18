@@ -103,13 +103,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Issue.BUILTIN_FIELDS.keySet());
-							for (InputSpec field: project.getIssueWorkflow().getFields())
+							for (InputSpec field: project.getIssueWorkflow().getFieldSpecs())
 								candidates.add(field.getName());
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = Lists.newArrayList(Issue.VOTES, Issue.COMMENTS, Issue.NUMBER, 
 									Issue.SUBMIT_DATE, Issue.UPDATE_DATE);
-							for (InputSpec field: project.getIssueWorkflow().getFields()) {
+							for (InputSpec field: project.getIssueWorkflow().getFieldSpecs()) {
 								if (field instanceof NumberInput || field instanceof ChoiceInput || field instanceof DateInput) 
 									candidates.add(field.getName());
 							}
@@ -156,7 +156,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									List<String> candidates = OneDev.getInstance(GroupManager.class).findAll().stream().map(it->it.getName()).collect(Collectors.toList());
 									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 								} else if (fieldName.equals(Issue.STATE)) {
-									List<String> candidates = project.getIssueWorkflow().getStates().stream().map(it->it.getName()).collect(Collectors.toList());
+									List<String> candidates = project.getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
 									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 								} else if (field instanceof ChoiceInput) {
 									OneContext.push(newOneContext());
@@ -229,10 +229,15 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	protected Optional<String> describe(ParentedElement expectedElement, String suggestedLiteral) {
 		if (suggestedLiteral.equals("mine")) {
 			if (SecurityUtils.getUser() != null)
-				return Optional.of("issues corresponding to me");
+				return Optional.of("issues relevant to me");
 			else
 				return null;
-		} else if (expectedElement.getParent() != null 
+		} 
+
+		if ((suggestedLiteral.equals("is me") || suggestedLiteral.equals("is not me")) && SecurityUtils.getUser() == null)
+			return null;						
+		
+		if (expectedElement.getParent() != null 
 				&& expectedElement.getParent().getParent() != null
 				&& expectedElement.getParent().getParent().getSpec() instanceof RuleRefElementSpec) {
 			RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) expectedElement.getParent().getParent().getSpec();

@@ -22,7 +22,7 @@ import io.onedev.server.web.util.WicketUtils;
 import io.onedev.utils.StringUtils;
 
 @Editable
-public class StateTransition implements Serializable {
+public class TransitionSpec implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -145,7 +145,7 @@ public class StateTransition implements Serializable {
 	private static List<String> getStateChoices() {
 		IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
 		List<String> stateNames = new ArrayList<>();
-		for (StateSpec state: page.getWorkflow().getStates())
+		for (StateSpec state: page.getWorkflow().getStateSpecs())
 			stateNames.add(state.getName());
 		return stateNames;
 	}

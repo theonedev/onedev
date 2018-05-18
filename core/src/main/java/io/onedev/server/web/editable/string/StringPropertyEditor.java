@@ -3,8 +3,6 @@ package io.onedev.server.web.editable.string;
 import java.lang.reflect.Method;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -47,15 +45,6 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 			add(fragment);
 		}
 		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));		
-		
-		input.add(new AjaxFormComponentUpdatingBehavior("change"){
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				onPropertyUpdating(target);
-			}
-			
-		});
 		
 		if (getter.getAnnotation(OmitName.class) != null)
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(getter)));

@@ -62,23 +62,25 @@ import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.WatchStatus;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
-import io.onedev.server.model.support.issue.workflow.StateTransition;
+import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.component.watchstatus.WatchStatus;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -229,17 +231,17 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 
-		List<StateTransition> transitions = getProject().getIssueWorkflow().getStateTransitions();
-		Collections.sort(transitions, new Comparator<StateTransition>() {
+		List<TransitionSpec> transitions = getProject().getIssueWorkflow().getTransitionSpecs();
+		Collections.sort(transitions, new Comparator<TransitionSpec>() {
 
 			@Override
-			public int compare(StateTransition o1, StateTransition o2) {
+			public int compare(TransitionSpec o1, TransitionSpec o2) {
 				IssueWorkflow workflow = getProject().getIssueWorkflow();
 				return workflow.getStateIndex(o1.getToState()) - workflow.getStateIndex(o2.getToState());
 			}
 			
 		});
-		for (StateTransition transition: transitions) {
+		for (TransitionSpec transition: transitions) {
 			if (transition.getFromStates().contains(getIssue().getState()) 
 					&& transition.getOnAction().getButton() != null 
 					&& getLoginUser() != null
@@ -266,9 +268,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						public void onClick(AjaxRequestTarget target) {
 							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
 							Serializable fieldBean = getIssueFieldManager().readFields(getIssue());
-							String prevState = getIssue().getState();
-							Map<String, PromptedField> prevFields = getIssue().getPromptedFields();
-							
 							Set<String> excludedFields = getIssueFieldManager().getExcludedFields(getIssue().getProject(), transition.getToState());
 
 							Form<?> form = new Form<Void>("form") {
@@ -287,6 +286,11 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {
 
 								@Override
+								protected AttachmentSupport getAttachmentSupport() {
+									return new ProjectAttachmentSupport(getProject(), getIssue().getUUID());
+								}
+
+								@Override
 								protected Project getProject() {
 									return getIssue().getProject();
 								}
@@ -297,6 +301,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 								}
 								
 							});
+
+							Map<String, PromptedField> prevFields = getIssue().getPromptedFields();
 							
 							form.add(new AjaxButton("save") {
 
@@ -310,12 +316,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 										if (!propertyContext.isExcluded()) {
 											if (propertyContext.isPropertyVisible(editor.getOneContext(propertyContext.getPropertyName()), editor.getBeanDescriptor()))
 												promptedFields.add(propertyContext.getDisplayName());
-											else
+											else 
 												promptedFields.remove(propertyContext.getDisplayName());
 										}
 									}
-									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevState, prevFields, promptedFields);
-									
+									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevFields, promptedFields);
+								
 									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
 								}
 								
@@ -427,11 +433,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	
 	private Component newNavContainer() {
 		if (position != null) {
-			/*
-			 * When calculating previous or next issues, we consider the case that we may edit current 
-			 * issue to cause it no longer matches the query. We will also decrease issue count 
-			 * matching the query in this case  
-			 */
 			Fragment fragment = new Fragment(NAV_ID, "issueNavFrag", this);
 			fragment.add(new Link<Void>("prev") {
 
@@ -451,22 +452,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				@Override
 				public void onClick() {
 					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery());
-					List<Issue> issues = getIssueManager().query(query, position.getOffset()-1, 2);
-					if (issues.size() == 2) {
-						if (issues.get(1).equals(getIssue())) {
-							QueryPosition prevPosition = new QueryPosition(position.getQuery(), 
-									position.getCount(), position.getOffset()-1);
-							PageParameters params = IssueDetailPage.paramsOf(issues.get(0), prevPosition);
-							setResponsePage(getPageClass(), params);
-						} else {
-							QueryPosition prevPosition = new QueryPosition(position.getQuery(), 
-									position.getCount()-1, position.getOffset()-1);
-							PageParameters params = IssueDetailPage.paramsOf(issues.get(0), prevPosition);
-							setResponsePage(getPageClass(), params);
-						}
-					} else if (issues.size() == 1) {
-						QueryPosition prevPosition = new QueryPosition(position.getQuery(), 
-								position.getCount()-1, position.getOffset()-1);
+					int count = position.getCount();
+					int offset = position.getOffset() - 1;
+					List<Issue> issues = getIssueManager().query(query, offset, 1);
+					if (!issues.isEmpty()) {
+						if (!query.getCriteria().matches(getIssue()))
+							count--;
+						QueryPosition prevPosition = new QueryPosition(position.getQuery(), count, offset);
 						PageParameters params = IssueDetailPage.paramsOf(issues.get(0), prevPosition);
 						setResponsePage(getPageClass(), params);
 					} else {
@@ -493,23 +485,18 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				@Override
 				public void onClick() {
 					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery());
-					List<Issue> issues = getIssueManager().query(query, position.getOffset(), 2);
+					int offset = position.getOffset();
+					int count = position.getCount();
+					if (query.getCriteria().matches(getIssue())) 
+						offset++;
+					else
+						count--;
+					
+					List<Issue> issues = getIssueManager().query(query, offset, 1);
 					if (!issues.isEmpty()) {
-						if (issues.get(0).equals(getIssue())) {
-							if (issues.size() == 2) {
-								QueryPosition nextPosition = new QueryPosition(position.getQuery(), 
-										position.getCount(), position.getOffset()+1);
-								PageParameters params = IssueDetailPage.paramsOf(issues.get(1), nextPosition);
-								setResponsePage(getPageClass(), params);
-							} else {
-								WebSession.get().warn("No more issues");
-							}
-						} else {
-							QueryPosition nextPosition = new QueryPosition(position.getQuery(), 
-									position.getCount()-1, position.getOffset());
-							PageParameters params = IssueDetailPage.paramsOf(issues.get(0), nextPosition);
-							setResponsePage(getPageClass(), params);
-						}
+						QueryPosition nextPosition = new QueryPosition(position.getQuery(), count, offset);
+						PageParameters params = IssueDetailPage.paramsOf(issues.get(0), nextPosition);
+						setResponsePage(getPageClass(), params);
 					} else {
 						WebSession.get().warn("No more issues");
 					}
@@ -550,7 +537,19 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			protected void populateItem(ListItem<PromptedField> item) {
 				PromptedField field = item.getModelObject();
 				item.add(new Label("name", field.getName()));
-				item.add(new FieldValuesPanel("values", item.getModel()));
+				item.add(new FieldValuesPanel("values") {
+
+					@Override
+					protected Issue getIssue() {
+						return IssueDetailPage.this.getIssue();
+					}
+
+					@Override
+					protected PromptedField getField() {
+						return item.getModelObject();
+					}
+					
+				});
 			}
 			
 		});
@@ -569,7 +568,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						new BeanDescriptor(fieldBean.getClass()).getMapOfDisplayNameToPropertyDescriptor();
 				
 				Set<String> excludedFields = new HashSet<>();
-				for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFields()) {
+				for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
 					if (!getIssue().getPromptedFields().containsKey(fieldSpec.getName()))
 						excludedFields.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
 				}
@@ -663,7 +662,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 			@Override
 			protected void populateItem(ListItem<IssueVote> item) {
-				item.add(new AvatarLink("voter", item.getModelObject().getUser()));
+				User user = item.getModelObject().getUser();
+				item.add(new AvatarLink("voter", user, user.getDisplayName()));
 			}
 
 			@Override
@@ -741,18 +741,10 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		return votesContainer;
 	}
 	
-	private IssueWatch getWatch(User user) {
-		for (IssueWatch watch: getIssue().getWatches()) {
-			if (user.equals(watch.getUser())) 
-				return watch;
-		}
-		return null;
-	}
-	
 	private List<IssueWatch> getEffectWatches() {
 		List<IssueWatch> watches = new ArrayList<>();
 		for (IssueWatch watch: getIssue().getWatches()) {
-			if (!watch.isIgnore())
+			if (watch.isWatching())
 				watches.add(watch);
 		}
 		Collections.sort(watches, new Comparator<IssueWatch>() {
@@ -793,7 +785,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 			@Override
 			protected void populateItem(ListItem<IssueWatch> item) {
-				item.add(new AvatarLink("watcher", item.getModelObject().getUser()));
+				User user = item.getModelObject().getUser();
+				item.add(new AvatarLink("watcher", user, user.getDisplayName()));
 			}
 			
 		});
@@ -818,39 +811,39 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 			@Override
 			protected WatchStatus getWatchStatus() {
-				IssueWatch issueWatch = getWatch(getLoginUser());
-				if (issueWatch != null && issueWatch.isIgnore())
-					return WatchStatus.IGNORE;
-				else if (issueWatch != null && !issueWatch.isIgnore())
-					return WatchStatus.WATCHING;
+				IssueWatch issueWatch = getIssue().getWatch(getLoginUser());
+				if (issueWatch != null && !issueWatch.isWatching())
+					return WatchStatus.DO_NOT_WATCH;
+				else if (issueWatch != null && issueWatch.isWatching())
+					return WatchStatus.WATCH;
 				else
-					return WatchStatus.NOT_WATCHING;
+					return WatchStatus.DEFAULT;
 			}
 
 			@Override
 			protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-				if (watchStatus == WatchStatus.IGNORE) {
-					IssueWatch issueWatch = getWatch(getLoginUser());
+				if (watchStatus == WatchStatus.DO_NOT_WATCH) {
+					IssueWatch issueWatch = getIssue().getWatch(getLoginUser());
 					if (issueWatch == null) {
 						issueWatch = new IssueWatch();
 						issueWatch.setIssue(getIssue());
 						issueWatch.setUser(getLoginUser());
 						getIssue().getWatches().add(issueWatch);
 					}
-					issueWatch.setIgnore(true);
+					issueWatch.setWatching(false);
 					OneDev.getInstance(IssueWatchManager.class).save(issueWatch);
-				} else if (watchStatus == WatchStatus.WATCHING) {
-					IssueWatch issueWatch = getWatch(getLoginUser());
+				} else if (watchStatus == WatchStatus.WATCH) {
+					IssueWatch issueWatch = getIssue().getWatch(getLoginUser());
 					if (issueWatch == null) {
 						issueWatch = new IssueWatch();
 						issueWatch.setIssue(getIssue());
 						issueWatch.setUser(getLoginUser());
 						getIssue().getWatches().add(issueWatch);
 					}
-					issueWatch.setIgnore(false);
+					issueWatch.setWatching(true);
 					OneDev.getInstance(IssueWatchManager.class).save(issueWatch);
 				} else {
-					IssueWatch issueWatch = getWatch(getLoginUser());
+					IssueWatch issueWatch = getIssue().getWatch(getLoginUser());
 					if (issueWatch != null) {
 						getIssue().getWatches().remove(issueWatch);
 						OneDev.getInstance(IssueWatchManager.class).delete(issueWatch);

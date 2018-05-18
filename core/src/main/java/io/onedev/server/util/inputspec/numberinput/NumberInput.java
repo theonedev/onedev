@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -81,6 +82,14 @@ public class NumberInput extends InputSpec {
 	@Override
 	public List<String> convertToStrings(Object value) {
 		return Lists.newArrayList(String.valueOf(value));
+	}
+
+	@Override
+	public long getOrdinal(OneContext context, Object fieldValue) {
+		if (fieldValue != null)
+			return (Integer)fieldValue;
+		else
+			return super.getOrdinal(context, fieldValue);
 	}
 	
 }

@@ -70,7 +70,6 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.verification.RequiredVerificationsPanel;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -531,8 +530,6 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 		Form<?> form = new Form<Void>("form");
 		fragment.add(form);
 		
-		String autosaveKey = "autosave:newPullRequest:" + getProject().getId();
-		
 		form.add(new Button("send") {
 
 			@Override
@@ -554,9 +551,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 					
 					OneDev.getInstance(PullRequestManager.class).open(getPullRequest());
 					
-					PageParameters params = RequestOverviewPage.paramsOf(getPullRequest());
-					params.add(BasePage.PARAM_AUTOSAVE_KEY_TO_CLEAR, autosaveKey);
-					setResponsePage(RequestOverviewPage.class, params);
+					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
 				}			
 				
 			}
@@ -621,11 +616,6 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 			@Override
 			protected Project getProject() {
 				return NewRequestPage.this.getProject();
-			}
-			
-			@Override
-			protected String getAutosaveKey() {
-				return autosaveKey;
 			}
 			
 		});

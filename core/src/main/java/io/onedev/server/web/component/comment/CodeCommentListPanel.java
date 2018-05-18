@@ -49,7 +49,6 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -166,19 +165,6 @@ public abstract class CodeCommentListPanel extends Panel {
 					
 				});
 				
-				ContentVersionSupport contentVersionSupport;
-				if (SecurityUtils.canModify(comment)) {
-					contentVersionSupport = new ContentVersionSupport() {
-
-						@Override
-						public long getVersion() {
-							return rowModel.getObject().getVersion();
-						}
-						
-					};
-				} else {
-					contentVersionSupport = null;
-				}
 				fragment.add(new MarkdownViewer("content", new IModel<String>() {
 
 					@Override
@@ -197,7 +183,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						OneDev.getInstance(CodeCommentManager.class).save(comment, getPullRequest());				
 					}
 					
-				}, contentVersionSupport));
+				}, null));
 				
 				WebMarkupContainer lastActivityContainer = new WebMarkupContainer("lastActivity");
 				if (comment.getLastActivity() != null) {

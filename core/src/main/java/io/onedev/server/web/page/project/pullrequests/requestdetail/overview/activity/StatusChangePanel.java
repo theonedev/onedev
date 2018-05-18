@@ -15,7 +15,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.hibernate.StaleStateException;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
@@ -31,7 +30,6 @@ import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.SinceChangesLink;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -48,19 +46,6 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 		
 		String note = getStatusChange().getNote();
 		if (StringUtils.isNotBlank(note)) {
-			ContentVersionSupport contentVersionSupport;
-			if (SecurityUtils.canModify(getStatusChange())) {
-				contentVersionSupport = new ContentVersionSupport() {
-
-					@Override
-					public long getVersion() {
-						return getStatusChange().getVersion();
-					}
-					
-				};
-			} else {
-				contentVersionSupport = null;
-			}
 			viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
 				@Override
@@ -78,7 +63,7 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 					OneDev.getInstance(PullRequestStatusChangeManager.class).save(getStatusChange());				
 				}
 
-			}, contentVersionSupport));
+			}, null));
 		} else {
 			viewer.add(new Label("content", "<i>No note</i>").setEscapeModelStrings(false));
 		}
@@ -99,8 +84,6 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
-				String autosaveKey = "autosave:editPullRequestStatusChange:" + getStatusChange().getId();
-				long lastVersion = getStatusChange().getVersion();
 				CommentInput input = new CommentInput("input", Model.of(getStatusChange().getNote()), false) {
 
 					@Override
@@ -112,11 +95,6 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 					@Override
 					protected Project getProject() {
 						return getStatusChange().getRequest().getTargetProject();
-					}
-					
-					@Override
-					protected String getAutosaveKey() {
-						return autosaveKey;
 					}
 					
 				};
@@ -132,20 +110,12 @@ class StatusChangePanel extends GenericPanel<PullRequestStatusChange> {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						try {
-							if (getStatusChange().getVersion() != lastVersion)
-								throw new StaleStateException("");
-							getStatusChange().setNote(input.getModelObject());
-							OneDev.getInstance(PullRequestStatusChangeManager.class).save(getStatusChange());
-	
-							Component viewer = newViewer();
-							editor.replaceWith(viewer);
-							target.add(viewer);
-							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
-						} catch (StaleStateException e) {
-							error("Some one changed the content you are editing. Reload the page and try again.");
-							target.add(feedback);
-						}
+						getStatusChange().setNote(input.getModelObject());
+						OneDev.getInstance(PullRequestStatusChangeManager.class).save(getStatusChange());
+
+						Component viewer = newViewer();
+						editor.replaceWith(viewer);
+						target.add(viewer);
 					}
 					
 				});

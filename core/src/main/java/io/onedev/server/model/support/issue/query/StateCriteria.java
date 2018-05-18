@@ -26,5 +26,18 @@ public class StateCriteria extends IssueCriteria {
 		else
 			return context.getBuilder().notEqual(attribute, value);
 	}
+
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.Is)
+			return issue.getState().equals(value);
+		else
+			return !issue.getState().equals(value);
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
+	}
 	
 }

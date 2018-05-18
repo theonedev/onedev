@@ -7,6 +7,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 
+import io.onedev.server.model.support.issue.WatchStatus;
+
 @SuppressWarnings("serial")
 abstract class WatchStatusPanel extends Panel {
 
@@ -18,47 +20,47 @@ abstract class WatchStatusPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AjaxLink<Void>("watching") {
+		add(new AjaxLink<Void>("default") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onWatchStatusChange(target, WatchStatus.WATCHING);
+				onWatchStatusChange(target, WatchStatus.DEFAULT);
 			}
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				if (getWatchStatus() == WatchStatus.WATCHING)
-					add(AttributeAppender.append("class", "active"));
-			}
-
-		});
-		add(new AjaxLink<Void>("notWatching") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onWatchStatusChange(target, WatchStatus.NOT_WATCHING);
-			}
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				if (getWatchStatus() == WatchStatus.NOT_WATCHING)
+				if (getWatchStatus() == WatchStatus.DEFAULT)
 					add(AttributeAppender.append("class", "active"));
 			}
 			
 		});
-		add(new AjaxLink<Void>("ignore") {
+		add(new AjaxLink<Void>("watch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onWatchStatusChange(target, WatchStatus.IGNORE);
+				onWatchStatusChange(target, WatchStatus.WATCH);
 			}
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				if (getWatchStatus() == WatchStatus.IGNORE)
+				if (getWatchStatus() == WatchStatus.WATCH)
+					add(AttributeAppender.append("class", "active"));
+			}
+
+		});
+		add(new AjaxLink<Void>("doNotWatch") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onWatchStatusChange(target, WatchStatus.DO_NOT_WATCH);
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (getWatchStatus() == WatchStatus.DO_NOT_WATCH)
 					add(AttributeAppender.append("class", "active"));
 			}
 			

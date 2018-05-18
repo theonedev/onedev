@@ -1,9 +1,9 @@
-package io.onedev.server.web.component.watchstatus;
+package io.onedev.server.model.support.issue;
 
 public enum WatchStatus {
-	WATCHING("Watching"), 
-	NOT_WATCHING("Not watching"), 
-	IGNORE("Ignore");
+	DEFAULT("Default"), 
+	WATCH("Watch"), 
+	DO_NOT_WATCH("Do not watch");
 	
 	private final String displayName;
 	

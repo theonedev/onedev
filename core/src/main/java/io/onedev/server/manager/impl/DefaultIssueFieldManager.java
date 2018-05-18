@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,10 +39,7 @@ import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.dateinput.DateInput;
-import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
-import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.InvalidFieldResolution;
@@ -70,7 +66,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	public Class<? extends Serializable> defineFieldBeanClass(Project project) {
 		String className = FIELD_BEAN_PREFIX + project.getId();
 		
-		return (Class<? extends Serializable>) InputSpec.defineClass(className, project.getIssueWorkflow().getFields());
+		return (Class<? extends Serializable>) InputSpec.defineClass(className, project.getIssueWorkflow().getFieldSpecs());
 	}
 	
 	@Override
@@ -121,6 +117,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 		Query query = getSession().createQuery("delete from IssueField where issue = :issue");
 		query.setParameter("issue", issue);
 		query.executeUpdate();
+		issue.getFields().clear();
 		
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
 
@@ -129,56 +126,42 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 			Object fieldValue = propertyDescriptor.getPropertyValue(fieldBean);
 			InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getField(fieldName);
 			if (fieldSpec != null) {
-				long ordinal = -1;
-				
-				if (fieldValue != null) {
-					if (fieldSpec instanceof ChoiceInput) {
-						OneContext.push(new OneContext() {
+				long ordinal = fieldSpec.getOrdinal(new OneContext() {
+
+					@Override
+					public Project getProject() {
+						return issue.getProject();
+					}
+
+					@Override
+					public EditContext getEditContext(int level) {
+						return new EditContext() {
 
 							@Override
-							public Project getProject() {
-								return issue.getProject();
-							}
-
-							@Override
-							public EditContext getEditContext(int level) {
-								return new EditContext() {
-
-									@Override
-									public Object getInputValue(String name) {
-										return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
-									}
-									
-								};
-							}
-
-							@Override
-							public InputContext getInputContext() {
-								throw new UnsupportedOperationException();
+							public Object getInputValue(String name) {
+								return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
 							}
 							
-						});
-						
-						try {
-							List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(false).keySet());
-							ordinal = choices.indexOf(fieldValue);
-						} finally {
-							OneContext.pop();
-						}
-					} else if (fieldSpec instanceof NumberInput) {
-						ordinal = (Integer) fieldValue;
-					} else if (fieldSpec instanceof IssueChoiceInput) {
-						ordinal = (Long) fieldValue;
-					} else if (fieldSpec instanceof DateInput) {
-						ordinal = ((Date)fieldValue).getTime();
+						};
 					}
-				}
+
+					@Override
+					public InputContext getInputContext() {
+						throw new UnsupportedOperationException();
+					}
+					
+				}, fieldValue);
 
 				IssueField field = new IssueField();
 				field.setIssue(issue);
 				field.setName(fieldName);
 				field.setOrdinal(ordinal);
 				field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
+				
+				/*
+				 * Need to add database records even for not-yet-prompted field in order to 
+				 * work with joined field query
+				 */
 				field.setPrompted(promptedFields.contains(fieldName));
 				
 				if (fieldValue != null) {
@@ -189,12 +172,19 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 							cloned.setIssue(issue);
 							cloned.setValue(string);
 							save(cloned);
+							issue.getFields().add(cloned);
 						}
 					} else {
 						save(field);
+						issue.getFields().add(field);
 					}
 				} else {
+					/*
+					 * Need to add a database record for null field in order to work with
+					 * joined field query 
+					 */
 					save(field);
+					issue.getFields().add(field);
 				}
 			}
 		}
@@ -206,7 +196,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 				new BeanDescriptor(defineFieldBeanClass(project)).getMapOfDisplayNameToPropertyDescriptor();
 		StateSpec stateSpec = project.getIssueWorkflow().getState(state);
 		Set<String> excludedFields = new HashSet<>();
-		for (InputSpec fieldSpec: project.getIssueWorkflow().getFields()) {
+		for (InputSpec fieldSpec: project.getIssueWorkflow().getFieldSpecs()) {
 			if (!stateSpec.getFields().contains(fieldSpec.getName())) 
 				excludedFields.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
 		}

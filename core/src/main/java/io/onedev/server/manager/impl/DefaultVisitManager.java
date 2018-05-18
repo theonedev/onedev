@@ -52,29 +52,41 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	
 	@Override
 	public void visitIssue(User user, Issue issue) {
+		visitIssue(user, issue, new Date(System.currentTimeMillis()+1000L));
+	}
+
+	@Override
+	public void visitIssue(User user, Issue issue, Date date) {
 		Environment env = getEnv(issue.getProject().getId().toString());
 		Store store = getStore(env, ISSUE_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
 			@Override
 			public void execute(Transaction txn) {
-				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), 
-						System.currentTimeMillis()+1000L);
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), -1);
+				if (millis < date.getTime())
+					writeLong(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), date.getTime());
 			}
 			
 		});
 	}
-
+	
 	@Override
 	public void visitPullRequest(User user, PullRequest request) {
+		visitPullRequest(user, request, new Date(System.currentTimeMillis()+1000L));
+	}
+	
+	@Override
+	public void visitPullRequest(User user, PullRequest request, Date date) {
 		Environment env = getEnv(request.getTargetProject().getId().toString());
 		Store store = getStore(env, PULL_REQUEST_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
 			@Override
 			public void execute(Transaction txn) {
-				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
-						System.currentTimeMillis()+1000L);
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), -1);
+				if (millis < date.getTime())
+					writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), date.getTime());
 			}
 			
 		});
@@ -82,14 +94,20 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	
 	@Override
 	public void visitPullRequestCodeComments(User user, PullRequest request) {
+		visitPullRequestCodeComments(user, request, new Date(System.currentTimeMillis()+1000L));
+	}
+	
+	@Override
+	public void visitPullRequestCodeComments(User user, PullRequest request, Date date) {
 		Environment env = getEnv(request.getTargetProject().getId().toString());
 		Store store = getStore(env, PULL_REQUEST_CODE_COMMENTS_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
 			@Override
 			public void execute(Transaction txn) {
-				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), 
-						System.currentTimeMillis()+1000L);
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), -1);
+				if (millis < date.getTime())
+					writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), date.getTime());
 			}
 			
 		});
@@ -97,14 +115,20 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	
 	@Override
 	public void visitCodeComment(User user, CodeComment comment) {
+		visitCodeComment(user, comment, new Date(System.currentTimeMillis()+1000L));
+	}
+	
+	@Override
+	public void visitCodeComment(User user, CodeComment comment, Date date) {
 		Environment env = getEnv(comment.getProject().getId().toString());
 		Store store = getStore(env, CODE_COMMENT_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
 			
 			@Override
 			public void execute(Transaction txn) {
-				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), 
-						System.currentTimeMillis()+1000L);
+				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), -1);
+				if (millis < date.getTime())
+					writeLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), date.getTime());
 			}
 			
 		});

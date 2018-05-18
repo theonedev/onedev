@@ -8,6 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.User;
 
 @SuppressWarnings("serial")
 public class CommentedActivity implements IssueActivity {
@@ -48,4 +49,9 @@ public class CommentedActivity implements IssueActivity {
 		return getComment().getAnchor();
 	}
 
+	@Override
+	public User getUser() {
+		return User.getForDisplay(getComment().getUser(), getComment().getUserName());
+	}
+	
 }

@@ -1,8 +1,11 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.util.Objects;
+
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 
 public class StringFieldCriteria extends FieldCriteria {
@@ -34,6 +37,24 @@ public class StringFieldCriteria extends FieldCriteria {
 			return context.getBuilder().like(attribute, "%" + value + "%");
 		else
 			return context.getBuilder().notLike(attribute, "%" + value + "%");
+	}
+
+	@Override
+	public boolean matches(Issue issue) {
+		String fieldValue = (String) getFieldValue(issue);
+		if (operator == IssueQueryLexer.Is)
+			return Objects.equals(fieldValue, value);
+		else if (operator == IssueQueryLexer.IsNot)
+			return !Objects.equals(fieldValue, value);
+		else if (operator == IssueQueryLexer.Contains)
+			return fieldValue != null && fieldValue.toLowerCase().contains(value.toLowerCase());
+		else
+			return fieldValue == null || !fieldValue.toLowerCase().contains(value.toLowerCase());
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
 	}
 
 }

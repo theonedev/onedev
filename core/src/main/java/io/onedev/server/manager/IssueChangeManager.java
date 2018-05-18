@@ -21,5 +21,5 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 			Map<String, PromptedField> prevFields, Collection<String> promptedFields);
 	
 	void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent, 
-			String prevState, Map<String, PromptedField> prevFields, Collection<String> promptedFields);
+			Map<String, PromptedField> prevFields, Collection<String> promptedFields);
 }

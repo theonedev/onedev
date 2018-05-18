@@ -119,8 +119,8 @@ public class MailSettingPage extends AdministrationPage {
 				super.onEvent(event);
 
 				if (event.getPayload() instanceof BeanUpdating) {
-					BeanUpdating beanChanged = (BeanUpdating) event.getPayload();
-					beanChanged.getHandler().add(testButton);
+					BeanUpdating beanUpdating = (BeanUpdating) event.getPayload();
+					beanUpdating.getHandler().add(testButton);
 				}
 				
 			}

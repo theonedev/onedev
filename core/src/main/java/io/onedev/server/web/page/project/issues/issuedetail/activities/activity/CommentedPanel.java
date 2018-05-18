@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.hibernate.StaleStateException;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
@@ -26,7 +25,6 @@ import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
@@ -56,19 +54,6 @@ class CommentedPanel extends GenericPanel<IssueComment> {
 	private Component newViewer() {
 		Fragment viewer = new Fragment("body", "viewFrag", this);
 		
-		ContentVersionSupport contentVersionSuppport;
-		if (SecurityUtils.canModify(getComment())) {
-			contentVersionSuppport = new ContentVersionSupport() {
-
-				@Override
-				public long getVersion() {
-					return getComment().getVersion();
-				}
-				
-			};
-		} else {
-			contentVersionSuppport = null;
-		}
 		viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
 			@Override
@@ -86,7 +71,7 @@ class CommentedPanel extends GenericPanel<IssueComment> {
 				OneDev.getInstance(IssueCommentManager.class).save(getComment());				
 			}
 			
-		}, contentVersionSuppport));
+		}, null));
 		
 		WebMarkupContainer actions = new WebMarkupContainer("actions");
 		actions.setVisible(SecurityUtils.canModify(getComment()));
@@ -103,7 +88,6 @@ class CommentedPanel extends GenericPanel<IssueComment> {
 				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
-				String autosaveKey = "autosave:editIssueComment:" + getComment().getId();
 				CommentInput input = new CommentInput("input", Model.of(getComment().getContent()), false) {
 
 					@Override
@@ -111,11 +95,6 @@ class CommentedPanel extends GenericPanel<IssueComment> {
 						return new ProjectAttachmentSupport(getProject(), getComment().getIssue().getUUID());
 					}
 
-					@Override
-					protected String getAutosaveKey() {
-						return autosaveKey;
-					}
-					
 					@Override
 					protected Project getProject() {
 						return getComment().getIssue().getProject();
@@ -125,26 +104,17 @@ class CommentedPanel extends GenericPanel<IssueComment> {
 				input.setRequired(true).setLabel(Model.of("Comment"));
 				form.add(input);
 
-				final long lastVersion = getComment().getVersion();
 				form.add(new AjaxSubmitLink("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						IssueComment comment = getComment();
-						try {
-							if (comment.getVersion() != lastVersion)
-								throw new StaleStateException("");
-							comment.setContent(input.getModelObject());
-							OneDev.getInstance(IssueCommentManager.class).save(comment);
-	
-							Component viewer = newViewer();
-							editor.replaceWith(viewer);
-							target.add(viewer);
-							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
-						} catch (StaleStateException e) {
-							error("Some one changed the content you are editing. Reload the page and try again.");
-							target.add(feedback);
-						}
+						comment.setContent(input.getModelObject());
+						OneDev.getInstance(IssueCommentManager.class).save(comment);
+
+						Component viewer = newViewer();
+						editor.replaceWith(viewer);
+						target.add(viewer);
 					}
 					
 					@Override

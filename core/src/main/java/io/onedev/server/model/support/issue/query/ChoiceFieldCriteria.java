@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.util.Objects;
+
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
@@ -34,6 +36,24 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 			return context.getBuilder().greaterThan(join.get(IssueField.ORDINAL), ordinal);
 		else
 			return context.getBuilder().lessThan(join.get(IssueField.ORDINAL), ordinal);
+	}
+
+	@Override
+	public boolean matches(Issue issue) {
+		Object fieldValue = getFieldValue(issue);
+		if (operator == IssueQueryLexer.Is)
+			return Objects.equals(fieldValue, value);
+		else if (operator == IssueQueryLexer.IsNot)
+			return !Objects.equals(fieldValue, value);
+		else if (operator == IssueQueryLexer.IsGreaterThan)
+			return getFieldOrdinal(issue) > ordinal;
+		else
+			return getFieldOrdinal(issue) < ordinal;
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
 	}
 
 }

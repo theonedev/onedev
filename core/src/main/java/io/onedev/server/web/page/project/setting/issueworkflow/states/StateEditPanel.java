@@ -42,7 +42,7 @@ abstract class StateEditPanel extends Panel {
 		
 		StateSpec state;
 		if (stateIndex != -1)
-			state = SerializationUtils.clone(getWorkflow().getStates().get(stateIndex));
+			state = SerializationUtils.clone(getWorkflow().getStateSpecs().get(stateIndex));
 		else
 			state = new StateSpec();
 
@@ -80,7 +80,7 @@ abstract class StateEditPanel extends Panel {
 				super.onSubmit(target, form);
 
 				if (stateIndex != -1) { 
-					StateSpec oldState = getWorkflow().getStates().get(stateIndex);
+					StateSpec oldState = getWorkflow().getStateSpecs().get(stateIndex);
 					if (!state.getName().equals(oldState.getName()) && getWorkflow().getState(state.getName()) != null) {
 						editor.getErrorContext(new PathSegment.Property("name"))
 								.addError("This name has already been used by another state");
@@ -92,14 +92,14 @@ abstract class StateEditPanel extends Panel {
 
 				if (!editor.hasErrors(true)) {
 					if (stateIndex != -1) {
-						StateSpec oldState = getWorkflow().getStates().get(stateIndex);
+						StateSpec oldState = getWorkflow().getStateSpecs().get(stateIndex);
 						if (!state.getName().equals(oldState.getName())) { 
 							getWorkflow().onRenameState(oldState.getName(), state.getName());
 							getWorkflow().setReconciled(false);
 						}
-						getWorkflow().getStates().set(stateIndex, state);
+						getWorkflow().getStateSpecs().set(stateIndex, state);
 					} else {
-						getWorkflow().getStates().add(state);
+						getWorkflow().getStateSpecs().add(state);
 					}
 					getProject().setIssueWorkflow(getWorkflow());
 					OneDev.getInstance(ProjectManager.class).save(getProject());

@@ -29,4 +29,17 @@ public class UpdateDateCriteria extends IssueCriteria {
 			return context.getBuilder().greaterThan(attribute, value.getTime());
 	}
 
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.IsBefore)
+			return issue.getLastActivity().getDate().before(value);
+		else
+			return issue.getLastActivity().getDate().after(value);
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
+	}
+
 }

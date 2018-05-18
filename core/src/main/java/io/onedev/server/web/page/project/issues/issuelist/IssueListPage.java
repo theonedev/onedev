@@ -1,9 +1,8 @@
 package io.onedev.server.web.page.project.issues.issuelist;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,13 +14,15 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -35,7 +36,6 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -48,20 +48,20 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueListCustomization;
+import io.onedev.server.model.support.issue.FieldsEditBean;
 import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.WatchStatus;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.UserLink;
@@ -70,10 +70,9 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.choice.MultiChoiceEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
@@ -81,6 +80,7 @@ import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.Work
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -92,8 +92,7 @@ public class IssueListPage extends ProjectPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private static final MetaDataKey<IssueListCustomization> CUSTOMIZATION_KEY = 
-			new MetaDataKey<IssueListCustomization>() {};
+	private static final MetaDataKey<ArrayList<String>> FIELDS_KEY = new MetaDataKey<ArrayList<String>>() {};
 			
 	private String query;
 	
@@ -104,73 +103,52 @@ public class IssueListPage extends ProjectPage {
 		query = params.get(PARAM_QUERY).toOptionalString();
 	}
 
-	private IssueListCustomization getCustomization() {
-		IssueListCustomization customization = WebSession.get().getMetaData(CUSTOMIZATION_KEY);
-		if (customization == null)
-			customization = getProject().getIssueListCustomization();
-		return customization;
+	private List<String> getFields() {
+		List<String> fields = WebSession.get().getMetaData(FIELDS_KEY);
+		if (fields == null)
+			fields = getProject().getIssueWorkflow().getListFields();
+		return fields;
 	}
 	
 	private Map<String, String> getUserQueries() {
-		LinkedHashMap<String, String> issueQueries = getLoginUser().getIssueQueries().get(getProject().getName());
-		if (issueQueries == null) {
-			issueQueries = new LinkedHashMap<>();
-			getLoginUser().getIssueQueries().put(getProject().getName(), issueQueries);
-		}
-		return issueQueries;
-		
+		IssueQuerySetting setting = getIssueQuerySettingManager().find(getProject(), getLoginUser());
+		if (setting != null) 
+			return setting.getUserQueries();
+		else 
+			return new HashMap<>();
 	}
 	
 	private IssueManager getIssueManager() {
 		return OneDev.getInstance(IssueManager.class);
 	}
 	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-
-		WebMarkupContainer head = new WebMarkupContainer("issueListHead");
-		head.setOutputMarkupId(true);
-		add(head);
-		
-		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
-		input.add(new IssueQueryBehavior(projectModel));
-		
-		if (getLoginUser() != null) {
-			input.add(new AjaxFormComponentUpdatingBehavior("input"){
+	private IssueQuerySettingManager getIssueQuerySettingManager() {
+		return OneDev.getInstance(IssueQuerySettingManager.class);		
+	}
 	
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					target.add(querySave);
-				}
-				
-			});
-		}
-		Form<?> form = new Form<Void>("query") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				setResponsePage(IssueListPage.class, IssueListPage.paramsOf(getProject(), query));
-			}
-
-		};
-		form.add(input);
-		head.add(form);
+	private void setWatchStatus(Map<String, Boolean> watches, String name, WatchStatus watchStatus) {
+		if (watchStatus != WatchStatus.DEFAULT) 
+			watches.put(name, watchStatus == WatchStatus.WATCH);
+		else
+			watches.remove(name);
+	}
+	
+	private WatchStatus getWatchStatus(Map<String, Boolean> watches, String name) {
+		Boolean watching = watches.get(name);
+		if (Boolean.TRUE.equals(watching))
+			return WatchStatus.WATCH;
+		else if (Boolean.FALSE.equals(watching))
+			return WatchStatus.DO_NOT_WATCH;
+		else
+			return WatchStatus.DEFAULT;
+	}
+	
+	private WebMarkupContainer newSideContainer() {
+		WebMarkupContainer side = new WebMarkupContainer("side");
+		side.setOutputMarkupId(true);
+		add(side);
 		
-		form.add(new NotificationPanel("feedback", form));
-		
-		head.add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canRead(getProject()));
-			}
-			
-		});
-		
-		head.add(querySave = new ModalLink("save") {
+		side.add(querySave = new ModalLink("save") {
 
 			@Override
 			protected void onConfigure() {
@@ -183,8 +161,10 @@ public class IssueListPage extends ProjectPage {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				configure();
-				if (!isEnabled())
+				if (!isEnabled()) {
 					tag.put("disabled", "disabled");
+					tag.put("title", "Input query to save");
+				}
 			}
 
 			@Override
@@ -207,9 +187,15 @@ public class IssueListPage extends ProjectPage {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						getUserQueries().put(bean.getName(), query);
-						OneDev.getInstance(UserManager.class).save(getLoginUser());
-						target.add(head);
+						IssueQuerySetting setting = getIssueQuerySettingManager().find(getProject(), getLoginUser());
+						if (setting == null) {
+							setting = new IssueQuerySetting();
+							setting.setProject(getProject());
+							setting.setUser(getLoginUser());
+						}
+						setting.getUserQueries().put(bean.getName(), query);
+						getIssueQuerySettingManager().save(setting);
+						target.add(side);
 						modal.close();
 					}
 					
@@ -219,9 +205,9 @@ public class IssueListPage extends ProjectPage {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						getProject().getIssueListCustomization().getSavedQueries().put(bean.getName(), query);
+						getProject().getIssueWorkflow().getQueries().put(bean.getName(), query);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
-						target.add(head);
+						target.add(side);
 						modal.close();
 					}
 
@@ -255,165 +241,297 @@ public class IssueListPage extends ProjectPage {
 			
 		}.setOutputMarkupId(true));
 		
-		head.add(new ModalLink("edit") {
+		side.add(new ModalLink("edit") {
 
+			private static final String TAB_PANEL_ID = "tabPanel";
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				if (SecurityUtils.canManage(getProject())) {
-					setVisible(!getUserQueries().isEmpty() 
-							|| !getProject().getIssueListCustomization().getSavedQueries().isEmpty());
+					setVisible(!getUserQueries().isEmpty() || !getProject().getIssueWorkflow().getQueries().isEmpty());
 				} else {
 					setVisible(getLoginUser() != null && !getUserQueries().isEmpty());
 				}
 			}
-			
-			private WebMarkupContainer newQueryList(String componentId, List<String> queries) {
-				Fragment fragment = new Fragment(componentId, "queryListFrag", IssueListPage.this);
-				WebMarkupContainer table = new WebMarkupContainer("queries");
-				fragment.add(table);
-				table.add(new ListView<String>("queries", queries) {
 
-					@Override
-					protected void populateItem(ListItem<String> item) {
-						item.add(new Label("name", item.getModelObject()));
-						item.add(new AjaxLink<Void>("delete") {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								queries.remove(item.getModelObject());
-								target.add(fragment);
-							}
-							
-						});
-					}
+			private Component newUserQueriesEditor(String componentId, ModalPanel modal, Map<String, String> userQueries) {
+				return new NamedQueriesEditor(componentId, userQueries) {
 					
-				});
-				table.add(new SortBehavior() {
-
 					@Override
-					protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-						int fromIndex = from.getItemIndex();
-						int toIndex = to.getItemIndex();
-						if (fromIndex < toIndex) {
-							for (int i=0; i<toIndex-fromIndex; i++) 
-								Collections.swap(queries, fromIndex+i, fromIndex+i+1);
-						} else {
-							for (int i=0; i<fromIndex-toIndex; i++) 
-								Collections.swap(queries, fromIndex-i, fromIndex-i-1);
+					protected void onSave(AjaxRequestTarget target, LinkedHashMap<String, String> queries) {
+						IssueQuerySetting setting = getIssueQuerySettingManager().find(getProject(), getLoginUser());
+						if (setting == null) {
+							setting = new IssueQuerySetting();
+							setting.setProject(getProject());
+							setting.setUser(getLoginUser());
 						}
-						target.add(fragment);
+						setting.setUserQueries(queries);
+						getIssueQuerySettingManager().save(setting);
+						target.add(side);
+						modal.close();
 					}
 					
-				}.sortable("tbody").handle(".drag-handle").helperClass("sort-helper"));
-				
-				fragment.add(new WebMarkupContainer("noRecords") {
-
 					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(queries.isEmpty());
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+				};
+			}
+			
+			private Component newProjectQueriesEditor(String componentId, ModalPanel modal, Map<String, String> projectQueries) {
+				return new NamedQueriesEditor(componentId, projectQueries) {
+					
+					@Override
+					protected void onSave(AjaxRequestTarget target, LinkedHashMap<String, String> queries) {
+						getProject().getIssueWorkflow().setQueries(queries);
+						OneDev.getInstance(ProjectManager.class).save(getProject());
+						target.add(side);
+						modal.close();
 					}
 					
-				});
-				fragment.setOutputMarkupId(true);
-				return fragment;
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+					
+				};
 			}
-
+			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "editSavedFrag", IssueListPage.this);
-				List<String> userQueries = new ArrayList<>(getUserQueries().keySet());
-				List<String> projectQueries = new ArrayList<>();
-				if (SecurityUtils.canManage(getProject())) 
-					projectQueries.addAll(getProject().getIssueListCustomization().getSavedQueries().keySet());
-				
-				if (!userQueries.isEmpty() && !projectQueries.isEmpty()) {
-					fragment.add(new Label("title", "Edit Saved Queries"));
-					Fragment tabFragment = new Fragment("content", "tabFrag", fragment);
-					List<Tab> tabs = new ArrayList<>();
-					tabs.add(new AjaxActionTab(Model.of("Mine")) {
+				Fragment fragment = new Fragment(id, "editSavedQueriesFrag", IssueListPage.this);
+				List<Tab> tabs = new ArrayList<>();
+
+				Map<String, String> userQueries = getUserQueries();
+				if (!userQueries.isEmpty()) {
+					tabs.add(new AjaxActionTab(Model.of("For Mine")) {
+
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+						}
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-							WebMarkupContainer queryList = newQueryList("tabPanel", userQueries);
-							tabFragment.replace(queryList);
-							target.add(queryList);
+							Component editor = newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries);
+							fragment.replace(editor);
+							target.add(editor);
 						}
 						
 					});
-					tabs.add(new AjaxActionTab(Model.of("All Users")) {
-
-						@Override
-						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-							WebMarkupContainer queryList = newQueryList("tabPanel", projectQueries);
-							tabFragment.replace(queryList);
-							target.add(queryList);
-						}
-						
-					});
-					tabFragment.add(new Tabbable("tab", tabs));
-					tabFragment.add(newQueryList("tabPanel", userQueries));
-					fragment.add(tabFragment);
-				} else if (!userQueries.isEmpty()) {
-					fragment.add(new Label("title", "Edit Saved Queries (Mine)"));
-					fragment.add(newQueryList("content", userQueries));
-				} else {
-					fragment.add(new Label("title", "Edit Saved Queries (All Users)"));
-					fragment.add(newQueryList("content", projectQueries));
+					fragment.add(newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries));
 				}
 				
-				fragment.add(new AjaxLink<Void>("save") {
+				Map<String, String> projectQueries = getProject().getIssueWorkflow().getQueries();
+				if (SecurityUtils.canManage(getProject()) && !projectQueries.isEmpty()) {
+					tabs.add(new AjaxActionTab(Model.of("For All Users")) {
 
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						LinkedHashMap<String, String> queryMap = new LinkedHashMap<>();
-						for (String query: userQueries)
-							queryMap.put(query, getUserQueries().get(query));
-						getLoginUser().getIssueQueries().put(getProject().getName(), queryMap);
-						OneDev.getInstance(UserManager.class).save(getLoginUser());
-						
-						if (SecurityUtils.canManage(getProject())) {
-							queryMap = new LinkedHashMap<>();
-							for (String query: projectQueries)
-								queryMap.put(query, getProject().getIssueListCustomization().getSavedQueries().get(query));
-							getProject().getIssueListCustomization().setSavedQueries(queryMap);
-							OneDev.getInstance(ProjectManager.class).save(getProject());
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
 						}
-						modal.close();
-						target.add(head);
-					}
-					
-				});
-				fragment.add(new AjaxLink<Void>("cancel") {
 
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+							Component editor = newProjectQueriesEditor(TAB_PANEL_ID, modal, projectQueries);
+							fragment.replace(editor);
+							target.add(editor);
+						}
+						
+					});
+					if (userQueries.isEmpty())
+						fragment.add(newProjectQueriesEditor(TAB_PANEL_ID, modal, projectQueries));
+				}
+				
+				fragment.add(new Tabbable("tab", tabs));
+				
 				fragment.add(new AjaxLink<Void>("close") {
 
 					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+					}
+
+					@Override
 					public void onClick(AjaxRequestTarget target) {
 						modal.close();
 					}
 					
 				});
-				fragment.setOutputMarkupId(true);
 				return fragment;
 			}
 			
 		});
 		
-		head.add(new ModalLink("fields") {
+		side.add(new ListView<NamedQuery>("userQueries", new LoadableDetachableModel<List<NamedQuery>>() {
+
+			@Override
+			protected List<NamedQuery> load() {
+				List<NamedQuery> namedQueries = new ArrayList<>();
+				if (getLoginUser() != null) {
+					for (Map.Entry<String, String> entry: getUserQueries().entrySet())
+						namedQueries.add(new NamedQuery(entry.getKey(), entry.getValue()));
+				}
+				return namedQueries;
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<NamedQuery> item) {
+				NamedQuery namedQuery = item.getModelObject();
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueListPage.class, IssueListPage.paramsOf(getProject(), namedQuery.getQuery()));
+				link.add(new Label("label", namedQuery.getName()));
+				item.add(link);
+				
+				item.add(new WatchStatusLink("watchStatus") {
+					
+					@Override
+					protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+						IssueQuerySetting setting = getIssueQuerySettingManager().find(getProject(), getLoginUser());
+						if (setting == null) {
+							setting = new IssueQuerySetting();
+							setting.setProject(getProject());
+							setting.setUser(getLoginUser());
+						}
+						setWatchStatus(setting.getUserQueryWatches(), namedQuery.getName(), watchStatus);
+						getIssueQuerySettingManager().save(setting);
+						target.add(this);
+					}
+					
+					@Override
+					protected WatchStatus getWatchStatus() {
+						IssueQuerySetting setting = getIssueQuerySettingManager().find(getProject(), getLoginUser());
+						if (setting != null)
+							return IssueListPage.this.getWatchStatus(setting.getUserQueryWatches(), namedQuery.getName());
+						else
+							return WatchStatus.DEFAULT;
+					}
+					
+				});
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getModelObject().isEmpty());
+			}
+
+		});
+		
+		side.add(new ListView<NamedQuery>("projectQueries", new LoadableDetachableModel<List<NamedQuery>>() {
+
+			@Override
+			protected List<NamedQuery> load() {
+				List<NamedQuery> namedQueries = new ArrayList<>();
+				for (Map.Entry<String, String> entry: getProject().getIssueWorkflow().getQueries().entrySet()) {
+					try {
+						if (getLoginUser() != null || !IssueQuery.parse(getProject(), entry.getValue()).needsLogin())
+							namedQueries.add(new NamedQuery(entry.getKey(), entry.getValue()));
+					} catch (Exception e) {
+						namedQueries.add(new NamedQuery(entry.getKey(), entry.getValue()));
+					}
+				}
+				return namedQueries;
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<NamedQuery> item) {
+				NamedQuery namedQuery = item.getModelObject();
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueListPage.class, IssueListPage.paramsOf(getProject(), namedQuery.getQuery()));
+				link.add(new Label("label", namedQuery.getName()));
+				item.add(link);
+				
+				item.add(new WatchStatusLink("watchStatus") {
+					
+					@Override
+					protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+						IssueQuerySetting setting = getIssueQuerySettingManager().find(getProject(), getLoginUser());
+						if (setting == null) {
+							setting = new IssueQuerySetting();
+							setting.setProject(getProject());
+							setting.setUser(getLoginUser());
+						}
+						setWatchStatus(setting.getProjectQueryWatches(), namedQuery.getName(), watchStatus);
+						getIssueQuerySettingManager().save(setting);
+						target.add(this);
+					}
+					
+					@Override
+					protected WatchStatus getWatchStatus() {
+						IssueQuerySetting setting = getIssueQuerySettingManager().find(getProject(), getLoginUser());
+						if (setting != null)
+							return IssueListPage.this.getWatchStatus(setting.getProjectQueryWatches(), namedQuery.getName());
+						else
+							return WatchStatus.DEFAULT;
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getLoginUser() != null);
+					}
+					
+				});
+				
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getModelObject().isEmpty());
+			}
+			
+		});
+				
+		return side;
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+
+		add(newSideContainer());
+		
+		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
+		input.add(new IssueQueryBehavior(projectModel));
+		
+		if (getLoginUser() != null) {
+			input.add(new AjaxFormComponentUpdatingBehavior("input"){
+	
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					target.add(querySave);
+				}
+				
+			});
+		}
+		Form<?> form = new Form<Void>("query") {
+
+			@Override
+			protected void onSubmit() {
+				super.onSubmit();
+				setResponsePage(IssueListPage.class, IssueListPage.paramsOf(getProject(), query));
+			}
+
+		};
+		form.add(input);
+		add(form);
+		
+		add(new ModalLink("displayFields") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "fieldsFrag", IssueListPage.this);
 
-				IssueListCustomization customization = getCustomization();
+				FieldsEditBean bean = new FieldsEditBean();
+				bean.setFields(getFields());
 				Form<?> form = new Form<Void>("form") {
 
 					@Override
@@ -423,27 +541,7 @@ public class IssueListPage extends ProjectPage {
 					}
 
 				};
-				
-				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(IssueListCustomization.class, "displayFields"); 
-				IModel<List<String>> propertyModel = new IModel<List<String>>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public List<String> getObject() {
-						return (List<String>) propertyDescriptor.getPropertyValue(customization);
-					}
-
-					@Override
-					public void setObject(List<String> object) {
-						propertyDescriptor.setPropertyValue(customization, object);
-					}
-					
-				};
-				form.add(new MultiChoiceEditor("editor", propertyDescriptor, propertyModel));
+				form.add(BeanContext.editBean("editor", bean));
 
 				form.add(new AjaxLink<Void>("close") {
 
@@ -459,7 +557,7 @@ public class IssueListPage extends ProjectPage {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						WebSession.get().setMetaData(CUSTOMIZATION_KEY, customization);
+						WebSession.get().setMetaData(FIELDS_KEY, (ArrayList<String>)bean.getFields());
 						setResponsePage(IssueListPage.this);
 					}
 					
@@ -476,8 +574,8 @@ public class IssueListPage extends ProjectPage {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						WebSession.get().setMetaData(CUSTOMIZATION_KEY, customization);
-						getProject().setIssueListCustomization(customization);
+						WebSession.get().setMetaData(FIELDS_KEY, (ArrayList<String>)bean.getFields());
+						getProject().getIssueWorkflow().setListFields(bean.getFields());
 						OneDev.getInstance(ProjectManager.class).save(getProject());
 						setResponsePage(IssueListPage.this);
 					}
@@ -499,67 +597,23 @@ public class IssueListPage extends ProjectPage {
 			
 		});
 		
-		head.add(new ListView<SavedQuery>("userQueries", new LoadableDetachableModel<List<SavedQuery>>() {
-
-			@Override
-			protected List<SavedQuery> load() {
-				List<SavedQuery> savedQueries = new ArrayList<>();
-				if (getLoginUser() != null) {
-					for (Map.Entry<String, String> entry: getUserQueries().entrySet())
-						savedQueries.add(new SavedQuery(entry.getKey(), entry.getValue()));
-				}
-				return savedQueries;
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<SavedQuery> item) {
-				SavedQuery savedQuery = item.getModelObject();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueListPage.class, IssueListPage.paramsOf(getProject(), savedQuery.query));
-				link.add(new Label("label", savedQuery.name));
-				item.add(link);
-			}
+		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getModelObject().isEmpty());
-			}
-
-		});
-		
-		head.add(new ListView<SavedQuery>("projectQueries", new LoadableDetachableModel<List<SavedQuery>>() {
-
-			@Override
-			protected List<SavedQuery> load() {
-				List<SavedQuery> savedQueries = new ArrayList<>();
-				for (Map.Entry<String, String> entry: getProject().getIssueListCustomization().getSavedQueries().entrySet())
-					savedQueries.add(new SavedQuery(entry.getKey(), entry.getValue()));
-				return savedQueries;
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<SavedQuery> item) {
-				SavedQuery savedQuery = item.getModelObject();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueListPage.class, IssueListPage.paramsOf(getProject(), savedQuery.query));
-				link.add(new Label("label", savedQuery.name));
-				item.add(link);
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getModelObject().isEmpty());
+				setVisible(SecurityUtils.canRead(getProject()));
 			}
 			
 		});
-		
+
 		AtomicReference<IssueQuery> parsedQuery = new AtomicReference<>(null);
 		try {
 			parsedQuery.set(IssueQuery.parse(getProject(), query));
+			if (getLoginUser() == null && parsedQuery.get().needsLogin()) {
+				form.error("Please login to perform this query");
+				parsedQuery.set(null);
+			}
 		} catch (Exception e) {
 			logger.error("Error parsing issue query: " + query, e);
 			if (StringUtils.isNotBlank(e.getMessage()))
@@ -606,6 +660,8 @@ public class IssueListPage extends ProjectPage {
 		};
 		
 		WebMarkupContainer body = new WebMarkupContainer("body");
+		
+		body.add(new NotificationPanel("feedback", form));
 		
 		if (SecurityUtils.canManage(getProject())) {
 			body.add(new ModalLink("reconcile") {
@@ -662,10 +718,6 @@ public class IssueListPage extends ProjectPage {
 			});
 		}
 		
-		body.setVisible(parsedQuery.get() != null);
-		
-		body.setOutputMarkupId(true);
-		
 		DataView<Issue> issuesView = new DataView<Issue>("issues", dataProvider) {
 
 			@Override
@@ -688,15 +740,20 @@ public class IssueListPage extends ProjectPage {
 				item.add(new IssueStateLabel("state", item.getModel()));
 				
 				RepeatingView fieldsView = new RepeatingView("fields");
-				for (String fieldName: getCustomization().getDisplayFields()) {
-					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), new AbstractReadOnlyModel<PromptedField>() {
+				for (String fieldName: getFields()) {
+					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
 
 						@Override
-						public PromptedField getObject() {
+						protected Issue getIssue() {
+							return item.getModelObject();
+						}
+
+						@Override
+						protected PromptedField getField() {
 							return item.getModelObject().getPromptedFields().get(fieldName);
 						}
 						
-					}).add(AttributeAppender.append("title", fieldName)));
+					}.add(AttributeAppender.append("title", fieldName)));
 				}
 				
 				item.add(fieldsView);
@@ -749,17 +806,18 @@ public class IssueListPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(dataProvider.size() == 0);
+				setVisible(parsedQuery.get() != null && dataProvider.size() == 0);
 			}
 			
 		});
 		add(body);
 	}
-
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new IssueListResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new IssueListResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueList.onDomReady();"));
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query) {
@@ -769,16 +827,68 @@ public class IssueListPage extends ProjectPage {
 		return params;
 	}
 	
-	private static class SavedQuery implements Serializable {
+	private abstract class NamedQueriesEditor extends Fragment {
+
+		private final NamedQueriesBean bean;
 		
-		final String name;
-		
-		final String query;
-		
-		SavedQuery(String name, String query) {
-			this.name = name;
-			this.query = query;
+		public NamedQueriesEditor(String id, Map<String, String> queries) {
+			super(id, "editSavedQueriesContentFrag", IssueListPage.this);
+			bean = new NamedQueriesBean();
+			for (Map.Entry<String, String> entry: queries.entrySet())
+				bean.getQueries().add(new NamedQuery(entry.getKey(), entry.getValue()));
 		}
+
+		@Override
+		protected void onInitialize() {
+			super.onInitialize();
+			
+			Form<?> form = new Form<Void>("form");
+			form.setOutputMarkupId(true);
+			
+			form.add(new NotificationPanel("feedback", form));
+			form.add(BeanContext.editBean("editor", bean));
+			form.add(new AjaxButton("save") {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					LinkedHashMap<String, String> namedQueries = new LinkedHashMap<>();
+					for (NamedQuery namedQuery: bean.getQueries()) {
+						if (namedQueries.put(namedQuery.getName(), namedQuery.getQuery()) != null) {
+							form.error("Duplicate name found: " + namedQuery.getName());
+							return;
+						}
+					}
+					onSave(target, namedQueries);
+				}
+
+				@Override
+				protected void onError(AjaxRequestTarget target, Form<?> form) {
+					super.onError(target, form);
+					target.add(form);
+				}
+				
+			});
+			form.add(new AjaxLink<Void>("cancel") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+				}
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					onCancel(target);
+				}
+				
+			});
+			add(form);
+			setOutputMarkupId(true);
+		}
+		
+		protected abstract void onSave(AjaxRequestTarget target, LinkedHashMap<String, String> queries);
+		
+		protected abstract void onCancel(AjaxRequestTarget target);
 	}
-	
 }

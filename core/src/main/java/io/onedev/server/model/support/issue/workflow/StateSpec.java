@@ -75,7 +75,7 @@ public class StateSpec implements Serializable {
 	private static List<String> getFieldChoices() {
 		List<String> fields = new ArrayList<>();
 		IssueStatesPage page = (IssueStatesPage) WicketUtils.getPage();
-		for (InputSpec field: page.getWorkflow().getFields())
+		for (InputSpec field: page.getWorkflow().getFieldSpecs())
 			fields.add(field.getName());
 		return fields;
 	}

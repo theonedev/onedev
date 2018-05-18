@@ -101,7 +101,7 @@ class AssistPanel extends Panel {
 		if (suggestion.getDescription() != null)
 			item.add(new Label("description", suggestion.getDescription()));
 		else
-			item.add(new Label("description").setVisible(false));
+			item.add(new Label("description"));
 		String content = suggestion.complete(inputStatus).getContent();
 		item.add(AttributeAppender.append("data-content", content));
 		item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));

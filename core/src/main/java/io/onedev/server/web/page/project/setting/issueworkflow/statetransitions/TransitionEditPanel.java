@@ -13,7 +13,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
-import io.onedev.server.model.support.issue.workflow.StateTransition;
+import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
@@ -40,11 +40,11 @@ abstract class TransitionEditPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		StateTransition transition;
+		TransitionSpec transition;
 		if (transitionIndex != -1)
-			transition = SerializationUtils.clone(getWorkflow().getStateTransitions().get(transitionIndex));
+			transition = SerializationUtils.clone(getWorkflow().getTransitionSpecs().get(transitionIndex));
 		else
-			transition = new StateTransition();
+			transition = new TransitionSpec();
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -86,9 +86,9 @@ abstract class TransitionEditPanel extends Panel {
 					target.add(form);
 				} else {
 					if (transitionIndex != -1)
-						getWorkflow().getStateTransitions().set(transitionIndex, transition);
+						getWorkflow().getTransitionSpecs().set(transitionIndex, transition);
 					else 
-						getWorkflow().getStateTransitions().add(transition);
+						getWorkflow().getTransitionSpecs().add(transition);
 					getProject().setIssueWorkflow(getWorkflow());
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					onSave(target);

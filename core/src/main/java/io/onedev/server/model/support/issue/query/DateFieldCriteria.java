@@ -31,4 +31,18 @@ public class DateFieldCriteria extends FieldCriteria {
 			return context.getBuilder().greaterThan(join.get(IssueField.ORDINAL), value.getTime());
 	}
 
+	@Override
+	public boolean matches(Issue issue) {
+		Date fieldValue = (Date) getFieldValue(issue);
+		if (operator == IssueQueryLexer.IsBefore)
+			return fieldValue != null && fieldValue.before(value);
+		else
+			return fieldValue != null && fieldValue.after(value);
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
+	}
+
 }

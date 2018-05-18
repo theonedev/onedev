@@ -31,4 +31,21 @@ public class VotesCriteria extends IssueCriteria {
 			return context.getBuilder().lessThan(attribute, value);
 	}
 
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.Is)
+			return issue.getNumOfVotes() == value;
+		else if (operator == IssueQueryLexer.IsNot)
+			return issue.getNumOfVotes() != value;
+		else if (operator == IssueQueryLexer.IsGreaterThan)
+			return issue.getNumOfVotes() > value;
+		else
+			return issue.getNumOfVotes() < value;
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
+	}
+
 }

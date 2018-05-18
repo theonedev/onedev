@@ -5,9 +5,7 @@ import java.util.Date;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
 
-@Editable(name="opened")
 public class IssueOpened extends IssueEvent implements MarkdownAware {
 
 	public IssueOpened(Issue issue) {
@@ -27,6 +25,16 @@ public class IssueOpened extends IssueEvent implements MarkdownAware {
 	@Override
 	public Date getDate() {
 		return getIssue().getSubmitDate();
+	}
+
+	@Override
+	public String getTitle() {
+		return String.format("[%s] Issue #%d: %s", getIssue().getState(), getIssue().getNumber(), getIssue().getTitle());
+	}
+
+	@Override
+	public String describeAsHtml() {
+		return String.format("<b>%s opened new issue</b>", escape(getUser().getDisplayName()));
 	}
 
 }

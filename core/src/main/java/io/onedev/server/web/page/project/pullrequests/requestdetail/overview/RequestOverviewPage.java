@@ -48,6 +48,7 @@ import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.MergeStrategy;
+import io.onedev.server.model.support.issue.WatchStatus;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.avatar.AvatarLink;
@@ -56,7 +57,6 @@ import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.requestreviewer.ReviewerListPanel;
 import io.onedev.server.web.component.verification.RequiredVerificationsPanel;
-import io.onedev.server.web.component.watchstatus.WatchStatus;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.activity.CommentedActivity;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.activity.OpenedActivity;
@@ -289,8 +289,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 		Form<?> form = new Form<Void>("form");
 		addComment.add(form);
 		
-		String autosaveKey = "autosave:addPullRequestComment:" + getPullRequest().getId();
-		
 		CommentInput input = new CommentInput("input", Model.of(""), false) {
 
 			@Override
@@ -301,11 +299,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected Project getProject() {
 				return RequestOverviewPage.this.getProject();
-			}
-			
-			@Override
-			protected String getAutosaveKey() {
-				return autosaveKey;
 			}
 			
 			@Override
@@ -343,14 +336,12 @@ public class RequestOverviewPage extends RequestDetailPage {
 						newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
 				target.prependJavaScript(script);
 				target.add(newActivityRow);
-				target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 			}
 
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
 				super.onError(target, form);
 				target.add(form);
-				target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 			}
 
 		});
@@ -524,11 +515,11 @@ public class RequestOverviewPage extends RequestDetailPage {
 				PullRequestWatch watch = getPullRequest().getWatch(getLoginUser());
 				if (watch != null) {
 					if (watch.isIgnore())
-						return WatchStatus.IGNORE;
+						return WatchStatus.DO_NOT_WATCH;
 					else
-						return WatchStatus.WATCHING;
+						return WatchStatus.WATCH;
 				} else {
-					return WatchStatus.NOT_WATCHING;
+					return WatchStatus.DEFAULT;
 				}
 			}
 			
@@ -563,7 +554,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onUpdate(AjaxRequestTarget target) {
 				PullRequestWatch watch = getPullRequest().getWatch(getLoginUser());
 				Dao dao = OneDev.getInstance(Dao.class);
-				if (optionModel.getObject() == WatchStatus.WATCHING) {
+				if (optionModel.getObject() == WatchStatus.WATCH) {
 					if (watch != null) {
 						watch.setIgnore(false);
 						watch.setReason(null);
@@ -574,7 +565,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 						getPullRequest().getWatches().add(watch);
 					}
 					dao.persist(watch);
-				} else if (optionModel.getObject() == WatchStatus.NOT_WATCHING) {
+				} else if (optionModel.getObject() == WatchStatus.DEFAULT) {
 					if (watch != null) {
 						dao.remove(watch);
 						getPullRequest().getWatches().remove(watch);

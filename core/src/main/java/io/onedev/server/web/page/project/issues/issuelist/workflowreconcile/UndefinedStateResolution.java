@@ -34,7 +34,7 @@ public class UndefinedStateResolution implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getNewStateChoices() {
 		ProjectPage projectPage = (ProjectPage) WicketUtils.getPage();
-		return projectPage.getProject().getIssueWorkflow().getStates().stream().map(each->each.getName()).collect(Collectors.toList());
+		return projectPage.getProject().getIssueWorkflow().getStateSpecs().stream().map(each->each.getName()).collect(Collectors.toList());
 	}
 	
 }

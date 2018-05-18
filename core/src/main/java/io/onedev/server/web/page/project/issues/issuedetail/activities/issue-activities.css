@@ -31,11 +31,18 @@
 #issue-detail>.main>.activities .activity>.body {
 	margin-top: 8px;
 }
-#issue-detail>.main>.activities .activity>.body>.actions {
+#issue-detail>.main>.activities .activity>.body .actions {
 	margin-top: 8px;
 }
-#issue-detail>.main>.activities .activity>.body>.actions a {
+#issue-detail>.main>.activities .activity>.body .actions a {
 	color: #888;
+	margin-right: 0;
+}
+#issue-detail>.main>.activities .activity>.body .actions .middot {
+	margin: 0 4px;
+}
+#issue-detail>.main>.activities .activity>.body .state-change .plain.diff {
+	margin-bottom: 12px;
 }
 #issue-detail>.main>.activities .activity>.head a {
 	color: #999;

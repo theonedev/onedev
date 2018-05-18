@@ -8,6 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.User;
 
 @SuppressWarnings("serial")
 public class ChangedActivity implements IssueActivity {
@@ -41,7 +42,12 @@ public class ChangedActivity implements IssueActivity {
 
 	@Override
 	public String getAnchor() {
-		return null;
+		return getChange().getAnchor();
+	}
+
+	@Override
+	public User getUser() {
+		return User.getForDisplay(getChange().getUser(), getChange().getUserName());
 	}
 
 }

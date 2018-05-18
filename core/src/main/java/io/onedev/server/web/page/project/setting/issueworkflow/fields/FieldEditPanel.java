@@ -47,7 +47,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 		
 		FieldBean bean = new FieldBean();
 		if (fieldIndex != -1)
-			bean.setField(SerializationUtils.clone(getWorkflow().getFields().get(fieldIndex)));
+			bean.setField(SerializationUtils.clone(getWorkflow().getFieldSpecs().get(fieldIndex)));
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -84,7 +84,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 
 				InputSpec field = bean.getField();
 				if (fieldIndex != -1) { 
-					InputSpec oldField = getWorkflow().getFields().get(fieldIndex);
+					InputSpec oldField = getWorkflow().getFieldSpecs().get(fieldIndex);
 					if (!field.getName().equals(oldField.getName()) && getWorkflow().getField(field.getName()) != null) {
 						editor.getErrorContext(new PathSegment.Property("field"))
 								.getErrorContext(new PathSegment.Property("name"))
@@ -98,15 +98,13 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 
 				if (!editor.hasErrors(true)) {
 					if (fieldIndex != -1) {
-						InputSpec oldField = getWorkflow().getFields().get(fieldIndex);
-						if (!field.getName().equals(oldField.getName())) {
+						InputSpec oldField = getWorkflow().getFieldSpecs().get(fieldIndex);
+						if (!field.getName().equals(oldField.getName())) 
 							getWorkflow().onRenameField(oldField.getName(), field.getName());
-							getProject().getIssueListCustomization().onRenameField(oldField.getName(), field.getName());
-						}
-						getWorkflow().getFields().set(fieldIndex, bean.getField());
+						getWorkflow().getFieldSpecs().set(fieldIndex, bean.getField());
 						getWorkflow().setReconciled(false);
 					} else {
-						getWorkflow().getFields().add(bean.getField());
+						getWorkflow().getFieldSpecs().add(bean.getField());
 					}
 					getProject().setIssueWorkflow(getWorkflow());
 					OneDev.getInstance(ProjectManager.class).save(getProject());
@@ -147,7 +145,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	public List<String> getInputNames() {
 		List<String> inputNames = new ArrayList<>();
 		int currentIndex = 0;
-		for (InputSpec field: getWorkflow().getFields()) {
+		for (InputSpec field: getWorkflow().getFieldSpecs()) {
 			if (currentIndex != fieldIndex)
 				inputNames.add(field.getName());
 			currentIndex++;

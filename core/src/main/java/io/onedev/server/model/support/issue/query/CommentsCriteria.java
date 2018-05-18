@@ -31,4 +31,21 @@ public class CommentsCriteria extends IssueCriteria {
 			return context.getBuilder().lessThan(attribute, value);
 	}
 
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.Is)
+			return issue.getNumOfComments() == value;
+		else if (operator == IssueQueryLexer.IsNot)
+			return issue.getNumOfComments() != value;
+		else if (operator == IssueQueryLexer.IsGreaterThan)
+			return issue.getNumOfComments() > value;
+		else
+			return issue.getNumOfComments() < value;
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
+	}
+
 }

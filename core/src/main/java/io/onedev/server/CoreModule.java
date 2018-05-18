@@ -77,6 +77,9 @@ import io.onedev.server.command.ResetAdminPasswordCommand;
 import io.onedev.server.command.RestoreDBCommand;
 import io.onedev.server.command.UpgradeCommand;
 import io.onedev.server.exception.OneException;
+import io.onedev.server.git.GitFilter;
+import io.onedev.server.git.GitPostReceiveCallback;
+import io.onedev.server.git.GitPreReceiveCallback;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.git.jackson.GitObjectMapperConfigurator;
 import io.onedev.server.manager.AttachmentManager;
@@ -96,6 +99,8 @@ import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.IssueNotificationManager;
+import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.IssueRelationManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
@@ -105,6 +110,7 @@ import io.onedev.server.manager.MembershipManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.PullRequestCommentManager;
 import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.manager.PullRequestNotificationManager;
 import io.onedev.server.manager.PullRequestReferenceManager;
 import io.onedev.server.manager.PullRequestStatusChangeManager;
 import io.onedev.server.manager.PullRequestTaskManager;
@@ -137,16 +143,18 @@ import io.onedev.server.manager.impl.DefaultIssueChangeManager;
 import io.onedev.server.manager.impl.DefaultIssueCommentManager;
 import io.onedev.server.manager.impl.DefaultIssueFieldManager;
 import io.onedev.server.manager.impl.DefaultIssueManager;
+import io.onedev.server.manager.impl.DefaultIssueNotificationManager;
+import io.onedev.server.manager.impl.DefaultIssueQuerySettingManager;
 import io.onedev.server.manager.impl.DefaultIssueRelationManager;
 import io.onedev.server.manager.impl.DefaultIssueVoteManager;
 import io.onedev.server.manager.impl.DefaultIssueWatchManager;
 import io.onedev.server.manager.impl.DefaultMailManager;
 import io.onedev.server.manager.impl.DefaultMarkdownManager;
 import io.onedev.server.manager.impl.DefaultMembershipManager;
-import io.onedev.server.manager.impl.DefaultNotificationManager;
 import io.onedev.server.manager.impl.DefaultProjectManager;
 import io.onedev.server.manager.impl.DefaultPullRequestCommentManager;
 import io.onedev.server.manager.impl.DefaultPullRequestManager;
+import io.onedev.server.manager.impl.DefaultPullRequestNotificationManager;
 import io.onedev.server.manager.impl.DefaultPullRequestReferenceManager;
 import io.onedev.server.manager.impl.DefaultPullRequestStatusChangeManager;
 import io.onedev.server.manager.impl.DefaultPullRequestTaskManager;
@@ -161,7 +169,6 @@ import io.onedev.server.manager.impl.DefaultUserManager;
 import io.onedev.server.manager.impl.DefaultVerificationManager;
 import io.onedev.server.manager.impl.DefaultVisitManager;
 import io.onedev.server.manager.impl.DefaultWorkExecutor;
-import io.onedev.server.manager.impl.NotificationManager;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
 import io.onedev.server.persistence.DefaultIdManager;
@@ -203,6 +210,7 @@ import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator
 import io.onedev.server.util.jetty.DefaultJettyRunner;
 import io.onedev.server.util.jetty.JettyRunner;
 import io.onedev.server.util.markdown.MarkdownProcessor;
+import io.onedev.server.util.readcallback.ReadCallbackServlet;
 import io.onedev.server.util.validation.DefaultEntityValidator;
 import io.onedev.server.util.validation.EntityValidator;
 import io.onedev.server.util.validation.ValidatorProvider;
@@ -313,7 +321,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentRelationManager.class).to(DefaultCodeCommentRelationManager.class);
 		bind(PullRequestReferenceManager.class).to(DefaultPullRequestReferenceManager.class);
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
-		bind(NotificationManager.class).to(DefaultNotificationManager.class);
+		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
+		bind(IssueNotificationManager.class).to(DefaultIssueNotificationManager.class);
 		bind(IssueWatchManager.class).to(DefaultIssueWatchManager.class);
 		bind(IssueChangeManager.class).to(DefaultIssueChangeManager.class);
 		bind(IssueVoteManager.class).to(DefaultIssueVoteManager.class);
@@ -325,6 +334,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(SessionFactory.class).toProvider(SessionFactoryProvider.class);
 		bind(EntityManagerFactory.class).toProvider(SessionFactoryProvider.class);
 		bind(IssueCommentManager.class).to(DefaultIssueCommentManager.class);
+		bind(IssueQuerySettingManager.class).to(DefaultIssueQuerySettingManager.class);
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
@@ -353,6 +363,11 @@ public class CoreModule extends AbstractPluginModule {
 		bind(SearchManager.class).to(DefaultSearchManager.class);
 		
 		bind(EntityValidator.class).to(DefaultEntityValidator.class);
+		
+		bind(GitFilter.class);
+		bind(GitPreReceiveCallback.class);
+		bind(GitPostReceiveCallback.class);
+		bind(ReadCallbackServlet.class);
 	}
 	
 	private void configureRestServices() {

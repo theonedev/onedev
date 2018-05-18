@@ -8,6 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.User;
 
 @SuppressWarnings("serial")
 public class OpenedActivity implements IssueActivity {
@@ -44,4 +45,9 @@ public class OpenedActivity implements IssueActivity {
 		return null;
 	}
 
+	@Override
+	public User getUser() {
+		return User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName());
+	}
+	
 }

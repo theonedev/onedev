@@ -34,17 +34,21 @@ public class IssueWorkflow implements Serializable, InputContext {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private List<StateSpec> states = new ArrayList<>();
+	private List<StateSpec> stateSpecs = new ArrayList<>();
 	
-	private transient Map<String, StateSpec> stateMap;
+	private transient Map<String, StateSpec> stateSpecMap;
 	
-	private List<StateTransition> stateTransitions = new ArrayList<>();
+	private List<TransitionSpec> transitionSpecs = new ArrayList<>();
 	
-	private List<InputSpec> fields = new ArrayList<>();
+	private List<InputSpec> fieldSpecs = new ArrayList<>();
 
+	private Map<String, String> queries = new LinkedHashMap<>();
+	
+	private List<String> listFields = new ArrayList<>();
+	
 	private boolean reconciled = true;
 	
-	private transient Map<String, InputSpec> fieldMap;
+	private transient Map<String, InputSpec> fieldSpecMap;
 	
 	public IssueWorkflow() {
 		ChoiceInput type = new ChoiceInput();
@@ -71,39 +75,39 @@ public class IssueWorkflow implements Serializable, InputContext {
 		specifiedChoices.setChoices(choices);
 		type.setChoiceProvider(specifiedChoices);
 		
-		fields.add(type);
+		fieldSpecs.add(type);
 		
-		ChoiceInput severity = new ChoiceInput();
-		severity.setName("Severity");
+		ChoiceInput priority = new ChoiceInput();
+		priority.setName("Priority");
 		specifiedChoices = new SpecifiedChoices();
 
 		choices = new ArrayList<>(); 
 		
-		Choice minor = new Choice();
-		minor.setValue("Minor");
-		minor.setColor("#d9ead3");
-		choices.add(minor);
+		Choice low = new Choice();
+		low.setValue("Low");
+		low.setColor("#d9ead3");
+		choices.add(low);
 
 		Choice normal = new Choice();
 		normal.setValue("Normal");
 		normal.setColor("#f4cccc");
 		choices.add(normal);
 
-		Choice major = new Choice();
-		major.setValue("Major");
-		major.setColor("#cc0000");
-		choices.add(major);
+		Choice high = new Choice();
+		high.setValue("High");
+		high.setColor("#cc0000");
+		choices.add(high);
 		
 		specifiedChoices.setChoices(choices);
-		severity.setChoiceProvider(specifiedChoices);
+		priority.setChoiceProvider(specifiedChoices);
 		
-		fields.add(severity);
+		fieldSpecs.add(priority);
 
 		UserChoiceInput assignee = new UserChoiceInput();
 		assignee.setChoiceProvider(new ProjectReaders());
 		assignee.setName("Assignee");
 		
-		fields.add(assignee);
+		fieldSpecs.add(assignee);
 		
 		ChoiceInput resolution = new ChoiceInput();
 		resolution.setName("Resolution");
@@ -126,7 +130,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 		specifiedChoices.setChoices(choices);
 		resolution.setChoiceProvider(specifiedChoices);
 		
-		fields.add(resolution);
+		fieldSpecs.add(resolution);
 
 		IssueChoiceInput duplicateIssue = new IssueChoiceInput();
 		duplicateIssue.setName("Duplicate With");
@@ -136,30 +140,30 @@ public class IssueWorkflow implements Serializable, InputContext {
 		valueIsOneOf.setValues(Lists.newArrayList("Duplicated"));
 		showCondition.setValueMatcher(valueIsOneOf);
 		duplicateIssue.setShowCondition(showCondition);
-		fields.add(duplicateIssue);
+		fieldSpecs.add(duplicateIssue);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
 		open.setColor("#f1c232");
-		open.setFields(Lists.newArrayList("Type", "Severity"));
+		open.setFields(Lists.newArrayList("Type", "Priority"));
 		
-		states.add(open);
+		stateSpecs.add(open);
 		
 		StateSpec assigned = new StateSpec();
 		assigned.setName("Assigned");
 		assigned.setColor("#9900ff");
 		assigned.setFields(Lists.newArrayList("Assignee"));
 		
-		states.add(assigned);
+		stateSpecs.add(assigned);
 		
 		StateSpec closed = new StateSpec();
 		closed.setColor("#cccccc");
 		closed.setName("Closed");
 		closed.setFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		
-		states.add(closed);
+		stateSpecs.add(closed);
 		
-		StateTransition transition = new StateTransition();
+		TransitionSpec transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open", "Assigned"));
 		transition.setToState("Closed");
 		PressButton pressButton = new PressButton();
@@ -167,9 +171,9 @@ public class IssueWorkflow implements Serializable, InputContext {
 		pressButton.setAuthorized(new ProjectWriters());
 		transition.setOnAction(pressButton);
 		
-		stateTransitions.add(transition);
+		transitionSpecs.add(transition);
 		
-		transition = new StateTransition();
+		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
 		transition.setToState("Assigned");
 		pressButton = new PressButton();
@@ -177,9 +181,9 @@ public class IssueWorkflow implements Serializable, InputContext {
 		pressButton.setAuthorized(new ProjectWriters());
 		transition.setOnAction(pressButton);
 		
-		stateTransitions.add(transition);
+		transitionSpecs.add(transition);
 		
-		transition = new StateTransition();
+		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Open");
 		TransitionPrerequisite prerequisite = new TransitionPrerequisite();
@@ -192,9 +196,9 @@ public class IssueWorkflow implements Serializable, InputContext {
 		pressButton.setAuthorized(new ProjectWriters());
 		transition.setOnAction(pressButton);
 		
-		stateTransitions.add(transition);
+		transitionSpecs.add(transition);
 		
-		transition = new StateTransition();
+		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Assigned");
 		prerequisite = new TransitionPrerequisite();
@@ -207,31 +211,60 @@ public class IssueWorkflow implements Serializable, InputContext {
 		pressButton.setAuthorized(new ProjectWriters());
 		transition.setOnAction(pressButton);
 		
-		stateTransitions.add(transition);
+		transitionSpecs.add(transition);
+		
+		listFields.add("Type");
+		listFields.add("Priority");
+		listFields.add("Assignee");
+		
+		queries.put("All", "all");
+		queries.put("Outstanding", "\"State\" is not \"Closed\"");
+		queries.put("Closed", "\"State\" is \"Closed\"");
+		queries.put("Added recently", "\"Submit Date\" is after \"one week ago\"");
+		queries.put("Updated recently", "\"Update Date\" is after \"one week ago\"");
+		queries.put("Submitted by me", "\"Submitter\" is me");
+		queries.put("Assigned to me", "\"Assignee\" is me");
+		queries.put("Hight Priority", "\"Priority\" is \"High\"");
 	}
 	
-	public List<StateSpec> getStates() {
-		return states;
+	public List<StateSpec> getStateSpecs() {
+		return stateSpecs;
 	}
 
-	public void setStates(List<StateSpec> states) {
-		this.states = states;
+	public void setStateSpecs(List<StateSpec> stateSpecs) {
+		this.stateSpecs = stateSpecs;
 	}
 
-	public List<StateTransition> getStateTransitions() {
-		return stateTransitions;
+	public List<TransitionSpec> getTransitionSpecs() {
+		return transitionSpecs;
 	}
 
-	public void setStateTransitions(List<StateTransition> stateTransitions) {
-		this.stateTransitions = stateTransitions;
+	public void setTransitionSpecs(List<TransitionSpec> stateTransitions) {
+		this.transitionSpecs = stateTransitions;
 	}
 
-	public List<InputSpec> getFields() {
-		return fields;
+	public List<InputSpec> getFieldSpecs() {
+		return fieldSpecs;
 	}
 
-	public void setFields(List<InputSpec> fields) {
-		this.fields = fields;
+	public void setFieldSpecs(List<InputSpec> fieldSpecs) {
+		this.fieldSpecs = fieldSpecs;
+	}
+
+	public Map<String, String> getQueries() {
+		return queries;
+	}
+
+	public void setQueries(Map<String, String> queries) {
+		this.queries = queries;
+	}
+
+	public List<String> getListFields() {
+		return listFields;
+	}
+
+	public void setListFields(List<String> listFields) {
+		this.listFields = listFields;
 	}
 
 	public boolean isReconciled() {
@@ -242,40 +275,40 @@ public class IssueWorkflow implements Serializable, InputContext {
 		this.reconciled = reconciled;
 	}
 
-	private Map<String, InputSpec> getFieldMap() {
-		if (fieldMap == null) {
-			fieldMap = new LinkedHashMap<>();
-			for (InputSpec field: getFields())
-				fieldMap.put(field.getName(), field);
+	private Map<String, InputSpec> getFieldSpecMap() {
+		if (fieldSpecMap == null) {
+			fieldSpecMap = new LinkedHashMap<>();
+			for (InputSpec field: getFieldSpecs())
+				fieldSpecMap.put(field.getName(), field);
 		}
-		return fieldMap;
+		return fieldSpecMap;
 	}
 	
-	private Map<String, StateSpec> getStateMap() {
-		if (stateMap == null) {
-			stateMap = new LinkedHashMap<>();
-			for (StateSpec state: getStates())
-				stateMap.put(state.getName(), state);
+	private Map<String, StateSpec> getStateSpecMap() {
+		if (stateSpecMap == null) {
+			stateSpecMap = new LinkedHashMap<>();
+			for (StateSpec state: getStateSpecs())
+				stateSpecMap.put(state.getName(), state);
 		}
-		return stateMap;
+		return stateSpecMap;
 	}
 	
 	@Override
 	public List<String> getInputNames() {
-		return new ArrayList<>(getFieldMap().keySet());
+		return new ArrayList<>(getFieldSpecMap().keySet());
 	}
 	
 	@Override
 	public InputSpec getInput(String inputName) {
-		InputSpec field = getFieldMap().get(inputName);
+		InputSpec field = getFieldSpecMap().get(inputName);
 		if (field == null)
 			throw new RuntimeException("Unable to find input: " + inputName);
 		return field;
 	}
 	
 	public List<String> onDeleteState(String stateName) {
-		for (Iterator<StateTransition> it = getStateTransitions().iterator(); it.hasNext();) {
-			StateTransition transition = it.next();
+		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
+			TransitionSpec transition = it.next();
 			transition.getFromStates().remove(stateName);
 			if (transition.getFromStates().isEmpty() || transition.getToState().equals(stateName))
 				it.remove();
@@ -284,7 +317,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 	}
 	
 	public void onRenameState(String oldName, String newName) {
-		for (StateTransition transition: getStateTransitions()) {
+		for (TransitionSpec transition: getTransitionSpecs()) {
 			int index = transition.getFromStates().indexOf(oldName);
 			if (index != -1)
 				transition.getFromStates().set(index, newName);
@@ -295,20 +328,20 @@ public class IssueWorkflow implements Serializable, InputContext {
 	
 	@Nullable
 	public StateSpec getState(String stateName) {
-		return getStateMap().get(stateName);
+		return getStateSpecMap().get(stateName);
 	}
 
 	public int getStateIndex(String stateName) {
-		for (int i=0; i<getStates().size(); i++) {
-			if (getStates().get(i).getName().equals(stateName))
+		for (int i=0; i<getStateSpecs().size(); i++) {
+			if (getStateSpecs().get(i).getName().equals(stateName))
 				return i;
 		}
 		return -1;
 	}
 	
-	public int getTransitionIndex(StateTransition transition) {
-		for (int i=0; i<getStateTransitions().size(); i++) {
-			if (getStateTransitions().get(i) == transition)
+	public int getTransitionIndex(TransitionSpec transition) {
+		for (int i=0; i<getTransitionSpecs().size(); i++) {
+			if (getTransitionSpecs().get(i) == transition)
 				return i;
 		}
 		return -1;
@@ -316,72 +349,76 @@ public class IssueWorkflow implements Serializable, InputContext {
 	
 	@Nullable
 	public InputSpec getField(String fieldName) {
-		return getFieldMap().get(fieldName);
+		return getFieldSpecMap().get(fieldName);
 	}
 
 	public int getFieldIndex(String fieldName) {
-		for (int i=0; i<getFields().size(); i++) {
-			if (getFields().get(i).getName().equals(fieldName))
+		for (int i=0; i<getFieldSpecs().size(); i++) {
+			if (getFieldSpecs().get(i).getName().equals(fieldName))
 				return i;
 		}
 		return -1;
 	}
 	
 	public void onRenameField(String oldName, String newName) {
-		for (StateSpec state: getStates()) 
+		for (StateSpec state: getStateSpecs()) 
 			state.onFieldRename(oldName, newName);
-		for (StateTransition transition: getStateTransitions())
+		for (TransitionSpec transition: getTransitionSpecs())
 			transition.onFieldRename(oldName, newName);
-		for (InputSpec field: getFields())
+		for (InputSpec field: getFieldSpecs())
 			field.onInputRename(oldName, newName);
+		int index = getListFields().indexOf(oldName);
+		if (index != -1)
+			getListFields().set(index, newName);
 	}
 	
 	public List<String> onDeleteField(String fieldName) {
 		List<String> usages = new ArrayList<>();
-		for (StateSpec state: getStates())  
+		for (StateSpec state: getStateSpecs())  
 			usages.addAll(UsageUtils.prependCategory("Issue state '" + state.getName() + "'", state.onFieldDelete(fieldName)));
-		for (StateTransition transition: getStateTransitions()) 
+		for (TransitionSpec transition: getTransitionSpecs()) 
 			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onFieldDelete(fieldName)));
-		for (InputSpec field: getFields())
+		for (InputSpec field: getFieldSpecs())
 			usages.addAll(UsageUtils.prependCategory("Issue field '" + field.getName() + "'", field.onInputDelete(fieldName)));
+		getListFields().remove(fieldName);
 		return usages;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		for (StateTransition transition: getStateTransitions())
+		for (TransitionSpec transition: getTransitionSpecs())
 			transition.onRenameUser(oldName, newName);
-		for (InputSpec field: getFields())
+		for (InputSpec field: getFieldSpecs())
 			field.onRenameUser(oldName, newName);
 	}
 	
 	public List<String> onDeleteUser(String userName) {
 		List<String> usages = new ArrayList<>();
-		for (InputSpec field: getFields())
+		for (InputSpec field: getFieldSpecs())
 			usages.addAll(UsageUtils.prependCategory("Issue field '" + field.getName() + "'" , field.onDeleteUser(userName)));
-		for (StateTransition transition: getStateTransitions())
+		for (TransitionSpec transition: getTransitionSpecs())
 			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onDeleteUser(userName)));
 		return usages;
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
-		for (StateTransition transition: getStateTransitions()) 
+		for (TransitionSpec transition: getTransitionSpecs()) 
 			transition.onRenameGroup(oldName, newName);
-		for (InputSpec field: getFields())
+		for (InputSpec field: getFieldSpecs())
 			field.onRenameGroup(oldName, newName);
 	}
 	
 	public List<String> onDeleteGroup(String groupName) {
 		List<String> usages = new ArrayList<>();
-		for (InputSpec field: getFields()) 
+		for (InputSpec field: getFieldSpecs()) 
 			usages.addAll(UsageUtils.prependCategory("Issue field '"  + field.getName() + "'", field.onDeleteGroup(groupName)));
-		for (StateTransition transition: getStateTransitions())
+		for (TransitionSpec transition: getTransitionSpecs())
 			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onDeleteGroup(groupName)));
 		return usages;
 	}
 	
 	public StateSpec getInitialState() {
-		if (!getStates().isEmpty())
-			return getStates().iterator().next();
+		if (!getStateSpecs().isEmpty())
+			return getStateSpecs().iterator().next();
 		else
 			throw new OneException("No any issue state is defined");
 	}

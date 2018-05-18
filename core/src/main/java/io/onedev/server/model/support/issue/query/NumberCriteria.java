@@ -11,16 +11,16 @@ public class NumberCriteria extends IssueCriteria {
 
 	private final int operator;
 	
-	private final int value;
+	private final long value;
 	
-	public NumberCriteria(int value, int operator) {
+	public NumberCriteria(long value, int operator) {
 		this.operator = operator;
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(QueryBuildContext context) {
-		Path<Integer> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.NUMBER));
+		Path<Long> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.NUMBER));
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsNot)
@@ -29,6 +29,23 @@ public class NumberCriteria extends IssueCriteria {
 			return context.getBuilder().greaterThan(attribute, value);
 		else
 			return context.getBuilder().lessThan(attribute, value);
+	}
+
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.Is)
+			return issue.getNumber() == value;
+		else if (operator == IssueQueryLexer.IsNot)
+			return issue.getNumber() != value;
+		else if (operator == IssueQueryLexer.IsGreaterThan)
+			return issue.getNumber() > value;
+		else
+			return issue.getNumber() < value;
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
 	}
 
 }

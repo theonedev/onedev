@@ -23,9 +23,9 @@ import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommented;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommented;
 import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
@@ -38,6 +38,7 @@ import io.onedev.server.event.pullrequest.PullRequestVerificationSucceeded;
 import io.onedev.server.manager.BranchWatchManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
+import io.onedev.server.manager.PullRequestNotificationManager;
 import io.onedev.server.manager.PullRequestTaskManager;
 import io.onedev.server.manager.PullRequestWatchManager;
 import io.onedev.server.manager.UrlManager;
@@ -45,11 +46,11 @@ import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.BranchWatch;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestStatusChange;
+import io.onedev.server.model.PullRequestStatusChange.Type;
 import io.onedev.server.model.PullRequestTask;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.ReviewInvitation;
 import io.onedev.server.model.User;
-import io.onedev.server.model.PullRequestStatusChange.Type;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.QualityCheckStatus;
@@ -57,7 +58,7 @@ import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.markdown.MentionParser;
 
 @Singleton
-public class DefaultNotificationManager implements NotificationManager {
+public class DefaultPullRequestNotificationManager implements PullRequestNotificationManager {
 	
 	private final BranchWatchManager branchWatchManager;
 	
@@ -74,7 +75,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	private final PullRequestWatchManager pullRequestWatchManager;
 	
 	@Inject
-	public DefaultNotificationManager(MarkdownManager markdownManager, BranchWatchManager branchWatchManager, 
+	public DefaultPullRequestNotificationManager(MarkdownManager markdownManager, BranchWatchManager branchWatchManager, 
 			MailManager mailManager, UrlManager urlManager, VisitManager visitInfoManager, 
 			PullRequestWatchManager pullRequestWatchManager, PullRequestTaskManager pullRequestTaskManager) {
 		this.branchWatchManager = branchWatchManager;

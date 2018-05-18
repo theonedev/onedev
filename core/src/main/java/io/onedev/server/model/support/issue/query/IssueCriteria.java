@@ -27,4 +27,9 @@ public abstract class IssueCriteria implements Serializable {
 			return root.get(pathName);
 		}
 	}
+	
+	public abstract boolean matches(Issue issue);
+	
+	public abstract boolean needsLogin();
+	
 }

@@ -11,6 +11,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import io.onedev.server.model.support.issue.changedata.ChangeData;
+
 @Entity
 @Table(indexes={
 		@Index(columnList="g_issue_id"), @Index(columnList="g_user_id")})
@@ -31,17 +33,10 @@ public class IssueChange extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date;
 	
-	@Column(nullable=false)
-	private String property;
-	
 	@Lob
 	@Column(length=65535)
-	private String prevContent;
+	private ChangeData data;
 
-	@Lob
-	@Column(length=65535)
-	private String content;
-	
 	public Issue getIssue() {
 		return issue;
 	}
@@ -74,28 +69,12 @@ public class IssueChange extends AbstractEntity {
 		this.date = date;
 	}
 
-	public String getProperty() {
-		return property;
+	public ChangeData getData() {
+		return data;
 	}
 
-	public void setProperty(String property) {
-		this.property = property;
-	}
-
-	public String getPrevContent() {
-		return prevContent;
-	}
-
-	public void setPrevContent(String prevContent) {
-		this.prevContent = prevContent;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
+	public void setData(ChangeData data) {
+		this.data = data;
 	}
 
 	public String getAnchor() {

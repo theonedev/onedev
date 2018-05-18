@@ -80,7 +80,6 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.issue.IssueListCustomization;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
@@ -169,14 +168,13 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
+	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private IssueWorkflow issueWorkflow = new IssueWorkflow();
 
-	@Lob
-	@Column(nullable=false, length=65535)
-	private IssueListCustomization issueListCustomization = new IssueListCustomization();
-	
 	private transient Repository repository;
 	
     private transient Map<BlobIdent, Blob> blobCache;
@@ -800,12 +798,12 @@ public class Project extends AbstractEntity {
 		this.issueWorkflow = issueWorkflow;
 	}
 
-	public IssueListCustomization getIssueListCustomization() {
-		return issueListCustomization;
+	public Collection<IssueQuerySetting> getIssueQuerySettings() {
+		return issueQuerySettings;
 	}
 
-	public void setIssueListCustomization(IssueListCustomization issueListCustomization) {
-		this.issueListCustomization = issueListCustomization;
+	public void setIssueQuerySettings(Collection<IssueQuerySetting> issueQuerySettings) {
+		this.issueQuerySettings = issueQuerySettings;
 	}
 
 	public long getVersion() {

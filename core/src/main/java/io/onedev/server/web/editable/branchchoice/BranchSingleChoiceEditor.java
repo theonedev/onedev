@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.branchchoice;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -42,7 +44,15 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
         // add this to control allowClear flag of select2
     	input.setRequired(propertyDescriptor.isPropertyRequired());
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
-        
+		input.add(new AjaxFormComponentUpdatingBehavior("change"){
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
+		
         add(input);
 	}
 

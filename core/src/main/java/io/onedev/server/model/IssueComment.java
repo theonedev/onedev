@@ -10,7 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 @Entity
 @Table(indexes={
@@ -19,9 +18,6 @@ public class IssueComment extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	@Version
-	private long version;
-	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Issue issue;
@@ -38,14 +34,6 @@ public class IssueComment extends AbstractEntity {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private String content;
-
-	public long getVersion() {
-		return version;
-	}
-
-	public void setVersion(long version) {
-		this.version = version;
-	}
 
 	public Issue getIssue() {
 		return issue;

@@ -1,7 +1,6 @@
 package io.onedev.server.manager.impl;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,7 +13,6 @@ import org.hibernate.query.Query;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.ProjectRenamed;
 import io.onedev.server.event.lifecycle.SystemStarted;
 import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.CacheManager;
@@ -30,7 +28,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityPersisted;
-import io.onedev.server.persistence.dao.EntityRemoved;
 import io.onedev.server.util.UsageUtils;
 import io.onedev.utils.StringUtils;
 
@@ -219,28 +216,6 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 		return null;
 	}
 
-	@Transactional
-	@Listen
-	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Project) {
-			Project project = (Project) event.getEntity();
-			for (User user: findAll()) {
-				user.getIssueQueries().remove(project.getName());
-				save(user);
-			}
-		}
-	}
-	
-	@Transactional
-	@Listen
-	public void on(ProjectRenamed event) {
-		for (User user: findAll()) {
-			LinkedHashMap<String, String> issueQueriesOfProject = user.getIssueQueries().remove(event.getOldName());
-			user.getIssueQueries().put(event.getProject().getName(), issueQueriesOfProject);
-			save(user);
-		}
-	}
-	
 	@Listen
 	public void on(SystemStarted event) {
 		for (User user: findAll()) {

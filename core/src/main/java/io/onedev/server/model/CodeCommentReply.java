@@ -11,7 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -43,9 +42,6 @@ public class CodeCommentReply extends AbstractEntity {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private String content;
-	
-	@Version
-	private long version;
 	
 	public CodeComment getComment() {
 		return comment;
@@ -81,14 +77,6 @@ public class CodeCommentReply extends AbstractEntity {
 		this.date = date;
 	}
 
-	public long getVersion() {
-		return version;
-	}
-
-	public void setVersion(long version) {
-		this.version = version;
-	}
-	
 	public String getAnchor() {
 		return getClass().getSimpleName() + "-" + getId();
 	}

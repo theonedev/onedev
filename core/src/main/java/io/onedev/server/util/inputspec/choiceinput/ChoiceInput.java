@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -78,6 +79,21 @@ public class ChoiceInput extends InputSpec {
 	@Override
 	public List<String> convertToStrings(Object value) {
 		return Lists.newArrayList((String) value);
+	}
+
+	@Override
+	public long getOrdinal(OneContext context, Object fieldValue) {
+		if (fieldValue != null) {
+			OneContext.push(context);
+			try {
+				List<String> choices = new ArrayList<>(getChoiceProvider().getChoices(false).keySet());
+				return choices.indexOf(fieldValue);
+			} finally {
+				OneContext.pop();
+			}
+		} else {
+			return super.getOrdinal(context, fieldValue);
+		}
 	}
 
 }

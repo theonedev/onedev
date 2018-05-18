@@ -1,8 +1,11 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.util.Objects;
+
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 
 public class BooleanFieldCriteria extends FieldCriteria {
@@ -26,6 +29,19 @@ public class BooleanFieldCriteria extends FieldCriteria {
 			return context.getBuilder().equal(attribute, String.valueOf(value));
 		else 
 			return context.getBuilder().notEqual(attribute, String.valueOf(value));
+	}
+
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.Is)
+			return Objects.equals(value, getFieldValue(issue));
+		else
+			return !Objects.equals(value, getFieldValue(issue));
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
 	}
 
 }

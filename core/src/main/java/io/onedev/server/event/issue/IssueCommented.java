@@ -5,9 +5,7 @@ import java.util.Date;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
 
-@Editable(name="commented")
 public class IssueCommented extends IssueEvent implements MarkdownAware {
 
 	private final IssueComment comment;
@@ -28,12 +26,25 @@ public class IssueCommented extends IssueEvent implements MarkdownAware {
 
 	@Override
 	public User getUser() {
-		return comment.getUser();
+		return User.getForDisplay(comment.getUser(), comment.getUserName());
 	}
 
 	@Override
 	public Date getDate() {
 		return comment.getDate();
+	}
+
+	@Override
+	public String getTitle() {
+		return String.format("[Commented] Issue #%d: %s", getIssue().getNumber(), getIssue().getTitle());
+	}
+
+	@Override
+	public String describeAsHtml() {
+		StringBuilder builder = new StringBuilder(String.format("<b>%s added new comment</b>", escape(getUser().getDisplayName())));
+		builder.append("<p style='margin: 16px 0;'>");
+		builder.append(escape(comment.getContent()));
+		return builder.toString();
 	}
 
 }

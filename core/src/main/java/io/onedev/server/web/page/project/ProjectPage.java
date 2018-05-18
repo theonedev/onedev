@@ -27,9 +27,12 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -151,19 +154,25 @@ public abstract class ProjectPage extends LayoutPage {
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 								String query = null;
-								Map<String, String> issueQueries = null;
-								if (getLoginUser() != null)
-									issueQueries = getLoginUser().getIssueQueries().get(getProject().getName());
-								if (issueQueries == null)
-									issueQueries = new HashMap<>();
-								
-								if (!issueQueries.isEmpty())
-									query = issueQueries.values().iterator().next();
-								if (query == null && !getProject().getIssueListCustomization().getSavedQueries().isEmpty())
-									query = getProject().getIssueListCustomization().getSavedQueries().values().iterator().next();
-								return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, IssueListPage.paramsOf(getProject(), query));
+								List<String> queries = new ArrayList<>();
+								if (getLoginUser() != null) {
+									IssueQuerySetting setting = OneDev.getInstance(IssueQuerySettingManager.class).find(getProject(), getLoginUser());
+									if (setting != null)
+										queries.addAll(setting.getUserQueries().values());
+								}
+								queries.addAll(getProject().getIssueWorkflow().getQueries().values());
+								for (String each: queries) {
+									try {
+										if (getLoginUser() != null || !IssueQuery.parse(getProject(), each).needsLogin()) {  
+											query = each;
+											break;
+										}
+									} catch (Exception e) {
+									}
+								} 
+								PageParameters params = IssueListPage.paramsOf(getProject(), query);
+								return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, params);
 							}
-							
 						};
 					}
 					

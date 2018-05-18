@@ -32,6 +32,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.query.IssueQueryParser.AllCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.AndCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.BracedCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.CriteriaContext;
@@ -111,6 +112,7 @@ public class IssueQuery implements Serializable {
 		return query;
 	}
 
+	@Nullable
 	public IssueCriteria getCriteria() {
 		return criteria;
 	}
@@ -206,15 +208,11 @@ public class IssueQuery implements Serializable {
 					
 					@Override
 					public IssueCriteria visitMineCriteria(MineCriteriaContext ctx) {
-						if (SecurityUtils.getUser() == null)
-							throw new OneException("Please login to perform this query");
-						
 						IssueCriteria submitterCriteria = new SubmitterCriteria(SecurityUtils.getUser(), IssueQueryLexer.Is);
 						List<IssueCriteria> fieldCriterias = new ArrayList<>();
-						for (InputSpec field: project.getIssueWorkflow().getFields()) {
+						for (InputSpec field: project.getIssueWorkflow().getFieldSpecs()) {
 							if (field instanceof UserChoiceInput) {
-								IssueCriteria fieldCriteria = new ChoiceFieldCriteria(field.getName(), 
-										SecurityUtils.getUser().getName(), -1, IssueQueryLexer.Is);
+								IssueCriteria fieldCriteria = new FieldUnaryCriteria(field.getName(), IssueQueryLexer.IsMe);
 								fieldCriterias.add(fieldCriteria);
 							} 
 						}
@@ -226,6 +224,11 @@ public class IssueQuery implements Serializable {
 						}
 					}
 
+					@Override
+					public IssueCriteria visitAllCriteria(AllCriteriaContext ctx) {
+						return null;
+					}
+					
 					@Override
 					public IssueCriteria visitUnaryCriteria(UnaryCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted().getText());
@@ -397,8 +400,6 @@ public class IssueQuery implements Serializable {
 		case IssueQueryLexer.IsNotMe:
 			if (!fieldName.equals(Issue.SUBMITTER) && !(field instanceof UserChoiceInput))
 				throw newOperatorException(fieldName, operator);
-			else if (SecurityUtils.getUser() == null)
-				throw new OneException("Please login to perform this query");
 			break;
 		case IssueQueryLexer.IsBefore:
 		case IssueQueryLexer.IsAfter:
@@ -441,6 +442,14 @@ public class IssueQuery implements Serializable {
 				throw newOperatorException(fieldName, operator);
 			break;
 		}
+	}
+	
+	public boolean needsLogin() {
+		return criteria != null && criteria.needsLogin();
+	}
+	
+	public boolean matches(Issue issue) {
+		return criteria == null || criteria.matches(issue);
 	}
 	
 	public static String getOperatorName(int operator) {

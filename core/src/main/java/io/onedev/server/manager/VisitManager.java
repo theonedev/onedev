@@ -13,11 +13,19 @@ public interface VisitManager {
 	
 	void visitPullRequest(User user, PullRequest request);
 	
+	void visitPullRequest(User user, PullRequest request, Date date);
+	
 	void visitPullRequestCodeComments(User user, PullRequest request);
+	
+	void visitPullRequestCodeComments(User user, PullRequest request, Date date);
 	
 	void visitIssue(User user, Issue issue);
 	
+	void visitIssue(User user, Issue issue, Date date);
+	
 	void visitCodeComment(User user, CodeComment comment);
+	
+	void visitCodeComment(User user, CodeComment comment, Date date);
 	
 	@Nullable
 	Date getIssueVisitDate(User user, Issue issue);

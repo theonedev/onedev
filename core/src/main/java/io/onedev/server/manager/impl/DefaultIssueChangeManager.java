@@ -18,16 +18,18 @@ import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.changedata.DescriptionChangeData;
+import io.onedev.server.model.support.issue.changedata.FieldChangeData;
+import io.onedev.server.model.support.issue.changedata.StateChangeData;
+import io.onedev.server.model.support.issue.changedata.TitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.utils.StringUtils;
 
 @Singleton
 public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange>
@@ -59,11 +61,9 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
-		change.setProperty("title");
 		change.setDate(new Date());
 		change.setUser(SecurityUtils.getUser());
-		change.setPrevContent(prevTitle);
-		change.setContent(issue.getTitle());
+		change.setData(new TitleChangeData(prevTitle, issue.getTitle()));
 		save(change);
 		
 		listenerRegistry.post(new IssueChanged(change));
@@ -80,27 +80,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
-		change.setProperty("description");
 		change.setDate(new Date());
 		change.setUser(SecurityUtils.getUser());
-		change.setPrevContent(prevDescription);
-		change.setContent(issue.getDescription());
+		change.setData(new DescriptionChangeData(prevDescription, issue.getDescription()));
 		save(change);
 		
 		listenerRegistry.post(new IssueChanged(change));
 	}
 
-	private String toString(@Nullable String state, Map<String, PromptedField> fields) {
-		StringBuilder builder = new StringBuilder();
-		if (state != null)
-			builder.append("State: " + state).append("\n");
-		for (Map.Entry<String, PromptedField> entry: fields.entrySet()) {
-			builder.append(entry.getKey()).append(": ");
-			builder.append(StringUtils.join(entry.getValue().getValues())).append("\n");
-		}
-		return builder.toString();
-	}
-	
 	@Transactional
 	@Override
 	public void changeFields(Issue issue, Serializable fieldBean, Map<String, PromptedField> prevFields, 
@@ -114,50 +101,37 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		issueFieldManager.writeFields(issue, fieldBean, promptedFields);
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
-		change.setProperty("custom fields");
 		change.setDate(new Date());
 		change.setUser(SecurityUtils.getUser());
-		change.setPrevContent(toString(null, prevFields));
-		
 		getSession().flush();
 		
 		EntityCriteria<IssueField> criteria = EntityCriteria.of(IssueField.class);
 		criteria.add(Restrictions.eq("issue", issue));
 		issue.setFields(dao.findAll(criteria));
 		
-		change.setContent(toString(null, issue.getPromptedFields()));
+		change.setData(new FieldChangeData(prevFields, issue.getPromptedFields()));
 		save(change);
 		
 		listenerRegistry.post(new IssueChanged(change));
 	}
 	
+	
 	@Transactional
 	@Override
-	public void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent, 
-			String prevState, Map<String, PromptedField> prevFields, Collection<String> promptedFields) {
+	public void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent,
+			Map<String, PromptedField> prevFields, Collection<String> promptedFields) {
 		long time = System.currentTimeMillis();
 		LastActivity lastActivity = new LastActivity();
-		lastActivity.setAction("changed state");
+		lastActivity.setAction("changed state to \"" + issue.getState() + "\"");
 		lastActivity.setDate(new Date(time));
 		lastActivity.setUser(SecurityUtils.getUser());
 		issueManager.save(issue);
 		
-		if (commentContent != null) {
-			IssueComment comment = new IssueComment();
-			comment.setIssue(issue);
-			comment.setContent(commentContent);
-			comment.setUser(SecurityUtils.getUser());
-			comment.setDate(new Date(time-1));
-			dao.persist(comment);
-		}
-		
 		issueFieldManager.writeFields(issue, fieldBean, promptedFields);
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
-		change.setProperty("state");
 		change.setDate(new Date(time));
 		change.setUser(SecurityUtils.getUser());
-		change.setPrevContent(toString(prevState, prevFields));
 		
 		getSession().flush();
 		
@@ -165,7 +139,8 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		criteria.add(Restrictions.eq("issue", issue));
 		issue.setFields(dao.findAll(criteria));
 		
-		change.setContent(toString(issue.getState(), issue.getPromptedFields()));
+		change.setData(new StateChangeData(issue.getState(), prevFields, issue.getPromptedFields(), commentContent));
+		
 		save(change);
 		
 		listenerRegistry.post(new IssueChanged(change));

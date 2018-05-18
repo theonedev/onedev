@@ -65,7 +65,7 @@ public class InvalidFieldResolution implements Serializable {
 		InvalidFieldContainer container = ((ComponentContext)OneContext.get()).getComponent().findParent(InvalidFieldContainer.class);
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
 		List<String> fields = new ArrayList<>();
-		for (InputSpec field: page.getProject().getIssueWorkflow().getFields()) {
+		for (InputSpec field: page.getProject().getIssueWorkflow().getFieldSpecs()) {
 			if (EditableUtils.getDisplayName(field.getClass()).equals(container.getFieldType()))
 				fields.add(field.getName());
 		}

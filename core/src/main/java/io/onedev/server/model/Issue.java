@@ -26,7 +26,6 @@ import javax.persistence.Version;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.VisitManager;
@@ -35,7 +34,6 @@ import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.PromptedField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.inputspec.InputSpec;
 
 /**
@@ -146,7 +144,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	private Collection<IssueComment> comments = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
-	private Collection<IssueChange> changes = new ArrayList<>();
+	private Collection<IssueChange> edits = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueVote> votes = new ArrayList<>();
@@ -168,8 +166,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.state = state;
 	}
 
-	@Editable(order=100)
-	@NotEmpty
 	public String getTitle() {
 		return title;
 	}
@@ -179,8 +175,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 		noSpaceTitle = StringUtils.deleteWhitespace(title);
 	}
 
-	@Editable(order=200)
-	@Markdown
 	public String getDescription() {
 		return description;
 	}
@@ -244,12 +238,12 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.comments = comments;
 	}
 
-	public Collection<IssueChange> getChanges() {
-		return changes;
+	public Collection<IssueChange> getEdits() {
+		return edits;
 	}
 
-	public void setChanges(Collection<IssueChange> changes) {
-		this.changes = changes;
+	public void setEdits(Collection<IssueChange> edits) {
+		this.edits = edits;
 	}
 
 	public Collection<IssueVote> getVotes() {
@@ -327,7 +321,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 				}
 			}
 			
-			for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFields()) {
+			for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
 				String fieldName = fieldSpec.getName();
 				List<IssueField> fields = fieldMap.get(fieldName);
 				if (fields != null) {
@@ -337,7 +331,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 						if (field.getValue() != null)
 							values.add(field.getValue());
 					}
-					promptedFields.put(fieldName, new PromptedField(this, fieldName, type, values));
+					promptedFields.put(fieldName, new PromptedField(fieldName, type, values));
 				}
 			}
 		}
@@ -362,6 +356,15 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	public static String getWebSocketObservable(Long issueId) {
 		return Issue.class.getName() + ":" + issueId;
+	}
+	
+	@Nullable
+	public IssueWatch getWatch(User user) {
+		for (IssueWatch watch: getWatches()) {
+			if (user.equals(watch.getUser())) 
+				return watch;
+		}
+		return null;
 	}
 	
 }

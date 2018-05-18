@@ -26,6 +26,12 @@ body {
 	margin-bottom: 0;
 }
 
+.has-error.form-control {
+    border-color: #a94442;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+}
+
 /* FEEDBACK */
 #session-feedback {
 	position: fixed; 
@@ -415,8 +421,14 @@ form>.actions {
 form>.actions>.btn {
 	margin-right: 12px;
 }
+form>.actions>.btn:last-child {
+	margin-right: 0;
+}
 .actions>a {
 	margin-right: 8px;
+}
+.actions>a:last-child {
+	margin-right: 0;
 }
 .nav-tabs>li>a {
 	color: #777;

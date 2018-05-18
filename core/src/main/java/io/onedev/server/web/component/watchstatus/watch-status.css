@@ -1,26 +1,27 @@
-.watch-status.not-watching:BEFORE {
+.watch-status:BEFORE {
 	font-family: "FontAwesome";
+}
+.watch-status:AFTER {
+	font-family: "FontAwesome";
+	margin-left: 4px;
+}
+.watch-status.default:BEFORE {
 	content: "\f10c";
-	margin-right: 4px;
 }
-.watch-status.not-watching:AFTER {
-	content: "Not watching";
+.watch-status.default:AFTER {
+	content: "Watch if involved";
 }
-.watch-status.watching:BEFORE {
-	font-family: "FontAwesome";
+.watch-status.watch:BEFORE {
 	content: "\f0a2";
-	margin-right: 4px;
 }
-.watch-status.watching:AFTER {
-	content: "Watching";
+.watch-status.watch:AFTER {
+	content: "Watch";
 }
-.watch-status.ignore:BEFORE {
-	font-family: "FontAwesome";
+.watch-status.do-not-watch:BEFORE {
 	content: "\f1f7";
-	margin-right: 4px;
 }
-.watch-status.ignore:AFTER {
-	content: "Ignore";
+.watch-status.do-not-watch:AFTER {
+	content: "Do not watch";
 }
 
 .floating .watch-status {

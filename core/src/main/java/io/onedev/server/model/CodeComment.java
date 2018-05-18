@@ -21,7 +21,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -60,9 +59,6 @@ import io.onedev.server.util.editable.EditableUtils;
 public class CodeComment extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
-	
-	@Version
-	private long version;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -125,10 +121,6 @@ public class CodeComment extends AbstractEntity {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
-	}
-
-	public long getVersion() {
-		return version;
 	}
 
 	public String getContent() {

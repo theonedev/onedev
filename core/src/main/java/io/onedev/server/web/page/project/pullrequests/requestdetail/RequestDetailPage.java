@@ -86,7 +86,6 @@ import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.verification.VerificationStatusPanel;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
@@ -674,7 +673,6 @@ public abstract class RequestDetailPage extends ProjectPage {
 		ProjectAndBranch source = request.getSource();
 		Preconditions.checkNotNull(source);
 		
-		String autosaveKey = "autosave:pullRequestOperation:" + getPullRequest().getId();
 		FormComponent<String> noteInput;
 		form.add(noteInput = new CommentInput("note", Model.of(""), false) {
 
@@ -689,11 +687,6 @@ public abstract class RequestDetailPage extends ProjectPage {
 				return requestModel.getObject().getTargetProject();
 			}
 
-			@Override
-			protected String getAutosaveKey() {
-				return autosaveKey;
-			}
-			
 			@Override
 			protected List<AttributeModifier> getInputModifiers() {
 				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a note"));
@@ -742,9 +735,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 					target.appendJavaScript("$(window).resize();");
 				} else {
 					operation.operate(request, noteInput.getModelObject());
-					PageParameters params = RequestOverviewPage.paramsOf(getPullRequest());
-					params.add(BasePage.PARAM_AUTOSAVE_KEY_TO_CLEAR, autosaveKey);
-					setResponsePage(RequestOverviewPage.class, params);
+					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
 				}
 			}
 

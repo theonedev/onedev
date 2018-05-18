@@ -31,7 +31,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
-import io.onedev.server.model.support.issue.workflow.StateTransition;
+import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -46,7 +46,7 @@ import jersey.repackaged.com.google.common.collect.Sets;
 @SuppressWarnings("serial")
 public class StateTransitionsPage extends IssueWorkflowPage {
 
-	private DataTable<StateTransition, Void> transitionsTable;
+	private DataTable<TransitionSpec, Void> transitionsTable;
 	
 	public StateTransitionsPage(PageParameters params) {
 		super(params);
@@ -83,34 +83,34 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 			
 		});
 		
-		List<IColumn<StateTransition, Void>> columns = new ArrayList<>();
+		List<IColumn<TransitionSpec, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<StateTransition, Void>(Model.of("From States")) {
+		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("From States")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<StateTransition>> cellItem, String componentId, IModel<StateTransition> rowModel) {
+			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				String label = StringUtils.join(rowModel.getObject().getFromStates());
 				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), label));
 			}
 		});		
 		
-		columns.add(new AbstractColumn<StateTransition, Void>(Model.of("To State")) {
+		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("To State")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<StateTransition>> cellItem, String componentId, IModel<StateTransition> rowModel) {
+			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), rowModel.getObject().getToState()));
 			}
 			
 		});		
 		
-		IDataProvider<StateTransition> dataProvider = new ListDataProvider<StateTransition>() {
+		IDataProvider<TransitionSpec> dataProvider = new ListDataProvider<TransitionSpec>() {
 
 			@Override
-			protected List<StateTransition> getData() {
-				Collections.sort(getWorkflow().getStateTransitions(), new Comparator<StateTransition>() {
+			protected List<TransitionSpec> getData() {
+				Collections.sort(getWorkflow().getTransitionSpecs(), new Comparator<TransitionSpec>() {
 
 					@Override
-					public int compare(StateTransition transition1, StateTransition transition2) {
+					public int compare(TransitionSpec transition1, TransitionSpec transition2) {
 						int fromStateIndex1 = getWorkflow().getStateIndex(transition1.getFromStates().get(0));
 						int fromStateIndex2 = getWorkflow().getStateIndex(transition2.getFromStates().get(0));
 						int toStateIndex1 = getWorkflow().getStateIndex(transition1.getToState());
@@ -122,12 +122,12 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 					}
 					
 				});
-				return getWorkflow().getStateTransitions();
+				return getWorkflow().getTransitionSpecs();
 			}
 
 		};
 		
-		add(transitionsTable = new DataTable<StateTransition, Void>("stateTransitions", columns, dataProvider, Integer.MAX_VALUE));
+		add(transitionsTable = new DataTable<TransitionSpec, Void>("stateTransitions", columns, dataProvider, Integer.MAX_VALUE));
 		transitionsTable.addTopToolbar(new HeadersToolbar<Void>(transitionsTable, null));
 		transitionsTable.addBottomToolbar(new NoRecordsToolbar(transitionsTable));
 		transitionsTable.setOutputMarkupId(true);
@@ -140,10 +140,10 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(getWorkflow().getStates(), fromIndex+i, fromIndex+i+1);
+						Collections.swap(getWorkflow().getStateSpecs(), fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(getWorkflow().getStates(), fromIndex-i, fromIndex-i-1);
+						Collections.swap(getWorkflow().getStateSpecs(), fromIndex-i, fromIndex-i-1);
 				}
 				
 				getProject().setIssueWorkflow(getWorkflow());
@@ -166,14 +166,14 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 		
 		private final String label;
 		
-		public ColumnFragment(String id, StateTransition transition, String label) {
+		public ColumnFragment(String id, TransitionSpec transition, String label) {
 			super(id, "columnFrag", StateTransitionsPage.this);
 			this.transitionIndex = getWorkflow().getTransitionIndex(transition);
 			this.label = label;
 		}
 		
-		private StateTransition getTransition() {
-			return getWorkflow().getStateTransitions().get(transitionIndex);
+		private TransitionSpec getTransition() {
+			return getWorkflow().getTransitionSpecs().get(transitionIndex);
 		}
 
 		@Override
@@ -238,7 +238,7 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									getWorkflow().getStates().remove(transitionIndex);
+									getWorkflow().getStateSpecs().remove(transitionIndex);
 									getProject().setIssueWorkflow(getWorkflow());
 									OneDev.getInstance(ProjectManager.class).save(getProject());
 									target.add(transitionsTable);

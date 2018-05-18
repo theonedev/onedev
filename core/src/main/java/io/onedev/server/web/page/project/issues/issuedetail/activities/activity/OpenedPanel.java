@@ -97,18 +97,12 @@ class OpenedPanel extends GenericPanel<Issue> {
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
-				String autosaveKey = "autosave:editIssueDescription:" + getIssue().getId(); 
 				long lastVersion = getIssue().getVersion();
 				CommentInput input = new CommentInput("input", Model.of(getIssue().getDescription()), false) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
 						return new ProjectAttachmentSupport(getIssue().getProject(), getIssue().getUUID());
-					}
-
-					@Override
-					protected String getAutosaveKey() {
-						return autosaveKey;
 					}
 
 					@Override
@@ -139,7 +133,6 @@ class OpenedPanel extends GenericPanel<Issue> {
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);
 							target.add(viewer);
-							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 						} catch (StaleStateException e) {
 							error("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);

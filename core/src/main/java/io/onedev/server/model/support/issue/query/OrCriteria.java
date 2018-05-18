@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.model.Issue;
+
 public class OrCriteria extends IssueCriteria {
 	
 	private static final long serialVersionUID = 1L;
@@ -23,4 +25,22 @@ public class OrCriteria extends IssueCriteria {
 		return context.getBuilder().or(predicates.toArray(new Predicate[0]));
 	}
 
+	@Override
+	public boolean matches(Issue issue) {
+		for (IssueCriteria criteria: criterias) {
+			if (criteria.matches(issue))
+				return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean needsLogin() {
+		for (IssueCriteria criteria: criterias) {
+			if (criteria.needsLogin())
+				return true;
+		}
+		return false;
+	}
+	
 }

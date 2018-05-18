@@ -11,7 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -29,9 +28,6 @@ public class PullRequestComment extends AbstractEntity {
 
 	public static final int DIFF_CONTEXT_SIZE = 3;
 
-	@Version
-	private long version;
-	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;
@@ -73,10 +69,6 @@ public class PullRequestComment extends AbstractEntity {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
-	}
-
-	public long getVersion() {
-		return version;
 	}
 
 	public String getContent() {

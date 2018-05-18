@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -56,6 +57,13 @@ public class IssueField extends AbstractEntity {
 		this.name = name;
 	}
 
+	/**
+	 * Get issue field value 
+	 * 
+	 * @return
+	 * 			a single value of the field, <tt>null</tt> if the field is not prompted yet
+	 */
+	@Nullable
 	public String getValue() {
 		return value;
 	}

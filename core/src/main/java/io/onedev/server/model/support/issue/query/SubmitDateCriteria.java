@@ -29,4 +29,17 @@ public class SubmitDateCriteria extends IssueCriteria {
 			return context.getBuilder().greaterThan(attribute, value.getTime());
 	}
 
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.IsBefore)
+			return issue.getSubmitDate().before(value);
+		else
+			return issue.getSubmitDate().after(value);
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
+	}
+
 }

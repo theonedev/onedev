@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -48,7 +50,15 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 		
 		input = new BranchMultiChoice("input", new Model(projectAndBranches), branchProvider);
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
+		
         add(input);
 	}
 

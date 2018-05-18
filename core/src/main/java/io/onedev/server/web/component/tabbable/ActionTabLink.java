@@ -17,7 +17,7 @@ public class ActionTabLink extends Panel {
 	}
 
 	protected WebMarkupContainer newLink(String id, final ActionTab tab) {
-		return new Link<Void>("link") {
+		return new Link<Void>(id) {
 
 			@Override
 			public void onClick() {

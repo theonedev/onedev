@@ -25,7 +25,7 @@ public class IssueWatch extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	private boolean ignore;
+	private boolean watching;
 	
 	public Issue getIssue() {
 		return issue;
@@ -43,12 +43,12 @@ public class IssueWatch extends AbstractEntity {
 		this.user = user;
 	}
 
-	public boolean isIgnore() {
-		return ignore;
+	public boolean isWatching() {
+		return watching;
 	}
 
-	public void setIgnore(boolean ignore) {
-		this.ignore = ignore;
+	public void setWatching(boolean watching) {
+		this.watching = watching;
 	}
 
 }

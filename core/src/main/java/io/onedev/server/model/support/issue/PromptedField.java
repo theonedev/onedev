@@ -5,15 +5,10 @@ import java.util.List;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import io.onedev.server.model.Issue;
-
 public class PromptedField implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@XStreamOmitField
-	private final Issue issue;
-	
 	private final String name;
 	
 	@XStreamOmitField
@@ -21,15 +16,10 @@ public class PromptedField implements Serializable {
 	
 	private final List<String> values;
 	
-	public PromptedField(Issue issue, String name, String type, List<String> values) {
-		this.issue = issue;
+	public PromptedField(String name, String type, List<String> values) {
 		this.name = name;
 		this.type = type;
 		this.values = values;
-	}
-
-	public Issue getIssue() {
-		return issue;
 	}
 
 	public String getName() {

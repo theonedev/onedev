@@ -793,7 +793,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			builder.append("&nbsp;");
 		} else {
 			for (long token: tokenized.getTokens()) {
-				builder.append(TokenUtils.toHtml(tokenized.getText(), token, null));
+				builder.append(TokenUtils.toHtml(tokenized.getText(), token, null, null));
 			}
 		}
 	}
@@ -858,7 +858,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
 						for (TextToken token: tokenBlock.getUnits()) {
 							if (tokenBlock.getOperation() != Operation.DELETE) 
-								builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation())));
+								builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
 						}
 					}
 				}			
@@ -905,7 +905,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
 						for (TextToken token: tokenBlock.getUnits()) {
 							if (tokenBlock.getOperation() != Operation.INSERT) 
-								builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation())));
+								builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
 						}
 					}
 				}
@@ -979,7 +979,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			} else {
 				for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
 					for (TextToken token: tokenBlock.getUnits()) 
-						builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation())));
+						builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
 				}
 			}
 			builder.append("</td>");
@@ -996,7 +996,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
 					for (TextToken token: tokenBlock.getUnits()) {
 						if (tokenBlock.getOperation() != Operation.INSERT) 
-							builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation())));
+							builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
 					}
 				}
 			}
@@ -1014,7 +1014,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
 					for (TextToken token: tokenBlock.getUnits()) {
 						if (tokenBlock.getOperation() != Operation.DELETE) 
-							builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation())));
+							builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
 					}
 				}
 			}			

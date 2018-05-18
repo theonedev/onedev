@@ -8,7 +8,8 @@ query
     ;
 
 criteria
-    : Mine																			#MineCriteria
+    : All																			#AllCriteria
+    | Mine																			#MineCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty) #UnaryCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains|DoesNotContain) WS+ criteriaValue=Quoted #ValueCriteria
     | criteria WS+ 'and' WS+ criteria												#AndCriteria
@@ -22,6 +23,10 @@ order
 
 Mine
 	: 'mine'
+	;
+	
+All
+	: 'all'
 	;
 	
 OrderBy

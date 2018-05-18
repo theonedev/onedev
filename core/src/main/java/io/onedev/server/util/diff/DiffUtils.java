@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.jsyntax.TextToken;
 import io.onedev.jsyntax.TokenTypes;
 import io.onedev.jsyntax.TokenUtils;
@@ -20,8 +22,6 @@ import io.onedev.server.model.support.TextRange;
 import io.onedev.server.util.diff.DiffMatchPatch.Diff;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.utils.StringUtils;
-
-import com.google.common.base.Preconditions;
 
 public class DiffUtils {
 
@@ -334,4 +334,149 @@ public class DiffUtils {
 		}
 	}
 
+	private static void appendTokenized(StringBuilder builder, Tokenized tokenized) {
+		if (tokenized.getTokens().length == 0) {
+			builder.append("&nbsp;");
+		} else {
+			for (long token: tokenized.getTokens()) {
+				builder.append(TokenUtils.toHtml(tokenized.getText(), token, null, null));
+			}
+		}
+	}
+	
+	private static void appendDeletesAndInserts(StringBuilder builder, DiffBlock<Tokenized> deleteBlock, 
+			DiffBlock<Tokenized> insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
+		int fromInsertLineIndex, int toInsertLineIndex) {
+		for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
+			appendDelete(builder, deleteBlock, i, null);
+		for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++)
+			appendInsert(builder, insertBlock, i, null);
+	}
+	
+	private static void appendInsert(StringBuilder builder, DiffBlock<Tokenized> block, int lineIndex, 
+			@Nullable List<DiffBlock<TextToken>> tokenDiffs) {
+		builder.append("<div style='").append(getLineOperationStyle(Operation.INSERT)).append("'>+");
+		if (tokenDiffs != null) {
+			if (tokenDiffs.isEmpty()) {
+				builder.append("&nbsp;");
+			} else {
+				for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
+					for (TextToken token: tokenBlock.getUnits()) {
+						if (tokenBlock.getOperation() != Operation.DELETE) 
+							builder.append(TokenUtils.toHtml(token, null, getTokenOperationStyle(tokenBlock.getOperation())));
+					}
+				}
+			}			
+		} else {
+			appendTokenized(builder, block.getUnits().get(lineIndex));
+		}
+		builder.append("</div>");
+	}
+	
+	private static void appendDelete(StringBuilder builder, DiffBlock<Tokenized> block, int lineIndex, 
+			@Nullable List<DiffBlock<TextToken>> tokenDiffs) {
+		builder.append("<div style='").append(getLineOperationStyle(Operation.DELETE)).append("'>-");
+		if (tokenDiffs != null) {
+			if (tokenDiffs.isEmpty()) {
+				builder.append("&nbsp;");
+			} else {
+				for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
+					for (TextToken token: tokenBlock.getUnits()) {
+						if (tokenBlock.getOperation() != Operation.INSERT) 
+							builder.append(TokenUtils.toHtml(token, null, getTokenOperationStyle(tokenBlock.getOperation())));
+					}
+				}
+			}
+		} else {
+			appendTokenized(builder, block.getUnits().get(lineIndex));
+		}
+		builder.append("</div>");
+	}
+	
+	private static void appendModification(StringBuilder builder, DiffBlock<Tokenized> deleteBlock, 
+			DiffBlock<Tokenized> insertBlock, int deleteLineIndex, int insertLineIndex, 
+			List<DiffBlock<TextToken>> tokenDiffs) {
+		builder.append("<div>*");
+		if (tokenDiffs.isEmpty()) {
+			builder.append("&nbsp;");
+		} else {
+			for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
+				for (TextToken token: tokenBlock.getUnits()) 
+					builder.append(TokenUtils.toHtml(token, null, getTokenOperationStyle(tokenBlock.getOperation())));
+			}
+		}
+		builder.append("</div>");
+	}
+	
+	private static String getLineOperationStyle(Operation operation) {
+		if (operation == Operation.INSERT)
+			return "background: #C5F7C5;";
+		else if (operation == Operation.DELETE)
+			return "background: #FAC8C8;";
+		else 
+			return null;
+	}
+	
+	private static String getTokenOperationStyle(Operation operation) {
+		if (operation == Operation.INSERT)
+			return "background: #05AB05; color: white;";
+		else if (operation == Operation.DELETE)
+			return "background: #F13B3B; color: white; text-decoration: line-through;";
+		else 
+			return null;
+	}
+	
+	public static String diffAsHtml(List<String> oldLines, List<String> newLines) {
+		List<DiffBlock<Tokenized>> diffBlocks = DiffUtils.diff(oldLines, null, newLines, null, WhitespaceOption.DO_NOT_IGNORE);
+		StringBuilder builder = new StringBuilder("<div style='font-family: monospace;'>");
+		for (int i=0; i<diffBlocks.size(); i++) {
+			DiffBlock<Tokenized> block = diffBlocks.get(i);
+			if (block.getOperation() == Operation.EQUAL) {
+				builder.append("<div>&nbsp;");
+				for (int j=0; j<block.getUnits().size(); j++)
+					appendTokenized(builder, block.getUnits().get(j));
+				builder.append("</div>");
+			} else if (block.getOperation() == Operation.DELETE) {
+				if (i+1<diffBlocks.size()) {
+					DiffBlock<Tokenized> nextBlock = diffBlocks.get(i+1);
+					if (nextBlock.getOperation() == Operation.INSERT) {
+						LinkedHashMap<Integer, LineDiff> lineChanges = 
+								DiffUtils.align(block.getUnits(), nextBlock.getUnits());
+						int prevDeleteLineIndex = 0;
+						int prevInsertLineIndex = 0;
+						for (Map.Entry<Integer, LineDiff> entry: lineChanges.entrySet()) {
+							int deleteLineIndex = entry.getKey();
+							LineDiff lineChange = entry.getValue();
+							int insertLineIndex = lineChange.getCompareLine();
+							
+							appendDeletesAndInserts(builder, block, nextBlock, prevDeleteLineIndex, deleteLineIndex, 
+									prevInsertLineIndex, insertLineIndex);
+							
+							appendModification(builder, block, nextBlock, deleteLineIndex, insertLineIndex, 
+									lineChange.getTokenDiffs()); 
+							
+							prevDeleteLineIndex = deleteLineIndex+1;
+							prevInsertLineIndex = insertLineIndex+1;
+						}
+						appendDeletesAndInserts(builder, block, nextBlock, 
+								prevDeleteLineIndex, block.getUnits().size(), 
+								prevInsertLineIndex, nextBlock.getUnits().size());
+						i++;
+					} else {
+						for (int j=0; j<block.getUnits().size(); j++) 
+							appendDelete(builder, block, j, null);
+					}
+				} else {
+					for (int j=0; j<block.getUnits().size(); j++) 
+						appendDelete(builder, block, j, null);
+				}
+			} else {
+				for (int j=0; j<block.getUnits().size(); j++) 
+					appendInsert(builder, block, j, null);
+			}
+		}
+		builder.append("</div>");
+		return builder.toString();
+	}
+	
 }

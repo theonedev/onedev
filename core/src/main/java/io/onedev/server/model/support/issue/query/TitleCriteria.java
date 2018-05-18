@@ -27,4 +27,17 @@ public class TitleCriteria extends IssueCriteria {
 			return context.getBuilder().notLike(attribute, "%" + value + "%");
 	}
 
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.Contains)
+			return issue.getTitle().toLowerCase().contains(value);
+		else
+			return !issue.getTitle().toLowerCase().contains(value);
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return false;
+	}
+
 }

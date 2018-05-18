@@ -433,8 +433,6 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 					
 					String uuid = UUID.randomUUID().toString();
 					
-					String autosaveKey = "autosave:addCodeCommentOnSource:" + context.getProject().getId() 
-							+ ":" + context.getBlobIdent().path;
 					CommentInput contentInput;
 					
 					StringBuilder mentions = new StringBuilder();
@@ -458,11 +456,6 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 							return new ProjectAttachmentSupport(context.getProject(), uuid);
 						}
 
-						@Override
-						protected String getAutosaveKey() {
-							return autosaveKey;
-						}
-						
 						@Override
 						protected Project getProject() {
 							return context.getProject();
@@ -544,11 +537,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 							commentContainer.replace(commentPanel);
 							target.add(commentContainer);
 
-							String script = String.format(""
-									+ "onedev.server.sourceView.onCommentAdded(%s);"
-									+ "localStorage.removeItem('%s');", 
-									getJsonOfComment(comment),
-									autosaveKey);
+							String script = String.format("onedev.server.sourceView.onCommentAdded(%s);", getJsonOfComment(comment));
 							target.appendJavaScript(script);
 							
 							context.onCommentOpened(target, comment);

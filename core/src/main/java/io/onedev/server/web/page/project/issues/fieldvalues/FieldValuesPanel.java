@@ -8,9 +8,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
@@ -36,10 +35,10 @@ import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ColorUtils;
 
 @SuppressWarnings("serial")
-public class FieldValuesPanel extends GenericPanel<PromptedField> implements EditContext {
+public abstract class FieldValuesPanel extends Panel implements EditContext {
 
-	public FieldValuesPanel(String id, IModel<PromptedField> model) {
-		super(id, model);
+	public FieldValuesPanel(String id) {
+		super(id);
 	}
 
 	@Override
@@ -74,7 +73,7 @@ public class FieldValuesPanel extends GenericPanel<PromptedField> implements Edi
 					}
 				} else {
 					Label label = new Label("value", value);
-					InputSpec fieldSpec = getField().getIssue().getProject().getIssueWorkflow().getField(getField().getName());
+					InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getField(getField().getName());
 					ChoiceProvider choiceProvider = null;
 					if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
 						choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
@@ -107,7 +106,7 @@ public class FieldValuesPanel extends GenericPanel<PromptedField> implements Edi
 		} else {
 			InputSpec fieldSpec = null;
 			if (getField() != null)
-				fieldSpec = getField().getIssue().getProject().getIssueWorkflow().getField(getField().getName());
+				fieldSpec = getIssue().getProject().getIssueWorkflow().getField(getField().getName());
 			String displayValue;
 			if (fieldSpec != null && fieldSpec.getNameOfEmptyValue() != null) 
 				displayValue = fieldSpec.getNameOfEmptyValue();
@@ -120,8 +119,8 @@ public class FieldValuesPanel extends GenericPanel<PromptedField> implements Edi
 
 	@Override
 	public Object getInputValue(String name) {
-		PromptedField field = getField().getIssue().getPromptedFields().get(name);
-		InputSpec fieldSpec = getField().getIssue().getProject().getIssueWorkflow().getField(name);
+		PromptedField field = getIssue().getPromptedFields().get(name);
+		InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getField(name);
 		if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
 			return fieldSpec.convertToObject(field.getValues());
 		} else {
@@ -129,9 +128,9 @@ public class FieldValuesPanel extends GenericPanel<PromptedField> implements Edi
 		}
 	}
 
-	private PromptedField getField() {
-		return getModelObject();
-	}
+	protected abstract Issue getIssue();
+	
+	protected abstract PromptedField getField();
 
 	@Override
 	public void renderHead(IHeaderResponse response) {

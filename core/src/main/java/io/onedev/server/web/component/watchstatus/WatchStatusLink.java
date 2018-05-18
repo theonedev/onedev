@@ -7,6 +7,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.server.model.support.issue.WatchStatus;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 
@@ -25,12 +26,12 @@ public abstract class WatchStatusLink extends DropdownLink {
 			@Override
 			protected String load() {
 				WatchStatus status = getWatchStatus();
-				if (status == WatchStatus.IGNORE)
-					return "ignore";
-				else if (status == WatchStatus.WATCHING)
-					return "watching";
+				if (status == WatchStatus.DO_NOT_WATCH)
+					return "do-not-watch";
+				else if (status == WatchStatus.WATCH)
+					return "watch";
 				else
-					return "not-watching";
+					return "default";
 			}
 			
 		}));

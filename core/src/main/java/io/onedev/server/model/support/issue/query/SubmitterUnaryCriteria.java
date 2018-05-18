@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.util.Objects;
+
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
@@ -23,6 +25,19 @@ public class SubmitterUnaryCriteria extends IssueCriteria {
 			return context.getBuilder().equal(attribute, SecurityUtils.getUser());
 		else
 			return context.getBuilder().notEqual(attribute, SecurityUtils.getUser());
+	}
+
+	@Override
+	public boolean matches(Issue issue) {
+		if (operator == IssueQueryLexer.IsMe)
+			return Objects.equals(issue.getSubmitter(), SecurityUtils.getUser());
+		else
+			return !Objects.equals(issue.getSubmitter(), SecurityUtils.getUser());
+	}
+
+	@Override
+	public boolean needsLogin() {
+		return true;
 	}
 
 }

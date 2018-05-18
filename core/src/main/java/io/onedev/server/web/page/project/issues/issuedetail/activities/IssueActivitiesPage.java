@@ -31,7 +31,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -62,7 +61,7 @@ public class IssueActivitiesPage extends IssueDetailPage {
 		for (IssueComment comment: getIssue().getComments())  
 			activities.add(new CommentedActivity(comment));
 		
-		for (IssueChange change: getIssue().getChanges())
+		for (IssueChange change: getIssue().getEdits())
 			activities.add(new ChangedActivity(change));
 		
 		activities.sort((o1, o2) -> {
@@ -96,7 +95,7 @@ public class IssueActivitiesPage extends IssueDetailPage {
 			}));
 		}
 		
-		row.add(new AvatarLink("avatar", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));
+		row.add(new AvatarLink("avatar", activity.getUser()));
 
 		row.add(AttributeAppender.append("class", activity.getClass().getSimpleName()));
 		return row;
@@ -166,7 +165,6 @@ public class IssueActivitiesPage extends IssueDetailPage {
 		if (getLoginUser() != null) {
 			Fragment fragment = new Fragment("addComment", "addCommentFrag", this);
 			fragment.setOutputMarkupId(true);
-			String autosaveKey = "autosave:addIssueComment:" + issue.getId();
 			CommentInput input = new CommentInput("comment", Model.of(""), false) {
 
 				@Override
@@ -177,11 +175,6 @@ public class IssueActivitiesPage extends IssueDetailPage {
 				@Override
 				protected Project getProject() {
 					return IssueActivitiesPage.this.getProject();
-				}
-				
-				@Override
-				protected String getAutosaveKey() {
-					return autosaveKey;
 				}
 				
 				@Override
@@ -221,14 +214,12 @@ public class IssueActivitiesPage extends IssueDetailPage {
 					target.add(newActivityRow);
 					
 					target.add(fragment);
-					target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 				}
 
 				@Override
 				protected void onError(AjaxRequestTarget target, Form<?> form) {
 					super.onError(target, form);
 					target.add(form);
-					target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 				}
 				
 			});

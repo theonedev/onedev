@@ -156,7 +156,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 
 			@Override
 			protected List<StateSpec> getData() {
-				return getWorkflow().getStates();
+				return getWorkflow().getStateSpecs();
 			}
 
 		};
@@ -174,10 +174,10 @@ public class IssueStatesPage extends IssueWorkflowPage {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(getWorkflow().getStates(), fromIndex+i, fromIndex+i+1);
+						Collections.swap(getWorkflow().getStateSpecs(), fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(getWorkflow().getStates(), fromIndex-i, fromIndex-i-1);
+						Collections.swap(getWorkflow().getStateSpecs(), fromIndex-i, fromIndex-i-1);
 				}
 				
 				getProject().setIssueWorkflow(getWorkflow());
@@ -198,7 +198,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 		new SideFloating(target, SideFloating.Placement.RIGHT) {
 
 			private StateSpec getState() {
-				return getWorkflow().getStates().get(index);
+				return getWorkflow().getStateSpecs().get(index);
 				
 			}
 			@Override
@@ -259,7 +259,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 							fragment.error(UsageUtils.getNotificationMessage("State '" + getState().getName() + "'", usages));
 							target.add(fragment);
 						} else {
-							getWorkflow().getStates().remove(index);
+							getWorkflow().getStateSpecs().remove(index);
 							getWorkflow().setReconciled(false);
 							getProject().setIssueWorkflow(getWorkflow());
 							OneDev.getInstance(ProjectManager.class).save(getProject());

@@ -39,7 +39,6 @@ import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
@@ -89,14 +88,7 @@ public abstract class BasePage extends WebPage {
 				 */
 				response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
 				
-				String autosaveKeyToClear = getPageParameters().get(PARAM_AUTOSAVE_KEY_TO_CLEAR).toString();
-				if (autosaveKeyToClear != null)
-					autosaveKeyToClear = "'" + JavaScriptEscape.escapeJavaScript(autosaveKeyToClear) + "'";
-				else
-					autosaveKeyToClear = "undefined";
-				response.render(OnDomReadyHeaderItem.forScript(
-						String.format("onedev.server.onDomReady(%s);", 
-						autosaveKeyToClear)));
+				response.render(OnDomReadyHeaderItem.forScript("onedev.server.onDomReady();"));
 				response.render(OnLoadHeaderItem.forScript("onedev.server.onWindowLoad();"));
 			}
 			

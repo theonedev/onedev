@@ -2,7 +2,6 @@ package io.onedev.server.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -10,7 +9,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
-import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -93,10 +91,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestTask> requestTasks = new ArrayList<>();
     
-	@Lob
-	@Column(length=65535)
-    private LinkedHashMap<String, LinkedHashMap<String, String>> issueQueries = new LinkedHashMap<>();
-
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
+    
     @Override
     public PrincipalCollection getPrincipals() {
         return new SimplePrincipalCollection(getId(), "");
@@ -191,10 +188,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.requestTasks = requestTasks;
 	}
 
-	public LinkedHashMap<String, LinkedHashMap<String, String>> getIssueQueries() {
-		return issueQueries;
-	}
-
 	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
@@ -230,6 +223,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.authorizations = authorizations;
 	}
 
+	public Collection<IssueQuerySetting> getIssueQuerySettings() {
+		return issueQuerySettings;
+	}
+
+	public void setIssueQuerySettings(Collection<IssueQuerySetting> issueQuerySettings) {
+		this.issueQuerySettings = issueQuerySettings;
+	}
+
 	public String getUUID() {
 		return uuid;
 	}
@@ -263,5 +264,5 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public UserFacade getFacade() {
 		return new UserFacade(this);
 	}
-	
+
 }

@@ -10,7 +10,6 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -53,9 +52,6 @@ public class PullRequestStatusChange extends AbstractEntity {
 		}
 		
 	}
-	
-	@Version
-	private long version;
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -123,10 +119,6 @@ public class PullRequestStatusChange extends AbstractEntity {
 
 	public void setDate(Date date) {
 		this.date = date;
-	}
-
-	public long getVersion() {
-		return version;
 	}
 
 	public String getAnchor() {

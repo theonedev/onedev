@@ -34,7 +34,6 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.StaleStateException;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
@@ -53,7 +52,6 @@ import io.onedev.server.web.asset.caret.CaretResourceReference;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
@@ -106,19 +104,6 @@ public abstract class CodeCommentPanel extends Panel {
 		commentContainer.add(new Label("action", "commented"));
 		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getDate())));
 
-		ContentVersionSupport contentVersionSupport;
-		if (SecurityUtils.canModify(getComment())) {
-			contentVersionSupport = new ContentVersionSupport() {
-
-				@Override
-				public long getVersion() {
-					return getComment().getVersion();
-				}
-				
-			};
-		} else {
-			contentVersionSupport = null;
-		}
 		commentContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
 			@Override
@@ -137,7 +122,7 @@ public abstract class CodeCommentPanel extends Panel {
 				OneDev.getInstance(CodeCommentManager.class).save(comment, getPullRequest());				
 			}
 			
-		}, contentVersionSupport));
+		}, null));
 
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
 		foot.setVisible(SecurityUtils.canModify(getComment()));
@@ -149,8 +134,6 @@ public abstract class CodeCommentPanel extends Panel {
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				
-				String autosaveKey = "autosave:editCodeComment:" + commentId;
-				
 				CommentInput contentInput = new CommentInput("content", Model.of(getComment().getContent()), true) {
 
 					@Override
@@ -161,11 +144,6 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected Project getProject() {
 						return getComment().getProject();
-					}
-					
-					@Override
-					protected String getAutosaveKey() {
-						return autosaveKey;
 					}
 					
 				};
@@ -194,7 +172,6 @@ public abstract class CodeCommentPanel extends Panel {
 					
 				});
 				
-				long lastVersion = getComment().getVersion();
 				form.add(new AjaxButton("save") {
 
 					@Override
@@ -207,21 +184,13 @@ public abstract class CodeCommentPanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						try {
-							CodeComment comment = getComment();
-							if (comment.getVersion() != lastVersion)
-								throw new StaleStateException("");
-							comment.setContent(contentInput.getModelObject());
-							OneDev.getInstance(CodeCommentManager.class).save(comment, getPullRequest());
-							WebMarkupContainer commentContainer = newCommentContainer();
-							fragment.replaceWith(commentContainer);
-							target.add(commentContainer);
-							onSaveComment(target, comment);
-							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));							
-						} catch (StaleStateException e) {
-							error("Some one changed the content you are editing. Reload the page and try again.");
-							target.add(feedback);
-						}
+						CodeComment comment = getComment();
+						comment.setContent(contentInput.getModelObject());
+						OneDev.getInstance(CodeCommentManager.class).save(comment, getPullRequest());
+						WebMarkupContainer commentContainer = newCommentContainer();
+						fragment.replaceWith(commentContainer);
+						target.add(commentContainer);
+						onSaveComment(target, comment);
 					}
 
 				});
@@ -279,19 +248,6 @@ public abstract class CodeCommentPanel extends Panel {
 		replyContainer.add(new Label("action", "replied"));
 		replyContainer.add(new Label("date", DateUtils.formatAge(reply.getDate())));
 
-		ContentVersionSupport contentVersionSupport;
-		if (SecurityUtils.canModify(getComment())) {
-			contentVersionSupport = new ContentVersionSupport() {
-				
-				@Override
-				public long getVersion() {
-					return getReply(replyId).getVersion();
-				}
-
-			};
-		} else {
-			contentVersionSupport = null;
-		}
 		replyContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
 			@Override
@@ -310,7 +266,7 @@ public abstract class CodeCommentPanel extends Panel {
 				OneDev.getInstance(CodeCommentReplyManager.class).save(reply, getCompareContext(), getPullRequest());				
 			}
 			
-		}, contentVersionSupport));			
+		}, null));			
 		
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
 		foot.setVisible(SecurityUtils.canModify(reply));
@@ -322,7 +278,6 @@ public abstract class CodeCommentPanel extends Panel {
 				Fragment fragment = new Fragment(replyContainer.getId(), "replyEditFrag", CodeCommentPanel.this, 
 						Model.of(replyId));
 				Form<?> form = new Form<Void>("form");
-				String autosaveKey = "autosave:editCodeCommentReply:" + replyId;
 				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent()), 
 						true) {
 
@@ -336,11 +291,6 @@ public abstract class CodeCommentPanel extends Panel {
 						return getComment().getProject();
 					}
 
-					@Override
-					protected String getAutosaveKey() {
-						return autosaveKey;
-					}
-					
 				};
 				contentInput.setRequired(true);
 				contentInput.setLabel(Model.of("Comment"));
@@ -367,7 +317,6 @@ public abstract class CodeCommentPanel extends Panel {
 					
 				});
 				
-				long lastVersion = reply.getVersion();
 				form.add(new AjaxButton("save") {
 
 					@Override
@@ -380,22 +329,14 @@ public abstract class CodeCommentPanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						try {
-							CodeCommentReply reply = getReply(replyId);
-							if (reply.getVersion() != lastVersion)
-								throw new StaleStateException("");
-							
-							reply.setContent(contentInput.getModelObject());
-							OneDev.getInstance(CodeCommentReplyManager.class).save(reply, getCompareContext(), 
-									getPullRequest());				
-							WebMarkupContainer replyContainer = newReplyContainer(componentId, reply);
-							fragment.replaceWith(replyContainer);
-							target.add(replyContainer);
-							target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));							
-						} catch (StaleStateException e) {
-							error("Someone changed the content you are editing. Reload the page and try again.");
-							target.add(feedback);
-						}
+						CodeCommentReply reply = getReply(replyId);
+						
+						reply.setContent(contentInput.getModelObject());
+						OneDev.getInstance(CodeCommentReplyManager.class).save(reply, getCompareContext(), 
+								getPullRequest());				
+						WebMarkupContainer replyContainer = newReplyContainer(componentId, reply);
+						fragment.replaceWith(replyContainer);
+						target.add(replyContainer);
 					}
 
 				}.add(new Label("label", "Save")));
@@ -613,8 +554,6 @@ public abstract class CodeCommentPanel extends Panel {
 		Fragment fragment = new Fragment("addReply", "replyEditFrag", CodeCommentPanel.this);
 		Form<?> form = new Form<Void>("form");
 
-		String autosaveKey = "autosave:addCodeCommentReply:" + commentId;
-		
 		String initialContent = "";
 		
 		if (getComment().getRelations().isEmpty()) {
@@ -651,11 +590,6 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected Project getProject() {
 				return getComment().getProject();
-			}
-
-			@Override
-			protected String getAutosaveKey() {
-				return autosaveKey;
 			}
 
 		};
@@ -717,8 +651,6 @@ public abstract class CodeCommentPanel extends Panel {
 				WebMarkupContainer addReplyContainer = newAddReplyContainer();
 				fragment.replaceWith(addReplyContainer);
 				target.add(addReplyContainer);
-				
-				target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));							
 			}
 
 		};

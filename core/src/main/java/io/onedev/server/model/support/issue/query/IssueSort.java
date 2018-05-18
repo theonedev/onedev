@@ -54,7 +54,7 @@ public class IssueSort implements Serializable {
 	private static List<String> getFieldChoices() {
 		List<String> fields = new ArrayList<>(IssueSort.BUILTIN_FIELDS);
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
-		for (InputSpec field: page.getProject().getIssueWorkflow().getFields()) {
+		for (InputSpec field: page.getProject().getIssueWorkflow().getFieldSpecs()) {
 			if (field instanceof ChoiceInput)
 				fields.add(field.getName());
 		}

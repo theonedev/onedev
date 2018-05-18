@@ -14,6 +14,9 @@ import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
@@ -90,6 +93,21 @@ public class DefaultUrlManager implements UrlManager {
 	public String urlFor(PullRequestStatusChange statusChange) {
 		String url = urlFor(statusChange.getRequest());
 		return url + "#" + statusChange.getAnchor();
+	}
+
+	@Override
+	public String urlFor(Issue issue) {
+		return urlFor(issue.getProject()) + "/issues/" + issue.getNumber() + "/activities";
+	}
+
+	@Override
+	public String urlFor(IssueComment comment) {
+		return urlFor(comment.getIssue()) + "#" + comment.getAnchor();
+	}
+
+	@Override
+	public String urlFor(IssueChange change) {
+		return urlFor(change.getIssue()) + "#" + change.getAnchor();
 	}
 
 }
