@@ -25,7 +25,7 @@ public class QueryBuildContext {
 	public Join<Issue, ?> getJoin(String fieldName) {
 		Join<Issue, ?> join = joins.get(fieldName);
 		if (join == null) {
-			join = root.join("fields");
+			join = root.join("fieldUnaries");
 			join.on(builder.equal(join.get("name"), fieldName));
 			joins.put(fieldName, join);
 		}

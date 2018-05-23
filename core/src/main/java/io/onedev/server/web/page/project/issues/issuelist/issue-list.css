@@ -6,7 +6,7 @@
 	top: 48px;
 	left: 240px;
 	bottom: 0;
-	width: 240px;
+	width: 300px;
 	padding: 20px;
 	border-right: 2px solid #E0E0E0;
 	overflow: auto;
@@ -51,7 +51,7 @@
 
 #issue-list>.main {
 	padding: 20px;
-	margin-left: 240px;
+	margin-left: 300px;
 }
 #issue-list>.main>.head {
 	position: relative;

@@ -47,7 +47,7 @@ public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
 					onSelect(target, selection);
 					selection = null;
 				}
-				String script = String.format("$('#%s').select2('data', null);", getMarkupId());
+				String script = String.format("setTimeout(function(){$('#%s').select2('data', null);}, 0);", getMarkupId());
 				target.appendJavaScript(script);
 			}
 					

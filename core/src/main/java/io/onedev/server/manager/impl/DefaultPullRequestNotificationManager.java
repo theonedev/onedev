@@ -1,9 +1,5 @@
 package io.onedev.server.manager.impl;
 
-import static io.onedev.server.model.PullRequestTask.Type.RESOLVE_CONFLICT;
-import static io.onedev.server.model.PullRequestTask.Type.REVIEW;
-import static io.onedev.server.model.PullRequestTask.Type.UPDATE;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -14,7 +10,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.util.StringUtils;
-import org.hibernate.criterion.Restrictions;
 
 import com.google.common.collect.Sets;
 
@@ -39,20 +34,19 @@ import io.onedev.server.manager.BranchWatchManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.PullRequestNotificationManager;
-import io.onedev.server.manager.PullRequestTaskManager;
 import io.onedev.server.manager.PullRequestWatchManager;
+import io.onedev.server.manager.TaskManager;
 import io.onedev.server.manager.UrlManager;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.BranchWatch;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestStatusChange;
 import io.onedev.server.model.PullRequestStatusChange.Type;
-import io.onedev.server.model.PullRequestTask;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.ReviewInvitation;
+import io.onedev.server.model.Task;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.QualityCheckStatus;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.markdown.MentionParser;
@@ -70,20 +64,20 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	
 	private final MarkdownManager markdownManager;
 	
-	private final PullRequestTaskManager pullRequestTaskManager;
+	private final TaskManager taskManager;
 	
 	private final PullRequestWatchManager pullRequestWatchManager;
 	
 	@Inject
 	public DefaultPullRequestNotificationManager(MarkdownManager markdownManager, BranchWatchManager branchWatchManager, 
 			MailManager mailManager, UrlManager urlManager, VisitManager visitInfoManager, 
-			PullRequestWatchManager pullRequestWatchManager, PullRequestTaskManager pullRequestTaskManager) {
+			PullRequestWatchManager pullRequestWatchManager, TaskManager taskManager) {
 		this.branchWatchManager = branchWatchManager;
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.visitInfoManager = visitInfoManager;
 		this.markdownManager = markdownManager;
-		this.pullRequestTaskManager = pullRequestTaskManager;
+		this.taskManager = taskManager;
 		this.pullRequestWatchManager = pullRequestWatchManager;
 	}
 	
@@ -125,25 +119,14 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	private boolean process(ReviewInvitation invitation, String subject) {
 		PullRequest request = invitation.getRequest();
 		User user = invitation.getUser();
-		EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-		criteria.add(Restrictions.eq("request", request))
-				.add(Restrictions.eq("user", user))
-				.add(Restrictions.eq("type", REVIEW));
 
 		boolean notified = false;
 		
 		if (invitation.getType() == ReviewInvitation.Type.EXCLUDE) {
-			for (PullRequestTask task: pullRequestTaskManager.findAll(criteria))
-				pullRequestTaskManager.delete(task);
+			taskManager.deleteTasks(request, user, Task.DESC_REVIEW);
 		} else {
-			if (pullRequestTaskManager.find(criteria) == null) {
-				PullRequestTask task = new PullRequestTask();
-				task.setRequest(request);
-				task.setUser(user);
-				task.setType(REVIEW);
-				
-				pullRequestTaskManager.save(task);
-				
+			if (taskManager.findAll(request, user, Task.DESC_REVIEW).isEmpty()) {
+				taskManager.addTask(request, user, Task.DESC_REVIEW);
 				String url = urlManager.urlFor(request);
 				String body = String.format(""
 						+ "Dear %s,"
@@ -154,7 +137,7 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 						+ "<p style='margin: 16px 0;'>"
 						+ "-- Sent by OneDev",
 						user.getDisplayName(), subject, url, url);
-				mailManager.sendMailAsync(Sets.newHashSet(task.getUser().getEmail()), subject, body);
+				mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), subject, body);
 				notified = true;
 			}
 			watch(request, user, "You are set to watch this pull request as you are invited as a reviewer.");
@@ -182,10 +165,7 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 					notifiedUsers.add(invitation.getUser());
 			}
 		} else if (event instanceof PullRequestUpdated) {
-			EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-			criteria.add(Restrictions.eq("request", request)).add(Restrictions.eq("type", UPDATE));
-			for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) 
-				pullRequestTaskManager.delete(task);
+			taskManager.deleteTasks(request, null, Task.DESC_UPDATE);
 			
 			if (!request.isMergeIntoTarget()) {
 				QualityCheckStatus qualityCheckStatus = request.getQualityCheckStatus();					
@@ -201,23 +181,10 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 		} else if (event instanceof PullRequestMergePreviewCalculated) {
 			if (request.getSubmitter() != null && request.getMergePreview() != null) {
 				if (request.getMergePreview().getMerged() != null) {
-					EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-					criteria.add(Restrictions.eq("user", request.getSubmitter()))
-							.add(Restrictions.eq("type", RESOLVE_CONFLICT));
-					for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) {
-						pullRequestTaskManager.delete(task);
-					}
+					taskManager.deleteTasks(request, request.getSubmitter(), Task.DESC_RESOLVE_CONFLICT);
 				} else {
-					PullRequestTask task = new PullRequestTask();
-					task.setRequest(request);
-					task.setUser(request.getSubmitter());
-					task.setType(RESOLVE_CONFLICT);
-					EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-					criteria.add(Restrictions.eq("request", task.getRequest()))
-							.add(Restrictions.eq("user", request.getSubmitter()))
-							.add(Restrictions.eq("type", task.getType()));
-					if (pullRequestTaskManager.find(criteria) == null) {
-						pullRequestTaskManager.save(task);
+					if (taskManager.findAll(request, request.getSubmitter(), Task.DESC_RESOLVE_CONFLICT).isEmpty()) {
+						taskManager.addTask(request, request.getSubmitter(), Task.DESC_RESOLVE_CONFLICT);
 						String subject = String.format("Please resolve conflicts in pull request #%d - %s", 
 								request.getNumber(), request.getTitle());
 						String url = urlManager.urlFor(request);
@@ -242,23 +209,11 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 			PullRequestStatusChangeEvent statusChangeEvent = (PullRequestStatusChangeEvent)event;
 			PullRequestStatusChange statusChange = statusChangeEvent.getStatusChange();
 			PullRequestStatusChange.Type type = statusChange.getType();
-			EntityCriteria<PullRequestTask> criteria = EntityCriteria.of(PullRequestTask.class);
-			criteria.add(Restrictions.eq("request", request));
 			if (type == PullRequestStatusChange.Type.APPROVED || type == PullRequestStatusChange.Type.DISAPPROVED) {
-				criteria.add(Restrictions.eq("user", statusChange.getUser())).add(Restrictions.eq("type", REVIEW));
-				for (PullRequestTask task: pullRequestTaskManager.findAll(criteria)) 
-					pullRequestTaskManager.delete(task);
+				taskManager.deleteTasks(request, statusChange.getUser(), Task.DESC_REVIEW);
 				if (type == PullRequestStatusChange.Type.DISAPPROVED && request.getSubmitter() != null) {
-					PullRequestTask task = new PullRequestTask();
-					task.setRequest(request);
-					task.setUser(request.getSubmitter());
-					task.setType(UPDATE);
-					criteria = EntityCriteria.of(PullRequestTask.class);
-					criteria.add(Restrictions.eq("request", task.getRequest()))
-							.add(Restrictions.eq("user", task.getUser()))
-							.add(Restrictions.eq("type", task.getType()));
-					if (pullRequestTaskManager.find(criteria) == null) {
-						pullRequestTaskManager.save(task);
+					if (taskManager.findAll(request, request.getSubmitter(), Task.DESC_UPDATE).isEmpty()) {
+						taskManager.addTask(request, request.getSubmitter(), Task.DESC_UPDATE);
 						String subject = String.format("%s disapproved pull request #%d - %s", 
 								event.getUser().getDisplayName(), request.getNumber(), request.getTitle());
 						String url = urlManager.urlFor(request);
@@ -277,8 +232,7 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 					}
 				}
 			} else if (type == PullRequestStatusChange.Type.MERGED || type == PullRequestStatusChange.Type.DISCARDED) {
-				for (PullRequestTask task: pullRequestTaskManager.findAll(criteria))
-					pullRequestTaskManager.delete(task);
+				taskManager.deleteTasks(request, null, null);
 			} else if (type == PullRequestStatusChange.Type.REMOVED_REVIEWER) {
 				String subject = String.format("You no longer needs to review pull request #%d - %s", request.getNumber(), 
 						request.getTitle());

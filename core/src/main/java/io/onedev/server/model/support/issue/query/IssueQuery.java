@@ -95,7 +95,7 @@ public class IssueQuery implements Serializable {
 				else
 					orders.add(builder.desc(root.get(Issue.BUILTIN_FIELDS.get(sort.getField()))));
 			} else {
-				Join<Issue, IssueFieldUnary> join = root.join("fields", JoinType.LEFT);
+				Join<Issue, IssueFieldUnary> join = root.join("fieldUnaries", JoinType.LEFT);
 				join.on(builder.equal(join.get(IssueFieldUnary.NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
 					orders.add(builder.asc(join.get(IssueFieldUnary.ORDINAL)));

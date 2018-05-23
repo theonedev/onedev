@@ -203,6 +203,14 @@ public class Issue extends AbstractEntity implements Referenceable {
 		numberStr = String.valueOf(number);
 	}
 
+	public String getNumberStr() {
+		return numberStr;
+	}
+
+	public void setNumberStr(String numberStr) {
+		this.numberStr = numberStr;
+	}
+
 	public User getSubmitter() {
 		return submitter;
 	}

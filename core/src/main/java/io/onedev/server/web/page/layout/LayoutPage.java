@@ -142,7 +142,7 @@ public abstract class LayoutPage extends BasePage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(!getLoginUser().getRequestTasks().isEmpty());
+					setVisible(!getLoginUser().getTasks().isEmpty());
 				}
 				
 			}.setOutputMarkupPlaceholderTag(true));

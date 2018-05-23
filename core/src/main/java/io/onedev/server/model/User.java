@@ -89,7 +89,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private Collection<IssueWatch> issueWatches = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestTask> requestTasks = new ArrayList<>();
+    private Collection<Task> tasks = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
@@ -180,12 +180,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.memberships = memberships;
 	}
 
-	public Collection<PullRequestTask> getRequestTasks() {
-		return requestTasks;
+	public Collection<Task> getTasks() {
+		return tasks;
 	}
 
-	public void setRequestTasks(Collection<PullRequestTask> requestTasks) {
-		this.requestTasks = requestTasks;
+	public void setTasks(Collection<Task> tasks) {
+		this.tasks = tasks;
 	}
 
 	@SuppressWarnings("deprecation")

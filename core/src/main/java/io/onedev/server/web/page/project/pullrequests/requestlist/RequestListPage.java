@@ -40,6 +40,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.RequestStatusLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -48,7 +49,6 @@ import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.requeststatus.RequestStatusPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
@@ -284,7 +284,7 @@ public class RequestListPage extends ProjectPage {
 					
 				});
 				
-				fragment.add(new RequestStatusPanel("status", rowModel));
+				fragment.add(new RequestStatusLabel("status", rowModel));
 				fragment.add(new BranchLink("target", request.getTarget(), null));
 				if (request.getSource() != null) { 
 					fragment.add(new BranchLink("source", request.getSource(), request));

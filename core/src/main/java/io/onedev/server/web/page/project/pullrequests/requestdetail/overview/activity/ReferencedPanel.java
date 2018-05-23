@@ -9,10 +9,10 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReference;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.component.RequestStatusLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.requeststatus.RequestStatusPanel;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
 
 @SuppressWarnings("serial")
@@ -39,7 +39,7 @@ class ReferencedPanel extends GenericPanel<PullRequestReference> {
 		link.add(new Label("title", reference.getReferencedBy().getTitle()));
 		add(link);
 		
-		add(new RequestStatusPanel("status", new AbstractReadOnlyModel<PullRequest>() {
+		add(new RequestStatusLabel("status", new AbstractReadOnlyModel<PullRequest>() {
 
 			@Override
 			public PullRequest getObject() {

@@ -173,9 +173,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	private Collection<PullRequestStatusChange> statusChanges = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestTask> tasks = new ArrayList<>();
-	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
@@ -392,14 +389,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 
 	public void setStatusChanges(Collection<PullRequestStatusChange> statusChanges) {
 		this.statusChanges = statusChanges;
-	}
-
-	public Collection<PullRequestTask> getTasks() {
-		return tasks;
-	}
-
-	public void setTasks(Collection<PullRequestTask> tasks) {
-		this.tasks = tasks;
 	}
 
 	public Collection<PullRequestWatch> getWatches() {

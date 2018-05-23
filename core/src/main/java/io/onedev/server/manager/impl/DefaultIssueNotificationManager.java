@@ -120,29 +120,29 @@ public class DefaultIssueNotificationManager implements IssueNotificationManager
 		
 		OneDev.getInstance(VisitManager.class).visitIssue(event.getUser(), issue);
 		
-		if (event instanceof IssueOpened) {
-			Map<String, Optional<IssueQuery>> parsedQueries = new HashMap<>();
-			
-			for (IssueQuerySetting setting: issue.getProject().getIssueQuerySettings()) {
-				boolean watched = false;
-				for (Map.Entry<String, Boolean> entry: setting.getUserQueryWatches().entrySet()) {
-					if (matches(parsedQueries, issue, setting.getUserQueries().get(entry.getKey()))) {
+		Map<String, Optional<IssueQuery>> parsedQueries = new HashMap<>();
+		
+		for (IssueQuerySetting setting: issue.getProject().getIssueQuerySettings()) {
+			boolean watched = false;
+			for (Map.Entry<String, Boolean> entry: setting.getUserQueryWatches().entrySet()) {
+				if (matches(parsedQueries, issue, setting.getUserQueries().get(entry.getKey()))) {
+					watch(issue, setting.getUser(), entry.getValue());
+					watched = true;
+					break;
+				}
+			}
+			if (!watched) {
+				for (Map.Entry<String, Boolean> entry: setting.getProjectQueryWatches().entrySet()) {
+					if (matches(parsedQueries, issue, issue.getProject().getIssueWorkflow().getSavedQueries().get(entry.getKey()))) {
 						watch(issue, setting.getUser(), entry.getValue());
 						watched = true;
 						break;
 					}
 				}
-				if (!watched) {
-					for (Map.Entry<String, Boolean> entry: setting.getProjectQueryWatches().entrySet()) {
-						if (matches(parsedQueries, issue, issue.getProject().getIssueWorkflow().getSavedQueries().get(entry.getKey()))) {
-							watch(issue, setting.getUser(), entry.getValue());
-							watched = true;
-							break;
-						}
-					}
-				}
 			}
-		} else if (event instanceof IssueChanged) {
+		}
+		
+		if (event instanceof IssueChanged) {
 			IssueChange issueChange = ((IssueChanged) event).getChange();
 			for (Group group: issueChange.getData().getNewGroups().values()) 
 				involvedUsers.addAll(group.getMembers());

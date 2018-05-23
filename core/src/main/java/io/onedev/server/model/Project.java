@@ -171,6 +171,9 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
 	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<Task> tasks = new ArrayList<>();
+	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private IssueWorkflow issueWorkflow = new IssueWorkflow();
