@@ -117,9 +117,9 @@ public class PropertyDescriptor implements Serializable {
 		return isPropertyVisible(oneContext, beanDescriptor, new HashSet<>());
 	}
 	
-	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
+	private boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
 		if (checkedPropertyNames.contains(getPropertyName()))
-			return true;
+			return false;
 		checkedPropertyNames.add(getPropertyName());
 		
 		OneContext.push(oneContext);

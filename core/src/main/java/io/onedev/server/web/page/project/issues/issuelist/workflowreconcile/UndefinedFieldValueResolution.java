@@ -69,7 +69,7 @@ public class UndefinedFieldValueResolution implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
 		UndefinedFieldValueContainer container = ((ComponentContext)OneContext.get()).getComponent().findParent(UndefinedFieldValueContainer.class); 
-		InputSpec fieldSpec = Preconditions.checkNotNull(OneContext.get().getProject().getIssueWorkflow().getField(container.getFieldName()));
+		InputSpec fieldSpec = Preconditions.checkNotNull(OneContext.get().getProject().getIssueWorkflow().getFieldSpec(container.getFieldName()));
 		OneContext.push(new OneContext() {
 
 			@Override

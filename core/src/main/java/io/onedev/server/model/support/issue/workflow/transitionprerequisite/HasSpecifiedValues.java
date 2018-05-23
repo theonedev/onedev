@@ -3,10 +3,14 @@ package io.onedev.server.model.support.issue.workflow.transitionprerequisite;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -14,6 +18,8 @@ import io.onedev.server.web.util.WicketUtils;
 public class HasSpecifiedValues implements ValueSpecification {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(HasSpecifiedValues.class);
 	
 	private List<String> fieldValues;
 	
@@ -38,10 +44,13 @@ public class HasSpecifiedValues implements ValueSpecification {
 		String fieldName = (String) OneContext.get().getEditContext(1).getInputValue("fieldName");
 		if (fieldName != null) {
 			IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
-			return page.getWorkflow().getInput(fieldName).getPossibleValues();
-		} else {
-			return new ArrayList<>();
-		}
+			InputSpec fieldSpec = page.getWorkflow().getInputSpec(fieldName);
+			if (fieldSpec != null)
+				return fieldSpec.getPossibleValues();
+			else
+				logger.error("Unable to find field spec: " + fieldName);
+		} 
+		return new ArrayList<>();
 	}
 
 }

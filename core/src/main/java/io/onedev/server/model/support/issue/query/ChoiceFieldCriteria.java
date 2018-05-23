@@ -6,7 +6,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueFieldUnary;
 
 public class ChoiceFieldCriteria extends FieldCriteria {
 
@@ -29,13 +29,13 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	public Predicate getPredicate(QueryBuildContext context) {
 		Join<Issue, ?> join = context.getJoin(getFieldName());
 		if (operator == IssueQueryLexer.Is)
-			return context.getBuilder().equal(join.get(IssueField.VALUE), value);
+			return context.getBuilder().equal(join.get(IssueFieldUnary.VALUE), value);
 		else if (operator == IssueQueryLexer.IsNot)
-			return context.getBuilder().notEqual(join.get(IssueField.VALUE), value);
+			return context.getBuilder().notEqual(join.get(IssueFieldUnary.VALUE), value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
-			return context.getBuilder().greaterThan(join.get(IssueField.ORDINAL), ordinal);
+			return context.getBuilder().greaterThan(join.get(IssueFieldUnary.ORDINAL), ordinal);
 		else
-			return context.getBuilder().lessThan(join.get(IssueField.ORDINAL), ordinal);
+			return context.getBuilder().lessThan(join.get(IssueFieldUnary.ORDINAL), ordinal);
 	}
 
 	@Override

@@ -2,6 +2,8 @@ package io.onedev.server.model.support.issue.workflow;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,7 +44,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 	
 	private List<InputSpec> fieldSpecs = new ArrayList<>();
 
-	private Map<String, String> queries = new LinkedHashMap<>();
+	private Map<String, String> savedQueries = new LinkedHashMap<>();
 	
 	private List<String> listFields = new ArrayList<>();
 	
@@ -217,14 +219,14 @@ public class IssueWorkflow implements Serializable, InputContext {
 		listFields.add("Priority");
 		listFields.add("Assignee");
 		
-		queries.put("All", "all");
-		queries.put("Outstanding", "\"State\" is not \"Closed\"");
-		queries.put("Closed", "\"State\" is \"Closed\"");
-		queries.put("Added recently", "\"Submit Date\" is after \"one week ago\"");
-		queries.put("Updated recently", "\"Update Date\" is after \"one week ago\"");
-		queries.put("Submitted by me", "\"Submitter\" is me");
-		queries.put("Assigned to me", "\"Assignee\" is me");
-		queries.put("Hight Priority", "\"Priority\" is \"High\"");
+		savedQueries.put("All", "all");
+		savedQueries.put("Outstanding", "\"State\" is not \"Closed\"");
+		savedQueries.put("Closed", "\"State\" is \"Closed\"");
+		savedQueries.put("Added recently", "\"Submit Date\" is after \"one week ago\"");
+		savedQueries.put("Updated recently", "\"Update Date\" is after \"one week ago\"");
+		savedQueries.put("Submitted by me", "\"Submitter\" is me");
+		savedQueries.put("Assigned to me", "\"Assignee\" is me");
+		savedQueries.put("Hight Priority", "\"Priority\" is \"High\"");
 	}
 	
 	public List<StateSpec> getStateSpecs() {
@@ -251,12 +253,12 @@ public class IssueWorkflow implements Serializable, InputContext {
 		this.fieldSpecs = fieldSpecs;
 	}
 
-	public Map<String, String> getQueries() {
-		return queries;
+	public Map<String, String> getSavedQueries() {
+		return savedQueries;
 	}
 
-	public void setQueries(Map<String, String> queries) {
-		this.queries = queries;
+	public void setSavedQueries(Map<String, String> savedQueries) {
+		this.savedQueries = savedQueries;
 	}
 
 	public List<String> getListFields() {
@@ -299,11 +301,8 @@ public class IssueWorkflow implements Serializable, InputContext {
 	}
 	
 	@Override
-	public InputSpec getInput(String inputName) {
-		InputSpec field = getFieldSpecMap().get(inputName);
-		if (field == null)
-			throw new RuntimeException("Unable to find input: " + inputName);
-		return field;
+	public InputSpec getInputSpec(String inputName) {
+		return getFieldSpecMap().get(inputName);
 	}
 	
 	public List<String> onDeleteState(String stateName) {
@@ -327,11 +326,11 @@ public class IssueWorkflow implements Serializable, InputContext {
 	}
 	
 	@Nullable
-	public StateSpec getState(String stateName) {
+	public StateSpec getStateSpec(String stateName) {
 		return getStateSpecMap().get(stateName);
 	}
 
-	public int getStateIndex(String stateName) {
+	public int getStateSpecIndex(String stateName) {
 		for (int i=0; i<getStateSpecs().size(); i++) {
 			if (getStateSpecs().get(i).getName().equals(stateName))
 				return i;
@@ -339,7 +338,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 		return -1;
 	}
 	
-	public int getTransitionIndex(TransitionSpec transition) {
+	public int getTransitionSpecIndex(TransitionSpec transition) {
 		for (int i=0; i<getTransitionSpecs().size(); i++) {
 			if (getTransitionSpecs().get(i) == transition)
 				return i;
@@ -348,11 +347,11 @@ public class IssueWorkflow implements Serializable, InputContext {
 	}
 	
 	@Nullable
-	public InputSpec getField(String fieldName) {
+	public InputSpec getFieldSpec(String fieldName) {
 		return getFieldSpecMap().get(fieldName);
 	}
 
-	public int getFieldIndex(String fieldName) {
+	public int getFieldSpecIndex(String fieldName) {
 		for (int i=0; i<getFieldSpecs().size(); i++) {
 			if (getFieldSpecs().get(i).getName().equals(fieldName))
 				return i;
@@ -416,15 +415,24 @@ public class IssueWorkflow implements Serializable, InputContext {
 		return usages;
 	}
 	
-	public StateSpec getInitialState() {
+	public StateSpec getInitialStateSpec() {
 		if (!getStateSpecs().isEmpty())
 			return getStateSpecs().iterator().next();
 		else
 			throw new OneException("No any issue state is defined");
 	}
+	
 	@Override
 	public boolean isReservedName(String inputName) {
 		throw new UnsupportedOperationException();
+	}
+	
+	public Collection<String> getEffectiveFields(String state) {
+		int index = getStateSpecIndex(state);
+		Collection<String> effectiveFields = new HashSet<>();
+		for (int i=0; i<=index; i++)
+			effectiveFields.addAll(getStateSpecs().get(i).getFields());
+		return effectiveFields;
 	}
 	
 }

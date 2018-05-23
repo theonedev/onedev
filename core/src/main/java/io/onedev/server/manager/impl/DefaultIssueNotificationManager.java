@@ -134,7 +134,7 @@ public class DefaultIssueNotificationManager implements IssueNotificationManager
 				}
 				if (!watched) {
 					for (Map.Entry<String, Boolean> entry: setting.getProjectQueryWatches().entrySet()) {
-						if (matches(parsedQueries, issue, issue.getProject().getIssueWorkflow().getQueries().get(entry.getKey()))) {
+						if (matches(parsedQueries, issue, issue.getProject().getIssueWorkflow().getSavedQueries().get(entry.getKey()))) {
 							watch(issue, setting.getUser(), entry.getValue());
 							watched = true;
 							break;

@@ -19,7 +19,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.EditableUtils;
@@ -73,7 +73,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					}
 				} else {
 					Label label = new Label("value", value);
-					InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getField(getField().getName());
+					InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(getField().getName());
 					ChoiceProvider choiceProvider = null;
 					if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
 						choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
@@ -106,7 +106,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		} else {
 			InputSpec fieldSpec = null;
 			if (getField() != null)
-				fieldSpec = getIssue().getProject().getIssueWorkflow().getField(getField().getName());
+				fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(getField().getName());
 			String displayValue;
 			if (fieldSpec != null && fieldSpec.getNameOfEmptyValue() != null) 
 				displayValue = fieldSpec.getNameOfEmptyValue();
@@ -119,8 +119,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 
 	@Override
 	public Object getInputValue(String name) {
-		PromptedField field = getIssue().getPromptedFields().get(name);
-		InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getField(name);
+		IssueField field = getIssue().getEffectiveFields().get(name);
+		InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(name);
 		if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
 			return fieldSpec.convertToObject(field.getValues());
 		} else {
@@ -130,7 +130,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 
 	protected abstract Issue getIssue();
 	
-	protected abstract PromptedField getField();
+	protected abstract IssueField getField();
 
 	@Override
 	public void renderHead(IHeaderResponse response) {

@@ -27,6 +27,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
+
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
@@ -91,7 +93,8 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
 				Fragment fragment = new Fragment(componentId, "nameColumnFrag", IssueStatesPage.this);
 				StateSpec state = rowModel.getObject();
-				int index = getWorkflow().getStateIndex(state.getName());				
+				int index = getWorkflow().getStateSpecIndex(state.getName());
+				Preconditions.checkState(index != -1);
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
@@ -113,7 +116,8 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
 				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStatesPage.this);
 				StateSpec state = rowModel.getObject();
-				int index = getWorkflow().getStateIndex(state.getName());				
+				int index = getWorkflow().getStateSpecIndex(state.getName());				
+				Preconditions.checkState(index != -1);
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
@@ -136,7 +140,8 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
 				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStatesPage.this);
 				StateSpec state = rowModel.getObject();
-				int index = getWorkflow().getStateIndex(state.getName());				
+				int index = getWorkflow().getStateSpecIndex(state.getName());				
+				Preconditions.checkState(index != -1);
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override

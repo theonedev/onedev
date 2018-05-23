@@ -160,7 +160,7 @@ public abstract class ProjectPage extends LayoutPage {
 									if (setting != null)
 										queries.addAll(setting.getUserQueries().values());
 								}
-								queries.addAll(getProject().getIssueWorkflow().getQueries().values());
+								queries.addAll(getProject().getIssueWorkflow().getSavedQueries().values());
 								for (String each: queries) {
 									try {
 										if (getLoginUser() != null || !IssueQuery.parse(getProject(), each).needsLogin()) {  

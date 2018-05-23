@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-public class PromptedField implements Serializable {
+public class IssueField implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -16,7 +16,7 @@ public class PromptedField implements Serializable {
 	
 	private final List<String> values;
 	
-	public PromptedField(String name, String type, List<String> values) {
+	public IssueField(String name, String type, List<String> values) {
 		this.name = name;
 		this.type = type;
 		this.values = values;

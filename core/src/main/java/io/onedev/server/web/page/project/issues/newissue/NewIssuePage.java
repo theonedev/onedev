@@ -17,15 +17,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -51,8 +48,8 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		return OneDev.getInstance(IssueManager.class);
 	}
 	
-	private IssueFieldManager getIssueFieldManager() {
-		return OneDev.getInstance(IssueFieldManager.class);
+	private IssueFieldUnaryManager getIssueFieldManager() {
+		return OneDev.getInstance(IssueFieldUnaryManager.class);
 	}
 	
 	@Override
@@ -61,7 +58,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 
 		Issue issue = new Issue();
 		issue.setSubmitDate(new Date());
-		issue.setState(getProject().getIssueWorkflow().getInitialState().getName());
+		issue.setState(getProject().getIssueWorkflow().getInitialStateSpec().getName());
 		issue.setProject(getProject());
 		issue.setSubmitter(getLoginUser());
 		Serializable fieldBean = getIssueFieldManager().readFields(issue);
@@ -71,10 +68,9 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				StateSpec stateSpec = Preconditions.checkNotNull(getProject().getIssueWorkflow().getState(issue.getState()));
 				issue.setProject(getProject());
 				issue.setSubmitter(getLoginUser());
-				getIssueManager().open(issue, fieldBean, stateSpec.getFields());
+				getIssueManager().open(issue, fieldBean);
 				setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null));
 			}
 			
@@ -109,7 +105,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		});
 		
 		Set<String> excludedFields = getIssueFieldManager().getExcludedFields(
-				getProject(), getProject().getIssueWorkflow().getInitialState().getName());
+				getProject(), getProject().getIssueWorkflow().getInitialStateSpec().getName());
 		form.add(BeanContext.editBean("fields", fieldBean, excludedFields));
 		
 		add(form);
@@ -127,8 +123,8 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	}
 
 	@Override
-	public InputSpec getInput(String inputName) {
-		return getProject().getIssueWorkflow().getInput(inputName);
+	public InputSpec getInputSpec(String inputName) {
+		return getProject().getIssueWorkflow().getInputSpec(inputName);
 	}
 
 	@Override

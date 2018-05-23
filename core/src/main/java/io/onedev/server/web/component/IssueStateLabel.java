@@ -4,6 +4,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.utils.ColorUtils;
@@ -29,14 +30,12 @@ public class IssueStateLabel extends Label {
 		super.onInitialize();
 		
 		Issue issue = issueModel.getObject();
-		StateSpec stateSpec = issue.getProject().getIssueWorkflow().getState(issue.getState());
-		if (stateSpec != null) {
-			String fontColor = ColorUtils.isLight(stateSpec.getColor())?"black":"white";
-			String style = String.format(
-					"background-color: %s; color: %s;", 
-					stateSpec.getColor(), fontColor);
-			add(AttributeAppender.append("style", style));
-		}
+		StateSpec stateSpec = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState());
+		if (stateSpec == null)
+			throw new OneException("Unable to find state spec: " + issue.getState());
+		String fontColor = ColorUtils.isLight(stateSpec.getColor())?"black":"white";
+		String style = String.format("background-color: %s; color: %s;", stateSpec.getColor(), fontColor);
+		add(AttributeAppender.append("style", style));
 		add(AttributeAppender.append("title", "State"));
 	}
 

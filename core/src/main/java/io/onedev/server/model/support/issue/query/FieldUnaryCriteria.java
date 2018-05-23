@@ -6,7 +6,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.security.SecurityUtils;
 
 public class FieldUnaryCriteria extends FieldCriteria {
@@ -22,7 +22,7 @@ public class FieldUnaryCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(QueryBuildContext context) {
-		Path<?> attribute = context.getJoin(getFieldName()).get(IssueField.VALUE);
+		Path<?> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.VALUE);
 		if (operator == IssueQueryLexer.IsEmpty)
 			return context.getBuilder().isNull(attribute);
 		else if (operator == IssueQueryLexer.IsNotEmpty)

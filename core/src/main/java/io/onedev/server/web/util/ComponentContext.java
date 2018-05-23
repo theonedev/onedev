@@ -3,6 +3,8 @@ package io.onedev.server.web.util;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.model.Project;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
@@ -33,7 +35,7 @@ public class ComponentContext extends OneContext {
 
 	@Override
 	public InputContext getInputContext() {
-		return WicketUtils.findInnermost(component, InputContext.class);
+		return Preconditions.checkNotNull(WicketUtils.findInnermost(component, InputContext.class));
 	}
 
 	public Component getComponent() {

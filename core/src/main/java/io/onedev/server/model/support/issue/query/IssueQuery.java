@@ -29,7 +29,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.AllCriteriaContext;
@@ -95,12 +95,12 @@ public class IssueQuery implements Serializable {
 				else
 					orders.add(builder.desc(root.get(Issue.BUILTIN_FIELDS.get(sort.getField()))));
 			} else {
-				Join<Issue, IssueField> join = root.join("fields", JoinType.LEFT);
-				join.on(builder.equal(join.get(IssueField.NAME), sort.getField()));
+				Join<Issue, IssueFieldUnary> join = root.join("fields", JoinType.LEFT);
+				join.on(builder.equal(join.get(IssueFieldUnary.NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(join.get(IssueField.ORDINAL)));
+					orders.add(builder.asc(join.get(IssueFieldUnary.ORDINAL)));
 				else
-					orders.add(builder.desc(join.get(IssueField.ORDINAL)));
+					orders.add(builder.desc(join.get(IssueFieldUnary.ORDINAL)));
 			}
 		}
 
@@ -271,8 +271,8 @@ public class IssueQuery implements Serializable {
 							} else if (fieldName.equals(Issue.DESCRIPTION)) {
 								return new DescriptionCriteria(value, operator);
 							} else {
-								InputSpec field = project.getIssueWorkflow().getField(fieldName);
-								if (field instanceof TextInput) 
+								InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+								if (fieldSpec instanceof TextInput) 
 									return new StringFieldCriteria(fieldName, value, operator);
 								else 
 									return new MultiChoiceFieldCriteria(fieldName, value, operator);
@@ -293,7 +293,7 @@ public class IssueQuery implements Serializable {
 									throw new OneException("Unable to find user with login: " + value);
 								return new SubmitterCriteria(user, operator);
 							} else {
-								InputSpec field = project.getIssueWorkflow().getField(fieldName);
+								InputSpec field = project.getIssueWorkflow().getFieldSpec(fieldName);
 								if (field instanceof IssueChoiceInput) {
 									value = value.trim();
 									if (value.startsWith("#"))
@@ -322,7 +322,7 @@ public class IssueQuery implements Serializable {
 							} else if (fieldName.equals(Issue.NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
-								InputSpec field = project.getIssueWorkflow().getField(fieldName);
+								InputSpec field = project.getIssueWorkflow().getFieldSpec(fieldName);
 								if (field instanceof NumberInput)
 									return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
 								else
@@ -360,9 +360,9 @@ public class IssueQuery implements Serializable {
 				if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.UPDATE_DATE) 
 						&& !fieldName.equals(Issue.VOTES) && !fieldName.equals(Issue.COMMENTS) 
 						&& !fieldName.equals(Issue.NUMBER)) {
-					InputSpec field = project.getIssueWorkflow().getField(fieldName);
-					if (!(field instanceof ChoiceInput) && !(field instanceof DateInput) 
-							&& !(field instanceof NumberInput)) {
+					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+					if (!(fieldSpec instanceof ChoiceInput) && !(fieldSpec instanceof DateInput) 
+							&& !(fieldSpec instanceof NumberInput)) {
 						throw new OneException("Can not order by field: " + fieldName);
 					}
 				}
@@ -387,8 +387,8 @@ public class IssueQuery implements Serializable {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		InputSpec field = project.getIssueWorkflow().getField(fieldName);
-		if (field == null && !Issue.BUILTIN_FIELDS.containsKey(fieldName))
+		InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+		if (fieldSpec == null && !Issue.BUILTIN_FIELDS.containsKey(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
@@ -398,20 +398,20 @@ public class IssueQuery implements Serializable {
 			break;
 		case IssueQueryLexer.IsMe:
 		case IssueQueryLexer.IsNotMe:
-			if (!fieldName.equals(Issue.SUBMITTER) && !(field instanceof UserChoiceInput))
+			if (!fieldName.equals(Issue.SUBMITTER) && !(fieldSpec instanceof UserChoiceInput))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsBefore:
 		case IssueQueryLexer.IsAfter:
-			if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.UPDATE_DATE) && !(field instanceof DateInput))
+			if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.UPDATE_DATE) && !(fieldSpec instanceof DateInput))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.Contains:
 		case IssueQueryLexer.DoesNotContain:
 			if (!fieldName.equals(Issue.TITLE) 
 					&& !fieldName.equals(Issue.DESCRIPTION)
-					&& !(field instanceof TextInput) 
-					&& !(field instanceof MultiChoiceInput)) {
+					&& !(fieldSpec instanceof TextInput) 
+					&& !(fieldSpec instanceof MultiChoiceInput)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -422,13 +422,13 @@ public class IssueQuery implements Serializable {
 					&& !fieldName.equals(Issue.COMMENTS) 
 					&& !fieldName.equals(Issue.SUBMITTER)
 					&& !fieldName.equals(Issue.NUMBER)
-					&& !(field instanceof IssueChoiceInput)
-					&& !(field instanceof BooleanInput)
-					&& !(field instanceof NumberInput) 
-					&& !(field instanceof ChoiceInput) 
-					&& !(field instanceof UserChoiceInput)
-					&& !(field instanceof GroupChoiceInput)
-					&& !(field instanceof TextInput)) {
+					&& !(fieldSpec instanceof IssueChoiceInput)
+					&& !(fieldSpec instanceof BooleanInput)
+					&& !(fieldSpec instanceof NumberInput) 
+					&& !(fieldSpec instanceof ChoiceInput) 
+					&& !(fieldSpec instanceof UserChoiceInput)
+					&& !(fieldSpec instanceof GroupChoiceInput)
+					&& !(fieldSpec instanceof TextInput)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -437,8 +437,8 @@ public class IssueQuery implements Serializable {
 			if (!fieldName.equals(Issue.VOTES)
 					&& !fieldName.equals(Issue.COMMENTS)
 					&& !fieldName.equals(Issue.NUMBER)
-					&& !(field instanceof NumberInput) 
-					&& !(field instanceof ChoiceInput))
+					&& !(fieldSpec instanceof NumberInput) 
+					&& !(fieldSpec instanceof ChoiceInput))
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

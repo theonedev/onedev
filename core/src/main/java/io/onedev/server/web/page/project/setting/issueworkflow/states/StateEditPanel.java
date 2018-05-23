@@ -81,11 +81,11 @@ abstract class StateEditPanel extends Panel {
 
 				if (stateIndex != -1) { 
 					StateSpec oldState = getWorkflow().getStateSpecs().get(stateIndex);
-					if (!state.getName().equals(oldState.getName()) && getWorkflow().getState(state.getName()) != null) {
+					if (!state.getName().equals(oldState.getName()) && getWorkflow().getStateSpec(state.getName()) != null) {
 						editor.getErrorContext(new PathSegment.Property("name"))
 								.addError("This name has already been used by another state");
 					}
-				} else if (getWorkflow().getState(state.getName()) != null) {
+				} else if (getWorkflow().getStateSpec(state.getName()) != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another state");
 				}

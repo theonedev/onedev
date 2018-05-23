@@ -27,6 +27,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
+
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
@@ -111,10 +113,10 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 
 					@Override
 					public int compare(TransitionSpec transition1, TransitionSpec transition2) {
-						int fromStateIndex1 = getWorkflow().getStateIndex(transition1.getFromStates().get(0));
-						int fromStateIndex2 = getWorkflow().getStateIndex(transition2.getFromStates().get(0));
-						int toStateIndex1 = getWorkflow().getStateIndex(transition1.getToState());
-						int toStateIndex2 = getWorkflow().getStateIndex(transition2.getToState());
+						int fromStateIndex1 = getWorkflow().getStateSpecIndex(transition1.getFromStates().get(0));
+						int fromStateIndex2 = getWorkflow().getStateSpecIndex(transition2.getFromStates().get(0));
+						int toStateIndex1 = getWorkflow().getStateSpecIndex(transition1.getToState());
+						int toStateIndex2 = getWorkflow().getStateSpecIndex(transition2.getToState());
 						if (fromStateIndex1 != fromStateIndex2)
 							return fromStateIndex1 - fromStateIndex2;
 						else
@@ -162,18 +164,19 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 
 	private class ColumnFragment extends Fragment {
 
-		private final int transitionIndex;
+		private final int index;
 		
 		private final String label;
 		
 		public ColumnFragment(String id, TransitionSpec transition, String label) {
 			super(id, "columnFrag", StateTransitionsPage.this);
-			this.transitionIndex = getWorkflow().getTransitionIndex(transition);
+			this.index = getWorkflow().getTransitionSpecIndex(transition);
+			Preconditions.checkState(this.index != -1);
 			this.label = label;
 		}
 		
 		private TransitionSpec getTransition() {
-			return getWorkflow().getTransitionSpecs().get(transitionIndex);
+			return getWorkflow().getTransitionSpecs().get(index);
 		}
 
 		@Override
@@ -206,7 +209,7 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 								@Override
 								protected Component newContent(String id, ModalPanel modal) {
 									sideFloating.close();
-									return new TransitionEditPanel(id, transitionIndex) {
+									return new TransitionEditPanel(id, index) {
 
 										@Override
 										protected void onSave(AjaxRequestTarget target) {
@@ -238,7 +241,7 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									getWorkflow().getStateSpecs().remove(transitionIndex);
+									getWorkflow().getStateSpecs().remove(index);
 									getProject().setIssueWorkflow(getWorkflow());
 									OneDev.getInstance(ProjectManager.class).save(getProject());
 									target.add(transitionsTable);

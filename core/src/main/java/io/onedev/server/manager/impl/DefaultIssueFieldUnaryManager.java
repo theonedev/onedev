@@ -2,7 +2,6 @@ package io.onedev.server.manager.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,12 +21,13 @@ import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -47,7 +47,7 @@ import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.Unde
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.UndefinedFieldValueResolution;
 
 @Singleton
-public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> implements IssueFieldManager {
+public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFieldUnary> implements IssueFieldUnaryManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueManager.class);
 	
@@ -56,7 +56,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	private final ProjectManager projectManager;
 	
 	@Inject
-	public DefaultIssueFieldManager(Dao dao, ProjectManager projectManager) {
+	public DefaultIssueFieldUnaryManager(Dao dao, ProjectManager projectManager) {
 		super(dao);
 		this.projectManager = projectManager;
 	}
@@ -87,12 +87,12 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 		Map<String, PropertyDescriptor> propertyDescriptors = beanDescriptor.getMapOfDisplayNameToPropertyDescriptor();
 			
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
-		
-		for (Map.Entry<String, PromptedField> entry: issue.getPromptedFields().entrySet()) {
+
+		for (Map.Entry<String, IssueField> entry: issue.getEffectiveFields().entrySet()) {
 			List<String> strings = entry.getValue().getValues();
 			Collections.sort(strings);
 			
-			InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getField(entry.getKey());
+			InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getFieldSpec(entry.getKey());
 			if (fieldSpec != null) {
 				try {
 					Object fieldValue;
@@ -100,8 +100,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 						fieldValue = fieldSpec.convertToObject(strings);
 					else
 						fieldValue = null;
-					propertyDescriptors.get(fieldSpec.getName()).setPropertyValue(
-							fieldBean, fieldValue);
+					propertyDescriptors.get(fieldSpec.getName()).setPropertyValue(fieldBean, fieldValue);
 				} catch (Exception e) {
 					logger.error("Error populating bean for field: " + fieldSpec.getName(), e);
 				}
@@ -113,18 +112,18 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 
 	@Transactional
 	@Override
-	public void writeFields(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {
-		Query query = getSession().createQuery("delete from IssueField where issue = :issue");
+	public void writeFields(Issue issue, Serializable fieldBean) {
+		Query query = getSession().createQuery("delete from IssueFieldUnary where issue = :issue");
 		query.setParameter("issue", issue);
 		query.executeUpdate();
-		issue.getFields().clear();
+		issue.getFieldUnaries().clear();
 		
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
 
 		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
 			String fieldName = propertyDescriptor.getDisplayName();
 			Object fieldValue = propertyDescriptor.getPropertyValue(fieldBean);
-			InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getField(fieldName);
+			InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getFieldSpec(fieldName);
 			if (fieldSpec != null) {
 				long ordinal = fieldSpec.getOrdinal(new OneContext() {
 
@@ -152,31 +151,25 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 					
 				}, fieldValue);
 
-				IssueField field = new IssueField();
+				IssueFieldUnary field = new IssueFieldUnary();
 				field.setIssue(issue);
 				field.setName(fieldName);
 				field.setOrdinal(ordinal);
 				field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
 				
-				/*
-				 * Need to add database records even for not-yet-prompted field in order to 
-				 * work with joined field query
-				 */
-				field.setPrompted(promptedFields.contains(fieldName));
-				
 				if (fieldValue != null) {
 					List<String> strings = fieldSpec.convertToStrings(fieldValue);
 					if (!strings.isEmpty()) {
 						for (String string: strings) {
-							IssueField cloned = (IssueField) SerializationUtils.clone(field);
+							IssueFieldUnary cloned = (IssueFieldUnary) SerializationUtils.clone(field);
 							cloned.setIssue(issue);
 							cloned.setValue(string);
 							save(cloned);
-							issue.getFields().add(cloned);
+							issue.getFieldUnaries().add(cloned);
 						}
 					} else {
 						save(field);
-						issue.getFields().add(field);
+						issue.getFieldUnaries().add(field);
 					}
 				} else {
 					/*
@@ -184,7 +177,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 					 * joined field query 
 					 */
 					save(field);
-					issue.getFields().add(field);
+					issue.getFieldUnaries().add(field);
 				}
 			}
 		}
@@ -194,7 +187,9 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	public Set<String> getExcludedFields(Project project, String state) {
 		Map<String, PropertyDescriptor> propertyDescriptors = 
 				new BeanDescriptor(defineFieldBeanClass(project)).getMapOfDisplayNameToPropertyDescriptor();
-		StateSpec stateSpec = project.getIssueWorkflow().getState(state);
+		StateSpec stateSpec = project.getIssueWorkflow().getStateSpec(state);
+		if (stateSpec == null)
+			throw new OneException("Unable to find state spec: " + state);
 		Set<String> excludedFields = new HashSet<>();
 		for (InputSpec fieldSpec: project.getIssueWorkflow().getFieldSpecs()) {
 			if (!stateSpec.getFields().contains(fieldSpec.getName())) 
@@ -206,7 +201,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	@Transactional
 	@Override
 	public void onRenameGroup(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueField set value=:newName where type=:groupChoice and value=:oldName");
+		Query query = getSession().createQuery("update IssueFieldUnary set value=:newName where type=:groupChoice and value=:oldName");
 		query.setParameter("groupChoice", InputSpec.GROUP_CHOICE);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
@@ -216,7 +211,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	@Transactional
 	@Override
 	public void onRenameUser(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueField set value=:newName where type=:userChoice and value=:oldName");
+		Query query = getSession().createQuery("update IssueFieldUnary set value=:newName where type=:userChoice and value=:oldName");
 		query.setParameter("userChoice", InputSpec.USER_CHOICE);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
@@ -227,9 +222,9 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	@Override
 	public void populateFields(List<Issue> issues) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<IssueField> query = builder.createQuery(IssueField.class);
+		CriteriaQuery<IssueFieldUnary> query = builder.createQuery(IssueFieldUnary.class);
 		
-		Root<IssueField> root = query.from(IssueField.class);
+		Root<IssueFieldUnary> root = query.from(IssueFieldUnary.class);
 		query.select(root);
 		root.join("issue");
 		
@@ -237,23 +232,23 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 		query.where(issueExpr.in(issues));
 		
 		for (Issue issue: issues)
-			issue.setFields(new ArrayList<>());
+			issue.setFieldUnaries(new ArrayList<>());
 		
-		for (IssueField field: getSession().createQuery(query).getResultList())
-			field.getIssue().getFields().add(field);
+		for (IssueFieldUnary field: getSession().createQuery(query).getResultList())
+			field.getIssue().getFieldUnaries().add(field);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
 	public Map<String, String> getInvalidFields(Project project) {
-		Query query = getSession().createQuery("select distinct name, type from IssueField where issue.project=:project");
+		Query query = getSession().createQuery("select distinct name, type from IssueFieldUnary where issue.project=:project");
 		query.setParameter("project", project);
 		Map<String, String> invalidFields = new HashMap<>();
 		for (Object[] row: (List<Object[]>)query.getResultList()) {
 			String name = (String) row[0];
 			String type = (String) row[1];
-			InputSpec fieldSpec = project.getIssueWorkflow().getField(name);
+			InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
 			if (fieldSpec == null || !EditableUtils.getDisplayName(fieldSpec.getClass()).equals(type))
 				invalidFields.put(name, type);
 		}
@@ -266,11 +261,11 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 		for (Map.Entry<String, InvalidFieldResolution> entry: resolutions.entrySet()) {
 			Query query;
 			if (entry.getValue().getFixType() == InvalidFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
-				query = getSession().createQuery("update IssueField set name=:newName where name=:oldName and issue.id in (select id from Issue where project=:project)");
+				query = getSession().createQuery("update IssueFieldUnary set name=:newName where name=:oldName and issue.id in (select id from Issue where project=:project)");
 				query.setParameter("oldName", entry.getKey());
 				query.setParameter("newName", entry.getValue().getNewField());
 			} else {
-				query = getSession().createQuery("delete from IssueField where name=:fieldName and issue.id in (select id from Issue where project=:project)");
+				query = getSession().createQuery("delete from IssueFieldUnary where name=:fieldName and issue.id in (select id from Issue where project=:project)");
 				query.setParameter("fieldName", entry.getKey());
 			}
 			query.setParameter("project", project);
@@ -282,7 +277,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	@Sessional
 	@Override
 	public Map<String, String> getUndefinedFieldValues(Project project) {
-		Query query = getSession().createQuery("select distinct name, value from IssueField where issue.project=:project and (type=:choice or type=:multiChoice)");
+		Query query = getSession().createQuery("select distinct name, value from IssueFieldUnary where issue.project=:project and (type=:choice or type=:multiChoice)");
 		query.setParameter("project", project);
 		query.setParameter("choice", InputSpec.CHOICE);
 		query.setParameter("multiChoice", InputSpec.MULTI_CHOICE);
@@ -316,7 +311,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 			for (Object[] row: (List<Object[]>)query.getResultList()) {
 				String name = (String) row[0];
 				String value = (String) row[1];
-				InputSpec fieldSpec = project.getIssueWorkflow().getField(name);
+				InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
 				if (fieldSpec != null && value != null) {
 					List<String> choices;
 					if (fieldSpec instanceof ChoiceInput)
@@ -339,12 +334,12 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 		for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
 			Query query;
 			if (entry.getValue().getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
-				query = getSession().createQuery("update IssueField set value=:newValue where name=:fieldName and value=:oldValue and issue.id in (select id from Issue where project=:project)");
+				query = getSession().createQuery("update IssueFieldUnary set value=:newValue where name=:fieldName and value=:oldValue and issue.id in (select id from Issue where project=:project)");
 				query.setParameter("fieldName", entry.getKey().getFieldName());
 				query.setParameter("oldValue", entry.getKey().getFieldValue());
 				query.setParameter("newValue", entry.getValue().getNewValue());
 			} else {
-				query = getSession().createQuery("delete from IssueField where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
+				query = getSession().createQuery("delete from IssueFieldUnary where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
 				query.setParameter("fieldName", entry.getKey().getFieldName());
 				query.setParameter("fieldValue", entry.getKey().getFieldValue());
 			}
@@ -383,7 +378,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 			
 		});
 		try {
-			Query query = getSession().createQuery("select distinct name, value, ordinal from IssueField where issue.project=:project and type=:choice");
+			Query query = getSession().createQuery("select distinct name, value, ordinal from IssueFieldUnary where issue.project=:project and type=:choice");
 			query.setParameter("project", project);
 			query.setParameter("choice", InputSpec.CHOICE);
 
@@ -391,12 +386,12 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 				String name = (String) row[0];
 				String value = (String) row[1];
 				long ordinal = (long) row[2];
-				InputSpec fieldSpec = project.getIssueWorkflow().getField(name);
+				InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
 				if (fieldSpec != null) {
 					List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
 					long newOrdinal = choices.indexOf(value);
 					if (ordinal != newOrdinal) {
-						query = getSession().createQuery("update IssueField set ordinal=:newOrdinal where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
+						query = getSession().createQuery("update IssueFieldUnary set ordinal=:newOrdinal where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
 						query.setParameter("fieldName", name);
 						query.setParameter("fieldValue", value);
 						query.setParameter("newOrdinal", newOrdinal);

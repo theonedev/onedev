@@ -22,7 +22,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -55,8 +55,8 @@ public abstract class WorkflowReconcilePanel extends Panel {
 		return OneDev.getInstance(IssueManager.class);
 	}
 	
-	private IssueFieldManager getIssueFieldManager() {
-		return OneDev.getInstance(IssueFieldManager.class);
+	private IssueFieldUnaryManager getIssueFieldManager() {
+		return OneDev.getInstance(IssueFieldUnaryManager.class);
 	}
 	
 	private Component checkStates(String markupId) {

@@ -7,6 +7,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.ChoiceProvider;
@@ -19,6 +21,8 @@ public class ShowCondition implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	private static final Logger logger = LoggerFactory.getLogger(ShowCondition.class);
+	
 	private String inputName;
 	
 	private ValueMatcher valueMatcher = new ValueIsOneOf();
@@ -51,18 +55,23 @@ public class ShowCondition implements Serializable {
 	}
 	
 	public boolean isVisible() {
-		InputSpec input = OneContext.get().getInputContext().getInput(getInputName());
-		Object inputValue = OneContext.get().getEditContext().getInputValue(getInputName());
-		if (inputValue != null) {
-			List<String> strings = input.convertToStrings(inputValue);
-			if (strings.isEmpty())
+		InputSpec inputSpec = OneContext.get().getInputContext().getInputSpec(getInputName());
+		if (inputSpec != null) {
+			Object inputValue = OneContext.get().getEditContext().getInputValue(getInputName());
+			if (inputValue != null) {
+				List<String> strings = inputSpec.convertToStrings(inputValue);
+				if (strings.isEmpty())
+					return getValueMatcher().matches(null);
+				else if (strings.size() == 1)
+					return getValueMatcher().matches(strings.iterator().next());
+				else 
+					throw new IllegalStateException("Show condition should not be based on a multi-value input");
+			} else {
 				return getValueMatcher().matches(null);
-			else if (strings.size() == 1)
-				return getValueMatcher().matches(strings.iterator().next());
-			else 
-				throw new IllegalStateException("Show condition should not be based on a multi-value input");
+			}
 		} else {
-			return getValueMatcher().matches(null);
+			logger.error("Unable to find input spec: " + getInputName());
+			return false;
 		}
 	}
 	

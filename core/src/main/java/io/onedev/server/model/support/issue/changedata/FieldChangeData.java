@@ -16,7 +16,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
@@ -27,33 +27,34 @@ public class FieldChangeData implements ChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Map<String, PromptedField> oldFields;
+	private final Map<String, IssueField> oldFields;
 	
-	private final Map<String, PromptedField> newFields;
+	private final Map<String, IssueField> newFields;
 	
-	public FieldChangeData(Map<String, PromptedField> oldFields, Map<String, PromptedField> newFields) {
+	public FieldChangeData(Map<String, IssueField> oldFields, Map<String, IssueField> newFields) {
 		this.oldFields = copyFields(oldFields);
 		this.newFields = copyFields(newFields);
-		for (Iterator<Map.Entry<String, PromptedField>> it = this.oldFields.entrySet().iterator(); it.hasNext();) {
-			Map.Entry<String, PromptedField> entry = it.next();
-			if (entry.getValue().getValues().equals(this.newFields.get(entry.getKey()).getValues())) {
+		for (Iterator<Map.Entry<String, IssueField>> it = this.oldFields.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, IssueField> entry = it.next();
+			IssueField newField = this.newFields.get(entry.getKey());
+			if (newField != null && entry.getValue().getValues().equals(newField.getValues())) {
 				this.newFields.remove(entry.getKey());
 				it.remove();
 			}
 		}
 	}
 
-	public Map<String, PromptedField> getOldFields() {
+	public Map<String, IssueField> getOldFields() {
 		return oldFields;
 	}
 
-	public Map<String, PromptedField> getNewFields() {
+	public Map<String, IssueField> getNewFields() {
 		return newFields;
 	}
 
-	private Map<String, PromptedField> copyFields(Map<String, PromptedField> fields) {
-		Map<String, PromptedField> copyOfFields = new LinkedHashMap<>();
-		for (Map.Entry<String, PromptedField> entry: fields.entrySet()) {
+	private Map<String, IssueField> copyFields(Map<String, IssueField> fields) {
+		Map<String, IssueField> copyOfFields = new LinkedHashMap<>();
+		for (Map.Entry<String, IssueField> entry: fields.entrySet()) {
 			if (!entry.getValue().getValues().contains(null) && !entry.getValue().getValues().isEmpty())
 				copyOfFields.put(entry.getKey(), entry.getValue());
 		}
@@ -74,9 +75,9 @@ public class FieldChangeData implements ChangeData {
 			return "changed custom fields";
 	}
 
-	public List<String> getLines(Map<String, PromptedField> fields) {
+	public List<String> getLines(Map<String, IssueField> fields) {
 		List<String> lines = new ArrayList<>();
-		for (Map.Entry<String, PromptedField> entry: fields.entrySet()) {
+		for (Map.Entry<String, IssueField> entry: fields.entrySet()) {
 			if (entry.getValue().getType().equals(InputSpec.ISSUE_CHOICE))
 				lines.add(entry.getKey() + ": #" + entry.getValue().getValues().iterator().next());
 			else
@@ -102,7 +103,7 @@ public class FieldChangeData implements ChangeData {
 	@Override
 	public Map<String, User> getNewUsers() {
 		Map<String, User> newUsers = new HashMap<>();
-		for (PromptedField field: newFields.values()) {
+		for (IssueField field: newFields.values()) {
 			if (field.getType().equals(InputSpec.USER_CHOICE)) {
 				User user = OneDev.getInstance(UserManager.class).findByName(field.getValues().iterator().next());
 				if (user != null)
@@ -115,7 +116,7 @@ public class FieldChangeData implements ChangeData {
 	@Override
 	public Map<String, Group> getNewGroups() {
 		Map<String, Group> newGroups = new HashMap<>();
-		for (PromptedField field: newFields.values()) {
+		for (IssueField field: newFields.values()) {
 			if (field.getType().equals(InputSpec.GROUP_CHOICE)) {
 				Group group = OneDev.getInstance(GroupManager.class).find(field.getValues().iterator().next());
 				if (group != null)

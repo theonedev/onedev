@@ -36,7 +36,7 @@ public class DefaultIssueQuerySettingManager extends AbstractEntityManager<Issue
 	@Override
 	public void save(IssueQuerySetting setting) {
 		setting.getUserQueryWatches().keySet().retainAll(setting.getUserQueries().keySet());
-		setting.getProjectQueryWatches().keySet().retainAll(setting.getProject().getIssueWorkflow().getQueries().keySet());
+		setting.getProjectQueryWatches().keySet().retainAll(setting.getProject().getIssueWorkflow().getSavedQueries().keySet());
 		if (setting.getProjectQueryWatches().isEmpty() && setting.getUserQueries().isEmpty()) {
 			if (!setting.isNew())
 				delete(setting);

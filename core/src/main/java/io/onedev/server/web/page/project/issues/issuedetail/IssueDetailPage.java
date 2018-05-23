@@ -51,7 +51,7 @@ import com.google.common.collect.Lists;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
@@ -61,7 +61,7 @@ import io.onedev.server.model.IssueVote;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.WatchStatus;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
@@ -85,7 +85,6 @@ import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
@@ -237,7 +236,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			@Override
 			public int compare(TransitionSpec o1, TransitionSpec o2) {
 				IssueWorkflow workflow = getProject().getIssueWorkflow();
-				return workflow.getStateIndex(o1.getToState()) - workflow.getStateIndex(o2.getToState());
+				return workflow.getStateSpecIndex(o1.getToState()) - workflow.getStateSpecIndex(o2.getToState());
 			}
 			
 		});
@@ -250,7 +249,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				if (transition.getPrerequisite() == null) {
 					applicable = true;
 				} else {
-					PromptedField field = getIssue().getPromptedFields().get(transition.getPrerequisite().getFieldName());
+					IssueField field = getIssue().getEffectiveFields().get(transition.getPrerequisite().getFieldName());
 					List<String> fieldValues;
 					if (field != null)
 						fieldValues = field.getValues();
@@ -267,8 +266,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
-							Serializable fieldBean = getIssueFieldManager().readFields(getIssue());
-							Set<String> excludedFields = getIssueFieldManager().getExcludedFields(getIssue().getProject(), transition.getToState());
+							Serializable fieldBean = getIssueFieldUnaryManager().readFields(getIssue());
+							Set<String> excludedFields = getIssueFieldUnaryManager().getExcludedFields(getIssue().getProject(), transition.getToState());
 
 							Form<?> form = new Form<Void>("form") {
 
@@ -302,7 +301,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 								
 							});
 
-							Map<String, PromptedField> prevFields = getIssue().getPromptedFields();
+							Map<String, IssueField> prevFields = getIssue().getEffectiveFields();
 							
 							form.add(new AjaxButton("save") {
 
@@ -310,17 +309,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 								protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 									super.onSubmit(target, form);
 									getIssue().setState(transition.getToState());
-									Set<String> promptedFields = new HashSet<>(getIssue().getPromptedFields().keySet());
-									
-									for (PropertyContext<?> propertyContext: editor.getPropertyContexts()) { 
-										if (!propertyContext.isExcluded()) {
-											if (propertyContext.isPropertyVisible(editor.getOneContext(propertyContext.getPropertyName()), editor.getBeanDescriptor()))
-												promptedFields.add(propertyContext.getDisplayName());
-											else 
-												promptedFields.remove(propertyContext.getDisplayName());
-										}
-									}
-									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevFields, promptedFields);
+									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevFields);
 								
 									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
 								}
@@ -518,24 +507,61 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getIssue().getFields().isEmpty());
+				setVisible(!getIssue().getEffectiveFields().isEmpty());
 			}
 			
 		};
 		fieldsContainer.setOutputMarkupId(true);
 		
-		fieldsContainer.add(new ListView<PromptedField>("fields", new LoadableDetachableModel<List<PromptedField>>() {
+		fieldsContainer.add(new ListView<IssueField>("fields", new LoadableDetachableModel<List<IssueField>>() {
 
+			private boolean isVisible(IssueField field, Set<String> checkedFieldNames) {
+				if (!checkedFieldNames.contains(field.getName())) {
+					checkedFieldNames.add(field.getName());
+					
+					IssueWorkflow workflow = getProject().getIssueWorkflow();
+					InputSpec fieldSpec = workflow.getFieldSpec(field.getName());
+					if (fieldSpec != null) {
+						if (fieldSpec.getShowCondition() != null) {
+							IssueField dependentField = getIssue().getEffectiveFields().get(fieldSpec.getShowCondition().getInputName());
+							if (dependentField != null) {
+								if (!isVisible(dependentField, checkedFieldNames))
+									return false;
+								String value;
+								if (!dependentField.getValues().isEmpty())
+									value = dependentField.getValues().iterator().next();
+								else
+									value = null;
+								return fieldSpec.getShowCondition().getValueMatcher().matches(value);
+							} else {
+								return false;
+							}
+						} else {
+							return true;
+						}
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}
+			
 			@Override
-			protected List<PromptedField> load() {
-				return new ArrayList<>(getIssue().getPromptedFields().values());
+			protected List<IssueField> load() {
+				List<IssueField> fields = new ArrayList<>();
+				for (IssueField field: getIssue().getEffectiveFields().values()) {
+					if (isVisible(field, new HashSet<>()))
+						fields.add(field);
+				}
+				return fields;
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<PromptedField> item) {
-				PromptedField field = item.getModelObject();
+			protected void populateItem(ListItem<IssueField> item) {
+				IssueField field = item.getModelObject();
 				item.add(new Label("name", field.getName()));
 				item.add(new FieldValuesPanel("values") {
 
@@ -545,7 +571,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					}
 
 					@Override
-					protected PromptedField getField() {
+					protected IssueField getField() {
 						return item.getModelObject();
 					}
 					
@@ -561,15 +587,15 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				Fragment fragment = new Fragment(id, "fieldEditFrag", IssueDetailPage.this);
 				Form<?> form = new Form<Void>("form");
 
-				Serializable fieldBean = OneDev.getInstance(IssueFieldManager.class).readFields(getIssue()); 
-				Map<String, PromptedField> prevFields = getIssue().getPromptedFields();
+				Serializable fieldBean = OneDev.getInstance(IssueFieldUnaryManager.class).readFields(getIssue()); 
+				Map<String, IssueField> prevFields = getIssue().getEffectiveFields();
 				
 				Map<String, PropertyDescriptor> propertyDescriptors = 
 						new BeanDescriptor(fieldBean.getClass()).getMapOfDisplayNameToPropertyDescriptor();
 				
 				Set<String> excludedFields = new HashSet<>();
 				for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
-					if (!getIssue().getPromptedFields().containsKey(fieldSpec.getName()))
+					if (!getIssue().getEffectiveFields().containsKey(fieldSpec.getName()))
 						excludedFields.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
 				}
 
@@ -580,8 +606,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						OneDev.getInstance(IssueChangeManager.class).changeFields(
-								getIssue(), fieldBean, prevFields, getIssue().getPromptedFields().keySet());
+						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, prevFields);
 						modal.close();
 						target.add(fieldsContainer);
 					}
@@ -873,8 +898,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		return OneDev.getInstance(IssueChangeManager.class);
 	}
 
-	private IssueFieldManager getIssueFieldManager() {
-		return OneDev.getInstance(IssueFieldManager.class);
+	private IssueFieldUnaryManager getIssueFieldUnaryManager() {
+		return OneDev.getInstance(IssueFieldUnaryManager.class);
 	}
 	
 	private IssueManager getIssueManager() {
@@ -908,8 +933,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	}
 
 	@Override
-	public InputSpec getInput(String inputName) {
-		return getProject().getIssueWorkflow().getInput(inputName);
+	public InputSpec getInputSpec(String inputName) {
+		return getProject().getIssueWorkflow().getInputSpec(inputName);
 	}
 	
 	@Override

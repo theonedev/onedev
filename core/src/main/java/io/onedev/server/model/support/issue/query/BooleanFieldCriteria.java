@@ -6,7 +6,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueFieldUnary;
 
 public class BooleanFieldCriteria extends FieldCriteria {
 
@@ -24,7 +24,7 @@ public class BooleanFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(QueryBuildContext context) {
-		Path<String> attribute = context.getJoin(getFieldName()).get(IssueField.VALUE);
+		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.VALUE);
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, String.valueOf(value));
 		else 

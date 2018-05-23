@@ -55,7 +55,7 @@ import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.FieldsEditBean;
-import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.WatchStatus;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -205,7 +205,7 @@ public class IssueListPage extends ProjectPage {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						getProject().getIssueWorkflow().getQueries().put(bean.getName(), query);
+						getProject().getIssueWorkflow().getSavedQueries().put(bean.getName(), query);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
 						target.add(side);
 						modal.close();
@@ -249,7 +249,7 @@ public class IssueListPage extends ProjectPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				if (SecurityUtils.canManage(getProject())) {
-					setVisible(!getUserQueries().isEmpty() || !getProject().getIssueWorkflow().getQueries().isEmpty());
+					setVisible(!getUserQueries().isEmpty() || !getProject().getIssueWorkflow().getSavedQueries().isEmpty());
 				} else {
 					setVisible(getLoginUser() != null && !getUserQueries().isEmpty());
 				}
@@ -284,7 +284,7 @@ public class IssueListPage extends ProjectPage {
 					
 					@Override
 					protected void onSave(AjaxRequestTarget target, LinkedHashMap<String, String> queries) {
-						getProject().getIssueWorkflow().setQueries(queries);
+						getProject().getIssueWorkflow().setSavedQueries(queries);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
 						target.add(side);
 						modal.close();
@@ -324,7 +324,7 @@ public class IssueListPage extends ProjectPage {
 					fragment.add(newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries));
 				}
 				
-				Map<String, String> projectQueries = getProject().getIssueWorkflow().getQueries();
+				Map<String, String> projectQueries = getProject().getIssueWorkflow().getSavedQueries();
 				if (SecurityUtils.canManage(getProject()) && !projectQueries.isEmpty()) {
 					tabs.add(new AjaxActionTab(Model.of("For All Users")) {
 
@@ -428,7 +428,7 @@ public class IssueListPage extends ProjectPage {
 			@Override
 			protected List<NamedQuery> load() {
 				List<NamedQuery> namedQueries = new ArrayList<>();
-				for (Map.Entry<String, String> entry: getProject().getIssueWorkflow().getQueries().entrySet()) {
+				for (Map.Entry<String, String> entry: getProject().getIssueWorkflow().getSavedQueries().entrySet()) {
 					try {
 						if (getLoginUser() != null || !IssueQuery.parse(getProject(), entry.getValue()).needsLogin())
 							namedQueries.add(new NamedQuery(entry.getKey(), entry.getValue()));
@@ -749,8 +749,8 @@ public class IssueListPage extends ProjectPage {
 						}
 
 						@Override
-						protected PromptedField getField() {
-							return item.getModelObject().getPromptedFields().get(fieldName);
+						protected IssueField getField() {
+							return item.getModelObject().getEffectiveFields().get(fieldName);
 						}
 						
 					}.add(AttributeAppender.append("title", fieldName)));

@@ -1,7 +1,6 @@
 package io.onedev.server.manager.impl;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -14,13 +13,13 @@ import org.hibernate.criterion.Restrictions;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.issue.IssueChanged;
 import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.changedata.DescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.FieldChangeData;
 import io.onedev.server.model.support.issue.changedata.StateChangeData;
@@ -37,16 +36,16 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 
 	private final IssueManager issueManager;
 	
-	private final IssueFieldManager issueFieldManager;
+	private final IssueFieldUnaryManager issueFieldUnaryManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
 	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager,  
-			IssueFieldManager issueFieldManager, ListenerRegistry listenerRegistry) {
+			IssueFieldUnaryManager issueFieldUnaryManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.issueManager = issueManager;
-		this.issueFieldManager = issueFieldManager;
+		this.issueFieldUnaryManager = issueFieldUnaryManager;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -90,26 +89,25 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 
 	@Transactional
 	@Override
-	public void changeFields(Issue issue, Serializable fieldBean, Map<String, PromptedField> prevFields, 
-			Collection<String> promptedFields) {
+	public void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields) {
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setAction("changed custom fields");
 		lastActivity.setDate(new Date());
 		lastActivity.setUser(SecurityUtils.getUser());
 		issueManager.save(issue);
 		
-		issueFieldManager.writeFields(issue, fieldBean, promptedFields);
+		issueFieldUnaryManager.writeFields(issue, fieldBean);
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setDate(new Date());
 		change.setUser(SecurityUtils.getUser());
 		getSession().flush();
 		
-		EntityCriteria<IssueField> criteria = EntityCriteria.of(IssueField.class);
+		EntityCriteria<IssueFieldUnary> criteria = EntityCriteria.of(IssueFieldUnary.class);
 		criteria.add(Restrictions.eq("issue", issue));
-		issue.setFields(dao.findAll(criteria));
+		issue.setFieldUnaries(dao.findAll(criteria));
 		
-		change.setData(new FieldChangeData(prevFields, issue.getPromptedFields()));
+		change.setData(new FieldChangeData(prevFields, issue.getEffectiveFields()));
 		save(change);
 		
 		listenerRegistry.post(new IssueChanged(change));
@@ -119,7 +117,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Override
 	public void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent,
-			Map<String, PromptedField> prevFields, Collection<String> promptedFields) {
+			Map<String, IssueField> prevFields) {
 		long time = System.currentTimeMillis();
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setAction("changed state to \"" + issue.getState() + "\"");
@@ -127,7 +125,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		lastActivity.setUser(SecurityUtils.getUser());
 		issueManager.save(issue);
 		
-		issueFieldManager.writeFields(issue, fieldBean, promptedFields);
+		issueFieldUnaryManager.writeFields(issue, fieldBean);
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setDate(new Date(time));
@@ -135,11 +133,11 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		
 		getSession().flush();
 		
-		EntityCriteria<IssueField> criteria = EntityCriteria.of(IssueField.class);
+		EntityCriteria<IssueFieldUnary> criteria = EntityCriteria.of(IssueFieldUnary.class);
 		criteria.add(Restrictions.eq("issue", issue));
-		issue.setFields(dao.findAll(criteria));
+		issue.setFieldUnaries(dao.findAll(criteria));
 		
-		change.setData(new StateChangeData(issue.getState(), prevFields, issue.getPromptedFields(), commentContent));
+		change.setData(new StateChangeData(issue.getState(), prevFields, issue.getEffectiveFields(), commentContent));
 		
 		save(change);
 		

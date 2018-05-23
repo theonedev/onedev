@@ -23,7 +23,7 @@ import org.hibernate.query.Query;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.issue.IssueOpened;
-import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -41,14 +41,14 @@ import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.Unde
 @Singleton
 public class DefaultIssueManager extends AbstractEntityManager<Issue> implements IssueManager {
 
-	private final IssueFieldManager issueFieldManager;
+	private final IssueFieldUnaryManager issueFieldManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@Inject
-	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager, ListenerRegistry listenerRegistry) {
+	public DefaultIssueManager(Dao dao, IssueFieldUnaryManager issueFieldManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 		this.listenerRegistry = listenerRegistry;
@@ -65,7 +65,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	@Transactional
 	@Override
-	public void open(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {
+	public void open(Issue issue, Serializable fieldBean) {
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setAction("submitted");
 		lastActivity.setUser(issue.getSubmitter());
@@ -73,7 +73,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		issue.setLastActivity(lastActivity);
 		issue.setNumber(getNextNumber(issue.getProject()));
 		save(issue);
-		issueFieldManager.writeFields(issue, fieldBean, promptedFields);
+		issueFieldManager.writeFields(issue, fieldBean);
 		listenerRegistry.post(new IssueOpened(issue));
 	}
 
@@ -145,7 +145,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		
 		List<String> states = query.getResultList();
 		for (Iterator<String> it = states.iterator(); it.hasNext();) {
-			if (project.getIssueWorkflow().getState(it.next()) != null)
+			if (project.getIssueWorkflow().getStateSpec(it.next()) != null)
 				it.remove();
 		}
 		return states;

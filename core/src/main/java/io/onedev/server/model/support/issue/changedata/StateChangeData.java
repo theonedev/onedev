@@ -10,7 +10,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.StateChangePanel;
 import io.onedev.utils.HtmlUtils;
@@ -23,7 +23,7 @@ public class StateChangeData extends FieldChangeData {
 	
 	private String comment;
 	
-	public StateChangeData(String state, Map<String, PromptedField> oldFields, Map<String, PromptedField> newFields, 
+	public StateChangeData(String state, Map<String, IssueField> oldFields, Map<String, IssueField> newFields, 
 			@Nullable String comment) {
 		super(oldFields, newFields);
 		this.state = state;

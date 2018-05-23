@@ -26,6 +26,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
+
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
@@ -161,7 +163,8 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 		
 		public ColumnFragment(String id, IModel<InputSpec> model, String label, boolean nameColumn) {
 			super(id, nameColumn?"nameColumnFrag":"otherColumnFrag", IssueFieldsPage.this, model);
-			this.index = getWorkflow().getFieldIndex(getField().getName());
+			this.index = getWorkflow().getFieldSpecIndex(getField().getName());
+			Preconditions.checkState(this.index != -1);
 			this.label = label;
 		}
 		

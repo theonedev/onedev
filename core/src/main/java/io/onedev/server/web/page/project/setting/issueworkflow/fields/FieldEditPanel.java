@@ -85,12 +85,12 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 				InputSpec field = bean.getField();
 				if (fieldIndex != -1) { 
 					InputSpec oldField = getWorkflow().getFieldSpecs().get(fieldIndex);
-					if (!field.getName().equals(oldField.getName()) && getWorkflow().getField(field.getName()) != null) {
+					if (!field.getName().equals(oldField.getName()) && getWorkflow().getFieldSpec(field.getName()) != null) {
 						editor.getErrorContext(new PathSegment.Property("field"))
 								.getErrorContext(new PathSegment.Property("name"))
 								.addError("This name has already been used by another field");
 					}
-				} else if (getWorkflow().getField(field.getName()) != null) {
+				} else if (getWorkflow().getFieldSpec(field.getName()) != null) {
 					editor.getErrorContext(new PathSegment.Property("field"))
 							.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another field");
@@ -154,8 +154,8 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	}
 	
 	@Override
-	public InputSpec getInput(String inputName) {
-		return getWorkflow().getField(inputName);
+	public InputSpec getInputSpec(String inputName) {
+		return getWorkflow().getFieldSpec(inputName);
 	}
 	
 	@Override

@@ -31,7 +31,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Referenceable;
-import io.onedev.server.model.support.issue.PromptedField;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -132,13 +132,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	private LastActivity lastActivity;
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
-	private Collection<IssueField> fields = new ArrayList<>();
-	
-	@OneToMany(mappedBy="current", cascade=CascadeType.REMOVE)
-	private Collection<IssueRelation> relationsByCurrent = new ArrayList<>();
-	
-	@OneToMany(mappedBy="other", cascade=CascadeType.REMOVE)
-	private Collection<IssueRelation> relationsByOther = new ArrayList<>();
+	private Collection<IssueFieldUnary> fieldUnaries = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueComment> comments = new ArrayList<>();
@@ -152,7 +146,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWatch> watches = new ArrayList<>();
 	
-	private transient Map<String, PromptedField> promptedFields;
+	private transient Map<String, IssueField> effectiveFields;
 	
 	public long getVersion() {
 		return version;
@@ -278,13 +272,13 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.numOfComments = numOfComments;
 	}
 
-	public Collection<IssueField> getFields() {
-		return fields;
+	public Collection<IssueFieldUnary> getFieldUnaries() {
+		return fieldUnaries;
 	}
 
-	public void setFields(Collection<IssueField> fields) {
-		this.fields = fields;
-		promptedFields = null;
+	public void setFieldUnaries(Collection<IssueFieldUnary> fieldUnaries) {
+		this.fieldUnaries = fieldUnaries;
+		effectiveFields = null;
 	}
 	
 	public LastActivity getLastActivity() {
@@ -305,14 +299,16 @@ public class Issue extends AbstractEntity implements Referenceable {
 		}
 	}
 	
-	public Map<String, PromptedField> getPromptedFields() {
-		if (promptedFields == null) {
-			promptedFields = new LinkedHashMap<>();
+	public Map<String, IssueField> getEffectiveFields() {
+		if (effectiveFields == null) {
+			effectiveFields = new LinkedHashMap<>();
 
-			Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
-			for (IssueField field: getFields()) {
-				if (field.isPrompted()) {
-					List<IssueField> fieldsOfName = fieldMap.get(field.getName());
+			Collection<String> effectiveFieldNames = getProject().getIssueWorkflow().getEffectiveFields(state);
+			
+			Map<String, List<IssueFieldUnary>> fieldMap = new HashMap<>(); 
+			for (IssueFieldUnary field: getFieldUnaries()) {
+				if (effectiveFieldNames.contains(field.getName())) {
+					List<IssueFieldUnary> fieldsOfName = fieldMap.get(field.getName());
 					if (fieldsOfName == null) {
 						fieldsOfName = new ArrayList<>();
 						fieldMap.put(field.getName(), fieldsOfName);
@@ -323,37 +319,21 @@ public class Issue extends AbstractEntity implements Referenceable {
 			
 			for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
 				String fieldName = fieldSpec.getName();
-				List<IssueField> fields = fieldMap.get(fieldName);
+				List<IssueFieldUnary> fields = fieldMap.get(fieldName);
 				if (fields != null) {
 					String type = fields.iterator().next().getType();
 					List<String> values = new ArrayList<>();
-					for (IssueField field: fields) {
+					for (IssueFieldUnary field: fields) {
 						if (field.getValue() != null)
 							values.add(field.getValue());
 					}
-					promptedFields.put(fieldName, new PromptedField(fieldName, type, values));
+					effectiveFields.put(fieldName, new IssueField(fieldName, type, values));
 				}
 			}
 		}
-		return promptedFields;
+		return effectiveFields;
 	}
 	
-	public Collection<IssueRelation> getRelationsByCurrent() {
-		return relationsByCurrent;
-	}
-
-	public void setRelationsByCurrent(Collection<IssueRelation> relationsByCurrent) {
-		this.relationsByCurrent = relationsByCurrent;
-	}
-
-	public Collection<IssueRelation> getRelationsByOther() {
-		return relationsByOther;
-	}
-
-	public void setRelationsByOther(Collection<IssueRelation> relationsByOther) {
-		this.relationsByOther = relationsByOther;
-	}
-
 	public static String getWebSocketObservable(Long issueId) {
 		return Issue.class.getName() + ":" + issueId;
 	}

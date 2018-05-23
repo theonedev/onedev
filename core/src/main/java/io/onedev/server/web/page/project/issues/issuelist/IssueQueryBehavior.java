@@ -124,15 +124,15 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							
 							try {
 								IssueQuery.checkField(project, fieldName, IssueQuery.getOperator(operatorName));
-								InputSpec field = project.getIssueWorkflow().getField(fieldName);
-								if (field instanceof DateInput || fieldName.equals(Issue.SUBMIT_DATE) 
+								InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+								if (fieldSpec instanceof DateInput || fieldName.equals(Issue.SUBMIT_DATE) 
 										|| fieldName.equals(Issue.UPDATE_DATE)) {
 									List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
 									candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
 									candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
 									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, null));
 									CollectionUtils.addIgnoreNull(suggestions, suggestToFence(unfencedMatchWith));
-								} else if (fieldName.equals(Issue.SUBMITTER) || field instanceof UserChoiceInput) {
+								} else if (fieldName.equals(Issue.SUBMITTER) || fieldSpec instanceof UserChoiceInput) {
 									for (User user: OneDev.getInstance(UserManager.class).findAll()) {
 										Range match = Range.match(user.getName(), unfencedLowerCaseMatchWith, true, false, true);
 										if (match != null) {
@@ -144,40 +144,40 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											suggestions.add(new InputSuggestion(user.getName(), description, match).escape("\"\\"));
 										}
 									}
-								} else if (field instanceof IssueChoiceInput) {
+								} else if (fieldSpec instanceof IssueChoiceInput) {
 									List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 									for (Issue issue: issues) {
 										InputSuggestion suggestion = new InputSuggestion("#" + issue.getNumber(), StringUtils.abbreviate(issue.getTitle(), MAX_ISSUE_TITLE_LEN), null);
 										suggestions.add(suggestion);
 									}
-								} else if (field instanceof BooleanInput) {
+								} else if (fieldSpec instanceof BooleanInput) {
 									suggestions.addAll(getSuggestions(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith, null));
-								} else if (field instanceof GroupChoiceInput) {
+								} else if (fieldSpec instanceof GroupChoiceInput) {
 									List<String> candidates = OneDev.getInstance(GroupManager.class).findAll().stream().map(it->it.getName()).collect(Collectors.toList());
 									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 								} else if (fieldName.equals(Issue.STATE)) {
 									List<String> candidates = project.getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
 									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
-								} else if (field instanceof ChoiceInput) {
+								} else if (fieldSpec instanceof ChoiceInput) {
 									OneContext.push(newOneContext());
 									try {
-										List<String> candidates = new ArrayList<>(((ChoiceInput)field).getChoiceProvider().getChoices(true).keySet());
+										List<String> candidates = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 									} finally {
 										OneContext.pop();
 									}								
-								} else if (field instanceof MultiChoiceInput) {
+								} else if (fieldSpec instanceof MultiChoiceInput) {
 									OneContext.push(newOneContext());
 									try {
-										List<String> candidates = new ArrayList<>(((MultiChoiceInput)field).getChoiceProvider().getChoices(true).keySet());
+										List<String> candidates = new ArrayList<>(((MultiChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 									} finally {
 										OneContext.pop();
 									}								
 								} else if (fieldName.equals(Issue.TITLE) || fieldName.equals(Issue.DESCRIPTION) 
 										|| fieldName.equals(Issue.VOTES) || fieldName.equals(Issue.COMMENTS) 
-										|| fieldName.equals(Issue.NUMBER) || field instanceof NumberInput 
-										|| field instanceof TextInput) {
+										|| fieldName.equals(Issue.NUMBER) || fieldSpec instanceof NumberInput 
+										|| fieldSpec instanceof TextInput) {
 									return null;
 								}
 							} catch (OneException ex) {

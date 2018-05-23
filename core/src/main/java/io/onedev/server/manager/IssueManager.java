@@ -19,7 +19,7 @@ public interface IssueManager extends EntityManager<Issue> {
     @Nullable
     Issue find(Project target, long number);
     
-	void open(Issue issue, Serializable fieldBean, Collection<String> promptedFields);
+	void open(Issue issue, Serializable fieldBean);
 	
 	void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions);
 	

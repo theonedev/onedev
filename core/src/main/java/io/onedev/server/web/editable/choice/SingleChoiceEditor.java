@@ -68,8 +68,16 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 					tag.remove("type");
 					super.onComponentTag(tag);
 				}
+
+				@Override
+				protected String getNullValidDisplayValue() {
+					if (propertyDescriptor.isPropertyRequired())
+						return "Please choose...";
+					else
+						return super.getNullValidDisplayValue();
+				}
 				
-			};
+			}.setNullValid(true);
 		}
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 

@@ -1,7 +1,6 @@
 package io.onedev.server.manager;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,14 +8,14 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.InvalidFieldResolution;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.UndefinedFieldValueResolution;
 
-public interface IssueFieldManager extends EntityManager<IssueField> {
+public interface IssueFieldUnaryManager extends EntityManager<IssueFieldUnary> {
 
 	Class<? extends Serializable> defineFieldBeanClass(Project project);
 	
@@ -25,7 +24,7 @@ public interface IssueFieldManager extends EntityManager<IssueField> {
 	
 	Serializable readFields(Issue issue);
 	
-	void writeFields(Issue issue, Serializable fieldBean, Collection<String> promptedFields);
+	void writeFields(Issue issue, Serializable fieldBean);
 	
 	Set<String> getExcludedFields(Project project, String state);
 	

@@ -10,7 +10,7 @@ import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.GroupManager;
-import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
@@ -32,11 +32,11 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	
 	private final CacheManager cacheManager;
 	
-	private final IssueFieldManager issueFieldManager;
+	private final IssueFieldUnaryManager issueFieldManager;
 	
 	@Inject
 	public DefaultGroupManager(Dao dao, ProjectManager projectManager, ConfigManager configManager, 
-			CacheManager cacheManager, IssueFieldManager issueFieldManager) {
+			CacheManager cacheManager, IssueFieldUnaryManager issueFieldManager) {
 		super(dao);
 		this.projectManager = projectManager;
 		this.configManager = configManager;

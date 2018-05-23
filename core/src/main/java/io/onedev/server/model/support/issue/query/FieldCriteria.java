@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
@@ -26,9 +26,9 @@ public abstract class FieldCriteria extends IssueCriteria {
 	}
 
 	protected long getFieldOrdinal(Issue issue) {
-		InputSpec field = issue.getProject().getIssueWorkflow().getField(fieldName);
-		if (field != null) {
-			return field.getOrdinal(new OneContext() {
+		InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getFieldSpec(fieldName);
+		if (fieldSpec != null) {
+			return fieldSpec.getOrdinal(new OneContext() {
 
 				@Override
 				public Project getProject() {
@@ -60,16 +60,16 @@ public abstract class FieldCriteria extends IssueCriteria {
 	
 	private Object getFieldValue(Issue issue, String fieldName) {
 		List<String> strings = new ArrayList<>();
-		for (IssueField field: issue.getFields()) {
+		for (IssueFieldUnary field: issue.getFieldUnaries()) {
 			if (field.getName().equals(fieldName))
 				strings.add(field.getValue());
 		}
 		if (strings.isEmpty() || strings.contains(null)) {
 			return null;
 		} else {
-			InputSpec field = issue.getProject().getIssueWorkflow().getField(fieldName);
-			if (field != null)
-				return field.convertToObject(strings);
+			InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getFieldSpec(fieldName);
+			if (fieldSpec != null)
+				return fieldSpec.convertToObject(strings);
 			else
 				return null;
 		}

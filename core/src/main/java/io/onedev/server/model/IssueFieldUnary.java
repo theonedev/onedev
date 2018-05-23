@@ -15,7 +15,7 @@ import javax.persistence.Table;
 				@Index(columnList="g_issue_id"), @Index(columnList="name"), 
 				@Index(columnList="value"), @Index(columnList="type"), 
 				@Index(columnList="ordinal")})
-public class IssueField extends AbstractEntity {
+public class IssueFieldUnary extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -36,8 +36,6 @@ public class IssueField extends AbstractEntity {
 
 	@Column(nullable=false)
 	private String type;
-	
-	private boolean prompted;
 	
 	private long ordinal;
 	
@@ -88,12 +86,4 @@ public class IssueField extends AbstractEntity {
 		this.ordinal = ordinal;
 	}
 
-	public boolean isPrompted() {
-		return prompted;
-	}
-
-	public void setPrompted(boolean prompted) {
-		this.prompted = prompted;
-	}
-	
 }

@@ -16,7 +16,7 @@ import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.lifecycle.SystemStarted;
 import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.CacheManager;
-import io.onedev.server.manager.IssueFieldManager;
+import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
@@ -38,7 +38,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
     private final ProjectManager projectManager;
     
-    private final IssueFieldManager issueFieldManager;
+    private final IssueFieldUnaryManager issueFieldManager;
     
     private final CacheManager cacheManager;
     
@@ -46,7 +46,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, 
-    		IssueFieldManager issueFieldManager, CacheManager cacheManager, 
+    		IssueFieldUnaryManager issueFieldManager, CacheManager cacheManager, 
     		PasswordService passwordService, ListenerRegistry listenerRegistry) {
         super(dao);
         
