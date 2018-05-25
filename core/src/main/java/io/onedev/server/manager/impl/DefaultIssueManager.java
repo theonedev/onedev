@@ -31,6 +31,7 @@ import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.query.QueryBuildContext;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -73,7 +74,9 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		issue.setLastActivity(lastActivity);
 		issue.setNumber(getNextNumber(issue.getProject()));
 		save(issue);
-		issueFieldManager.writeFields(issue, fieldBean);
+
+		StateSpec initialState = issue.getProject().getIssueWorkflow().getInitialStateSpec();
+		issueFieldManager.writeFields(issue, fieldBean, initialState.getFields());
 		listenerRegistry.post(new IssueOpened(issue));
 	}
 

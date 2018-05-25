@@ -60,7 +60,7 @@ public class StateSpec implements Serializable {
 	}
 
 	@Editable(order=500, name="Required Fields", description="Select issue fields required by this state. "
-			+ "Required fields will be prompted for user input when issue transits to this state")
+			+ "Required fields will be prompted when issue transits to this state")
 	@ChoiceProvider("getFieldChoices")
 	@NameOfEmptyValue("No required fields")
 	public List<String> getFields() {

@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.setting.issueworkflow.statetransitions;
 
+import java.util.List;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -14,6 +16,8 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
+import io.onedev.server.util.inputspec.InputContext;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
@@ -21,7 +25,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
-abstract class TransitionEditPanel extends Panel {
+abstract class TransitionEditPanel extends Panel implements InputContext {
 
 	private final int transitionIndex;
 	
@@ -116,6 +120,21 @@ abstract class TransitionEditPanel extends Panel {
 		add(form);
 	}
 
+	@Override
+	public List<String> getInputNames() {
+		return getWorkflow().getFieldNames();
+	}
+	
+	@Override
+	public InputSpec getInputSpec(String inputName) {
+		return getWorkflow().getFieldSpec(inputName);
+	}
+	
+	@Override
+	public boolean isReservedName(String inputName) {
+		throw new UnsupportedOperationException();
+	}
+	
 	protected abstract IssueWorkflow getWorkflow();
 	
 	protected abstract void onSave(AjaxRequestTarget target);

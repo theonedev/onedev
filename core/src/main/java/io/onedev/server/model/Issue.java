@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -311,29 +313,29 @@ public class Issue extends AbstractEntity implements Referenceable {
 		if (effectiveFields == null) {
 			effectiveFields = new LinkedHashMap<>();
 
-			Collection<String> effectiveFieldNames = getProject().getIssueWorkflow().getEffectiveFields(state);
+			Collection<String> fieldNames = getProject().getIssueWorkflow().getApplicableFields(state);
 			
-			Map<String, List<IssueFieldUnary>> fieldMap = new HashMap<>(); 
-			for (IssueFieldUnary field: getFieldUnaries()) {
-				if (effectiveFieldNames.contains(field.getName())) {
-					List<IssueFieldUnary> fieldsOfName = fieldMap.get(field.getName());
+			Map<String, List<IssueFieldUnary>> unaryMap = new HashMap<>(); 
+			for (IssueFieldUnary unary: getFieldUnaries()) {
+				if (fieldNames.contains(unary.getName()) && unary.isPrompted()) {
+					List<IssueFieldUnary> fieldsOfName = unaryMap.get(unary.getName());
 					if (fieldsOfName == null) {
 						fieldsOfName = new ArrayList<>();
-						fieldMap.put(field.getName(), fieldsOfName);
+						unaryMap.put(unary.getName(), fieldsOfName);
 					}
-					fieldsOfName.add(field);
+					fieldsOfName.add(unary);
 				}
 			}
 			
 			for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
 				String fieldName = fieldSpec.getName();
-				List<IssueFieldUnary> fields = fieldMap.get(fieldName);
-				if (fields != null) {
-					String type = fields.iterator().next().getType();
+				List<IssueFieldUnary> unaries = unaryMap.get(fieldName);
+				if (unaries != null) {
+					String type = unaries.iterator().next().getType();
 					List<String> values = new ArrayList<>();
-					for (IssueFieldUnary field: fields) {
-						if (field.getValue() != null)
-							values.add(field.getValue());
+					for (IssueFieldUnary unary: unaries) {
+						if (unary.getValue() != null)
+							values.add(unary.getValue());
 					}
 					effectiveFields.put(fieldName, new IssueField(fieldName, type, values));
 				}
@@ -354,5 +356,13 @@ public class Issue extends AbstractEntity implements Referenceable {
 		}
 		return null;
 	}
-	
+
+	public Collection<String> getPromptedFields() {
+		Set<String> promptedFields = new HashSet<>();
+		for (IssueFieldUnary unary: getFieldUnaries()) {
+			if (unary.isPrompted())
+				promptedFields.add(unary.getName());
+		}
+		return promptedFields;
+	}
 }

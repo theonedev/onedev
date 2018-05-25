@@ -130,13 +130,13 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public void onFieldRename(String oldName, String newName) {
-		if (getPrerequisite() != null && getPrerequisite().getFieldName().equals(oldName))
-			getPrerequisite().setFieldName(newName);
+		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(oldName))
+			getPrerequisite().setInputName(newName);
 	}
 	
 	public List<String> onFieldDelete(String fieldName) {
 		List<String> usages = new ArrayList<>();
-		if (getPrerequisite() != null && getPrerequisite().getFieldName().equals(fieldName))
+		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName))
 			usages.add("Prerequisite");
 		return usages;
 	}

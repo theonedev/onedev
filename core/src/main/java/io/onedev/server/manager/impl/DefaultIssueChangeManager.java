@@ -1,6 +1,7 @@
 package io.onedev.server.manager.impl;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -89,14 +90,15 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 
 	@Transactional
 	@Override
-	public void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields) {
+	public void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields, 
+			Collection<String> promptedFields) {
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setAction("changed custom fields");
 		lastActivity.setDate(new Date());
 		lastActivity.setUser(SecurityUtils.getUser());
 		issueManager.save(issue);
 		
-		issueFieldUnaryManager.writeFields(issue, fieldBean);
+		issueFieldUnaryManager.writeFields(issue, fieldBean, promptedFields);
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setDate(new Date());
@@ -117,7 +119,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Override
 	public void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent,
-			Map<String, IssueField> prevFields) {
+			Map<String, IssueField> prevFields, Collection<String> promptedFields) {
 		long time = System.currentTimeMillis();
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setAction("changed state to \"" + issue.getState() + "\"");
@@ -125,7 +127,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		lastActivity.setUser(SecurityUtils.getUser());
 		issueManager.save(issue);
 		
-		issueFieldUnaryManager.writeFields(issue, fieldBean);
+		issueFieldUnaryManager.writeFields(issue, fieldBean, promptedFields);
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setDate(new Date(time));

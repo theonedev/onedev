@@ -1,6 +1,7 @@
 package io.onedev.server.manager;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -16,8 +17,9 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void changeDescription(Issue issue, String oldDescription);
 	
-	void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields);
+	void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields, 
+			Collection<String> promptedFields);
 	
 	void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent, 
-			Map<String, IssueField> prevFields);
+			Map<String, IssueField> prevFields, Collection<String> promptedFields);
 }

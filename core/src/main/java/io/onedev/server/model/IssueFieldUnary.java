@@ -36,6 +36,8 @@ public class IssueFieldUnary extends AbstractEntity {
 
 	@Column(nullable=false)
 	private String type;
+
+	private boolean prompted;
 	
 	private long ordinal;
 	
@@ -84,6 +86,14 @@ public class IssueFieldUnary extends AbstractEntity {
 
 	public void setOrdinal(long ordinal) {
 		this.ordinal = ordinal;
+	}
+
+	public boolean isPrompted() {
+		return prompted;
+	}
+
+	public void setPrompted(boolean prompted) {
+		this.prompted = prompted;
 	}
 
 }

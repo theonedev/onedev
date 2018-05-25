@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -61,7 +60,6 @@ import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.UserLink;
@@ -92,8 +90,6 @@ public class IssueListPage extends ProjectPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private static final MetaDataKey<ArrayList<String>> FIELDS_KEY = new MetaDataKey<ArrayList<String>>() {};
-			
 	private String query;
 	
 	private Component querySave;
@@ -103,13 +99,6 @@ public class IssueListPage extends ProjectPage {
 		query = params.get(PARAM_QUERY).toOptionalString();
 	}
 
-	private List<String> getFields() {
-		List<String> fields = WebSession.get().getMetaData(FIELDS_KEY);
-		if (fields == null)
-			fields = getProject().getIssueWorkflow().getListFields();
-		return fields;
-	}
-	
 	private Map<String, String> getUserQueries() {
 		IssueQuerySetting setting = getIssueQuerySettingManager().find(getProject(), getLoginUser());
 		if (setting != null) 
@@ -531,7 +520,7 @@ public class IssueListPage extends ProjectPage {
 				Fragment fragment = new Fragment(id, "fieldsFrag", IssueListPage.this);
 
 				FieldsEditBean bean = new FieldsEditBean();
-				bean.setFields(getFields());
+				bean.setFields(getProject().getIssueWorkflow().getListFields());
 				Form<?> form = new Form<Void>("form") {
 
 					@Override
@@ -557,24 +546,6 @@ public class IssueListPage extends ProjectPage {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						WebSession.get().setMetaData(FIELDS_KEY, (ArrayList<String>)bean.getFields());
-						setResponsePage(IssueListPage.this);
-					}
-					
-				});
-				
-				form.add(new AjaxButton("saveAsDefault") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()));
-					}
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						WebSession.get().setMetaData(FIELDS_KEY, (ArrayList<String>)bean.getFields());
 						getProject().getIssueWorkflow().setListFields(bean.getFields());
 						OneDev.getInstance(ProjectManager.class).save(getProject());
 						setResponsePage(IssueListPage.this);
@@ -593,6 +564,12 @@ public class IssueListPage extends ProjectPage {
 				form.setOutputMarkupId(true);
 				fragment.add(form);
 				return fragment;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canManage(getProject()));
 			}
 			
 		});
@@ -740,7 +717,7 @@ public class IssueListPage extends ProjectPage {
 				item.add(new IssueStateLabel("state", item.getModel()));
 				
 				RepeatingView fieldsView = new RepeatingView("fields");
-				for (String fieldName: getFields()) {
+				for (String fieldName: getProject().getIssueWorkflow().getListFields()) {
 					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
 
 						@Override

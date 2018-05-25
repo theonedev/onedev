@@ -16,12 +16,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.support.authorized.ProjectWriters;
 import io.onedev.server.model.support.issue.workflow.action.PressButton;
-import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
-import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsNotSet;
-import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsSet;
-import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueSpecification;
 import io.onedev.server.util.UsageUtils;
-import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceprovider.Choice;
@@ -32,7 +27,7 @@ import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.util.inputspec.userchoiceprovider.ProjectReaders;
 
-public class IssueWorkflow implements Serializable, InputContext {
+public class IssueWorkflow implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -106,6 +101,8 @@ public class IssueWorkflow implements Serializable, InputContext {
 		fieldSpecs.add(priority);
 
 		UserChoiceInput assignee = new UserChoiceInput();
+		assignee.setAllowEmpty(true);
+		assignee.setNameOfEmptyValue("No assignee");
 		assignee.setChoiceProvider(new ProjectReaders());
 		assignee.setName("Assignee");
 		
@@ -147,16 +144,9 @@ public class IssueWorkflow implements Serializable, InputContext {
 		StateSpec open = new StateSpec();
 		open.setName("Open");
 		open.setColor("#f1c232");
-		open.setFields(Lists.newArrayList("Type", "Priority"));
+		open.setFields(Lists.newArrayList("Type", "Priority", "Assignee"));
 		
 		stateSpecs.add(open);
-		
-		StateSpec assigned = new StateSpec();
-		assigned.setName("Assigned");
-		assigned.setColor("#9900ff");
-		assigned.setFields(Lists.newArrayList("Assignee"));
-		
-		stateSpecs.add(assigned);
 		
 		StateSpec closed = new StateSpec();
 		closed.setColor("#cccccc");
@@ -166,7 +156,7 @@ public class IssueWorkflow implements Serializable, InputContext {
 		stateSpecs.add(closed);
 		
 		TransitionSpec transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open", "Assigned"));
+		transition.setFromStates(Lists.newArrayList("Open"));
 		transition.setToState("Closed");
 		PressButton pressButton = new PressButton();
 		pressButton.setName("Close");
@@ -176,38 +166,8 @@ public class IssueWorkflow implements Serializable, InputContext {
 		transitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Assigned");
-		pressButton = new PressButton();
-		pressButton.setName("Assign");
-		pressButton.setAuthorized(new ProjectWriters());
-		transition.setOnAction(pressButton);
-		
-		transitionSpecs.add(transition);
-		
-		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Open");
-		TransitionPrerequisite prerequisite = new TransitionPrerequisite();
-		prerequisite.setFieldName("Assignee");
-		ValueSpecification specification = new ValueIsNotSet();
-		prerequisite.setValueSpecification(specification);
-		transition.setPrerequisite(prerequisite);
-		pressButton = new PressButton();
-		pressButton.setName("Reopen");
-		pressButton.setAuthorized(new ProjectWriters());
-		transition.setOnAction(pressButton);
-		
-		transitionSpecs.add(transition);
-		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Closed"));
-		transition.setToState("Assigned");
-		prerequisite = new TransitionPrerequisite();
-		prerequisite.setFieldName("Assignee");
-		specification = new ValueIsSet();
-		prerequisite.setValueSpecification(specification);
-		transition.setPrerequisite(prerequisite);
 		pressButton = new PressButton();
 		pressButton.setName("Reopen");
 		pressButton.setAuthorized(new ProjectWriters());
@@ -295,14 +255,8 @@ public class IssueWorkflow implements Serializable, InputContext {
 		return stateSpecMap;
 	}
 	
-	@Override
-	public List<String> getInputNames() {
+	public List<String> getFieldNames() {
 		return new ArrayList<>(getFieldSpecMap().keySet());
-	}
-	
-	@Override
-	public InputSpec getInputSpec(String inputName) {
-		return getFieldSpecMap().get(inputName);
 	}
 	
 	public List<String> onDeleteState(String stateName) {
@@ -422,17 +376,12 @@ public class IssueWorkflow implements Serializable, InputContext {
 			throw new OneException("No any issue state is defined");
 	}
 	
-	@Override
-	public boolean isReservedName(String inputName) {
-		throw new UnsupportedOperationException();
-	}
-	
-	public Collection<String> getEffectiveFields(String state) {
+	public Collection<String> getApplicableFields(String state) {
 		int index = getStateSpecIndex(state);
-		Collection<String> effectiveFields = new HashSet<>();
+		Collection<String> applicableFields = new HashSet<>();
 		for (int i=0; i<=index; i++)
-			effectiveFields.addAll(getStateSpecs().get(i).getFields());
-		return effectiveFields;
+			applicableFields.addAll(getStateSpecs().get(i).getFields());
+		return applicableFields;
 	}
 	
 }

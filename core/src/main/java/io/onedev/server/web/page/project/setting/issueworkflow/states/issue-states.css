@@ -32,6 +32,9 @@
 	height: 24px;
 	border-radius: 3px;
 }
+.floating.state-spec {
+	width: 600px;
+}
 .floating.state-spec .actions {
 	margin-bottom: 12px;
 }

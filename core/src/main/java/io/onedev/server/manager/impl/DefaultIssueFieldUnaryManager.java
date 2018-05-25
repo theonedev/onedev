@@ -2,6 +2,7 @@ package io.onedev.server.manager.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,7 +113,7 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 
 	@Transactional
 	@Override
-	public void writeFields(Issue issue, Serializable fieldBean) {
+	public void writeFields(Issue issue, Serializable fieldBean, Collection<String> promptedFields) {
 		Query query = getSession().createQuery("delete from IssueFieldUnary where issue = :issue");
 		query.setParameter("issue", issue);
 		query.executeUpdate();
@@ -156,6 +157,7 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 				field.setName(fieldName);
 				field.setOrdinal(ordinal);
 				field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
+				field.setPrompted(promptedFields.contains(fieldName));
 				
 				if (fieldValue != null) {
 					List<String> strings = fieldSpec.convertToStrings(fieldValue);
@@ -184,16 +186,18 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 	}
 
 	@Override
-	public Set<String> getExcludedFields(Project project, String state) {
+	public Set<String> getExcludedFields(Issue issue, String state) {
 		Map<String, PropertyDescriptor> propertyDescriptors = 
-				new BeanDescriptor(defineFieldBeanClass(project)).getMapOfDisplayNameToPropertyDescriptor();
-		StateSpec stateSpec = project.getIssueWorkflow().getStateSpec(state);
+				new BeanDescriptor(defineFieldBeanClass(issue.getProject())).getMapOfDisplayNameToPropertyDescriptor();
+		StateSpec stateSpec = issue.getProject().getIssueWorkflow().getStateSpec(state);
 		if (stateSpec == null)
 			throw new OneException("Unable to find state spec: " + state);
 		Set<String> excludedFields = new HashSet<>();
-		for (InputSpec fieldSpec: project.getIssueWorkflow().getFieldSpecs()) {
-			if (!stateSpec.getFields().contains(fieldSpec.getName())) 
+		for (InputSpec fieldSpec: issue.getProject().getIssueWorkflow().getFieldSpecs()) {
+			if (!stateSpec.getFields().contains(fieldSpec.getName()) 
+					|| issue.getEffectiveFields().containsKey(fieldSpec.getName())) { 
 				excludedFields.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
+			}
 		}
 		return excludedFields;
 	}

@@ -1,6 +1,7 @@
 package io.onedev.server.manager;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,9 +25,9 @@ public interface IssueFieldUnaryManager extends EntityManager<IssueFieldUnary> {
 	
 	Serializable readFields(Issue issue);
 	
-	void writeFields(Issue issue, Serializable fieldBean);
+	void writeFields(Issue issue, Serializable fieldBean, Collection<String> promptedFields);
 	
-	Set<String> getExcludedFields(Project project, String state);
+	Set<String> getExcludedFields(Issue issue, String state);
 	
 	void onRenameUser(String oldName, String newName);
 	

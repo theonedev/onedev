@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.issues.issuedetail;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -50,6 +51,7 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
@@ -65,6 +67,7 @@ import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.WatchStatus;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
@@ -249,13 +252,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				if (transition.getPrerequisite() == null) {
 					applicable = true;
 				} else {
-					IssueField field = getIssue().getEffectiveFields().get(transition.getPrerequisite().getFieldName());
+					IssueField field = getIssue().getEffectiveFields().get(transition.getPrerequisite().getInputName());
 					List<String> fieldValues;
 					if (field != null)
 						fieldValues = field.getValues();
 					else
 						fieldValues = new ArrayList<>();
-					if (transition.getPrerequisite().getValueSpecification().matches(fieldValues))
+					if (transition.getPrerequisite().matches(fieldValues))
 						applicable = true;
 				}
 				if (applicable) {
@@ -267,7 +270,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						public void onClick(AjaxRequestTarget target) {
 							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
 							Serializable fieldBean = getIssueFieldUnaryManager().readFields(getIssue());
-							Set<String> excludedFields = getIssueFieldUnaryManager().getExcludedFields(getIssue().getProject(), transition.getToState());
+							Set<String> excludedFields = getIssueFieldUnaryManager().getExcludedFields(getIssue(), transition.getToState());
 
 							Form<?> form = new Form<Void>("form") {
 
@@ -301,15 +304,21 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 								
 							});
 
-							Map<String, IssueField> prevFields = getIssue().getEffectiveFields();
-							
 							form.add(new AjaxButton("save") {
 
 								@Override
 								protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 									super.onSubmit(target, form);
+
+									Map<String, IssueField> prevFields = getIssue().getEffectiveFields();
+									Collection<String> promptedFields = getIssue().getPromptedFields();
+									StateSpec toStateSpec = getProject().getIssueWorkflow().getStateSpec(transition.getToState());
+									if (toStateSpec == null)
+										throw new OneException("Unable to find state spec: " + transition.getToState());
+									promptedFields.addAll(toStateSpec.getFields());
+									
 									getIssue().setState(transition.getToState());
-									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevFields);
+									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevFields, promptedFields);
 								
 									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
 								}
@@ -606,7 +615,9 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, prevFields);
+
+						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, prevFields, 
+								getIssue().getPromptedFields());
 						modal.close();
 						target.add(fieldsContainer);
 					}
@@ -929,12 +940,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 	@Override
 	public List<String> getInputNames() {
-		return getProject().getIssueWorkflow().getInputNames();
+		return getProject().getIssueWorkflow().getFieldNames();
 	}
 
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return getProject().getIssueWorkflow().getInputSpec(inputName);
+		return getProject().getIssueWorkflow().getFieldSpec(inputName);
 	}
 	
 	@Override

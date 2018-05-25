@@ -104,8 +104,8 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 			
 		});
 		
-		Set<String> excludedFields = getIssueFieldManager().getExcludedFields(
-				getProject(), getProject().getIssueWorkflow().getInitialStateSpec().getName());
+		Set<String> excludedFields = getIssueFieldManager().getExcludedFields(issue, 
+				getProject().getIssueWorkflow().getInitialStateSpec().getName());
 		form.add(BeanContext.editBean("fields", fieldBean, excludedFields));
 		
 		add(form);
@@ -119,12 +119,12 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 
 	@Override
 	public List<String> getInputNames() {
-		return getProject().getIssueWorkflow().getInputNames();
+		return getProject().getIssueWorkflow().getFieldNames();
 	}
 
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return getProject().getIssueWorkflow().getInputSpec(inputName);
+		return getProject().getIssueWorkflow().getFieldSpec(inputName);
 	}
 
 	@Override
