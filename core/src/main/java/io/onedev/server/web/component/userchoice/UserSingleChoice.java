@@ -17,7 +17,8 @@ public class UserSingleChoice extends Select2Choice<UserFacade> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Choose a user ...");
+		if (isRequired())
+			getSettings().setPlaceholder("Choose a user ...");
 		getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");

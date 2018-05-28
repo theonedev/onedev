@@ -54,7 +54,6 @@ import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
 import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
-import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
@@ -411,7 +410,7 @@ public class IssueQuery implements Serializable {
 			if (!fieldName.equals(Issue.TITLE) 
 					&& !fieldName.equals(Issue.DESCRIPTION)
 					&& !(fieldSpec instanceof TextInput) 
-					&& !(fieldSpec instanceof MultiChoiceInput)) {
+					&& !fieldSpec.isAllowMultiple()) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;

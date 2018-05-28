@@ -67,7 +67,16 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 			user = null;
 		
 		UserFacade facade = user!=null?user.getFacade():null;
-    	input = new UserSingleChoice("input", Model.of(facade), new UserChoiceProvider(choices));
+    	input = new UserSingleChoice("input", Model.of(facade), new UserChoiceProvider(choices)) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+    		
+    	};
         input.setConvertEmptyInputStringToNull(true);
         
         // add this to control allowClear flag of select2

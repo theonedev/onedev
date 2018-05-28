@@ -84,6 +84,12 @@ public class NumberInput extends InputSpec {
 		return Lists.newArrayList(String.valueOf(value));
 	}
 
+	@Editable
+	@Override
+	public boolean isAllowMultiple() {
+		return false;
+	}
+
 	@Override
 	public long getOrdinal(OneContext context, Object fieldValue) {
 		if (fieldValue != null)

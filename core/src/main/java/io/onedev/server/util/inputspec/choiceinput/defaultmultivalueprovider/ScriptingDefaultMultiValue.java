@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.multichoiceinput.defaultvalueprovider;
+package io.onedev.server.util.inputspec.choiceinput.defaultmultivalueprovider;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.editable.annotation.Script;
 
 @Editable(order=400, name="Evaluate script to get default value")
-public class ScriptingDefaultValue implements DefaultValueProvider {
+public class ScriptingDefaultMultiValue implements DefaultMultiValueProvider {
 
 	private static final long serialVersionUID = 1L;
 

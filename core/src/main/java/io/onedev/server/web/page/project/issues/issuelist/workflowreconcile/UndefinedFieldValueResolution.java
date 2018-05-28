@@ -20,7 +20,6 @@ import io.onedev.server.util.editable.annotation.ShowCondition;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
 import io.onedev.server.web.util.ComponentContext;
@@ -97,10 +96,7 @@ public class UndefinedFieldValueResolution implements Serializable {
 			
 		});
 		try {
-			if (fieldSpec instanceof ChoiceInput)
-				return new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-			else
-				return new ArrayList<>(((MultiChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
+			return new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
 		} finally {
 			OneContext.pop();
 		}

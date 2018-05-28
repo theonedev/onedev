@@ -12,11 +12,11 @@ import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.GroupUsers;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ProjectReaders;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
-import io.onedev.server.util.inputspec.userchoiceprovider.ChoiceProvider;
-import io.onedev.server.util.inputspec.userchoiceprovider.GroupUsers;
-import io.onedev.server.util.inputspec.userchoiceprovider.ProjectReaders;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=150, name=InputSpec.USER_CHOICE)
@@ -72,6 +72,12 @@ public class UserChoiceInput extends InputSpec {
 		appendMethods(buffer, index, "String", choiceProvider, defaultValueProvider);
 		
 		return buffer.toString();
+	}
+
+	@Editable
+	@Override
+	public boolean isAllowMultiple() {
+		return false;
 	}
 
 	@Override

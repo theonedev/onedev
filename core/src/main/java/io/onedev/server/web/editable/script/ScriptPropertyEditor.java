@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.script;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
@@ -9,6 +10,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -33,6 +35,15 @@ public class ScriptPropertyEditor extends PropertyEditor<String> {
 		container.add(input = new TextArea<String>("input", Model.of(getModelObject())));
 		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));		
 		input.setOutputMarkupId(true);
+
+		input.add(new OnTypingDoneBehavior() {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
 	}
 
 	@Override

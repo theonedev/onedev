@@ -48,6 +48,15 @@ public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 	}
 
 	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		if (isRequired())
+			getSettings().setPlaceholder("Select below...");
+		else
+			getSettings().setPlaceholder("");
+	}
+
+	@Override
 	public void convertInput() {
 
 		String input = getWebRequest().getRequestParameters().getParameterValue(getInputName()).toString();

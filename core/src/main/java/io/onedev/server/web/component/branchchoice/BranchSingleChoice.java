@@ -19,7 +19,8 @@ public class BranchSingleChoice extends Select2Choice<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		getSettings().setPlaceholder("Choose a branch ...");
+		if (isRequired())
+			getSettings().setPlaceholder("Choose a branch ...");
 		getSettings().setFormatResult("onedev.server.branchChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.branchChoiceFormatter.escapeMarkup");

@@ -72,8 +72,18 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 		} 
 		
-		input = new UserMultiChoice("input", new Model((Serializable)users), new UserChoiceProvider(choices));
+		input = new UserMultiChoice("input", new Model((Serializable)users), new UserChoiceProvider(choices)) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+			
+		};
         input.setConvertEmptyInputStringToNull(true);
+        input.setRequired(propertyDescriptor.isPropertyRequired());
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

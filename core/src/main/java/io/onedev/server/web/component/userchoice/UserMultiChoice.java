@@ -20,7 +20,8 @@ public class UserMultiChoice extends Select2MultiChoice<UserFacade> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Choose users ...");
+		if (isRequired())
+			getSettings().setPlaceholder("Choose users ...");
 		getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");

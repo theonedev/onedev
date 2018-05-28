@@ -14,7 +14,7 @@ import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.editable.annotation.UserChoice;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.inputspec.userchoiceprovider.ChoiceProvider;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
 
 @Editable(order=100, name="Specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {

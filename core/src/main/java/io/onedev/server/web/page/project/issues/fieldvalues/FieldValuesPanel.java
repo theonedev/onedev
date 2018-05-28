@@ -25,8 +25,7 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -74,13 +73,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				} else {
 					Label label = new Label("value", value);
 					InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(getField().getName());
-					ChoiceProvider choiceProvider = null;
 					if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
-						choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
-					} else if (fieldSpec != null && fieldSpec instanceof MultiChoiceInput) {
-						choiceProvider = ((MultiChoiceInput)fieldSpec).getChoiceProvider();
-					} 
-					if (choiceProvider != null) {
+						ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
 						OneContext.push(new ComponentContext(this));
 						try {
 							String backgroundColor = choiceProvider.getChoices(false).get(value);
@@ -96,7 +90,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						} finally {
 							OneContext.pop();
 						}
-					}
+					} 
 					item.add(label);
 				}
 				valuesView.add(item);

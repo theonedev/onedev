@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.multichoiceinput.defaultvalueprovider;
+package io.onedev.server.util.inputspec.choiceinput.defaultmultivalueprovider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +13,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.OmitName;
-import io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 
 @Editable(order=100, name="Specified default value")
-public class SpecifiedDefaultValue implements DefaultValueProvider {
+public class SpecifiedDefaultMultiValue implements DefaultMultiValueProvider {
 
 	private static final long serialVersionUID = 1L;
 

@@ -39,7 +39,16 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
     		
     	});
 
-    	input = new BranchSingleChoice("input", getModel(), branchProvider);
+    	input = new BranchSingleChoice("input", getModel(), branchProvider) {
+    		
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+			
+    	};
     	
         // add this to control allowClear flag of select2
     	input.setRequired(propertyDescriptor.isPropertyRequired());

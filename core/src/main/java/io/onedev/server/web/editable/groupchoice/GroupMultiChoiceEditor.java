@@ -71,8 +71,18 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 			}
 		} 
 		
-		input = new GroupMultiChoice("input", new Model((Serializable)groups), new GroupChoiceProvider(choices));
+		input = new GroupMultiChoice("input", new Model((Serializable)groups), new GroupChoiceProvider(choices)) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+			
+		};
         input.setConvertEmptyInputStringToNull(true);
+        input.setRequired(propertyDescriptor.isPropertyRequired());
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

@@ -30,7 +30,7 @@ public abstract class InputSpec implements Serializable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(InputSpec.class);
 	
-	public static final String BOOLEAN = "Boolean";
+	public static final String BOOLEAN = "Checkbox";
 
 	public static final String TEXT = "Text";
 	
@@ -40,9 +40,7 @@ public abstract class InputSpec implements Serializable {
 	
 	public static final String NUMBER = "Number";
 	
-	public static final String CHOICE = "Choice";
-	
-	public static final String MULTI_CHOICE = "Multi-choice";
+	public static final String CHOICE = "Enumeration";
 	
 	public static final String USER_CHOICE = "User choice";
 	
@@ -53,13 +51,15 @@ public abstract class InputSpec implements Serializable {
 	private String name;
 
 	private String description;
+
+	private boolean allowMultiple;
 	
 	private boolean allowEmpty;
 	
 	private String nameOfEmptyValue;
 	
 	private ShowCondition showCondition;
-
+	
 	@Editable(order=10)
 	@InputName
 	@NotEmpty
@@ -79,6 +79,15 @@ public abstract class InputSpec implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	@Editable(order=35, description="resource.input.allowMultiple")
+	public boolean isAllowMultiple() {
+		return allowMultiple;
+	}
+
+	public void setAllowMultiple(boolean allowMultiple) {
+		this.allowMultiple = allowMultiple;
 	}
 
 	@Editable(order=40, name="Show Conditionally", description="resource.input.showCondition")
@@ -158,6 +167,8 @@ public abstract class InputSpec implements Serializable {
 		}
 		if (showCondition != null) 
 			buffer.append("    @ShowCondition(\"isInput" + index + "Visible\")\n");
+		if (getNameOfEmptyValue() != null)
+			buffer.append("    @NameOfEmptyValue(\"" + escape(getNameOfEmptyValue()) + "\")");
 	}
 	
 	protected void appendDefaultValueProvider(StringBuffer buffer, int index) {
@@ -187,7 +198,7 @@ public abstract class InputSpec implements Serializable {
 		if (choiceProvider != null) {
 			buffer.append("    private static List getInput" + index + "Choices() {\n");
 			String literalBytes = getLiteral(SerializationUtils.serialize(choiceProvider));
-			if (choiceProvider instanceof io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider) {
+			if (choiceProvider instanceof io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider) {
 				buffer.append("        return new ArrayList(SerializationUtils.deserialize(" + literalBytes + ").getChoices(false).keySet());\n");
 			} else {
 				buffer.append("        return SerializationUtils.deserialize(" + literalBytes + ").getChoices(false);\n");

@@ -49,6 +49,12 @@ public class TextInput extends InputSpec {
 		this.defaultValueProvider = defaultValueProvider;
 	}
 
+	@Editable
+	@Override
+	public boolean isAllowMultiple() {
+		return false;
+	}
+
 	@Override
 	public String getPropertyDef(Map<String, Integer> indexes) {
 		int index = indexes.get(getName());

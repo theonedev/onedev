@@ -19,7 +19,8 @@ public class BranchMultiChoice extends Select2MultiChoice<String> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Choose branches ...");
+		if (isRequired())
+			getSettings().setPlaceholder("Choose branches ...");
 		getSettings().setFormatResult("onedev.server.branchChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.branchChoiceFormatter.escapeMarkup");

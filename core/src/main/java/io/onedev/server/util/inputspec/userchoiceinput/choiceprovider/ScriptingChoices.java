@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.userchoiceprovider;
+package io.onedev.server.util.inputspec.userchoiceinput.choiceprovider;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -19,13 +19,13 @@ import io.onedev.server.model.support.issue.workflow.action.PressButton;
 import io.onedev.server.util.UsageUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.choiceprovider.Choice;
-import io.onedev.server.util.inputspec.choiceprovider.SpecifiedChoices;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
-import io.onedev.server.util.inputspec.userchoiceprovider.ProjectReaders;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ProjectReaders;
 
 public class IssueWorkflow implements Serializable {
 	

@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.groupchoiceprovider;
+package io.onedev.server.util.inputspec.groupchoiceinput.choiceprovider;
 
 import java.util.ArrayList;
 import java.util.HashMap;

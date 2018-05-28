@@ -48,8 +48,19 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 		if (getModelObject() != null) 
 			projectAndBranches.addAll(getModelObject());
 		
-		input = new BranchMultiChoice("input", new Model(projectAndBranches), branchProvider);
+		input = new BranchMultiChoice("input", new Model(projectAndBranches), branchProvider) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+			
+		};
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+        input.setRequired(propertyDescriptor.isPropertyRequired());
+        
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override

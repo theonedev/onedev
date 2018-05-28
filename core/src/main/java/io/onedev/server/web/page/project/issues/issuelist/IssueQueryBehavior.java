@@ -41,7 +41,6 @@ import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
 import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
-import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
@@ -162,14 +161,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									OneContext.push(newOneContext());
 									try {
 										List<String> candidates = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
-									} finally {
-										OneContext.pop();
-									}								
-								} else if (fieldSpec instanceof MultiChoiceInput) {
-									OneContext.push(newOneContext());
-									try {
-										List<String> candidates = new ArrayList<>(((MultiChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 									} finally {
 										OneContext.pop();

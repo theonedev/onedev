@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.userchoiceprovider;
+package io.onedev.server.util.inputspec.userchoiceinput.choiceprovider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,15 +10,15 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.facade.UserFacade;
 
-@Editable(order=130, name="Users able to write the project")
-public class ProjectWriters implements ChoiceProvider {
+@Editable(order=140, name="Users able to administrate the project")
+public class ProjectAdministrators implements ChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public List<UserFacade> getChoices(boolean allPossible) {
 		Project project = OneContext.get().getProject();
-		return new ArrayList<>(SecurityUtils.getAuthorizedUsers(project.getFacade(), ProjectPrivilege.WRITE));
+		return new ArrayList<>(SecurityUtils.getAuthorizedUsers(project.getFacade(), ProjectPrivilege.ADMIN));
 	}
 
 }

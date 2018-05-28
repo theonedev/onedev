@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -26,8 +24,6 @@ import io.onedev.utils.ReflectionUtils;
 @SuppressWarnings("serial")
 public class SingleChoiceEditor extends PropertyEditor<String> {
 
-	private static final int SELECT2_THRESHOLD = 10;
-	
 	private List<String> choices = new ArrayList<>();
 	
 	private FormComponent<String> input;
@@ -57,28 +53,18 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			OneContext.pop();
 		}
 
-		if (choices.size() > SELECT2_THRESHOLD) {
-			input = new StringSingleChoice("input", Model.of(getModelObject()), choices);
-		} else {
-			input = new DropDownChoice<String>("input", Model.of(getModelObject()), choices) {
+		input = new StringSingleChoice("input", Model.of(getModelObject()), choices) {
 
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					tag.setName("select");
-					tag.remove("type");
-					super.onComponentTag(tag);
-				}
-
-				@Override
-				protected String getNullValidDisplayValue() {
-					if (propertyDescriptor.isPropertyRequired())
-						return "Please choose...";
-					else
-						return super.getNullValidDisplayValue();
-				}
-				
-			}.setNullValid(true);
-		}
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+			
+		};
+        // add this to control allowClear flag of select2
+    	input.setRequired(propertyDescriptor.isPropertyRequired());
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

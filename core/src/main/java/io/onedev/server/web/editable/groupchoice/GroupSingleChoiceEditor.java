@@ -66,7 +66,16 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 			group = null;
 		
 		GroupFacade facade = group!=null?group.getFacade():null;
-    	input = new GroupSingleChoice("input", Model.of(facade), new GroupChoiceProvider(choices));
+    	input = new GroupSingleChoice("input", Model.of(facade), new GroupChoiceProvider(choices)) {
+
+    		@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+    		
+    	};
         input.setConvertEmptyInputStringToNull(true);
 
         // add this to control allowClear flag of select2

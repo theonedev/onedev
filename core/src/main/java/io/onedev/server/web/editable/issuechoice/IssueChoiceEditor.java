@@ -51,7 +51,16 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 			}
     		
     	});
-    	input = new IssueSingleChoice("input", Model.of(issue), choiceProvider);
+    	input = new IssueSingleChoice("input", Model.of(issue), choiceProvider) {
+
+    		@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+    		
+    	};
         input.setConvertEmptyInputStringToNull(true);
         
         // add this to control allowClear flag of select2

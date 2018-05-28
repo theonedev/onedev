@@ -12,10 +12,10 @@ import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.groupchoiceinput.choiceprovider.AllGroups;
+import io.onedev.server.util.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
-import io.onedev.server.util.inputspec.groupchoiceprovider.AllGroups;
-import io.onedev.server.util.inputspec.groupchoiceprovider.ChoiceProvider;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=160, name=InputSpec.GROUP_CHOICE)
@@ -71,6 +71,12 @@ public class GroupChoiceInput extends InputSpec {
 		appendMethods(buffer, index, "String", choiceProvider, defaultValueProvider);
 		
 		return buffer.toString();
+	}
+
+	@Editable
+	@Override
+	public boolean isAllowMultiple() {
+		return false;
 	}
 
 	@Override

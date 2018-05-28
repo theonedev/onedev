@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Date;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -13,6 +14,7 @@ import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextField
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextFieldConfig;
 import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -43,6 +45,15 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 
 		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
 		add(input);
+		
+		input.add(new OnTypingDoneBehavior() {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
 	}
 
 	@Override

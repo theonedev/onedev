@@ -1,87 +1,74 @@
 package io.onedev.server.web.editable.enumeration;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.util.editable.annotation.ExcludeValues;
+import io.onedev.server.util.editable.EditableUtils;
+import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.utils.WordUtils;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 
-	private final EnumSet<?> enumSet;
+	private final Class<Enum> enumClass;
 	
-	private DropDownChoice<String> input;
+	private StringSingleChoice input;
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public EnumPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Enum<?>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 		
-        enumSet = EnumSet.allOf((Class<Enum>) propertyDescriptor.getPropertyClass());
+		enumClass = (Class<Enum>) EditableUtils.getElementClass(
+				propertyDescriptor.getPropertyGetter().getGenericReturnType());		
 	}
 
+	private String getDisplayValue(String choice) {
+		return StringUtils.capitalize(choice.replace('_', ' ').toLowerCase());
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Collection<String> excludeValues = new HashSet<>();
-		ExcludeValues annotation = propertyDescriptor.getPropertyGetter().getAnnotation(ExcludeValues.class);
-		if (annotation != null) {
-			for (String excludeValue: annotation.value()) {
-				excludeValues.add(excludeValue);
-			}
-		}
 		List<String> choices = new ArrayList<>();
-        for (Iterator<?> it = enumSet.iterator(); it.hasNext();) {
+        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
             Enum<?> value = (Enum<?>) it.next();
-            if (!excludeValues.contains(value.name()))
-                choices.add(value.toString());
+            choices.add(getDisplayValue(value.toString()));
         }
 
         String stringValue;
         if (getModelObject() != null)
-        	stringValue = getModelObject().toString();
+        	stringValue = getDisplayValue(getModelObject().toString());
         else
         	stringValue = null;
         
-        IChoiceRenderer<String> choiceRenderer = new IChoiceRenderer<String>() {
+		input = new StringSingleChoice("input", Model.of(stringValue), choices) {
 
 			@Override
-			public Object getDisplayValue(String object) {
-				return StringUtils.capitalize(object.replace('_', ' ').toLowerCase());
-			}
-
-			@Override
-			public String getIdValue(String object, int index) {
-				return object;
-			}
-
-			@Override
-			public String getObject(String id, IModel<? extends List<? extends String>> choices) {
-				return id;
+			protected void onInitialize() {
+				super.onInitialize();
+        		if (propertyDescriptor.isPropertyRequired()) 
+					getSettings().setPlaceholder("Select " + WordUtils.uncamel(enumClass.getSimpleName()).toLowerCase() + "...");
+        		else if (propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
 			}
 			
 		};
-        input = new DropDownChoice<String>("input", Model.of(stringValue), choices, choiceRenderer);
-
-        input.setNullValid(!getPropertyDescriptor().isPropertyRequired());	
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+        // add this to control allowClear flag of select2
+    	input.setRequired(propertyDescriptor.isPropertyRequired());
+        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
@@ -102,10 +89,10 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 
 	@Override
 	protected Enum<?> convertInputToValue() throws ConversionException {
-		String stringValue = input.getConvertedInput();
-        for (Iterator<?> it = enumSet.iterator(); it.hasNext();) {
+		String displayValue = input.getConvertedInput();
+        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
             Enum<?> value = (Enum<?>) it.next();
-            if (value.toString().equals(stringValue)) 
+            if (getDisplayValue(value.toString()).equals(displayValue)) 
             	return value;
         }
         return null;

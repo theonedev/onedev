@@ -64,8 +64,18 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
         
 		IModel<Collection<String>> model = new Model((Serializable) selections);
         
-		input = new StringMultiChoice("input", model, choices);
+		input = new StringMultiChoice("input", model, choices) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
+					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			}
+			
+		};
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+        input.setRequired(propertyDescriptor.isPropertyRequired());
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

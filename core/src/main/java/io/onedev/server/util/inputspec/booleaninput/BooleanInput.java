@@ -29,6 +29,12 @@ public class BooleanInput extends InputSpec {
 		this.defaultValueProvider = defaultValueProvider;
 	}
 
+	@Editable
+	@Override
+	public boolean isAllowMultiple() {
+		return false;
+	}
+
 	@Override
 	public List<String> getPossibleValues() {
 		return Lists.newArrayList("true", "false");

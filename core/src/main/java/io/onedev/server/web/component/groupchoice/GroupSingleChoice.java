@@ -18,7 +18,8 @@ public class GroupSingleChoice extends Select2Choice<GroupFacade> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Choose a group ...");
+		if (isRequired())
+			getSettings().setPlaceholder("Choose a group ...");
 		getSettings().setFormatResult("onedev.server.groupChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");

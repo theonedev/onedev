@@ -82,6 +82,10 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 	protected void onInitialize() {
 		super.onInitialize();
 		getSettings().setMultiple(true);
+		if (isRequired())
+			getSettings().setPlaceholder("Select below...");
+		else
+			getSettings().setPlaceholder("");
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.password;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.model.IModel;
@@ -7,6 +8,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.util.editable.annotation.Password;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -46,6 +48,22 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 			input.add(AttributeAppender.append("autocomplete", autoComplete));
 			inputAgain.add(AttributeAppender.append("autocomplete", autoComplete));
 		}
+		input.add(new OnTypingDoneBehavior() {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
+		inputAgain.add(new OnTypingDoneBehavior() {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
 	}
 
 	@Override

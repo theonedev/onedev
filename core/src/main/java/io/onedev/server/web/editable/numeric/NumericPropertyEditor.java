@@ -1,10 +1,12 @@
 package io.onedev.server.web.editable.numeric;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -27,6 +29,15 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 		input.setType(getPropertyDescriptor().getPropertyClass());
 		add(input);
 		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		
+		input.add(new OnTypingDoneBehavior() {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				onPropertyUpdating(target);
+			}
+			
+		});
 	}
 
 	@Override

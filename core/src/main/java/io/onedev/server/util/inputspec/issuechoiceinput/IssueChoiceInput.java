@@ -32,6 +32,12 @@ public class IssueChoiceInput extends InputSpec {
 		return Long.valueOf(strings.iterator().next());
 	}
 
+	@Editable
+	@Override
+	public boolean isAllowMultiple() {
+		return false;
+	}
+
 	@Override
 	public List<String> convertToStrings(Object value) {
 		return Lists.newArrayList(value.toString());

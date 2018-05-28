@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -17,6 +18,7 @@ import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.EditableUtils;
+import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.BeanUtils;
@@ -111,6 +113,15 @@ public class PropertyDescriptor implements Serializable {
 				|| getPropertyGetter().getAnnotation(NotNull.class) != null 
 				|| getPropertyGetter().getAnnotation(NotEmpty.class) != null
 				|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
+	}
+	
+	@Nullable
+	public String getNameOfEmptyValue() {
+		NameOfEmptyValue annotation = getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
+		if (annotation != null)
+			return annotation.value();
+		else
+			return null;
 	}
 
 	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor) {

@@ -13,10 +13,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.util.editable.annotation.ShowCondition;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.util.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.util.inputspec.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.inputspec.choiceprovider.SpecifiedChoices;
 
 @Editable(order=145, name=InputSpec.CHOICE)
 public class ChoiceInput extends InputSpec {
@@ -26,6 +28,8 @@ public class ChoiceInput extends InputSpec {
 	private ChoiceProvider choiceProvider = new SpecifiedChoices();
 
 	private DefaultValueProvider defaultValueProvider;
+	
+	private DefaultMultiValueProvider defaultMultiValueProvider;
 	
 	@Editable(order=1000, name="Available Choices")
 	@NotNull(message="may not be empty")
@@ -37,6 +41,7 @@ public class ChoiceInput extends InputSpec {
 		this.choiceProvider = choiceProvider;
 	}
 
+	@ShowCondition("isDefaultValueProviderVisible")
 	@Editable(order=1100, name="Default Value")
 	@NameOfEmptyValue("No default value")
 	public DefaultValueProvider getDefaultValueProvider() {
@@ -46,7 +51,28 @@ public class ChoiceInput extends InputSpec {
 	public void setDefaultValueProvider(DefaultValueProvider defaultValueProvider) {
 		this.defaultValueProvider = defaultValueProvider;
 	}
+	
+	@SuppressWarnings("unused")
+	private static boolean isDefaultValueProviderVisible() {
+		return OneContext.get().getEditContext().getInputValue("allowMultiple").equals(false);
+	}
 
+	@ShowCondition("isDefaultMultiValueProviderVisible")
+	@Editable(order=1100, name="Default Value")
+	@NameOfEmptyValue("No default value")
+	public DefaultMultiValueProvider getDefaultMultiValueProvider() {
+		return defaultMultiValueProvider;
+	}
+
+	public void setDefaultMultiValueProvider(DefaultMultiValueProvider defaultMultiValueProvider) {
+		this.defaultMultiValueProvider = defaultMultiValueProvider;
+	}
+
+	@SuppressWarnings("unused")
+	private static boolean isDefaultMultiValueProviderVisible() {
+		return OneContext.get().getEditContext().getInputValue("allowMultiple").equals(true);
+	}
+	
 	@Override
 	public List<String> getPossibleValues() {
 		List<String> possibleValues = new ArrayList<>();
@@ -59,26 +85,44 @@ public class ChoiceInput extends InputSpec {
 	public String getPropertyDef(Map<String, Integer> indexes) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
-		appendField(buffer, index, "String");
+		appendField(buffer, index, isAllowMultiple()? "List<String>": "String");
 		appendCommonAnnotations(buffer, index);
-		if (!isAllowEmpty())
-			buffer.append("    @NotEmpty\n");
+		if (!isAllowEmpty()) {
+			if (isAllowMultiple())
+				buffer.append("    @Size(min=1, message=\"At least one option needs to be selected\")\n");
+			else
+				buffer.append("    @NotEmpty\n");
+		}
 		appendChoiceProvider(buffer, index, "@ChoiceProvider");
-		if (defaultValueProvider != null)
-			appendDefaultValueProvider(buffer, index);
-		appendMethods(buffer, index, "String", choiceProvider, defaultValueProvider);
+		
+		if (isAllowMultiple()) {
+			if (defaultMultiValueProvider != null)
+				appendDefaultValueProvider(buffer, index);
+			appendMethods(buffer, index, "List<String>", choiceProvider, defaultMultiValueProvider);
+		} else {
+			if (defaultValueProvider != null)
+				appendDefaultValueProvider(buffer, index);
+			appendMethods(buffer, index, "String", choiceProvider, defaultValueProvider);
+		}
 		
 		return buffer.toString();
 	}
 
 	@Override
 	public Object convertToObject(List<String> strings) {
-		return strings.iterator().next();
+		if (isAllowMultiple())
+			return strings;
+		else
+			return strings.iterator().next();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> convertToStrings(Object value) {
-		return Lists.newArrayList((String) value);
+		if (isAllowMultiple())
+			return (List<String>) value;
+		else
+			return Lists.newArrayList((String) value);
 	}
 
 	@Override

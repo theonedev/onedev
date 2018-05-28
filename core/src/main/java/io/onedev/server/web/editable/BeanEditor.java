@@ -156,8 +156,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				String required;
 				if (propertyContext.isPropertyRequired() 
 						&& propertyContext.getPropertyClass() != boolean.class
-						&& propertyContext.getPropertyClass() != Boolean.class
-						&& propertyContext.getPropertyClass() != List.class) {
+						&& propertyContext.getPropertyClass() != Boolean.class) {
 					required = "*";
 				} else {
 					required = "&nbsp;";

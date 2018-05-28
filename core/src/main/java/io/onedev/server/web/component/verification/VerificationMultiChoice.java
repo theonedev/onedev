@@ -36,7 +36,8 @@ public class VerificationMultiChoice extends Select2MultiChoice<String> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Choose verifications...");
+		if (isRequired())
+			getSettings().setPlaceholder("Choose verifications...");
 		getSettings().setFormatResult("onedev.server.verificationChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.verificationChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.verificationChoiceFormatter.escapeMarkup");

@@ -40,7 +40,6 @@ import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.multichoiceinput.MultiChoiceInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.InvalidFieldResolution;
@@ -281,10 +280,9 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 	@Sessional
 	@Override
 	public Map<String, String> getUndefinedFieldValues(Project project) {
-		Query query = getSession().createQuery("select distinct name, value from IssueFieldUnary where issue.project=:project and (type=:choice or type=:multiChoice)");
+		Query query = getSession().createQuery("select distinct name, value from IssueFieldUnary where issue.project=:project and type=:choice");
 		query.setParameter("project", project);
 		query.setParameter("choice", InputSpec.CHOICE);
-		query.setParameter("multiChoice", InputSpec.MULTI_CHOICE);
 		Map<String, String> undefinedFieldValues = new HashMap<>();
 		OneContext.push(new OneContext() {
 
@@ -317,11 +315,7 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 				String value = (String) row[1];
 				InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
 				if (fieldSpec != null && value != null) {
-					List<String> choices;
-					if (fieldSpec instanceof ChoiceInput)
-						choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-					else
-						choices = new ArrayList<>(((MultiChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
+					List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
 					if (!choices.contains(value))
 						undefinedFieldValues.put(name, value);
 				}

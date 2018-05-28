@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.choiceprovider;
+package io.onedev.server.util.inputspec.choiceinput.choiceprovider;
 
 import java.util.HashMap;
 import java.util.Map;

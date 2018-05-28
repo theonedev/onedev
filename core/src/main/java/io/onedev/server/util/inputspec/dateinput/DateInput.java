@@ -52,6 +52,12 @@ public class DateInput extends InputSpec {
 		return Constants.DATE_FORMATTER.parseDateTime(strings.iterator().next()).toDate();
 	}
 
+	@Editable
+	@Override
+	public boolean isAllowMultiple() {
+		return false;
+	}
+
 	@Override
 	public List<String> convertToStrings(Object value) {
 		return Lists.newArrayList(Constants.DATE_FORMATTER.print(new DateTime(value)));

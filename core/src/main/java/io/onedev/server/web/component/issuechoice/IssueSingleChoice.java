@@ -17,7 +17,8 @@ public class IssueSingleChoice extends Select2Choice<Issue> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Select issue ...");
+		if (isRequired())
+			getSettings().setPlaceholder("Select issue ...");
 		getSettings().setFormatResult("onedev.server.issueChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.issueChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.issueChoiceFormatter.escapeMarkup");

@@ -24,6 +24,10 @@ public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBeha
 		this.timeout = timeout;
 	}
 
+	public OnTypingDoneBehavior() {
+		this(250);
+	}
+	
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
