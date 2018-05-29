@@ -1,18 +1,15 @@
 #issue-list {
-	margin: -20px;
+	display: table;
+	width: 100%;
+}
+#issue-list>div {
+	display: table-cell;
 }
 #issue-list>.side {
-	position: fixed;
-	top: 48px;
-	left: 240px;
-	bottom: 0;
 	width: 300px;
-	padding: 20px;
-	border-right: 2px solid #E0E0E0;
-	overflow: auto;
-}
-#project>.minimized.sidebar+.content>#issue-list>.side {
-	left: 44px;
+	border: 1px solid #E0E0E0;
+	padding: 20px; 
+	border-radius: 4px;
 }
 #issue-list>.side>.head>.actions {
 	margin: 8px 0 0 12px;
@@ -50,8 +47,7 @@
 }
 
 #issue-list>.main {
-	padding: 20px;
-	margin-left: 300px;
+	padding-left: 20px;
 }
 #issue-list>.main>.head {
 	position: relative;

@@ -32,6 +32,7 @@ import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.issues.issueboard.IssueBoardPage;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
@@ -196,7 +197,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/pulls/${request}/merge-preview", MergePreviewPage.class));
 		add(new OnePageMapper("projects/${project}/pulls/${request}/invalid", InvalidRequestPage.class));
 
-		add(new OnePageMapper("projects/${project}/issues", IssueListPage.class));
+		add(new OnePageMapper("projects/${project}/issue-board", IssueBoardPage.class));
+		add(new OnePageMapper("projects/${project}/issue-list", IssueListPage.class));
 		add(new OnePageMapper("projects/${project}/issues/${issue}/activities", IssueActivitiesPage.class));
 		add(new OnePageMapper("projects/${project}/issues/new", NewIssuePage.class));
 		

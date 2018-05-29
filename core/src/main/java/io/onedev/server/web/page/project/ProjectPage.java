@@ -48,6 +48,7 @@ import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
@@ -145,7 +146,8 @@ public abstract class ProjectPage extends LayoutPage {
 				tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
 						0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class));
 				
-				tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssueDetailPage.class, NewIssuePage.class) {
+				tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssuesPage.class, 
+						IssueDetailPage.class, NewIssuePage.class) {
 
 					@Override
 					public Component render(String componentId) {

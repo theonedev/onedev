@@ -71,7 +71,7 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.WorkflowReconcilePanel;
@@ -82,7 +82,7 @@ import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
-public class IssueListPage extends ProjectPage {
+public class IssueListPage extends IssuesPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(IssueListPage.class);
 	
