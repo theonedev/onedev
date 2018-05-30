@@ -4,18 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.util.editable.annotation.BranchPattern;
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
-import io.onedev.server.util.editable.annotation.Color;
-import io.onedev.server.util.editable.annotation.GroupChoice;
-import io.onedev.server.util.editable.annotation.Markdown;
-import io.onedev.server.util.editable.annotation.Multiline;
-import io.onedev.server.util.editable.annotation.Password;
-import io.onedev.server.util.editable.annotation.PathPattern;
-import io.onedev.server.util.editable.annotation.ReviewRequirementSpec;
-import io.onedev.server.util.editable.annotation.Script;
-import io.onedev.server.util.editable.annotation.TagPattern;
-import io.onedev.server.util.editable.annotation.UserChoice;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
@@ -23,6 +11,19 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.annotation.BranchPattern;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Color;
+import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.web.editable.annotation.IssueQuery;
+import io.onedev.server.web.editable.annotation.Markdown;
+import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.web.editable.annotation.Password;
+import io.onedev.server.web.editable.annotation.PathPattern;
+import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
+import io.onedev.server.web.editable.annotation.Script;
+import io.onedev.server.web.editable.annotation.TagPattern;
+import io.onedev.server.web.editable.annotation.UserChoice;
 
 @SuppressWarnings("serial")
 public class StringEditSupport implements EditSupport {
@@ -40,6 +41,7 @@ public class StringEditSupport implements EditSupport {
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(Password.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(BranchPattern.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(TagPattern.class) == null
+				&& propertyDescriptor.getPropertyGetter().getAnnotation(IssueQuery.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(GroupChoice.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(UserChoice.class) == null
 				&& propertyDescriptor.getPropertyGetter().getAnnotation(PathPattern.class) == null

@@ -2,7 +2,7 @@ package io.onedev.server.model.support.setting;
 
 import java.io.Serializable;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 public class SecuritySetting implements Serializable {

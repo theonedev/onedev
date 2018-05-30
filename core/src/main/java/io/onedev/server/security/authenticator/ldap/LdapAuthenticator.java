@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.server.security.authenticator.Authenticated;
 import io.onedev.server.security.authenticator.Authenticator;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.Password;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.utils.StringUtils;
 
 @Editable(name="Generic LDAP", order=200)

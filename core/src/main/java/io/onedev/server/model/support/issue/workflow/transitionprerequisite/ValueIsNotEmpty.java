@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.issue.workflow.transitionprerequisite;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=300, name="is not empty")
 public class ValueIsNotEmpty implements ValueMatcher {

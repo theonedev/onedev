@@ -43,4 +43,9 @@ public class SubmitterCriteria extends IssueCriteria {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return quote(Issue.SUBMITTER) + " " + IssueQuery.getOperatorName(operator) + " " + quote(value.getName());
+	}
+
 }

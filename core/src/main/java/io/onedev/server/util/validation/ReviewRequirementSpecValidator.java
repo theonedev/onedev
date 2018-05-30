@@ -3,9 +3,9 @@ package io.onedev.server.util.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.util.editable.annotation.ReviewRequirementSpec;
 import io.onedev.server.util.reviewrequirement.InvalidReviewRuleException;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
 
 public class ReviewRequirementSpecValidator implements ConstraintValidator<ReviewRequirementSpec, String> {
 	

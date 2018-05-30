@@ -15,9 +15,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.editable.annotation.BranchChoice;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.UserChoice;
+import io.onedev.server.web.editable.annotation.BranchChoice;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.UserChoice;
 
 @SuppressWarnings("serial")
 @Editable

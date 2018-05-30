@@ -16,9 +16,9 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.FileChoice;
-import io.onedev.server.util.editable.annotation.UserChoice;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.FileChoice;
+import io.onedev.server.web.editable.annotation.UserChoice;
 import io.onedev.server.web.page.project.ProjectPage;
 
 @Editable

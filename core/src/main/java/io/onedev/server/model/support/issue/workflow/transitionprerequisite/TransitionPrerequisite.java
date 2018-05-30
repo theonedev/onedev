@@ -9,9 +9,9 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 public class TransitionPrerequisite implements Serializable {

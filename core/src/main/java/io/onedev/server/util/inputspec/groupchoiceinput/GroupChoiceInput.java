@@ -8,14 +8,14 @@ import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.groupchoiceinput.choiceprovider.AllGroups;
 import io.onedev.server.util.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=160, name=InputSpec.GROUP_CHOICE)
@@ -99,14 +99,15 @@ public class GroupChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public List<String> onDeleteGroup(String groupName) {
-		List<String> usages = super.onDeleteGroup(groupName);
+	public boolean onDeleteGroup(String groupName) {
+		if (super.onDeleteGroup(groupName))
+			return true;
 		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
 			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
 			if (specifiedDefaultValue.getValue().equals(groupName))
-				usages.add("Default Value"); 
+				defaultValueProvider = null; 
 		}
-		return usages;
+		return false;
 	}
 	
 }

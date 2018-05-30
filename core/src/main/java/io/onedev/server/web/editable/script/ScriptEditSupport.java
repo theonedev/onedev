@@ -5,13 +5,13 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.util.editable.annotation.Script;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.annotation.Script;
 
 @SuppressWarnings("serial")
 public class ScriptEditSupport implements EditSupport {

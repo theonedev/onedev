@@ -44,7 +44,7 @@ import io.onedev.server.model.support.TextRange;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.util.editable.EditableUtils;
+import io.onedev.server.web.editable.EditableUtils;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations

@@ -41,9 +41,9 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		
 		OneContext.push(oneContext);
 		try {
-			io.onedev.server.util.editable.annotation.ChoiceProvider choiceProvider = 
+			io.onedev.server.web.editable.annotation.ChoiceProvider choiceProvider = 
 					propertyDescriptor.getPropertyGetter().getAnnotation(
-							io.onedev.server.util.editable.annotation.ChoiceProvider.class);
+							io.onedev.server.web.editable.annotation.ChoiceProvider.class);
 			Preconditions.checkNotNull(choiceProvider);
 			for (String each: (List<String>)ReflectionUtils
 					.invokeStaticMethod(propertyDescriptor.getBeanClass(), choiceProvider.value())) {

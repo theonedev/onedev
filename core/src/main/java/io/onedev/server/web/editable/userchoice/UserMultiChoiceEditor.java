@@ -18,7 +18,6 @@ import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.UserChoice;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.userchoice.UserChoiceProvider;
 import io.onedev.server.web.component.userchoice.UserMultiChoice;
@@ -26,6 +25,7 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.UserChoice;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ReflectionUtils;
 

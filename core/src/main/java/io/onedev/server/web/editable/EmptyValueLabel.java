@@ -5,7 +5,7 @@ import java.lang.reflect.AnnotatedElement;
 import org.apache.wicket.markup.html.basic.Label;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @SuppressWarnings("serial")
 public class EmptyValueLabel extends Label {

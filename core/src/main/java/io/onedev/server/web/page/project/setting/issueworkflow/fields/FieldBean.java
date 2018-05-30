@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 public class FieldBean implements Serializable {

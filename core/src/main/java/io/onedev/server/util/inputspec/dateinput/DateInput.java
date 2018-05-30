@@ -10,10 +10,10 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.util.Constants;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.dateinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=505, name=InputSpec.DATE)
 public class DateInput extends InputSpec {

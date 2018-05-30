@@ -12,14 +12,14 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.util.editable.EditableUtils;
-import io.onedev.server.util.editable.annotation.Multiline;
-import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
 public class StringPropertyEditor extends PropertyEditor<String> {

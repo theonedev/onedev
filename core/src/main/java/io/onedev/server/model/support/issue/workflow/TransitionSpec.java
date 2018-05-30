@@ -14,9 +14,9 @@ import io.onedev.server.model.support.authorized.SpecifiedUser;
 import io.onedev.server.model.support.issue.workflow.action.IssueAction;
 import io.onedev.server.model.support.issue.workflow.action.PressButton;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.utils.StringUtils;
@@ -89,18 +89,17 @@ public class TransitionSpec implements Serializable {
 		}
 	}
 	
-	public List<String> onDeleteUser(String userName) {
-		List<String> usages = new ArrayList<>();
+	public boolean onDeleteUser(String userName) {
 		IssueAction onAction = getOnAction();
 		if (onAction instanceof PressButton) {
 			PressButton pressButton = (PressButton) onAction;
 			if (pressButton.getAuthorized() instanceof SpecifiedUser) {
 				SpecifiedUser specifiedUser = (SpecifiedUser) pressButton.getAuthorized();
 				if (specifiedUser.getUserName().equals(userName))
-					usages.add("On Action");
+					return true;
 			}
 		}
-		return usages;
+		return false;
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
@@ -115,18 +114,17 @@ public class TransitionSpec implements Serializable {
 		}
 	}
 	
-	public List<String> onDeleteGroup(String groupName) {
-		List<String> usages = new ArrayList<>();
+	public boolean onDeleteGroup(String groupName) {
 		IssueAction onAction = getOnAction();
 		if (onAction instanceof PressButton) {
 			PressButton pressButton = (PressButton) onAction;
 			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
 				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
 				if (specifiedGroup.getGroupName().equals(groupName))
-					usages.add("On Action");
+					return true;
 			}
 		}
-		return usages;
+		return false;
 	}
 	
 	public void onFieldRename(String oldName, String newName) {
@@ -134,11 +132,8 @@ public class TransitionSpec implements Serializable {
 			getPrerequisite().setInputName(newName);
 	}
 	
-	public List<String> onFieldDelete(String fieldName) {
-		List<String> usages = new ArrayList<>();
-		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName))
-			usages.add("Prerequisite");
-		return usages;
+	public boolean onFieldDelete(String fieldName) {
+		return getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName);
 	}
 	
 	@SuppressWarnings("unused")

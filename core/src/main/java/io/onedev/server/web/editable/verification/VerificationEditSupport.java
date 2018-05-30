@@ -8,14 +8,14 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.util.StringUtils;
 
-import io.onedev.server.util.editable.EditableUtils;
-import io.onedev.server.util.editable.annotation.VerificationChoice;
 import io.onedev.server.web.editable.EditSupport;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.annotation.VerificationChoice;
 
 @SuppressWarnings("serial")
 public class VerificationEditSupport implements EditSupport {

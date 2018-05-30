@@ -5,9 +5,9 @@ import java.io.Serializable;
 import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.server.git.command.GitCommand;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
+import io.onedev.server.web.editable.annotation.Editable;
 
 /**
  * Git relevant settings.

@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -16,7 +17,6 @@ import com.google.common.collect.Lists;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.support.authorized.ProjectWriters;
 import io.onedev.server.model.support.issue.workflow.action.PressButton;
-import io.onedev.server.util.UsageUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
@@ -39,10 +39,6 @@ public class IssueWorkflow implements Serializable {
 	
 	private List<InputSpec> fieldSpecs = new ArrayList<>();
 
-	private Map<String, String> savedQueries = new LinkedHashMap<>();
-	
-	private List<String> listFields = new ArrayList<>();
-	
 	private boolean reconciled = true;
 	
 	private transient Map<String, InputSpec> fieldSpecMap;
@@ -174,19 +170,6 @@ public class IssueWorkflow implements Serializable {
 		transition.setOnAction(pressButton);
 		
 		transitionSpecs.add(transition);
-		
-		listFields.add("Type");
-		listFields.add("Priority");
-		listFields.add("Assignee");
-		
-		savedQueries.put("All", "all");
-		savedQueries.put("Outstanding", "\"State\" is not \"Closed\"");
-		savedQueries.put("Closed", "\"State\" is \"Closed\"");
-		savedQueries.put("Added recently", "\"Submit Date\" is after \"one week ago\"");
-		savedQueries.put("Updated recently", "\"Update Date\" is after \"one week ago\"");
-		savedQueries.put("Submitted by me", "\"Submitter\" is me");
-		savedQueries.put("Assigned to me", "\"Assignee\" is me");
-		savedQueries.put("Hight Priority", "\"Priority\" is \"High\"");
 	}
 	
 	public List<StateSpec> getStateSpecs() {
@@ -211,22 +194,6 @@ public class IssueWorkflow implements Serializable {
 
 	public void setFieldSpecs(List<InputSpec> fieldSpecs) {
 		this.fieldSpecs = fieldSpecs;
-	}
-
-	public Map<String, String> getSavedQueries() {
-		return savedQueries;
-	}
-
-	public void setSavedQueries(Map<String, String> savedQueries) {
-		this.savedQueries = savedQueries;
-	}
-
-	public List<String> getListFields() {
-		return listFields;
-	}
-
-	public void setListFields(List<String> listFields) {
-		this.listFields = listFields;
 	}
 
 	public boolean isReconciled() {
@@ -259,14 +226,13 @@ public class IssueWorkflow implements Serializable {
 		return new ArrayList<>(getFieldSpecMap().keySet());
 	}
 	
-	public List<String> onDeleteState(String stateName) {
+	public void onDeleteState(String stateName) {
 		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
 			TransitionSpec transition = it.next();
 			transition.getFromStates().remove(stateName);
 			if (transition.getFromStates().isEmpty() || transition.getToState().equals(stateName))
 				it.remove();
 		}
-		return new ArrayList<>();
 	}
 	
 	public void onRenameState(String oldName, String newName) {
@@ -319,22 +285,27 @@ public class IssueWorkflow implements Serializable {
 		for (TransitionSpec transition: getTransitionSpecs())
 			transition.onFieldRename(oldName, newName);
 		for (InputSpec field: getFieldSpecs())
-			field.onInputRename(oldName, newName);
-		int index = getListFields().indexOf(oldName);
-		if (index != -1)
-			getListFields().set(index, newName);
+			field.onRenameInput(oldName, newName);
 	}
 	
-	public List<String> onDeleteField(String fieldName) {
-		List<String> usages = new ArrayList<>();
+	public void onDeleteField(String fieldName) {
 		for (StateSpec state: getStateSpecs())  
-			usages.addAll(UsageUtils.prependCategory("Issue state '" + state.getName() + "'", state.onFieldDelete(fieldName)));
-		for (TransitionSpec transition: getTransitionSpecs()) 
-			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onFieldDelete(fieldName)));
-		for (InputSpec field: getFieldSpecs())
-			usages.addAll(UsageUtils.prependCategory("Issue field '" + field.getName() + "'", field.onInputDelete(fieldName)));
-		getListFields().remove(fieldName);
-		return usages;
+			state.onFieldDelete(fieldName);
+		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) { 
+			if (it.next().onFieldDelete(fieldName))
+				it.remove();
+		}
+		
+		Set<String> deletedFields = new HashSet<>();
+		for (Iterator<InputSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
+			InputSpec field = it.next();
+			if (field.onDeleteInput(fieldName)) {
+				it.remove();
+				deletedFields.add(field.getName());
+			}
+		}
+		for (String deletedField: deletedFields)
+			onDeleteField(deletedField);
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
@@ -344,13 +315,23 @@ public class IssueWorkflow implements Serializable {
 			field.onRenameUser(oldName, newName);
 	}
 	
-	public List<String> onDeleteUser(String userName) {
-		List<String> usages = new ArrayList<>();
-		for (InputSpec field: getFieldSpecs())
-			usages.addAll(UsageUtils.prependCategory("Issue field '" + field.getName() + "'" , field.onDeleteUser(userName)));
-		for (TransitionSpec transition: getTransitionSpecs())
-			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onDeleteUser(userName)));
-		return usages;
+	public void onDeleteUser(String userName) {
+		Set<String> deletedFields = new HashSet<>();
+		for (Iterator<InputSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
+			InputSpec field = it.next();
+			if (field.onDeleteUser(userName)) {
+				it.remove();
+				deletedFields.add(field.getName());
+			}
+		}
+		for (String deletedField: deletedFields)
+			onDeleteField(deletedField);
+		
+		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
+			TransitionSpec transition = it.next();
+			if (transition.onDeleteUser(userName))
+				it.remove();
+		}
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
@@ -360,13 +341,23 @@ public class IssueWorkflow implements Serializable {
 			field.onRenameGroup(oldName, newName);
 	}
 	
-	public List<String> onDeleteGroup(String groupName) {
-		List<String> usages = new ArrayList<>();
-		for (InputSpec field: getFieldSpecs()) 
-			usages.addAll(UsageUtils.prependCategory("Issue field '"  + field.getName() + "'", field.onDeleteGroup(groupName)));
-		for (TransitionSpec transition: getTransitionSpecs())
-			usages.addAll(UsageUtils.prependCategory("Issue state transition '" + transition + "'", transition.onDeleteGroup(groupName)));
-		return usages;
+	public void onDeleteGroup(String groupName) {
+		Set<String> deletedFields = new HashSet<>();
+		for (Iterator<InputSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
+			InputSpec field = it.next();
+			if (field.onDeleteGroup(groupName)) {
+				it.remove();
+				deletedFields.add(field.getName());
+			}
+		}
+		for (String deletedField: deletedFields)
+			onDeleteField(deletedField);
+		
+		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
+			TransitionSpec transition = it.next();
+			if (transition.onDeleteGroup(groupName))
+				it.remove();
+		}
 	}
 	
 	public StateSpec getInitialStateSpec() {

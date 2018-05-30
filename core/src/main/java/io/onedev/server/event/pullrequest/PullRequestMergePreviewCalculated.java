@@ -4,7 +4,7 @@ import java.util.Date;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="merge preview calculated")
 public class PullRequestMergePreviewCalculated extends PullRequestEvent {

@@ -57,4 +57,9 @@ public class StringFieldCriteria extends FieldCriteria {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + quote(value);
+	}
+
 }

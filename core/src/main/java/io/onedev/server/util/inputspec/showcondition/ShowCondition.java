@@ -11,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 public class ShowCondition implements Serializable {

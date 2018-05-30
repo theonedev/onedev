@@ -5,8 +5,8 @@ import java.util.List;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.CacheManager;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.facade.GroupFacade;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=100, name="All groups")
 public class AllGroups implements ChoiceProvider {

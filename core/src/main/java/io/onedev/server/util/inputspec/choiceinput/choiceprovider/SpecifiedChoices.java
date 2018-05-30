@@ -7,8 +7,8 @@ import java.util.Map;
 
 import javax.validation.constraints.Size;
 
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=100, name="Use specified choices")
 public class SpecifiedChoices extends ChoiceProvider {

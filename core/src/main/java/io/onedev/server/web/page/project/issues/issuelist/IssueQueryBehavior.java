@@ -18,6 +18,7 @@ import io.onedev.codeassist.InputSuggestion;
 import io.onedev.codeassist.ParentedElement;
 import io.onedev.codeassist.grammar.ElementSpec;
 import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
+import io.onedev.codeassist.grammar.LiteralElementSpec;
 import io.onedev.codeassist.grammar.RuleRefElementSpec;
 import io.onedev.codeassist.parser.Element;
 import io.onedev.server.OneDev;
@@ -216,6 +217,14 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		return null;
 	}
 	
+	@Override
+	protected List<String> getHints(ParentedElement expectedElement, String matchWith) {
+		List<String> hints = super.getHints(expectedElement, matchWith);
+		if (expectedElement.getSpec() instanceof LiteralElementSpec) 
+			hints.add("Input text without space to match options");
+		return hints;
+	}
+
 	@Override
 	protected Optional<String> describe(ParentedElement expectedElement, String suggestedLiteral) {
 		if (suggestedLiteral.equals("mine")) {

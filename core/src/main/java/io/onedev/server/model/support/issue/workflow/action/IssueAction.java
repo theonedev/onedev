@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 public interface IssueAction extends Serializable {

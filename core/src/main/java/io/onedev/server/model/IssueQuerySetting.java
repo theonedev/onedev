@@ -1,7 +1,9 @@
 package io.onedev.server.model;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +13,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import io.onedev.server.model.support.issue.NamedQuery;
 
 @Entity
 @Table(
@@ -31,7 +35,7 @@ public class IssueQuerySetting extends AbstractEntity {
 
 	@Lob
 	@Column(nullable=false, length=65535)
-	private LinkedHashMap<String, String> userQueries = new LinkedHashMap<>();
+	private ArrayList<NamedQuery> userQueries = new ArrayList<>();
 
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -56,12 +60,21 @@ public class IssueQuerySetting extends AbstractEntity {
 		this.user = user;
 	}
 
-	public LinkedHashMap<String, String> getUserQueries() {
+	public ArrayList<NamedQuery> getUserQueries() {
 		return userQueries;
 	}
 
-	public void setUserQueries(LinkedHashMap<String, String> userQueries) {
+	public void setUserQueries(ArrayList<NamedQuery> userQueries) {
 		this.userQueries = userQueries;
+	}
+	
+	@Nullable
+	public NamedQuery getUserQuery(String name) {
+		for (NamedQuery namedQuery: getUserQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
 	}
 
 	public LinkedHashMap<String, Boolean> getUserQueryWatches() {

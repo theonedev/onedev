@@ -23,17 +23,17 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.launcher.loader.ImplementationRegistry;
-import io.onedev.server.util.editable.EditableUtils;
-import io.onedev.server.util.editable.annotation.Horizontal;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.util.editable.annotation.Vertical;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.Vertical;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {

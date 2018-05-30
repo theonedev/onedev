@@ -29,14 +29,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.google.common.collect.Lists;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.annotation.Editable;
 
 /**
  * @author robin
@@ -337,6 +340,9 @@ public class Issue extends AbstractEntity implements Referenceable {
 						if (unary.getValue() != null)
 							values.add(unary.getValue());
 					}
+					Collections.sort(values);
+					if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
+						values = Lists.newArrayList(values.iterator().next());
 					effectiveFields.put(fieldName, new IssueField(fieldName, type, values));
 				}
 			}

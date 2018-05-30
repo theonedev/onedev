@@ -51,4 +51,9 @@ public class FieldUnaryCriteria extends FieldCriteria {
 		return operator == IssueQueryLexer.IsMe || operator == IssueQueryLexer.IsNotMe;
 	}
 
+	@Override
+	public String toString() {
+		return quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator);
+	}
+
 }

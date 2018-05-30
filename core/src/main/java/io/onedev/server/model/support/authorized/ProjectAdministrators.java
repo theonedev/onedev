@@ -4,7 +4,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=400, name="Project administrators")
 public class ProjectAdministrators implements Authorized {

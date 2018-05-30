@@ -6,9 +6,10 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.manager.IssueQuerySettingManager;
+import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.IssueQuerySetting;
+import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -35,8 +36,10 @@ public class DefaultIssueQuerySettingManager extends AbstractEntityManager<Issue
 	@Transactional
 	@Override
 	public void save(IssueQuerySetting setting) {
-		setting.getUserQueryWatches().keySet().retainAll(setting.getUserQueries().keySet());
-		setting.getProjectQueryWatches().keySet().retainAll(setting.getProject().getIssueWorkflow().getSavedQueries().keySet());
+		for (NamedQuery namedQuery: setting.getUserQueries()) 
+			setting.getUserQueryWatches().remove(namedQuery.getName());
+		for (NamedQuery namedQuery: setting.getProject().getSavedIssueQueries())
+			setting.getProjectQueryWatches().remove(namedQuery.getName());
 		if (setting.getProjectQueryWatches().isEmpty() && setting.getUserQueries().isEmpty()) {
 			if (!setting.isNew())
 				delete(setting);

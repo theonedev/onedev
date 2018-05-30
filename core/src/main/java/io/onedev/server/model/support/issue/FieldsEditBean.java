@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.WicketUtils;
 

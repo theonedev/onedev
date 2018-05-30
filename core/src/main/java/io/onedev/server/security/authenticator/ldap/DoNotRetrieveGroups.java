@@ -1,6 +1,6 @@
 package io.onedev.server.security.authenticator.ldap;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=100)
 public class DoNotRetrieveGroups implements GroupRetrieval {

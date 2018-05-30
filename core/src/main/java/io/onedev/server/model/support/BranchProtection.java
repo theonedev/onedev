@@ -2,6 +2,7 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,11 +19,11 @@ import io.onedev.server.model.support.ifsubmittedby.Anyone;
 import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedGroup;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
-import io.onedev.server.util.editable.annotation.BranchPattern;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.ReviewRequirementSpec;
-import io.onedev.server.util.editable.annotation.VerificationChoice;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.web.editable.annotation.BranchPattern;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
+import io.onedev.server.web.editable.annotation.VerificationChoice;
 import io.onedev.utils.PathUtils;
 
 @Editable
@@ -204,31 +205,33 @@ public class BranchProtection implements Serializable {
 		}
 	}
 	
-	public List<String> onDeleteGroup(String groupName) {
-		List<String> usages = new ArrayList<>();
+	public boolean onDeleteGroup(String groupName) {
 		if (getSubmitter() instanceof SpecifiedGroup) {
 			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
 			if (specifiedGroup.getGroupName().equals(groupName))
-				usages.add("If Submitted By");
+				return true;
 		}
 		
 		ReviewRequirement reviewRequirement = getReviewRequirement();
 		if (reviewRequirement != null) {
 			for (Group group: reviewRequirement.getGroups().keySet()) {
 				if (group.getName().equals(groupName))
-					usages.add("Review Requirement");
+					return true;
 			}
 		}
 		
-		for (FileProtection fileProtection: getFileProtections()) {
-			reviewRequirement = fileProtection.getReviewRequirement();
+		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
+			FileProtection protection = it.next();
+			reviewRequirement = protection.getReviewRequirement();
 			for (Group group: reviewRequirement.getGroups().keySet()) {
-				if (group.getName().equals(groupName))
-					usages.add("File protection '" + fileProtection.getPath() + "': Review Requirement");
+				if (group.getName().equals(groupName)) {
+					it.remove();
+					break;
+				}
 			}
 		}
 		
-		return usages;
+		return false;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
@@ -259,30 +262,32 @@ public class BranchProtection implements Serializable {
 		}	
 	}
 	
-	public List<String> onDeleteUser(String userName) {
-		List<String> usages = new ArrayList<>();
+	public boolean onDeleteUser(String userName) {
 		if (getSubmitter() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(userName))
-				usages.add("If Submitted By");
+				return true;
 		}
 		
 		ReviewRequirement reviewRequirement = getReviewRequirement();
 		if (reviewRequirement != null) {
 			for (User user: reviewRequirement.getUsers()) {
 				if (user.getName().equals(userName))
-					usages.add("Required Reviewers");
+					return true;
 			}
 		}
 		
-		for (FileProtection fileProtection: getFileProtections()) {
-			reviewRequirement = fileProtection.getReviewRequirement();
+		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
+			FileProtection protection = it.next();
+			reviewRequirement = protection.getReviewRequirement();
 			for (User user: reviewRequirement.getUsers()) {
-				if (user.getName().equals(userName))
-					usages.add("File protection '" + fileProtection.getPath() + "': Review Requirement");
+				if (user.getName().equals(userName)) {
+					it.remove();
+					break;
+				}
 			}
 		}
-		return usages;
+		return false;
 	}
 	
 	public boolean onBranchDeleted(String branchName) {

@@ -16,7 +16,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.ComponentContext;
 
 @SuppressWarnings("serial")

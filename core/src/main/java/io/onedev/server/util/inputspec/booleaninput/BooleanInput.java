@@ -7,10 +7,10 @@ import javax.validation.constraints.NotNull;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.booleaninput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.booleaninput.defaultvalueprovider.FalseDefaultValue;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=300, name=InputSpec.BOOLEAN)
 public class BooleanInput extends InputSpec {

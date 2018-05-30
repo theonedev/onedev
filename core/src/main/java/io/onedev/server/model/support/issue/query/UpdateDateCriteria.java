@@ -15,9 +15,12 @@ public class UpdateDateCriteria extends IssueCriteria {
 	
 	private final Date value;
 	
-	public UpdateDateCriteria(Date value, int operator) {
+	private final String rawValue;
+	
+	public UpdateDateCriteria(Date value, String rawValue, int operator) {
 		this.operator = operator;
 		this.value = value;
+		this.rawValue = rawValue;
 	}
 
 	@Override
@@ -40,6 +43,11 @@ public class UpdateDateCriteria extends IssueCriteria {
 	@Override
 	public boolean needsLogin() {
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return quote(Issue.UPDATE_DATE) + " " + IssueQuery.getOperatorName(operator) + " " + quote(rawValue);
 	}
 
 }

@@ -12,8 +12,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 

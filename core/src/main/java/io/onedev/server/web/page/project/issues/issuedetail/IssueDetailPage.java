@@ -449,7 +449,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				@Override
 				public void onClick() {
-					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery());
+					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true);
 					int count = position.getCount();
 					int offset = position.getOffset() - 1;
 					List<Issue> issues = getIssueManager().query(query, offset, 1);
@@ -482,7 +482,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				@Override
 				public void onClick() {
-					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery());
+					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true);
 					int offset = position.getOffset();
 					int count = position.getCount();
 					if (query.getCriteria().matches(getIssue())) 

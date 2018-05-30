@@ -2,8 +2,14 @@ package io.onedev.server.model.support.issue.query;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -142,7 +148,7 @@ public class IssueQuery implements Serializable {
 			throw new OneException("Invalid boolean: " + value);
 	}
 	
-	public static IssueQuery parse(Project project, @Nullable String queryString) {
+	public static IssueQuery parse(Project project, @Nullable String queryString, boolean validate) {
 		if (queryString != null) {
 			ANTLRInputStream is = new ANTLRInputStream(queryString); 
 			IssueQueryLexer lexer = new IssueQueryLexer(is);
@@ -198,7 +204,7 @@ public class IssueQuery implements Serializable {
 							
 						});
 						try {
-							List<String> choices = new ArrayList<>(((ChoiceInput)field).getChoiceProvider().getChoices(true).keySet());
+							List<String> choices = new ArrayList<>(field.getChoiceProvider().getChoices(true).keySet());
 							return choices.indexOf(value);
 						} finally {
 							OneContext.pop();
@@ -232,7 +238,8 @@ public class IssueQuery implements Serializable {
 					public IssueCriteria visitUnaryCriteria(UnaryCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted().getText());
 						int operator = ctx.operator.getType();
-						checkField(project, fieldName, operator);
+						if (validate)
+							checkField(project, fieldName, operator);
 						if (fieldName.equals(Issue.SUBMITTER))
 							return new SubmitterUnaryCriteria(operator);
 						else
@@ -249,7 +256,8 @@ public class IssueQuery implements Serializable {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
-						checkField(project, fieldName, operator);
+						if (validate)
+							checkField(project, fieldName, operator);
 						
 						switch (operator) {
 						case IssueQueryLexer.IsBefore:
@@ -258,11 +266,11 @@ public class IssueQuery implements Serializable {
 							if (dateValue == null)
 								throw new OneException("Unrecognized date: " + value);
 							if (fieldName.equals(Issue.SUBMIT_DATE)) 
-								return new SubmitDateCriteria(dateValue, operator);
+								return new SubmitDateCriteria(dateValue, value, operator);
 							else if (fieldName.equals(Issue.UPDATE_DATE))
-								return new UpdateDateCriteria(dateValue, operator);
+								return new UpdateDateCriteria(dateValue, value, operator);
 							else 
-								return new DateFieldCriteria(fieldName, dateValue, operator);
+								return new DateFieldCriteria(fieldName, dateValue, value, operator);
 						case IssueQueryLexer.Contains:
 						case IssueQueryLexer.DoesNotContain:
 							if (fieldName.equals(Issue.TITLE)) {
@@ -270,11 +278,17 @@ public class IssueQuery implements Serializable {
 							} else if (fieldName.equals(Issue.DESCRIPTION)) {
 								return new DescriptionCriteria(value, operator);
 							} else {
-								InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
-								if (fieldSpec instanceof TextInput) 
+								if (validate) {
+									InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+									if (fieldSpec instanceof TextInput) {
+										return new StringFieldCriteria(fieldName, value, operator);
+									} else {
+										long ordinal = getValueOrdinal((ChoiceInput) fieldSpec, value);
+										return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, true);
+									}
+								} else {
 									return new StringFieldCriteria(fieldName, value, operator);
-								else 
-									return new MultiChoiceFieldCriteria(fieldName, value, operator);
+								}
 							}
 						case IssueQueryLexer.Is:
 						case IssueQueryLexer.IsNot:
@@ -304,10 +318,10 @@ public class IssueQuery implements Serializable {
 									return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
 								} else if (field instanceof ChoiceInput) { 
 									long ordinal = getValueOrdinal((ChoiceInput) field, value);
-									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator);
+									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
 								} else if (field instanceof UserChoiceInput 
 										|| field instanceof GroupChoiceInput) {
-									return new ChoiceFieldCriteria(fieldName, value, -1, operator);
+									return new ChoiceFieldCriteria(fieldName, value, -1, operator, false);
 								} else {
 									return new StringFieldCriteria(fieldName, value, operator);
 								}
@@ -321,11 +335,17 @@ public class IssueQuery implements Serializable {
 							} else if (fieldName.equals(Issue.NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
-								InputSpec field = project.getIssueWorkflow().getFieldSpec(fieldName);
-								if (field instanceof NumberInput)
-									return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
-								else
-									return new ChoiceFieldCriteria(fieldName, value, getValueOrdinal((ChoiceInput) field, value), operator);
+								if (validate) {
+									InputSpec field = project.getIssueWorkflow().getFieldSpec(fieldName);
+									if (field instanceof NumberInput) {
+										return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
+									} else {
+										long ordinal = getValueOrdinal((ChoiceInput) field, value);
+										return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
+									}
+								} else {
+									return new NumberFieldCriteria(fieldName, 0, operator);
+								}
 							}
 						default:
 							throw new OneException("Unexpected operator " + getOperatorName(operator));
@@ -356,8 +376,11 @@ public class IssueQuery implements Serializable {
 			List<IssueSort> issueSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!fieldName.equals(Issue.SUBMIT_DATE) && !fieldName.equals(Issue.UPDATE_DATE) 
-						&& !fieldName.equals(Issue.VOTES) && !fieldName.equals(Issue.COMMENTS) 
+				if (validate 
+						&& !fieldName.equals(Issue.SUBMIT_DATE) 
+						&& !fieldName.equals(Issue.UPDATE_DATE) 
+						&& !fieldName.equals(Issue.VOTES) 
+						&& !fieldName.equals(Issue.COMMENTS) 
 						&& !fieldName.equals(Issue.NUMBER)) {
 					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
 					if (!(fieldSpec instanceof ChoiceInput) && !(fieldSpec instanceof DateInput) 
@@ -410,7 +433,7 @@ public class IssueQuery implements Serializable {
 			if (!fieldName.equals(Issue.TITLE) 
 					&& !fieldName.equals(Issue.DESCRIPTION)
 					&& !(fieldSpec instanceof TextInput) 
-					&& !fieldSpec.isAllowMultiple()) {
+					&& !(fieldSpec != null && fieldSpec.isAllowMultiple())) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -463,4 +486,80 @@ public class IssueQuery implements Serializable {
 		}
 		throw new OneException("Unable to find operator: " + operatorName);
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		if (criteria != null) 
+			builder.append(criteria.toString()).append(" ");
+		else
+			builder.append("all");
+		if (!sorts.isEmpty()) {
+			builder.append("order by ");
+			for (IssueSort sort: sorts)
+				builder.append(sort.toString()).append(" ");
+		}
+		return builder.toString().trim();
+	}
+	
+	public Collection<String> getUndefinedStates(Project project) {
+		if (criteria != null) 
+			return criteria.getUndefinedStates(project);
+		else
+			return new ArrayList<>();
+	}
+	
+	public void onRenameState(String oldState, String newState) {
+		if (criteria != null)
+			criteria.onRenameState(oldState, newState);
+	}
+
+	public Collection<String> getUndefinedFields(Project project) {
+		Set<String> undefinedFields = new HashSet<>();
+		if (criteria != null)
+			undefinedFields.addAll(criteria.getUndefinedFields(project));
+		for (IssueSort sort: sorts) {
+			if (!Issue.BUILTIN_FIELDS.containsKey(sort.getField()) 
+					&& project.getIssueWorkflow().getFieldSpec(sort.getField()) == null) {
+				undefinedFields.add(sort.getField());
+			}
+		}
+		return undefinedFields;
+	}
+
+	public void onRenameField(String oldField, String newField) {
+		if (criteria != null)
+			criteria.onRenameField(oldField, newField);
+		for (IssueSort sort: sorts) {
+			if (sort.getField().equals(oldField))
+				sort.setField(newField);
+		}
+	}
+
+	public boolean onDeleteField(String fieldName) {
+		if (criteria != null && criteria.onDeleteField(fieldName))
+			return true;
+		for (Iterator<IssueSort> it = sorts.iterator(); it.hasNext();) {
+			if (it.next().getField().equals(fieldName))
+				it.remove();
+		}
+		return false;
+	}
+	
+	public Map<String, String> getUndefinedFieldValues(Project project) {
+		if (criteria != null)
+			return criteria.getUndefinedFieldValues(project);
+		else
+			return new HashMap<>();
+	}
+
+	public void onRenameFieldValue(String fieldName, String oldValue, String newValue) {
+		if (criteria != null)
+			criteria.onRenameFieldValue(fieldName, oldValue, newValue);
+	}
+	
+	public boolean onDeleteFieldValue(String fieldName, String fieldValue) {
+		return criteria != null && criteria.onDeleteFieldValue(fieldName, fieldValue);
+	}
+	
 }

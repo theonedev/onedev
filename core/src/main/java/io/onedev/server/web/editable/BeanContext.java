@@ -10,7 +10,7 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")

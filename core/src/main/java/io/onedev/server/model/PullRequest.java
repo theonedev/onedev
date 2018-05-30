@@ -56,8 +56,8 @@ import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.QualityCheckStatus;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.jackson.RestView;
+import io.onedev.server.web.editable.EditableUtils;
 
 @Entity
 /*

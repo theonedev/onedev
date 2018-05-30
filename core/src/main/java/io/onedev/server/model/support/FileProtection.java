@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.PathPattern;
-import io.onedev.server.util.editable.annotation.ReviewRequirementSpec;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.PathPattern;
+import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
 
 @Editable
 public class FileProtection implements Serializable {

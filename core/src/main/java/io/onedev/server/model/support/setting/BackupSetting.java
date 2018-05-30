@@ -8,10 +8,10 @@ import javax.validation.ConstraintValidatorContext;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.quartz.CronExpression;
 
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.util.validation.annotation.Directory;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 @ClassValidating

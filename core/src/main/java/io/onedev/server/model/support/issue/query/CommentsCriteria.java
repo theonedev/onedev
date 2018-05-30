@@ -48,4 +48,9 @@ public class CommentsCriteria extends IssueCriteria {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return quote(Issue.COMMENTS) + " " + IssueQuery.getOperatorName(operator) + " " + quote(String.valueOf(value));
+	}
+
 }

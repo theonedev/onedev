@@ -4,7 +4,7 @@ import java.util.Date;
 
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="there are new commits")
 public class PullRequestUpdated extends PullRequestEvent {

@@ -32,6 +32,7 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ComponentRenderer;
@@ -67,6 +68,15 @@ public abstract class ProjectPage extends LayoutPage {
 	private static final String PARAM_PROJECT = "project";
 	
 	protected final IModel<Project> projectModel;
+	
+	protected final IModel<IssueQuerySetting> issueQuerySettingModel = new LoadableDetachableModel<IssueQuerySetting>() {
+
+		@Override
+		protected IssueQuerySetting load() {
+			return OneDev.getInstance(IssueQuerySettingManager.class).find(getProject(), getLoginUser());
+		}
+		
+	};
 	
 	public static PageParameters paramsOf(Project project) {
 		PageParameters params = new PageParameters();
@@ -158,14 +168,17 @@ public abstract class ProjectPage extends LayoutPage {
 								String query = null;
 								List<String> queries = new ArrayList<>();
 								if (getLoginUser() != null) {
-									IssueQuerySetting setting = OneDev.getInstance(IssueQuerySettingManager.class).find(getProject(), getLoginUser());
-									if (setting != null)
-										queries.addAll(setting.getUserQueries().values());
+									IssueQuerySetting setting = getIssueQuerySetting();
+									if (setting != null) {
+										for (NamedQuery namedQuery: setting.getUserQueries())
+											queries.add(namedQuery.getQuery());
+									}
 								}
-								queries.addAll(getProject().getIssueWorkflow().getSavedQueries().values());
+								for (NamedQuery namedQuery: getProject().getSavedIssueQueries())
+									queries.add(namedQuery.getQuery());
 								for (String each: queries) {
 									try {
-										if (getLoginUser() != null || !IssueQuery.parse(getProject(), each).needsLogin()) {  
+										if (getLoginUser() != null || !IssueQuery.parse(getProject(), each, true).needsLogin()) {  
 											query = each;
 											break;
 										}
@@ -214,9 +227,14 @@ public abstract class ProjectPage extends LayoutPage {
 		return projectModel.getObject();
 	}
 	
+	protected IssueQuerySetting getIssueQuerySetting() {
+		return issueQuerySettingModel.getObject();
+	}
+	
 	@Override
 	protected void onDetach() {
 		projectModel.detach();
+		issueQuerySettingModel.detach();
 		super.onDetach();
 	}
 

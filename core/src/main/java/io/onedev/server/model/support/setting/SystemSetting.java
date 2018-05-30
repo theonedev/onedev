@@ -13,10 +13,10 @@ import io.onedev.server.git.config.CurlConfig;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.git.config.SystemCurl;
 import io.onedev.server.git.config.SystemGit;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.util.validation.annotation.Directory;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 @ClassValidating

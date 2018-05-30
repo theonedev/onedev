@@ -2,7 +2,7 @@ package io.onedev.server.model.support.issue.workflow.transitionprerequisite;
 
 import java.io.Serializable;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 public interface ValueMatcher extends Serializable {

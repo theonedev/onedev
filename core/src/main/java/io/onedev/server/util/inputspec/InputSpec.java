@@ -1,7 +1,6 @@
 package io.onedev.server.util.inputspec;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +17,10 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.validation.annotation.InputName;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public abstract class InputSpec implements Serializable {
@@ -110,7 +109,7 @@ public abstract class InputSpec implements Serializable {
 	}
 	
 	@Editable(order=60)
-	@io.onedev.server.util.editable.annotation.ShowCondition("isNameOfEmptyValueVisible")
+	@io.onedev.server.web.editable.annotation.ShowCondition("isNameOfEmptyValueVisible")
 	@NotEmpty
 	public String getNameOfEmptyValue() {
 		return nameOfEmptyValue;
@@ -216,16 +215,13 @@ public abstract class InputSpec implements Serializable {
 		}
 	}
 	
-	public void onInputRename(String oldName, String newName) {
+	public void onRenameInput(String oldName, String newName) {
 		if (showCondition != null && oldName.equals(showCondition.getInputName()))
 			showCondition.setInputName(newName);
 	}
 	
-	public List<String> onInputDelete(String inputName) {
-		if (showCondition != null && inputName.equals(showCondition.getInputName()))
-			return Lists.newArrayList("Show Condition");
-		else
-			return new ArrayList<>();
+	public boolean onDeleteInput(String inputName) {
+		return showCondition != null && inputName.equals(showCondition.getInputName());
 	}
 	
 	public static Class<?> defineClass(String className, List<InputSpec> inputs) {
@@ -267,12 +263,12 @@ public abstract class InputSpec implements Serializable {
 		
 	}
 
-	public List<String> onDeleteUser(String userName) {
-		return new ArrayList<>();
+	public boolean onDeleteUser(String userName) {
+		return false;
 	}
 	
-	public List<String> onDeleteGroup(String groupName) {
-		return new ArrayList<>();
+	public boolean onDeleteGroup(String groupName) {
+		return false;
 	}
 	
 	public abstract List<String> convertToStrings(Object object);

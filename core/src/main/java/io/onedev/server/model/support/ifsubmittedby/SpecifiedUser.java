@@ -8,9 +8,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.OmitName;
-import io.onedev.server.util.editable.annotation.UserChoice;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.UserChoice;
 
 @Editable(order=200, name="User")
 public class SpecifiedUser implements IfSubmittedBy {

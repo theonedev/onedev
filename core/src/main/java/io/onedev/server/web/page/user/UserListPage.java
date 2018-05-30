@@ -29,7 +29,6 @@ import org.hibernate.criterion.Restrictions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -147,12 +146,8 @@ public class UserListPage extends LayoutPage {
 
 					@Override
 					public void onClick() {
-						try {
-							OneDev.getInstance(UserManager.class).delete(rowModel.getObject());
-							setResponsePage(UserListPage.class);
-						} catch (InUseException e) {
-							usersTable.error(e.getNotificationMessage()	);
-						}
+						OneDev.getInstance(UserManager.class).delete(rowModel.getObject());
+						setResponsePage(UserListPage.class);
 					}
 
 					@Override

@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=100, name="has value of")
 public class ValueIsOneOf implements ValueMatcher {

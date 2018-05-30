@@ -80,13 +80,14 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.Markdown;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.validation.annotation.ProjectName;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.LockUtils;
 import io.onedev.utils.PathUtils;
@@ -177,7 +178,15 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private IssueWorkflow issueWorkflow = new IssueWorkflow();
+	
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedQuery> savedIssueQueries = new ArrayList<>();
 
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<String> issueListFields = new ArrayList<>();
+	
 	private transient Repository repository;
 	
     private transient Map<BlobIdent, Blob> blobCache;
@@ -191,6 +200,21 @@ public class Project extends AbstractEntity {
     private transient Optional<String> defaultBranchOptional;
     
     private transient Optional<RevCommit> lastCommitOptional;
+    
+    public Project() {
+		issueListFields.add("Type");
+		issueListFields.add("Priority");
+		issueListFields.add("Assignee");
+		
+		savedIssueQueries.add(new NamedQuery("All", "all"));
+		savedIssueQueries.add(new NamedQuery("Outstanding", "\"State\" is not \"Closed\""));
+		savedIssueQueries.add(new NamedQuery("Closed", "\"State\" is \"Closed\""));
+		savedIssueQueries.add(new NamedQuery("Added recently", "\"Submit Date\" is after \"one week ago\""));
+		savedIssueQueries.add(new NamedQuery("Updated recently", "\"Update Date\" is after \"one week ago\""));
+		savedIssueQueries.add(new NamedQuery("Submitted by me", "\"Submitter\" is me"));
+		savedIssueQueries.add(new NamedQuery("Assigned to me", "\"Assignee\" is me"));
+		savedIssueQueries.add(new NamedQuery("Hight Priority", "\"Priority\" is \"High\""));
+    }
     
 	@Editable(order=100)
 	@ProjectName
@@ -799,6 +823,31 @@ public class Project extends AbstractEntity {
 
 	public void setIssueWorkflow(IssueWorkflow issueWorkflow) {
 		this.issueWorkflow = issueWorkflow;
+	}
+
+	public ArrayList<NamedQuery> getSavedIssueQueries() {
+		return savedIssueQueries;
+	}
+
+	public void setSavedIssueQueries(ArrayList<NamedQuery> savedIssueQueries) {
+		this.savedIssueQueries = savedIssueQueries;
+	}
+	
+	@Nullable
+	public NamedQuery getSavedIssueQuery(String name) {
+		for (NamedQuery namedQuery: getSavedIssueQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+
+	public ArrayList<String> getIssueListFields() {
+		return issueListFields;
+	}
+
+	public void setIssueListFields(ArrayList<String> issueListFields) {
+		this.issueListFields = issueListFields;
 	}
 
 	public Collection<IssueQuerySetting> getIssueQuerySettings() {

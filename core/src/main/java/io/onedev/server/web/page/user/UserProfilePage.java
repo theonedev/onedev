@@ -13,7 +13,6 @@ import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -100,12 +99,8 @@ public class UserProfilePage extends UserPage {
 
 				@Override
 				public void onClick() {
-					try {
-						OneDev.getInstance(UserManager.class).delete(getUser());
-						setResponsePage(UserListPage.class);
-					} catch (InUseException e) {
-						form.error(e.getNotificationMessage());
-					}
+					OneDev.getInstance(UserManager.class).delete(getUser());
+					setResponsePage(UserListPage.class);
 				}
 				
 			}.add(new ConfirmOnClick("Do you really want to delete user '" + getUser().getDisplayName() + "'?")));

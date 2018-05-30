@@ -34,7 +34,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
-import io.onedev.server.util.UsageUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -259,18 +258,14 @@ public class IssueStatesPage extends IssueWorkflowPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						List<String> usages = getWorkflow().onDeleteState(getState().getName());
-						if (!usages.isEmpty()) {
-							fragment.error(UsageUtils.getNotificationMessage("State '" + getState().getName() + "'", usages));
-							target.add(fragment);
-						} else {
-							getWorkflow().getStateSpecs().remove(index);
-							getWorkflow().setReconciled(false);
-							getProject().setIssueWorkflow(getWorkflow());
-							OneDev.getInstance(ProjectManager.class).save(getProject());
-							target.add(statesTable);
-							close();
-						}
+						String stateName = getState().getName();
+						getWorkflow().getStateSpecs().remove(index);
+						getWorkflow().onDeleteState(stateName);
+						getWorkflow().setReconciled(false);
+						getProject().setIssueWorkflow(getWorkflow());
+						OneDev.getInstance(ProjectManager.class).save(getProject());
+						target.add(statesTable);
+						close();
 					}
 					
 				});

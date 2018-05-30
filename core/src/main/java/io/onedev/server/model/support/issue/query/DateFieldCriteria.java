@@ -14,11 +14,14 @@ public class DateFieldCriteria extends FieldCriteria {
 
 	private final Date value;
 	
+	private final String rawValue;
+	
 	private final int operator;
 	
-	public DateFieldCriteria(String name, Date value, int operator) {
+	public DateFieldCriteria(String name, Date value, String rawValue, int operator) {
 		super(name);
 		this.value = value;
+		this.rawValue = rawValue;
 		this.operator = operator;
 	}
 
@@ -43,6 +46,11 @@ public class DateFieldCriteria extends FieldCriteria {
 	@Override
 	public boolean needsLogin() {
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + quote(rawValue);
 	}
 
 }

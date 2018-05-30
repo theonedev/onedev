@@ -30,11 +30,11 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import io.onedev.launcher.loader.AppLoader;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.Password;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.UserName;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Password;
 
 @Entity
 @Table(indexes={@Index(columnList="email"), @Index(columnList="fullName")})

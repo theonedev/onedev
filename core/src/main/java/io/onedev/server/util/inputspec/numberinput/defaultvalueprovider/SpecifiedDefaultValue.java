@@ -1,7 +1,7 @@
 package io.onedev.server.util.inputspec.numberinput.defaultvalueprovider;
 
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {

@@ -1,6 +1,6 @@
 package io.onedev.server.util.inputspec.booleaninput.defaultvalueprovider;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=100, name="true")
 public class TrueDefaultValue implements DefaultValueProvider {

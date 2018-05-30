@@ -48,8 +48,8 @@ import io.onedev.server.model.Task;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.QualityCheckStatus;
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.markdown.MentionParser;
+import io.onedev.server.web.editable.EditableUtils;
 
 @Singleton
 public class DefaultPullRequestNotificationManager implements PullRequestNotificationManager {

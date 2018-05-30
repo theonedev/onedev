@@ -32,6 +32,7 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.markdown.MentionParser;
@@ -91,16 +92,16 @@ public class DefaultIssueNotificationManager implements IssueNotificationManager
 		builder.append("<img src='").append(ReadCallbackServlet.getUrl(callback)).append("' alt='read track'>");
 	}
 	
-	private boolean matches(Map<String, Optional<IssueQuery>> parsedQueries, Issue issue, @Nullable String query) {
-		if (query != null) {
-			Optional<IssueQuery> issueQuery = parsedQueries.get(query);
+	private boolean matches(Map<String, Optional<IssueQuery>> parsedQueries, Issue issue, @Nullable NamedQuery namedQuery) {
+		if (namedQuery != null) {
+			Optional<IssueQuery> issueQuery = parsedQueries.get(namedQuery.getQuery());
 			if (issueQuery == null) {
 				try {
-					issueQuery = Optional.of(IssueQuery.parse(issue.getProject(), query));
+					issueQuery = Optional.of(IssueQuery.parse(issue.getProject(), namedQuery.getQuery(), true));
 				} catch (Exception e) {
 					issueQuery = Optional.empty();
 				}
-				parsedQueries.put(query, issueQuery);
+				parsedQueries.put(namedQuery.getQuery(), issueQuery);
 			}
 			return issueQuery.isPresent() && issueQuery.get().matches(issue); 
 		} else {
@@ -125,7 +126,7 @@ public class DefaultIssueNotificationManager implements IssueNotificationManager
 		for (IssueQuerySetting setting: issue.getProject().getIssueQuerySettings()) {
 			boolean watched = false;
 			for (Map.Entry<String, Boolean> entry: setting.getUserQueryWatches().entrySet()) {
-				if (matches(parsedQueries, issue, setting.getUserQueries().get(entry.getKey()))) {
+				if (matches(parsedQueries, issue, setting.getUserQuery(entry.getKey()))) {
 					watch(issue, setting.getUser(), entry.getValue());
 					watched = true;
 					break;
@@ -133,7 +134,7 @@ public class DefaultIssueNotificationManager implements IssueNotificationManager
 			}
 			if (!watched) {
 				for (Map.Entry<String, Boolean> entry: setting.getProjectQueryWatches().entrySet()) {
-					if (matches(parsedQueries, issue, issue.getProject().getIssueWorkflow().getSavedQueries().get(entry.getKey()))) {
+					if (matches(parsedQueries, issue, issue.getProject().getSavedIssueQuery(entry.getKey()))) {
 						watch(issue, setting.getUser(), entry.getValue());
 						watched = true;
 						break;

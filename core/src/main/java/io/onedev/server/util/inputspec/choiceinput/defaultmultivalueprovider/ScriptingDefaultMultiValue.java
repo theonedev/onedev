@@ -5,10 +5,10 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.Multiline;
-import io.onedev.server.util.editable.annotation.OmitName;
-import io.onedev.server.util.editable.annotation.Script;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.Script;
 
 @Editable(order=400, name="Evaluate script to get default value")
 public class ScriptingDefaultMultiValue implements DefaultMultiValueProvider {

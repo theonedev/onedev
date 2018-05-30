@@ -6,10 +6,10 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.numberinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=400, name=InputSpec.NUMBER)
 public class NumberInput extends InputSpec {

@@ -9,11 +9,11 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import io.onedev.server.util.editable.EditableUtils;
-import io.onedev.server.util.editable.annotation.Horizontal;
-import io.onedev.server.util.editable.annotation.Vertical;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.Vertical;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyViewer extends Panel {

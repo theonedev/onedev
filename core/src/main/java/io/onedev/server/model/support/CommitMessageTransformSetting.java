@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 public class CommitMessageTransformSetting implements Serializable {

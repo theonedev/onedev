@@ -3,7 +3,7 @@ package io.onedev.server.util.inputspec.choiceinput.choiceprovider;
 import java.io.Serializable;
 import java.util.Map;
 
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 public abstract class ChoiceProvider implements Serializable {

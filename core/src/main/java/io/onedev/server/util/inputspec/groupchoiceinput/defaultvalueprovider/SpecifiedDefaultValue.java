@@ -10,11 +10,11 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.GroupChoice;
-import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=100, name="Specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {

@@ -6,13 +6,13 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.util.editable.annotation.FileChoice;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.annotation.FileChoice;
 
 @SuppressWarnings("serial")
 public class FileEditSupport implements EditSupport {

@@ -48,4 +48,9 @@ public class NumberCriteria extends IssueCriteria {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return quote(Issue.NUMBER) + " " + IssueQuery.getOperatorName(operator) + " " + quote(String.valueOf(value));
+	}
+
 }

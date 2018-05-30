@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.annotation.Editable;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=160, name=InputSpec.ISSUE_CHOICE)

@@ -9,9 +9,9 @@ import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.GroupChoice;
-import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=300, name="Group")
 public class SpecifiedGroup implements IfSubmittedBy {

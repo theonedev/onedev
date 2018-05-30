@@ -27,10 +27,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PathSegment.Property;

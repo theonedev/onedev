@@ -5,7 +5,7 @@ import java.util.Date;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="replied code comment")
 public class PullRequestCodeCommentReplied extends PullRequestCodeCommentEvent {

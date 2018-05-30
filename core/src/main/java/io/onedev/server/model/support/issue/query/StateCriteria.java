@@ -1,17 +1,22 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 
 public class StateCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String value;
+	private String value;
 	
-	private final int operator;
+	private int operator;
 	
 	public StateCriteria(String value, int operator) {
 		this.value = value;
@@ -38,6 +43,25 @@ public class StateCriteria extends IssueCriteria {
 	@Override
 	public boolean needsLogin() {
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return quote(Issue.STATE) + " " + IssueQuery.getOperatorName(operator) + " " + quote(value);
+	}
+
+	@Override
+	public Collection<String> getUndefinedStates(Project project) {
+		List<String> undefinedStates = new ArrayList<>();
+		if (project.getIssueWorkflow().getStateSpec(value) == null)
+			undefinedStates.add(value);
+		return undefinedStates;
+	}
+	
+	@Override
+	public void onRenameState(String oldState, String newState) {
+		if (value.equals(oldState))
+			value = newState;
 	}
 	
 }

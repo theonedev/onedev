@@ -8,8 +8,6 @@ import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
@@ -17,6 +15,8 @@ import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.GroupUsers
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ProjectReaders;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=150, name=InputSpec.USER_CHOICE)
@@ -90,14 +90,15 @@ public class UserChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public List<String> onDeleteUser(String userName) {
-		List<String> usages = super.onDeleteUser(userName);
+	public boolean onDeleteUser(String userName) {
+		if (super.onDeleteUser(userName))
+			return true;
 		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
 			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
 			if (specifiedDefaultValue.getValue().equals(userName))
-				usages.add("Default Value");
+				defaultValueProvider = null;
 		}
-		return usages;
+		return false;
 	}
 
 	@Override
@@ -110,14 +111,15 @@ public class UserChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public List<String> onDeleteGroup(String groupName) {
-		List<String> usages = super.onDeleteGroup(groupName);
+	public boolean onDeleteGroup(String groupName) {
+		if (super.onDeleteGroup(groupName))
+			return true;
 		if (choiceProvider instanceof GroupUsers) {
 			GroupUsers groupUsers = (GroupUsers) choiceProvider;
 			if (groupUsers.getGroupName().equals(groupName))
-				usages.add("Available Choices");
+				return true;
 		}
-		return usages;
+		return false;
 	}
 	
 	@Override

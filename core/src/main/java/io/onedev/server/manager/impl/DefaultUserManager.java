@@ -1,7 +1,6 @@
 package io.onedev.server.manager.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,7 +13,6 @@ import org.hibernate.query.Query;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.lifecycle.SystemStarted;
-import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.ProjectManager;
@@ -28,7 +26,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityPersisted;
-import io.onedev.server.util.UsageUtils;
 import io.onedev.utils.StringUtils;
 
 @Singleton
@@ -38,7 +35,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
     private final ProjectManager projectManager;
     
-    private final IssueFieldUnaryManager issueFieldManager;
+    private final IssueFieldUnaryManager issueFieldUnaryManager;
     
     private final CacheManager cacheManager;
     
@@ -46,13 +43,13 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, 
-    		IssueFieldUnaryManager issueFieldManager, CacheManager cacheManager, 
+    		IssueFieldUnaryManager issueFieldUnaryManager, CacheManager cacheManager, 
     		PasswordService passwordService, ListenerRegistry listenerRegistry) {
         super(dao);
         
         this.passwordService = passwordService;
         this.projectManager = projectManager;
-        this.issueFieldManager = issueFieldManager;
+        this.issueFieldUnaryManager = issueFieldUnaryManager;
         this.cacheManager = cacheManager;
         this.listenerRegistry = listenerRegistry;
     }
@@ -76,7 +73,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     			project.getIssueWorkflow().onRenameUser(oldName, user.getName());
     		}
     		
-    		issueFieldManager.onRenameUser(oldName, user.getName());
+    		issueFieldUnaryManager.onRenameUser(oldName, user.getName());
     	}
     }
     
@@ -166,17 +163,17 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	
 		dao.remove(user);
 
-		List<String> usages = new ArrayList<>();
 		for (Project project: projectManager.findAll()) {
-			for (BranchProtection protection: project.getBranchProtections()) 
-				usages.addAll(UsageUtils.prependCategory("Project '" + project.getName() + "' / Branch Protection", protection.onDeleteUser(user.getName())));
-			for (TagProtection protection: project.getTagProtections()) 
-				usages.addAll(UsageUtils.prependCategory("Project '" + project.getName() + "' / Tag Protection", protection.onDeleteUser(user.getName())));
-			usages.addAll(UsageUtils.prependCategory("Project '" + project.getName(), project.getIssueWorkflow().onDeleteUser(user.getName())));
+			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
+				if (it.next().onDeleteUser(user.getName()))
+					it.remove();
+			}
+			for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) { 
+				if (it.next().onDeleteUser(user.getName()))
+					it.remove();
+			}
+			project.getIssueWorkflow().onDeleteUser(user.getName());
 		}
-		
-		if (!usages.isEmpty())
-			throw new InUseException("User '" + user.getName() + "'", usages);
 	}
 
 	@Sessional

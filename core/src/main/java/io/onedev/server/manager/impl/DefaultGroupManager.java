@@ -1,12 +1,10 @@
 package io.onedev.server.manager.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.GroupManager;
@@ -21,7 +19,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.authenticator.Authenticator;
-import io.onedev.server.util.UsageUtils;
 
 @Singleton
 public class DefaultGroupManager extends AbstractEntityManager<Group> implements GroupManager {
@@ -70,24 +67,24 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	@Transactional
 	@Override
 	public void delete(Group group) {
-		List<String> usages = new ArrayList<>();
 		for (Project project: projectManager.findAll()) {
-			for (BranchProtection protection: project.getBranchProtections()) 
-				usages.addAll(UsageUtils.prependCategory("Project '" + project.getName() + "' / Setting / Branch Protection", protection.onDeleteGroup(group.getName())));
-			for (TagProtection protection: project.getTagProtections())   
-				usages.addAll(UsageUtils.prependCategory("Project '" + project.getName() + "' / Setting / Tag Protection", protection.onDeleteGroup(group.getName())));
-			usages.addAll(UsageUtils.prependCategory("Project '" + project.getName() + "' / Setting", project.getIssueWorkflow().onDeleteGroup(group.getName())));
+			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
+				if (it.next().onDeleteGroup(group.getName()))
+					it.remove();
+			}
+			for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) {
+				if (it.next().onDeleteGroup(group.getName()))
+					it.remove();
+			}
+			project.getIssueWorkflow().onDeleteGroup(group.getName());
 		}
 		Authenticator authenticator = configManager.getAuthenticator();
 		if (authenticator != null) { 
-			usages.addAll(UsageUtils.prependCategory("Administration / External Authentication", authenticator.onDeleteGroup(group.getName())));
+			authenticator.onDeleteGroup(group.getName());
 			configManager.saveAuthenticator(authenticator);
 		}
 		
 		dao.remove(group);
-		
-		if (!usages.isEmpty())
-			throw new InUseException("Group '" + group.getName() + "'", usages);
 	}
 
 	@Sessional

@@ -10,13 +10,15 @@
 			</div>
 			<hr>
 			<div class="body">
+				<wicket:enclosure child="userQueries">
 				<div wicket:id="userQueries">
 					<span class="btn-group">
 						<a wicket:id="link" class="btn btn-sm btn-default"><span wicket:id="label"></span></a>
 						<a wicket:id="watchStatus" class="watch-status btn btn-default btn-sm"></a>
 					</span>
-					<hr/>
 				</div>
+				<hr/>
+				</wicket:enclosure>
 				<div wicket:id="projectQueries">
 					<span class="btn-group">
 						<a wicket:id="link" class="btn btn-sm btn-default"><span wicket:id="label"></span></a>
@@ -46,11 +48,6 @@
 			</div>
 			<div wicket:id="body" class="body">
 				<div wicket:id="feedback"></div>
-				<wicket:enclosure child="reconcile">
-				<div class="alert alert-warning">Issue workflow has been changed and it may 
-				cause issue working improperly, please 
-				<a wicket:id="reconcile">reconcile</a> existing issues with the change</div>
-				</wicket:enclosure>
 				<div wicket:id="issues">
 					<div class="primary">
 						<div wicket:id="number" class="number"></div>

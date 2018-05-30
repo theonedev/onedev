@@ -17,7 +17,6 @@ import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
@@ -133,12 +132,8 @@ public class GroupProfilePage extends GroupPage {
 
 				@Override
 				public void onClick() {
-					try {
-						OneDev.getInstance(GroupManager.class).delete(getGroup());
-						setResponsePage(GroupListPage.class);
-					} catch (InUseException exception) {
-						form.error(exception.getNotificationMessage());
-					}
+					OneDev.getInstance(GroupManager.class).delete(getGroup());
+					setResponsePage(GroupListPage.class);
 				}
 				
 			}.add(new ConfirmOnClick("Do you really want to delete group '" + getGroup().getName() + "'?")));

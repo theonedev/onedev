@@ -3,10 +3,10 @@ package io.onedev.server.util.inputspec.textinput;
 import java.util.List;
 import java.util.Map;
 
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=100, name=InputSpec.TEXT)

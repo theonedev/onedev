@@ -40,4 +40,9 @@ public class TitleCriteria extends IssueCriteria {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return quote(Issue.TITLE) + " " + IssueQuery.getOperatorName(operator) + " " + quote(value);
+	}
+
 }

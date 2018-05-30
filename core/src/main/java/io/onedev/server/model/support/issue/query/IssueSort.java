@@ -7,11 +7,12 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
+import org.unbescape.java.JavaEscape;
 
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.WicketUtils;
 import jersey.repackaged.com.google.common.collect.Lists;
@@ -59,6 +60,14 @@ public class IssueSort implements Serializable {
 				fields.add(field.getName());
 		}
 		return fields;
+	}
+	
+	@Override
+	public String toString() {
+		if (direction == Direction.ASCENDING)
+			return "\"" + JavaEscape.escapeJava(field) + "\"" + " asc";
+		else
+			return "\"" + JavaEscape.escapeJava(field) + "\"" + " desc";
 	}
 	
 }

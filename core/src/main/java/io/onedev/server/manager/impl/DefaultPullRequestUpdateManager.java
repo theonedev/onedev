@@ -28,7 +28,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.editable.EditableUtils;
+import io.onedev.server.web.editable.EditableUtils;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 

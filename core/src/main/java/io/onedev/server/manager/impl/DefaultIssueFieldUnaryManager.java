@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,15 +35,11 @@ import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.EditableUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.InvalidFieldResolution;
-import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issues.issuelist.workflowreconcile.UndefinedFieldValueResolution;
 
 @Singleton
 public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFieldUnary> implements IssueFieldUnaryManager {
@@ -239,169 +234,6 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 		
 		for (IssueFieldUnary field: getSession().createQuery(query).getResultList())
 			field.getIssue().getFieldUnaries().add(field);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Sessional
-	@Override
-	public Map<String, String> getInvalidFields(Project project) {
-		Query query = getSession().createQuery("select distinct name, type from IssueFieldUnary where issue.project=:project");
-		query.setParameter("project", project);
-		Map<String, String> invalidFields = new HashMap<>();
-		for (Object[] row: (List<Object[]>)query.getResultList()) {
-			String name = (String) row[0];
-			String type = (String) row[1];
-			InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
-			if (fieldSpec == null || !EditableUtils.getDisplayName(fieldSpec.getClass()).equals(type))
-				invalidFields.put(name, type);
-		}
-		return invalidFields;
-	}
-
-	@Transactional
-	@Override
-	public void fixInvalidFields(Project project, Map<String, InvalidFieldResolution> resolutions) {
-		for (Map.Entry<String, InvalidFieldResolution> entry: resolutions.entrySet()) {
-			Query query;
-			if (entry.getValue().getFixType() == InvalidFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
-				query = getSession().createQuery("update IssueFieldUnary set name=:newName where name=:oldName and issue.id in (select id from Issue where project=:project)");
-				query.setParameter("oldName", entry.getKey());
-				query.setParameter("newName", entry.getValue().getNewField());
-			} else {
-				query = getSession().createQuery("delete from IssueFieldUnary where name=:fieldName and issue.id in (select id from Issue where project=:project)");
-				query.setParameter("fieldName", entry.getKey());
-			}
-			query.setParameter("project", project);
-			query.executeUpdate();
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Sessional
-	@Override
-	public Map<String, String> getUndefinedFieldValues(Project project) {
-		Query query = getSession().createQuery("select distinct name, value from IssueFieldUnary where issue.project=:project and type=:choice");
-		query.setParameter("project", project);
-		query.setParameter("choice", InputSpec.CHOICE);
-		Map<String, String> undefinedFieldValues = new HashMap<>();
-		OneContext.push(new OneContext() {
-
-			@Override
-			public Project getProject() {
-				return project;
-			}
-
-			@Override
-			public EditContext getEditContext(int level) {
-				return new EditContext() {
-
-					@Override
-					public Object getInputValue(String name) {
-						return null;
-					}
-					
-				};
-			}
-
-			@Override
-			public InputContext getInputContext() {
-				throw new UnsupportedOperationException();
-			}
-			
-		});
-		try {
-			for (Object[] row: (List<Object[]>)query.getResultList()) {
-				String name = (String) row[0];
-				String value = (String) row[1];
-				InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
-				if (fieldSpec != null && value != null) {
-					List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-					if (!choices.contains(value))
-						undefinedFieldValues.put(name, value);
-				}
-			}
-			return undefinedFieldValues;
-		} finally {
-			OneContext.pop();
-		}
-	}
-
-	@Transactional
-	@Override
-	public void fixUndefinedFieldValues(Project project, Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions) {
-		for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
-			Query query;
-			if (entry.getValue().getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
-				query = getSession().createQuery("update IssueFieldUnary set value=:newValue where name=:fieldName and value=:oldValue and issue.id in (select id from Issue where project=:project)");
-				query.setParameter("fieldName", entry.getKey().getFieldName());
-				query.setParameter("oldValue", entry.getKey().getFieldValue());
-				query.setParameter("newValue", entry.getValue().getNewValue());
-			} else {
-				query = getSession().createQuery("delete from IssueFieldUnary where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
-				query.setParameter("fieldName", entry.getKey().getFieldName());
-				query.setParameter("fieldValue", entry.getKey().getFieldValue());
-			}
-			query.setParameter("project", project);
-			query.executeUpdate();
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Transactional
-	@Override
-	public void fixFieldValueOrders(Project project) {
-		OneContext.push(new OneContext() {
-
-			@Override
-			public Project getProject() {
-				return project;
-			}
-
-			@Override
-			public EditContext getEditContext(int level) {
-				return new EditContext() {
-
-					@Override
-					public Object getInputValue(String name) {
-						return null;
-					}
-					
-				};
-			}
-
-			@Override
-			public InputContext getInputContext() {
-				throw new UnsupportedOperationException();
-			}
-			
-		});
-		try {
-			Query query = getSession().createQuery("select distinct name, value, ordinal from IssueFieldUnary where issue.project=:project and type=:choice");
-			query.setParameter("project", project);
-			query.setParameter("choice", InputSpec.CHOICE);
-
-			for (Object[] row: (List<Object[]>)query.getResultList()) {
-				String name = (String) row[0];
-				String value = (String) row[1];
-				long ordinal = (long) row[2];
-				InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
-				if (fieldSpec != null) {
-					List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-					long newOrdinal = choices.indexOf(value);
-					if (ordinal != newOrdinal) {
-						query = getSession().createQuery("update IssueFieldUnary set ordinal=:newOrdinal where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
-						query.setParameter("fieldName", name);
-						query.setParameter("fieldValue", value);
-						query.setParameter("newOrdinal", newOrdinal);
-						query.setParameter("project", project);
-						query.executeUpdate();
-					}
-				}
-			}
-		} finally {
-			OneContext.pop();
-		}
-		
 	}
 	
 }

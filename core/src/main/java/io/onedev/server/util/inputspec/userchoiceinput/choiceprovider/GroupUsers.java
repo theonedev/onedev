@@ -9,10 +9,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.GroupChoice;
-import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=150, name="Users belonging to group")
 public class GroupUsers implements ChoiceProvider {

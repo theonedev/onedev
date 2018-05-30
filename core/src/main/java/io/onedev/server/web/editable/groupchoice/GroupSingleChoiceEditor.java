@@ -16,7 +16,6 @@ import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.GroupChoice;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.web.component.groupchoice.GroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupSingleChoice;
@@ -24,6 +23,7 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.GroupChoice;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ReflectionUtils;
 

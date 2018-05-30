@@ -5,7 +5,7 @@ import java.util.Date;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="commented")
 public class PullRequestCommented extends PullRequestEvent implements MarkdownAware {

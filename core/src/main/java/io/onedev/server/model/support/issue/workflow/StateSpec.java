@@ -7,11 +7,11 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.editable.annotation.ChoiceProvider;
-import io.onedev.server.util.editable.annotation.Color;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Color;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -87,12 +87,11 @@ public class StateSpec implements Serializable {
 		}
 	}
 	
-	public List<String> onFieldDelete(String fieldName) {
+	public void onFieldDelete(String fieldName) {
 		for (Iterator<String> it = getFields().iterator(); it.hasNext();) {
 			if (it.next().equals(fieldName))
 				it.remove();
 		}
-		return new ArrayList<>();
 	}
 	
 }

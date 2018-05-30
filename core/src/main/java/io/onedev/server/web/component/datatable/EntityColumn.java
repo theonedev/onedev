@@ -8,7 +8,7 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.util.editable.EditableUtils;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 

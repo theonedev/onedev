@@ -1,21 +1,17 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.server.model.support.ifsubmittedby.Anyone;
 import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedGroup;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.TagPattern;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.TagPattern;
 
 @Editable
 public class TagProtection implements Serializable {
@@ -99,13 +95,13 @@ public class TagProtection implements Serializable {
 		}
 	}
 	
-	public List<String> onDeleteGroup(String groupName) {
+	public boolean onDeleteGroup(String groupName) {
 		if (getSubmitter() instanceof SpecifiedGroup) {
 			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
 			if (specifiedGroup.getGroupName().equals(groupName))
-				return Lists.newArrayList("If Performed By");
+				return true;
 		}
-		return new ArrayList<>();
+		return false;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
@@ -116,13 +112,13 @@ public class TagProtection implements Serializable {
 		}
 	}
 	
-	public List<String> onDeleteUser(String userName) {
+	public boolean onDeleteUser(String userName) {
 		if (getSubmitter() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(userName))
-				return Lists.newArrayList("If Performed By");
+				return true;
 		}
-		return new ArrayList<>();
+		return false;
 	}
 
 	public boolean onTagDeleted(String tagName) {

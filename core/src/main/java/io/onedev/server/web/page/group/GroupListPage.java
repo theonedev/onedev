@@ -29,7 +29,6 @@ import org.hibernate.criterion.Restrictions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.exception.InUseException;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -152,12 +151,8 @@ public class GroupListPage extends LayoutPage {
 
 					@Override
 					public void onClick() {
-						try {
-							OneDev.getInstance(GroupManager.class).delete(rowModel.getObject());
-							setResponsePage(GroupListPage.class);
-						} catch (InUseException exception) {
-							groupsTable.error(exception.getNotificationMessage());
-						}
+						OneDev.getInstance(GroupManager.class).delete(rowModel.getObject());
+						setResponsePage(GroupListPage.class);
 					}
 
 					@Override

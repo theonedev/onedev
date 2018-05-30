@@ -19,10 +19,10 @@ import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.web.behavior.testform.TestFormBehavior;
 import io.onedev.server.web.behavior.testform.TestResult;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")

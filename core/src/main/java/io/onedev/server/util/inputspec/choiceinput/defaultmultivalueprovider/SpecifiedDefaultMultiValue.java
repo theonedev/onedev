@@ -11,9 +11,9 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.OmitName;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=100, name="Specified default value")
 public class SpecifiedDefaultMultiValue implements DefaultMultiValueProvider {
@@ -23,7 +23,7 @@ public class SpecifiedDefaultMultiValue implements DefaultMultiValueProvider {
 	private List<String> value;
 
 	@Editable(name="Literal default value")
-	@io.onedev.server.util.editable.annotation.ChoiceProvider("getValueChoices")
+	@io.onedev.server.web.editable.annotation.ChoiceProvider("getValueChoices")
 	@NotEmpty
 	@OmitName
 	public List<String> getValue() {

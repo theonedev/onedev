@@ -11,14 +11,14 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.util.editable.annotation.ShowCondition;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Editable(order=145, name=InputSpec.CHOICE)
 public class ChoiceInput extends InputSpec {

@@ -7,8 +7,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=130, name="Users able to write the project")
 public class ProjectWriters implements ChoiceProvider {

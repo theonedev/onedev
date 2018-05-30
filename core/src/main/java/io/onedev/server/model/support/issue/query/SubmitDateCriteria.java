@@ -15,9 +15,12 @@ public class SubmitDateCriteria extends IssueCriteria {
 	
 	private final Date value;
 	
-	public SubmitDateCriteria(Date value, int operator) {
+	private final String rawValue;
+	
+	public SubmitDateCriteria(Date value, String rawValue, int operator) {
 		this.operator = operator;
 		this.value = value;
+		this.rawValue = rawValue;
 	}
 
 	@Override
@@ -40,6 +43,11 @@ public class SubmitDateCriteria extends IssueCriteria {
 	@Override
 	public boolean needsLogin() {
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return quote(Issue.SUBMIT_DATE) + " " + IssueQuery.getOperatorName(operator) + " " + quote(rawValue);
 	}
 
 }

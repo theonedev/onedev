@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.editable.annotation.Color;
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.Color;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class Choice implements Serializable {

@@ -6,8 +6,9 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.OmitName;
+import io.onedev.server.model.support.issue.NamedQuery;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 public class NamedQueriesBean implements Serializable {

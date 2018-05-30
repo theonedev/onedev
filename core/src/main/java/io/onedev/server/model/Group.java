@@ -13,8 +13,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.editable.annotation.Editable;
 import io.onedev.server.util.facade.GroupFacade;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)

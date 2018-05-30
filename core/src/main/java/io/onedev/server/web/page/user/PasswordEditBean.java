@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.editable.annotation.Editable;
-import io.onedev.server.util.editable.annotation.Password;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Password;
 
 @Editable
 public class PasswordEditBean implements Serializable {
