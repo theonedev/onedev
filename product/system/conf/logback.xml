@@ -33,6 +33,7 @@
 	<logger name="org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl" level="ERROR"/>
 	<logger name="org.reflections" level="WARN"/>
 	<logger name="org.apache.shiro.realm.AuthorizingRealm" level="WARN"/>
+	<logger name="com.joestelmach.natty" level="WARN"/>	
 	<logger name="jetbrains.exodus" level="WARN"/>
 	<logger name="jetbrains.exodus.io.FileDataWriter" level="ERROR"/>
 	<logger name="com.zaxxer.hikari.HikariDataSource" level="ERROR"/>

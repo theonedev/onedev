@@ -27,17 +27,14 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserInfoManager;
-import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.NamedQuery;
-import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.link.FirstIssueQueryLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
@@ -68,15 +65,6 @@ public abstract class ProjectPage extends LayoutPage {
 	private static final String PARAM_PROJECT = "project";
 	
 	protected final IModel<Project> projectModel;
-	
-	protected final IModel<IssueQuerySetting> issueQuerySettingModel = new LoadableDetachableModel<IssueQuerySetting>() {
-
-		@Override
-		protected IssueQuerySetting load() {
-			return OneDev.getInstance(IssueQuerySettingManager.class).find(getProject(), getLoginUser());
-		}
-		
-	};
 	
 	public static PageParameters paramsOf(Project project) {
 		PageParameters params = new PageParameters();
@@ -165,28 +153,7 @@ public abstract class ProjectPage extends LayoutPage {
 
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								String query = null;
-								List<String> queries = new ArrayList<>();
-								if (getLoginUser() != null) {
-									IssueQuerySetting setting = getIssueQuerySetting();
-									if (setting != null) {
-										for (NamedQuery namedQuery: setting.getUserQueries())
-											queries.add(namedQuery.getQuery());
-									}
-								}
-								for (NamedQuery namedQuery: getProject().getSavedIssueQueries())
-									queries.add(namedQuery.getQuery());
-								for (String each: queries) {
-									try {
-										if (getLoginUser() != null || !IssueQuery.parse(getProject(), each, true).needsLogin()) {  
-											query = each;
-											break;
-										}
-									} catch (Exception e) {
-									}
-								} 
-								PageParameters params = IssueListPage.paramsOf(getProject(), query);
-								return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, params);
+								return new FirstIssueQueryLink(linkId, getProject());
 							}
 						};
 					}
@@ -227,14 +194,9 @@ public abstract class ProjectPage extends LayoutPage {
 		return projectModel.getObject();
 	}
 	
-	protected IssueQuerySetting getIssueQuerySetting() {
-		return issueQuerySettingModel.getObject();
-	}
-	
 	@Override
 	protected void onDetach() {
 		projectModel.detach();
-		issueQuerySettingModel.detach();
 		super.onDetach();
 	}
 

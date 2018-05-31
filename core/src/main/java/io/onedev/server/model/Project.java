@@ -74,6 +74,7 @@ import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.UserManager;
@@ -201,6 +202,8 @@ public class Project extends AbstractEntity {
     
     private transient Optional<RevCommit> lastCommitOptional;
     
+    private transient Optional<IssueQuerySetting> issueQuerySettingOfCurrentUser;
+    
     public Project() {
 		issueListFields.add("Type");
 		issueListFields.add("Priority");
@@ -209,8 +212,8 @@ public class Project extends AbstractEntity {
 		savedIssueQueries.add(new NamedQuery("All", "all"));
 		savedIssueQueries.add(new NamedQuery("Outstanding", "\"State\" is not \"Closed\""));
 		savedIssueQueries.add(new NamedQuery("Closed", "\"State\" is \"Closed\""));
-		savedIssueQueries.add(new NamedQuery("Added recently", "\"Submit Date\" is after \"one week ago\""));
-		savedIssueQueries.add(new NamedQuery("Updated recently", "\"Update Date\" is after \"one week ago\""));
+		savedIssueQueries.add(new NamedQuery("Added recently", "\"Submit Date\" is after \"last week\""));
+		savedIssueQueries.add(new NamedQuery("Updated recently", "\"Update Date\" is after \"last week\""));
 		savedIssueQueries.add(new NamedQuery("Submitted by me", "\"Submitter\" is me"));
 		savedIssueQueries.add(new NamedQuery("Assigned to me", "\"Assignee\" is me"));
 		savedIssueQueries.add(new NamedQuery("Hight Priority", "\"Priority\" is \"High\""));
@@ -983,6 +986,22 @@ public class Project extends AbstractEntity {
 		}
 		
 		return authors;
+	}
+	
+	@Nullable
+	public IssueQuerySetting getIssueQuerySettingOfCurrentUser() {
+		if (issueQuerySettingOfCurrentUser == null) {
+			User currentUser = SecurityUtils.getUser();
+			if (currentUser != null)
+				issueQuerySettingOfCurrentUser = Optional.fromNullable(OneDev.getInstance(IssueQuerySettingManager.class).find(this, currentUser));
+			else
+				issueQuerySettingOfCurrentUser = Optional.absent();
+		}
+		return issueQuerySettingOfCurrentUser.orNull();
+	}
+	
+	public void setIssueQuerySettingOfCurrentUser(IssueQuerySetting setting) {
+		issueQuerySettingOfCurrentUser = Optional.fromNullable(setting);
 	}
 	
 }

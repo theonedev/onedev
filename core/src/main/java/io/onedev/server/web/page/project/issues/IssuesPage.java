@@ -15,6 +15,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.link.FirstIssueQueryLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -94,7 +95,21 @@ public abstract class IssuesPage extends ProjectPage {
 		}
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new IssuesTab("List", IssueListPage.class));
+		tabs.add(new IssuesTab("List", IssueListPage.class) {
+
+			@Override
+			public Component render(String componentId) {
+				return new PageTabLink(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+						return new FirstIssueQueryLink(linkId, getProject());
+					}
+				};
+				
+			}
+			
+		});
 		tabs.add(new IssuesTab("Boards", IssueBoardsPage.class));
 		
 		add(new Tabbable("issuesTabs", tabs));

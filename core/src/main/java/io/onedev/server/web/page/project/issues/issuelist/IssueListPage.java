@@ -114,6 +114,11 @@ public class IssueListPage extends IssuesPage {
 			watches.remove(name);
 	}
 	
+	@Nullable
+	private IssueQuerySetting getIssueQuerySetting() {
+		return getProject().getIssueQuerySettingOfCurrentUser();
+	}
+	
 	private ArrayList<NamedQuery> getUserQueries() {
 		if (getIssueQuerySetting() != null)
 			return getIssueQuerySetting().getUserQueries();
@@ -180,7 +185,7 @@ public class IssueListPage extends IssuesPage {
 							setting = new IssueQuerySetting();
 							setting.setProject(getProject());
 							setting.setUser(getLoginUser());
-							issueQuerySettingModel.setObject(setting);
+							getProject().setIssueQuerySettingOfCurrentUser(setting);
 						}
 						NamedQuery namedQuery = setting.getUserQuery(bean.getName());
 						if (namedQuery == null) {

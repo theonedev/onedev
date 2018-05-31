@@ -1,15 +1,14 @@
 grammar IssueQuery;
 
 query
-    : WS* criteria WS+ OrderBy WS+ order (WS+ 'and' WS+ order)* WS* EOF
-    | WS* criteria WS* EOF
+    : WS* (criteria|All) WS+ OrderBy WS+ order (WS+ 'and' WS+ order)* WS* EOF
+    | WS* (criteria|All) WS* EOF
     | WS* OrderBy WS+ order (WS+ 'and' WS+ order)* WS* EOF
     | WS* EOF
     ;
 
 criteria
-    : All																			#AllCriteria
-    | Mine																			#MineCriteria
+    : Mine																			#MineCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty) #UnaryCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains|DoesNotContain) WS+ criteriaValue=Quoted #ValueCriteria
     | criteria WS+ 'and' WS+ criteria												#AndCriteria

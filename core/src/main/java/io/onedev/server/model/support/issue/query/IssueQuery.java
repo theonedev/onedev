@@ -38,7 +38,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.query.IssueQueryParser.AllCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.AndCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.BracedCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.CriteriaContext;
@@ -229,11 +228,6 @@ public class IssueQuery implements Serializable {
 						}
 					}
 
-					@Override
-					public IssueCriteria visitAllCriteria(AllCriteriaContext ctx) {
-						return null;
-					}
-					
 					@Override
 					public IssueCriteria visitUnaryCriteria(UnaryCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted().getText());
