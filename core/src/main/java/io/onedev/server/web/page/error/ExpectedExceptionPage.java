@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.error;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -32,7 +33,7 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 		container.setOutputMarkupId(true);
 		add(container);
 		
-		container.add(new Label("title", title));
+		container.add(new Label("title", StringUtils.abbreviate(title, 80)));
 		
 		container.add(new ViewStateAwarePageLink<Void>("home", ProjectListPage.class));
 		

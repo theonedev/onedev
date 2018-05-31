@@ -21,6 +21,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
@@ -68,6 +69,10 @@ public class IssueWorkflow implements Serializable {
 		specifiedChoices.setChoices(choices);
 		type.setChoiceProvider(specifiedChoices);
 		
+		SpecifiedDefaultValue specifiedDefaultValue = new SpecifiedDefaultValue();
+		specifiedDefaultValue.setValue("Bug");
+		type.setDefaultValueProvider(specifiedDefaultValue);
+		
 		fieldSpecs.add(type);
 		
 		ChoiceInput priority = new ChoiceInput();
@@ -94,6 +99,10 @@ public class IssueWorkflow implements Serializable {
 		specifiedChoices.setChoices(choices);
 		priority.setChoiceProvider(specifiedChoices);
 		
+		specifiedDefaultValue = new SpecifiedDefaultValue();
+		specifiedDefaultValue.setValue("Normal");
+		priority.setDefaultValueProvider(specifiedDefaultValue);
+		
 		fieldSpecs.add(priority);
 
 		UserChoiceInput assignee = new UserChoiceInput();
@@ -115,7 +124,7 @@ public class IssueWorkflow implements Serializable {
 		choices.add(fixed);
 
 		Choice wontFix = new Choice();
-		wontFix.setValue("Won't Fix");
+		wontFix.setValue("Invalid");
 		choices.add(wontFix);
 
 		Choice duplicated = new Choice();
@@ -124,6 +133,10 @@ public class IssueWorkflow implements Serializable {
 		
 		specifiedChoices.setChoices(choices);
 		resolution.setChoiceProvider(specifiedChoices);
+		
+		specifiedDefaultValue = new SpecifiedDefaultValue();
+		specifiedDefaultValue.setValue("Fixed");
+		resolution.setDefaultValueProvider(specifiedDefaultValue);
 		
 		fieldSpecs.add(resolution);
 
