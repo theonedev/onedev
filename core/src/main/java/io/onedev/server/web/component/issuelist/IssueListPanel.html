@@ -1,0 +1,65 @@
+<wicket:panel>
+	<div class="issue-list">
+		<div class="head">
+			<form wicket:id="query">
+				<div class="input-group no-autofocus">
+					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order issues here"></input>
+					<span class="input-group-btn">
+						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+					</span>
+				</div>
+			</form>
+			<div class="actions">
+				<a wicket:id="displayFields" class="btn btn-default display-fields" title="Custom fields to display"><i class="fa fa-list-ul"></i></a>
+				<a wicket:id="newIssue" class="btn btn-success open-new"><i class="fa fa-plus"></i> Open New</a>
+			</div>
+		</div>
+		<div class="body">
+			<div wicket:id="feedback"></div>
+			<div wicket:id="issues">
+				<div class="primary">
+					<div wicket:id="number" class="number"></div>
+					<div wicket:id="title" class="title"></div>
+					<div class="last-activity">
+						<a wicket:id="user"></a>
+						<span wicket:id="action"></span>
+						<span wicket:id="date"></span>
+					</div>
+				</div>
+				<div class="additional">
+					<div class="state"><div wicket:id="state"></div></div>
+					<div wicket:id="fields"></div>
+					<div class="built-in">
+						<wicket:enclosure child="milestone">
+							<span title="Milestone"><i class="fa fa-ext fa-milestone"></i> <a wicket:id="milestone"><span wicket:id="name"></span></a></span>
+						</wicket:enclosure>
+						<span title="Votes"><i class="fa fa-thumbs-o-up"></i> <span wicket:id="votes" class="votes"></span></span>
+						<span title="Comments"><i class="fa fa-comments"></i> <span wicket:id="comments" class="comments"></span></span>
+					</div>
+				</div>
+			</div>
+			<div class="center"><ul wicket:id="issuesPageNav"></ul></div>
+			<div wicket:id="noIssues" class="no-records">No issues found</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="titleFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="fieldsFrag">
+		<form wicket:id="form" class="issue-table-fields leave-confirm no-autofocus">
+			<div class="modal-header">
+				<button wicket:id="close" type="button" class="close">&times;</button>
+				<h4 id="modal-title" class="modal-title">
+					Fields to Display
+				</h4>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="editor"></div>
+			</div>
+			<div class="modal-footer clearfix">
+				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save"></input>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
+		</form>	
+	</wicket:fragment>	
+</wicket:panel>

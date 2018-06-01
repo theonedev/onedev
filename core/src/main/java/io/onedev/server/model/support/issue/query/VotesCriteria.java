@@ -50,7 +50,7 @@ public class VotesCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return quote(Issue.VOTES) + " " + IssueQuery.getOperatorName(operator) + " " + quote(String.valueOf(value));
+		return IssueQuery.quote(Issue.VOTES) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 }

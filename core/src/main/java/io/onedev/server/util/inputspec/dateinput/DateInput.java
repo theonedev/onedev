@@ -40,8 +40,6 @@ public class DateInput extends InputSpec {
 		appendCommonAnnotations(buffer, index);
 		if (!isAllowEmpty())
 			buffer.append("    @NotNull\n");
-		if (defaultValueProvider != null)
-			appendDefaultValueProvider(buffer, index);
 		appendMethods(buffer, index, "Date", null, defaultValueProvider);
 		
 		return buffer.toString();

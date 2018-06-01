@@ -1,6 +1,8 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -46,7 +48,13 @@ public class BooleanFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + quote(String.valueOf(value));
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(String.valueOf(value));
+	}
+
+	@Override
+	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+		if (operator == IssueQueryLexer.Is)
+			setFieldValue(fieldBean, value);
 	}
 
 }

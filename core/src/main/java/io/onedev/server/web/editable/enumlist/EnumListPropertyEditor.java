@@ -20,7 +20,6 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.utils.WordUtils;
 
 @SuppressWarnings({"serial", "unchecked", "rawtypes"})
 public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
@@ -60,10 +59,7 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         	@Override
         	protected void onInitialize() {
         		super.onInitialize();
-        		if (propertyDescriptor.isPropertyRequired()) 
-					getSettings().setPlaceholder("Select " + WordUtils.uncamel(enumClass.getSimpleName()).toLowerCase() + "(s)...");
-        		else if (propertyDescriptor.getNameOfEmptyValue() != null)
-					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+				getSettings().configurePlaceholder(propertyDescriptor);
         	}
         	
         };

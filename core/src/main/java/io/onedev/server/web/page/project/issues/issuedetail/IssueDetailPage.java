@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
@@ -61,6 +62,7 @@ import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueField;
@@ -72,6 +74,8 @@ import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -80,6 +84,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -93,10 +98,12 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class IssueDetailPage extends ProjectPage implements InputContext {
@@ -316,9 +323,10 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 									if (toStateSpec == null)
 										throw new OneException("Unable to find state spec: " + transition.getToState());
 									promptedFields.addAll(toStateSpec.getFields());
-									
+								
+									String prevState = getIssue().getState();
 									getIssue().setState(transition.getToState());
-									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevFields, promptedFields);
+									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevState, prevFields, promptedFields);
 								
 									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
 								}
@@ -348,8 +356,32 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		}
 		
 		add(transitionsView);
+
+		List<String> criterias = new ArrayList<>();
+		if (getIssue().getMilestone() != null)
+			criterias.add(IssueQuery.quote(Issue.MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
+		for (Map.Entry<String, IssueField> entry: getIssue().getEffectiveFields().entrySet()) {
+			List<String> strings = entry.getValue().getValues();
+			if (strings.isEmpty()) {
+				criterias.add(IssueQuery.quote(entry.getKey()) + " is empty");
+			} else { 
+				InputSpec field = getProject().getIssueWorkflow().getFieldSpec(entry.getKey());
+				if (field instanceof ChoiceInput && ((ChoiceInput)field).isAllowMultiple()) {
+					for (String string: strings)
+						criterias.add(IssueQuery.quote(entry.getKey()) + " contains " + IssueQuery.quote(string));
+				} else if (!(field instanceof DateInput)) { 
+					criterias.add(IssueQuery.quote(entry.getKey()) + " is " + IssueQuery.quote(strings.iterator().next()));
+				}
+			}
+		}
+
+		String query;
+		if (!criterias.isEmpty())
+			query = StringUtils.join(criterias, " and ");
+		else
+			query = null;
 		
-		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())) {
+		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)) {
 
 			@Override
 			protected void onConfigure() {
@@ -412,6 +444,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 		add(newNavContainer());
 		add(newFieldsContainer());
+		add(newMilestoneContainer());
 		add(newVotesContainer());
 		add(newWatchesContainer());
 		
@@ -452,7 +485,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true);
 					int count = position.getCount();
 					int offset = position.getOffset() - 1;
-					List<Issue> issues = getIssueManager().query(query, offset, 1);
+					List<Issue> issues = getIssueManager().query(getProject(), query, offset, 1);
 					if (!issues.isEmpty()) {
 						if (!query.getCriteria().matches(getIssue()))
 							count--;
@@ -490,7 +523,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					else
 						count--;
 					
-					List<Issue> issues = getIssueManager().query(query, offset, 1);
+					List<Issue> issues = getIssueManager().query(getProject(), query, offset, 1);
 					if (!issues.isEmpty()) {
 						QueryPosition nextPosition = new QueryPosition(position.getQuery(), count, offset);
 						PageParameters params = IssueDetailPage.paramsOf(issues.get(0), nextPosition);
@@ -661,6 +694,91 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		});		
 		
 		return fieldsContainer;
+	}
+	
+	private Component newMilestoneContainer() {
+		Fragment fragment = new Fragment("milestone", "milestoneViewFrag", this);
+		if (getIssue().getMilestone() != null) {
+			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null));
+			link.add(new Label("label", getIssue().getMilestone().getName()));
+			fragment.add(link);
+		} else {
+			WebMarkupContainer link = new WebMarkupContainer("link") {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("span");
+				}
+				
+			};
+			link.add(new Label("label", "<i>Unspecified</i>").setEscapeModelStrings(false));
+			fragment.add(link);
+		}
+
+		fragment.add(new AjaxLink<Void>("edit") {
+
+			private String milestoneName = getIssue().getMilestoneName();
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				Fragment fragment =  new Fragment("milestone", "milestoneEditFrag", IssueDetailPage.this);
+				Form<?> form = new Form<Void>("form");
+				
+				List<String> milestones = getProject().getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
+				StringSingleChoice choice = new StringSingleChoice("milestone", 
+						new PropertyModel<String>(this, "milestoneName"), milestones) {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						getSettings().setPlaceholder("Unspecified");
+					}
+					
+				};
+				choice.setRequired(false);
+				form.add(choice);
+
+				form.add(new AjaxButton("save") {
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+						String prevMilestoneName = getIssue().getMilestoneName();
+						Milestone milestone = getProject().getMilestone(milestoneName);
+						getIssue().setMilestone(milestone);
+						getIssueChangeManager().changeMilestone(getIssue(), prevMilestoneName);
+						Component container = newMilestoneContainer();
+						getPage().replace(container);
+						target.add(container);
+					}
+
+				});
+				form.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						Component container = newMilestoneContainer();
+						getPage().replace(container);
+						target.add(container);
+					}
+					
+				});
+				fragment.add(form);
+				fragment.setOutputMarkupId(true);
+				getPage().replace(fragment);
+				target.add(fragment);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canModify(getIssue()));
+			}
+			
+		});
+		fragment.setOutputMarkupId(true);
+		return fragment;
 	}
 	
 	private Component newVotesContainer() {

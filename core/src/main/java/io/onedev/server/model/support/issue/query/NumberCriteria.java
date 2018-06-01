@@ -50,7 +50,7 @@ public class NumberCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return quote(Issue.NUMBER) + " " + IssueQuery.getOperatorName(operator) + " " + quote(String.valueOf(value));
+		return IssueQuery.quote(Issue.NUMBER) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 }

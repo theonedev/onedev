@@ -56,8 +56,7 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
     		@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				if (propertyDescriptor.getNameOfEmptyValue() != null)
-					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+				getSettings().configurePlaceholder(propertyDescriptor);
 			}
     		
     	};

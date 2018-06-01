@@ -79,6 +79,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 	
 	public static final String UPDATE_DATE = "Update Date";
 	
+	public static final String MILESTONE = "Milestone";
+	
 	static {
 		BUILTIN_FIELDS.put(NUMBER, "number");
 		BUILTIN_FIELDS.put(STATE, "state");
@@ -89,6 +91,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		BUILTIN_FIELDS.put(UPDATE_DATE, "lastActivity.date");
 		BUILTIN_FIELDS.put(VOTES, "numOfVotes");
 		BUILTIN_FIELDS.put(COMMENTS, "numOfComments");
+		BUILTIN_FIELDS.put(MILESTONE, "milestone");
 	}
 	
 	@Version
@@ -107,6 +110,9 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Project project;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	private Milestone milestone;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private User submitter;
@@ -133,6 +139,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private String noSpaceTitle;
 	
+	private int boardPosition;
+	
 	@Embedded
 	private LastActivity lastActivity;
 	
@@ -143,7 +151,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	private Collection<IssueComment> comments = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
-	private Collection<IssueChange> edits = new ArrayList<>();
+	private Collection<IssueChange> changes = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueVote> votes = new ArrayList<>();
@@ -237,6 +245,14 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.submitDate = submitDate.getTime();
 	}
 
+	public Milestone getMilestone() {
+		return milestone;
+	}
+
+	public void setMilestone(Milestone milestone) {
+		this.milestone = milestone;
+	}
+
 	public Collection<IssueComment> getComments() {
 		return comments;
 	}
@@ -245,12 +261,12 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.comments = comments;
 	}
 
-	public Collection<IssueChange> getEdits() {
-		return edits;
+	public Collection<IssueChange> getChanges() {
+		return changes;
 	}
 
-	public void setEdits(Collection<IssueChange> edits) {
-		this.edits = edits;
+	public void setChanges(Collection<IssueChange> changes) {
+		this.changes = changes;
 	}
 
 	public Collection<IssueVote> getVotes() {
@@ -283,6 +299,14 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	public void setNumOfComments(int numOfComments) {
 		this.numOfComments = numOfComments;
+	}
+
+	public int getBoardPosition() {
+		return boardPosition;
+	}
+
+	public void setBoardPosition(int boardPosition) {
+		this.boardPosition = boardPosition;
 	}
 
 	public Collection<IssueFieldUnary> getFieldUnaries() {
@@ -371,4 +395,10 @@ public class Issue extends AbstractEntity implements Referenceable {
 		}
 		return promptedFields;
 	}
+	
+	@Nullable
+	public String getMilestoneName() {
+		return getMilestone()!=null? getMilestone().getName():null;
+	}
+	
 }

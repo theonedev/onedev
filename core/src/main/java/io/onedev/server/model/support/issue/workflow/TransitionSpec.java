@@ -16,6 +16,7 @@ import io.onedev.server.model.support.issue.workflow.action.PressButton;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.WicketUtils;
@@ -26,6 +27,8 @@ public class TransitionSpec implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private String description;
+	
 	private List<String> fromStates;
 	
 	private String toState;
@@ -33,6 +36,17 @@ public class TransitionSpec implements Serializable {
 	private TransitionPrerequisite prerequisite;
 	
 	private IssueAction onAction;
+	
+	@Editable(order=50)
+	@NameOfEmptyValue("No description")
+	@Multiline
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 	
 	@Editable(order=100)
 	@Size(min=1, message="At least one state needs to be specified")

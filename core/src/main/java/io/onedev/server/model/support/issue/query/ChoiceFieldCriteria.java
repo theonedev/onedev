@@ -1,10 +1,12 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
@@ -84,7 +86,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + quote(value);
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value);
 	}
 
 	@Override
@@ -106,6 +108,30 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@Override
 	public boolean onDeleteFieldValue(String fieldName, String fieldValue) {
 		return fieldName.equals(getFieldName()) && fieldValue.equals(value);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+		if (allowMultiple) {
+			if (operator == IssueQueryLexer.Contains) {
+				List list;
+				if (!initedLists.contains(getFieldName())) {
+					list = new ArrayList();
+					setFieldValue(fieldBean, list);
+					initedLists.add(getFieldName());
+				} else {
+					list = (List) getFieldValue(fieldBean);
+					if (list == null) {
+						list = new ArrayList();
+						setFieldValue(fieldBean, list);
+					}
+				}
+				list.add(value);
+			}
+		} else if (operator == IssueQueryLexer.Is) {
+			setFieldValue(fieldBean, value);
+		}
 	}
 
 }

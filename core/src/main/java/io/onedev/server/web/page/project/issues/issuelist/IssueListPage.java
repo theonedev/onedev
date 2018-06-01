@@ -1,69 +1,47 @@
 package io.onedev.server.web.page.project.issues.issuelist;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.markup.repeater.data.DataView;
-import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.FieldsEditBean;
-import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.model.support.issue.WatchStatus;
+import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.IssueStateLabel;
-import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
-import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.web.component.issuelist.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
@@ -73,19 +51,13 @@ import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.issues.IssuesPage;
-import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class IssueListPage extends IssuesPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(IssueListPage.class);
-	
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
 	private static final String PARAM_QUERY = "query";
@@ -99,10 +71,6 @@ public class IssueListPage extends IssuesPage {
 		query = params.get(PARAM_QUERY).toOptionalString();
 	}
 
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
-	}
-	
 	private IssueQuerySettingManager getIssueQuerySettingManager() {
 		return OneDev.getInstance(IssueQuerySettingManager.class);		
 	}
@@ -503,212 +471,6 @@ public class IssueListPage extends IssuesPage {
 
 		add(newSideContainer());
 		
-		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
-		input.add(new IssueQueryBehavior(projectModel));
-		
-		if (getLoginUser() != null) {
-			input.add(new AjaxFormComponentUpdatingBehavior("input"){
-	
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					target.add(querySave);
-				}
-				
-			});
-		}
-		Form<?> form = new Form<Void>("query") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				setResponsePage(IssueListPage.class, IssueListPage.paramsOf(getProject(), query));
-			}
-
-		};
-		form.add(input);
-		add(form);
-		
-		add(new ModalLink("displayFields") {
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "fieldsFrag", IssueListPage.this);
-
-				FieldsEditBean bean = new FieldsEditBean();
-				bean.setFields(getProject().getIssueListFields());
-				Form<?> form = new Form<Void>("form") {
-
-					@Override
-					protected void onError() {
-						super.onError();
-						RequestCycle.get().find(AjaxRequestTarget.class).add(this);
-					}
-
-				};
-				form.add(BeanContext.editBean("editor", bean));
-
-				form.add(new AjaxLink<Void>("close") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				
-				form.add(new AjaxButton("save") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						getProject().setIssueListFields((ArrayList<String>) bean.getFields());
-						OneDev.getInstance(ProjectManager.class).save(getProject());
-						setResponsePage(IssueListPage.this);
-					}
-					
-				});
-				
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				form.setOutputMarkupId(true);
-				fragment.add(form);
-				return fragment;
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()));
-			}
-			
-		});
-		
-		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canRead(getProject()));
-			}
-			
-		});
-
-		AtomicReference<IssueQuery> parsedQuery = new AtomicReference<>(null);
-		try {
-			parsedQuery.set(IssueQuery.parse(getProject(), query, true));
-			if (getLoginUser() == null && parsedQuery.get().needsLogin()) {
-				form.error("Please login to perform this query");
-				parsedQuery.set(null);
-			}
-		} catch (Exception e) {
-			logger.error("Error parsing issue query: " + query, e);
-			if (StringUtils.isNotBlank(e.getMessage()))
-				form.error(e.getMessage());
-			else
-				form.error("Malformed issue query");
-		}
-		
-		int count;
-		if (parsedQuery.get() != null)
-			count = getIssueManager().count(parsedQuery.get().getCriteria());
-		else
-			count = 0;
-		
-		IDataProvider<Issue> dataProvider = new IDataProvider<Issue>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Iterator<? extends Issue> iterator(long first, long count) {
-				return getIssueManager().query(parsedQuery.get(), (int)first, (int)count).iterator();
-			}
-
-			@Override
-			public long size() {
-				return count;
-			}
-
-			@Override
-			public IModel<Issue> model(Issue object) {
-				Long issueId = object.getId();
-				return new LoadableDetachableModel<Issue>() {
-
-					@Override
-					protected Issue load() {
-						return OneDev.getInstance(IssueManager.class).load(issueId);
-					}
-					
-				};
-			}
-			
-		};
-		
-		WebMarkupContainer body = new WebMarkupContainer("body");
-		
-		body.add(new NotificationPanel("feedback", form));
-		
-		DataView<Issue> issuesView = new DataView<Issue>("issues", dataProvider) {
-
-			@Override
-			protected void populateItem(Item<Issue> item) {
-				Issue issue = item.getModelObject();
-				item.add(new Label("number", "#" + issue.getNumber()));
-				Fragment titleFrag = new Fragment("title", "titleFrag", IssueListPage.this);
-				QueryPosition position = new QueryPosition(query, count, (int)getCurrentPage() * WebConstants.PAGE_SIZE + item.getIndex());
-				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(issue, position));
-				link.add(new Label("label", issue.getTitle()));
-				titleFrag.add(link);
-				item.add(titleFrag);
-
-				item.add(new UserLink("user", 
-						User.getForDisplay(issue.getLastActivity().getUser(), issue.getLastActivity().getUserName())));
-				item.add(new Label("action", issue.getLastActivity().getAction()));
-				item.add(new Label("date", DateUtils.formatAge(issue.getLastActivity().getDate())));
-				
-				item.add(new IssueStateLabel("state", item.getModel()));
-				
-				RepeatingView fieldsView = new RepeatingView("fields");
-				for (String fieldName: getProject().getIssueListFields()) {
-					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
-
-						@Override
-						protected Issue getIssue() {
-							return item.getModelObject();
-						}
-
-						@Override
-						protected IssueField getField() {
-							return item.getModelObject().getEffectiveFields().get(fieldName);
-						}
-						
-					}.add(AttributeAppender.append("title", fieldName)));
-				}
-				
-				item.add(fieldsView);
-				item.add(new Label("votes", issue.getNumOfVotes()));
-				item.add(new Label("comments", issue.getNumOfComments()));
-				
-				Date lastActivityDate;
-				if (issue.getLastActivity() != null)
-					lastActivityDate = issue.getLastActivity().getDate();
-				else
-					lastActivityDate = issue.getSubmitDate();
-				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(lastActivityDate)?"issue":"issue new"));
-			}
-			
-		};
-		issuesView.setItemsPerPage(WebConstants.PAGE_SIZE);
-		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
 
 			@Override
@@ -725,36 +487,42 @@ public class IssueListPage extends IssuesPage {
 			
 		};
 		
-		issuesView.setCurrentPage(pagingHistorySupport.getCurrentPage());
-		
-		body.add(issuesView);
-		
-		body.add(new HistoryAwarePagingNavigator("issuesPageNav", issuesView, pagingHistorySupport) {
+		add(new IssueListPanel("main", new PropertyModel<String>(this, "query")) {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(issuesView.getPageCount() > 1);
+			protected Project getProject() {
+				return IssueListPage.this.getProject();
+			}
+
+			@Override
+			protected IssueCriteria getBaseCriteria() {
+				return null;
+			}
+
+			@Override
+			protected PagingHistorySupport getPagingHistorySupport() {
+				return pagingHistorySupport;
+			}
+
+			@Override
+			protected void onQueryUpdated(AjaxRequestTarget target) {
+				setResponsePage(IssueListPage.class, paramsOf(getProject(), query));
+			}
+
+			@Override
+			protected void onQueryUpdating(AjaxRequestTarget target) {
+				if (getLoginUser() != null)
+					target.add(querySave);
 			}
 			
 		});
-		body.add(new WebMarkupContainer("noIssues") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(parsedQuery.get() != null && dataProvider.size() == 0);
-			}
-			
-		});
-		add(body);
+		
 	}
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new IssueListResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueList.onDomReady();"));
+		response.render(CssHeaderItem.forReference(new IssueListResourceReference()));
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query) {

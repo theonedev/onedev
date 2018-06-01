@@ -26,6 +26,10 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.issueboards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
+import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
 import io.onedev.server.web.page.project.issues.workflowreconcile.WorkflowReconcilePanel;
 
 @SuppressWarnings("serial")
@@ -111,6 +115,8 @@ public abstract class IssuesPage extends ProjectPage {
 			
 		});
 		tabs.add(new IssuesTab("Boards", IssueBoardsPage.class));
+		tabs.add(new IssuesTab("Milestones", MilestoneListPage.class, NewMilestonePage.class, 
+				MilestoneDetailPage.class, MilestoneEditPage.class));
 		
 		add(new Tabbable("issuesTabs", tabs));
 	}
@@ -119,6 +125,20 @@ public abstract class IssuesPage extends ProjectPage {
 
 		public IssuesTab(String title, Class<? extends Page> pageClass) {
 			super(Model.of(title), pageClass);
+		}
+		
+		public IssuesTab(String title, Class<? extends Page> pageClass, Class<? extends Page> additionalPageClass1) {
+			super(Model.of(title), pageClass, additionalPageClass1);
+		}
+		
+		public IssuesTab(String title, Class<? extends Page> pageClass, Class<? extends Page> additionalPageClass1, 
+				Class<? extends Page> additionalPageClass2) {
+			super(Model.of(title), pageClass, additionalPageClass1, additionalPageClass2);
+		}
+		
+		public IssuesTab(String title, Class<? extends Page> pageClass, Class<? extends Page> additionalPageClass1, 
+				Class<? extends Page> additionalPageClass2, Class<? extends Page> additionalPageClass3) {
+			super(Model.of(title), pageClass, additionalPageClass1, additionalPageClass2, additionalPageClass3);
 		}
 		
 		@Override

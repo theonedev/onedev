@@ -61,7 +61,7 @@ public class IssueActivitiesPage extends IssueDetailPage {
 		for (IssueComment comment: getIssue().getComments())  
 			activities.add(new CommentedActivity(comment));
 		
-		for (IssueChange change: getIssue().getEdits())
+		for (IssueChange change: getIssue().getChanges())
 			activities.add(new ChangedActivity(change));
 		
 		activities.sort((o1, o2) -> {

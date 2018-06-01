@@ -94,15 +94,6 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Description")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().getDescription(), false));
-			}
-			
-		});		
-		
 		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Type")) {
 
 			@Override

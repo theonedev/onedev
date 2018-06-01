@@ -95,15 +95,10 @@ public class ChoiceInput extends InputSpec {
 		}
 		appendChoiceProvider(buffer, index, "@ChoiceProvider");
 		
-		if (isAllowMultiple()) {
-			if (defaultMultiValueProvider != null)
-				appendDefaultValueProvider(buffer, index);
+		if (isAllowMultiple())
 			appendMethods(buffer, index, "List<String>", choiceProvider, defaultMultiValueProvider);
-		} else {
-			if (defaultValueProvider != null)
-				appendDefaultValueProvider(buffer, index);
+		else 
 			appendMethods(buffer, index, "String", choiceProvider, defaultValueProvider);
-		}
 		
 		return buffer.toString();
 	}

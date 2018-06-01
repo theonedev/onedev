@@ -47,7 +47,7 @@ public class UpdateDateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return quote(Issue.UPDATE_DATE) + " " + IssueQuery.getOperatorName(operator) + " " + quote(rawValue);
+		return IssueQuery.quote(Issue.UPDATE_DATE) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(rawValue);
 	}
 
 }

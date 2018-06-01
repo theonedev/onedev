@@ -47,7 +47,7 @@ public class IssueFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + quote(String.valueOf(value));
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 }

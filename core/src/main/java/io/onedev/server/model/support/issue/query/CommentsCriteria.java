@@ -50,7 +50,7 @@ public class CommentsCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return quote(Issue.COMMENTS) + " " + IssueQuery.getOperatorName(operator) + " " + quote(String.valueOf(value));
+		return IssueQuery.quote(Issue.COMMENTS) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 }

@@ -42,7 +42,7 @@ public class DescriptionCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return quote(Issue.DESCRIPTION) + " " + IssueQuery.getOperatorName(operator) + " " + quote(value);
+		return IssueQuery.quote(Issue.DESCRIPTION) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value);
 	}
 
 }

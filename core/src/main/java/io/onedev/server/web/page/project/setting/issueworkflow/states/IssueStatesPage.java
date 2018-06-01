@@ -109,6 +109,29 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			}
 		});		
 		
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Closed")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
+				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStatesPage.this);
+				StateSpec state = rowModel.getObject();
+				int index = getWorkflow().getStateSpecIndex(state.getName());				
+				Preconditions.checkState(index != -1);
+				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						newStateDetail(target, index);
+					}
+					
+				};
+				link.add(new Label("label", rowModel.getObject().isClosed()));
+				fragment.add(link);
+				cellItem.add(fragment);
+			}
+			
+		});		
+		
 		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Color")) {
 
 			@Override
@@ -127,29 +150,6 @@ public class IssueStatesPage extends IssueWorkflowPage {
 				};
 				link.add(new Label("label").add(AttributeAppender.append("style", "background: " + state.getColor() + ";")));
 				fragment.add(AttributeAppender.append("class", "color"));
-				fragment.add(link);
-				cellItem.add(fragment);
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Description")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStatesPage.this);
-				StateSpec state = rowModel.getObject();
-				int index = getWorkflow().getStateSpecIndex(state.getName());				
-				Preconditions.checkState(index != -1);
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						newStateDetail(target, index);
-					}
-					
-				};
-				link.add(new Label("label", state.getDescription()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}

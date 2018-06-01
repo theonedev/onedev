@@ -11,6 +11,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Color;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
 import io.onedev.server.web.util.WicketUtils;
@@ -21,6 +22,8 @@ public class StateSpec implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String name;
+	
+	private boolean closed;
 	
 	private String description;
 	
@@ -38,8 +41,18 @@ public class StateSpec implements Serializable {
 		this.name = name;
 	}
 
+	@Editable(order=150, description="Check this to indicate a closed state")
+	public boolean isClosed() {
+		return closed;
+	}
+
+	public void setClosed(boolean closed) {
+		this.closed = closed;
+	}
+
 	@Editable(order=200)
 	@NameOfEmptyValue("No description")
+	@Multiline
 	public String getDescription() {
 		return description;
 	}

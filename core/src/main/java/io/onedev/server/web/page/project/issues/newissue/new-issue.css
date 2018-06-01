@@ -5,3 +5,6 @@
 #new-issue>.body>div {
 	margin-bottom: 20px;
 }
+#new-issue>.body .select2-container {
+	width: 100%;
+}

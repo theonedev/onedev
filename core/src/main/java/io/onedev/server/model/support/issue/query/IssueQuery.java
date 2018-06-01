@@ -12,13 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -26,7 +19,6 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.java.JavaEscape;
@@ -35,7 +27,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.AndCriteriaContext;
@@ -83,39 +74,6 @@ public class IssueQuery implements Serializable {
 		this(null, new ArrayList<>());
 	}
 	
-	public CriteriaQuery<Issue> buildCriteriaQuery(Session session) {
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Issue> query = builder.createQuery(Issue.class);
-		Root<Issue> root = query.from(Issue.class);
-
-		if (criteria != null) 
-			query.where(criteria.getPredicate(new QueryBuildContext(root, builder)));
-
-		List<Order> orders = new ArrayList<>();
-		for (IssueSort sort: sorts) {
-			if (Issue.BUILTIN_FIELDS.containsKey(sort.getField())) {
-				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(root.get(Issue.BUILTIN_FIELDS.get(sort.getField()))));
-				else
-					orders.add(builder.desc(root.get(Issue.BUILTIN_FIELDS.get(sort.getField()))));
-			} else {
-				Join<Issue, IssueFieldUnary> join = root.join("fieldUnaries", JoinType.LEFT);
-				join.on(builder.equal(join.get(IssueFieldUnary.NAME), sort.getField()));
-				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(join.get(IssueFieldUnary.ORDINAL)));
-				else
-					orders.add(builder.desc(join.get(IssueFieldUnary.ORDINAL)));
-			}
-		}
-
-		Path<String> idPath = root.get("id");
-		if (orders.isEmpty())
-			orders.add(builder.desc(idPath));
-		query.orderBy(orders);
-		
-		return query;
-	}
-
 	@Nullable
 	public IssueCriteria getCriteria() {
 		return criteria;
@@ -234,7 +192,11 @@ public class IssueQuery implements Serializable {
 						int operator = ctx.operator.getType();
 						if (validate)
 							checkField(project, fieldName, operator);
-						if (fieldName.equals(Issue.SUBMITTER))
+						if (fieldName.equals(Issue.MILESTONE))
+							return new MilestoneUnaryCriteria(operator);
+						else if (fieldName.equals(Issue.DESCRIPTION))
+							return new DescriptionUnaryCriteria(operator);
+						else if (fieldName.equals(Issue.SUBMITTER))
 							return new SubmitterUnaryCriteria(operator);
 						else
 							return new FieldUnaryCriteria(fieldName, operator);
@@ -286,7 +248,9 @@ public class IssueQuery implements Serializable {
 							}
 						case IssueQueryLexer.Is:
 						case IssueQueryLexer.IsNot:
-							if (fieldName.equals(Issue.STATE)) {
+							if (fieldName.equals(Issue.MILESTONE)) {
+								return new MilestoneCriteria(value, operator);
+							} else if (fieldName.equals(Issue.STATE)) {
 								return new StateCriteria(value, operator);
 							} else if (fieldName.equals(Issue.VOTES)) {
 								return new VotesCriteria(getIntValue(value), operator);
@@ -409,8 +373,10 @@ public class IssueQuery implements Serializable {
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
 		case IssueQueryLexer.IsNotEmpty:
-			if (Issue.BUILTIN_FIELDS.containsKey(fieldName))
+			if (Issue.BUILTIN_FIELDS.containsKey(fieldName) && !fieldName.equals(Issue.DESCRIPTION)
+					&& !fieldName.equals(Issue.MILESTONE)) {
 				throw newOperatorException(fieldName, operator);
+			}
 			break;
 		case IssueQueryLexer.IsMe:
 		case IssueQueryLexer.IsNotMe:
@@ -438,6 +404,7 @@ public class IssueQuery implements Serializable {
 					&& !fieldName.equals(Issue.COMMENTS) 
 					&& !fieldName.equals(Issue.SUBMITTER)
 					&& !fieldName.equals(Issue.NUMBER)
+					&& !fieldName.equals(Issue.MILESTONE)
 					&& !(fieldSpec instanceof IssueChoiceInput)
 					&& !(fieldSpec instanceof BooleanInput)
 					&& !(fieldSpec instanceof NumberInput) 
@@ -554,6 +521,10 @@ public class IssueQuery implements Serializable {
 	
 	public boolean onDeleteFieldValue(String fieldName, String fieldValue) {
 		return criteria != null && criteria.onDeleteFieldValue(fieldName, fieldValue);
+	}
+	
+	public static String quote(String value) {
+		return "\"" + JavaEscape.escapeJava(value) + "\"";
 	}
 	
 }

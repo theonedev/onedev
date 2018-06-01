@@ -58,8 +58,6 @@ public class NumberInput extends InputSpec {
 		appendCommonAnnotations(buffer, index);
 		if (!isAllowEmpty())
 			buffer.append("    @NotNull\n");
-		if (defaultValueProvider != null)
-			appendDefaultValueProvider(buffer, index);
 		if (minValue != null) {
 			if (maxValue != null) {
 				buffer.append("    @Range(min=" + minValue.toString() + "L,max=" + maxValue.toString() +"L)\n");

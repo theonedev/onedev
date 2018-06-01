@@ -17,7 +17,6 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.utils.WordUtils;
 
 @SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
@@ -57,10 +56,7 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-        		if (propertyDescriptor.isPropertyRequired()) 
-					getSettings().setPlaceholder("Select " + WordUtils.uncamel(enumClass.getSimpleName()).toLowerCase() + "...");
-        		else if (propertyDescriptor.getNameOfEmptyValue() != null)
-					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+				getSettings().configurePlaceholder(propertyDescriptor);
 			}
 			
 		};
@@ -68,7 +64,7 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
     	input.setRequired(propertyDescriptor.isPropertyRequired());
         input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
         
-		input.add(new AjaxFormComponentUpdatingBehavior("change"){
+		input.add(new AjaxFormComponentUpdatingBehavior("change") {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {

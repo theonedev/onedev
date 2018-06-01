@@ -7,7 +7,6 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
-import org.unbescape.java.JavaEscape;
 
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
@@ -65,9 +64,9 @@ public class IssueSort implements Serializable {
 	@Override
 	public String toString() {
 		if (direction == Direction.ASCENDING)
-			return "\"" + JavaEscape.escapeJava(field) + "\"" + " asc";
+			return IssueQuery.quote(field) + " asc";
 		else
-			return "\"" + JavaEscape.escapeJava(field) + "\"" + " desc";
+			return IssueQuery.quote(field) + " desc";
 	}
 	
 }

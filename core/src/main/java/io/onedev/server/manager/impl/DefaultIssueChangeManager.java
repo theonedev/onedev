@@ -23,6 +23,7 @@ import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.changedata.DescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.FieldChangeData;
+import io.onedev.server.model.support.issue.changedata.MilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.StateChangeData;
 import io.onedev.server.model.support.issue.changedata.TitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -90,6 +91,25 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 
 	@Transactional
 	@Override
+	public void changeMilestone(Issue issue, String prevMilestone) {
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setAction("changed milestone");
+		lastActivity.setDate(new Date());
+		lastActivity.setUser(SecurityUtils.getUser());
+		issueManager.save(issue);
+		
+		IssueChange change = new IssueChange();
+		change.setIssue(issue);
+		change.setDate(new Date());
+		change.setUser(SecurityUtils.getUser());
+		change.setData(new MilestoneChangeData(prevMilestone, issue.getMilestoneName()));
+		save(change);
+		
+		listenerRegistry.post(new IssueChanged(change));
+	}
+	
+	@Transactional
+	@Override
 	public void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields, 
 			Collection<String> promptedFields) {
 		LastActivity lastActivity = new LastActivity();
@@ -119,7 +139,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Override
 	public void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent,
-			Map<String, IssueField> prevFields, Collection<String> promptedFields) {
+			String prevState, Map<String, IssueField> prevFields, Collection<String> promptedFields) {
 		long time = System.currentTimeMillis();
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setAction("changed state to \"" + issue.getState() + "\"");
@@ -139,7 +159,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		criteria.add(Restrictions.eq("issue", issue));
 		issue.setFieldUnaries(dao.findAll(criteria));
 		
-		change.setData(new StateChangeData(issue.getState(), prevFields, issue.getEffectiveFields(), commentContent));
+		change.setData(new StateChangeData(issue.getState(), prevState, prevFields, issue.getEffectiveFields(), commentContent));
 		
 		save(change);
 		

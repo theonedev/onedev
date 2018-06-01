@@ -42,7 +42,7 @@ public class SubmitterUnaryCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return quote(Issue.SUBMITTER) + " " + IssueQuery.getOperatorName(operator);
+		return IssueQuery.quote(Issue.SUBMITTER) + " " + IssueQuery.getOperatorName(operator);
 	}
 
 }

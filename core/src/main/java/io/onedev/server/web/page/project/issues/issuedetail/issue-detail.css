@@ -12,7 +12,8 @@
 	position: relative;
 }
 #issue-detail>.main>.title a {
-	color: #999;
+	color: #666;
+	margin-left: 8px;
 }
 #issue-detail>.main>.title input[type=text] {
 	width: 600px;
@@ -91,6 +92,7 @@
 #issue-detail>.side .fields td {
 	padding-bottom: 10px;
 	vertical-align: middle;
+	vertical-align: top;
 }
 #issue-detail>.side .fields tr:last-child td {
 	padding-bottom: 0;
@@ -98,7 +100,7 @@
 #issue-detail>.side .fields .name {
 	line-height: 20px;
 	white-space: nowrap;
-	padding-right: 20px;
+	padding: 3px 20px 3px 0;
 }
 #issue-detail>.side .fields .values .value>div, #issue-detail>.side .fields .values i {
 	display: table-cell;
@@ -108,5 +110,10 @@
 #issue-detail>.side .fields>a {
 	display: block;
 	margin-top: 12px;
+}
+#issue-detail>.side a.action {
+	margin-top: 0;
+	margin-left: 8px;
+	color: #666;
 }
 

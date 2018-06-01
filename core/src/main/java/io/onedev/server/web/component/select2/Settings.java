@@ -13,11 +13,15 @@
 package io.onedev.server.web.component.select2;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 
 import org.json.JSONException;
 import org.json.JSONStringer;
 
 import io.onedev.server.web.component.select2.json.Json;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 /**
  * Select2 settings. Refer to the Select2 documentation for what these options
@@ -399,4 +403,15 @@ public final class Settings implements Serializable {
 	public void setDropdownAutoWidth(Boolean dropdownAutoWidth) {
 		this.dropdownAutoWidth = dropdownAutoWidth;
 	}
+	
+	public void configurePlaceholder(PropertyDescriptor propertyDescriptor) {
+		if (propertyDescriptor.isPropertyRequired()) {
+			Method getter = propertyDescriptor.getPropertyGetter();
+			if (getter.getAnnotation(OmitName.class) != null)
+				setPlaceholder("Select " + EditableUtils.getDisplayName(getter).toLowerCase() + "...");
+		} else if (propertyDescriptor.getNameOfEmptyValue() != null) {
+			setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+		}
+	}
+	
 }

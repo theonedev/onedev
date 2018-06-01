@@ -15,9 +15,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -29,12 +34,15 @@ import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
+import io.onedev.server.model.support.issue.query.IssueSort;
+import io.onedev.server.model.support.issue.query.IssueSort.Direction;
 import io.onedev.server.model.support.issue.query.QueryBuildContext;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -95,6 +103,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		StateSpec initialState = issue.getProject().getIssueWorkflow().getInitialStateSpec();
 		issueFieldManager.writeFields(issue, fieldBean, initialState.getFields());
+		
 		listenerRegistry.post(new IssueOpened(issue));
 	}
 
@@ -129,11 +138,51 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		return nextNumber.getAndIncrement();
 	}
 	
+	private Predicate[] getPredicates(IssueCriteria criteria, Project project, QueryBuildContext context) {
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(context.getBuilder().equal(context.getRoot().get("project"), project));
+		if (criteria != null)
+			predicates.add(criteria.getPredicate(context));
+		return predicates.toArray(new Predicate[0]);
+	}
+	
+	public CriteriaQuery<Issue> buildCriteriaQuery(Session session, Project project, IssueQuery issueQuery) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Issue> query = builder.createQuery(Issue.class);
+		Root<Issue> root = query.from(Issue.class);
+		
+		QueryBuildContext context = new QueryBuildContext(root, builder);
+		query.where(getPredicates(issueQuery.getCriteria(), project, context));
+
+		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		for (IssueSort sort: issueQuery.getSorts()) {
+			if (Issue.BUILTIN_FIELDS.containsKey(sort.getField())) {
+				if (sort.getDirection() == Direction.ASCENDING)
+					orders.add(builder.asc(root.get(Issue.BUILTIN_FIELDS.get(sort.getField()))));
+				else
+					orders.add(builder.desc(root.get(Issue.BUILTIN_FIELDS.get(sort.getField()))));
+			} else {
+				Join<Issue, IssueFieldUnary> join = root.join("fieldUnaries", JoinType.LEFT);
+				join.on(builder.equal(join.get(IssueFieldUnary.NAME), sort.getField()));
+				if (sort.getDirection() == Direction.ASCENDING)
+					orders.add(builder.asc(join.get(IssueFieldUnary.ORDINAL)));
+				else
+					orders.add(builder.desc(join.get(IssueFieldUnary.ORDINAL)));
+			}
+		}
+
+		Path<String> idPath = root.get("id");
+		if (orders.isEmpty())
+			orders.add(builder.desc(idPath));
+		query.orderBy(orders);
+		
+		return query;
+	}
+
 	@Sessional
 	@Override
-	public List<Issue> query(IssueQuery issueQuery, int firstResult, int maxResults) {
-		CriteriaQuery<Issue> criteriaQuery = issueQuery.buildCriteriaQuery(getSession());
-		
+	public List<Issue> query(Project project, IssueQuery issueQuery, int firstResult, int maxResults) {
+		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(getSession(), project, issueQuery);
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -146,13 +195,14 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	@Sessional
 	@Override
-	public int count(IssueCriteria issueCriteria) {
+	public int count(Project project, IssueCriteria issueCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
-		
-		if (issueCriteria != null)
-			criteriaQuery.where(issueCriteria.getPredicate(new QueryBuildContext(root, builder)));
+
+		QueryBuildContext context = new QueryBuildContext(root, builder);
+		criteriaQuery.where(getPredicates(issueCriteria, project, context));
+
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}

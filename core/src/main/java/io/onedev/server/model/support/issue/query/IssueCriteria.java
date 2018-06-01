@@ -5,12 +5,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
-import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Splitter;
 
@@ -35,16 +34,19 @@ public abstract class IssueCriteria implements Serializable {
 		}
 	}
 	
+	public final void populate(Issue issue, Serializable fieldBean) {
+		populate(issue, fieldBean, new HashSet<>());
+	}
+	
+	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+	}
+	
 	public abstract boolean matches(Issue issue);
 	
 	public abstract boolean needsLogin();
 	
 	public abstract String toString();
 
-	protected String quote(String value) {
-		return "\"" + JavaEscape.escapeJava(value) + "\"";
-	}
-	
 	public Collection<String> getUndefinedStates(Project project) {
 		return new HashSet<>();
 	}

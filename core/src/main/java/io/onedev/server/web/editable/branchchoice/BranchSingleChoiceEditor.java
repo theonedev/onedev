@@ -44,8 +44,7 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				if (!propertyDescriptor.isPropertyRequired() && propertyDescriptor.getNameOfEmptyValue() != null)
-					getSettings().setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+				getSettings().configurePlaceholder(propertyDescriptor);
 			}
 			
     	};

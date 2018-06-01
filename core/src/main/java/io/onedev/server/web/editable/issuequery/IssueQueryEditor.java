@@ -8,13 +8,13 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.issuelist.IssueQueryBehavior;
 
 @SuppressWarnings("serial")
 public class IssueQueryEditor extends PropertyEditor<String> {

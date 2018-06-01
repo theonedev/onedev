@@ -50,7 +50,7 @@ public class DateFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + quote(rawValue);
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(rawValue);
 	}
 
 }

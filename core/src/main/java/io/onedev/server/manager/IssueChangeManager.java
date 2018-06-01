@@ -13,13 +13,15 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueChangeManager extends EntityManager<IssueChange> {
 
-	void changeTitle(Issue issue, String oldTitle);
+	void changeTitle(Issue issue, String prevTitle);
 	
-	void changeDescription(Issue issue, String oldDescription);
+	void changeDescription(Issue issue, String prevDescription);
+	
+	void changeMilestone(Issue issue, String prevMilestone);
 	
 	void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields, 
 			Collection<String> promptedFields);
 	
 	void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent, 
-			Map<String, IssueField> prevFields, Collection<String> promptedFields);
+			String prevState, Map<String, IssueField> prevFields, Collection<String> promptedFields);
 }

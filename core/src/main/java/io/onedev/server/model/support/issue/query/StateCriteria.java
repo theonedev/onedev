@@ -47,7 +47,7 @@ public class StateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return quote(Issue.STATE) + " " + IssueQuery.getOperatorName(operator) + " " + quote(value);
+		return IssueQuery.quote(Issue.STATE) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value);
 	}
 
 	@Override

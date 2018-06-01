@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,6 +14,8 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.PropertyDescriptor;
 
 public abstract class FieldCriteria extends IssueCriteria {
 
@@ -101,6 +104,18 @@ public abstract class FieldCriteria extends IssueCriteria {
 	@Override
 	public boolean onDeleteField(String fieldName) {
 		return fieldName.equals(this.fieldName);
+	}
+	
+	protected Object getFieldValue(Serializable fieldBean) {
+		PropertyDescriptor propertyDescriptor = new BeanDescriptor(fieldBean.getClass())
+				.getMapOfDisplayNameToPropertyDescriptor().get(fieldName);
+		return propertyDescriptor.getPropertyValue(fieldBean);
+	}
+	
+	protected void setFieldValue(Serializable fieldBean, Object value) {
+		PropertyDescriptor propertyDescriptor = new BeanDescriptor(fieldBean.getClass())
+				.getMapOfDisplayNameToPropertyDescriptor().get(fieldName);
+		propertyDescriptor.setPropertyValue(fieldBean, value);
 	}
 	
 }

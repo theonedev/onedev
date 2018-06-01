@@ -20,6 +20,7 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.validation.annotation.InputName;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
@@ -72,6 +73,7 @@ public abstract class InputSpec implements Serializable {
 
 	@Editable(order=30, description="resource.input.description")
 	@NameOfEmptyValue("No description")
+	@Multiline
 	public String getDescription() {
 		return description;
 	}
@@ -148,7 +150,7 @@ public abstract class InputSpec implements Serializable {
 	}
 
 	protected void appendField(StringBuffer buffer, int index, String type) {
-		buffer.append("    private " + type + " input" + index + ";\n");
+		buffer.append("    private Optional<" + type + "> input" + index + ";\n");
 		buffer.append("\n");
 	}
 	
@@ -170,25 +172,29 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("    @NameOfEmptyValue(\"" + escape(getNameOfEmptyValue()) + "\")");
 	}
 	
-	protected void appendDefaultValueProvider(StringBuffer buffer, int index) {
-		buffer.append("    @DefaultValueProvider(\"getDefaultInput" + index + "\")\n");
-	}
-	
 	protected void appendMethods(StringBuffer buffer, int index, String type, 
 			@Nullable Serializable choiceProvider, @Nullable Serializable defaultValueProvider) {
+		String literalBytes = getLiteral(SerializationUtils.serialize(defaultValueProvider));
 		buffer.append("    public " + type + " getInput" + index + "() {\n");
-		buffer.append("        return input" + index + ";\n");
+		buffer.append("        if (input" + index + "!=null) {\n");
+		buffer.append("            return input" + index + ".orNull();\n");
+		buffer.append("        } else {\n");
+		if (defaultValueProvider != null)
+			buffer.append("            return SerializationUtils.deserialize(" + literalBytes + ").getDefaultValue();\n");
+		else
+			buffer.append("        return null;\n");
+		buffer.append("        }\n");
 		buffer.append("    }\n");
 		buffer.append("\n");
 		
 		buffer.append("    public void setInput" + index + "(" + type + " value) {\n");
-		buffer.append("        this.input" + index + "=value;\n");
+		buffer.append("        this.input" + index + "=Optional.fromNullable(value);\n");
 		buffer.append("    }\n");
 		buffer.append("\n");
 		
 		if (showCondition != null) {
 			buffer.append("    private static boolean isInput" + index + "Visible() {\n");
-			String literalBytes = getLiteral(SerializationUtils.serialize(showCondition));
+			literalBytes = getLiteral(SerializationUtils.serialize(showCondition));
 			buffer.append("        return SerializationUtils.deserialize(" + literalBytes + ").isVisible();\n");
 			buffer.append("    }\n");
 			buffer.append("\n");
@@ -196,20 +202,12 @@ public abstract class InputSpec implements Serializable {
 
 		if (choiceProvider != null) {
 			buffer.append("    private static List getInput" + index + "Choices() {\n");
-			String literalBytes = getLiteral(SerializationUtils.serialize(choiceProvider));
+			literalBytes = getLiteral(SerializationUtils.serialize(choiceProvider));
 			if (choiceProvider instanceof io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider) {
 				buffer.append("        return new ArrayList(SerializationUtils.deserialize(" + literalBytes + ").getChoices(false).keySet());\n");
 			} else {
 				buffer.append("        return SerializationUtils.deserialize(" + literalBytes + ").getChoices(false);\n");
 			}
-			buffer.append("    }\n");
-			buffer.append("\n");
-		}
-		
-		if (defaultValueProvider != null) {
-			buffer.append("    private static " + type + " getDefaultInput" + index + "() {\n");
-			String literalBytes = getLiteral(SerializationUtils.serialize(defaultValueProvider));
-			buffer.append("        return SerializationUtils.deserialize(" + literalBytes + ").getDefaultValue();\n");
 			buffer.append("    }\n");
 			buffer.append("\n");
 		}
@@ -227,6 +225,7 @@ public abstract class InputSpec implements Serializable {
 	public static Class<?> defineClass(String className, List<InputSpec> inputs) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("import org.apache.commons.lang3.SerializationUtils;\n");
+		buffer.append("import com.google.common.base.Optional;\n");
 		buffer.append("import io.onedev.server.web.editable.annotation.*;\n");
 		buffer.append("import io.onedev.util.*;\n");
 		buffer.append("import io.onedev.server.util.*;\n");

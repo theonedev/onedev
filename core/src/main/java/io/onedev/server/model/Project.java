@@ -176,6 +176,9 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Task> tasks = new ArrayList<>();
 	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<Milestone> milestones = new ArrayList<>();
+	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private IssueWorkflow issueWorkflow = new IssueWorkflow();
@@ -915,6 +918,14 @@ public class Project extends AbstractEntity {
 		}
 	}
 
+	public Collection<Milestone> getMilestones() {
+		return milestones;
+	}
+
+	public void setMilestones(Collection<Milestone> milestones) {
+		this.milestones = milestones;
+	}
+
 	@Nullable
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
@@ -1002,6 +1013,15 @@ public class Project extends AbstractEntity {
 	
 	public void setIssueQuerySettingOfCurrentUser(IssueQuerySetting setting) {
 		issueQuerySettingOfCurrentUser = Optional.fromNullable(setting);
+	}
+	
+	@Nullable
+	public Milestone getMilestone(@Nullable String milestoneName) {
+		for (Milestone milestone: milestones) {
+			if (milestone.getName().equals(milestoneName))
+				return milestone;
+		}
+		return null;
 	}
 	
 }

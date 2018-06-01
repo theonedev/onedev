@@ -54,8 +54,6 @@ import io.onedev.server.web.websocket.WebSocketManager;
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
 
-	public static final String PARAM_AUTOSAVE_KEY_TO_CLEAR = "autosaveKeyToClear";
-	
 	private FeedbackPanel sessionFeedback;
 	
 	private RepeatingView rootComponents;

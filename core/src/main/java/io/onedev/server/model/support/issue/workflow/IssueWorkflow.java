@@ -16,6 +16,10 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.support.authorized.ProjectWriters;
+import io.onedev.server.model.support.issue.query.IssueCriteria;
+import io.onedev.server.model.support.issue.query.IssueQueryLexer;
+import io.onedev.server.model.support.issue.query.OrCriteria;
+import io.onedev.server.model.support.issue.query.StateCriteria;
 import io.onedev.server.model.support.issue.workflow.action.PressButton;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
@@ -152,14 +156,15 @@ public class IssueWorkflow implements Serializable {
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
-		open.setColor("#f1c232");
+		open.setColor("#f0ad4e");
 		open.setFields(Lists.newArrayList("Type", "Priority", "Assignee"));
 		
 		stateSpecs.add(open);
 		
 		StateSpec closed = new StateSpec();
-		closed.setColor("#cccccc");
+		closed.setColor("#777");
 		closed.setName("Closed");
+		closed.setClosed(true);
 		closed.setFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		
 		stateSpecs.add(closed);
@@ -386,6 +391,21 @@ public class IssueWorkflow implements Serializable {
 		for (int i=0; i<=index; i++)
 			applicableFields.addAll(getStateSpecs().get(i).getFields());
 		return applicableFields;
+	}
+
+	@Nullable
+	public IssueCriteria getStatesCriteria(boolean closed) {
+		List<IssueCriteria> criterias = new ArrayList<>();
+		for (StateSpec state: getStateSpecs()) {
+			if (closed == state.isClosed())
+				criterias.add(new StateCriteria(state.getName(), IssueQueryLexer.Is));
+		}
+		if (criterias.size() > 1)
+			return new OrCriteria(criterias);
+		else if (criterias.size() == 1)
+			return criterias.iterator().next();
+		else
+			return null;
 	}
 	
 }

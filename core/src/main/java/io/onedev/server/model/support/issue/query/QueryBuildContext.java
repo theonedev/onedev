@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
@@ -25,9 +26,14 @@ public class QueryBuildContext {
 	public Join<Issue, ?> getJoin(String fieldName) {
 		Join<Issue, ?> join = joins.get(fieldName);
 		if (join == null) {
-			join = root.join("fieldUnaries");
-			join.on(builder.equal(join.get("name"), fieldName));
-			joins.put(fieldName, join);
+			if (fieldName.equals(Issue.MILESTONE)) {
+				join = root.join("milestone", JoinType.LEFT);
+				joins.put(fieldName, join);
+			} else {
+				join = root.join("fieldUnaries");
+				join.on(builder.equal(join.get("name"), fieldName));
+				joins.put(fieldName, join);
+			}
 		}
 		return join;
 	}

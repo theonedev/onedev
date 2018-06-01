@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.issuelist;
+package io.onedev.server.web.behavior;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -165,7 +165,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 									} finally {
 										OneContext.pop();
-									}								
+									}			
+								} else if (fieldName.equals(Issue.MILESTONE)) {
+									List<String> candidates = project.getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
+									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 								} else if (fieldName.equals(Issue.TITLE) || fieldName.equals(Issue.DESCRIPTION) 
 										|| fieldName.equals(Issue.VOTES) || fieldName.equals(Issue.COMMENTS) 
 										|| fieldName.equals(Issue.NUMBER) || fieldSpec instanceof NumberInput 

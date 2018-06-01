@@ -19,19 +19,26 @@ public class StateChangeData extends FieldChangeData {
 
 	private static final long serialVersionUID = 1L;
 
+	private final String prevState;
+	
 	private final String state;
 	
 	private String comment;
 	
-	public StateChangeData(String state, Map<String, IssueField> oldFields, Map<String, IssueField> newFields, 
+	public StateChangeData(String state, String prevState, Map<String, IssueField> oldFields, Map<String, IssueField> newFields, 
 			@Nullable String comment) {
 		super(oldFields, newFields);
 		this.state = state;
+		this.prevState = prevState;
 		this.comment = comment;
 	}
 
 	public String getState() {
 		return state;
+	}
+
+	public String getPrevState() {
+		return prevState;
 	}
 
 	@Override

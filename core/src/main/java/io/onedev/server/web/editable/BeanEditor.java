@@ -34,14 +34,12 @@ import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.PathSegment.Property;
-import io.onedev.server.web.editable.annotation.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Vertical;
 import io.onedev.server.web.editable.bean.BeanPropertyEditor;
 import io.onedev.server.web.editable.polymorphic.PolymorphicPropertyEditor;
 import io.onedev.server.web.util.ComponentContext;
-import io.onedev.utils.ReflectionUtils;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -170,13 +168,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				
 				OneContext.push(context);
 				try {
-					DefaultValueProvider defaultValueProvider = propertyContext.getPropertyGetter().getAnnotation(DefaultValueProvider.class);
-					if (defaultValueProvider != null) {
-						propertyValue = (Serializable) ReflectionUtils.invokeStaticMethod(
-								propertyContext.getBeanClass(), defaultValueProvider.value());
-					} else { 
-						propertyValue = (Serializable) propertyContext.getPropertyValue(getModelObject());
-					}
+					propertyValue = (Serializable) propertyContext.getPropertyValue(getModelObject());
 				} finally {
 					OneContext.pop();
 				}

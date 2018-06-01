@@ -24,9 +24,9 @@ public interface IssueManager extends EntityManager<Issue> {
     
 	void open(Issue issue, Serializable fieldBean);
 	
-	List<Issue> query(IssueQuery issueQuery, int firstResult, int maxResults);
+	List<Issue> query(Project project, IssueQuery issueQuery, int firstResult, int maxResults);
 	
-	int count(@Nullable IssueCriteria issueCriteria);
+	int count(Project project, @Nullable IssueCriteria issueCriteria);
 	
 	List<Issue> query(Project project, @Nullable String term, int count);
 	
@@ -43,5 +43,4 @@ public interface IssueManager extends EntityManager<Issue> {
 	void fixUndefinedFieldValues(Project project, Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions);
 	
 	void fixFieldValueOrders(Project project);
-	
 }

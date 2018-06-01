@@ -40,8 +40,6 @@ public class PasswordInput extends InputSpec {
 		appendCommonAnnotations(buffer, index);
 		if (!isAllowEmpty())
 			buffer.append("    @NotEmpty\n");
-		if (defaultValueProvider != null)
-			appendDefaultValueProvider(buffer, index);
 		buffer.append("    @Password\n");
 		appendMethods(buffer, index, "String", null, defaultValueProvider);
 		
