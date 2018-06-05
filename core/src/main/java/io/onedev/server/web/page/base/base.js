@@ -605,6 +605,39 @@ onedev.server = {
 		}
 	},
 	
+	setupInputClear: function() {
+		function installClearer($container) {
+			$container.find(".clearable-wrapper").each(function() {
+				var $wrapper = $(this);
+				var $input = $wrapper.find("input[type=text]:visible, input:not([type]):visible");
+				if (!$input.hasClass("clearable")) {
+					$input.addClass("clearable");
+					var $clear = $("<a class='input-clear'>x</a>");
+					$wrapper.append($clear);
+					if ($input.next().hasClass("input-group-btn"))
+						$clear.addClass("input-group-clear");
+					$clear.click(function() {
+						$input.val("");
+						$input.focus();
+						$input.trigger("input");
+					});
+					function setVisibility() {
+						if ($input.val() != "")
+							$clear.show();
+						else
+							$clear.hide();
+					}
+					$input.on("input change", setVisibility);
+					setVisibility();
+				}
+			});
+		}
+		$(document).on("elementReplaced", function(event, componentId) {
+			installClearer($("#" + componentId));
+		});
+		installClearer($(document));
+	},
+	
 	onDomReady: function() {
 		onedev.server.setupAjaxLoadingIndicator();
 		onedev.server.form.setupDirtyCheck();
@@ -612,6 +645,7 @@ onedev.server = {
 		onedev.server.setupWebsocketCallback();
 		onedev.server.mouseState.track();
 		onedev.server.ajaxRequests.track();
+		onedev.server.setupInputClear();
 		
 		$(document).keydown(function(e) {
 			if (e.keyCode == 27)
@@ -625,6 +659,7 @@ onedev.server = {
 	
 	onWindowLoad: function() {
 		onedev.server.setupAutoSize();
+		
 		/*
 		 * Browser will also issue resize event after window is loaded, but that is too late, 
 		 * as getFromHistoryAndSetToView() must be happened after view size has been adjusted

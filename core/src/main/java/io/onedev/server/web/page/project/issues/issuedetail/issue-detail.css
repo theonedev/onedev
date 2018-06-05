@@ -11,13 +11,17 @@
 	color: #444;
 	position: relative;
 }
-#issue-detail>.main>.title a {
+#issue-detail>.main>.title a.edit {
 	color: #666;
 	margin-left: 8px;
 }
 #issue-detail>.main>.title input[type=text] {
 	width: 600px;
 	font-weight: normal;
+}
+#issue-detail>.main>.title .input-clear {
+	right: auto;
+	left: 573px;
 }
 #issue-detail>.main>.title .alert {
 	font-weight: normal;

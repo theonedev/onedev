@@ -17,7 +17,7 @@
 	font-size: 16px;
 }
 
-#request-detail>.head {
+#request-detail>.head .title, #request-detail>.head a.edit {
 	font-size: 24px; 
 	font-weight: bold; 
 	padding: 0;
@@ -26,6 +26,11 @@
 	width: 600px;
 	font-weight: normal;
 }
+#request-detail>.head .input-clear {
+	right: auto;
+	left: 573px;
+}
+
 #request-detail>.head a i {
 	color: #999; 
 	font-size: 19px;

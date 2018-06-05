@@ -48,5 +48,6 @@
 
 #issue-list>.main {
 	padding-left: 20px;
+	vertical-align: top;
 }
 

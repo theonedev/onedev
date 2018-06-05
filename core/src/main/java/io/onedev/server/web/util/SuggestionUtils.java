@@ -42,7 +42,8 @@ public class SuggestionUtils {
 				Range match = new Range(index, index+lowerCaseMatchWith.length());
 				InputSuggestion suggestion = new InputSuggestion(branch, match);
 				if (escapeChars != null)
-					suggestions.add(suggestion.escape(escapeChars));
+					suggestion = suggestion.escape(escapeChars);
+				suggestions.add(suggestion);
 			}
 		}
 		return suggestions;

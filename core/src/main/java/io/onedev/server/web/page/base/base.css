@@ -544,3 +544,30 @@ input.search {
 	font-family: sans-serif;
 }
 
+.clearable-wrapper {
+	position: relative;
+}
+.clearable-wrapper input.clearable::-ms-clear {
+    display: none;
+}
+a.input-clear {
+	font-family: sans-serif;
+	display: block;
+	width: 24px; 
+	height: 24px;
+	line-height: 24px;
+	font-size: 16px;
+	position: absolute;
+	right: 5px;
+	top: 0; 
+	bottom: 0;
+	margin: auto;
+	text-decoration: none;
+	color: #999;
+	z-index: 10;
+	background: white;
+	text-align: center;
+}
+a.input-clear.input-group-clear {
+	right: 42px;
+}
