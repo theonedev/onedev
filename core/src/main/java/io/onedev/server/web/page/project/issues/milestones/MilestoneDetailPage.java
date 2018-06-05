@@ -77,7 +77,7 @@ public class MilestoneDetailPage extends IssuesPage {
 
 			@Override
 			public String getObject() {
-				return "label label-" + (getMilestone().isClosed()? "default": "warning");
+				return "label label-" + (getMilestone().isClosed()? "success": "warning");
 			}
 			
 		})));

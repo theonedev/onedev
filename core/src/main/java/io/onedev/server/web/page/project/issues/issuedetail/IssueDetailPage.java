@@ -318,7 +318,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 									super.onSubmit(target, form);
 
 									Map<String, IssueField> prevFields = getIssue().getEffectiveFields();
-									Collection<String> promptedFields = getIssue().getPromptedFields();
+									Collection<String> promptedFields = getIssue().getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
 									StateSpec toStateSpec = getProject().getIssueWorkflow().getStateSpec(transition.getToState());
 									if (toStateSpec == null)
 										throw new OneException("Unable to find state spec: " + transition.getToState());
@@ -487,7 +487,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					int offset = position.getOffset() - 1;
 					List<Issue> issues = getIssueManager().query(getProject(), query, offset, 1);
 					if (!issues.isEmpty()) {
-						if (!query.getCriteria().matches(getIssue()))
+						if (!query.matches(getIssue()))
 							count--;
 						QueryPosition prevPosition = new QueryPosition(position.getQuery(), count, offset);
 						PageParameters params = IssueDetailPage.paramsOf(issues.get(0), prevPosition);
@@ -518,7 +518,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true);
 					int offset = position.getOffset();
 					int count = position.getCount();
-					if (query.getCriteria().matches(getIssue())) 
+					if (query.matches(getIssue())) 
 						offset++;
 					else
 						count--;
@@ -649,8 +649,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, prevFields, 
-								getIssue().getPromptedFields());
+						Collection<String> promptedFields = getIssue().getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
+						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, prevFields, promptedFields);
 						modal.close();
 						target.add(fieldsContainer);
 					}

@@ -37,8 +37,6 @@ public class IssueFieldUnary extends AbstractEntity {
 	@Column(nullable=false)
 	private String type;
 
-	private boolean prompted;
-	
 	private long ordinal;
 	
 	public Issue getIssue() {
@@ -57,12 +55,6 @@ public class IssueFieldUnary extends AbstractEntity {
 		this.name = name;
 	}
 
-	/**
-	 * Get issue field value 
-	 * 
-	 * @return
-	 * 			a single value of the field, <tt>null</tt> if the field is not prompted yet
-	 */
 	@Nullable
 	public String getValue() {
 		return value;
@@ -86,14 +78,6 @@ public class IssueFieldUnary extends AbstractEntity {
 
 	public void setOrdinal(long ordinal) {
 		this.ordinal = ordinal;
-	}
-
-	public boolean isPrompted() {
-		return prompted;
-	}
-
-	public void setPrompted(boolean prompted) {
-		this.prompted = prompted;
 	}
 
 }

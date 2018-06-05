@@ -5,8 +5,10 @@
 	margin-right: 20px;
 }
 #milestone-list>.body tbody a {
-	color: #444;
 	margin-right: 8px;
+}
+#milestone-list>.body tbody .actions a {
+	color: #666;
 }
 
 .issue-stats .progress {
@@ -16,6 +18,9 @@
 .issue-stats .text {
 	float: left;
 	margin-right: 20px;
+}
+.issue-stats .text a:first-child {
+	margin-right: 8px;
 }
 .milestone-sort.active:before {
 	font-family: "FontAwesome";
@@ -35,9 +40,17 @@
 #milestone-detail>.title>* {
 	margin-right: 20px;
 }
+#milestone-detail>.title>.status {
+	margin-right: 10px;
+	font-size: 16px;
+	margin-top: -2px;
+}
 #milestone-detail>.title .due, #milestone-detail>.title a {
 	font-weight: normal;
 	font-size: 16px;
+}
+#milestone-detail>.title .actions a {
+	color: #666;
 }
 #milestone-detail .description {
 	background: #F5F5F5;

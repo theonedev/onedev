@@ -162,7 +162,7 @@ public class IssueWorkflow implements Serializable {
 		stateSpecs.add(open);
 		
 		StateSpec closed = new StateSpec();
-		closed.setColor("#777");
+		closed.setColor("#5cb85c");
 		closed.setName("Closed");
 		closed.setClosed(true);
 		closed.setFields(Lists.newArrayList("Resolution", "Duplicate With"));

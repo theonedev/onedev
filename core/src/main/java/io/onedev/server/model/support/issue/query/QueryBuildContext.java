@@ -30,7 +30,7 @@ public class QueryBuildContext {
 				join = root.join("milestone", JoinType.LEFT);
 				joins.put(fieldName, join);
 			} else {
-				join = root.join("fieldUnaries");
+				join = root.join("fieldUnaries", JoinType.LEFT);
 				join.on(builder.equal(join.get("name"), fieldName));
 				joins.put(fieldName, join);
 			}

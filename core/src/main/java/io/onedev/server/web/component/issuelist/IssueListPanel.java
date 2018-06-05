@@ -217,6 +217,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						getProject().setIssueListFields((ArrayList<String>) bean.getFields());
 						OneDev.getInstance(ProjectManager.class).save(getProject());
 						target.add(IssueListPanel.this);
+						modal.close();
 					}
 					
 				});

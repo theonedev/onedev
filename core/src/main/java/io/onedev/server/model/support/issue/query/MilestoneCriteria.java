@@ -54,7 +54,7 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.MILESTONE) + " " + IssueQuery.getOperatorName(operator);
+		return IssueQuery.quote(Issue.MILESTONE) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value);
 	}
 
 	@Override

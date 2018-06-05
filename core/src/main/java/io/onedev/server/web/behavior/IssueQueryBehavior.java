@@ -223,8 +223,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected List<String> getHints(ParentedElement expectedElement, String matchWith) {
 		List<String> hints = super.getHints(expectedElement, matchWith);
-		if (expectedElement.getSpec() instanceof LiteralElementSpec) 
+		if (expectedElement.getSpec() instanceof LiteralElementSpec 
+				|| expectedElement.getSpec() instanceof LexerRuleRefElementSpec) { 
 			hints.add("Input text without space to match options");
+		}
 		return hints;
 	}
 

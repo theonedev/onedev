@@ -117,63 +117,60 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 
 		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
 			String fieldName = propertyDescriptor.getDisplayName();
-			Object fieldValue = propertyDescriptor.getPropertyValue(fieldBean);
-			InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getFieldSpec(fieldName);
-			if (fieldSpec != null) {
-				long ordinal = fieldSpec.getOrdinal(new OneContext() {
+			if (promptedFields.contains(fieldName)) {
+				Object fieldValue = propertyDescriptor.getPropertyValue(fieldBean);
+				InputSpec fieldSpec = issue.getProject().getIssueWorkflow().getFieldSpec(fieldName);
+				if (fieldSpec != null) {
+					long ordinal = fieldSpec.getOrdinal(new OneContext() {
 
-					@Override
-					public Project getProject() {
-						return issue.getProject();
-					}
+						@Override
+						public Project getProject() {
+							return issue.getProject();
+						}
 
-					@Override
-					public EditContext getEditContext(int level) {
-						return new EditContext() {
+						@Override
+						public EditContext getEditContext(int level) {
+							return new EditContext() {
 
-							@Override
-							public Object getInputValue(String name) {
-								return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
-							}
-							
-						};
-					}
+								@Override
+								public Object getInputValue(String name) {
+									return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
+								}
+								
+							};
+						}
 
-					@Override
-					public InputContext getInputContext() {
-						throw new UnsupportedOperationException();
-					}
+						@Override
+						public InputContext getInputContext() {
+							throw new UnsupportedOperationException();
+						}
+						
+					}, fieldValue);
+
+					IssueFieldUnary field = new IssueFieldUnary();
+					field.setIssue(issue);
+					field.setName(fieldName);
+					field.setOrdinal(ordinal);
+					field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
 					
-				}, fieldValue);
-
-				IssueFieldUnary field = new IssueFieldUnary();
-				field.setIssue(issue);
-				field.setName(fieldName);
-				field.setOrdinal(ordinal);
-				field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
-				field.setPrompted(promptedFields.contains(fieldName));
-				
-				if (fieldValue != null) {
-					List<String> strings = fieldSpec.convertToStrings(fieldValue);
-					if (!strings.isEmpty()) {
-						for (String string: strings) {
-							IssueFieldUnary cloned = (IssueFieldUnary) SerializationUtils.clone(field);
-							cloned.setIssue(issue);
-							cloned.setValue(string);
-							save(cloned);
-							issue.getFieldUnaries().add(cloned);
+					if (fieldValue != null) {
+						List<String> strings = fieldSpec.convertToStrings(fieldValue);
+						if (!strings.isEmpty()) {
+							for (String string: strings) {
+								IssueFieldUnary cloned = (IssueFieldUnary) SerializationUtils.clone(field);
+								cloned.setIssue(issue);
+								cloned.setValue(string);
+								save(cloned);
+								issue.getFieldUnaries().add(cloned);
+							}
+						} else {
+							save(field);
+							issue.getFieldUnaries().add(field);
 						}
 					} else {
 						save(field);
 						issue.getFieldUnaries().add(field);
 					}
-				} else {
-					/*
-					 * Need to add a database record for null field in order to work with
-					 * joined field query 
-					 */
-					save(field);
-					issue.getFieldUnaries().add(field);
 				}
 			}
 		}
