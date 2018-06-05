@@ -1,9 +1,9 @@
 grammar IssueQuery;
 
 query
-    : WS* (criteria|All) WS+ OrderBy WS+ order (WS+ 'and' WS+ order)* WS* EOF
+    : WS* (criteria|All) WS+ OrderBy WS+ order (WS+ And WS+ order)* WS* EOF
     | WS* (criteria|All) WS* EOF
-    | WS* OrderBy WS+ order (WS+ 'and' WS+ order)* WS* EOF
+    | WS* OrderBy WS+ order (WS+ And WS+ order)* WS* EOF
     | WS* EOF
     ;
 
@@ -11,13 +11,13 @@ criteria
     : Mine																			#MineCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty) #UnaryCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains|DoesNotContain) WS+ criteriaValue=Quoted #ValueCriteria
-    | criteria WS+ 'and' WS+ criteria												#AndCriteria
-    | criteria WS+ 'or' WS+ criteria												#OrCriteria
-    | '(' WS* criteria WS* ')'														#BracedCriteria
+    | criteria WS+ And WS+ criteria												#AndCriteria
+    | criteria WS+ Or WS+ criteria												#OrCriteria
+    | LParens WS* criteria WS* RParens														#BracedCriteria
     ;
 
 order
-	: orderField=Quoted WS* (WS+ direction=('asc'|'desc'))?
+	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
 	;
 
 Mine
@@ -79,6 +79,30 @@ IsEmpty
 IsNotEmpty
 	: 'is' WS+ 'not' WS+ 'empty'
 	;
+	
+And
+	: 'and'
+	;
+	
+Or
+	: 'or'
+	;
+	
+Asc
+	: 'asc'
+	;
+	
+Desc
+	: 'desc'
+	;			
+	
+LParens
+	: '('
+	;
+	
+RParens
+	: ')'
+	;				
 
 Quoted
     : '"' (ESCAPE|~["\\])+? '"'
