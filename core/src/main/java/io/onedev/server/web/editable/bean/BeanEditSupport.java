@@ -19,15 +19,14 @@ import io.onedev.utils.ClassUtils;
 public class BeanEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-		Class<?> propertyClass = propertyDescriptor.getPropertyClass();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Class<?> propertyClass = descriptor.getPropertyClass();
 		if (propertyClass.getAnnotation(Editable.class) != null && ClassUtils.isConcrete(propertyClass)) {
-			return new PropertyContext<Serializable>(propertyDescriptor) {
+			return new PropertyContext<Serializable>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<Serializable> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -43,7 +42,7 @@ public class BeanEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<Serializable> renderForEdit(String componentId, IModel<Serializable> model) {
-					return new BeanPropertyEditor(componentId, this, model);
+					return new BeanPropertyEditor(componentId, descriptor, model);
 				}
 				
 			};

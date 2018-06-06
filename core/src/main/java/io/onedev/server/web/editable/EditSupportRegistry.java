@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public interface EditSupportRegistry {
 
-	PropertyContext<Serializable> getPropertyEditContext(Class<?> beanClass, String propertyName);
+	PropertyContext<Serializable> getPropertyEditContext(PropertyDescriptor descriptor);
 
 }

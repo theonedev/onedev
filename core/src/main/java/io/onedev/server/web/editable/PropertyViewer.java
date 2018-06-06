@@ -7,21 +7,21 @@ import org.apache.wicket.markup.html.panel.Panel;
 @SuppressWarnings("serial")
 public abstract class PropertyViewer extends Panel {
 
-	private final PropertyDescriptor propertyDescriptor;
+	private final PropertyDescriptor descriptor;
 	
-	public PropertyViewer(String id, PropertyDescriptor propertyDescriptor) {
+	public PropertyViewer(String id, PropertyDescriptor descriptor) {
 		super(id);
 	
-		this.propertyDescriptor = propertyDescriptor;
+		this.descriptor = descriptor;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(newContent("content", propertyDescriptor));
+		add(newContent("content", descriptor));
 		add(AttributeAppender.append("class", "property viewer editable"));
 	}
 	
-	protected abstract Component newContent(String id, PropertyDescriptor propertyDescriptor);
+	protected abstract Component newContent(String id, PropertyDescriptor descriptor);
 }

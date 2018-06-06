@@ -38,12 +38,12 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 		config.clearButton(true);
 		config.withFormat(DateEditSupport.DATE_INPUT_FORMAT);
 		input = new DateTextField("input", Model.of(getModelObject()), config);
-		input.setType(getPropertyDescriptor().getPropertyClass());
-		Method propertyGetter = getPropertyDescriptor().getPropertyGetter();
+		input.setType(getDescriptor().getPropertyClass());
+		Method propertyGetter = getDescriptor().getPropertyGetter();
 		if (propertyGetter.getAnnotation(OmitName.class) != null)
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(propertyGetter)));
 
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 		add(input);
 		
 		input.add(new OnTypingDoneBehavior() {

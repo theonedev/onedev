@@ -17,18 +17,16 @@ import io.onedev.server.web.editable.annotation.Script;
 public class ScriptEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-
-		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
-		if (propertyDescriptor.getPropertyGetter().getAnnotation(Script.class) != null) {
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
+		if (descriptor.getPropertyGetter().getAnnotation(Script.class) != null) {
 			Preconditions.checkState(propertyClass == String.class, 
 					"@Code annotation should only be applied to a string property");
-			return new PropertyContext<String>(propertyDescriptor) {
+			return new PropertyContext<String>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -44,7 +42,7 @@ public class ScriptEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					return new ScriptPropertyEditor(componentId, this, model);
+					return new ScriptPropertyEditor(componentId, descriptor, model);
 				}
 				
 			};

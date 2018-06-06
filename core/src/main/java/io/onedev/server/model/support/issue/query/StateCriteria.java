@@ -1,8 +1,10 @@
 package io.onedev.server.model.support.issue.query;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -43,6 +45,12 @@ public class StateCriteria extends IssueCriteria {
 	@Override
 	public boolean needsLogin() {
 		return false;
+	}
+
+	@Override
+	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+		if (operator == IssueQueryLexer.Is)
+			issue.setState(value);
 	}
 
 	@Override

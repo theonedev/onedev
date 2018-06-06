@@ -13,7 +13,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -42,6 +41,7 @@ import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.issuelist.IssueListPanel;
+import io.onedev.server.web.component.issuelist.QuerySaveSupport;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
@@ -53,7 +53,6 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class IssueListPage extends IssuesPage {
@@ -64,7 +63,7 @@ public class IssueListPage extends IssuesPage {
 	
 	private String query;
 	
-	private Component querySave;
+	private Component side;
 	
 	public IssueListPage(PageParameters params) {
 		super(params);
@@ -108,112 +107,6 @@ public class IssueListPage extends IssuesPage {
 		WebMarkupContainer side = new WebMarkupContainer("side");
 		side.setOutputMarkupId(true);
 		add(side);
-		
-		side.add(querySave = new ModalLink("save") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(query));
-				setVisible(getLoginUser() != null);
-			}
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				configure();
-				if (!isEnabled()) {
-					tag.put("disabled", "disabled");
-					tag.put("title", "Input query to save");
-				}
-			}
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "saveQueryFrag", IssueListPage.this);
-				Form<?> form = new Form<Void>("form") {
-
-					@Override
-					protected void onError() {
-						super.onError();
-						RequestCycle.get().find(AjaxRequestTarget.class).add(this);
-					}
-					
-				};
-				SaveQueryBean bean = new SaveQueryBean();
-				BeanEditor editor = BeanContext.editBean("editor", bean); 
-				form.add(editor);
-				form.add(new AjaxButton("save") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						IssueQuerySetting setting = getIssueQuerySetting();
-						if (setting == null) {
-							setting = new IssueQuerySetting();
-							setting.setProject(getProject());
-							setting.setUser(getLoginUser());
-							getProject().setIssueQuerySettingOfCurrentUser(setting);
-						}
-						NamedQuery namedQuery = setting.getUserQuery(bean.getName());
-						if (namedQuery == null) {
-							namedQuery = new NamedQuery(bean.getName(), query);
-							setting.getUserQueries().add(namedQuery);
-						} else {
-							namedQuery.setQuery(query);
-						}
-						getIssueQuerySettingManager().save(setting);
-						target.add(side);
-						modal.close();
-					}
-					
-				});
-				form.add(new AjaxButton("saveForAll") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						NamedQuery namedQuery = getProject().getSavedIssueQuery(bean.getName());
-						if (namedQuery == null) {
-							namedQuery = new NamedQuery(bean.getName(), query);
-							getProject().getSavedIssueQueries().add(namedQuery);
-						} else {
-							namedQuery.setQuery(query);
-						}
-						OneDev.getInstance(ProjectManager.class).save(getProject());
-						target.add(side);
-						modal.close();
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()));
-					}
-					
-				});
-				form.add(new AjaxLink<Void>("close") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-				});
-				form.setOutputMarkupId(true);
-				fragment.add(form);
-				return fragment;
-			}
-			
-		}.setOutputMarkupId(true));
 		
 		side.add(new ModalLink("edit") {
 
@@ -469,7 +362,7 @@ public class IssueListPage extends IssuesPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(newSideContainer());
+		add(side = newSideContainer());
 		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
 
@@ -510,11 +403,104 @@ public class IssueListPage extends IssuesPage {
 			}
 
 			@Override
-			protected void onQueryUpdating(AjaxRequestTarget target) {
-				if (getLoginUser() != null)
-					target.add(querySave);
+			protected QuerySaveSupport getQuerySaveSupport() {
+				return new QuerySaveSupport() {
+
+					@Override
+					public void onSaveQuery(AjaxRequestTarget target) {
+						new ModalPanel(target)  {
+
+							@Override
+							protected Component newContent(String id) {
+								Fragment fragment = new Fragment(id, "saveQueryFrag", IssueListPage.this);
+								Form<?> form = new Form<Void>("form") {
+
+									@Override
+									protected void onError() {
+										super.onError();
+										RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+									}
+									
+								};
+								SaveQueryBean bean = new SaveQueryBean();
+								BeanEditor editor = BeanContext.editBean("editor", bean); 
+								form.add(editor);
+								form.add(new AjaxButton("save") {
+
+									@Override
+									protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+										super.onSubmit(target, form);
+										IssueQuerySetting setting = getIssueQuerySetting();
+										if (setting == null) {
+											setting = new IssueQuerySetting();
+											setting.setProject(getProject());
+											setting.setUser(getLoginUser());
+											getProject().setIssueQuerySettingOfCurrentUser(setting);
+										}
+										NamedQuery namedQuery = setting.getUserQuery(bean.getName());
+										if (namedQuery == null) {
+											namedQuery = new NamedQuery(bean.getName(), query);
+											setting.getUserQueries().add(namedQuery);
+										} else {
+											namedQuery.setQuery(query);
+										}
+										getIssueQuerySettingManager().save(setting);
+										target.add(side);
+										close();
+									}
+									
+								});
+								form.add(new AjaxButton("saveForAll") {
+
+									@Override
+									protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+										super.onSubmit(target, form);
+										NamedQuery namedQuery = getProject().getSavedIssueQuery(bean.getName());
+										if (namedQuery == null) {
+											namedQuery = new NamedQuery(bean.getName(), query);
+											getProject().getSavedIssueQueries().add(namedQuery);
+										} else {
+											namedQuery.setQuery(query);
+										}
+										OneDev.getInstance(ProjectManager.class).save(getProject());
+										target.add(side);
+										close();
+									}
+
+									@Override
+									protected void onConfigure() {
+										super.onConfigure();
+										setVisible(SecurityUtils.canManage(getProject()));
+									}
+									
+								});
+								form.add(new AjaxLink<Void>("close") {
+
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										close();
+									}
+									
+								});
+								form.add(new AjaxLink<Void>("cancel") {
+
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										close();
+									}
+									
+								});
+								form.setOutputMarkupId(true);
+								fragment.add(form);
+								return fragment;
+							}
+							
+						};
+					}
+					
+				};
 			}
-			
+
 		});
 		
 	}

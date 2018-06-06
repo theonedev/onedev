@@ -16,17 +16,16 @@ import io.onedev.server.web.editable.annotation.Password;
 public class PasswordEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-		if (propertyDescriptor.getPropertyClass() == String.class) {
-			Password password = propertyDescriptor.getPropertyGetter().getAnnotation(Password.class);
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		if (descriptor.getPropertyClass() == String.class) {
+			Password password = descriptor.getPropertyGetter().getAnnotation(Password.class);
 			if (password != null) {
 				if (password.confirmative()) {
-					return new PropertyContext<String>(propertyDescriptor) {
+					return new PropertyContext<String>(descriptor) {
 
 						@Override
 						public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-							return new PropertyViewer(componentId, this) {
+							return new PropertyViewer(componentId, descriptor) {
 
 								@Override
 								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -42,16 +41,16 @@ public class PasswordEditSupport implements EditSupport {
 
 						@Override
 						public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-							return new ConfirmativePasswordPropertyEditor(componentId, this, model);
+							return new ConfirmativePasswordPropertyEditor(componentId, descriptor, model);
 						}
 						
 					};
 				} else {
-					return new PropertyContext<String>(propertyDescriptor) {
+					return new PropertyContext<String>(descriptor) {
 
 						@Override
 						public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-							return new PropertyViewer(componentId, this) {
+							return new PropertyViewer(componentId, descriptor) {
 
 								@Override
 								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -67,7 +66,7 @@ public class PasswordEditSupport implements EditSupport {
 
 						@Override
 						public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-							return new PasswordPropertyEditor(componentId, this, model);
+							return new PasswordPropertyEditor(componentId, descriptor, model);
 						}
 						
 					};

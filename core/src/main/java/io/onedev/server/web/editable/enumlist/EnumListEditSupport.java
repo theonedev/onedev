@@ -18,18 +18,16 @@ import io.onedev.server.web.editable.PropertyViewer;
 public class EnumListEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-		
-		if (List.class.isAssignableFrom(propertyDescriptor.getPropertyClass())) {
-			final Class<?> elementClass = EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
+			final Class<?> elementClass = EditableUtils.getElementClass(descriptor.getPropertyGetter().getGenericReturnType());
 			if (elementClass != null && Enum.class.isAssignableFrom(elementClass)) {
-	            return new PropertyContext<List<Enum<?>>>(propertyDescriptor) {
+	            return new PropertyContext<List<Enum<?>>>(descriptor) {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<List<Enum<?>>> model) {
 
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -52,7 +50,7 @@ public class EnumListEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<Enum<?>>> renderForEdit(String componentId, IModel<List<Enum<?>>> model) {
-						return new EnumListPropertyEditor(componentId, this, model);
+						return new EnumListPropertyEditor(componentId, descriptor, model);
 					}
 	            	
 	            };

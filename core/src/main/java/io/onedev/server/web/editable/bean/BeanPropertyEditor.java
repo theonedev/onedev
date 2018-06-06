@@ -24,15 +24,15 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 
 	private final String BEAN_EDITOR_ID = "beanEditor";
 	
-	public BeanPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Serializable> propertyModel) {
-		super(id, propertyDescriptor, propertyModel);
+	public BeanPropertyEditor(String id, PropertyDescriptor descriptor, IModel<Serializable> propertyModel) {
+		super(id, descriptor, propertyModel);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (getPropertyDescriptor().isPropertyRequired()) {
+		if (getDescriptor().isPropertyRequired()) {
 			add(new WebMarkupContainer("enable").setVisible(false));
 		} else {
 			add(new CheckBox("enable", new IModel<Boolean>() {
@@ -72,7 +72,7 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 
 		Serializable propertyValue = getModelObject();
 		
-		if (getPropertyDescriptor().isPropertyRequired() && propertyValue == null) {
+		if (getDescriptor().isPropertyRequired() && propertyValue == null) {
 			propertyValue = newProperty();
 		}
 		add(newBeanEditor(propertyValue));
@@ -90,7 +90,7 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 	
 	private Serializable newProperty() {
 		try {
-			return (Serializable) getPropertyDescriptor().getPropertyClass().newInstance();
+			return (Serializable) getDescriptor().getPropertyClass().newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}

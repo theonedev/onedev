@@ -21,17 +21,16 @@ import io.onedev.server.web.editable.annotation.GroupChoice;
 public class GroupEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-		Method propertyGetter = propertyDescriptor.getPropertyGetter();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Method propertyGetter = descriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(GroupChoice.class) != null) {
         	if (Collection.class.isAssignableFrom(propertyGetter.getReturnType()) 
         			&& EditableUtils.getElementClass(propertyGetter.getGenericReturnType()) == String.class) {
-        		return new PropertyContext<Collection<String>>(propertyDescriptor) {
+        		return new PropertyContext<Collection<String>>(descriptor) {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<Collection<String>> model) {
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -48,16 +47,16 @@ public class GroupEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<Collection<String>> renderForEdit(String componentId, IModel<Collection<String>> model) {
-						return new GroupMultiChoiceEditor(componentId, this, model);
+						return new GroupMultiChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};
         	} else if (propertyGetter.getReturnType() == String.class) {
-        		return new PropertyContext<String>(propertyDescriptor) {
+        		return new PropertyContext<String>(descriptor) {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -74,7 +73,7 @@ public class GroupEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new GroupSingleChoiceEditor(componentId, this, model);
+						return new GroupSingleChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};

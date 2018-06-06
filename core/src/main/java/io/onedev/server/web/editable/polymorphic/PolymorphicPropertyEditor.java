@@ -143,7 +143,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 			@Override
 			protected String getNullValidDisplayValue() {
-				NameOfEmptyValue nameOfEmptyValue = getPropertyDescriptor().getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
+				NameOfEmptyValue nameOfEmptyValue = getDescriptor().getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
 				if (nameOfEmptyValue != null)
 					return nameOfEmptyValue.value();
 				else
@@ -152,9 +152,9 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			
 		};
 		
-		typeSelector.setNullValid(!getPropertyDescriptor().isPropertyRequired());
+		typeSelector.setNullValid(!getDescriptor().isPropertyRequired());
 		
-		typeSelector.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		typeSelector.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 		
 		typeSelector.add(new AjaxFormComponentUpdatingBehavior("change"){
 

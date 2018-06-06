@@ -27,9 +27,9 @@ public class ColorPropertyEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new ColorPicker("input", Model.of(getModelObject()), !getPropertyDescriptor().isPropertyRequired());
+		input = new ColorPicker("input", Model.of(getModelObject()), !getDescriptor().isPropertyRequired());
 		add(input);
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 
 		input.add(new OnTypingDoneBehavior() {
 

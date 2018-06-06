@@ -24,6 +24,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issuelist.IssueListPanel;
+import io.onedev.server.web.component.issuelist.QuerySaveSupport;
 import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 
@@ -170,9 +171,10 @@ public class MilestoneDetailPage extends IssuesPage {
 			}
 
 			@Override
-			protected void onQueryUpdating(AjaxRequestTarget target) {
+			protected QuerySaveSupport getQuerySaveSupport() {
+				return null;
 			}
-			
+
 		});
 	}
 	

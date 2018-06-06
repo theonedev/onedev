@@ -21,18 +21,17 @@ import io.onedev.server.web.editable.annotation.UserChoice;
 public class UserEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-        Method propertyGetter = propertyDescriptor.getPropertyGetter();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+        Method propertyGetter = descriptor.getPropertyGetter();
         UserChoice userChoice = propertyGetter.getAnnotation(UserChoice.class);
         if (userChoice != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
         			&& EditableUtils.getElementClass(propertyGetter.getGenericReturnType()) == String.class) {
-        		return new PropertyContext<List<String>>(propertyDescriptor) {
+        		return new PropertyContext<List<String>>(descriptor) {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -49,16 +48,16 @@ public class UserEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
-						return new UserMultiChoiceEditor(componentId, this, model);
+						return new UserMultiChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};
         	} else if (propertyGetter.getReturnType() == String.class) {
-        		return new PropertyContext<String>(propertyDescriptor) {
+        		return new PropertyContext<String>(descriptor) {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -74,7 +73,7 @@ public class UserEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new UserSingleChoiceEditor(componentId, this, model);
+						return new UserSingleChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};

@@ -49,11 +49,11 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 		
 		OneContext.push(oneContext);
 		try {
-			GroupChoice groupChoice = propertyDescriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
+			GroupChoice groupChoice = descriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
 			Preconditions.checkNotNull(groupChoice);
 			if (groupChoice.value().length() != 0) {
 				choices.addAll((List<GroupFacade>)ReflectionUtils
-						.invokeStaticMethod(propertyDescriptor.getBeanClass(), groupChoice.value()));
+						.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
 			} else {
 				choices.addAll(OneDev.getInstance(CacheManager.class).getGroups().values());
 			}
@@ -76,13 +76,13 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(propertyDescriptor);
+				getSettings().configurePlaceholder(descriptor);
 			}
 			
 		};
         input.setConvertEmptyInputStringToNull(true);
-        input.setRequired(propertyDescriptor.isPropertyRequired());
-        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+        input.setRequired(descriptor.isPropertyRequired());
+        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

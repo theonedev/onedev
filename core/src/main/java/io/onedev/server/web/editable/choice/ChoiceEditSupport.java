@@ -18,17 +18,15 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 public class ChoiceEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-
-		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
-		if (propertyDescriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class) != null) {
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
+		if (descriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class) != null) {
 			if (propertyClass == String.class) {
-				return new PropertyContext<String>(propertyDescriptor) {
+				return new PropertyContext<String>(descriptor) {
 	
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 	
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -44,17 +42,17 @@ public class ChoiceEditSupport implements EditSupport {
 	
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new SingleChoiceEditor(componentId, this, model);
+						return new SingleChoiceEditor(componentId, descriptor, model);
 					}
 					
 				};
-			} else if (List.class.isAssignableFrom(propertyDescriptor.getPropertyClass())) {
-	            return new PropertyContext<List<String>>(propertyDescriptor) {
+			} else if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
+	            return new PropertyContext<List<String>>(descriptor) {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
 
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -77,7 +75,7 @@ public class ChoiceEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
-						return new MultiChoiceEditor(componentId, this, model);
+						return new MultiChoiceEditor(componentId, descriptor, model);
 					}
 	            	
 	            };

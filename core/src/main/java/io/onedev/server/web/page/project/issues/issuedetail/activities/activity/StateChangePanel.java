@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.issues.issuedetail.activities.activity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -142,9 +143,9 @@ public abstract class StateChangePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<String> oldLines = getChangeData().getLines(getChangeData().getOldFields());
-		List<String> newLines = getChangeData().getLines(getChangeData().getNewFields());
-		add(new PlainDiffPanel("fields", oldLines, newLines).setVisible(!oldLines.equals(newLines)));
+		List<String> oldLines = new ArrayList<>(getChangeData().getOldLines());
+		List<String> newLines = new ArrayList<>(getChangeData().getNewLines());
+		add(new PlainDiffPanel("fields", oldLines, newLines, true).setVisible(!oldLines.equals(newLines)));
 		
 		add(newViewer());
 	}

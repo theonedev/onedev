@@ -102,18 +102,9 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		
 	};
 	
-	private IModel<Integer> countModel = new LoadableDetachableModel<Integer>() {
-
-		@Override
-		protected Integer load() {
-			IssueQuery parsedQuery = parsedQueryModel.getObject();
-			if (parsedQuery != null)
-				return getIssueManager().count(getProject(), parsedQuery.getCriteria());
-			else
-				return 0;
-		}
-		
-	};
+	private DataView<Issue> issuesView;
+	
+	private Component querySave;
 	
 	public IssueListPanel(String id, IModel<String> queryModel) {
 		super(id, queryModel);
@@ -130,7 +121,6 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 	@Override
 	protected void onDetach() {
 		parsedQueryModel.detach();
-		countModel.detach();
 		super.onDetach();
 	}
 	
@@ -143,7 +133,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 	
 	protected abstract void onQueryUpdated(AjaxRequestTarget target);
 	
-	protected abstract void onQueryUpdating(AjaxRequestTarget target);
+	@Nullable
+	protected abstract QuerySaveSupport getQuerySaveSupport();
 	
 	@Override
 	protected void onInitialize() {
@@ -162,7 +153,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				onQueryUpdating(target);
+				if (SecurityUtils.getUser() != null)
+					target.add(querySave);
 			}
 			
 		});
@@ -180,6 +172,27 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 		});
 		add(form);
+		
+		add(new Label("pageInfo", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				long firstItemIndex = issuesView.getFirstItemOffset()+1;
+				long lastItemIndex = firstItemIndex + issuesView.getItemsPerPage() - 1;
+				if (lastItemIndex > issuesView.getItemCount())
+					lastItemIndex = issuesView.getItemCount();
+				return "Displaying " + firstItemIndex + "-" + lastItemIndex + " of " + issuesView.getItemCount();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(issuesView.getItemCount() != 0);
+			}
+			
+		});
 		
 		add(new ModalLink("displayFields") {
 
@@ -238,7 +251,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()));
+				setVisible(SecurityUtils.canManage(getProject()) && issuesView.getItemCount() != 0);
 			}
 			
 		});
@@ -258,6 +271,75 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 		});
 		
+		add(querySave = new AjaxLink<Void>("saveQuery") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(StringUtils.isNotBlank(getQuery()));
+				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				configure();
+				if (!isEnabled()) {
+					tag.put("disabled", "disabled");
+					tag.put("title", "Input query to save");
+				}
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				getQuerySaveSupport().onSaveQuery(target);
+			}		
+			
+		});
+		
+		add(new ModalLink("batchEdit") {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new BatchUpdatePanel(id) {
+
+					@Override
+					protected Project getProject() {
+						return IssueListPanel.this.getProject();
+					}
+
+					@Override
+					protected IssueQuery getQuery() {
+						return parsedQueryModel.getObject();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected void onUpdated(AjaxRequestTarget target) {
+						modal.close();
+						onQueryUpdated(target);
+					}
+
+					@Override
+					protected long getNumOfIssues() {
+						return issuesView.getItemCount();
+					}
+					
+				};
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canManage(getProject()) && issuesView.getItemCount() != 0);
+			}
+			
+		});
+		
 		IDataProvider<Issue> dataProvider = new IDataProvider<Issue>() {
 
 			@Override
@@ -271,7 +353,11 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 
 			@Override
 			public long size() {
-				return countModel.getObject();
+				IssueQuery parsedQuery = parsedQueryModel.getObject();
+				if (parsedQuery != null)
+					return getIssueManager().count(getProject(), parsedQuery.getCriteria());
+				else
+					return 0;
 			}
 
 			@Override
@@ -291,14 +377,14 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		
 		add(new NotificationPanel("feedback", this));
 		
-		DataView<Issue> issuesView = new DataView<Issue>("issues", dataProvider) {
+		issuesView = new DataView<Issue>("issues", dataProvider) {
 
 			@Override
 			protected void populateItem(Item<Issue> item) {
 				Issue issue = item.getModelObject();
 				item.add(new Label("number", "#" + issue.getNumber()));
 				Fragment titleFrag = new Fragment("title", "titleFrag", IssueListPanel.this);
-				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), countModel.getObject(), 
+				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesView.getItemCount(), 
 						(int)getCurrentPage() * WebConstants.PAGE_SIZE + item.getIndex());
 				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
 						IssueActivitiesPage.paramsOf(issue, position));
@@ -346,7 +432,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						}
 						
 					};
-					milestoneLink.add(new Label("name", "<i>Unspecified</i>").setEscapeModelStrings(false));
+					milestoneLink.add(new Label("name", "<i>No milestone</i>").setEscapeModelStrings(false));
 					item.add(milestoneLink);
 				}
 				item.add(new Label("votes", issue.getNumOfVotes()));
@@ -362,6 +448,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			}
 			
 		};
+		issuesView.setOutputMarkupId(true);
 		issuesView.setItemsPerPage(WebConstants.PAGE_SIZE);
 		
 		issuesView.setCurrentPage(getPagingHistorySupport().getCurrentPage());
@@ -382,7 +469,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(parsedQueryModel.getObject() != null && countModel.getObject() == 0);
+				setVisible(parsedQueryModel.getObject() != null && issuesView.getItemCount() == 0);
 			}
 			
 		});

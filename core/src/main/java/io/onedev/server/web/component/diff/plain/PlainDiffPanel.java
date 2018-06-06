@@ -35,13 +35,16 @@ import io.onedev.utils.StringUtils;
 public class PlainDiffPanel extends Panel {
 
 	private final Map<Integer, Integer> contextSizes = new HashMap<>();
+
+	private final boolean forceAlign;
 	
 	private AbstractPostAjaxBehavior callbackBehavior;
 	
 	private List<DiffBlock<Tokenized>> diffBlocks;
 	
-	public PlainDiffPanel(String id, List<String> oldLines, List<String> newLines) {
+	public PlainDiffPanel(String id, List<String> oldLines, List<String> newLines, boolean forceAlign) {
 		super(id);
+		this.forceAlign = forceAlign;
 		diffBlocks = DiffUtils.diff(oldLines, null, newLines, null, WhitespaceOption.DO_NOT_IGNORE);
 	}
 
@@ -148,7 +151,7 @@ public class PlainDiffPanel extends Panel {
 					DiffBlock<Tokenized> nextBlock = diffBlocks.get(i+1);
 					if (nextBlock.getOperation() == Operation.INSERT) {
 						LinkedHashMap<Integer, LineDiff> lineChanges = 
-								DiffUtils.align(block.getUnits(), nextBlock.getUnits());
+								DiffUtils.align(block.getUnits(), nextBlock.getUnits(), forceAlign);
 						int prevDeleteLineIndex = 0;
 						int prevInsertLineIndex = 0;
 						for (Map.Entry<Integer, LineDiff> entry: lineChanges.entrySet()) {

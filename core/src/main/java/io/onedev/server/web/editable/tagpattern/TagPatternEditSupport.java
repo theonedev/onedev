@@ -18,19 +18,18 @@ import io.onedev.server.web.editable.annotation.TagPattern;
 public class TagPatternEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-		Method propertyGetter = propertyDescriptor.getPropertyGetter();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Method propertyGetter = descriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(TagPattern.class) != null) {
         	if (propertyGetter.getReturnType() != String.class) {
 	    		throw new RuntimeException("Annotation 'TagPattern' should be applied to property "
 	    				+ "with type 'String'.");
         	}
-    		return new PropertyContext<String>(propertyDescriptor) {
+    		return new PropertyContext<String>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -47,7 +46,7 @@ public class TagPatternEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new TagPatternEditor(componentId, this, model);
+		        	return new TagPatternEditor(componentId, descriptor, model);
 				}
     			
     		};

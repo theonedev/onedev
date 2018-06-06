@@ -18,18 +18,16 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 public class BooleanEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-		
-		Method propertyGetter = propertyDescriptor.getPropertyGetter();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Method propertyGetter = descriptor.getPropertyGetter();
 		
 		Class<?> propertyClass = propertyGetter.getReturnType();
 		if (propertyClass == boolean.class || propertyClass == Boolean.class) {
-			return new PropertyContext<Boolean>(propertyDescriptor) {
+			return new PropertyContext<Boolean>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<Boolean> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -49,10 +47,10 @@ public class BooleanEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<Boolean> renderForEdit(String componentId, IModel<Boolean> model) {
-					if (isPropertyRequired())
-						return new BooleanPropertyEditor(componentId, this, model);
+					if (descriptor.isPropertyRequired())
+						return new BooleanPropertyEditor(componentId, descriptor, model);
 					else
-						return new NullableBooleanPropertyEditor(componentId, this, model);
+						return new NullableBooleanPropertyEditor(componentId, descriptor, model);
 				}
 				
 			};

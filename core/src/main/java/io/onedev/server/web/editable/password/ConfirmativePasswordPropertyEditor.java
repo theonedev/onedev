@@ -33,16 +33,16 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		input = new PasswordTextField("input", Model.of(getModelObject()));
 		input.setResetPassword(true);
 		input.setRequired(false);
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 		add(input);
 		
 		inputAgain = new PasswordTextField("inputAgain", Model.of(getModelObject()));
 		inputAgain.setResetPassword(true);
 		inputAgain.setRequired(false);
-		inputAgain.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		inputAgain.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 		add(inputAgain);
 		
-		Password password = getPropertyDescriptor().getPropertyGetter().getAnnotation(Password.class);
+		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);
 		String autoComplete = password.autoComplete();
 		if (StringUtils.isNotBlank(autoComplete)) {
 			input.add(AttributeAppender.append("autocomplete", autoComplete));

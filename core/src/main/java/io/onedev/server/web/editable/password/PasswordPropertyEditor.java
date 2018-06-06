@@ -31,10 +31,10 @@ public class PasswordPropertyEditor extends PropertyEditor<String> {
 		input = new PasswordTextField("input", Model.of(getModelObject()));
 		input.setRequired(false);
 		input.setResetPassword(false);
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 		add(input);
 
-		Password password = getPropertyDescriptor().getPropertyGetter().getAnnotation(Password.class);
+		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);
 		String autoComplete = password.autoComplete();
 		if (StringUtils.isNotBlank(autoComplete))
 			input.add(AttributeAppender.append("autocomplete", autoComplete));

@@ -20,8 +20,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void changeMilestone(Issue issue, String prevMilestone);
 	
 	void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields, 
-			Collection<String> promptedFields);
+			Collection<String> fieldNames);
 	
 	void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent, 
-			String prevState, Map<String, IssueField> prevFields, Collection<String> promptedFields);
+			String prevState, Map<String, IssueField> prevFields, Collection<String> fieldNames);
 }

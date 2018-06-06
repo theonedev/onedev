@@ -30,7 +30,7 @@ public class TagPatternEditor extends PropertyEditor<String> {
 		super.onInitialize();
     	
     	input = new TextField<String>("input", getModel());
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));		
+		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));		
     	
     	input.add(new TagPatternAssistBehavior(new AbstractReadOnlyModel<Project>() {
 

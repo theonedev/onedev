@@ -31,7 +31,7 @@ public class PropertyDescriptor implements Serializable {
 	
 	private final String propertyName;
 	
-	private boolean excluded;
+	private boolean propertyExcluded;
 	
 	private final Set<String> dependencyPropertyNames = new HashSet<>();
 	
@@ -52,7 +52,7 @@ public class PropertyDescriptor implements Serializable {
 	public PropertyDescriptor(PropertyDescriptor propertyDescriptor) {
 		this.beanClass = propertyDescriptor.getBeanClass();
 		this.propertyName = propertyDescriptor.getPropertyName();
-		this.excluded = propertyDescriptor.isExcluded();
+		this.propertyExcluded = propertyDescriptor.isPropertyExcluded();
 	}
 	
 	public Class<?> getBeanClass() {
@@ -75,12 +75,12 @@ public class PropertyDescriptor implements Serializable {
 		return propertySetter;
 	}
 
-	public boolean isExcluded() {
-		return excluded;
+	public boolean isPropertyExcluded() {
+		return propertyExcluded;
 	}
 
-	public void setExcluded(boolean excluded) {
-		this.excluded = excluded;
+	public void setPropertyExcluded(boolean propertyExcluded) {
+		this.propertyExcluded = propertyExcluded;
 	}
 
 	public void copyProperty(Object fromBean, Object toBean) {

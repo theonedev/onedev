@@ -277,7 +277,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						public void onClick(AjaxRequestTarget target) {
 							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
 							Serializable fieldBean = getIssueFieldUnaryManager().readFields(getIssue());
-							Set<String> excludedFields = getIssueFieldUnaryManager().getExcludedFields(getIssue(), transition.getToState());
+							Set<String> excludedFields = getIssueFieldUnaryManager().getExcludedProperties(getIssue(), transition.getToState());
 
 							Form<?> form = new Form<Void>("form") {
 
@@ -318,15 +318,14 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 									super.onSubmit(target, form);
 
 									Map<String, IssueField> prevFields = getIssue().getEffectiveFields();
-									Collection<String> promptedFields = getIssue().getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
 									StateSpec toStateSpec = getProject().getIssueWorkflow().getStateSpec(transition.getToState());
 									if (toStateSpec == null)
 										throw new OneException("Unable to find state spec: " + transition.getToState());
-									promptedFields.addAll(toStateSpec.getFields());
 								
 									String prevState = getIssue().getState();
 									getIssue().setState(transition.getToState());
-									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevState, prevFields, promptedFields);
+									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevState, prevFields, 
+											toStateSpec.getFields());
 								
 									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
 								}
@@ -649,8 +648,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						Collection<String> promptedFields = getIssue().getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
-						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, prevFields, promptedFields);
+						Collection<String> fieldNames = getIssue().getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
+						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, prevFields, fieldNames);
 						modal.close();
 						target.add(fieldsContainer);
 					}
@@ -712,7 +711,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				}
 				
 			};
-			link.add(new Label("label", "<i>Unspecified</i>").setEscapeModelStrings(false));
+			link.add(new Label("label", "<i>No milestone</i>").setEscapeModelStrings(false));
 			fragment.add(link);
 		}
 
@@ -732,7 +731,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						getSettings().setPlaceholder("Unspecified");
+						getSettings().setPlaceholder("No milestone");
 					}
 					
 				};

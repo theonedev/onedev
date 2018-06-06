@@ -30,12 +30,14 @@ import org.hibernate.query.Query;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.issue.IssueOpened;
+import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.IssueQuerySetting;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.NamedQuery;
@@ -69,15 +71,19 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	private final ListenerRegistry listenerRegistry;
 	
 	private final IssueQuerySettingManager issueQuerySettingManager;
+
+	private final IssueChangeManager issueChangeManager;
 	
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldUnaryManager issueFieldManager, 
-			IssueQuerySettingManager issueQuerySettingManager, ListenerRegistry listenerRegistry) {
+			IssueQuerySettingManager issueQuerySettingManager, IssueChangeManager issueChangeManager, 
+			ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
+		this.issueChangeManager = issueChangeManager;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -620,5 +626,35 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		
 	}
-	
+
+	@Transactional
+	@Override
+	public void batchUpdate(Project project, IssueQuery issueQuery, Set<String> updateFields, String state,
+			Milestone milestone, Serializable fieldBean) {
+		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(getSession(), project, issueQuery);
+		Query<Issue> query = getSession().createQuery(criteriaQuery);
+		int i=0; 
+		for (Issue issue: query.getResultList()) {
+			Set<String>	fieldNames = new HashSet<>(updateFields);
+			if (fieldNames.contains(Issue.STATE)) {
+				fieldNames.remove(Issue.STATE);
+				String prevState = issue.getState();
+				issue.setState(state);
+				issueChangeManager.changeState(issue, fieldBean, null, prevState, 
+						issue.getEffectiveFields(), new HashSet<>());
+			}
+			if (fieldNames.contains(Issue.MILESTONE)) {
+				fieldNames.remove(Issue.MILESTONE);
+				String prevMilestoneName = issue.getMilestoneName();
+				issue.setMilestone(milestone);
+				issueChangeManager.changeMilestone(issue, prevMilestoneName);
+			}
+			if (!fieldNames.isEmpty()) 
+				issueChangeManager.changeFields(issue, fieldBean, issue.getEffectiveFields(), fieldNames);
+			i++;
+			if (i % 100 == 0)
+				System.out.println(i);
+		}
+	}
+
 }

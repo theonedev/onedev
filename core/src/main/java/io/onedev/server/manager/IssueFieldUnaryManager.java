@@ -21,9 +21,9 @@ public interface IssueFieldUnaryManager extends EntityManager<IssueFieldUnary> {
 	
 	Serializable readFields(Issue issue);
 	
-	void writeFields(Issue issue, Serializable fieldBean, Collection<String> promptedFields);
+	void writeFields(Issue issue, Serializable fieldBean, Collection<String> fieldNames);
 	
-	Set<String> getExcludedFields(Issue issue, String state);
+	Set<String> getExcludedProperties(Issue issue, String state);
 	
 	void onRenameUser(String oldName, String newName);
 	

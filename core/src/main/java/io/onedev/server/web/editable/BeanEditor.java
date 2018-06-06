@@ -77,7 +77,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		if (checkedPropertyNames.contains(dependentPropertyName))
 			return false;
 		checkedPropertyNames.add(dependentPropertyName);
-		Set<String> directDependencies = getPropertyContext(dependentPropertyName).getDependencyPropertyNames();
+		Set<String> directDependencies = getPropertyContext(dependentPropertyName).getDescriptor().getDependencyPropertyNames();
 		if (directDependencies.contains(dependencyPropertyName))
 			return true;
 		for (String directDependency: directDependencies) {
@@ -138,7 +138,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					nameContainer = this;
 					valueContainer = this;
 				}
-				Label nameLabel = new Label("name", propertyContext.getDisplayName(this));
+				Label nameLabel = new Label("name", propertyContext.getDescriptor().getDisplayName(this));
 				nameContainer.add(nameLabel);
 				
 				OmitName omitName = propertyContext.getPropertyGetter().getAnnotation(OmitName.class);
@@ -152,7 +152,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				}
 
 				String required;
-				if (propertyContext.isPropertyRequired() 
+				if (propertyContext.getDescriptor().isPropertyRequired() 
 						&& propertyContext.getPropertyClass() != boolean.class
 						&& propertyContext.getPropertyClass() != Boolean.class) {
 					required = "*";
@@ -168,14 +168,14 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				
 				OneContext.push(context);
 				try {
-					propertyValue = (Serializable) propertyContext.getPropertyValue(getModelObject());
+					propertyValue = (Serializable) propertyContext.getDescriptor().getPropertyValue(getModelObject());
 				} finally {
 					OneContext.pop();
 				}
 				PropertyEditor<Serializable> propertyEditor = propertyContext.renderForEdit("value", Model.of(propertyValue)); 
 				valueContainer.add(propertyEditor);
 				
-				descriptionLabel = new Label("description", propertyContext.getDescription(this)) {
+				descriptionLabel = new Label("description", propertyContext.getDescriptor().getDescription(this)) {
 
 					@Override
 					protected void onConfigure() {
@@ -228,13 +228,13 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				 * generated via groovy script    
 				 */
 				String propertyName = beanDescriptor.getPropertyName(name);
-				propertyContext.getDependencyPropertyNames().add(propertyName);
+				propertyContext.getDescriptor().getDependencyPropertyNames().add(propertyName);
 
 				Optional<Object> result= BeanEditor.this.visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, Optional<Object>>() {
 
 					@Override
 					public void component(PropertyEditor<?> object, IVisit<Optional<Object>> visit) {
-						if (object.getPropertyDescriptor().getPropertyName().equals(propertyName)) {
+						if (object.getDescriptor().getPropertyName().equals(propertyName)) {
 							visit.stop(Optional.ofNullable(object.getConvertedInput()));
 						} else { 
 							visit.dontGoDeeper();
@@ -243,7 +243,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					
 				});
 				if (result == null)
-					return getPropertyContext(propertyName).getPropertyValue(getModelObject());
+					return getPropertyContext(propertyName).getDescriptor().getPropertyValue(getModelObject());
 				else
 					return result.orElse(null);
 			}
@@ -251,7 +251,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(propertyContext.isPropertyVisible(new ComponentContext(this), beanDescriptor) && !propertyContext.isExcluded());
+				setVisible(propertyContext.getDescriptor().isPropertyVisible(new ComponentContext(this), beanDescriptor) 
+						&& !propertyContext.getDescriptor().isPropertyExcluded());
 			}
 
 		};
@@ -305,8 +306,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 								int propertyIndex = (int) item.getDefaultModelObject();
 								PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
 								if (propertyContext.getPropertyName().equals(property.getName()) 
-										&& propertyContext.isPropertyVisible(new ComponentContext(item), beanDescriptor)
-										&& !propertyContext.isExcluded()) {
+										&& propertyContext.getDescriptor().isPropertyVisible(new ComponentContext(item), beanDescriptor)
+										&& !propertyContext.getDescriptor().isPropertyExcluded()) {
 									found = true;
 									break;
 								}
@@ -354,7 +355,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 			@Override
 			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
-				if (object.getPropertyDescriptor().getPropertyName().equals(property.getName()))
+				if (object.getDescriptor().getPropertyName().equals(property.getName()))
 					visit.stop(object);
 				else
 					visit.dontGoDeeper();
@@ -371,8 +372,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 			@Override
 			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
-				if (!object.getPropertyDescriptor().isExcluded())
-					object.getPropertyDescriptor().setPropertyValue(bean, object.getConvertedInput());
+				if (!object.getDescriptor().isPropertyExcluded())
+					object.getDescriptor().setPropertyValue(bean, object.getConvertedInput());
 				visit.dontGoDeeper();
 			}
 			

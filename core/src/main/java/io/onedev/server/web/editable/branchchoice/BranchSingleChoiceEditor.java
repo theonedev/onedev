@@ -44,14 +44,14 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(propertyDescriptor);
+				getSettings().configurePlaceholder(descriptor);
 			}
 			
     	};
     	
         // add this to control allowClear flag of select2
-    	input.setRequired(propertyDescriptor.isPropertyRequired());
-        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+    	input.setRequired(descriptor.isPropertyRequired());
+        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override

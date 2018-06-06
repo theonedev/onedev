@@ -32,20 +32,24 @@ public class MilestoneChangeData implements ChangeData {
 	
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new PlainDiffPanel(componentId, getOldLines(), getNewLines());
+		return new PlainDiffPanel(componentId, getOldLines(), getNewLines(), true);
 	}
 	
 	private List<String> getOldLines() {
 		List<String> oldLines = new ArrayList<>();
 		if (oldMilestone != null)
-			oldLines.add(oldMilestone);
+			oldLines.add("Milestone: " + oldMilestone);
+		else
+			oldLines.add("Milestone: ");
 		return oldLines;
 	}
 
 	private List<String> getNewLines() {
 		List<String> newLines = new ArrayList<>();
 		if (newMilestone != null)
-			newLines.add(newMilestone);
+			newLines.add("Milestone: " + newMilestone);
+		else
+			newLines.add("Milestone: ");
 		return newLines;
 	}
 	
@@ -71,7 +75,7 @@ public class MilestoneChangeData implements ChangeData {
 		String escaped = HtmlUtils.escapeHtml(change.getUser().getDisplayName());
 		StringBuilder builder = new StringBuilder(String.format("<b>%s changed milestone</b>", escaped));
 		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(getOldLines(), getNewLines()));
+		builder.append(DiffUtils.diffAsHtml(getOldLines(), getNewLines(), true));
 		return builder.toString();
 	}
 

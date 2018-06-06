@@ -657,7 +657,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					MarkAwareDiffBlock nextBlock = getDiffBlocks().get(i+1);
 					if (nextBlock.getType() == Type.INSERT) {
 						LinkedHashMap<Integer, LineDiff> lineChanges = 
-								DiffUtils.align(block.getLines(), nextBlock.getLines());
+								DiffUtils.align(block.getLines(), nextBlock.getLines(), false);
 						if (blameInfo != null && diffMode == DiffViewMode.UNIFIED) {
 							for (int j=0; j<block.getLines().size(); j++) { 
 								LineDiff lineDiff = lineChanges.get(j);

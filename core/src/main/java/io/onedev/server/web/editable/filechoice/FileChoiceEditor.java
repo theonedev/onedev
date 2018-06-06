@@ -49,7 +49,7 @@ public class FileChoiceEditor extends PropertyEditor<String> {
 		super.onInitialize();
 		
 		input = new TextField<String>("input", Model.of(getModelObject()));
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 		
 		input.add(new InputAssistBehavior() {
 			

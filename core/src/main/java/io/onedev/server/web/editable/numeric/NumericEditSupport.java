@@ -18,19 +18,17 @@ import io.onedev.server.web.editable.annotation.IssueChoice;
 public class NumericEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-
-		Method propertyGetter = propertyDescriptor.getPropertyGetter();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Method propertyGetter = descriptor.getPropertyGetter();
 		Class<?> propertyClass = propertyGetter.getReturnType();
 		if ((propertyClass == int.class || propertyClass == long.class 
 				|| propertyClass == Integer.class || propertyClass == Long.class) 
 				&& propertyGetter.getAnnotation(IssueChoice.class) == null) {
-			return new PropertyContext<Number>(propertyDescriptor) {
+			return new PropertyContext<Number>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<Number> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -46,7 +44,7 @@ public class NumericEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<Number> renderForEdit(String componentId, IModel<Number> model) {
-					return new NumericPropertyEditor(componentId, this, model);
+					return new NumericPropertyEditor(componentId, descriptor, model);
 				}
 				
 			};

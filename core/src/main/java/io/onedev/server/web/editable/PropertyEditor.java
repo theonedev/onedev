@@ -21,12 +21,12 @@ import io.onedev.server.web.util.ComponentContext;
 @SuppressWarnings("serial")
 public abstract class PropertyEditor<T> extends ValueEditor<T> {
 
-	protected final PropertyDescriptor propertyDescriptor;
+	protected final PropertyDescriptor descriptor;
 	
-	public PropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<T> propertyModel) {
+	public PropertyEditor(String id, PropertyDescriptor descriptor, IModel<T> propertyModel) {
 		super(id, propertyModel);
 		
-		this.propertyDescriptor = propertyDescriptor;
+		this.descriptor = descriptor;
 	}
 
 	@Override
@@ -41,8 +41,8 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 				try {
 					Validator validator = AppLoader.getInstance(Validator.class);
 					Set<?> violations = validator.validateValue(
-							propertyDescriptor.getBeanClass(), 
-							propertyDescriptor.getPropertyName(), 
+							descriptor.getBeanClass(), 
+							descriptor.getPropertyName(), 
 							validatable.getValue());
 					
 					for (Object each: violations) {
@@ -78,13 +78,13 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 	protected void onPropertyUpdating(IPartialPageRequestHandler target) {
 		validate();
 		if (!hasErrors(true)) 
-			send(getParent(), Broadcast.BUBBLE, new PropertyUpdating(target, propertyDescriptor.getPropertyName()));								
+			send(getParent(), Broadcast.BUBBLE, new PropertyUpdating(target, descriptor.getPropertyName()));								
 		else
 			clearErrors(true);
 	}
 	
-	public PropertyDescriptor getPropertyDescriptor() {
-		return propertyDescriptor;
+	public PropertyDescriptor getDescriptor() {
+		return descriptor;
 	}
 
 }

@@ -16,17 +16,15 @@ import io.onedev.server.web.editable.annotation.Markdown;
 public class MarkdownEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-
-		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
 		if (propertyClass == String.class 
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) != null) {
-			return new PropertyContext<String>(propertyDescriptor) {
+				&& descriptor.getPropertyGetter().getAnnotation(Markdown.class) != null) {
+			return new PropertyContext<String>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -38,7 +36,7 @@ public class MarkdownEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					return new MarkdownPropertyEditor(componentId, this, model);
+					return new MarkdownPropertyEditor(componentId, descriptor, model);
 				}
 				
 			};

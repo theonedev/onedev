@@ -68,7 +68,7 @@ public class BeanViewer extends Panel implements EditContext {
 				valueTd.add(propertyContext.renderForView("content", Model.of(propertyValue)));
 				
 				item.setVisible(propertyContext.isPropertyVisible(new ComponentContext(BeanViewer.this), beanDescriptor) 
-						&& !propertyContext.isExcluded());
+						&& !propertyContext.isPropertyExcluded());
 				
 				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 			}

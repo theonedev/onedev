@@ -36,7 +36,7 @@ public class BranchPatternEditor extends PropertyEditor<String> {
 			}
     		
     	}));
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
         
         add(input);
 	}

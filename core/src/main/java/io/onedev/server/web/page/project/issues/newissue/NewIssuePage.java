@@ -63,7 +63,14 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		return OneDev.getInstance(IssueFieldUnaryManager.class);
 	}
 	
-	private void populateWithQuery(Issue issue, Serializable fieldBean) {
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+
+		Issue issue = new Issue();
+		issue.setProject(getProject());
+		Serializable fieldBean = getIssueFieldUnaryManager().readFields(issue);
+		
 		if (queryString != null) {
 			try {
 				IssueQuery query = IssueQuery.parse(getProject(), queryString, true);
@@ -72,20 +79,9 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 			} catch (Exception e) {
 			}
 		} 
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-
-		Issue issue = new Issue();
 		issue.setSubmitDate(new Date());
 		issue.setState(getProject().getIssueWorkflow().getInitialStateSpec().getName());
-		issue.setProject(getProject());
 		issue.setSubmitter(getLoginUser());
-		Serializable fieldBean = getIssueFieldUnaryManager().readFields(issue);
-		
-		populateWithQuery(issue, fieldBean);
 		
 		milestoneName = issue.getMilestoneName();
 		
@@ -138,14 +134,14 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().setPlaceholder("Unspecified");
+				getSettings().setPlaceholder("No milestone");
 			}
 			
 		};
 		choice.setRequired(false);
 		form.add(choice);
 		
-		Set<String> excludedFields = getIssueFieldUnaryManager().getExcludedFields(issue, 
+		Set<String> excludedFields = getIssueFieldUnaryManager().getExcludedProperties(issue, 
 				getProject().getIssueWorkflow().getInitialStateSpec().getName());
 		form.add(BeanContext.editBean("fields", fieldBean, excludedFields));
 		

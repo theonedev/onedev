@@ -18,17 +18,16 @@ import io.onedev.server.web.editable.annotation.IssueChoice;
 public class IssueEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-        Method propertyGetter = propertyDescriptor.getPropertyGetter();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+        Method propertyGetter = descriptor.getPropertyGetter();
         IssueChoice issueChoice = propertyGetter.getAnnotation(IssueChoice.class);
         if (issueChoice != null) {
         	if (propertyGetter.getReturnType() == Long.class) {
-        		return new PropertyContext<Long>(propertyDescriptor) {
+        		return new PropertyContext<Long>(descriptor) {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<Long> model) {
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -44,7 +43,7 @@ public class IssueEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
-						return new IssueChoiceEditor(componentId, this, model);
+						return new IssueChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};

@@ -16,15 +16,13 @@ import io.onedev.utils.StringUtils;
 public class EnumEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-		
-        if (Enum.class.isAssignableFrom(propertyDescriptor.getPropertyClass())) {
-            return new PropertyContext<Enum<?>>(propertyDescriptor) {
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+        if (Enum.class.isAssignableFrom(descriptor.getPropertyClass())) {
+            return new PropertyContext<Enum<?>>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<Enum<?>> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -39,7 +37,7 @@ public class EnumEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<Enum<?>> renderForEdit(String componentId, IModel<Enum<?>> model) {
-					return new EnumPropertyEditor(componentId, this, model);
+					return new EnumPropertyEditor(componentId, descriptor, model);
 				}
             	
             };

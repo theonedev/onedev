@@ -183,7 +183,7 @@ public class DiffUtils {
 	 * @return
 	 */
 	public static LinkedHashMap<Integer, LineDiff> align(
-			List<Tokenized> deleteLines, List<Tokenized> insertLines) {
+			List<Tokenized> deleteLines, List<Tokenized> insertLines, boolean forceAlign) {
 		LinkedHashMap<Integer, LineDiff> lineDiffs = new LinkedHashMap<>();
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
@@ -212,7 +212,7 @@ public class DiffUtils {
 						}
 					}
 				}
-				if (equal*3 >= total) {
+				if (forceAlign || equal*3 >= total) {
 					List<DiffBlock<TextToken>> diffBlocks = new ArrayList<>();
 					int oldLineNo = 0;
 					int newLineNo = 0;
@@ -426,7 +426,7 @@ public class DiffUtils {
 			return null;
 	}
 	
-	public static String diffAsHtml(List<String> oldLines, List<String> newLines) {
+	public static String diffAsHtml(List<String> oldLines, List<String> newLines, boolean forceAlign) {
 		List<DiffBlock<Tokenized>> diffBlocks = DiffUtils.diff(oldLines, null, newLines, null, WhitespaceOption.DO_NOT_IGNORE);
 		StringBuilder builder = new StringBuilder("<div style='font-family: monospace;'>");
 		for (int i=0; i<diffBlocks.size(); i++) {
@@ -441,7 +441,7 @@ public class DiffUtils {
 					DiffBlock<Tokenized> nextBlock = diffBlocks.get(i+1);
 					if (nextBlock.getOperation() == Operation.INSERT) {
 						LinkedHashMap<Integer, LineDiff> lineChanges = 
-								DiffUtils.align(block.getUnits(), nextBlock.getUnits());
+								DiffUtils.align(block.getUnits(), nextBlock.getUnits(), forceAlign);
 						int prevDeleteLineIndex = 0;
 						int prevInsertLineIndex = 0;
 						for (Map.Entry<Integer, LineDiff> entry: lineChanges.entrySet()) {

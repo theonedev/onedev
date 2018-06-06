@@ -34,7 +34,7 @@ public class DescriptionChangeData implements ChangeData {
 	
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new PlainDiffPanel(componentId, getLines(oldDescription), getLines(newDescription));
+		return new PlainDiffPanel(componentId, getLines(oldDescription), getLines(newDescription), false);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class DescriptionChangeData implements ChangeData {
 		String escaped = HtmlUtils.escapeHtml(change.getUser().getDisplayName());
 		StringBuilder builder = new StringBuilder(String.format("<b>%s changed description</b>", escaped));
 		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(getLines(oldDescription), getLines(newDescription)));
+		builder.append(DiffUtils.diffAsHtml(getLines(oldDescription), getLines(newDescription), false));
 		return builder.toString();
 	}
 

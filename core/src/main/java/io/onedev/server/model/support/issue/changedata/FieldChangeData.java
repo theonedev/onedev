@@ -2,7 +2,6 @@ package io.onedev.server.model.support.issue.changedata;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,43 +26,64 @@ public class FieldChangeData implements ChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Map<String, IssueField> oldFields;
+	protected final List<String> oldLines = new ArrayList<>();
 	
-	private final Map<String, IssueField> newFields;
+	protected final List<String> newLines = new ArrayList<>();
+	
+	protected final Map<String, String> newUserNames = new HashMap<>();
+	
+	protected final Map<String, String> newGroupNames = new HashMap<>();
 	
 	public FieldChangeData(Map<String, IssueField> oldFields, Map<String, IssueField> newFields) {
-		this.oldFields = copyFields(oldFields);
-		this.newFields = copyFields(newFields);
-		for (Iterator<Map.Entry<String, IssueField>> it = this.oldFields.entrySet().iterator(); it.hasNext();) {
-			Map.Entry<String, IssueField> entry = it.next();
-			IssueField newField = this.newFields.get(entry.getKey());
-			if (newField != null && entry.getValue().getValues().equals(newField.getValues())) {
-				this.newFields.remove(entry.getKey());
-				it.remove();
+		oldFields = copyNonEmptyFields(oldFields);
+		newFields = copyNonEmptyFields(newFields);
+
+		for (IssueField oldField: oldFields.values()) {
+			IssueField newField = newFields.get(oldField.getName());
+			if (newField != null) {
+				if (!describe(oldField).equals(describe(newField))) {
+					oldLines.add(describe(oldField));
+					newLines.add(describe(newField));
+					extractUsersAndGroups(newField);
+				}
+			} else {
+				oldLines.add(describe(oldField));
+				newLines.add("");
+			}
+		}
+		for (IssueField newField: newFields.values()) {
+			IssueField oldField = oldFields.get(newField.getName());
+			if (oldField == null) {
+				oldLines.add("");
+				newLines.add(describe(newField));
+				extractUsersAndGroups(newField);
 			}
 		}
 	}
-
-	public Map<String, IssueField> getOldFields() {
-		return oldFields;
-	}
-
-	public Map<String, IssueField> getNewFields() {
-		return newFields;
-	}
-
-	private Map<String, IssueField> copyFields(Map<String, IssueField> fields) {
-		Map<String, IssueField> copyOfFields = new LinkedHashMap<>();
+	
+	private Map<String, IssueField> copyNonEmptyFields(Map<String, IssueField> fields) {
+		Map<String, IssueField> copy = new LinkedHashMap<>();
 		for (Map.Entry<String, IssueField> entry: fields.entrySet()) {
-			if (!entry.getValue().getValues().contains(null) && !entry.getValue().getValues().isEmpty())
-				copyOfFields.put(entry.getKey(), entry.getValue());
+			if (!entry.getValue().getValues().isEmpty())
+				copy.put(entry.getKey(), entry.getValue());
 		}
-		return copyOfFields;
+		return copy;
+	}
+	
+	private void extractUsersAndGroups(IssueField field) {
+		if (field.getType().equals(InputSpec.USER_CHOICE) && !field.getValues().isEmpty()) 
+			newUserNames.put(field.getName(), field.getValues().iterator().next());
+		if (field.getType().equals(InputSpec.GROUP_CHOICE) && !field.getValues().isEmpty()) 
+			newGroupNames.put(field.getName(), field.getValues().iterator().next());
+	}
+
+	private String describe(IssueField field) {
+		return field.getName() + ": " + StringUtils.join(field.getValues(), ", ");		
 	}
 	
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new PlainDiffPanel(componentId, getLines(oldFields), getLines(newFields));
+		return new PlainDiffPanel(componentId, oldLines, newLines, true);
 	}
 
 	@Override
@@ -77,12 +97,8 @@ public class FieldChangeData implements ChangeData {
 
 	public List<String> getLines(Map<String, IssueField> fields) {
 		List<String> lines = new ArrayList<>();
-		for (Map.Entry<String, IssueField> entry: fields.entrySet()) {
-			if (entry.getValue().getType().equals(InputSpec.ISSUE_CHOICE))
-				lines.add(entry.getKey() + ": #" + entry.getValue().getValues().iterator().next());
-			else
-				lines.add(entry.getKey() + ": " + StringUtils.join(entry.getValue().getValues(), ", "));
-		}
+		for (Map.Entry<String, IssueField> entry: fields.entrySet())
+			lines.add(entry.getKey() + ": " + StringUtils.join(entry.getValue().getValues(), ", "));
 		return lines;
 	}
 	
@@ -91,7 +107,7 @@ public class FieldChangeData implements ChangeData {
 		String escaped = HtmlUtils.escapeHtml(change.getUser().getDisplayName());
 		StringBuilder builder = new StringBuilder(String.format("<b>%s changed custom fields</b>", escaped));
 		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(getLines(oldFields), getLines(newFields)));
+		builder.append(DiffUtils.diffAsHtml(oldLines, newLines, true));
 		return builder.toString();
 	}
 
@@ -100,15 +116,21 @@ public class FieldChangeData implements ChangeData {
 		return null;
 	}
 
+	public List<String> getOldLines() {
+		return oldLines;
+	}
+
+	public List<String> getNewLines() {
+		return newLines;
+	}
+
 	@Override
 	public Map<String, User> getNewUsers() {
 		Map<String, User> newUsers = new HashMap<>();
-		for (IssueField field: newFields.values()) {
-			if (field.getType().equals(InputSpec.USER_CHOICE)) {
-				User user = OneDev.getInstance(UserManager.class).findByName(field.getValues().iterator().next());
-				if (user != null)
-					newUsers.put(field.getName(), user);
-			}
+		for (Map.Entry<String, String> entry: newUserNames.entrySet()) {
+			User user = OneDev.getInstance(UserManager.class).findByName(entry.getValue());
+			if (user != null)
+				newUsers.put(entry.getKey(), user);
 		}
 		return newUsers;
 	}
@@ -116,12 +138,10 @@ public class FieldChangeData implements ChangeData {
 	@Override
 	public Map<String, Group> getNewGroups() {
 		Map<String, Group> newGroups = new HashMap<>();
-		for (IssueField field: newFields.values()) {
-			if (field.getType().equals(InputSpec.GROUP_CHOICE)) {
-				Group group = OneDev.getInstance(GroupManager.class).find(field.getValues().iterator().next());
-				if (group != null)
-					newGroups.put(field.getName(), group);
-			}
+		for (Map.Entry<String, String> entry: newGroupNames.entrySet()) {
+			Group group = OneDev.getInstance(GroupManager.class).find(entry.getValue());
+			if (group != null)
+				newGroups.put(entry.getKey(), group);
 		}
 		return newGroups;
 	}

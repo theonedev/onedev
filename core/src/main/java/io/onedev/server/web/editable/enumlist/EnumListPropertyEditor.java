@@ -59,12 +59,12 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         	@Override
         	protected void onInitialize() {
         		super.onInitialize();
-				getSettings().configurePlaceholder(propertyDescriptor);
+				getSettings().configurePlaceholder(descriptor);
         	}
         	
         };
-        input.setRequired(propertyDescriptor.isPropertyRequired());
-        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+        input.setRequired(descriptor.isPropertyRequired());
+        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

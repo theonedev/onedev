@@ -19,19 +19,18 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 public class BranchPatternEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-		Method propertyGetter = propertyDescriptor.getPropertyGetter();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Method propertyGetter = descriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(BranchPattern.class) != null) {
         	if (propertyGetter.getReturnType() != String.class) {
 	    		throw new RuntimeException("Annotation 'BranchPattern' should be applied to property "
 	    				+ "with type 'String'.");
         	}
-    		return new PropertyContext<String>(propertyDescriptor) {
+    		return new PropertyContext<String>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -52,7 +51,7 @@ public class BranchPatternEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new BranchPatternEditor(componentId, this, model);
+		        	return new BranchPatternEditor(componentId, descriptor, model);
 				}
     			
     		};

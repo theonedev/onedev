@@ -16,15 +16,13 @@ import io.onedev.server.web.editable.annotation.Color;
 public class ColorEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-
-		if (propertyDescriptor.getPropertyGetter().getAnnotation(Color.class) != null) {
-			return new PropertyContext<String>(propertyDescriptor) {
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		if (descriptor.getPropertyGetter().getAnnotation(Color.class) != null) {
+			return new PropertyContext<String>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -41,7 +39,7 @@ public class ColorEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					return new ColorPropertyEditor(componentId, this, model);
+					return new ColorPropertyEditor(componentId, descriptor, model);
 				}
 				
 			};

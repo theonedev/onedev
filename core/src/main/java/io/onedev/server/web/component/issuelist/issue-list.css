@@ -1,14 +1,28 @@
 .issue-list>.head {
 	position: relative;
+}
+.issue-list>.head>* {
 	margin-bottom: 20px;
 }
 .issue-list>.head>form {
-	margin-right: 200px;
+	margin-right: 124px;
 }
-.issue-list>.head>.actions {
-	position: absolute; 
+.issue-list>.head>.open-new {
+	position: absolute;
 	right: 0;
 	top: 0;
+}
+.issue-list>.head>.actions>* {
+	margin-right: 16px;
+	color: #666;
+}
+.issue-list>.head>.actions a[disabled] {
+	text-decoration: none;
+	color: #999;
+	cursor: default;
+}
+.issue-list>.head>.actions>.page-info {
+	margin-right: 0;
 }
 
 .issue-list .issue {
@@ -86,4 +100,12 @@
 }
 .issue-list .issue .additional>.built-in>span:last-child {
 	margin-right: 0;
+}
+
+.issue-batch-update .alert {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+.issue-batch-update .select-fields>.checkboxes>* {
+	margin-right: 10px;
 }

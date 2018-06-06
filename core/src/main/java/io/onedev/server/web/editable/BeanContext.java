@@ -14,32 +14,34 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
-public class BeanContext extends BeanDescriptor {
+public class BeanContext implements Serializable {
+	
+	private final BeanDescriptor descriptor;
 	
 	public BeanContext(Class<?> beanClass) {
-		this(beanClass, Sets.newHashSet());
+		descriptor = new BeanDescriptor(beanClass, Sets.newHashSet());
 	}
 	
 	public BeanContext(Class<?> beanClass, Set<String> excludedProperties) {
-		super(beanClass, excludedProperties);
+		descriptor = new BeanDescriptor(beanClass, excludedProperties);
 	}
 	
-	public BeanContext(BeanDescriptor beanDescriptor) {
-		super(beanDescriptor);
+	public BeanContext(BeanDescriptor descriptor) {
+		this.descriptor = descriptor;
 	}
 	
 	public BeanViewer renderForView(String componentId, IModel<Serializable> model) {
 		checkBeanEditable();
-		return new BeanViewer(componentId, this, model);
+		return new BeanViewer(componentId, descriptor, model);
 	}
 
 	public BeanEditor renderForEdit(String componentId, IModel<Serializable> model) {
 		checkBeanEditable();
-		return new BeanEditor(componentId, this, model);
+		return new BeanEditor(componentId, descriptor, model);
 	}
 	
 	private void checkBeanEditable() {
-		Class<?> beanClass = getBeanClass();
+		Class<?> beanClass = descriptor.getBeanClass();
 		if (beanClass.getAnnotation(Editable.class) == null) {
 			throw new RuntimeException("Can not edit bean " + beanClass 
 				+ " as it is not annotated with @Editable");
@@ -65,7 +67,7 @@ public class BeanContext extends BeanDescriptor {
 
 			@Override
 			public void setObject(Serializable object) {
-				copyProperties(object, getObject());
+				descriptor.copyProperties(object, getObject());
 			}
 			
 		};

@@ -20,16 +20,16 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public PropertyContext<Serializable> getPropertyEditContext(Class<?> beanClass, String propertyName) {
+	public PropertyContext<Serializable> getPropertyEditContext(PropertyDescriptor descriptor) {
 		for (EditSupport each: editSupports) {
-			PropertyContext<?> editContext = each.getEditContext(beanClass, propertyName);
+			PropertyContext<?> editContext = each.getEditContext(descriptor);
 			if (editContext != null)
 				return (PropertyContext<Serializable>) editContext;
 		}
 		throw new RuntimeException(String.format(
 				"Unable to find edit context (bean: %s, property: %s). Possible reason: forget to annotate "
 				+ "return type of the method with @Editable", 
-				beanClass.getName(), propertyName));
+				descriptor.getBeanClass().getName(), descriptor.getPropertyName()));
 	}
 
 }

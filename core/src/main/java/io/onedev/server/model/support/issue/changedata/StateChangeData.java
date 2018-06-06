@@ -31,6 +31,9 @@ public class StateChangeData extends FieldChangeData {
 		this.state = state;
 		this.prevState = prevState;
 		this.comment = comment;
+		
+		oldLines.add(0, "State: " + prevState);
+		newLines.add(0, "State: " + state);
 	}
 
 	public String getState() {
@@ -74,17 +77,15 @@ public class StateChangeData extends FieldChangeData {
 		if (external) 
 			return String.format("[%s] Issue #%d: %s", state, issue.getNumber(), issue.getTitle());  
 		else 
-			return "changed state to \"" + state + "\"";
+			return "changed state";
 	}
 	
 	@Override
 	public String describeAsHtml(IssueChange change) {
 		String escapedName = HtmlUtils.escapeHtml(change.getUser().getDisplayName());
-		String escapedState = HtmlUtils.escapeHtml(state);
-		StringBuilder builder = new StringBuilder(String.format("<b>%s changed state to &quot;%s&quot;</b>", 
-				escapedName, escapedState));
+		StringBuilder builder = new StringBuilder(String.format("<b>%s changed state</b>", escapedName));
 		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(getLines(getOldFields()), getLines(getNewFields())));
+		builder.append(DiffUtils.diffAsHtml(getOldLines(), getNewLines(), true));
 		if (comment != null) {
 			builder.append("<p style='margin: 16px 0;'>");
 			builder.append(OneDev.getInstance(MarkdownManager.class).escape(comment));			

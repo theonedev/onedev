@@ -20,16 +20,14 @@ public class DateEditSupport implements EditSupport {
 	public static final String DATE_INPUT_FORMAT = "yyyy-MM-dd";
 	
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-
-		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
 		if (propertyClass == Date.class) {
-			return new PropertyContext<Date>(propertyDescriptor) {
+			return new PropertyContext<Date>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<Date> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -49,7 +47,7 @@ public class DateEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<Date> renderForEdit(String componentId, IModel<Date> model) {
-					return new DatePropertyEditor(componentId, this, model);
+					return new DatePropertyEditor(componentId, descriptor, model);
 				}
 				
 			};

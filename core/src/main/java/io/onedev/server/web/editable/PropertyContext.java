@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -9,17 +10,24 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.launcher.loader.AppLoader;
+import io.onedev.server.util.OneContext;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
-public abstract class PropertyContext<T> extends PropertyDescriptor {
+public abstract class PropertyContext<T> implements Serializable {
 
+	private final PropertyDescriptor descriptor;
+	
 	public PropertyContext(Class<?> beanClass, String propertyName) {
-		super(beanClass, propertyName);
+		descriptor = new PropertyDescriptor(beanClass, propertyName);
 	}
 	
-	public PropertyContext(PropertyDescriptor propertyDescriptor) {
-		super(propertyDescriptor);
+	public PropertyContext(PropertyDescriptor descriptor) {
+		this.descriptor = descriptor;
+	}
+	
+	public PropertyDescriptor getDescriptor() {
+		return descriptor;
 	}
 	
 	public abstract PropertyViewer renderForView(String componentId, IModel<T> model);
@@ -43,12 +51,12 @@ public abstract class PropertyContext<T> extends PropertyDescriptor {
 
 			@Override
 			public Serializable getObject() {
-				return (Serializable) editContext.getPropertyValue(beanModel.getObject());
+				return (Serializable) editContext.getDescriptor().getPropertyValue(beanModel.getObject());
 			}
 
 			@Override
 			public void setObject(Serializable object) {
-				editContext.setPropertyValue(beanModel.getObject(), object);
+				editContext.getDescriptor().setPropertyValue(beanModel.getObject(), object);
 			}
 			
 		});
@@ -83,7 +91,7 @@ public abstract class PropertyContext<T> extends PropertyDescriptor {
 
 			@Override
 			protected Serializable load() {
-				return (Serializable) editContext.getPropertyValue(beanModel.getObject());
+				return (Serializable) editContext.getDescriptor().getPropertyValue(beanModel.getObject());
 			}
 			
 		});
@@ -94,14 +102,56 @@ public abstract class PropertyContext<T> extends PropertyDescriptor {
 	}
 
 	public static PropertyContext<Serializable> of(Class<?> beanClass, String propertyName) {
-		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		return registry.getPropertyEditContext(beanClass, propertyName);
+		return of(new PropertyDescriptor(beanClass, propertyName));
 	}
 	
 	public static PropertyContext<Serializable> of(PropertyDescriptor propertyDescriptor) {
-		PropertyContext<Serializable> propertyContext = of(propertyDescriptor.getBeanClass(), propertyDescriptor.getPropertyName());
-		propertyContext.setExcluded(propertyDescriptor.isExcluded());
-		return propertyContext;
+		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
+		return registry.getPropertyEditContext(propertyDescriptor);
+	}
+	
+	public String getDisplayName(Component component) {
+		return descriptor.getDisplayName(component);
+	}
+	
+	public String getDisplayName() {
+		return descriptor.getDisplayName();
+	}
+	
+	public String getPropertyName() {
+		return descriptor.getPropertyName();
+	}
+	
+	public Method getPropertyGetter() {
+		return descriptor.getPropertyGetter();
+	}
+	
+	public Class<?> getPropertyClass() {
+		return descriptor.getPropertyClass();
+	}
+	
+	public Object getPropertyValue(Object bean) {
+		return descriptor.getPropertyValue(bean);
+	}
+	
+	public void setPropertyValue(Object bean, Object value) {
+		descriptor.setPropertyValue(bean, value);
+	}
+	
+	public boolean isPropertyExcluded()	{
+		return descriptor.isPropertyExcluded();
+	}
+	
+	public void setPropertyExcluded(boolean propertyExcluded) {
+		descriptor.setPropertyExcluded(propertyExcluded);
+	}
+	
+	public boolean isPropertyRequired() {
+		return descriptor.isPropertyRequired();
+	}
+
+	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor) {
+		return descriptor.isPropertyVisible(oneContext, beanDescriptor);
 	}
 	
 }

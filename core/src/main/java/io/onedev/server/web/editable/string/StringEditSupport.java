@@ -29,28 +29,26 @@ import io.onedev.server.web.editable.annotation.UserChoice;
 public class StringEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-
-		Class<?> propertyClass = propertyDescriptor.getPropertyGetter().getReturnType();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
 		if (propertyClass == String.class 
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(Script.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(Color.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(Password.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(BranchPattern.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(TagPattern.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(IssueQuery.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(GroupChoice.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(UserChoice.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(PathPattern.class) == null
-				&& propertyDescriptor.getPropertyGetter().getAnnotation(ReviewRequirementSpec.class) == null) {
-			return new PropertyContext<String>(propertyDescriptor) {
+				&& descriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(Markdown.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(Script.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(Color.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(Password.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(BranchPattern.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(TagPattern.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(IssueQuery.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(GroupChoice.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(UserChoice.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(PathPattern.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(ReviewRequirementSpec.class) == null) {
+			return new PropertyContext<String>(descriptor) {
 
 				@Override
 				public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-					return new PropertyViewer(componentId, this) {
+					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -70,7 +68,7 @@ public class StringEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					return new StringPropertyEditor(componentId, this, model);
+					return new StringPropertyEditor(componentId, descriptor, model);
 				}
 				
 			};

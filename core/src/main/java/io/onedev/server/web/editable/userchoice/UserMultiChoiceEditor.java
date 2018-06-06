@@ -50,11 +50,11 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 		
 		OneContext.push(oneContext);
 		try {
-			UserChoice userChoice = propertyDescriptor.getPropertyGetter().getAnnotation(UserChoice.class);
+			UserChoice userChoice = descriptor.getPropertyGetter().getAnnotation(UserChoice.class);
 			Preconditions.checkNotNull(userChoice);
 			if (userChoice.value().length() != 0) {
 				choices.addAll((List<UserFacade>)ReflectionUtils
-						.invokeStaticMethod(propertyDescriptor.getBeanClass(), userChoice.value()));
+						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
 			} else {
 				choices.addAll(OneDev.getInstance(CacheManager.class).getUsers().values());
 			}
@@ -77,13 +77,13 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(propertyDescriptor);
+				getSettings().configurePlaceholder(descriptor);
 			}
 			
 		};
         input.setConvertEmptyInputStringToNull(true);
-        input.setRequired(propertyDescriptor.isPropertyRequired());
-        input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));
+        input.setRequired(descriptor.isPropertyRequired());
+        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

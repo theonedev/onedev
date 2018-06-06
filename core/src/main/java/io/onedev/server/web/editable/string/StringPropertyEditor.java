@@ -34,19 +34,19 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Method getter = getPropertyDescriptor().getPropertyGetter();
+		Method getter = getDescriptor().getPropertyGetter();
 		if (getter.getAnnotation(Multiline.class) != null) {
 			Fragment fragment = new Fragment("content", "multiLineFrag", this);
 			fragment.add(input = new TextArea<String>("input", Model.of(getModelObject())));
-			input.setType(getPropertyDescriptor().getPropertyClass());
+			input.setType(getDescriptor().getPropertyClass());
 			add(fragment);
 		} else {
 			Fragment fragment = new Fragment("content", "singleLineFrag", this);
 			fragment.add(input = new TextField<String>("input", Model.of(getModelObject())));
-			input.setType(getPropertyDescriptor().getPropertyClass());
+			input.setType(getDescriptor().getPropertyClass());
 			add(fragment);
 		}
-		input.setLabel(Model.of(getPropertyDescriptor().getDisplayName(this)));		
+		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));		
 		
 		input.add(new OnTypingDoneBehavior() {
 

@@ -18,17 +18,16 @@ import io.onedev.server.web.editable.annotation.FileChoice;
 public class FileEditSupport implements EditSupport {
 
 	@Override
-	public PropertyContext<?> getEditContext(Class<?> beanClass, String propertyName) {
-		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(beanClass, propertyName);
-        Method propertyGetter = propertyDescriptor.getPropertyGetter();
+	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+        Method propertyGetter = descriptor.getPropertyGetter();
         FileChoice fileChoice = propertyGetter.getAnnotation(FileChoice.class);
         if (fileChoice != null) {
         	if (propertyGetter.getReturnType() == String.class) {
-        		return new PropertyContext<String>(propertyDescriptor) {
+        		return new PropertyContext<String>(descriptor) {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-						return new PropertyViewer(componentId, this) {
+						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
@@ -44,7 +43,7 @@ public class FileEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new FileChoiceEditor(componentId, this, model);
+						return new FileChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};

@@ -62,9 +62,9 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	
 	@SuppressWarnings("unchecked")
 	private List<Serializable> newList() {
-		if (ClassUtils.isConcrete(getPropertyDescriptor().getPropertyClass())) {
+		if (ClassUtils.isConcrete(getDescriptor().getPropertyClass())) {
 			try {
-				return (List<Serializable>) getPropertyDescriptor().getPropertyClass().newInstance();
+				return (List<Serializable>) getDescriptor().getPropertyClass().newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
@@ -85,7 +85,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (getPropertyDescriptor().isPropertyRequired()) {
+		if (getDescriptor().isPropertyRequired()) {
 			add(new WebMarkupContainer("enable").setVisible(false));
 		} else {
 			add(new CheckBox("enable", new IModel<Boolean>() {
@@ -122,7 +122,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		}
 		
 		List<Serializable> list = getModelObject();
-		if (list == null && getPropertyDescriptor().isPropertyRequired())
+		if (list == null && getDescriptor().isPropertyRequired())
 			list = newList(); 
 		add(newListEditor(list));
 	}
@@ -336,7 +336,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				PathSegment.Property property = (Property) pathSegment;
 
 				for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
-					if (propertyEditor.getPropertyDescriptor().getPropertyName().equals(property.getName()))
+					if (propertyEditor.getDescriptor().getPropertyName().equals(property.getName()))
 						return propertyEditor;
 				}
 				return null;
@@ -359,7 +359,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				for (Component column: columns) {
 					@SuppressWarnings("unchecked")
 					PropertyEditor<Serializable> propertyEditor = (PropertyEditor<Serializable>) column.get("propertyEditor");
-					propertyEditor.getPropertyDescriptor().setPropertyValue(element, propertyEditor.getConvertedInput());
+					propertyEditor.getDescriptor().setPropertyValue(element, propertyEditor.getConvertedInput());
 				}
 			}
 			return newList;
