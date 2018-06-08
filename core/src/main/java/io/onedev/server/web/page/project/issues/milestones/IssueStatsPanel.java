@@ -11,6 +11,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
 
 @SuppressWarnings("serial")
 class IssueStatsPanel extends GenericPanel<Milestone> {
@@ -38,7 +39,7 @@ class IssueStatsPanel extends GenericPanel<Milestone> {
 		
 		add(new WebMarkupContainer("progress").add(AttributeAppender.append("style", "width: " + progress + "%;")));
 		
-		IssueCriteria openCriteria = getMilestone().getProject().getIssueWorkflow().getStatesCriteria(false);
+		IssueCriteria openCriteria = getMilestone().getProject().getIssueWorkflow().getStatesCriteria(StateSpec.Category.CLOSED);
 		if (openCriteria != null) {
 			Link<Void> link = new BookmarkablePageLink<Void>("open", MilestoneDetailPage.class, 
 					MilestoneDetailPage.paramsOf(getMilestone(), openCriteria.toString()));
@@ -58,7 +59,7 @@ class IssueStatsPanel extends GenericPanel<Milestone> {
 			add(link);
 		}
 		
-		IssueCriteria closedCriteria = getMilestone().getProject().getIssueWorkflow().getStatesCriteria(true);
+		IssueCriteria closedCriteria = getMilestone().getProject().getIssueWorkflow().getStatesCriteria(StateSpec.Category.OPEN);
 		if (closedCriteria != null) {
 			Link<Void> link = new BookmarkablePageLink<Void>("closed",  MilestoneDetailPage.class, 
 					MilestoneDetailPage.paramsOf(getMilestone(), closedCriteria.toString()));

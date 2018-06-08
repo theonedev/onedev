@@ -21,9 +21,11 @@ public class StateSpec implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public enum Category {OPEN, CLOSED};
+	
 	private String name;
 	
-	private boolean closed;
+	private Category category;
 	
 	private String description;
 	
@@ -41,13 +43,14 @@ public class StateSpec implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=150, description="Check this to indicate a closed state")
-	public boolean isClosed() {
-		return closed;
+	@Editable(order=150, description="Select category of this state")
+	@NotEmpty
+	public Category getCategory() {
+		return category;
 	}
 
-	public void setClosed(boolean closed) {
-		this.closed = closed;
+	public void setCategory(Category category) {
+		this.category = category;
 	}
 
 	@Editable(order=200)

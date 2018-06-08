@@ -156,6 +156,7 @@ public class IssueWorkflow implements Serializable {
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
+		open.setCategory(StateSpec.Category.OPEN);
 		open.setColor("#f0ad4e");
 		open.setFields(Lists.newArrayList("Type", "Priority", "Assignee"));
 		
@@ -164,7 +165,7 @@ public class IssueWorkflow implements Serializable {
 		StateSpec closed = new StateSpec();
 		closed.setColor("#5cb85c");
 		closed.setName("Closed");
-		closed.setClosed(true);
+		closed.setCategory(StateSpec.Category.CLOSED);
 		closed.setFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		
 		stateSpecs.add(closed);
@@ -394,10 +395,10 @@ public class IssueWorkflow implements Serializable {
 	}
 
 	@Nullable
-	public IssueCriteria getStatesCriteria(boolean closed) {
+	public IssueCriteria getStatesCriteria(StateSpec.Category category) {
 		List<IssueCriteria> criterias = new ArrayList<>();
 		for (StateSpec state: getStateSpecs()) {
-			if (closed == state.isClosed())
+			if (category == state.getCategory())
 				criterias.add(new StateCriteria(state.getName(), IssueQueryLexer.Is));
 		}
 		if (criterias.size() > 1)

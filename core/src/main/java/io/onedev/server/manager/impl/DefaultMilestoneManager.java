@@ -64,15 +64,15 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	}
 	
 	@Override
-	public void updateIssueCount(Milestone milestone, boolean closed) {
-		IssueCriteria criteria = milestone.getProject().getIssueWorkflow().getStatesCriteria(closed);
+	public void updateIssueCount(Milestone milestone, StateSpec.Category category) {
+		IssueCriteria criteria = milestone.getProject().getIssueWorkflow().getStatesCriteria(category);
 		if (criteria != null) {
-			if (closed)
+			if (category == StateSpec.Category.CLOSED)
 				milestone.setNumOfClosedIssues(issueManager.count(milestone.getProject(), criteria));
 			else
 				milestone.setNumOfOpenIssues(issueManager.count(milestone.getProject(), criteria));
 		} else {
-			if (closed)
+			if (category == StateSpec.Category.CLOSED)
 				milestone.setNumOfClosedIssues(0);
 			else
 				milestone.setNumOfOpenIssues(0);
@@ -94,7 +94,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	public void close(Milestone milestone, @Nullable Milestone moveOpenIssuesToMilestone) {
 		List<String> criterias = new ArrayList<>();
 		for (StateSpec state: milestone.getProject().getIssueWorkflow().getStateSpecs()) {
-			if (!state.isClosed())
+			if (state.getCategory() == StateSpec.Category.OPEN)
 				criterias.add("state='" + state.getName() + "'");
 		}
 		if (!criterias.isEmpty()) {
@@ -127,7 +127,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		if (milestone != null) {
 			StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState());
 			Preconditions.checkNotNull(state);
-			if (state.isClosed())
+			if (state.getCategory() == StateSpec.Category.CLOSED)
 				milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()+1);
 			else
 				milestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()+1);
@@ -144,7 +144,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			if (milestone != null) {
 				StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState());
 				Preconditions.checkNotNull(state);
-				if (state.isClosed()) 
+				if (state.getCategory() == StateSpec.Category.CLOSED) 
 					milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()-1);
 				else
 					milestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()-1);
@@ -164,8 +164,8 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			Preconditions.checkNotNull(prevState);
 			StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(data.getState());
 			Preconditions.checkNotNull(prevState);
-			if (prevState.isClosed() != state.isClosed()) {
-				if (prevState.isClosed()) {
+			if (prevState.getCategory() != state.getCategory()) {
+				if (prevState.getCategory() == StateSpec.Category.CLOSED) {
 					milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()-1);
 					milestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()+1);
 				} else {
@@ -180,7 +180,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			Milestone newMilestone = issue.getProject().getMilestone(data.getNewMilestone());
 			StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState());
 			Preconditions.checkNotNull(state);
-			if (state.isClosed()) {
+			if (state.getCategory() == StateSpec.Category.CLOSED) {
 				if (oldMilestone != null)
 					oldMilestone.setNumOfClosedIssues(oldMilestone.getNumOfClosedIssues()-1);
 				if (newMilestone != null)

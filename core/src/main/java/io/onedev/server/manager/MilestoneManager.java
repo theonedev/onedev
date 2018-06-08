@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface MilestoneManager extends EntityManager<Milestone> {
@@ -14,5 +15,5 @@ public interface MilestoneManager extends EntityManager<Milestone> {
 	
 	void close(Milestone milestone, @Nullable Milestone moveOpenIssuesToMilestone);
 	
-	void updateIssueCount(Milestone milestone, boolean closed);
+	void updateIssueCount(Milestone milestone, StateSpec.Category category);
 }

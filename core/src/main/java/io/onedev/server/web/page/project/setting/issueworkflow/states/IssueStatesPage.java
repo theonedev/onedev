@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -109,7 +110,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Closed")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Category")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
@@ -125,7 +126,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 					}
 					
 				};
-				link.add(new Label("label", rowModel.getObject().isClosed()));
+				link.add(new Label("label", StringUtils.capitalize(rowModel.getObject().getCategory().name().toLowerCase())));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
