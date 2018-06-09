@@ -1,14 +1,14 @@
 <wicket:panel>
-	<div wicket:id="values" class="field-values"></div>
+	<div wicket:id="content" class="field-values"></div>
+	<wicket:fragment wicket:id="nonEmptyValuesFrag">
+		<div wicket:id="values" class="value"></div>	
+	</wicket:fragment>
 	<wicket:fragment wicket:id="userFrag">
-		<a wicket:id="name"></a>
+		<a wicket:id="name" class="user"></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="issueFrag">
 		<div class="issue">
 			<a wicket:id="link"><span wicket:id="label"></span></a> <span wicket:id="state" class="label state"></span>
 		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="nonEmptyValuesFrag">
-		<div wicket:id="values" class="value"><div wicket:id="value"></div></div>	
 	</wicket:fragment>
 </wicket:panel>

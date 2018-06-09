@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.inputspec.InputSpec;
@@ -44,7 +46,7 @@ public class StateSpec implements Serializable {
 	}
 
 	@Editable(order=150, description="Select category of this state")
-	@NotEmpty
+	@NotNull
 	public Category getCategory() {
 		return category;
 	}

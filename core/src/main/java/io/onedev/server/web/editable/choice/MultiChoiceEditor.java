@@ -3,7 +3,9 @@ package io.onedev.server.web.editable.choice;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -26,7 +28,7 @@ import io.onedev.utils.ReflectionUtils;
 @SuppressWarnings("serial")
 public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 
-	private final List<String> choices = new ArrayList<>();
+	private final Map<String, String> choices = new LinkedHashMap<>();
 	
 	private Select2MultiChoice<String> input;
 	
@@ -48,9 +50,13 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 					descriptor.getPropertyGetter().getAnnotation(
 							io.onedev.server.web.editable.annotation.ChoiceProvider.class);
 			Preconditions.checkNotNull(choiceProvider);
-			for (String each: (List<String>)ReflectionUtils
-					.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value())) {
-				choices.add(each);
+			Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
+			if (result instanceof List) {
+				for (String each: (List<String>)result) {
+					choices.put(each, each);
+				}
+			} else {
+				choices.putAll(((Map)result));
 			}
 		} finally {
 			OneContext.pop();
@@ -64,7 +70,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
         
 		IModel<Collection<String>> model = new Model((Serializable) selections);
         
-		input = new StringMultiChoice("input", model, choices) {
+		input = new StringMultiChoice("input", model, new ArrayList<>(choices.keySet())) {
 
 			@Override
 			protected void onInitialize() {
@@ -97,7 +103,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected List<String> convertInputToValue() throws ConversionException {
 		List<String> values = new ArrayList<>();
 		for (String each: input.getConvertedInput())
-			values.add(each);
+			values.add(choices.get(each));
 		return values;
 	}
 

@@ -157,8 +157,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWatch> watches = new ArrayList<>();
 	
-	private transient Map<String, IssueField> effectiveFields;
-	
 	public long getVersion() {
 		return version;
 	}
@@ -313,7 +311,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	public void setFieldUnaries(Collection<IssueFieldUnary> fieldUnaries) {
 		this.fieldUnaries = fieldUnaries;
-		effectiveFields = null;
 	}
 	
 	public LastActivity getLastActivity() {
@@ -335,38 +332,36 @@ public class Issue extends AbstractEntity implements Referenceable {
 	}
 	
 	public Map<String, IssueField> getEffectiveFields() {
-		if (effectiveFields == null) {
-			effectiveFields = new LinkedHashMap<>();
+		Map<String, IssueField> effectiveFields = new LinkedHashMap<>();
 
-			Collection<String> fieldNames = getProject().getIssueWorkflow().getApplicableFields(state);
-			
-			Map<String, List<IssueFieldUnary>> unaryMap = new HashMap<>(); 
-			for (IssueFieldUnary unary: getFieldUnaries()) {
-				if (fieldNames.contains(unary.getName())) {
-					List<IssueFieldUnary> fieldsOfName = unaryMap.get(unary.getName());
-					if (fieldsOfName == null) {
-						fieldsOfName = new ArrayList<>();
-						unaryMap.put(unary.getName(), fieldsOfName);
-					}
-					fieldsOfName.add(unary);
+		Collection<String> fieldNames = getProject().getIssueWorkflow().getApplicableFields(state);
+		
+		Map<String, List<IssueFieldUnary>> unaryMap = new HashMap<>(); 
+		for (IssueFieldUnary unary: getFieldUnaries()) {
+			if (fieldNames.contains(unary.getName())) {
+				List<IssueFieldUnary> fieldsOfName = unaryMap.get(unary.getName());
+				if (fieldsOfName == null) {
+					fieldsOfName = new ArrayList<>();
+					unaryMap.put(unary.getName(), fieldsOfName);
 				}
+				fieldsOfName.add(unary);
 			}
-			
-			for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
-				String fieldName = fieldSpec.getName();
-				List<IssueFieldUnary> unaries = unaryMap.get(fieldName);
-				if (unaries != null) {
-					String type = unaries.iterator().next().getType();
-					List<String> values = new ArrayList<>();
-					for (IssueFieldUnary unary: unaries) {
-						if (unary.getValue() != null)
-							values.add(unary.getValue());
-					}
-					Collections.sort(values);
-					if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
-						values = Lists.newArrayList(values.iterator().next());
-					effectiveFields.put(fieldName, new IssueField(fieldName, type, values));
+		}
+		
+		for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
+			String fieldName = fieldSpec.getName();
+			List<IssueFieldUnary> unaries = unaryMap.get(fieldName);
+			if (unaries != null) {
+				String type = unaries.iterator().next().getType();
+				List<String> values = new ArrayList<>();
+				for (IssueFieldUnary unary: unaries) {
+					if (unary.getValue() != null)
+						values.add(unary.getValue());
 				}
+				Collections.sort(values);
+				if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
+					values = Lists.newArrayList(values.iterator().next());
+				effectiveFields.put(fieldName, new IssueField(fieldName, type, values));
 			}
 		}
 		return effectiveFields;

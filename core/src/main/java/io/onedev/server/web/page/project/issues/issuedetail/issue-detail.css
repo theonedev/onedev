@@ -38,8 +38,6 @@
 #issue-detail>.side>.nav {
 	font-size: 16px;
 	position: relative;
-}
-#issue-detail>.side>.nav {
 	text-align: center;
 }
 #issue-detail>.side>.nav a {
@@ -61,15 +59,13 @@
 
 #issue-detail>.side>div>.head {
 	font-weight: bold;
+	margin-bottom: 16px;
 }
-#issue-detail>.side>div>.body {
-	margin-top: 12px;
+#issue-detail>.side>div .body>* {
+	margin-bottom: 16px;
 }
 #issue-detail>.side>div>.body a.avatar {
 	margin-right: 8px;
-}
-#issue-detail>.side>div>.body>a {
-	margin-top: 12px;
 }
 
 #issue-detail>.side {
@@ -80,7 +76,7 @@
 	width: 360px;
 	border-left: 2px solid #E0E0E0;
 	padding: 20px;
-	background: #F9F9F9;
+	background: #FAFAFA;
 	overflow: auto;
 }
 #issue-detail>.side>* {
@@ -106,18 +102,16 @@
 	white-space: nowrap;
 	padding: 3px 20px 3px 0;
 }
-#issue-detail>.side .fields .values .value>div, #issue-detail>.side .fields .values i {
+#issue-detail>.side .fields .value.has-color {
 	display: table-cell;
 	border-radius: 3px;
-	padding: 3px 6px;
-}
-#issue-detail>.side .fields>a {
-	display: block;
-	margin-top: 12px;
+	padding: 2px 4px;
 }
 #issue-detail>.side a.action {
 	margin-top: 0;
 	margin-left: 8px;
 	color: #666;
 }
-
+#issue-detail>.side .milestone>.body>.progress {
+	margin-top: 20px;
+}

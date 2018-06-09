@@ -90,9 +90,9 @@ public class FieldChangeData implements ChangeData {
 	public String getTitle(IssueChange change, boolean external) {
 		Issue issue = change.getIssue();
 		if (external) 
-			return String.format("[Custom Fields Changed] Issue #%d: %s", issue.getNumber(), issue.getTitle());  
+			return String.format("[Fields Changed] Issue #%d: %s", issue.getNumber(), issue.getTitle());  
 		else 
-			return "changed custom fields";
+			return "changed fields";
 	}
 
 	public List<String> getLines(Map<String, IssueField> fields) {
@@ -105,14 +105,14 @@ public class FieldChangeData implements ChangeData {
 	@Override
 	public String describeAsHtml(IssueChange change) {
 		String escaped = HtmlUtils.escapeHtml(change.getUser().getDisplayName());
-		StringBuilder builder = new StringBuilder(String.format("<b>%s changed custom fields</b>", escaped));
+		StringBuilder builder = new StringBuilder(String.format("<b>%s changed fields</b>", escaped));
 		builder.append("<p style='margin: 16px 0;'>");
 		builder.append(DiffUtils.diffAsHtml(oldLines, newLines, true));
 		return builder.toString();
 	}
 
 	@Override
-	public String getComment() {
+	public CommentSupport getCommentSupport() {
 		return null;
 	}
 

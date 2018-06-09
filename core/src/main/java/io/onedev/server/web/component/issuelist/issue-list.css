@@ -12,100 +12,35 @@
 	right: 0;
 	top: 0;
 }
-.issue-list>.head>.actions>* {
+.issue-list>.head>.others>* {
 	margin-right: 16px;
 	color: #666;
 }
-.issue-list>.head>.actions a[disabled] {
+.issue-list>.head>.others a[disabled] {
 	text-decoration: none;
 	color: #999;
 	cursor: default;
 }
-.issue-list>.head>.actions>.page-info {
-	margin-right: 0;
+.issue-list>.body td.custom-field div, .issue-list>.body td.state div {
+	display: inline;
 }
-
-.issue-list .issue {
-	border-bottom: 2px solid #DDD;
-	margin-bottom: 12px;
-	border-left: 4px solid white;
-	padding-left: 8px;
-}
-.issue-list .new.issue {
-	border-left-color: #4667EE;
-}
-.issue-list .issue .primary {
-	display: table;
-	table-layout: fixed;
-	width: 100%;
-}
-.issue-list .issue .primary>div {
-	display: table-cell;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	padding-right: 8px;
-}
-.issue-list .issue .primary .number {
-	width: 75px;
-	font-size: 16px;
-	font-weight: bold;
-}
-.issue-list .issue .primary .title a {
-	font-size: 16px;
-	font-weight: bold;
-}
-.issue-list .issue .primary .last-activity {
-	text-align: right;
-	width: 300px;
-	padding-right: 0;
-}
-.issue-list .issue .additional {
-	display: table;
-	table-layout: fixed;
-	width: 100%;
-}
-.issue-list .issue .additional>div {
-	display: table-cell;
-	padding: 8px 8px 8px 0;
-}
-.issue-list .issue .additional .state>div {
-	color: white;
-}
-.issue-list .issue .additional .field-values>.value {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-} 
-.issue-list .issue .additional .field-values>.white.value {
-	color: white;
-} 
-
-.issue-list .issue .additional .state>div, 
-.issue-list .issue .additional .field-values .value>div, 
-.issue-list .issue .additional .field-values i {
-	display: table-cell;
-	padding: 3px 6px;
+.issue-list>.body .field-values .value.has-color, .issue-list>.body td.state div {
+	padding: 2px 4px;
 	border-radius: 3px;
 }
-.issue-list .issue .additional .state>div {
+.issue-list>.body td.custom-field {
+	white-space: nowrap;
+}
+.issue-list>.body tr.issue.new {
 	font-weight: bold;
-} 
-.issue-list .issue .additional>.built-in{
-	text-align: right;
-	padding-right: 0;
 }
-.issue-list .issue .additional>.built-in>span {
-	margin-right: 8px;
+.issue-batch-edit form .modal-body>div {
+	margin-bottom: 20px;
 }
-.issue-list .issue .additional>.built-in>span:last-child {
-	margin-right: 0;
-}
-
-.issue-batch-update .alert {
+.issue-batch-edit .alert {
 	margin-top: 10px;
 	margin-bottom: 5px;
 }
-.issue-batch-update .select-fields>.checkboxes>* {
+.issue-batch-edit .select-fields>.checkboxes>* {
 	margin-right: 10px;
 }

@@ -54,6 +54,16 @@ public class DescriptionChangeData implements ChangeData {
 			lines = new ArrayList<>();
 		return lines;
 	}
+
+	@Override
+	public List<String> getOldLines() {
+		return getLines(oldDescription);
+	}
+	
+	@Override
+	public List<String> getNewLines() {
+		return getLines(newDescription);
+	}
 	
 	@Override
 	public String describeAsHtml(IssueChange change) {
@@ -65,7 +75,7 @@ public class DescriptionChangeData implements ChangeData {
 	}
 
 	@Override
-	public String getComment() {
+	public CommentSupport getCommentSupport() {
 		return null;
 	}
 

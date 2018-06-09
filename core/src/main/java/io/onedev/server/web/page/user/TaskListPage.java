@@ -35,7 +35,7 @@ import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.RequestStatusLabel;
 import io.onedev.server.web.component.datatable.EntityDataProvider;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
-import io.onedev.server.web.component.datatable.SelectionColumn;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;

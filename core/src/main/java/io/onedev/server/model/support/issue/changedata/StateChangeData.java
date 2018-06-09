@@ -12,50 +12,60 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.StateChangePanel;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ChangeDataPanel;
 import io.onedev.utils.HtmlUtils;
 
 public class StateChangeData extends FieldChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String prevState;
+	private final String oldState;
 	
-	private final String state;
+	private final String newState;
 	
 	private String comment;
 	
-	public StateChangeData(String state, String prevState, Map<String, IssueField> oldFields, Map<String, IssueField> newFields, 
-			@Nullable String comment) {
+	public StateChangeData(String oldState, String newState, Map<String, IssueField> oldFields, 
+			Map<String, IssueField> newFields, @Nullable String comment) {
 		super(oldFields, newFields);
-		this.state = state;
-		this.prevState = prevState;
+		this.oldState = oldState;
+		this.newState = newState;
 		this.comment = comment;
 		
-		oldLines.add(0, "State: " + prevState);
-		newLines.add(0, "State: " + state);
+		oldLines.add(0, "State: " + oldState);
+		newLines.add(0, "State: " + newState);
 	}
 
-	public String getState() {
-		return state;
+	public String getNewState() {
+		return newState;
 	}
 
-	public String getPrevState() {
-		return prevState;
+	public String getOldState() {
+		return oldState;
 	}
 
 	@Override
-	public String getComment() {
-		return comment;
-	}
+	public CommentSupport getCommentSupport() {
+		return new CommentSupport() {
 
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+			private static final long serialVersionUID = 1L;
 
+			@Override
+			public String getComment() {
+				return comment;
+			}
+
+			@Override
+			public void setComment(String comment) {
+				StateChangeData.this.comment = comment;
+			}
+			
+		};
+	}
+	
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new StateChangePanel(componentId) {
+		return new ChangeDataPanel(componentId) {
 			
 			private static final long serialVersionUID = 1L;
 
@@ -75,7 +85,7 @@ public class StateChangeData extends FieldChangeData {
 	public String getTitle(IssueChange change, boolean external) {
 		Issue issue = change.getIssue();
 		if (external) 
-			return String.format("[%s] Issue #%d: %s", state, issue.getNumber(), issue.getTitle());  
+			return String.format("[%s] Issue #%d: %s", newState, issue.getNumber(), issue.getTitle());  
 		else 
 			return "changed state";
 	}

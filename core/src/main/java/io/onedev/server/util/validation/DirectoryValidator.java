@@ -13,10 +13,12 @@ public class DirectoryValidator implements ConstraintValidator<Directory, String
 
 	private Directory annotation;
 	
+	@Override
 	public void initialize(Directory constaintAnnotation) {
 		annotation = constaintAnnotation;
 	}
 
+	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		try {
 			if (value == null)

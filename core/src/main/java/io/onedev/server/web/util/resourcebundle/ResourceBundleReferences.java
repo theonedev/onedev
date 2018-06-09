@@ -2,7 +2,6 @@ package io.onedev.server.web.util.resourcebundle;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -42,11 +41,16 @@ public class ResourceBundleReferences {
 	
 	private final List<ConcatResourceBundleReference<CssReferenceHeaderItem>> cssBundleReferences = new ArrayList<>();
 	
-	public ResourceBundleReferences(Class<?> packageScope, Class<?>... additionalPackageScopes) {
-		List<Class<?>> packageScopes = new ArrayList<>();
-		packageScopes.add(packageScope);
-		packageScopes.addAll(Arrays.asList(additionalPackageScopes));
+	public ResourceBundleReferences(Class<?>... packageScopes) {
 		dependencyMap = buildDependencyMap(packageScopes);
+		for (Map.Entry<ResourceReference, DependencyAware<ResourceReference>> entry: dependencyMap.entrySet()) {
+			if (entry.getKey().getName().endsWith(".css")) {
+				for (ResourceReference dependency: entry.getValue().getDependencies()) {
+					if (dependency.getName().endsWith(".js"))
+						throw new RuntimeException("Css resource '" + entry.getKey() + "' should not depend on javascript resource '" + dependency.getKey() + "' as it can cause circular dependency between js bundle and css bundle");
+				}
+			}
+		}
 		dependentMap = DependencyUtils.getDependentMap(dependencyMap);
 		sorted = DependencyUtils.sortDependencies(dependencyMap);
 
@@ -146,7 +150,7 @@ public class ResourceBundleReferences {
 		return dependents;
 	}
 	
-	private Map<ResourceReference, DependencyAware<ResourceReference>> buildDependencyMap(List<Class<?>> packageScopes) {
+	private Map<ResourceReference, DependencyAware<ResourceReference>> buildDependencyMap(Class<?> packageScopes[]) {
 		Map<ResourceReference, DependencyAware<ResourceReference>> dependencyMap = new LinkedHashMap<>();
 		Collection<Class<? extends ResourceReference>> resourceClasses = new ArrayList<>();
 		for (Class<?> packageScope: packageScopes) {

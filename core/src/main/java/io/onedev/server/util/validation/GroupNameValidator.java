@@ -7,9 +7,11 @@ import io.onedev.server.util.validation.annotation.GroupName;
 
 public class GroupNameValidator implements ConstraintValidator<GroupName, String> {
 
+	@Override
 	public void initialize(GroupName constaintAnnotation) {
 	}
 
+	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		if (value == null) {
 			return true;

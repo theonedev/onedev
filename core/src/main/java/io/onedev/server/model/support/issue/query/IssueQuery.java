@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -22,6 +24,8 @@ import org.antlr.v4.runtime.Recognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.java.JavaEscape;
+
+import com.google.common.base.Splitter;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
@@ -105,7 +109,7 @@ public class IssueQuery implements Serializable {
 			throw new OneException("Invalid boolean: " + value);
 	}
 	
-	public static IssueQuery parse(Project project, @Nullable String queryString, boolean validate) {
+	public static IssueQuery parse(Project project, @Nullable String queryString, boolean allowSort, boolean validate) {
 		if (queryString != null) {
 			ANTLRInputStream is = new ANTLRInputStream(queryString); 
 			IssueQueryLexer lexer = new IssueQueryLexer(is);
@@ -330,30 +334,34 @@ public class IssueQuery implements Serializable {
 			} else {
 				issueCriteria = null;
 			}
-			
+
 			List<IssueSort> issueSorts = new ArrayList<>();
-			for (OrderContext order: queryContext.order()) {
-				String fieldName = getValue(order.Quoted().getText());
-				if (validate 
-						&& !fieldName.equals(Issue.SUBMIT_DATE) 
-						&& !fieldName.equals(Issue.UPDATE_DATE) 
-						&& !fieldName.equals(Issue.VOTES) 
-						&& !fieldName.equals(Issue.COMMENTS) 
-						&& !fieldName.equals(Issue.NUMBER)) {
-					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
-					if (!(fieldSpec instanceof ChoiceInput) && !(fieldSpec instanceof DateInput) 
-							&& !(fieldSpec instanceof NumberInput)) {
-						throw new OneException("Can not order by field: " + fieldName);
+			if (allowSort) {
+				for (OrderContext order: queryContext.order()) {
+					String fieldName = getValue(order.Quoted().getText());
+					if (validate 
+							&& !fieldName.equals(Issue.SUBMIT_DATE) 
+							&& !fieldName.equals(Issue.UPDATE_DATE) 
+							&& !fieldName.equals(Issue.VOTES) 
+							&& !fieldName.equals(Issue.COMMENTS) 
+							&& !fieldName.equals(Issue.NUMBER)) {
+						InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+						if (!(fieldSpec instanceof ChoiceInput) && !(fieldSpec instanceof DateInput) 
+								&& !(fieldSpec instanceof NumberInput)) {
+							throw new OneException("Can not order by field: " + fieldName);
+						}
 					}
+					
+					IssueSort issueSort = new IssueSort();
+					issueSort.setField(fieldName);
+					if (order.direction != null && order.direction.getText().equals("asc"))
+						issueSort.setDirection(Direction.ASCENDING);
+					else
+						issueSort.setDirection(Direction.DESCENDING);
+					issueSorts.add(issueSort);
 				}
-				
-				IssueSort issueSort = new IssueSort();
-				issueSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("asc"))
-					issueSort.setDirection(Direction.ASCENDING);
-				else
-					issueSort.setDirection(Direction.DESCENDING);
-				issueSorts.add(issueSort);
+			} else if (validate && queryContext.OrderBy() != null) {
+				throw new OneException("Issue order is not supported here");
 			}
 			
 			return new IssueQuery(issueCriteria, issueSorts);
@@ -525,6 +533,18 @@ public class IssueQuery implements Serializable {
 	
 	public static String quote(String value) {
 		return "\"" + JavaEscape.escapeJava(value) + "\"";
+	}
+	
+	public static <T> Path<T> getPath(Root<Issue> root, String pathName) {
+		int index = pathName.indexOf('.');
+		if (index != -1) {
+			Path<T> path = root.get(pathName.substring(0, index));
+			for (String field: Splitter.on(".").split(pathName.substring(index+1))) 
+				path = path.get(field);
+			return path;
+		} else {
+			return root.get(pathName);
+		}
 	}
 	
 }

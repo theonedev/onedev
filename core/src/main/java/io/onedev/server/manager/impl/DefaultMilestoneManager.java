@@ -47,8 +47,12 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	@Transactional
 	@Override
 	public void delete(Milestone milestone, @Nullable Milestone moveIssuesToMilestone) {
+    	Query<?> query = getSession().createQuery("update IssueBoard set milestone=null where milestone=:milestone");
+    	query.setParameter("milestone", milestone);
+    	query.executeUpdate();
+		
 		if (moveIssuesToMilestone != null) {
-			Query<?> query = getSession().createQuery("update Issue set milestone=:newMilestone where milestone=:milestone");
+			query = getSession().createQuery("update Issue set milestone=:newMilestone where milestone=:milestone");
 			query.setParameter("milestone", milestone);
 			query.setParameter("newMilestone", moveIssuesToMilestone);
 			query.executeUpdate();
@@ -56,7 +60,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			moveIssuesToMilestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()+moveIssuesToMilestone.getNumOfOpenIssues());
 			save(moveIssuesToMilestone);
 		} else {
-			Query<?> query = getSession().createQuery("update Issue set milestone=null where milestone=:milestone");
+			query = getSession().createQuery("update Issue set milestone=null where milestone=:milestone");
 			query.setParameter("milestone", milestone);
 			query.executeUpdate();
 		}
@@ -160,9 +164,9 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		Milestone milestone = issue.getMilestone();
 		if (milestone != null && event.getChange().getData() instanceof StateChangeData) {
 			StateChangeData data = (StateChangeData) event.getChange().getData();
-			StateSpec prevState = issue.getProject().getIssueWorkflow().getStateSpec(data.getPrevState());
+			StateSpec prevState = issue.getProject().getIssueWorkflow().getStateSpec(data.getOldState());
 			Preconditions.checkNotNull(prevState);
-			StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(data.getState());
+			StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(data.getNewState());
 			Preconditions.checkNotNull(prevState);
 			if (prevState.getCategory() != state.getCategory()) {
 				if (prevState.getCategory() == StateSpec.Category.CLOSED) {

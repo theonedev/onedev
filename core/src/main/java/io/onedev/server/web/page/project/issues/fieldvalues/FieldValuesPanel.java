@@ -1,9 +1,10 @@
 package io.onedev.server.web.page.project.issues.fieldvalues;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -49,29 +50,28 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		if (getField() != null && !getField().getValues().isEmpty()) {
 			UserManager userManager = OneDev.getInstance(UserManager.class);
 			IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-			Fragment fragment = new Fragment("values", "nonEmptyValuesFrag", this);
+			Fragment fragment = new Fragment("content", "nonEmptyValuesFrag", this);
 			RepeatingView valuesView = new RepeatingView("values");
 			for (String value: getField().getValues()) {
-				WebMarkupContainer item = new WebMarkupContainer(valuesView.newChildId());
 				if (getField().getType().equals(InputSpec.USER_CHOICE)) {
 					User user = User.getForDisplay(userManager.findByName(value), value);
-					Fragment userFrag = new Fragment("value", "userFrag", this);
+					Fragment userFrag = new Fragment(valuesView.newChildId(), "userFrag", this);
 					userFrag.add(new UserLink("name", user));
-					item.add(userFrag);
+					valuesView.add(userFrag);
 				} else if (getField().getType().equals(InputSpec.ISSUE_CHOICE)) {
 					Issue issue = issueManager.find(project, Long.valueOf(value));
 					if (issue != null) {
-						Fragment issueFrag = new Fragment("value", "issueFrag", this);
+						Fragment issueFrag = new Fragment(valuesView.newChildId(), "issueFrag", this);
 						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null));
 						link.add(new Label("label", "#" + issue.getNumber()));
 						issueFrag.add(link);
 						issueFrag.add(new IssueStateLabel("state", Model.of(issue)));
-						item.add(issueFrag);
+						valuesView.add(issueFrag);
 					} else {
-						item.add(new Label("value", "#" + value));
+						valuesView.add(new Label(valuesView.newChildId(), "#" + value));
 					}
 				} else {
-					Label label = new Label("value", value);
+					Label label = new Label(valuesView.newChildId(), value);
 					InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(getField().getName());
 					if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
 						ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
@@ -84,16 +84,14 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 										"background-color: %s; color: %s;", 
 										backgroundColor, fontColor);
 								label.add(AttributeAppender.append("style", style));
-								if (fontColor.equals("white"))
-									item.add(AttributeAppender.append("class", "white"));
+								label.add(AttributeAppender.append("class", "has-color"));
 							}
 						} finally {
 							OneContext.pop();
 						}
 					} 
-					item.add(label);
+					valuesView.add(label);
 				}
-				valuesView.add(item);
 			}
 			fragment.add(valuesView);
 			add(fragment);
@@ -107,7 +105,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			else
 				displayValue = "Undefined";
 			displayValue = HtmlEscape.escapeHtml5(displayValue);
-			add(new Label("values", "<i>" + displayValue + "</i>").setEscapeModelStrings(false));
+			add(new Label("content", "<i>" + displayValue + "</i>").setEscapeModelStrings(false));
 		}		
 	}
 
@@ -124,6 +122,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 
 	protected abstract Issue getIssue();
 	
+	@Nullable
 	protected abstract IssueField getField();
 
 	@Override

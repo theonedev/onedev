@@ -1,0 +1,33 @@
+<wicket:extend>
+	<div id="issue-boards">
+		<wicket:container wicket:id="content"></wicket:container>
+	</div>
+	<wicket:fragment wicket:id="hasBoardsFrag">
+		<div class="head clearfix">
+			<div class="input-group">
+				<span class="input-group-btn">
+					<a class="board-selector btn btn-default">
+						<i class="fa fa-columns"></i>
+						States
+						<i class="fa fa-caret-down"></i>
+					</a>
+					<a class="milestone-selector btn btn-default">
+						<i class="fa fa-ext fa-milestone"></i>
+						All
+						<i class="fa fa-caret-down"></i>
+					</a>
+				</span>
+				<input class="form-control"></input>
+				<span class="input-group-btn">
+					<button type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+				</span>
+			</div>
+			<a class="btn btn-success add-new"><i class="fa fa-plus"></i> Add New</a>
+		</div>
+		<div class="body">
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noBoardsFrag">
+		<div class="alert alert-info no-boards">No issue boards defined <a wicket:id="newBoard"><i class="fa fa-plus"></i> Add New</a></div>
+	</wicket:fragment>
+</wicket:extend>

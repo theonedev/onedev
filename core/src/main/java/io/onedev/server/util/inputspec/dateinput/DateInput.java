@@ -33,14 +33,14 @@ public class DateInput extends InputSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
+	public String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "Date");
 		appendCommonAnnotations(buffer, index);
 		if (!isAllowEmpty())
 			buffer.append("    @NotNull\n");
-		appendMethods(buffer, index, "Date", null, defaultValueProvider);
+		appendMethods(buffer, index, "Date", null, setDefaultValue?defaultValueProvider:null);
 		
 		return buffer.toString();
 	}

@@ -295,7 +295,7 @@ public class IssueListPage extends IssuesPage {
 				List<NamedQuery> namedQueries = new ArrayList<>();
 				for (NamedQuery namedQuery: getProject().getSavedIssueQueries()) {
 					try {
-						if (getLoginUser() != null || !IssueQuery.parse(getProject(), namedQuery.getQuery(), true).needsLogin())
+						if (getLoginUser() != null || !IssueQuery.parse(getProject(), namedQuery.getQuery(), true, true).needsLogin())
 							namedQueries.add(namedQuery);
 					} catch (Exception e) {
 						namedQueries.add(namedQuery);

@@ -179,6 +179,9 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<IssueBoard> issueBoards = new ArrayList<>();
+	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private IssueWorkflow issueWorkflow = new IssueWorkflow();
@@ -208,9 +211,14 @@ public class Project extends AbstractEntity {
     private transient Optional<IssueQuerySetting> issueQuerySettingOfCurrentUser;
     
     public Project() {
+    	issueListFields.add(Issue.NUMBER);
+    	issueListFields.add(Issue.STATE);
+    	issueListFields.add(Issue.TITLE);
 		issueListFields.add("Type");
 		issueListFields.add("Priority");
+		issueListFields.add(Issue.SUBMITTER);
 		issueListFields.add("Assignee");
+		issueListFields.add(Issue.VOTES);
 		
 		savedIssueQueries.add(new NamedQuery("All", "all"));
 		savedIssueQueries.add(new NamedQuery("Outstanding", "\"State\" is not \"Closed\""));
@@ -924,6 +932,14 @@ public class Project extends AbstractEntity {
 
 	public void setMilestones(Collection<Milestone> milestones) {
 		this.milestones = milestones;
+	}
+
+	public Collection<IssueBoard> getIssueBoards() {
+		return issueBoards;
+	}
+
+	public void setIssueBoards(Collection<IssueBoard> issueBoards) {
+		this.issueBoards = issueBoards;
 	}
 
 	@Nullable

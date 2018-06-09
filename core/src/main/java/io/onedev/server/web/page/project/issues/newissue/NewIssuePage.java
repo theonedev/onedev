@@ -73,7 +73,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		
 		if (queryString != null) {
 			try {
-				IssueQuery query = IssueQuery.parse(getProject(), queryString, true);
+				IssueQuery query = IssueQuery.parse(getProject(), queryString, true, true);
 				if (query.getCriteria() != null)
 					query.getCriteria().populate(issue, fieldBean);
 			} catch (Exception e) {

@@ -4,12 +4,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
@@ -46,6 +44,4 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	void fixFieldValueOrders(Project project);
 	
-	void batchUpdate(Project project, IssueQuery issueQuery, Set<String> updateFields, String state, 
-			@Nullable Milestone milestone, Serializable fieldBean);
 }

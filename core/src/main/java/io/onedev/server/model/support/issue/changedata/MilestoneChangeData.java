@@ -12,6 +12,7 @@ import org.apache.wicket.Component;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.User;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
@@ -25,9 +26,9 @@ public class MilestoneChangeData implements ChangeData {
 	
 	private final String newMilestone;
 	
-	public MilestoneChangeData(@Nullable String oldMilestone, @Nullable String newMilestone) {
-		this.oldMilestone = oldMilestone;
-		this.newMilestone = newMilestone;
+	public MilestoneChangeData(@Nullable Milestone oldMilestone, @Nullable Milestone newMilestone) {
+		this.oldMilestone = oldMilestone!=null?oldMilestone.getName():null;
+		this.newMilestone = newMilestone!=null?newMilestone.getName():null;
 	}
 	
 	@Override
@@ -35,7 +36,8 @@ public class MilestoneChangeData implements ChangeData {
 		return new PlainDiffPanel(componentId, getOldLines(), getNewLines(), true);
 	}
 	
-	private List<String> getOldLines() {
+	@Override
+	public List<String> getOldLines() {
 		List<String> oldLines = new ArrayList<>();
 		if (oldMilestone != null)
 			oldLines.add("Milestone: " + oldMilestone);
@@ -44,7 +46,8 @@ public class MilestoneChangeData implements ChangeData {
 		return oldLines;
 	}
 
-	private List<String> getNewLines() {
+	@Override
+	public List<String> getNewLines() {
 		List<String> newLines = new ArrayList<>();
 		if (newMilestone != null)
 			newLines.add("Milestone: " + newMilestone);
@@ -80,7 +83,7 @@ public class MilestoneChangeData implements ChangeData {
 	}
 
 	@Override
-	public String getComment() {
+	public CommentSupport getCommentSupport() {
 		return null;
 	}
 

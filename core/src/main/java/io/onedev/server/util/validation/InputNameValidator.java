@@ -8,9 +8,11 @@ import io.onedev.server.util.validation.annotation.InputName;
 
 public class InputNameValidator implements ConstraintValidator<InputName, String> {
 
+	@Override
 	public void initialize(InputName constaintAnnotation) {
 	}
 
+	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		if (value == null) {
 			return true;

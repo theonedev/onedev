@@ -9,9 +9,11 @@ import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
 
 public class ReviewRequirementSpecValidator implements ConstraintValidator<ReviewRequirementSpec, String> {
 	
+	@Override
 	public void initialize(ReviewRequirementSpec constaintAnnotation) {
 	}
 
+	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		if (value == null) {
 			return true;

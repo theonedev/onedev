@@ -14,10 +14,10 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueFieldUnaryManager extends EntityManager<IssueFieldUnary> {
 
-	Class<? extends Serializable> defineFieldBeanClass(Project project);
+	Class<? extends Serializable> defineFieldBeanClass(Project project, boolean setDefaultValue);
 	
 	@Nullable
-	Class<? extends Serializable> loadFieldBeanClass(String className);
+	Class<? extends Serializable> loadFieldBeanClass(String className, boolean setDefaultValue);
 	
 	Serializable readFields(Issue issue);
 	

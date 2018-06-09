@@ -1,7 +1,9 @@
 package io.onedev.server.web.editable.choice;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -24,7 +26,7 @@ import io.onedev.utils.ReflectionUtils;
 @SuppressWarnings("serial")
 public class SingleChoiceEditor extends PropertyEditor<String> {
 
-	private List<String> choices = new ArrayList<>();
+	private Map<String, String> choices = new LinkedHashMap<>();
 	
 	private FormComponent<String> input;
 	
@@ -32,7 +34,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -45,15 +47,19 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 					descriptor.getPropertyGetter().getAnnotation(
 							io.onedev.server.web.editable.annotation.ChoiceProvider.class);
 			Preconditions.checkNotNull(choiceProvider);
-			for (String each: (List<String>)ReflectionUtils
-					.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value())) {
-				choices.add(each);
+			Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
+			if (result instanceof List) {
+				for (String each: (List<String>)result) {
+					choices.put(each, each);
+				}
+			} else {
+				choices.putAll(((Map)result));
 			}
 		} finally {
 			OneContext.pop();
 		}
 
-		input = new StringSingleChoice("input", Model.of(getModelObject()), choices) {
+		input = new StringSingleChoice("input", Model.of(getModelObject()), new ArrayList<>(choices.keySet())) {
 
 			@Override
 			protected void onInitialize() {
@@ -85,7 +91,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		return input.getConvertedInput();
+		return choices.get(input.getConvertedInput());
 	}
 
 }

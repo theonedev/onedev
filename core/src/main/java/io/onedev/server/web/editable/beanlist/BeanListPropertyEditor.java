@@ -10,7 +10,6 @@ import java.util.List;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
@@ -18,7 +17,6 @@ import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -34,10 +32,10 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PathSegment.Property;
-import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
@@ -84,42 +82,6 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		if (getDescriptor().isPropertyRequired()) {
-			add(new WebMarkupContainer("enable").setVisible(false));
-		} else {
-			add(new CheckBox("enable", new IModel<Boolean>() {
-				
-				@Override
-				public void detach() {
-					
-				}
-	
-				@Override
-				public Boolean getObject() {
-					Component listEditor = BeanListPropertyEditor.this.get("listEditor");
-					if (listEditor != null)
-						return listEditor.isVisible();
-					else
-						return BeanListPropertyEditor.this.getModelObject() != null;
-				}
-	
-				@Override
-				public void setObject(Boolean object) {
-					BeanListPropertyEditor.this.get("listEditor").setVisible(object);
-				}
-				
-			}).add(new AjaxFormComponentUpdatingBehavior("click") {
-				
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					onPropertyUpdating(target);
-					target.add(BeanListPropertyEditor.this.get("listEditor"));
-				}
-				
-			}));
-			
-		}
 		
 		List<Serializable> list = getModelObject();
 		if (list == null && getDescriptor().isPropertyRequired())
@@ -347,25 +309,21 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
-		if (get("listEditor").isVisible()) {
-			List<Serializable> newList = newList();
+		List<Serializable> newList = newList();
+		
+		RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
+		for (Component row: rows) {
+			Serializable element = newElement();
+			newList.add(element);
 			
-			RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
-			for (Component row: rows) {
-				Serializable element = newElement();
-				newList.add(element);
-				
-				RepeatingView columns = (RepeatingView) row.get("properties");
-				for (Component column: columns) {
-					@SuppressWarnings("unchecked")
-					PropertyEditor<Serializable> propertyEditor = (PropertyEditor<Serializable>) column.get("propertyEditor");
-					propertyEditor.getDescriptor().setPropertyValue(element, propertyEditor.getConvertedInput());
-				}
+			RepeatingView columns = (RepeatingView) row.get("properties");
+			for (Component column: columns) {
+				@SuppressWarnings("unchecked")
+				PropertyEditor<Serializable> propertyEditor = (PropertyEditor<Serializable>) column.get("propertyEditor");
+				propertyEditor.getDescriptor().setPropertyValue(element, propertyEditor.getConvertedInput());
 			}
-			return newList;
-		} else {
-			return null;
 		}
+		return newList;
 	}
 	
 }

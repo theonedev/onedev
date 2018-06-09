@@ -126,9 +126,7 @@ class OpenedPanel extends GenericPanel<Issue> {
 						try {
 							if (getIssue().getVersion() != lastVersion)
 								throw new StaleStateException("");
-							String prevDescription = getIssue().getDescription();
-							getIssue().setDescription(input.getModelObject());
-							OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), prevDescription);
+							OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), input.getModelObject());
 	
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);

@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.issuelist;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,10 +12,15 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigatorLabel;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -25,12 +29,10 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.markup.repeater.data.DataView;
-import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +56,8 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.component.IssueStateLabel;
-import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -78,7 +81,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		protected IssueQuery load() {
 			IssueQuery parsedQuery = null;
 			try {
-				parsedQuery = IssueQuery.parse(getProject(), getQuery(), true);
+				parsedQuery = IssueQuery.parse(getProject(), getQuery(), true, true);
 				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin()) {
 					error("Please login to perform this query");
 					parsedQuery = null;
@@ -102,9 +105,15 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		
 	};
 	
-	private DataView<Issue> issuesView;
+	private DataTable<Issue, Void> issuesTable;
+	
+	private SelectionColumn<Issue, Void> selectionColumn;
 	
 	private Component querySave;
+	
+	private ModalLink batchEditSelected;
+	
+	private SortableDataProvider<Issue, Void> dataProvider;	
 	
 	public IssueListPanel(String id, IModel<String> queryModel) {
 		super(id, queryModel);
@@ -148,7 +157,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 				return getProject();
 			}
 			
-		}));
+		}, true));
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			
 			@Override
@@ -172,27 +181,6 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 		});
 		add(form);
-		
-		add(new Label("pageInfo", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				long firstItemIndex = issuesView.getFirstItemOffset()+1;
-				long lastItemIndex = firstItemIndex + issuesView.getItemsPerPage() - 1;
-				if (lastItemIndex > issuesView.getItemCount())
-					lastItemIndex = issuesView.getItemCount();
-				return "Displaying " + firstItemIndex + "-" + lastItemIndex + " of " + issuesView.getItemCount();
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(issuesView.getItemCount() != 0);
-			}
-			
-		});
 		
 		add(new ModalLink("displayFields") {
 
@@ -229,8 +217,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						super.onSubmit(target, form);
 						getProject().setIssueListFields((ArrayList<String>) bean.getFields());
 						OneDev.getInstance(ProjectManager.class).save(getProject());
-						target.add(IssueListPanel.this);
 						modal.close();
+						onQueryUpdated(target);
 					}
 					
 				});
@@ -251,7 +239,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()) && issuesView.getItemCount() != 0);
+				setVisible(SecurityUtils.canManage(getProject()) && issuesTable.getItemCount() != 0);
 			}
 			
 		});
@@ -297,20 +285,15 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 		});
 		
-		add(new ModalLink("batchEdit") {
+		add(batchEditSelected = new ModalLink("batchEditSelected") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new BatchUpdatePanel(id) {
+				return new BatchEditPanel(id) {
 
 					@Override
 					protected Project getProject() {
 						return IssueListPanel.this.getProject();
-					}
-
-					@Override
-					protected IssueQuery getQuery() {
-						return parsedQueryModel.getObject();
 					}
 
 					@Override
@@ -325,22 +308,75 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 
 					@Override
-					protected long getNumOfIssues() {
-						return issuesView.getItemCount();
+					protected Iterator<Issue> getIssueIterator() {
+						List<Issue> issues = new ArrayList<>();
+						for (IModel<Issue> each: selectionColumn.getSelections())
+							issues.add(each.getObject());
+						return issues.iterator();
 					}
-					
+
+					@Override
+					protected int getIssueCount() {
+						return selectionColumn.getSelections().size();
+					}
+
 				};
 			}
 			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()) && issuesView.getItemCount() != 0);
+				setVisible(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+			}
+			
+		});
+
+		batchEditSelected.setOutputMarkupPlaceholderTag(true);
+		
+		add(new ModalLink("batchEditAll") {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new BatchEditPanel(id) {
+
+					@Override
+					protected Project getProject() {
+						return IssueListPanel.this.getProject();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected void onUpdated(AjaxRequestTarget target) {
+						modal.close();
+						onQueryUpdated(target);
+					}
+
+					@Override
+					protected Iterator<? extends Issue> getIssueIterator() {
+						return dataProvider.iterator(0, issuesTable.getItemCount());
+					}
+
+					@Override
+					protected int getIssueCount() {
+						return (int) issuesTable.getItemCount();
+					}
+
+				};
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canManage(getProject()) && issuesTable.getItemCount() != 0);
 			}
 			
 		});
 		
-		IDataProvider<Issue> dataProvider = new IDataProvider<Issue>() {
+		dataProvider = new SortableDataProvider<Issue, Void>() {
 
 			@Override
 			public void detach() {
@@ -377,99 +413,186 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		
 		add(new NotificationPanel("feedback", this));
 		
-		issuesView = new DataView<Issue>("issues", dataProvider) {
+		List<IColumn<Issue, Void>> columns = new ArrayList<>();
+		
+		if (SecurityUtils.canManage(getProject())) {
+			columns.add(selectionColumn = new SelectionColumn<Issue, Void>() {
+
+				@Override
+				protected void onSelectionChange(AjaxRequestTarget target) {
+					target.add(batchEditSelected);
+				}
+				
+			});
+		}
+		
+		for (String field: getProject().getIssueListFields()) {
+			switch (field) {
+			case Issue.NUMBER:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of("#")) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						cellItem.add(new Label(componentId, rowModel.getObject().getNumber()));
+					}
+				});
+				break;
+			case Issue.STATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.STATE)) {
+
+					@Override
+					public String getCssClass() {
+						return "state";
+					}
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						cellItem.add(new IssueStateLabel(componentId, rowModel));
+					}
+				});
+				break;
+			case Issue.TITLE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.TITLE)) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						Fragment fragment = new Fragment(componentId, "linkFrag", IssueListPanel.this);
+						QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
+								(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + cellItem.getIndex());
+						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
+								IssueActivitiesPage.paramsOf(rowModel.getObject(), position));
+						link.add(new Label("label", rowModel.getObject().getTitle()));
+						fragment.add(link);
+						cellItem.add(fragment);
+					}
+				});
+				break;
+			case Issue.SUBMITTER:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.SUBMITTER)) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						Issue issue = rowModel.getObject();
+						Fragment fragment = new Fragment(componentId, "userFrag", IssueListPanel.this);
+						User submitter = User.getForDisplay(issue.getSubmitter(), issue.getSubmitterName());
+						fragment.add(new UserLink("link", submitter));
+						cellItem.add(fragment);
+					}
+				});
+				break;
+			case Issue.SUBMIT_DATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.SUBMIT_DATE)) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getSubmitDate())));
+					}
+				});
+				break;
+			case Issue.UPDATE_DATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.UPDATE_DATE)) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getLastActivity().getDate())));
+					}
+				});
+				break;
+			case Issue.MILESTONE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.MILESTONE)) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						Issue issue = rowModel.getObject();
+						if (issue.getMilestone() != null) {
+							Fragment fragment = new Fragment(componentId, "linkFrag", IssueListPanel.this);
+							Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, 
+									MilestoneDetailPage.paramsOf(issue.getMilestone(), null));
+							link.add(new Label("label", issue.getMilestoneName()));
+							fragment.add(link);
+							cellItem.add(fragment);
+						} else {
+							cellItem.add(new Label(componentId, "<i>No milestone</i>").setEscapeModelStrings(false));
+						}
+					}
+				});
+				break;
+			case Issue.VOTES:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.VOTES)) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						cellItem.add(new Label(componentId, rowModel.getObject().getNumOfVotes()));
+					}
+				});
+				break;
+			case Issue.COMMENTS:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.COMMENTS)) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						cellItem.add(new Label(componentId, rowModel.getObject().getNumOfVotes()));
+					}
+				});
+				break;
+			default:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(field)) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+							IModel<Issue> rowModel) {
+						cellItem.add(new FieldValuesPanel(componentId) {
+
+							@Override
+							protected Issue getIssue() {
+								return rowModel.getObject();
+							}
+
+							@Override
+							protected IssueField getField() {
+								return rowModel.getObject().getEffectiveFields().get(field);
+							}
+							
+						}.setRenderBodyOnly(true));
+					}
+
+					@Override
+					public String getCssClass() {
+						return "custom-field";
+					}
+					
+				});
+			}
+		}
+		
+		add(issuesTable = new HistoryAwareDataTable<Issue, Void>("issues", columns, dataProvider, 
+				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override
-			protected void populateItem(Item<Issue> item) {
-				Issue issue = item.getModelObject();
-				item.add(new Label("number", "#" + issue.getNumber()));
-				Fragment titleFrag = new Fragment("title", "titleFrag", IssueListPanel.this);
-				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesView.getItemCount(), 
-						(int)getCurrentPage() * WebConstants.PAGE_SIZE + item.getIndex());
-				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(issue, position));
-				link.add(new Label("label", issue.getTitle()));
-				titleFrag.add(link);
-				item.add(titleFrag);
-
-				item.add(new UserLink("user", 
-						User.getForDisplay(issue.getLastActivity().getUser(), issue.getLastActivity().getUserName())));
-				item.add(new Label("action", issue.getLastActivity().getAction()));
-				item.add(new Label("date", DateUtils.formatAge(issue.getLastActivity().getDate())));
-				
-				item.add(new IssueStateLabel("state", item.getModel()));
-				
-				RepeatingView fieldsView = new RepeatingView("fields");
-				for (String fieldName: getProject().getIssueListFields()) {
-					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
-
-						@Override
-						protected Issue getIssue() {
-							return item.getModelObject();
-						}
-
-						@Override
-						protected IssueField getField() {
-							return item.getModelObject().getEffectiveFields().get(fieldName);
-						}
-						
-					}.add(AttributeAppender.append("title", fieldName)));
-				}
-				
-				item.add(fieldsView);
-				if (issue.getMilestone() != null) {
-					Link<Void> milestoneLink = new BookmarkablePageLink<Void>("milestone", MilestoneDetailPage.class, 
-							MilestoneDetailPage.paramsOf(issue.getMilestone(), null));
-					milestoneLink.add(new Label("name", issue.getMilestoneName()));
-					item.add(milestoneLink);
-				} else {
-					WebMarkupContainer milestoneLink = new WebMarkupContainer("milestone") {
-
-						@Override
-						protected void onComponentTag(ComponentTag tag) {
-							super.onComponentTag(tag);
-							tag.setName("span");
-						}
-						
-					};
-					milestoneLink.add(new Label("name", "<i>No milestone</i>").setEscapeModelStrings(false));
-					item.add(milestoneLink);
-				}
-				item.add(new Label("votes", issue.getNumOfVotes()));
-				item.add(new Label("comments", issue.getNumOfComments()));
-				
-				Date lastActivityDate;
-				if (issue.getLastActivity() != null)
-					lastActivityDate = issue.getLastActivity().getDate();
-				else
-					lastActivityDate = issue.getSubmitDate();
+			protected Item<Issue> newRowItem(String id, int index, IModel<Issue> model) {
+				Item<Issue> item = super.newRowItem(id, index, model);
+				Issue issue = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(lastActivityDate)?"issue":"issue new"));
+						issue.isVisitedAfter(issue.getLastActivity().getDate())?"issue":"issue new"));
+				return item;
 			}
-			
-		};
-		issuesView.setOutputMarkupId(true);
-		issuesView.setItemsPerPage(WebConstants.PAGE_SIZE);
-		
-		issuesView.setCurrentPage(getPagingHistorySupport().getCurrentPage());
-		
-		add(issuesView);
-		
-		add(new HistoryAwarePagingNavigator("issuesPageNav", issuesView, getPagingHistorySupport()) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(issuesView.getPageCount() > 1);
-			}
-			
 		});
-		add(new WebMarkupContainer("noIssues") {
+		
+		add(new NavigatorLabel("pageInfo", issuesTable) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(parsedQueryModel.getObject() != null && issuesView.getItemCount() == 0);
+				setVisible(issuesTable.getItemCount() != 0);
 			}
 			
 		});

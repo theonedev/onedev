@@ -51,7 +51,7 @@ public class NumberInput extends InputSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
+	public String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "Integer");
@@ -67,7 +67,7 @@ public class NumberInput extends InputSpec {
 		} else if (maxValue != null) {
 			buffer.append("    @Range(max=" + maxValue.toString() + "L)\n");
 		}
-		appendMethods(buffer, index, "Integer", null, defaultValueProvider);
+		appendMethods(buffer, index, "Integer", null, setDefaultValue?defaultValueProvider:null);
 		
 		return buffer.toString();
 	}

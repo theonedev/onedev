@@ -2,9 +2,11 @@ package io.onedev.server.web.component.issuelist;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -18,18 +20,22 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.PropertyModel;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
-import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.RunTaskBehavior;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
@@ -38,7 +44,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
-abstract class BatchUpdatePanel extends Panel implements InputContext {
+abstract class BatchEditPanel extends Panel implements InputContext {
 
 	private Set<String> selectedFields = new HashSet<>();
 
@@ -50,7 +56,9 @@ abstract class BatchUpdatePanel extends Panel implements InputContext {
 	
 	private BeanEditor customFieldsEditor;
 	
-	public BatchUpdatePanel(String id) {
+	private String comment;
+	
+	public BatchEditPanel(String id) {
 		super(id);
 	}
 
@@ -80,7 +88,7 @@ abstract class BatchUpdatePanel extends Panel implements InputContext {
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
 		
-		form.add(new Label("title", "Batch Editing " + getNumOfIssues() + " Issues"));
+		form.add(new Label("title", "Batch Editing " + getIssueCount() + " Issues"));
 		
 		form.add(new NotificationPanel("feedback", form));
 		
@@ -157,18 +165,11 @@ abstract class BatchUpdatePanel extends Panel implements InputContext {
 		
 		builtInFieldsBean = new BuiltInFieldsBean();
 		try {
-			customFieldsBean = OneDev.getInstance(IssueFieldUnaryManager.class).defineFieldBeanClass(getProject()).newInstance();
+			customFieldsBean = OneDev.getInstance(IssueFieldUnaryManager.class).defineFieldBeanClass(getProject(), false).newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
-		
-		Issue issue = new Issue();
-		if (getQuery().getCriteria() != null)
-			getQuery().getCriteria().populate(issue, customFieldsBean);
-
-		builtInFieldsBean.setState(issue.getState());
-		builtInFieldsBean.setMilestone(issue.getMilestoneName());
-		
+				
 		Set<String> excludedProperties = new HashSet<>();
 		if (!selectedFields.contains(Issue.STATE))
 			excludedProperties.add(Issue.BUILTIN_FIELDS.get(Issue.STATE));
@@ -187,6 +188,19 @@ abstract class BatchUpdatePanel extends Panel implements InputContext {
 		customFieldsEditor = BeanContext.editBean("customFieldsEditor", customFieldsBean, excludedProperties); 
 		form.add(customFieldsEditor);				
 
+		form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {
+
+			@Override
+			protected Project getProject() {
+				return BatchEditPanel.this.getProject();
+			}
+
+			@Override
+			protected List<AttributeModifier> getInputModifiers() {
+				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
+			}
+			
+		});
 		form.add(new AjaxButton("save") {
 
 			private RunTaskBehavior runTaskBehavior;
@@ -204,9 +218,21 @@ abstract class BatchUpdatePanel extends Panel implements InputContext {
 					
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
-						Milestone milestone = getProject().getMilestone(builtInFieldsBean.getMilestone());
-						OneDev.getInstance(IssueManager.class).batchUpdate(getProject(), getQuery(), 
-								selectedFields, builtInFieldsBean.getState(), milestone, customFieldsBean);
+						String state;
+						if (selectedFields.contains(Issue.STATE))
+							state = builtInFieldsBean.getState();
+						else
+							state = null;
+						Optional<Milestone> milestone;
+						if (selectedFields.contains(Issue.MILESTONE))
+							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
+						else
+							milestone = null;
+						Set<String> fieldNames = new HashSet<>(selectedFields);
+						fieldNames.remove(Issue.STATE);
+						fieldNames.remove(Issue.MILESTONE);
+						OneDev.getInstance(IssueChangeManager.class).batchUpdate(getIssueIterator(), state, milestone, 
+								customFieldsBean, fieldNames, comment);
 						onUpdated(target);
 					}
 					
@@ -270,11 +296,12 @@ abstract class BatchUpdatePanel extends Panel implements InputContext {
 
 	protected abstract Project getProject();
 	
-	protected abstract IssueQuery getQuery(); 
+	protected abstract Iterator<? extends Issue> getIssueIterator(); 
+	
+	protected abstract int getIssueCount();
 	
 	protected abstract void onUpdated(AjaxRequestTarget target);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 	
-	protected abstract long getNumOfIssues();
 }

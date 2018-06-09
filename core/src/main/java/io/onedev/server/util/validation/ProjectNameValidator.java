@@ -11,9 +11,11 @@ public class ProjectNameValidator implements ConstraintValidator<ProjectName, St
 
 	private static final Pattern PATTERN = Pattern.compile("[\\w-\\.]+");
 	
+	@Override
 	public void initialize(ProjectName constaintAnnotation) {
 	}
 
+	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		if (value == null) {
 			return true;

@@ -2,26 +2,32 @@ package io.onedev.server.manager;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Optional;
+
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.support.issue.IssueField;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueChangeManager extends EntityManager<IssueChange> {
 
-	void changeTitle(Issue issue, String prevTitle);
+	void changeTitle(Issue issue, String title);
 	
-	void changeDescription(Issue issue, String prevDescription);
+	void changeDescription(Issue issue, @Nullable String description);
 	
-	void changeMilestone(Issue issue, String prevMilestone);
+	void changeMilestone(Issue issue, Milestone milestone);
 	
-	void changeFields(Issue issue, Serializable fieldBean, Map<String, IssueField> prevFields, 
-			Collection<String> fieldNames);
+	void changeFields(Issue issue, Serializable fieldBean, Collection<String> fieldNames);
 	
-	void changeState(Issue issue, Serializable fieldBean, @Nullable String commentContent, 
-			String prevState, Map<String, IssueField> prevFields, Collection<String> fieldNames);
+	void changeState(Issue issue, String state, Serializable fieldBean, Collection<String> fieldNames, 
+			@Nullable String comment);
+	
+	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Optional<Milestone> milestone, 
+			Serializable fieldBean, Set<String> fieldNames, @Nullable String comment);
+	
 }

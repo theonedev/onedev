@@ -59,17 +59,17 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Class<? extends Serializable> defineFieldBeanClass(Project project) {
+	public Class<? extends Serializable> defineFieldBeanClass(Project project, boolean setDefaultValue) {
 		String className = FIELD_BEAN_PREFIX + project.getId();
 		
-		return (Class<? extends Serializable>) InputSpec.defineClass(className, project.getIssueWorkflow().getFieldSpecs());
+		return (Class<? extends Serializable>) InputSpec.defineClass(className, project.getIssueWorkflow().getFieldSpecs(), setDefaultValue);
 	}
 	
 	@Override
-	public Class<? extends Serializable> loadFieldBeanClass(String className) {
+	public Class<? extends Serializable> loadFieldBeanClass(String className, boolean setDefaultValue) {
 		if (className.startsWith(FIELD_BEAN_PREFIX)) {
 			Long projectId = Long.valueOf(className.substring(FIELD_BEAN_PREFIX.length()));
-			return defineFieldBeanClass(projectManager.load(projectId));
+			return defineFieldBeanClass(projectManager.load(projectId), setDefaultValue);
 		} else {
 			return null;
 		}
@@ -78,7 +78,7 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 	@Sessional
 	@Override
 	public Serializable readFields(Issue issue) {
-		BeanDescriptor beanDescriptor = new BeanDescriptor(defineFieldBeanClass(issue.getProject()));
+		BeanDescriptor beanDescriptor = new BeanDescriptor(defineFieldBeanClass(issue.getProject(), true));
 		
 		Map<String, PropertyDescriptor> propertyDescriptors = beanDescriptor.getMapOfDisplayNameToPropertyDescriptor();
 			
@@ -186,7 +186,7 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 	@Override
 	public Set<String> getExcludedProperties(Issue issue, String state) {
 		Map<String, PropertyDescriptor> propertyDescriptors = 
-				new BeanDescriptor(defineFieldBeanClass(issue.getProject())).getMapOfDisplayNameToPropertyDescriptor();
+				new BeanDescriptor(defineFieldBeanClass(issue.getProject(), false)).getMapOfDisplayNameToPropertyDescriptor();
 		StateSpec stateSpec = issue.getProject().getIssueWorkflow().getStateSpec(state);
 		if (stateSpec == null)
 			throw new OneException("Unable to find state spec: " + state);

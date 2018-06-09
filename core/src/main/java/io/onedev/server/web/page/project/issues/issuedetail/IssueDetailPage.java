@@ -23,8 +23,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -82,6 +82,7 @@ import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
+import io.onedev.server.web.component.milestoneprogress.MilestoneProgressBar;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
@@ -160,9 +161,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				String prevTitle = getIssue().getTitle();
-				getIssue().setTitle(titleInput.getModelObject());
-				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), prevTitle);
+				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), titleInput.getModelObject());
 				
 				Fragment titleViewer = newTitleViewer();
 				titleEditor.replaceWith(titleViewer);
@@ -317,15 +316,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 								protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 									super.onSubmit(target, form);
 
-									Map<String, IssueField> prevFields = getIssue().getEffectiveFields();
 									StateSpec toStateSpec = getProject().getIssueWorkflow().getStateSpec(transition.getToState());
 									if (toStateSpec == null)
 										throw new OneException("Unable to find state spec: " + transition.getToState());
 								
-									String prevState = getIssue().getState();
-									getIssue().setState(transition.getToState());
-									getIssueChangeManager().changeState(getIssue(), fieldBean, comment, prevState, prevFields, 
-											toStateSpec.getFields());
+									getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldBean,  
+											toStateSpec.getFields(), comment);
 								
 									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
 								}
@@ -481,7 +477,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				@Override
 				public void onClick() {
-					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true);
+					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true, true);
 					int count = position.getCount();
 					int offset = position.getOffset() - 1;
 					List<Issue> issues = getIssueManager().query(getProject(), query, offset, 1);
@@ -514,7 +510,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				@Override
 				public void onClick() {
-					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true);
+					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true, true);
 					int offset = position.getOffset();
 					int count = position.getCount();
 					if (query.matches(getIssue())) 
@@ -629,7 +625,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				Form<?> form = new Form<Void>("form");
 
 				Serializable fieldBean = OneDev.getInstance(IssueFieldUnaryManager.class).readFields(getIssue()); 
-				Map<String, IssueField> prevFields = getIssue().getEffectiveFields();
 				
 				Map<String, PropertyDescriptor> propertyDescriptors = 
 						new BeanDescriptor(fieldBean.getClass()).getMapOfDisplayNameToPropertyDescriptor();
@@ -649,7 +644,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						super.onSubmit(target, form);
 
 						Collection<String> fieldNames = getIssue().getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
-						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, prevFields, fieldNames);
+						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, fieldNames);
 						modal.close();
 						target.add(fieldsContainer);
 					}
@@ -700,6 +695,14 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		if (getIssue().getMilestone() != null) {
 			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null));
 			link.add(new Label("label", getIssue().getMilestone().getName()));
+			fragment.add(new MilestoneProgressBar("progress", new AbstractReadOnlyModel<Milestone>() {
+
+				@Override
+				public Milestone getObject() {
+					return getIssue().getMilestone();
+				}
+				
+			}));
 			fragment.add(link);
 		} else {
 			WebMarkupContainer link = new WebMarkupContainer("link") {
@@ -712,6 +715,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				
 			};
 			link.add(new Label("label", "<i>No milestone</i>").setEscapeModelStrings(false));
+			fragment.add(new WebMarkupContainer("progress").setVisible(false));
 			fragment.add(link);
 		}
 
@@ -743,10 +747,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						String prevMilestoneName = getIssue().getMilestoneName();
 						Milestone milestone = getProject().getMilestone(milestoneName);
-						getIssue().setMilestone(milestone);
-						getIssueChangeManager().changeMilestone(getIssue(), prevMilestoneName);
+						getIssueChangeManager().changeMilestone(getIssue(), milestone);
 						Component container = newMilestoneContainer();
 						getPage().replace(container);
 						target.add(container);
@@ -941,6 +943,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				User user = item.getModelObject().getUser();
 				item.add(new AvatarLink("watcher", user, user.getDisplayName()));
 			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getEffectWatches().isEmpty());
+			}
 			
 		});
 		
@@ -1037,7 +1045,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new IssueDetailResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new IssueDetailResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueDetail.onDomReady();"));
 	}
 

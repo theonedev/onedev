@@ -14,6 +14,7 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
@@ -37,7 +38,8 @@ public class IssueQueryEditor extends PropertyEditor<String> {
 				return ((ProjectPage) getPage()).getProject();
 			}
     		
-    	}));
+    	}, getDescriptor().getPropertyGetter().getAnnotation(IssueQuery.class).allowSort()));
+        
 		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
         
         add(input);

@@ -44,7 +44,7 @@ import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
-import io.onedev.server.web.component.datatable.SelectionColumn;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.groupchoice.AbstractGroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupChoiceResourceReference;
 import io.onedev.server.web.component.select2.Response;

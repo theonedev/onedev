@@ -1,6 +1,7 @@
 package io.onedev.server.model.support.issue.changedata;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
@@ -31,7 +32,17 @@ public class TitleChangeData implements ChangeData {
 	public Component render(String componentId, IssueChange change) {
 		return new PlainDiffPanel(componentId, Lists.newArrayList(oldTitle), Lists.newArrayList(newTitle), true);
 	}
+	
+	@Override
+	public List<String> getOldLines() {
+		return Lists.newArrayList(oldTitle);
+	}
 
+	@Override
+	public List<String> getNewLines() {
+		return Lists.newArrayList(newTitle);
+	}
+	
 	@Override
 	public String getTitle(IssueChange change, boolean external) {
 		Issue issue = change.getIssue();
@@ -51,10 +62,10 @@ public class TitleChangeData implements ChangeData {
 	}
 
 	@Override
-	public String getComment() {
+	public CommentSupport getCommentSupport() {
 		return null;
 	}
-
+	
 	@Override
 	public Map<String, User> getNewUsers() {
 		return new HashMap<>();

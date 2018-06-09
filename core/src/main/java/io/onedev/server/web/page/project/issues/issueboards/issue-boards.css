@@ -1,0 +1,20 @@
+#issue-boards>.head {
+	position: relative;
+}
+#issue-boards>.head>.input-group {
+	margin-right: 120px;
+}
+#issue-boards>.head>.add-new {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+#issue-boards .no-boards {
+	font-size: 16px;
+}
+#issue-boards .no-boards a {
+	margin-left: 12px;
+}
+#new-board>.head {
+	margin-bottom: 20px;
+}

@@ -82,7 +82,7 @@ public class ChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
+	public String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, isAllowMultiple()? "List<String>": "String");
@@ -96,9 +96,9 @@ public class ChoiceInput extends InputSpec {
 		appendChoiceProvider(buffer, index, "@ChoiceProvider");
 		
 		if (isAllowMultiple())
-			appendMethods(buffer, index, "List<String>", choiceProvider, defaultMultiValueProvider);
+			appendMethods(buffer, index, "List<String>", choiceProvider, setDefaultValue?defaultMultiValueProvider:null);
 		else 
-			appendMethods(buffer, index, "String", choiceProvider, defaultValueProvider);
+			appendMethods(buffer, index, "String", choiceProvider, setDefaultValue?defaultValueProvider:null);
 		
 		return buffer.toString();
 	}

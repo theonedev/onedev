@@ -33,7 +33,7 @@ public class PasswordInput extends InputSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
+	public String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "String");
@@ -41,7 +41,7 @@ public class PasswordInput extends InputSpec {
 		if (!isAllowEmpty())
 			buffer.append("    @NotEmpty\n");
 		buffer.append("    @Password\n");
-		appendMethods(buffer, index, "String", null, defaultValueProvider);
+		appendMethods(buffer, index, "String", null, setDefaultValue?defaultValueProvider:null);
 		
 		return buffer.toString();
 	}

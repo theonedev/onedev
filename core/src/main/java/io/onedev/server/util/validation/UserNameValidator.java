@@ -7,9 +7,11 @@ import io.onedev.server.util.validation.annotation.UserName;
 
 public class UserNameValidator implements ConstraintValidator<UserName, String> {
 	
+	@Override
 	public void initialize(UserName constaintAnnotation) {
 	}
 
+	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		if (value == null) {
 			return true;

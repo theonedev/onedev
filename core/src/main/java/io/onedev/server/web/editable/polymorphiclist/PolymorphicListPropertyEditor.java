@@ -17,13 +17,11 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
@@ -99,39 +97,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (getDescriptor().isPropertyRequired()) {
-			add(new WebMarkupContainer("enable").setVisible(false));
-		} else {
-			CheckBox checkBox = new CheckBox("enable", new IModel<Boolean>() {
-				
-				@Override
-				public void detach() {
-					
-				}
-	
-				@Override
-				public Boolean getObject() {
-					return PolymorphicListPropertyEditor.this.get("listEditor").isVisible();
-				}
-	
-				@Override
-				public void setObject(Boolean object) {
-					PolymorphicListPropertyEditor.this.get("listEditor").setVisible(object);
-				}
-				
-			});
-			checkBox.add(new AjaxFormComponentUpdatingBehavior("change") {
-				
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					target.add(PolymorphicListPropertyEditor.this.get("listEditor"));
-				}
-				
-			});
-			checkBox.setLabel(Model.of(getDescriptor().getDisplayName(this)));
-			add(checkBox);
-		}
-		
 		List<Serializable> list = getModelObject();
 		if (list == null && getDescriptor().isPropertyRequired())
 			list = newList(); 
@@ -374,17 +339,13 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
-		if (get("listEditor").isVisible()) {
-			List<Serializable> newList = newList();
-			RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
-			for (Component row: rows) {
-				BeanEditor elementEditor = (BeanEditor) row.get("elementEditor");
-				newList.add(elementEditor.getConvertedInput());
-			}
-			return newList;
-		} else {
-			return null;
+		List<Serializable> newList = newList();
+		RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
+		for (Component row: rows) {
+			BeanEditor elementEditor = (BeanEditor) row.get("elementEditor");
+			newList.add(elementEditor.getConvertedInput());
 		}
+		return newList;
 	}
 	
 }

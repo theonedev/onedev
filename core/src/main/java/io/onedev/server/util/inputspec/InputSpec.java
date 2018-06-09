@@ -138,7 +138,7 @@ public abstract class InputSpec implements Serializable {
 		return escaped;
 	}
 	
-	public abstract String getPropertyDef(Map<String, Integer> indexes);
+	public abstract String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue);
 	
 	protected String getLiteral(byte[] bytes) {
 		StringBuffer buffer = new StringBuffer("[");
@@ -222,7 +222,7 @@ public abstract class InputSpec implements Serializable {
 		return showCondition != null && inputName.equals(showCondition.getInputName());
 	}
 	
-	public static Class<?> defineClass(String className, List<InputSpec> inputs) {
+	public static Class<?> defineClass(String className, List<InputSpec> inputs, boolean setDefaultValue) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("import org.apache.commons.lang3.SerializationUtils;\n");
 		buffer.append("import com.google.common.base.Optional;\n");
@@ -244,7 +244,7 @@ public abstract class InputSpec implements Serializable {
 		for (InputSpec input: inputs)
 			indexes.put(input.getName(), index++);
 		for (InputSpec input: inputs)
-			buffer.append(input.getPropertyDef(indexes));
+			buffer.append(input.getPropertyDef(indexes, setDefaultValue));
 
 		buffer.append("}\n");
 		buffer.append("return " + className + ";\n");

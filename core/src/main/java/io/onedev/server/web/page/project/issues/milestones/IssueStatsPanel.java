@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -12,6 +11,7 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.web.component.milestoneprogress.MilestoneProgressBar;
 
 @SuppressWarnings("serial")
 class IssueStatsPanel extends GenericPanel<Milestone> {
@@ -28,18 +28,9 @@ class IssueStatsPanel extends GenericPanel<Milestone> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		int progress;
-		int totalIssues = getMilestone().getNumOfOpenIssues()+getMilestone().getNumOfClosedIssues();
-		if (totalIssues != 0)
-			progress = 100 * getMilestone().getNumOfClosedIssues() / totalIssues;
-		else
-			progress = 0;
-		if (progress > 100)
-			progress = 100;
+		add(new MilestoneProgressBar("progress", getModel()));
 		
-		add(new WebMarkupContainer("progress").add(AttributeAppender.append("style", "width: " + progress + "%;")));
-		
-		IssueCriteria openCriteria = getMilestone().getProject().getIssueWorkflow().getStatesCriteria(StateSpec.Category.CLOSED);
+		IssueCriteria openCriteria = getMilestone().getProject().getIssueWorkflow().getStatesCriteria(StateSpec.Category.OPEN);
 		if (openCriteria != null) {
 			Link<Void> link = new BookmarkablePageLink<Void>("open", MilestoneDetailPage.class, 
 					MilestoneDetailPage.paramsOf(getMilestone(), openCriteria.toString()));
@@ -59,7 +50,7 @@ class IssueStatsPanel extends GenericPanel<Milestone> {
 			add(link);
 		}
 		
-		IssueCriteria closedCriteria = getMilestone().getProject().getIssueWorkflow().getStatesCriteria(StateSpec.Category.OPEN);
+		IssueCriteria closedCriteria = getMilestone().getProject().getIssueWorkflow().getStatesCriteria(StateSpec.Category.CLOSED);
 		if (closedCriteria != null) {
 			Link<Void> link = new BookmarkablePageLink<Void>("closed",  MilestoneDetailPage.class, 
 					MilestoneDetailPage.paramsOf(getMilestone(), closedCriteria.toString()));

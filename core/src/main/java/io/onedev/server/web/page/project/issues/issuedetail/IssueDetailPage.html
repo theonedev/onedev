@@ -20,9 +20,6 @@
 		<div class="side">
 			<div wicket:id="issueNav" class="nav"></div>
 			<div wicket:id="fields" class="fields">
-				<div class="head">
-					Custom Fields <a wicket:id="edit" title="Edit custom fields" class="edit action"><i class="fa fa-pencil"></i></a>
-				</div>
 				<div class="body">
 					<table>
 						<tr wicket:id="fields">
@@ -30,6 +27,9 @@
 							<td class="values"><div wicket:id="values"></div></td>
 						</tr>
 					</table>
+				</div>
+				<div class="actions">
+					<a wicket:id="edit" class="btn btn-default btn-sm edit"><i class="fa fa-pencil"></i> Edit</a>
 				</div>
 			</div>
 			<div class="milestone">
@@ -46,23 +46,29 @@
 						<span wicket:id="voters"><a wicket:id="voter" class="avatar"></a></span> <span wicket:id="more">and more</span>
 					</div>
 					</wicket:enclosure>
-					<a wicket:id="vote" class="btn btn-default btn-sm vote"><i class="fa fa-thumbs-o-up"></i> <span wicket:id="label"></span></a>
+					<div class="actions">
+						<a wicket:id="vote" class="btn btn-default btn-sm vote"><i class="fa fa-thumbs-o-up"></i> <span wicket:id="label"></span></a>
+					</div>
 				</div>
 			</div>
-			<div wicket:id="watches" class="watch">
+			<div wicket:id="watches" class="watches">
 				<div class="head">
 					Issue Watchers (<span wicket:id="count"></span>)
 				</div>
 				<div class="body">
-					<div class="watchers">
-						<span wicket:id="watchers"><a wicket:id="watcher" class="avatar"></a></span> <span wicket:id="more">and more</span>
+					<wicket:enclosure child="watchers">
+						<div class="watchers">
+							<span wicket:id="watchers"><a wicket:id="watcher" class="avatar"></a></span> <span wicket:id="more">and more</span>
+						</div>
+					</wicket:enclosure>
+					<div class="actions">
+						<a wicket:id="watch" class="watch-status btn btn-sm btn-default"></a>
 					</div>
-					<a wicket:id="watch" class="watch-status btn btn-sm btn-default"></a>
 				</div>
 			</div>
 			<wicket:enclosure child="delete">
-			<div>
-			<a wicket:id="delete" class="delete btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</a>
+			<div class="actions">
+				<a wicket:id="delete" class="delete btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</a>
 			</div>
 			</wicket:enclosure>
 		</div>
@@ -105,7 +111,7 @@
 			<div class="modal-header">
 				<button wicket:id="close" type="button" class="close">&times;</button>
 				<h4 id="modal-title" class="modal-title">
-					Edit Custom Fields
+					Edit Fields
 				</h4>
 			</div>
 			<div class="modal-body">
@@ -120,6 +126,7 @@
 	<wicket:fragment wicket:id="milestoneViewFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a> 
 		<a wicket:id="edit" title="Change milestone" class="edit action"><i class="fa fa-pencil"></i></a>
+		<div wicket:id="progress" class="progress"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneEditFrag">
 		<form wicket:id="form">

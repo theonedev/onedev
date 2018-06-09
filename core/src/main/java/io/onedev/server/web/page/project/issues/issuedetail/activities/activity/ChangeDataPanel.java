@@ -22,7 +22,7 @@ import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.changedata.StateChangeData;
+import io.onedev.server.model.support.issue.changedata.ChangeData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
@@ -32,23 +32,23 @@ import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
-public abstract class StateChangePanel extends Panel {
+public abstract class ChangeDataPanel extends Panel {
 
 	private static final String COMMENT_ID = "comment";
 	
-	public StateChangePanel(String id) {
+	public ChangeDataPanel(String id) {
 		super(id);
 	}
 	
 	private Component newViewer() {
 		Fragment viewer = new Fragment(COMMENT_ID, "viewFrag", this);
 		
-		if (StringUtils.isNotBlank(getChangeData().getComment())) {
+		if (StringUtils.isNotBlank(getChangeData().getCommentSupport().getComment())) {
 			viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
 				@Override
 				public String getObject() {
-					return getChangeData().getComment();
+					return getChangeData().getCommentSupport().getComment();
 				}
 
 				@Override
@@ -57,7 +57,7 @@ public abstract class StateChangePanel extends Panel {
 
 				@Override
 				public void setObject(String object) {
-					getChangeData().setComment(object);
+					getChangeData().getCommentSupport().setComment(object);
 					getChange().setData(getChangeData());
 					OneDev.getInstance(IssueChangeManager.class).save(getChange());				
 				}
@@ -73,13 +73,13 @@ public abstract class StateChangePanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment editor = new Fragment(COMMENT_ID, "editFrag", StateChangePanel.this);
+				Fragment editor = new Fragment(COMMENT_ID, "editFrag", ChangeDataPanel.this);
 				
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				editor.add(form);
 				
-				CommentInput input = new CommentInput("input", Model.of(getChangeData().getComment()), false) {
+				CommentInput input = new CommentInput("input", Model.of(getChangeData().getCommentSupport().getComment()), false) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -98,7 +98,7 @@ public abstract class StateChangePanel extends Panel {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						getChangeData().setComment(input.getModelObject());
+						getChangeData().getCommentSupport().setComment(input.getModelObject());
 						getChange().setData(getChangeData());
 						OneDev.getInstance(IssueChangeManager.class).save(getChange());
 
@@ -147,14 +147,17 @@ public abstract class StateChangePanel extends Panel {
 		List<String> newLines = new ArrayList<>(getChangeData().getNewLines());
 		add(new PlainDiffPanel("fields", oldLines, newLines, true).setVisible(!oldLines.equals(newLines)));
 		
-		add(newViewer());
+		if (getChangeData().getCommentSupport() != null)
+			add(newViewer());
+		else
+			add(new WebMarkupContainer(COMMENT_ID).setVisible(false));
 	}
 
 	private Issue getIssue() {
 		return getChange().getIssue();
 	}
 	
-	protected abstract StateChangeData getChangeData();
+	protected abstract ChangeData getChangeData();
 	
 	protected abstract IssueChange getChange();
 	

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.onedev.server.model.Issue;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -29,7 +30,8 @@ public class FieldsEditBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
-		List<String> fields = new ArrayList<>();
+		List<String> fields = new ArrayList<>(Issue.BUILTIN_FIELDS.keySet());
+		fields.remove(Issue.DESCRIPTION);
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
 		for (InputSpec field: page.getProject().getIssueWorkflow().getFieldSpecs())
 			fields.add(field.getName());
