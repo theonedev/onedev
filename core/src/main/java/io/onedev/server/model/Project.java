@@ -221,7 +221,7 @@ public class Project extends AbstractEntity {
 		issueListFields.add(Issue.VOTES);
 		
 		savedIssueQueries.add(new NamedQuery("All", "all"));
-		savedIssueQueries.add(new NamedQuery("Outstanding", "\"State\" is not \"Closed\""));
+		savedIssueQueries.add(new NamedQuery("Open", "\"State\" is \"Open\""));
 		savedIssueQueries.add(new NamedQuery("Closed", "\"State\" is \"Closed\""));
 		savedIssueQueries.add(new NamedQuery("Added recently", "\"Submit Date\" is after \"last week\""));
 		savedIssueQueries.add(new NamedQuery("Updated recently", "\"Update Date\" is after \"last week\""));

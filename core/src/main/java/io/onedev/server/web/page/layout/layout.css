@@ -112,17 +112,17 @@
 	padding: 20px;
 }
 
-.floating>.content>.user {
+.floating>.content>.user-menu {
 	padding: 12px 0;
 	min-width: 120px;
 }
-.floating>.content>.user a {
+.floating>.content>.user-menu a {
 	display: block;
 	color: #555;
 	text-decoration: none;
 	padding: 8px 12px;
 }
-.floating>.content>.user a:hover {
+.floating>.content>.user-menu a:hover {
 	background: #F2F2F2;
 }
 

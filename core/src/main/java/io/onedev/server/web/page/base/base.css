@@ -11,21 +11,6 @@ body {
 	cursor: move;
 }
 
-
-/* TOOLTIPS */
-.tooltip-inner {
-	max-width: 400px;
-}
-.tooltip .tooltip-inner {
-	text-align: left;
-}
-.tooltip .tooltip-inner dl dt {
-	font-size: 15px;
-}
-.tooltip .tooltip-inner dl {
-	margin-bottom: 0;
-}
-
 .has-error.form-control {
     border-color: #a94442;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);

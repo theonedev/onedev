@@ -90,6 +90,7 @@ import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.component.userlist.UserListLink;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -460,7 +461,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	private Component newNavContainer() {
 		if (position != null) {
 			Fragment fragment = new Fragment(NAV_ID, "issueNavFrag", this);
-			fragment.add(new Link<Void>("prev") {
+			fragment.add(new Link<Void>("next") {
 
 				@Override
 				protected void onConfigure() {
@@ -493,7 +494,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				}
 				
 			});
-			fragment.add(new Link<Void>("next") {
+			fragment.add(new Link<Void>("prev") {
 
 				@Override
 				protected void onConfigure() {
@@ -530,7 +531,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				
 			});
 			
-			fragment.add(new Label("current", "issue " + (position.getOffset()+1) + " of " + position.getCount()));
+			fragment.add(new Label("current", "issue " + (position.getCount()-position.getOffset()) + " of " + position.getCount()));
 			
 			return fragment;
 		} else {
@@ -782,6 +783,19 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		return fragment;
 	}
 	
+	private List<IssueVote> getSortedVotes() {
+		List<IssueVote> votes = new ArrayList<>(getIssue().getVotes());
+		Collections.sort(votes, new Comparator<IssueVote>() {
+
+			@Override
+			public int compare(IssueVote o1, IssueVote o2) {
+				return o2.getId().compareTo(o1.getId());
+			}
+			
+		});
+		return votes;
+	}
+	
 	private Component newVotesContainer() {
 		WebMarkupContainer votesContainer = new WebMarkupContainer("votes");
 		votesContainer.setOutputMarkupId(true);
@@ -799,15 +813,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 			@Override
 			protected List<IssueVote> load() {
-				List<IssueVote> votes = new ArrayList<>(getIssue().getVotes());
-				Collections.sort(votes, new Comparator<IssueVote>() {
-
-					@Override
-					public int compare(IssueVote o1, IssueVote o2) {
-						return o2.getId().compareTo(o1.getId());
-					}
-					
-				});
+				List<IssueVote> votes = getSortedVotes();
 				if (votes.size() > MAX_DISPLAY_AVATARS)
 					votes = votes.subList(0, MAX_DISPLAY_AVATARS);
 				return votes;
@@ -829,14 +835,24 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		});
 		
-		votesContainer.add(new WebMarkupContainer("more") {
+		votesContainer.add(new UserListLink("more") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getIssue().getVotes().size() > MAX_DISPLAY_AVATARS);
 			}
-			
+
+			@Override
+			protected List<User> getUsers() {
+				List<IssueVote> votes = getSortedVotes();
+				if (votes.size() > MAX_DISPLAY_AVATARS)
+					votes = votes.subList(MAX_DISPLAY_AVATARS, votes.size());
+				else
+					votes = new ArrayList<>();
+				return votes.stream().map(it->it.getUser()).collect(Collectors.toList());
+			}
+					
 		});
 		
 		AjaxLink<Void> voteLink = new AjaxLink<Void>("vote") {
@@ -952,12 +968,22 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		});
 		
-		watchesContainer.add(new WebMarkupContainer("more") {
+		watchesContainer.add(new UserListLink("more") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getEffectWatches().size() > MAX_DISPLAY_AVATARS);
+			}
+
+			@Override
+			protected List<User> getUsers() {
+				List<IssueWatch> watches = getEffectWatches();
+				if (watches.size() > MAX_DISPLAY_AVATARS)
+					watches = watches.subList(MAX_DISPLAY_AVATARS, watches.size());
+				else
+					watches = new ArrayList<>();
+				return watches.stream().map(it->it.getUser()).collect(Collectors.toList());
 			}
 			
 		});

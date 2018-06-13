@@ -29,6 +29,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -460,8 +461,9 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 							IModel<Issue> rowModel) {
 						Fragment fragment = new Fragment(componentId, "linkFrag", IssueListPanel.this);
+						OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
 						QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
-								(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + cellItem.getIndex());
+								(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
 								IssueActivitiesPage.paramsOf(rowModel.getObject(), position));
 						link.add(new Label("label", rowModel.getObject().getTitle()));
