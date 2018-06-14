@@ -34,9 +34,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.MilestoneSort;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.MilestoneDueLabel;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -79,7 +79,7 @@ public class MilestoneListPage extends IssuesPage {
 		if (sortString != null)
 			sort = MilestoneSort.valueOf(sortString.toUpperCase());
 		else
-			sort = MilestoneSort.RECENTLY_UPDATED;
+			sort = MilestoneSort.CLOSEST_DUE_DATE;
 	}
 
 	@Override
@@ -137,6 +137,12 @@ public class MilestoneListPage extends IssuesPage {
 				setResponsePage(NewMilestonePage.class, NewMilestonePage.paramsOf(getProject()));
 			}
 			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canManage(getProject()));
+			}
+			
 		});
 		
 		List<IColumn<Milestone, Void>> columns = new ArrayList<>();
@@ -161,11 +167,7 @@ public class MilestoneListPage extends IssuesPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
 					IModel<Milestone> rowModel) {
-				Milestone milestone = rowModel.getObject();
-				if (milestone.getDueDate() != null)
-					cellItem.add(new Label(componentId, DateUtils.formatDate(milestone.getDueDate())));
-				else
-					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+				cellItem.add(new MilestoneDueLabel(componentId, rowModel));
 			}
 		});
 		

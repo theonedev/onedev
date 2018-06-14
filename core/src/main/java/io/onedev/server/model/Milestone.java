@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
@@ -11,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -36,13 +38,13 @@ public class Milestone extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Project project;
 	
+	@Column(nullable=false)
 	private String name;
 	
 	private String description;
 	
+	@Column(nullable=false)
 	private Date dueDate;
-	
-	private Date updateDate;
 	
 	private int numOfOpenIssues;
 	
@@ -82,20 +84,13 @@ public class Milestone extends AbstractEntity {
 	}
 
 	@Editable(order=300)
+	@NotNull
 	public Date getDueDate() {
 		return dueDate;
 	}
 
 	public void setDueDate(Date dueDate) {
 		this.dueDate = dueDate;
-	}
-
-	public Date getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
 	}
 
 	public boolean isClosed() {

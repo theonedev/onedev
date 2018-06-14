@@ -3,31 +3,53 @@
 		<wicket:container wicket:id="content"></wicket:container>
 	</div>
 	<wicket:fragment wicket:id="hasBoardsFrag">
-		<div class="head clearfix">
-			<div class="input-group">
-				<span class="input-group-btn">
-					<a class="board-selector btn btn-default">
-						<i class="fa fa-columns"></i>
-						States
-						<i class="fa fa-caret-down"></i>
-					</a>
-					<a class="milestone-selector btn btn-default">
-						<i class="fa fa-ext fa-milestone"></i>
-						All
-						<i class="fa fa-caret-down"></i>
-					</a>
-				</span>
-				<input class="form-control"></input>
-				<span class="input-group-btn">
-					<button type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
-				</span>
-			</div>
-			<a class="btn btn-success add-new"><i class="fa fa-plus"></i> Add New</a>
+		<div class="head">
+			<form wicket:id="query" class="clearable-wrapper">
+				<div class="input-group">
+					<span class="input-group-btn">
+						<a wicket:id="boardMenu" class="board-selector btn btn-default">
+							<i class="fa fa-columns"></i>
+							<span wicket:id="board"></span>
+							<i class="fa fa-caret-down"></i>
+						</a>
+						<a wicket:id="milestoneMenu" class="milestone-selector btn btn-default">
+							<i class="fa fa-ext fa-milestone"></i>
+							<span wicket:id="milestone"></span>
+							<i class="fa fa-caret-down"></i>
+						</a>
+					</span>
+					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control no-autofocus" placeholder="Filter issues"></input>
+					<span class="input-group-btn">
+						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+					</span>
+				</div>
+			</form>
+			<a wicket:id="newBoard" class="btn btn-success add-new"><i class="fa fa-plus"></i> New Board</a>
 		</div>
 		<div class="body">
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noBoardsFrag">
 		<div class="alert alert-info no-boards">No issue boards defined <a wicket:id="newBoard"><i class="fa fa-plus"></i> Add New</a></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="boardMenuFrag">
+		<div class="board-menu board-and-milestone">
+			<div wicket:id="boards" class="board">
+				<span wicket:id="dragHandle" class="drag-handle" title="Drag to reorder"><i class="fa fa-arrows"></i></span>			
+				<a wicket:id="select" class="select"><span wicket:id="name"></span></a>
+				<a wicket:id="edit" class="action" title="Edit"><i class="fa fa-pencil"></i></a>
+				<a wicket:id="delete" class="action" title="Delete"><i class="fa fa-trash"></i></a>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="milestoneMenuFrag">
+		<div class="milestone-menu">
+			<div wicket:id="milestones" class="milestone">
+				<a wicket:id="select" class="select"><span wicket:id="name"></span></a>
+				<span wicket:id="status" class="status"></span>
+				<a wicket:id="detail" class="action" title="Detail"><i class="fa fa-arrow-circle-right"></i></a>
+			</div>
+			<a wicket:id="showClosed">Show Closed <i class="fa fa-angle-double-down"></i></a>
+		</div>
 	</wicket:fragment>
 </wicket:extend>

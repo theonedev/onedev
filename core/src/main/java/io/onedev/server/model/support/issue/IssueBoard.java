@@ -1,25 +1,18 @@
-package io.onedev.server.model;
+package io.onedev.server.model.support.issue;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.annotation.Nullable;
 import javax.validation.constraints.Size;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -30,50 +23,18 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
 
-@Entity
-@Table(
-		indexes={@Index(columnList="g_project_id"), @Index(columnList="g_milestone_id"), @Index(columnList="name")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "name"})}
-)
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class IssueBoard extends AbstractEntity {
+public class IssueBoard implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
-	private Project project;
-
-	@ManyToOne(fetch=FetchType.LAZY)
-	private Milestone milestone;
-	
-	@Column(nullable=false)
 	private String name;
 	
 	private String issueFilter;
 	
-	@Column(nullable=false)
 	private String identifyField;
 	
-	@Lob
-	private ArrayList<String> columns = new ArrayList<>();
-
-	public Project getProject() {
-		return project;
-	}
-
-	public void setProject(Project project) {
-		this.project = project;
-	}
-
-	public Milestone getMilestone() {
-		return milestone;
-	}
-
-	public void setMilestone(Milestone milestone) {
-		this.milestone = milestone;
-	}
+	private List<String> columns = new ArrayList<>();
 
 	@Editable(order=100)
 	@NotEmpty
@@ -87,6 +48,7 @@ public class IssueBoard extends AbstractEntity {
 
 	@Editable(order=200, name="Issue Filter", description="Optionally specify a query to filter issues of the board")
 	@IssueQuery(allowSort=false)
+	@Nullable
 	public String getIssueFilter() {
 		return issueFilter;
 	}
@@ -110,11 +72,11 @@ public class IssueBoard extends AbstractEntity {
 			+ "a value of the issue field specified above")
 	@Size(min=2, message="At least two columns need to be defined")
 	@ChoiceProvider("getColumnChoices")
-	public ArrayList<String> getColumns() {
+	public List<String> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(ArrayList<String> columns) {
+	public void setColumns(List<String> columns) {
 		this.columns = columns;
 	}
 
@@ -133,7 +95,7 @@ public class IssueBoard extends AbstractEntity {
 	
 	@SuppressWarnings("unused")
 	private static Map<String, String> getColumnChoices() {
-		Map<String, String> choices = new HashMap<>();
+		Map<String, String> choices = new LinkedHashMap<>();
 		Project project = OneContext.get().getProject();
 		String fieldName = (String) OneContext.get().getEditContext().getInputValue("identifyField");
 		if (Issue.STATE.equals(fieldName)) {
@@ -147,6 +109,14 @@ public class IssueBoard extends AbstractEntity {
 				choices.put(fieldSpec.getNameOfEmptyValue(), null);
 		} 
 		return choices;
+	}
+	
+	public static int getBoardIndex(List<IssueBoard> boards, String name) {
+		for (int i=0; i<boards.size(); i++) {
+			if (name.equals(boards.get(i).getName()))
+				return i;
+		}
+		return -1;
 	}
 	
 }

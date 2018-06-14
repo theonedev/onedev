@@ -4,11 +4,11 @@ import org.eclipse.jgit.util.StringUtils;
 import org.hibernate.criterion.Order;
 
 public enum MilestoneSort {
-	RECENTLY_UPDATED {
+	CLOSEST_DUE_DATE {
 
 		@Override
 		public Order getOrder() {
-			return Order.desc("updateDate");
+			return Order.asc("dueDate");
 		}
 		
 	},
@@ -17,14 +17,6 @@ public enum MilestoneSort {
 		@Override
 		public Order getOrder() {
 			return Order.desc("dueDate");
-		}
-		
-	},
-	CLOSEST_DUE_DATE {
-
-		@Override
-		public Order getOrder() {
-			return Order.asc("dueDate");
 		}
 		
 	},

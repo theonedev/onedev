@@ -1,7 +1,7 @@
 #issue-boards>.head {
 	position: relative;
 }
-#issue-boards>.head>.input-group {
+#issue-boards>.head>form {
 	margin-right: 120px;
 }
 #issue-boards>.head>.add-new {
@@ -17,4 +17,47 @@
 }
 #new-board>.head {
 	margin-bottom: 20px;
+}
+.board-menu, .milestone-menu {
+	padding: 8px 12px;
+}
+.board-menu .board, .milestone-menu .milestone {
+	position: relative;
+	padding: 4px 0 4px 20px;
+	white-space: nowrap;
+}
+.board-menu .active:before, .milestone-menu .active:before {
+	content: "\f00c";
+	font-family: "FontAwesome";
+	position: absolute;
+	left: 0;
+	top: 4px;
+}
+.milestone-menu .active:before {
+	top: 6px;
+}
+.board-menu a.action, .milestone-menu a.action {
+	text-decoration: none;
+	margin-left: 8px;
+	color: #444;
+}
+.milestone-menu .status {
+	margin-left: 4px;
+}
+.milestone-menu .action {
+	font-size: 16px;
+}
+.milestone-menu>a {
+	display: block;
+	text-decoration: none;
+	background: #F9F9F9;
+	border: 1px solid #CCC;
+	border-radius: 3px;
+	padding: 4px 8px;
+	margin-top: 8px;
+	color: #666;
+	font-size: 12px;
+}
+.milestone-menu>a:hover {
+	background: #E5E5E5;
 }

@@ -1,7 +1,6 @@
 package io.onedev.server.manager.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -97,7 +96,6 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 				milestone.setNumOfOpenIssues(0);
 			}
 		}
-		milestone.setUpdateDate(new Date());
 		milestone.setClosed(true);
 		save(milestone);
 	}

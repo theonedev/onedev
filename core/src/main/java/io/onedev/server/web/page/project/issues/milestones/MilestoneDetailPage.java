@@ -3,11 +3,9 @@ package io.onedev.server.web.page.project.issues.milestones;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
@@ -21,7 +19,8 @@ import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQueryLexer;
 import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.component.MilestoneDueLabel;
+import io.onedev.server.web.component.MilestoneStatusLabel;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issuelist.IssueListPanel;
 import io.onedev.server.web.component.issuelist.QuerySaveSupport;
@@ -67,38 +66,9 @@ public class MilestoneDetailPage extends IssuesPage {
 
 		add(new Label("name", getMilestone().getName()));
 		
-		add(new Label("status", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return getMilestone().isClosed()? "Closed": "Open";
-			}
-			
-		}).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return "label label-" + (getMilestone().isClosed()? "success": "warning");
-			}
-			
-		})));
+		add(new MilestoneStatusLabel("status", milestoneModel));
 		
-		add(new Label("due", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return "Due " + DateUtils.formatDate(getMilestone().getDueDate());
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getMilestone().getDueDate() != null);
-			}
-			
-		});
+		add(new MilestoneDueLabel("due", milestoneModel));
 		
 		add(new MilestoneActionsPanel("actions", milestoneModel) {
 

@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
-import java.util.Date;
-
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -13,6 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Milestone;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
@@ -59,7 +58,6 @@ public class MilestoneEditPage extends IssuesPage {
 				} 
 				if (!editor.hasErrors(true)){
 					editor.getBeanDescriptor().copyProperties(milestone, milestoneModel.getObject());
-					milestoneModel.getObject().setUpdateDate(new Date());
 					milestoneManager.save(milestoneModel.getObject());
 					Session.get().success("Milestone saved");
 					setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(milestoneModel.getObject(), null));
@@ -88,6 +86,11 @@ public class MilestoneEditPage extends IssuesPage {
 		PageParameters params = paramsOf(milestone.getProject());
 		params.add(PARAM_MILESTONE, milestone.getId());
 		return params;
+	}
+	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canManage(getProject());
 	}
 	
 }

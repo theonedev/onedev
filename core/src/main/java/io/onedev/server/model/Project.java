@@ -81,6 +81,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.issue.IssueBoard;
 import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.persistence.UnitOfWork;
@@ -179,9 +180,6 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<IssueBoard> issueBoards = new ArrayList<>();
-	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private IssueWorkflow issueWorkflow = new IssueWorkflow();
@@ -193,6 +191,10 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<String> issueListFields = new ArrayList<>();
+	
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<IssueBoard> issueBoards = new ArrayList<>();
 	
 	private transient Repository repository;
 	
@@ -934,11 +936,11 @@ public class Project extends AbstractEntity {
 		this.milestones = milestones;
 	}
 
-	public Collection<IssueBoard> getIssueBoards() {
+	public ArrayList<IssueBoard> getIssueBoards() {
 		return issueBoards;
 	}
 
-	public void setIssueBoards(Collection<IssueBoard> issueBoards) {
+	public void setIssueBoards(ArrayList<IssueBoard> issueBoards) {
 		this.issueBoards = issueBoards;
 	}
 
