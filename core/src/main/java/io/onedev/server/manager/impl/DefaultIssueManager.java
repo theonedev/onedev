@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -36,13 +37,17 @@ import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.IssueQuerySetting;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.NamedQuery;
+import io.onedev.server.model.support.issue.query.AndCriteria;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
+import io.onedev.server.model.support.issue.query.IssueQueryLexer;
 import io.onedev.server.model.support.issue.query.IssueSort;
 import io.onedev.server.model.support.issue.query.IssueSort.Direction;
+import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.model.support.issue.query.QueryBuildContext;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -205,6 +210,24 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
+	}
+
+	@Override
+	public int count(Milestone milestone, @Nullable StateSpec.Category category) {
+		if (category != null) {
+			IssueCriteria criteria = milestone.getProject().getIssueWorkflow().getStatesCriteria(category);
+			if (criteria != null) {
+				List<IssueCriteria> criterias = new ArrayList<>();
+				criterias.add(new MilestoneCriteria(milestone.getName(), IssueQueryLexer.Is));
+				criterias.add(criteria);
+				return count(milestone.getProject(), new AndCriteria(criterias));
+			} else {
+				return 0;
+			}
+		} else {
+			IssueCriteria criteria = new MilestoneCriteria(milestone.getName(), IssueQueryLexer.Is);
+			return count(milestone.getProject(), criteria);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -623,4 +646,35 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		
 	}
 
+	/*
+	@Transactional
+	@Override
+	public void test() {
+		Project project = OneDev.getInstance(ProjectManager.class).load(1L);
+		Milestone m1 = OneDev.getInstance(MilestoneManager.class).load(1L);
+		Milestone m2 = OneDev.getInstance(MilestoneManager.class).load(2L);
+		User user = OneDev.getInstance(UserManager.class).load(1L);
+		for (int i=1; i<=100000; i++) {
+			Issue issue = new Issue();
+			issue.setProject(project);
+			if (i<=50000)
+				issue.setMilestone(m1);
+			else
+				issue.setMilestone(m2);
+			issue.setTitle("issue " + i);
+			issue.setSubmitter(user);
+			issue.setSubmitDate(new Date());
+			issue.setBoardPosition(1);
+			issue.setState("Open");
+			LastActivity lastActivity = new LastActivity();
+			lastActivity.setAction("submitted");
+			lastActivity.setUser(issue.getSubmitter());
+			lastActivity.setDate(issue.getSubmitDate());
+			issue.setLastActivity(lastActivity);
+			issue.setNumber(getNextNumber(issue.getProject()));
+			issue.setLastActivity(lastActivity);
+			save(issue);
+		}
+	}
+	*/
 }

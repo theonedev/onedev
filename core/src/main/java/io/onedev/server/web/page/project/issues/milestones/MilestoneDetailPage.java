@@ -100,7 +100,7 @@ public class MilestoneDetailPage extends IssuesPage {
 			
 		});
 		
-		add(new ActionPanel("actions", milestoneModel) {
+		add(new MilestoneActionsPanel("actions", milestoneModel) {
 
 			@Override
 			protected void onDeleted(AjaxRequestTarget target) {

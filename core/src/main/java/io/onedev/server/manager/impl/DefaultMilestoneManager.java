@@ -16,14 +16,13 @@ import com.google.common.base.Preconditions;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.issue.IssueChanged;
 import io.onedev.server.event.issue.IssueOpened;
-import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.changedata.BatchChangeData;
 import io.onedev.server.model.support.issue.changedata.MilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.StateChangeData;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -36,12 +35,9 @@ import io.onedev.utils.StringUtils;
 @Singleton
 public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> implements MilestoneManager {
 
-	private final IssueManager issueManager;
-	
 	@Inject
-	public DefaultMilestoneManager(Dao dao, IssueManager issueManager) {
+	public DefaultMilestoneManager(Dao dao) {
 		super(dao);
-		this.issueManager = issueManager;
 	}
 
 	@Transactional
@@ -67,23 +63,6 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		super.delete(milestone);
 	}
 	
-	@Override
-	public void updateIssueCount(Milestone milestone, StateSpec.Category category) {
-		IssueCriteria criteria = milestone.getProject().getIssueWorkflow().getStatesCriteria(category);
-		if (criteria != null) {
-			if (category == StateSpec.Category.CLOSED)
-				milestone.setNumOfClosedIssues(issueManager.count(milestone.getProject(), criteria));
-			else
-				milestone.setNumOfOpenIssues(issueManager.count(milestone.getProject(), criteria));
-		} else {
-			if (category == StateSpec.Category.CLOSED)
-				milestone.setNumOfClosedIssues(0);
-			else
-				milestone.setNumOfOpenIssues(0);
-		}
-		save(milestone);
-	}
-
 	@Sessional
 	@Override
 	public Milestone find(Project project, String name) {
@@ -156,20 +135,16 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			}
 		}
 	}
-	
-	@Transactional
-	@Listen
-	public void on(IssueChanged event) {
-		Issue issue = event.getIssue();
-		Milestone milestone = issue.getMilestone();
-		if (milestone != null && event.getChange().getData() instanceof StateChangeData) {
-			StateChangeData data = (StateChangeData) event.getChange().getData();
-			StateSpec prevState = issue.getProject().getIssueWorkflow().getStateSpec(data.getOldState());
-			Preconditions.checkNotNull(prevState);
-			StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(data.getNewState());
-			Preconditions.checkNotNull(prevState);
-			if (prevState.getCategory() != state.getCategory()) {
-				if (prevState.getCategory() == StateSpec.Category.CLOSED) {
+
+	private void onStateChange(Project project, @Nullable String milestoneName, String oldState, String newState) {
+		Milestone milestone = project.getMilestone(milestoneName);
+		if (milestone != null) {
+			StateSpec oldStateSpec = project.getIssueWorkflow().getStateSpec(oldState);
+			Preconditions.checkNotNull(oldStateSpec);
+			StateSpec newStateSpec = project.getIssueWorkflow().getStateSpec(newState);
+			Preconditions.checkNotNull(oldStateSpec);
+			if (oldStateSpec.getCategory() != newStateSpec.getCategory()) {
+				if (oldStateSpec.getCategory() == StateSpec.Category.CLOSED) {
 					milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()-1);
 					milestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()+1);
 				} else {
@@ -178,27 +153,46 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 				}
 				save(milestone);
 			}
-		} else if (event.getChange().getData() instanceof MilestoneChangeData) {
-			MilestoneChangeData data = (MilestoneChangeData) event.getChange().getData();
-			Milestone oldMilestone = issue.getProject().getMilestone(data.getOldMilestone());
-			Milestone newMilestone = issue.getProject().getMilestone(data.getNewMilestone());
-			StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState());
-			Preconditions.checkNotNull(state);
-			if (state.getCategory() == StateSpec.Category.CLOSED) {
-				if (oldMilestone != null)
-					oldMilestone.setNumOfClosedIssues(oldMilestone.getNumOfClosedIssues()-1);
-				if (newMilestone != null)
-					newMilestone.setNumOfClosedIssues(newMilestone.getNumOfClosedIssues()+1);
-			} else {
-				if (oldMilestone != null)
-					oldMilestone.setNumOfOpenIssues(oldMilestone.getNumOfOpenIssues()-1);
-				if (newMilestone != null)
-					newMilestone.setNumOfOpenIssues(newMilestone.getNumOfOpenIssues()+1);
-			}
-			if (oldMilestone != null)
-				save(oldMilestone);
-			if (newMilestone != null)
-				save(newMilestone);
 		}
 	}
+	
+	private void onMilestoneChange(Project project, String state, @Nullable String oldMilestoneName, @Nullable String newMilestoneName) {
+		Milestone oldMilestone = project.getMilestone(oldMilestoneName);
+		Milestone newMilestone = project.getMilestone(newMilestoneName);
+		StateSpec stateSpec = project.getIssueWorkflow().getStateSpec(state);
+		Preconditions.checkNotNull(stateSpec);
+		if (stateSpec.getCategory() == StateSpec.Category.CLOSED) {
+			if (oldMilestone != null)
+				oldMilestone.setNumOfClosedIssues(oldMilestone.getNumOfClosedIssues()-1);
+			if (newMilestone != null)
+				newMilestone.setNumOfClosedIssues(newMilestone.getNumOfClosedIssues()+1);
+		} else {
+			if (oldMilestone != null)
+				oldMilestone.setNumOfOpenIssues(oldMilestone.getNumOfOpenIssues()-1);
+			if (newMilestone != null)
+				newMilestone.setNumOfOpenIssues(newMilestone.getNumOfOpenIssues()+1);
+		}
+		if (oldMilestone != null)
+			save(oldMilestone);
+		if (newMilestone != null)
+			save(newMilestone);
+	}
+	
+	@Transactional
+	@Listen
+	public void on(IssueChanged event) {
+		Project project = event.getIssue().getProject();
+		if (event.getChange().getData() instanceof BatchChangeData) {
+			BatchChangeData data = (BatchChangeData) event.getChange().getData();
+			onStateChange(project, data.getOldMilestone(), data.getOldState(), data.getNewState());
+			onMilestoneChange(project, data.getNewState(), data.getOldMilestone(), data.getNewMilestone());
+		} else if (event.getChange().getData() instanceof StateChangeData) {
+			StateChangeData data = (StateChangeData) event.getChange().getData();
+			onStateChange(project, event.getIssue().getMilestoneName(), data.getOldState(), data.getNewState());
+		} else if (event.getChange().getData() instanceof MilestoneChangeData) {
+			MilestoneChangeData data = (MilestoneChangeData) event.getChange().getData();
+			onMilestoneChange(project, event.getIssue().getState(), data.getOldMilestone(), data.getNewMilestone());
+		}
+	}
+	
 }

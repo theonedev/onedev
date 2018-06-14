@@ -194,7 +194,7 @@ public class MilestoneListPage extends IssuesPage {
 				@Override
 				public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
 						IModel<Milestone> rowModel) {
-					cellItem.add(new ActionPanel(componentId, rowModel) {
+					cellItem.add(new MilestoneActionsPanel(componentId, rowModel) {
 
 						@Override
 						protected void onUpdated(AjaxRequestTarget target) {

@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue;
+package io.onedev.server.web.component.issuelist;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class FieldsEditBean implements Serializable {
 
 	private List<String> fields = new ArrayList<>();
 
-	@Editable
+	@Editable(description="<b>Hint:</b> Selected fields can be dragged and reordered")
 	@ChoiceProvider("getFieldChoices")
 	public List<String> getFields() {
 		return fields;

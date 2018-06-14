@@ -90,17 +90,15 @@
 }
 
 #issue-detail>.side .fields td {
-	padding-bottom: 10px;
-	vertical-align: middle;
+	padding-bottom: 12px;
 	vertical-align: top;
 }
 #issue-detail>.side .fields tr:last-child td {
 	padding-bottom: 0;
 }
-#issue-detail>.side .fields .name {
-	line-height: 20px;
+#issue-detail>.side .fields td.name {
 	white-space: nowrap;
-	padding: 3px 20px 3px 0;
+	padding-right: 20px;
 }
 #issue-detail>.side .fields .value.has-color {
 	display: table-cell;

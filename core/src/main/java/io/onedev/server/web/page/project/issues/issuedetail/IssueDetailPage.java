@@ -613,7 +613,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						return item.getModelObject();
 					}
 					
-				});
+				}.setRenderBodyOnly(true));
 			}
 			
 		});

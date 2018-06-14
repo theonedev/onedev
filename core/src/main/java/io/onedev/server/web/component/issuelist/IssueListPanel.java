@@ -47,7 +47,6 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.FieldsEditBean;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.query.AndCriteria;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
@@ -163,7 +162,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				if (SecurityUtils.getUser() != null)
+				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 					target.add(querySave);
 			}
 			

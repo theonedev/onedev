@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.string.Strings;
@@ -103,6 +104,7 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 
 	@Override
 	protected void renderInitializationScript(IHeaderResponse response) {
+		response.render(JavaScriptHeaderItem.forReference(new DragSortResourceReference()));
 		Collection<? extends T> choices;
 		if (getWebRequest().getRequestParameters().getParameterNames().contains(getInputName())) {
 			convertInput();
@@ -130,6 +132,8 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 			response.render(OnLoadHeaderItem.forScript(
 					JQuery.execute("$('#%s').select2('data', %s);", getJquerySafeMarkupId(), selection.toJson())));
 		}
+		String script = String.format("onedev.server.select2DragSort.onWindowLoad('%s');", getMarkupId());
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
 }

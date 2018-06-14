@@ -50,7 +50,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="title"), @Index(columnList="noSpaceTitle"),  
 				@Index(columnList="number"), @Index(columnList="numberStr"), 
 				@Index(columnList="submitDate"), @Index(columnList="g_submitter_id"),
-				@Index(columnList="numOfVotes"), @Index(columnList="numOfComments")})
+				@Index(columnList="numOfVotes"), @Index(columnList="numOfComments"),
+				@Index(columnList="g_milestone_id"), @Index(columnList="LAST_ACT_DATE")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Issue extends AbstractEntity implements Referenceable {
