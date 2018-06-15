@@ -4,11 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -57,6 +55,7 @@ import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 import io.onedev.utils.WordUtils;
 
 public class IssueQuery implements Serializable {
@@ -515,11 +514,11 @@ public class IssueQuery implements Serializable {
 		return false;
 	}
 	
-	public Map<String, String> getUndefinedFieldValues(Project project) {
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
 		if (criteria != null)
 			return criteria.getUndefinedFieldValues(project);
 		else
-			return new HashMap<>();
+			return new HashSet<>();
 	}
 
 	public void onRenameFieldValue(String fieldName, String oldValue, String newValue) {

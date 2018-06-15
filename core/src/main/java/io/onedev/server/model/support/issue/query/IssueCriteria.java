@@ -2,15 +2,14 @@ package io.onedev.server.model.support.issue.query;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
 public abstract class IssueCriteria implements Serializable {
 	
@@ -49,8 +48,8 @@ public abstract class IssueCriteria implements Serializable {
 		return false;
 	}
 
-	public Map<String, String> getUndefinedFieldValues(Project project) {
-		return new HashMap<>();
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
+		return new HashSet<>();
 	}
 
 	public void onRenameFieldValue(String fieldName, String oldValue, String newValue) {

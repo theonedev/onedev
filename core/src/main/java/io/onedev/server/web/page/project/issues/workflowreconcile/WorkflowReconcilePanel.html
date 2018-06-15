@@ -39,13 +39,12 @@
 			<div class="modal-header">
 				<button wicket:id="close" type="button" class="close">&times;</button>
 				<h4 id="modal-title" class="modal-title">
-					Fix Invalid Fields
+					Fix Undefined Fields
 				</h4>
 			</div>
 			<div class="modal-body">
 				<div class="alert alert-warning">
-					Please resolve invalid fields below. Invalid fields are those with 
-					undefined name or incorrect type
+					Please resolve undefined fields below
 				</div>
 				<table class="table table-condensed">
 					<thead>
@@ -55,9 +54,6 @@
 						<tr wicket:id="rows">
 							<td class="name">
 								<span wicket:id="name"></span>
-							</td>
-							<td class="type">
-								<span wicket:id="type"></span>
 							</td>
 							<td class="resolution">
 								<div wicket:id="resolution"></div>

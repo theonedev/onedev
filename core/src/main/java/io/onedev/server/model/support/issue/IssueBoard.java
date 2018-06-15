@@ -2,9 +2,13 @@ package io.onedev.server.model.support.issue;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.Size;
@@ -14,7 +18,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
@@ -22,6 +28,10 @@ import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValueResolution;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedStateResolution;
 
 @Editable
 public class IssueBoard implements Serializable {
@@ -86,9 +96,8 @@ public class IssueBoard implements Serializable {
 		Project project = OneContext.get().getProject();
 		choices.add(Issue.STATE);
 		for (InputSpec fieldSpec: project.getIssueWorkflow().getFieldSpecs()) {
-			if (!fieldSpec.isAllowMultiple() && (fieldSpec instanceof ChoiceInput || fieldSpec instanceof UserChoiceInput || fieldSpec instanceof GroupChoiceInput)) {
+			if (!fieldSpec.isAllowMultiple() && (fieldSpec instanceof ChoiceInput || fieldSpec instanceof UserChoiceInput || fieldSpec instanceof GroupChoiceInput))
 				choices.add(fieldSpec.getName());
-			}
 		}
 		return choices;
 	}
@@ -117,6 +126,200 @@ public class IssueBoard implements Serializable {
 				return i;
 		}
 		return -1;
+	}
+	
+	public Set<String> getUndefinedStates(Project project) {
+		Set<String> undefinedStates = new HashSet<>();
+		if (getIssueFilter() != null) {
+			try {
+				undefinedStates.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, false).getUndefinedStates(project));
+			} catch (Exception e) {
+			}
+		}
+		if (getIdentifyField().equals(Issue.STATE)) {
+			for (String column: getColumns()) {
+				if (project.getIssueWorkflow().getStateSpec(column) == null)
+					undefinedStates.add(column);
+			}
+		}
+		return undefinedStates;
+	}
+	
+	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
+		if (getIssueFilter() != null) {
+			try {
+				io.onedev.server.model.support.issue.query.IssueQuery query = 
+						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, false);
+				for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
+					query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
+				setIssueFilter(query.toString());
+			} catch (Exception e) {
+			}
+		}
+		if (getIdentifyField().equals(Issue.STATE)) {
+			for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
+				int index = getColumns().indexOf(entry.getKey());
+				if (index != -1)
+					getColumns().set(index, entry.getValue().getNewState());
+			}
+		}
+	}
+	
+	public Set<String> getUndefinedFields(Project project) {
+		Set<String> undefinedFields = new HashSet<>();
+		if (getIssueFilter() != null) {
+			try {
+				undefinedFields.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, false).getUndefinedFields(project));
+			} catch (Exception e) {
+			}
+		}
+		if (!Issue.STATE.equals(getIdentifyField())) { 
+			InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(getIdentifyField());
+			if (fieldSpec == null)
+				undefinedFields.add(getIdentifyField());
+		}
+		return undefinedFields;
+	}
+	
+	public boolean fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions) {
+		if (getIssueFilter() != null) {
+			try {
+				io.onedev.server.model.support.issue.query.IssueQuery query = 
+						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, false);
+				boolean remove = false;
+				for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+					UndefinedFieldResolution resolution = entry.getValue();
+					if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
+						query.onRenameField(entry.getKey(), resolution.getNewField());
+					} else if (query.onDeleteField(entry.getKey())) {
+						remove = true;
+						break;
+					}
+				}				
+				if (remove)
+					setIssueFilter(null);
+				else
+					setIssueFilter(query.toString());
+			} catch (Exception e) {
+			}
+		}
+		
+		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+			UndefinedFieldResolution resolution = entry.getValue();
+			if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
+				if (getIdentifyField().equals(entry.getKey()))
+					setIdentifyField(resolution.getNewField());
+			} else if (getIdentifyField().equals(entry.getKey())) {
+				return true;
+			}
+		}				
+		return false;
+	}
+	
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
+		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
+		OneContext.push(new OneContext() {
+
+			@Override
+			public Project getProject() {
+				return project;
+			}
+
+			@Override
+			public EditContext getEditContext(int level) {
+				return new EditContext() {
+
+					@Override
+					public Object getInputValue(String name) {
+						return null;
+					}
+					
+				};
+			}
+
+			@Override
+			public InputContext getInputContext() {
+				throw new UnsupportedOperationException();
+			}
+			
+		});
+		try {
+			if (getIssueFilter() != null) {
+				try {
+					undefinedFieldValues.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, true).getUndefinedFieldValues(project));
+				} catch (Exception e) {
+				}
+			}
+
+			if (!getIdentifyField().equals(Issue.STATE)) {
+				for (String column: getColumns()) {
+					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(getIdentifyField());
+					List<String> choices = fieldSpec.getPossibleValues();
+					if (!choices.contains(column))
+						undefinedFieldValues.add(new UndefinedFieldValue(getIdentifyField(), column));
+				}
+			}
+			
+			return undefinedFieldValues;
+		} finally {
+			OneContext.pop();
+		}
+	}
+	
+	public boolean fixUndefinedFieldValues(Project project, Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions) {
+		if (getIssueFilter() != null) {
+			try {
+				io.onedev.server.model.support.issue.query.IssueQuery query = 
+						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), true, true);
+				boolean remove = false;
+				for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
+					UndefinedFieldValueResolution resolution = entry.getValue();
+					if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
+						query.onRenameFieldValue(entry.getKey().getFieldName(), entry.getKey().getFieldValue(), 
+								entry.getValue().getNewValue());
+					} else if (query.onDeleteFieldValue(entry.getKey().getFieldName(), entry.getKey().getFieldValue())) {
+						remove = true;
+						break;
+					}
+				}				
+				if (remove)
+					setIssueFilter(null);
+				else
+					setIssueFilter(query.toString());
+			} catch (Exception e) {
+			}
+		}
+
+		for (Iterator<String> it = getColumns().iterator(); it.hasNext();) {
+			String column = it.next();
+			for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
+				UndefinedFieldValueResolution resolution = entry.getValue();
+				if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.DELETE_THIS_VALUE) {
+					if (entry.getKey().getFieldName().equals(getIdentifyField()) 
+							&& entry.getKey().getFieldValue().equals(column)) {
+						it.remove();
+					}
+				} 
+			}				
+		}
+		
+		if (getColumns().size() < 2)
+			return true;
+		
+		for (int i=0; i<getColumns().size(); i++) {
+			String column = getColumns().get(i);
+			for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
+				UndefinedFieldValueResolution resolution = entry.getValue();
+				if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
+					if (entry.getKey().getFieldName().equals(getIdentifyField()) 
+							&& entry.getKey().getFieldValue().equals(column)) {
+						getColumns().set(i, resolution.getNewValue());
+					}
+				} 
+			}				
+		}
+		
+		return false;
 	}
 	
 }

@@ -1,3 +1,11 @@
 .field-values .issue a {
 	margin-right: 4px;
 }
+.field-values>.has-color {
+	margin-bottom: 4px;
+	border-radius: 3px;
+	padding: 2px 4px;
+}
+.field-values>.has-color:last-child {
+	margin-bottom: 0;
+}

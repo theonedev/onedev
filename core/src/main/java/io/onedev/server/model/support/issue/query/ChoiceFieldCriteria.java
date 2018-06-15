@@ -2,9 +2,9 @@ package io.onedev.server.model.support.issue.query;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -15,7 +15,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
 public class ChoiceFieldCriteria extends FieldCriteria {
 
@@ -90,12 +90,12 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Map<String, String> getUndefinedFieldValues(Project project) {
-		Map<String, String> undefinedFieldValues = new HashMap<>();
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
+		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(getFieldName());
-		List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
+		List<String> choices = fieldSpec.getPossibleValues();
 		if (!choices.contains(value))
-			undefinedFieldValues.put(getFieldName(), value);
+			undefinedFieldValues.add(new UndefinedFieldValue(getFieldName(), value));
 		return undefinedFieldValues;
 	}
 	

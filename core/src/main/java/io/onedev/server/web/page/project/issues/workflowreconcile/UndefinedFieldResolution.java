@@ -10,18 +10,15 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.workflowreconcile.WorkflowReconcilePanel.InvalidFieldContainer;
-import io.onedev.server.web.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
-public class InvalidFieldResolution implements Serializable {
+public class UndefinedFieldResolution implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -62,13 +59,10 @@ public class InvalidFieldResolution implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
-		InvalidFieldContainer container = ((ComponentContext)OneContext.get()).getComponent().findParent(InvalidFieldContainer.class);
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
 		List<String> fields = new ArrayList<>();
-		for (InputSpec field: page.getProject().getIssueWorkflow().getFieldSpecs()) {
-			if (container.getFieldType() == null || EditableUtils.getDisplayName(field.getClass()).equals(container.getFieldType()))
-				fields.add(field.getName());
-		}
+		for (InputSpec field: page.getProject().getIssueWorkflow().getFieldSpecs()) 
+			fields.add(field.getName());
 		return fields;
 	}
 	

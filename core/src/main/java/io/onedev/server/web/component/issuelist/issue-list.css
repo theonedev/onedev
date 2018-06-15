@@ -21,10 +21,7 @@
 	color: #999;
 	cursor: default;
 }
-.issue-list>.body td.custom-field div, .issue-list>.body td.state div {
-	display: inline;
-}
-.issue-list>.body .field-values .value.has-color, .issue-list>.body td.state div {
+.issue-list>.body td.state div {
 	padding: 2px 4px;
 	border-radius: 3px;
 }

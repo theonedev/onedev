@@ -100,11 +100,6 @@
 	white-space: nowrap;
 	padding-right: 20px;
 }
-#issue-detail>.side .fields .value.has-color {
-	display: table-cell;
-	border-radius: 3px;
-	padding: 2px 4px;
-}
 #issue-detail>.side a.action {
 	margin-top: 0;
 	margin-left: 8px;

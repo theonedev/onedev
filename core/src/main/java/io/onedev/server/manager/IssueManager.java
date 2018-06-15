@@ -14,7 +14,7 @@ import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.web.page.project.issues.workflowreconcile.InvalidFieldResolution;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValueResolution;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedStateResolution;
@@ -38,11 +38,11 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions);
 	
-	Map<String, String> getInvalidFields(Project project);
+	Collection<String> getUndefinedFields(Project project);
 	
-	void fixInvalidFields(Project project, Map<String, InvalidFieldResolution> resolutions);
+	void fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions);
 	
-	Map<String, String> getUndefinedFieldValues(Project project);
+	Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project);
 	
 	void fixUndefinedFieldValues(Project project, Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions);
 	

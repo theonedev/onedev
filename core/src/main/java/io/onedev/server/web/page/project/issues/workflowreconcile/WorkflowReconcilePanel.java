@@ -156,8 +156,8 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Map<String, String> invalidFieldMap = getIssueManager().getInvalidFields(getProject());
-				if (!invalidFieldMap.isEmpty()) {
+				Collection<String> undefinedFields = getIssueManager().getUndefinedFields(getProject());
+				if (!undefinedFields.isEmpty()) {
 					Fragment fragment = new Fragment(markupId, "fixFieldsFrag", WorkflowReconcilePanel.this);
 					Form<?> form = new Form<Void>("form") {
 
@@ -170,16 +170,12 @@ public abstract class WorkflowReconcilePanel extends Panel {
 					};
 
 					RepeatingView rows = new RepeatingView("rows");
-					Map<String, InvalidFieldResolution> resolutions = new HashMap<>();
-					for (Map.Entry<String, String> entry: invalidFieldMap.entrySet()) { 
-						InvalidFieldResolution resolution = new InvalidFieldResolution();
-						resolutions.put(entry.getKey(), resolution);
-						InvalidFieldContainer row = new InvalidFieldContainer(rows.newChildId(), entry.getValue());
-						row.add(new Label("name", entry.getKey()));
-						if (entry.getValue() != null)
-							row.add(new Label("type", entry.getValue()));
-						else
-							row.add(new Label("type", "<i>Unknown</i>").setEscapeModelStrings(false));
+					Map<String, UndefinedFieldResolution> resolutions = new HashMap<>();
+					for (String undefinedField: undefinedFields) { 
+						UndefinedFieldResolution resolution = new UndefinedFieldResolution();
+						resolutions.put(undefinedField, resolution);
+						WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
+						row.add(new Label("name", undefinedField));
 						row.add(BeanContext.editBean("resolution", resolution));
 						rows.add(row);
 					}
@@ -215,7 +211,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
 							
-							getIssueManager().fixInvalidFields(getProject(), resolutions);
+							getIssueManager().fixUndefinedFields(getProject(), resolutions);
 							
 							Component content = checkFieldValues(CONTENT_ID);
 							WorkflowReconcilePanel.this.replace(content);
@@ -250,7 +246,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Map<String, String> undefinedFieldValues = getIssueManager().getUndefinedFieldValues(getProject());
+				Collection<UndefinedFieldValue> undefinedFieldValues = getIssueManager().getUndefinedFieldValues(getProject());
 				if (!undefinedFieldValues.isEmpty()) {
 					Fragment fragment = new Fragment(markupId, "fixFieldValuesFrag", WorkflowReconcilePanel.this);
 					Form<?> form = new Form<Void>("form") {
@@ -265,12 +261,12 @@ public abstract class WorkflowReconcilePanel extends Panel {
 					
 					RepeatingView rows = new RepeatingView("rows");
 					Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions = new HashMap<>();
-					for (Map.Entry<String, String> entry: undefinedFieldValues.entrySet()) {
+					for (UndefinedFieldValue undefinedFieldValue: undefinedFieldValues) {
 						UndefinedFieldValueResolution resolution = new UndefinedFieldValueResolution();
-						resolutions.put(new UndefinedFieldValue(entry.getKey(), entry.getValue()), resolution);
-						UndefinedFieldValueContainer row = new UndefinedFieldValueContainer(rows.newChildId(), entry.getKey());
-						row.add(new Label("name", entry.getKey()));
-						row.add(new Label("value", entry.getValue()));
+						resolutions.put(undefinedFieldValue, resolution);
+						UndefinedFieldValueContainer row = new UndefinedFieldValueContainer(rows.newChildId(), undefinedFieldValue.getFieldName());
+						row.add(new Label("name", undefinedFieldValue.getFieldName()));
+						row.add(new Label("value", undefinedFieldValue.getFieldValue()));
 						row.add(BeanContext.editBean("resolution", resolution));
 						rows.add(row);
 					}
@@ -374,22 +370,6 @@ public abstract class WorkflowReconcilePanel extends Panel {
 	protected abstract void onCompleted(AjaxRequestTarget target);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
-	
-	static class InvalidFieldContainer extends WebMarkupContainer {
-		
-		final String fieldType;
-		
-		InvalidFieldContainer(String id, String fieldType) {
-			super(id);
-			
-			this.fieldType = fieldType;
-		}
-
-		public String getFieldType() {
-			return fieldType;
-		}
-		
-	}
 	
 	static class UndefinedFieldValueContainer extends WebMarkupContainer {
 		

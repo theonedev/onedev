@@ -2,17 +2,16 @@ package io.onedev.server.model.support.issue.query;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
 public class OrCriteria extends IssueCriteria {
 	
@@ -106,10 +105,10 @@ public class OrCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public Map<String, String> getUndefinedFieldValues(Project project) {
-		Map<String, String> undefinedFieldValues = new HashMap<>();
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
+		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		for (IssueCriteria criteria: criterias)
-			undefinedFieldValues.putAll(criteria.getUndefinedFieldValues(project));
+			undefinedFieldValues.addAll(criteria.getUndefinedFieldValues(project));
 		return undefinedFieldValues;
 	}
 	
