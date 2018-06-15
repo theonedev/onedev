@@ -57,6 +57,8 @@ import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetai
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
+import io.onedev.server.web.page.project.stats.ProjectContribsPage;
+import io.onedev.server.web.page.project.stats.ProjectStatsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 
 @SuppressWarnings("serial")
@@ -165,10 +167,8 @@ public abstract class ProjectPage extends LayoutPage {
 				
 				tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
 				
-				/*
 				tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
 						ProjectStatsPage.class));
-				*/
 				
 				if (SecurityUtils.canManage(getProject()))
 					tabs.add(new ProjectTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, ProjectSettingPage.class));
