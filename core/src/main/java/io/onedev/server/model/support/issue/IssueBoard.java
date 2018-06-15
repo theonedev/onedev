@@ -44,7 +44,7 @@ public class IssueBoard implements Serializable {
 	
 	private String identifyField;
 	
-	private List<String> columns = new ArrayList<>();
+	private List<String> lists = new ArrayList<>();
 
 	@Editable(order=100)
 	@NotEmpty
@@ -67,7 +67,7 @@ public class IssueBoard implements Serializable {
 		this.issueFilter = issueFilter;
 	}
 
-	@Editable(order=300, description="Specify issue field to identify different columns of the board")
+	@Editable(order=300, description="Specify issue field to identify different lists of the board")
 	@ChoiceProvider("getIdentifyFieldChoices")
 	@NotEmpty
 	public String getIdentifyField() {
@@ -78,16 +78,16 @@ public class IssueBoard implements Serializable {
 		this.identifyField = identifyField;
 	}
 
-	@Editable(order=400, description="Specify columns of the board. Each column corresponds to "
+	@Editable(order=400, description="Specify lists of the board. Each list corresponds to "
 			+ "a value of the issue field specified above")
-	@Size(min=2, message="At least two columns need to be defined")
-	@ChoiceProvider("getColumnChoices")
-	public List<String> getColumns() {
-		return columns;
+	@Size(min=2, message="At least two lists need to be defined")
+	@ChoiceProvider("getListChoices")
+	public List<String> getLists() {
+		return lists;
 	}
 
-	public void setColumns(List<String> columns) {
-		this.columns = columns;
+	public void setLists(List<String> lists) {
+		this.lists = lists;
 	}
 
 	@SuppressWarnings("unused")
@@ -103,7 +103,7 @@ public class IssueBoard implements Serializable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static Map<String, String> getColumnChoices() {
+	private static Map<String, String> getListChoices() {
 		Map<String, String> choices = new LinkedHashMap<>();
 		Project project = OneContext.get().getProject();
 		String fieldName = (String) OneContext.get().getEditContext().getInputValue("identifyField");
@@ -137,9 +137,9 @@ public class IssueBoard implements Serializable {
 			}
 		}
 		if (getIdentifyField().equals(Issue.STATE)) {
-			for (String column: getColumns()) {
-				if (project.getIssueWorkflow().getStateSpec(column) == null)
-					undefinedStates.add(column);
+			for (String list: getLists()) {
+				if (project.getIssueWorkflow().getStateSpec(list) == null)
+					undefinedStates.add(list);
 			}
 		}
 		return undefinedStates;
@@ -158,9 +158,9 @@ public class IssueBoard implements Serializable {
 		}
 		if (getIdentifyField().equals(Issue.STATE)) {
 			for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
-				int index = getColumns().indexOf(entry.getKey());
+				int index = getLists().indexOf(entry.getKey());
 				if (index != -1)
-					getColumns().set(index, entry.getValue().getNewState());
+					getLists().set(index, entry.getValue().getNewState());
 			}
 		}
 	}
@@ -252,11 +252,11 @@ public class IssueBoard implements Serializable {
 			}
 
 			if (!getIdentifyField().equals(Issue.STATE)) {
-				for (String column: getColumns()) {
+				for (String list: getLists()) {
 					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(getIdentifyField());
 					List<String> choices = fieldSpec.getPossibleValues();
-					if (!choices.contains(column))
-						undefinedFieldValues.add(new UndefinedFieldValue(getIdentifyField(), column));
+					if (!choices.contains(list))
+						undefinedFieldValues.add(new UndefinedFieldValue(getIdentifyField(), list));
 				}
 			}
 			
@@ -290,30 +290,30 @@ public class IssueBoard implements Serializable {
 			}
 		}
 
-		for (Iterator<String> it = getColumns().iterator(); it.hasNext();) {
-			String column = it.next();
+		for (Iterator<String> it = getLists().iterator(); it.hasNext();) {
+			String list = it.next();
 			for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
 				UndefinedFieldValueResolution resolution = entry.getValue();
 				if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.DELETE_THIS_VALUE) {
 					if (entry.getKey().getFieldName().equals(getIdentifyField()) 
-							&& entry.getKey().getFieldValue().equals(column)) {
+							&& entry.getKey().getFieldValue().equals(list)) {
 						it.remove();
 					}
 				} 
 			}				
 		}
 		
-		if (getColumns().size() < 2)
+		if (getLists().size() < 2)
 			return true;
 		
-		for (int i=0; i<getColumns().size(); i++) {
-			String column = getColumns().get(i);
+		for (int i=0; i<getLists().size(); i++) {
+			String list = getLists().get(i);
 			for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
 				UndefinedFieldValueResolution resolution = entry.getValue();
 				if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
 					if (entry.getKey().getFieldName().equals(getIdentifyField()) 
-							&& entry.getKey().getFieldValue().equals(column)) {
-						getColumns().set(i, resolution.getNewValue());
+							&& entry.getKey().getFieldValue().equals(list)) {
+						getLists().set(i, resolution.getNewValue());
 					}
 				} 
 			}				
