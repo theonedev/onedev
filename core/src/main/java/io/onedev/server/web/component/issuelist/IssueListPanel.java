@@ -81,7 +81,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		protected IssueQuery load() {
 			IssueQuery parsedQuery = null;
 			try {
-				parsedQuery = IssueQuery.parse(getProject(), getQuery(), true, true);
+				parsedQuery = IssueQuery.parse(getProject(), getQuery(), true);
 				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin()) {
 					error("Please login to perform this query");
 					parsedQuery = null;
@@ -157,7 +157,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 				return getProject();
 			}
 			
-		}, true));
+		}));
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			
 			@Override

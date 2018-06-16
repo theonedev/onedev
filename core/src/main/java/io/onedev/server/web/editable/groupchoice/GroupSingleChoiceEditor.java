@@ -65,7 +65,12 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			group = null;
 		
-		GroupFacade facade = group!=null?group.getFacade():null;
+		GroupFacade facade;
+		if (group != null && choices.contains(group.getFacade()))
+			facade = group.getFacade();
+		else
+			facade = null;
+		
     	input = new GroupSingleChoice("input", Model.of(facade), new GroupChoiceProvider(choices)) {
 
     		@Override

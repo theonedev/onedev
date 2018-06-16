@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
@@ -62,10 +63,14 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			OneContext.pop();
 		}
 		
+		Map<String, String> invertedChoices = MapUtils.invertMap(choices);
         Collection<String> selections = new ArrayList<>();
         if (getModelObject() != null) {
-        	for (String each: getModelObject())
-        		selections.add(each);
+        	for (String value: getModelObject()) {
+        		String key = invertedChoices.get(value);
+        		if (key != null)
+        			selections.add(key);
+        	}
         }
         
 		IModel<Collection<String>> model = new Model((Serializable) selections);
@@ -98,7 +103,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 	public ErrorContext getErrorContext(PathSegment pathSegment) {
 		return null;
 	}
-
+	
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
 		List<String> values = new ArrayList<>();

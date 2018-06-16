@@ -66,7 +66,7 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 			GroupManager groupManager = OneDev.getInstance(GroupManager.class);
 			for (String groupName: getModelObject()) {
 				Group group = groupManager.find(groupName);
-				if (group != null)
+				if (group != null && choices.contains(group.getFacade()))
 					groups.add(group.getFacade());
 			}
 		} 

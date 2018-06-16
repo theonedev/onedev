@@ -54,8 +54,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	private final boolean allowSort;
-	
 	private static final String VALUE_OPEN = "\"";
 	
 	private static final String VALUE_CLOSE = "\"";
@@ -67,10 +65,9 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	private static final int MAX_ISSUE_TITLE_LEN = 75;
 	
-	public IssueQueryBehavior(IModel<Project> projectModel, boolean allowSort) {
+	public IssueQueryBehavior(IModel<Project> projectModel) {
 		super(IssueQueryParser.class, "query");
 		this.projectModel = projectModel;
-		this.allowSort = allowSort;
 	}
 
 	@Override
@@ -244,9 +241,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 		if ((suggestedLiteral.equals("is me") || suggestedLiteral.equals("is not me")) && SecurityUtils.getUser() == null)
 			return null;	
-		
-		if (suggestedLiteral.equals("order by") && !allowSort)
-			return null;
 		
 		if (expectedElement.getParent() != null 
 				&& expectedElement.getParent().getParent() != null

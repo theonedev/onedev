@@ -36,7 +36,8 @@ public class MilestoneDueLabel extends Label {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		if (milestoneModel.getObject().getDueDate().before(new Date())) 
+		Milestone milestone = milestoneModel.getObject();
+		if (!milestone.isClosed() && milestone.getDueDate().before(new Date())) 
 			add(AttributeAppender.append("style", "color: red;"));		
 	}
 

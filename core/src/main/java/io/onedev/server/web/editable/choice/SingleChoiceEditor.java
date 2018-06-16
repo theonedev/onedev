@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponent;
@@ -59,7 +60,9 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			OneContext.pop();
 		}
 
-		input = new StringSingleChoice("input", Model.of(getModelObject()), new ArrayList<>(choices.keySet())) {
+		String key = MapUtils.invertMap(choices).get(getModelObject());
+		
+		input = new StringSingleChoice("input", Model.of(key), new ArrayList<>(choices.keySet())) {
 
 			@Override
 			protected void onInitialize() {

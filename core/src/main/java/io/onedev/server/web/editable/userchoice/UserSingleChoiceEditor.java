@@ -66,7 +66,12 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			user = null;
 		
-		UserFacade facade = user!=null?user.getFacade():null;
+		UserFacade facade;
+		if (user != null && choices.contains(user.getFacade()))
+			facade = user.getFacade();
+		else
+			facade = null;
+		
     	input = new UserSingleChoice("input", Model.of(facade), new UserChoiceProvider(choices)) {
 
 			@Override

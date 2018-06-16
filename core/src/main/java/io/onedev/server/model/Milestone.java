@@ -84,7 +84,7 @@ public class Milestone extends AbstractEntity {
 	}
 
 	@Editable(order=300)
-	@NotNull
+	@NotNull(message="may not be empty")
 	public Date getDueDate() {
 		return dueDate;
 	}

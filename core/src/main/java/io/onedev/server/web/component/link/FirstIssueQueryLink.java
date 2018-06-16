@@ -30,7 +30,7 @@ public class FirstIssueQueryLink extends ViewStateAwarePageLink<Void> {
 			queries.add(namedQuery.getQuery());
 		for (String each: queries) {
 			try {
-				if (SecurityUtils.getUser() != null || !IssueQuery.parse(project, each, true, true).needsLogin()) {  
+				if (SecurityUtils.getUser() != null || !IssueQuery.parse(project, each, true).needsLogin()) {  
 					query = each;
 					break;
 				}

@@ -97,7 +97,7 @@ public class DefaultIssueNotificationManager implements IssueNotificationManager
 			Optional<IssueQuery> issueQuery = parsedQueries.get(namedQuery.getQuery());
 			if (issueQuery == null) {
 				try {
-					issueQuery = Optional.of(IssueQuery.parse(issue.getProject(), namedQuery.getQuery(), true, true));
+					issueQuery = Optional.of(IssueQuery.parse(issue.getProject(), namedQuery.getQuery(), true));
 				} catch (Exception e) {
 					issueQuery = Optional.empty();
 				}

@@ -245,7 +245,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		for (NamedQuery namedQuery: project.getSavedIssueQueries()) {
 			try {
-				states.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true, false).getUndefinedStates(project));
+				states.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedStates(project));
 			} catch (Exception e) {
 			}
 		}
@@ -253,7 +253,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
 			for (NamedQuery namedQuery: setting.getUserQueries()) {
 				try {
-					states.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true, false).getUndefinedStates(project));
+					states.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedStates(project));
 				} catch (Exception e) {
 				}
 			}
@@ -278,7 +278,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		
 		for (NamedQuery namedQuery: project.getSavedIssueQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true, false);
+				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
 				for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 					query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 				namedQuery.setQuery(query.toString());
@@ -289,7 +289,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
 			for (NamedQuery namedQuery: setting.getUserQueries()) {
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true, false);
+					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
 					for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 						query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 					namedQuery.setQuery(query.toString());
@@ -364,14 +364,14 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		for (NamedQuery namedQuery: project.getSavedIssueQueries()) {
 			try {
-				undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true, false).getUndefinedFields(project));
+				undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedFields(project));
 			} catch (Exception e) {
 			}
 		}
 		for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
 			for (NamedQuery namedQuery: setting.getUserQueries()) {
 				try {
-					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true, false).getUndefinedFields(project));
+					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedFields(project));
 				} catch (Exception e) {
 				}
 			}
@@ -407,7 +407,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		for (Iterator<NamedQuery> it = project.getSavedIssueQueries().iterator(); it.hasNext();) {
 			NamedQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true, false);
+				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
 				boolean remove = false;
 				for (Map.Entry<String, UndefinedFieldResolution> resolutionEntry: resolutions.entrySet()) {
 					UndefinedFieldResolution resolution = resolutionEntry.getValue();
@@ -429,7 +429,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			for (Iterator<NamedQuery> it = setting.getUserQueries().iterator(); it.hasNext();) {
 				NamedQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true, false);
+					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
 					boolean remove = false;
 					for (Map.Entry<String, UndefinedFieldResolution> resolutionEntry: resolutions.entrySet()) {
 						UndefinedFieldResolution resolution = resolutionEntry.getValue();
@@ -504,14 +504,14 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			
 			for (NamedQuery namedQuery: project.getSavedIssueQueries()) {
 				try {
-					undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true, true).getUndefinedFieldValues(project));
+					undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true).getUndefinedFieldValues(project));
 				} catch (Exception e) {
 				}
 			}
 			for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
 				for (NamedQuery namedQuery: setting.getUserQueries()) {
 					try {
-						undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true, true).getUndefinedFieldValues(project));
+						undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true).getUndefinedFieldValues(project));
 					} catch (Exception e) {
 					}
 				}
@@ -548,7 +548,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		for (Iterator<NamedQuery> it = project.getSavedIssueQueries().iterator(); it.hasNext();) {
 			NamedQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true, true);
+				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true);
 				boolean remove = false;
 				for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> resolutionEntry: resolutions.entrySet()) {
 					UndefinedFieldValueResolution resolution = resolutionEntry.getValue();
@@ -571,7 +571,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			for (Iterator<NamedQuery> it = setting.getUserQueries().iterator(); it.hasNext();) {
 				NamedQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true, true);
+					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true);
 					boolean remove = false;
 					for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> resolutionEntry: resolutions.entrySet()) {
 						UndefinedFieldValueResolution resolution = resolutionEntry.getValue();

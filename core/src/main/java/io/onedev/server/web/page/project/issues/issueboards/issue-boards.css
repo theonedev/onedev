@@ -61,3 +61,35 @@
 .milestone-menu>a:hover {
 	background: #E5E5E5;
 }
+
+#issue-boards>.body {
+	position: relative;
+	overflow-x: auto;
+	overflow-y: hidden;
+	margin: 0 -20px;
+	/* hack to makes all column of same width and same space */
+	padding: 20px 0 20px 20px; 
+	display: flex;
+}
+.board-column {
+	flex: 1 1 auto;
+	min-width: 250px;
+	height: 100%;
+	/* hack to makes all column of same width and same space */
+	padding-right: 20px;
+}
+.board-column>.content {
+	border: 1px solid #E0E0E0;
+	border-radius: 4px;
+	height: 100%;
+}
+.board-column>.content>.head {
+	font-weight: bold;
+	padding: 6px 12px;
+	font-size: 15px;
+	border-bottom: 1px solid #E0E0E0;
+}
+.board-column>.content>.body {
+	position: relative;
+	overflow: auto;
+} 

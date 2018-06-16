@@ -10,11 +10,8 @@ import io.onedev.utils.StringUtils;
 
 public class IssueQueryValidator implements ConstraintValidator<IssueQuery, String> {
 
-	private boolean allowSort;
-	
 	@Override
 	public void initialize(IssueQuery constaintAnnotation) {
-		allowSort = constaintAnnotation.allowSort();
 	}
 
 	@Override
@@ -24,7 +21,7 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 		} else {
 			Project project = OneContext.get().getProject();
 			try {
-				io.onedev.server.model.support.issue.query.IssueQuery.parse(project, value, allowSort, true);
+				io.onedev.server.model.support.issue.query.IssueQuery.parse(project, value, true);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

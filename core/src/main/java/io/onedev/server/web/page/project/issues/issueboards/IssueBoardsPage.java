@@ -24,6 +24,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -321,7 +322,7 @@ public class IssueBoardsPage extends IssuesPage {
 			});
 			
 			TextField<String> input = new TextField<String>("input", Model.of(query));
-			input.add(new IssueQueryBehavior(projectModel, false));
+			input.add(new IssueQueryBehavior(projectModel));
 			form.add(input);
 
 			form.add(new Button("submit") {
@@ -346,6 +347,66 @@ public class IssueBoardsPage extends IssuesPage {
 				}
 				
 			});
+			
+			fragment.add(new BoardColumnPanel("backlog") {
+
+				@Override
+				protected Project getProject() {
+					return IssueBoardsPage.this.getProject();
+				}
+
+				@Override
+				protected IssueBoard getBoard() {
+					return IssueBoardsPage.this.getBoard();
+				}
+
+				@Override
+				protected Milestone getMilestone() {
+					return IssueBoardsPage.this.getMilestone();
+				}
+
+				@Override
+				protected int getColumnIndex() {
+					return -1;
+				}
+				
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(getMilestone() != null);
+				}
+				
+			});
+			
+			RepeatingView columnsView = new RepeatingView("columns");
+			for (int i=0; i<getBoard().getColumns().size(); i++) {
+				int index = i;
+				columnsView.add(new BoardColumnPanel(columnsView.newChildId()) {
+
+					@Override
+					protected Project getProject() {
+						return IssueBoardsPage.this.getProject();
+					}
+
+					@Override
+					protected IssueBoard getBoard() {
+						return IssueBoardsPage.this.getBoard();
+					}
+
+					@Override
+					protected Milestone getMilestone() {
+						return IssueBoardsPage.this.getMilestone();
+					}
+
+					@Override
+					protected int getColumnIndex() {
+						return index;
+					}
+
+				});
+			}
+			fragment.add(columnsView);
+			
 			add(fragment);
 		} else {
 			Fragment fragment = new Fragment("content", "noBoardsFrag", this);

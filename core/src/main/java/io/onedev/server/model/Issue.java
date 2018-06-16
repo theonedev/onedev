@@ -138,8 +138,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private String noSpaceTitle;
 	
-	private int boardPosition;
-	
 	@Embedded
 	private LastActivity lastActivity;
 	
@@ -296,14 +294,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	public void setNumOfComments(int numOfComments) {
 		this.numOfComments = numOfComments;
-	}
-
-	public int getBoardPosition() {
-		return boardPosition;
-	}
-
-	public void setBoardPosition(int boardPosition) {
-		this.boardPosition = boardPosition;
 	}
 
 	public Collection<IssueFieldUnary> getFieldUnaries() {

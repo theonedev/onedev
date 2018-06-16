@@ -67,7 +67,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			UserManager userManager = OneDev.getInstance(UserManager.class);
 			for (String userName: getModelObject()) {
 				User user = userManager.findByName(userName);
-				if (user != null)
+				if (user != null && choices.contains(user.getFacade()))
 					users.add(user.getFacade());
 			}
 		} 

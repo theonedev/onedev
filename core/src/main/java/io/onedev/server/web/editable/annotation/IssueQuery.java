@@ -20,5 +20,4 @@ public @interface IssueQuery {
 
     Class<? extends Payload>[] payload() default {};
     
-    boolean allowSort() default true;
 }

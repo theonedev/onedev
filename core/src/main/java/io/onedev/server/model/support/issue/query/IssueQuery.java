@@ -108,7 +108,7 @@ public class IssueQuery implements Serializable {
 			throw new OneException("Invalid boolean: " + value);
 	}
 	
-	public static IssueQuery parse(Project project, @Nullable String queryString, boolean allowSort, boolean validate) {
+	public static IssueQuery parse(Project project, @Nullable String queryString, boolean validate) {
 		if (queryString != null) {
 			ANTLRInputStream is = new ANTLRInputStream(queryString); 
 			IssueQueryLexer lexer = new IssueQueryLexer(is);
@@ -335,32 +335,28 @@ public class IssueQuery implements Serializable {
 			}
 
 			List<IssueSort> issueSorts = new ArrayList<>();
-			if (allowSort) {
-				for (OrderContext order: queryContext.order()) {
-					String fieldName = getValue(order.Quoted().getText());
-					if (validate 
-							&& !fieldName.equals(Issue.SUBMIT_DATE) 
-							&& !fieldName.equals(Issue.UPDATE_DATE) 
-							&& !fieldName.equals(Issue.VOTES) 
-							&& !fieldName.equals(Issue.COMMENTS) 
-							&& !fieldName.equals(Issue.NUMBER)) {
-						InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
-						if (!(fieldSpec instanceof ChoiceInput) && !(fieldSpec instanceof DateInput) 
-								&& !(fieldSpec instanceof NumberInput)) {
-							throw new OneException("Can not order by field: " + fieldName);
-						}
+			for (OrderContext order: queryContext.order()) {
+				String fieldName = getValue(order.Quoted().getText());
+				if (validate 
+						&& !fieldName.equals(Issue.SUBMIT_DATE) 
+						&& !fieldName.equals(Issue.UPDATE_DATE) 
+						&& !fieldName.equals(Issue.VOTES) 
+						&& !fieldName.equals(Issue.COMMENTS) 
+						&& !fieldName.equals(Issue.NUMBER)) {
+					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+					if (!(fieldSpec instanceof ChoiceInput) && !(fieldSpec instanceof DateInput) 
+							&& !(fieldSpec instanceof NumberInput)) {
+						throw new OneException("Can not order by field: " + fieldName);
 					}
-					
-					IssueSort issueSort = new IssueSort();
-					issueSort.setField(fieldName);
-					if (order.direction != null && order.direction.getText().equals("asc"))
-						issueSort.setDirection(Direction.ASCENDING);
-					else
-						issueSort.setDirection(Direction.DESCENDING);
-					issueSorts.add(issueSort);
 				}
-			} else if (validate && queryContext.OrderBy() != null) {
-				throw new OneException("Issue order is not supported here");
+				
+				IssueSort issueSort = new IssueSort();
+				issueSort.setField(fieldName);
+				if (order.direction != null && order.direction.getText().equals("asc"))
+					issueSort.setDirection(Direction.ASCENDING);
+				else
+					issueSort.setDirection(Direction.DESCENDING);
+				issueSorts.add(issueSort);
 			}
 			
 			return new IssueQuery(issueCriteria, issueSorts);

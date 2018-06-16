@@ -44,7 +44,7 @@ public class IssueBoard implements Serializable {
 	
 	private String identifyField;
 	
-	private List<String> lists = new ArrayList<>();
+	private List<String> columns = new ArrayList<>();
 
 	@Editable(order=100)
 	@NotEmpty
@@ -57,7 +57,7 @@ public class IssueBoard implements Serializable {
 	}
 
 	@Editable(order=200, name="Issue Filter", description="Optionally specify a query to filter issues of the board")
-	@IssueQuery(allowSort=false)
+	@IssueQuery
 	@Nullable
 	public String getIssueFilter() {
 		return issueFilter;
@@ -81,13 +81,13 @@ public class IssueBoard implements Serializable {
 	@Editable(order=400, description="Specify lists of the board. Each list corresponds to "
 			+ "a value of the issue field specified above")
 	@Size(min=2, message="At least two lists need to be defined")
-	@ChoiceProvider("getListChoices")
-	public List<String> getLists() {
-		return lists;
+	@ChoiceProvider("getColumnChoices")
+	public List<String> getColumns() {
+		return columns;
 	}
 
-	public void setLists(List<String> lists) {
-		this.lists = lists;
+	public void setColumns(List<String> columns) {
+		this.columns = columns;
 	}
 
 	@SuppressWarnings("unused")
@@ -103,7 +103,7 @@ public class IssueBoard implements Serializable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static Map<String, String> getListChoices() {
+	private static Map<String, String> getColumnChoices() {
 		Map<String, String> choices = new LinkedHashMap<>();
 		Project project = OneContext.get().getProject();
 		String fieldName = (String) OneContext.get().getEditContext().getInputValue("identifyField");
@@ -132,14 +132,14 @@ public class IssueBoard implements Serializable {
 		Set<String> undefinedStates = new HashSet<>();
 		if (getIssueFilter() != null) {
 			try {
-				undefinedStates.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, false).getUndefinedStates(project));
+				undefinedStates.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false).getUndefinedStates(project));
 			} catch (Exception e) {
 			}
 		}
 		if (getIdentifyField().equals(Issue.STATE)) {
-			for (String list: getLists()) {
-				if (project.getIssueWorkflow().getStateSpec(list) == null)
-					undefinedStates.add(list);
+			for (String column: getColumns()) {
+				if (project.getIssueWorkflow().getStateSpec(column) == null)
+					undefinedStates.add(column);
 			}
 		}
 		return undefinedStates;
@@ -149,7 +149,7 @@ public class IssueBoard implements Serializable {
 		if (getIssueFilter() != null) {
 			try {
 				io.onedev.server.model.support.issue.query.IssueQuery query = 
-						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, false);
+						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false);
 				for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 					query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 				setIssueFilter(query.toString());
@@ -158,9 +158,9 @@ public class IssueBoard implements Serializable {
 		}
 		if (getIdentifyField().equals(Issue.STATE)) {
 			for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
-				int index = getLists().indexOf(entry.getKey());
+				int index = getColumns().indexOf(entry.getKey());
 				if (index != -1)
-					getLists().set(index, entry.getValue().getNewState());
+					getColumns().set(index, entry.getValue().getNewState());
 			}
 		}
 	}
@@ -169,7 +169,7 @@ public class IssueBoard implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		if (getIssueFilter() != null) {
 			try {
-				undefinedFields.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, false).getUndefinedFields(project));
+				undefinedFields.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false).getUndefinedFields(project));
 			} catch (Exception e) {
 			}
 		}
@@ -185,7 +185,7 @@ public class IssueBoard implements Serializable {
 		if (getIssueFilter() != null) {
 			try {
 				io.onedev.server.model.support.issue.query.IssueQuery query = 
-						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, false);
+						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false);
 				boolean remove = false;
 				for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 					UndefinedFieldResolution resolution = entry.getValue();
@@ -246,17 +246,17 @@ public class IssueBoard implements Serializable {
 		try {
 			if (getIssueFilter() != null) {
 				try {
-					undefinedFieldValues.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), false, true).getUndefinedFieldValues(project));
+					undefinedFieldValues.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), true).getUndefinedFieldValues(project));
 				} catch (Exception e) {
 				}
 			}
 
 			if (!getIdentifyField().equals(Issue.STATE)) {
-				for (String list: getLists()) {
+				for (String column: getColumns()) {
 					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(getIdentifyField());
 					List<String> choices = fieldSpec.getPossibleValues();
-					if (!choices.contains(list))
-						undefinedFieldValues.add(new UndefinedFieldValue(getIdentifyField(), list));
+					if (!choices.contains(column))
+						undefinedFieldValues.add(new UndefinedFieldValue(getIdentifyField(), column));
 				}
 			}
 			
@@ -270,7 +270,7 @@ public class IssueBoard implements Serializable {
 		if (getIssueFilter() != null) {
 			try {
 				io.onedev.server.model.support.issue.query.IssueQuery query = 
-						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), true, true);
+						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getIssueFilter(), true);
 				boolean remove = false;
 				for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
 					UndefinedFieldValueResolution resolution = entry.getValue();
@@ -290,30 +290,30 @@ public class IssueBoard implements Serializable {
 			}
 		}
 
-		for (Iterator<String> it = getLists().iterator(); it.hasNext();) {
-			String list = it.next();
+		for (Iterator<String> it = getColumns().iterator(); it.hasNext();) {
+			String column = it.next();
 			for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
 				UndefinedFieldValueResolution resolution = entry.getValue();
 				if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.DELETE_THIS_VALUE) {
 					if (entry.getKey().getFieldName().equals(getIdentifyField()) 
-							&& entry.getKey().getFieldValue().equals(list)) {
+							&& entry.getKey().getFieldValue().equals(column)) {
 						it.remove();
 					}
 				} 
 			}				
 		}
 		
-		if (getLists().size() < 2)
+		if (getColumns().size() < 2)
 			return true;
 		
-		for (int i=0; i<getLists().size(); i++) {
-			String list = getLists().get(i);
+		for (int i=0; i<getColumns().size(); i++) {
+			String column = getColumns().get(i);
 			for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
 				UndefinedFieldValueResolution resolution = entry.getValue();
 				if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
 					if (entry.getKey().getFieldName().equals(getIdentifyField()) 
-							&& entry.getKey().getFieldValue().equals(list)) {
-						getLists().set(i, resolution.getNewValue());
+							&& entry.getKey().getFieldValue().equals(column)) {
+						getColumns().set(i, resolution.getNewValue());
 					}
 				} 
 			}				
