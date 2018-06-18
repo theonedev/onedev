@@ -9,6 +9,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
+import io.onedev.server.model.Project;
 
 public class NumberFieldCriteria extends FieldCriteria {
 
@@ -25,7 +26,7 @@ public class NumberFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<Integer> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.ORDINAL);
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
@@ -57,7 +58,7 @@ public class NumberFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(String.valueOf(value));
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 	@Override

@@ -12,6 +12,10 @@ onedev.server.issueBoards = {
 	onColumnDomReady: function(containerId) {
 		var $body = $("#" + containerId + ">.content>.body");
 		var ps = new PerfectScrollbar($body[0]);
+		
+		// Scroll bar will not show in the flex box without this line
+		setTimeout(function() {ps.update();}, 100);
+		
 		$(window).resize(function() {
 			ps.update();
 		});

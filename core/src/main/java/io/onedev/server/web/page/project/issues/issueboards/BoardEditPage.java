@@ -60,7 +60,7 @@ public class BoardEditPage extends IssuesPage {
 					getProject().setIssueBoards(boards);
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					Session.get().success("Issue board saved");
-					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), board, null, null));
+					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), board, null, false, null, null));
 				}
 			}
 			

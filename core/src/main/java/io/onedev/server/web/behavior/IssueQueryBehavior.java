@@ -242,6 +242,11 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		if ((suggestedLiteral.equals("is me") || suggestedLiteral.equals("is not me")) && SecurityUtils.getUser() == null)
 			return null;	
 		
+		if (suggestedLiteral.equals("open"))
+			return Optional.of("issues with state in open category");
+		else if (suggestedLiteral.equals("closed"))
+			return Optional.of("issues with state in closed category");
+		
 		if (expectedElement.getParent() != null 
 				&& expectedElement.getParent().getParent() != null
 				&& expectedElement.getParent().getParent().getSpec() instanceof RuleRefElementSpec) {

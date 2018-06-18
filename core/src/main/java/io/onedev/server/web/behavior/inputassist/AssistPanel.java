@@ -55,6 +55,11 @@ class AssistPanel extends Panel {
 		suggestionsContainer.add(new InfiniteScrollBehavior(PAGE_SIZE) {
 
 			@Override
+			protected String getItemSelector() {
+				return ">table>tbody>tr";
+			}
+
+			@Override
 			protected void appendPage(AjaxRequestTarget target, int page) {
 				for (int i=(page-1)*PAGE_SIZE; i<page*PAGE_SIZE; i++) {
 					if (i < suggestions.size()) {

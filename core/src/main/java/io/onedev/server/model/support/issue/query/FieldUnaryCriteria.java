@@ -9,6 +9,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
+import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
 public class FieldUnaryCriteria extends FieldCriteria {
@@ -23,7 +24,7 @@ public class FieldUnaryCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<?> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.VALUE);
 		if (operator == IssueQueryLexer.IsEmpty)
 			return context.getBuilder().isNull(attribute);
@@ -55,7 +56,7 @@ public class FieldUnaryCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator);
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator);
 	}
 
 	@Override

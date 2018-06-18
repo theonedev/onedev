@@ -394,19 +394,13 @@ public class IssueWorkflow implements Serializable {
 		return applicableFields;
 	}
 
-	@Nullable
-	public IssueCriteria getStatesCriteria(StateSpec.Category category) {
+	public IssueCriteria getCategoryCriteria(StateSpec.Category category) {
 		List<IssueCriteria> criterias = new ArrayList<>();
 		for (StateSpec state: getStateSpecs()) {
 			if (category == state.getCategory())
 				criterias.add(new StateCriteria(state.getName(), IssueQueryLexer.Is));
 		}
-		if (criterias.size() > 1)
-			return new OrCriteria(criterias);
-		else if (criterias.size() == 1)
-			return criterias.iterator().next();
-		else
-			return null;
+		return new OrCriteria(criterias);
 	}
 	
 }

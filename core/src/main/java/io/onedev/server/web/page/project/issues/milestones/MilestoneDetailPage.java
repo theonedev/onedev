@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
+import java.util.ArrayList;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -15,7 +17,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
+import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.query.IssueQueryLexer;
 import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -126,8 +128,8 @@ public class MilestoneDetailPage extends IssuesPage {
 			}
 
 			@Override
-			protected IssueCriteria getBaseCriteria() {
-				return new MilestoneCriteria(getMilestone().getName(), IssueQueryLexer.Is);
+			protected IssueQuery getBaseQuery() {
+				return new IssueQuery(new MilestoneCriteria(getMilestone().getName(), IssueQueryLexer.Is), new ArrayList<>());
 			}
 
 			@Override

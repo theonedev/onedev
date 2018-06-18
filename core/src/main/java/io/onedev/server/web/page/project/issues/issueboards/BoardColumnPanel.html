@@ -1,10 +1,11 @@
 <wicket:panel>
 	<div wicket:id="content" class="content">
-		<div wicket:id="head" class="head">
-			<a wicket:id="avatarLink"></a>
-			<a wicket:id="userLink"></a>
-			<span wicket:id="title"></span>
+		<div wicket:id="head" class="head clearfix">
+			<a wicket:id="avatarLink" class="pull-left"></a>
+			<a wicket:id="userLink" class="pull-left"></a>
+			<span wicket:id="title" class="pull-left"></span>
+			<span wicket:id="count" class="badge pull-right"></span>
 		</div>
-		<div class="body"></div>
+		<div wicket:id="body" class="body"></div>
 	</div>
 </wicket:panel>

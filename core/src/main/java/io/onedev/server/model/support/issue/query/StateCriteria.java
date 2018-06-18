@@ -26,7 +26,7 @@ public class StateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<?> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.STATE));
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
@@ -55,7 +55,7 @@ public class StateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.STATE) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(Issue.STATE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
 	}
 
 	@Override

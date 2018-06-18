@@ -6,6 +6,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 
 public class SubmitterCriteria extends IssueCriteria {
@@ -22,7 +23,7 @@ public class SubmitterCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<User> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.SUBMITTER));
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
@@ -45,7 +46,7 @@ public class SubmitterCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.SUBMITTER) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value.getName());
+		return IssueQuery.quote(Issue.SUBMITTER) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value.getName());
 	}
 
 }

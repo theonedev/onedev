@@ -605,6 +605,20 @@ onedev.server = {
 		}
 	},
 	
+	setupAlertClose: function() {
+		function installListener($container) {
+			$container.find(".alert").on("close.bs.alert", function() {
+				setTimeout(function() {
+					$(window).resize();
+				}, 0);
+			});
+		}
+		$(document).on("elementReplaced", function(event, componentId) {
+			installListener($("#" + componentId));
+		});
+		installListener($(document));
+	},
+	
 	setupInputClear: function() {
 		function installClearer($container) {
 			$container.find(".clearable-wrapper").each(function() {
@@ -646,6 +660,7 @@ onedev.server = {
 		onedev.server.mouseState.track();
 		onedev.server.ajaxRequests.track();
 		onedev.server.setupInputClear();
+		onedev.server.setupAlertClose();
 		
 		$(document).keydown(function(e) {
 			if (e.keyCode == 27)

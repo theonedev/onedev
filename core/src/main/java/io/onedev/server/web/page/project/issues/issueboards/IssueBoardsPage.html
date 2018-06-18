@@ -7,18 +7,19 @@
 			<form wicket:id="query" class="clearable-wrapper">
 				<div class="input-group">
 					<span class="input-group-btn">
-						<a wicket:id="boardMenu" class="board-selector btn btn-default">
+						<a wicket:id="boardMenu" title="Board" class="board-selector btn btn-default">
 							<i class="fa fa-columns"></i>
 							<span wicket:id="board"></span>
 							<i class="fa fa-caret-down"></i>
 						</a>
-						<a wicket:id="milestoneMenu" class="milestone-selector btn btn-default">
+						<a wicket:id="backlog" class="backlog btn btn-default"><i class="fa fa-inbox"></i> Backlog</a>
+						<a wicket:id="milestoneMenu" title="Milestone" class="milestone-selector btn btn-default">
 							<i class="fa fa-ext fa-milestone"></i>
 							<span wicket:id="milestone"></span>
 							<i class="fa fa-caret-down"></i>
 						</a>
 					</span>
-					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control no-autofocus" placeholder="Filter issues"></input>
+					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control no-autofocus"></input>
 					<span class="input-group-btn">
 						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
 					</span>
@@ -26,9 +27,9 @@
 			</form>
 			<a wicket:id="newBoard" class="btn btn-success add-new"><i class="fa fa-plus"></i> New Board</a>
 		</div>
+		<div wicket:id="feedback" class="feedback"></div>
 		<div class="body">
-			<div wicket:id="backlog" class="backlog-column board-column"></div>
-			<div wicket:id="columns" class="board-column"></div>
+			<div wicket:id="columns" class="column"></div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noBoardsFrag">

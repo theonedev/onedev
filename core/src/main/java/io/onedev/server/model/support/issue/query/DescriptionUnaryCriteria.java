@@ -4,6 +4,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 
 public class DescriptionUnaryCriteria extends IssueCriteria {
 
@@ -16,7 +17,7 @@ public class DescriptionUnaryCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<?> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.DESCRIPTION));
 		if (operator == IssueQueryLexer.IsEmpty)
 			return context.getBuilder().isNull(attribute);
@@ -39,7 +40,7 @@ public class DescriptionUnaryCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.DESCRIPTION) + " " + IssueQuery.getOperatorName(operator);
+		return IssueQuery.quote(Issue.DESCRIPTION) + " " + IssueQuery.getRuleName(operator);
 	}
 
 }

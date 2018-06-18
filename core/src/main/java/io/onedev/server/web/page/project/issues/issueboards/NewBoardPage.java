@@ -49,7 +49,7 @@ public class NewBoardPage extends IssuesPage {
 					getProject().setIssueBoards(boards);
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					Session.get().success("New issue board created");
-					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), board, null, null));
+					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), board, null, false, null, null));
 				}
 			}
 			

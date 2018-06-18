@@ -24,10 +24,10 @@ public class OrCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		List<Predicate> predicates = new ArrayList<>();
 		for (IssueCriteria criteria: criterias)
-			predicates.add(criteria.getPredicate(context));
+			predicates.add(criteria.getPredicate(project, context));
 		return context.getBuilder().or(predicates.toArray(new Predicate[0]));
 	}
 

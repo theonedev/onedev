@@ -42,12 +42,8 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	@Transactional
 	@Override
 	public void delete(Milestone milestone, @Nullable Milestone moveIssuesToMilestone) {
-    	Query<?> query = getSession().createQuery("update IssueBoard set milestone=null where milestone=:milestone");
-    	query.setParameter("milestone", milestone);
-    	query.executeUpdate();
-		
 		if (moveIssuesToMilestone != null) {
-			query = getSession().createQuery("update Issue set milestone=:newMilestone where milestone=:milestone");
+			Query<?> query = getSession().createQuery("update Issue set milestone=:newMilestone where milestone=:milestone");
 			query.setParameter("milestone", milestone);
 			query.setParameter("newMilestone", moveIssuesToMilestone);
 			query.executeUpdate();
@@ -55,7 +51,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			moveIssuesToMilestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()+moveIssuesToMilestone.getNumOfOpenIssues());
 			save(moveIssuesToMilestone);
 		} else {
-			query = getSession().createQuery("update Issue set milestone=null where milestone=:milestone");
+			Query<?> query = getSession().createQuery("update Issue set milestone=null where milestone=:milestone");
 			query.setParameter("milestone", milestone);
 			query.executeUpdate();
 		}

@@ -38,8 +38,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
@@ -48,8 +46,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.model.support.issue.query.AndCriteria;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -79,28 +75,21 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 
 		@Override
 		protected IssueQuery load() {
-			IssueQuery parsedQuery = null;
 			try {
-				parsedQuery = IssueQuery.parse(getProject(), getQuery(), true);
-				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin()) {
+				IssueQuery additionalQuery = IssueQuery.parse(getProject(), getQuery(), true);
+				if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
 					error("Please login to perform this query");
-					parsedQuery = null;
-				} else if (getBaseCriteria() != null) {
-					if (parsedQuery.getCriteria() != null) {
-						List<IssueCriteria> criterias = Lists.newArrayList(getBaseCriteria(), parsedQuery.getCriteria());
-						parsedQuery = new IssueQuery(new AndCriteria(criterias), parsedQuery.getSorts());
-					} else {
-						parsedQuery = new IssueQuery(getBaseCriteria(), parsedQuery.getSorts());
-					}
+				} else { 
+					if (SecurityUtils.getUser() == null && getBaseQuery().needsLogin())
+						error("Please login to show the issues");
+					else
+						return IssueQuery.merge(getBaseQuery(), additionalQuery);
 				}
 			} catch (Exception e) {
 				logger.error("Error parsing issue query: " + getQuery(), e);
-				if (StringUtils.isNotBlank(e.getMessage()))
-					error(e.getMessage());
-				else
-					error("Malformed issue query");
+				error(e.getMessage());
 			}
-			return parsedQuery;
+			return null;
 		}
 		
 	};
@@ -135,8 +124,9 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 	
 	protected abstract Project getProject();
 
-	@Nullable
-	protected abstract IssueCriteria getBaseCriteria();
+	protected IssueQuery getBaseQuery() {
+		return new IssueQuery();
+	}
 
 	protected abstract PagingHistorySupport getPagingHistorySupport();
 	

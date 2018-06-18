@@ -4,6 +4,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 
 public class VotesCriteria extends IssueCriteria {
 
@@ -19,7 +20,7 @@ public class VotesCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<Integer> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.VOTES));
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
@@ -50,7 +51,7 @@ public class VotesCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.VOTES) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(String.valueOf(value));
+		return IssueQuery.quote(Issue.VOTES) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 }

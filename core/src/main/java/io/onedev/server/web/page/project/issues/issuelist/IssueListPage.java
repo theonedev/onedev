@@ -37,7 +37,6 @@ import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.model.support.issue.WatchStatus;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.issuelist.IssueListPanel;
@@ -385,11 +384,6 @@ public class IssueListPage extends IssuesPage {
 			@Override
 			protected Project getProject() {
 				return IssueListPage.this.getProject();
-			}
-
-			@Override
-			protected IssueCriteria getBaseCriteria() {
-				return null;
 			}
 
 			@Override

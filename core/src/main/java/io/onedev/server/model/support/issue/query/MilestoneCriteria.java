@@ -8,6 +8,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Project;
 
 public class MilestoneCriteria extends IssueCriteria {
 
@@ -31,7 +32,7 @@ public class MilestoneCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<?> attribute = context.getJoin(Issue.MILESTONE).get(Milestone.NAME);
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
@@ -54,7 +55,7 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.MILESTONE) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(Issue.MILESTONE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
 	}
 
 	@Override

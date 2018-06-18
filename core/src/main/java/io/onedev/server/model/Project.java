@@ -223,13 +223,14 @@ public class Project extends AbstractEntity {
 		issueListFields.add(Issue.VOTES);
 		
 		savedIssueQueries.add(new NamedQuery("All", "all"));
-		savedIssueQueries.add(new NamedQuery("Open", "\"State\" is \"Open\""));
-		savedIssueQueries.add(new NamedQuery("Closed", "\"State\" is \"Closed\""));
+		savedIssueQueries.add(new NamedQuery("Open", "open"));
+		savedIssueQueries.add(new NamedQuery("My open", "open and mine"));
+		savedIssueQueries.add(new NamedQuery("Closed", "closed"));
 		savedIssueQueries.add(new NamedQuery("Added recently", "\"Submit Date\" is after \"last week\""));
 		savedIssueQueries.add(new NamedQuery("Updated recently", "\"Update Date\" is after \"last week\""));
 		savedIssueQueries.add(new NamedQuery("Submitted by me", "\"Submitter\" is me"));
 		savedIssueQueries.add(new NamedQuery("Assigned to me", "\"Assignee\" is me"));
-		savedIssueQueries.add(new NamedQuery("Hight Priority", "\"Priority\" is \"High\""));
+		savedIssueQueries.add(new NamedQuery("High Priority", "\"Priority\" is \"High\""));
     }
     
 	@Editable(order=100)

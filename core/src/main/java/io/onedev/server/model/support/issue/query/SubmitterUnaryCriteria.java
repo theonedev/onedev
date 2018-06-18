@@ -6,6 +6,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
 public class SubmitterUnaryCriteria extends IssueCriteria {
@@ -19,7 +20,7 @@ public class SubmitterUnaryCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<?> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.SUBMITTER));
 		if (operator == IssueQueryLexer.IsMe)
 			return context.getBuilder().equal(attribute, SecurityUtils.getUser());
@@ -42,7 +43,7 @@ public class SubmitterUnaryCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.SUBMITTER) + " " + IssueQuery.getOperatorName(operator);
+		return IssueQuery.quote(Issue.SUBMITTER) + " " + IssueQuery.getRuleName(operator);
 	}
 
 }

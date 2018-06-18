@@ -19,8 +19,6 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Splitter;
@@ -33,15 +31,16 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.AndCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.BracedCriteriaContext;
+import io.onedev.server.model.support.issue.query.IssueQueryParser.ClosedCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.CriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.MineCriteriaContext;
+import io.onedev.server.model.support.issue.query.IssueQueryParser.OpenCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.OrCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.OrderContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.QueryContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.UnaryCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueQueryParser.ValueCriteriaContext;
 import io.onedev.server.model.support.issue.query.IssueSort.Direction;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
@@ -61,8 +60,6 @@ import io.onedev.utils.WordUtils;
 public class IssueQuery implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final Logger logger = LoggerFactory.getLogger(IssueQuery.class);
 	
 	private final IssueCriteria criteria;
 	
@@ -118,12 +115,7 @@ public class IssueQuery implements Serializable {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					if (e != null) {
-						logger.error("Error lexing issue query", e);
-					} else if (msg != null) {
-						logger.error("Error lexing issue query: " + msg);
-					}
-					throw new RuntimeException("Malformed issue query");
+					throw new OneException("Malformed query syntax", e);
 				}
 				
 			});
@@ -131,7 +123,15 @@ public class IssueQuery implements Serializable {
 			IssueQueryParser parser = new IssueQueryParser(tokens);
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
-			QueryContext queryContext = parser.query();
+			QueryContext queryContext;
+			try {
+				queryContext = parser.query();
+			} catch (Exception e) {
+				if (e instanceof OneException)
+					throw e;
+				else
+					throw new OneException("Malformed query syntax", e);
+			}
 			CriteriaContext criteriaContext = queryContext.criteria();
 			IssueCriteria issueCriteria;
 			if (criteriaContext != null) {
@@ -173,22 +173,19 @@ public class IssueQuery implements Serializable {
 					
 					@Override
 					public IssueCriteria visitMineCriteria(MineCriteriaContext ctx) {
-						IssueCriteria submitterCriteria = new SubmitterCriteria(SecurityUtils.getUser(), IssueQueryLexer.Is);
-						List<IssueCriteria> fieldCriterias = new ArrayList<>();
-						for (InputSpec field: project.getIssueWorkflow().getFieldSpecs()) {
-							if (field instanceof UserChoiceInput) {
-								IssueCriteria fieldCriteria = new FieldUnaryCriteria(field.getName(), IssueQueryLexer.IsMe);
-								fieldCriterias.add(fieldCriteria);
-							} 
-						}
-						if (!fieldCriterias.isEmpty()) {
-							fieldCriterias.add(0, submitterCriteria);
-							return new OrCriteria(fieldCriterias);
-						} else {
-							return submitterCriteria;
-						}
+						return new MineCriteria();
 					}
 
+					@Override
+					public IssueCriteria visitOpenCriteria(OpenCriteriaContext ctx) {
+						return new OpenCriteria();
+					}
+					
+					@Override
+					public IssueCriteria visitClosedCriteria(ClosedCriteriaContext ctx) {
+						return new ClosedCriteria();
+					}
+					
 					@Override
 					public IssueCriteria visitUnaryCriteria(UnaryCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted().getText());
@@ -309,7 +306,7 @@ public class IssueQuery implements Serializable {
 								}
 							}
 						default:
-							throw new OneException("Unexpected operator " + getOperatorName(operator));
+							throw new OneException("Unexpected operator " + getRuleName(operator));
 						}
 					}
 					
@@ -366,7 +363,7 @@ public class IssueQuery implements Serializable {
 	}
 	
 	private static OneException newOperatorException(String fieldName, int operator) {
-		return new OneException("Field '" + fieldName + "' is not applicable for operator '" + getOperatorName(operator) + "'");
+		return new OneException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
@@ -438,8 +435,8 @@ public class IssueQuery implements Serializable {
 		return criteria == null || criteria.matches(issue);
 	}
 	
-	public static String getOperatorName(int operator) {
-		return WordUtils.uncamel(IssueQueryLexer.ruleNames[operator-1]).toLowerCase();
+	public static String getRuleName(int rule) {
+		return WordUtils.uncamel(IssueQueryLexer.ruleNames[rule-1]).toLowerCase();
 	}
 	
 	public static int getOperator(String operatorName) {
@@ -540,6 +537,18 @@ public class IssueQuery implements Serializable {
 		} else {
 			return root.get(pathName);
 		}
+	}
+	
+	public static IssueQuery merge(IssueQuery query1, IssueQuery query2) {
+		List<IssueCriteria> criterias = new ArrayList<>();
+		if (query1.getCriteria() != null)
+			criterias.add(query1.getCriteria());
+		if (query2.getCriteria() != null)
+			criterias.add(query2.getCriteria());
+		List<IssueSort> sorts = new ArrayList<>();
+		sorts.addAll(query1.getSorts());
+		sorts.addAll(query2.getSorts());
+		return new IssueQuery(IssueCriteria.of(criterias), sorts);
 	}
 	
 }

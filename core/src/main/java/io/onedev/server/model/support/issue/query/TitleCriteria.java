@@ -4,6 +4,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 
 public class TitleCriteria extends IssueCriteria {
 
@@ -19,7 +20,7 @@ public class TitleCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<String> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.TITLE));
 		if (operator == IssueQueryLexer.Contains)
 			return context.getBuilder().like(attribute, "%" + value + "%");
@@ -42,7 +43,7 @@ public class TitleCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.TITLE) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(Issue.TITLE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
 	}
 
 }

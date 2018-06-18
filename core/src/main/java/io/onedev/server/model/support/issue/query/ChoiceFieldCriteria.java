@@ -38,7 +38,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Join<Issue, ?> join = context.getJoin(getFieldName());
 		if (allowMultiple) {
 			if (operator == IssueQueryLexer.Contains)
@@ -86,7 +86,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
 	}
 
 	@Override

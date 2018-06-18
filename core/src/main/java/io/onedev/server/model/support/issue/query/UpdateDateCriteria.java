@@ -6,6 +6,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 
 public class UpdateDateCriteria extends IssueCriteria {
 
@@ -24,7 +25,7 @@ public class UpdateDateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext context) {
 		Path<Long> attribute = IssueQuery.getPath(context.getRoot(), Issue.BUILTIN_FIELDS.get(Issue.UPDATE_DATE));
 		if (operator == IssueQueryLexer.IsBefore)
 			return context.getBuilder().lessThan(attribute, value.getTime());
@@ -47,7 +48,7 @@ public class UpdateDateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.UPDATE_DATE) + " " + IssueQuery.getOperatorName(operator) + " " + IssueQuery.quote(rawValue);
+		return IssueQuery.quote(Issue.UPDATE_DATE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(rawValue);
 	}
 
 }

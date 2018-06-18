@@ -30,7 +30,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
@@ -38,6 +41,7 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.IssueBoard;
+import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
@@ -52,17 +56,92 @@ import io.onedev.server.web.util.ConfirmOnClick;
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends IssuesPage {
 
+	private static final Logger logger = LoggerFactory.getLogger(IssueBoardsPage.class);
+	
 	private static final String PARAM_BOARD = "board";
 	
 	private static final String PARAM_MILESTONE = "milestone";
 	
+	private static final String PARAM_BACKLOG = "backlog";
+	
 	private static final String PARAM_QUERY = "query";
+	
+	private static final String PARAM_BACKLOG_QUERY = "backlog-query";
 	
 	private final IModel<IssueBoard> boardModel;
 	
 	private final IModel<Milestone> milestoneModel;
 	
+	private final boolean backlog;
+	
 	private final String query;
+	
+	private final String backlogQuery;
+	
+	private final IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
+
+		@Override
+		protected IssueQuery load() {
+			return parse(false, getBoard().getBaseQuery(), query);
+		}
+		
+	};
+	
+	private final IModel<IssueQuery> parsedBacklogQueryModel = new LoadableDetachableModel<IssueQuery>() {
+
+		@Override
+		protected IssueQuery load() {
+			return parse(true, getBoard().getBacklogBaseQuery(), backlogQuery);
+		}
+		
+	};
+	
+	private NotificationPanel feedback;
+	
+	private IssueQuery parse(boolean backlog, @Nullable String baseQueryString, @Nullable String additionalQueryString) {
+		IssueQuery additionalQuery;
+		try {
+			additionalQuery = IssueQuery.parse(getProject(), additionalQueryString, true);
+		} catch (Exception e) {
+			String prefix;
+			if (backlog)
+				prefix = "Error parsing backlog query: ";
+			else
+				prefix = "Error parsing issue query: ";
+			logger.error(prefix + additionalQueryString, e);
+			error(prefix + e.getMessage());
+			return null;
+		}			
+
+		if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
+			error("Please login to perform this query");
+			return null;
+		} else { 
+			IssueQuery baseQuery;
+			try {
+				baseQuery = IssueQuery.parse(getProject(), baseQueryString, true);
+			} catch (Exception e) {
+				String prefix;
+				if (backlog)
+					prefix = "Error parsing backlog base query: ";
+				else
+					prefix = "Error parsing base query: ";
+					
+				logger.error(prefix + baseQueryString, e);
+				error(prefix + e.getMessage());
+				return null;
+			}
+			if (SecurityUtils.getUser() == null && baseQuery.needsLogin()) {
+				if (backlog)
+					error("Login is required for backlog base query");
+				else
+					error("Login is required for base query");
+				return null;
+			} else {
+				return IssueQuery.merge(baseQuery, additionalQuery);
+			}
+		} 
+	}
 	
 	public IssueBoardsPage(PageParameters params) {
 		super(params);
@@ -115,7 +194,9 @@ public class IssueBoardsPage extends IssuesPage {
 			
 		};
 		
+		backlog = params.get(PARAM_BACKLOG).toBoolean() && getMilestone() != null;
 		query = params.get(PARAM_QUERY).toString();
+		backlogQuery = params.get(PARAM_BACKLOG_QUERY).toString();
 	}
 	
 	private List<Milestone> getMilestones() {
@@ -135,6 +216,8 @@ public class IssueBoardsPage extends IssuesPage {
 	protected void onDetach() {
 		boardModel.detach();
 		milestoneModel.detach();
+		parsedQueryModel.detach();
+		parsedBacklogQueryModel.detach();
 		super.onDetach();
 	}
 
@@ -177,7 +260,9 @@ public class IssueBoardsPage extends IssuesPage {
 						protected void populateItem(ListItem<IssueBoard> item) {
 							item.add(new WebMarkupContainer("dragHandle").setVisible(SecurityUtils.canManage(getProject())));
 							
-							PageParameters params = IssueBoardsPage.paramsOf(getProject(), item.getModelObject(), getMilestone(), query);
+							PageParameters params = IssueBoardsPage.paramsOf(
+									getProject(), item.getModelObject(), getMilestone(), 
+									backlog, backlogQuery, query);
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 							link.add(new Label("name", item.getModelObject().getName()));
 							item.add(link);
@@ -202,9 +287,9 @@ public class IssueBoardsPage extends IssuesPage {
 									
 									PageParameters params;
 									if (item.getModelObject().getName().equals(getBoard().getName())) 
-										params = IssueBoardsPage.paramsOf(getProject(), null, getMilestone(), query);
+										params = IssueBoardsPage.paramsOf(getProject(), null, getMilestone(), backlog, query, backlogQuery);
 									else
-										params = IssueBoardsPage.paramsOf(getProject(), getBoard(), getMilestone(), query);
+										params = IssueBoardsPage.paramsOf(getProject(), getBoard(), getMilestone(), backlog, query, backlogQuery);
 									setResponsePage(IssueBoardsPage.class, params);
 								}
 
@@ -238,6 +323,28 @@ public class IssueBoardsPage extends IssuesPage {
 					fragment.setOutputMarkupId(true);
 					
 					return fragment;
+				}
+				
+			});
+			form.add(new Link<Void>("backlog") {
+
+				@Override
+				protected void onInitialize() {
+					super.onInitialize();
+					if (backlog)
+						add(AttributeAppender.append("class", "active"));
+				}
+
+				@Override
+				public void onClick() {
+					PageParameters params = paramsOf(getProject(), getBoard(), getMilestone(), !backlog, query, backlogQuery);
+					setResponsePage(IssueBoardsPage.class, params);
+				}
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(getMilestone() != null);
 				}
 				
 			});
@@ -280,7 +387,7 @@ public class IssueBoardsPage extends IssuesPage {
 						@Override
 						protected void populateItem(ListItem<Milestone> item) {
 							Milestone milestone = item.getModelObject();
-							PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, query);
+							PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, backlog, query, backlogQuery);
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 							link.add(new Label("name", milestone.getName()));
 							item.add(link);
@@ -321,8 +428,18 @@ public class IssueBoardsPage extends IssuesPage {
 				
 			});
 			
-			TextField<String> input = new TextField<String>("input", Model.of(query));
+			IModel<String> model;
+			if (backlog)
+				model = Model.of(backlogQuery);
+			else
+				model = Model.of(query);
+			TextField<String> input = new TextField<String>("input", model);
 			input.add(new IssueQueryBehavior(projectModel));
+			if (backlog)
+				input.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
+			else
+				input.add(AttributeAppender.append("placeholder", "Filter issues"));
+				
 			form.add(input);
 
 			form.add(new Button("submit") {
@@ -330,7 +447,15 @@ public class IssueBoardsPage extends IssuesPage {
 				@Override
 				public void onSubmit() {
 					super.onSubmit();
-					PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), getMilestone(), input.getModelObject());
+					PageParameters params;
+					if (backlog) {
+						params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
+								getMilestone(), backlog, query, input.getModelObject());
+					} else {
+						params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
+								getMilestone(), backlog, input.getModelObject(), backlogQuery);
+					}
+						
 					setResponsePage(IssueBoardsPage.class, params);
 				}
 				
@@ -338,7 +463,8 @@ public class IssueBoardsPage extends IssuesPage {
 			
 			fragment.add(form);
 			
-			fragment.add(new BookmarkablePageLink<Void>("newBoard", NewBoardPage.class, NewBoardPage.paramsOf(getProject())) {
+			fragment.add(new BookmarkablePageLink<Void>("newBoard", 
+					NewBoardPage.class, NewBoardPage.paramsOf(getProject())) {
 
 				@Override
 				protected void onConfigure() {
@@ -348,39 +474,27 @@ public class IssueBoardsPage extends IssuesPage {
 				
 			});
 			
-			fragment.add(new BoardColumnPanel("backlog") {
-
-				@Override
-				protected Project getProject() {
-					return IssueBoardsPage.this.getProject();
-				}
-
-				@Override
-				protected IssueBoard getBoard() {
-					return IssueBoardsPage.this.getBoard();
-				}
-
-				@Override
-				protected Milestone getMilestone() {
-					return IssueBoardsPage.this.getMilestone();
-				}
-
-				@Override
-				protected int getColumnIndex() {
-					return -1;
-				}
-				
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(getMilestone() != null);
-				}
-				
-			});
+			fragment.add(feedback = new NotificationPanel("feedback", IssueBoardsPage.this));
+			feedback.setOutputMarkupPlaceholderTag(true);
 			
 			RepeatingView columnsView = new RepeatingView("columns");
-			for (int i=0; i<getBoard().getColumns().size(); i++) {
-				int index = i;
+			if (backlog) {
+				columnsView.add(new BacklogColumnPanel("backlog") {
+
+					@Override
+					protected Project getProject() {
+						return IssueBoardsPage.this.getProject();
+					}
+
+					@Override
+					protected IssueQuery getBacklogQuery() {
+						return parsedBacklogQueryModel.getObject();
+					}
+					
+				});
+			}
+			
+			for (String column: getBoard().getColumns()) {
 				columnsView.add(new BoardColumnPanel(columnsView.newChildId()) {
 
 					@Override
@@ -399,8 +513,13 @@ public class IssueBoardsPage extends IssuesPage {
 					}
 
 					@Override
-					protected int getColumnIndex() {
-						return index;
+					protected String getColumn() {
+						return column;
+					}
+
+					@Override
+					protected IssueQuery getBoardQuery() {
+						return parsedQueryModel.getObject();
 					}
 
 				});
@@ -431,14 +550,18 @@ public class IssueBoardsPage extends IssuesPage {
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable IssueBoard board, 
-			@Nullable Milestone milestone, @Nullable String query) {
+			@Nullable Milestone milestone, boolean backlog, @Nullable String query, 
+			@Nullable String backlogQuery) {
 		PageParameters params = paramsOf(project);
 		if (board != null)
 			params.add(PARAM_BOARD, board.getName());
 		if (milestone != null)
 			params.add(PARAM_MILESTONE, milestone.getName());
+		params.add(PARAM_BACKLOG, backlog);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
+		if (backlogQuery != null)
+			params.add(PARAM_BACKLOG_QUERY, backlogQuery);
 		return params;
 	}
 	

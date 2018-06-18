@@ -147,7 +147,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(context.getBuilder().equal(context.getRoot().get("project"), project));
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(context));
+			predicates.add(criteria.getPredicate(project, context));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -215,7 +215,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Override
 	public int count(Milestone milestone, @Nullable StateSpec.Category category) {
 		if (category != null) {
-			IssueCriteria criteria = milestone.getProject().getIssueWorkflow().getStatesCriteria(category);
+			IssueCriteria criteria = milestone.getProject().getIssueWorkflow().getCategoryCriteria(category);
 			if (criteria != null) {
 				List<IssueCriteria> criterias = new ArrayList<>();
 				criterias.add(new MilestoneCriteria(milestone.getName(), IssueQueryLexer.Is));

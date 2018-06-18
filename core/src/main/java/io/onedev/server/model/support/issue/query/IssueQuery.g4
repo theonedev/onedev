@@ -9,6 +9,8 @@ query
 
 criteria
     : Mine																			#MineCriteria
+    | Open																			#OpenCriteria
+    | Closed																		#ClosedCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty) #UnaryCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains|DoesNotContain) WS+ criteriaValue=Quoted #ValueCriteria
     | criteria WS+ And WS+ criteria												#AndCriteria
@@ -27,6 +29,14 @@ Mine
 All
 	: 'all'
 	;
+	
+Open
+	: 'open'
+	;
+	
+Closed
+	: 'closed'
+	;	
 	
 OrderBy
     : 'order' WS+ 'by'

@@ -3,8 +3,10 @@ package io.onedev.server.model.support.issue.query;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
@@ -15,7 +17,7 @@ public abstract class IssueCriteria implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public abstract Predicate getPredicate(QueryBuildContext context);
+	public abstract Predicate getPredicate(Project project, QueryBuildContext context);
 
 	public final void populate(Issue issue, Serializable fieldBean) {
 		populate(issue, fieldBean, new HashSet<>());
@@ -59,4 +61,13 @@ public abstract class IssueCriteria implements Serializable {
 		return false;
 	}
 	
+	@Nullable
+	public static IssueCriteria of(List<IssueCriteria> criterias) {
+		if (criterias.size() > 1)
+			return new AndCriteria(criterias);
+		else if (criterias.size() == 1)
+			return criterias.iterator().next();
+		else
+			return null;
+	}
 }
