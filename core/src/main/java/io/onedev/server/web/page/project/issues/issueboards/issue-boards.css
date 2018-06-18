@@ -104,7 +104,7 @@
 
 #issue-boards>.body>.column>.content>.body {
 	position: relative;
-	padding: 12px;
+	padding: 16px;
 	overflow: auto;
 	height: 100%;
 } 
@@ -112,7 +112,7 @@
 	margin-top: 8px;
 }
 #issue-boards>.body>.column>.content>.body>.card {
-	margin-top: 12px;
+	margin-top: 16px;
 } 
 #issue-boards>.body>.column>.content>.body>.card:first-child {
 	margin-top: 0;
@@ -120,15 +120,14 @@
 
 #issue-boards>.body>.column>.content>.body>.card {
 	border-radius: 4px;
-	padding: 8px 24px 8px 8px;
+	padding: 8px 48px 8px 8px;
 	background: white;
 	position: relative;
-	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0), 0 1px 3px 0 rgba(0, 0, 0, 0.2);	
+	box-shadow: 1px 1px 4px 1px rgba(0 ,0 ,0 ,0.1);	
+	cursor: move;
 }
 #issue-boards>.body>.column>.content>.body>.card>.number {
 	margin-right: 8px;
-	color: #777;
-	text-decoration: none;
 	font-size: 12px;
 	line-height: 20px;
 }
@@ -137,6 +136,69 @@
 	width: 12px;
 	height: 12px;
 	position: absolute;
-	right: 8px;
+	right: 30px;
 	top: 12px;
+	cursor: default;
+}
+#issue-boards>.body>.column>.content>.body>.card>.detail {
+	position: absolute;
+	right: 8px;
+	top: 7px;
+	color: #666;
+	text-decoration: none;
+}
+
+.board-card-detail {
+	padding: 20px;
+}
+.board-card-detail>.head {
+	font-size: 16px;
+	font-weight: bold;
+	border-bottom: 1px solid #E0E0E0;
+	padding-bottom: 20px;
+	margin-bottom: 20px;
+}
+.board-card-detail>.head {
+	padding-right: 28px;
+}
+.board-card-detail>.head>.number {
+	margin-right: 8px;
+}
+.board-card-detail>.head>.close {
+	position: absolute;
+	top: 20px; 
+	right: 20px;
+}
+.board-card-detail>.head>.close {
+	font-family: sans-serif;
+}
+.board-card-detail>.head .state {
+	border-radius: 3px;
+	padding: 3px 6px;
+}
+.board-card-detail>.body>* {
+	margin-bottom: 20px;
+}
+.board-card-detail>.body>:last-child {
+	margin-bottom: 0;
+}
+.board-card-detail>.body>table>tbody>tr>td {
+	padding: 4px;
+	vertical-align: top;
+	white-space: nowrap;
+}
+.board-card-detail>.body>table>tbody>tr>td.name {
+	color: #666;
+	font-size: 12px;
+	line-height: 20px;
+}
+.board-card-detail>.body>table>tbody>tr>td.spacing {
+	width: 20px;
+}
+.board-card-detail>.body>table>tbody>tr>td.value>.state {
+	border-radius: 3px;
+	padding: 3px 6px;
+}
+.board-card-detail>.body>table>tbody>tr>td.value .avatar {
+	margin-left: 4px;
 }

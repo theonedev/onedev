@@ -5,7 +5,11 @@ import java.util.List;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
@@ -22,14 +26,16 @@ abstract class CardListPanel extends Panel {
 		super.onInitialize();
 		RepeatingView cardsView = new RepeatingView("cards");
 		for (Issue issue: queryIssues(0)) {
-			cardsView.add(new BoardCardPanel(cardsView.newChildId()) {
+			Long issueId = issue.getId();
+			IModel<Issue> model = new LoadableDetachableModel<Issue>() {
 
 				@Override
-				protected Issue getIssue() {
-					return issue;
+				protected Issue load() {
+					return OneDev.getInstance(IssueManager.class).load(issueId);
 				}
 				
-			});
+			};
+			cardsView.add(new BoardCardPanel(cardsView.newChildId(), model));
 		}
 		add(cardsView);
 		
@@ -43,14 +49,16 @@ abstract class CardListPanel extends Panel {
 			@Override
 			protected void appendPage(AjaxRequestTarget target, int page) {
 				for (Issue issue: queryIssues(page-1)) {
-					BoardCardPanel card = new BoardCardPanel(cardsView.newChildId()) {
+					Long issueId = issue.getId();
+					IModel<Issue> model = new LoadableDetachableModel<Issue>() {
 
 						@Override
-						protected Issue getIssue() {
-							return issue;
+						protected Issue load() {
+							return OneDev.getInstance(IssueManager.class).load(issueId);
 						}
 						
 					};
+					BoardCardPanel card = new BoardCardPanel(cardsView.newChildId(), model);
 					cardsView.add(card);
 					String script = String.format("$('#%s').append('<div id=\"%s\"></div>');", 
 							getMarkupId(), card.getMarkupId());

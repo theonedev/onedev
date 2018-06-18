@@ -27,6 +27,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.web.component.IssueStateLabel;
+import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -57,6 +58,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					User user = User.getForDisplay(userManager.findByName(value), value);
 					Fragment userFrag = new Fragment(valuesView.newChildId(), "userFrag", this);
 					userFrag.add(new UserLink("name", user));
+					userFrag.add(new AvatarLink("avatar", user));
 					valuesView.add(userFrag);
 				} else if (getField().getType().equals(InputSpec.ISSUE_CHOICE)) {
 					Issue issue = issueManager.find(project, Long.valueOf(value));
@@ -128,7 +130,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new FieldValuesResourceReference()));
+		response.render(CssHeaderItem.forReference(new FieldValuesCssResourceReference()));
 	}
 	
 }

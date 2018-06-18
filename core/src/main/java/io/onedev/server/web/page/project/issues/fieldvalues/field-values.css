@@ -1,6 +1,9 @@
 .field-values .issue a {
 	margin-right: 4px;
 }
+.field-values .avatar {
+	margin-left: 4px;
+}
 .field-values>.has-color {
 	margin-bottom: 4px;
 	border-radius: 3px;

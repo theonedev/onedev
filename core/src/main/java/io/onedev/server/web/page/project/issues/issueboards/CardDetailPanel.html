@@ -1,0 +1,33 @@
+<wicket:panel>
+	<div class="board-card-detail">
+		<div class="head">
+			<a wicket:id="number" class="number"><span wicket:id="label"></span></a>
+			<span wicket:id="title" class="title"></span>
+			<a wicket:id="close" class="close">x</a>
+		</div>
+		<div class="body">
+			<table>
+				<tr wicket:id="fieldPairs">
+					<td class="name">
+						<div wicket:id="name1"></div>
+					</td>
+					<td class="value">
+						<div wicket:id="value1"></div>
+					</td>
+					<td class="spacing"></td>
+					<td class="name">
+						<div wicket:id="name2"></div>
+					</td>
+					<td class="value">
+						<div wicket:id="value2"></div>
+					</td>
+				</tr>
+			</table>
+			<div wicket:id="description" class="description"></div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="userFrag">
+		<a wicket:id="name"></a> 
+		<a wicket:id="avatar" class="avatar"></a>
+	</wicket:fragment>
+</wicket:panel>

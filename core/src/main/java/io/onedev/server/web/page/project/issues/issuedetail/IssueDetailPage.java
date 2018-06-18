@@ -553,43 +553,11 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 		fieldsContainer.add(new ListView<IssueField>("fields", new LoadableDetachableModel<List<IssueField>>() {
 
-			private boolean isVisible(IssueField field, Set<String> checkedFieldNames) {
-				if (!checkedFieldNames.contains(field.getName())) {
-					checkedFieldNames.add(field.getName());
-					
-					IssueWorkflow workflow = getProject().getIssueWorkflow();
-					InputSpec fieldSpec = workflow.getFieldSpec(field.getName());
-					if (fieldSpec != null) {
-						if (fieldSpec.getShowCondition() != null) {
-							IssueField dependentField = getIssue().getEffectiveFields().get(fieldSpec.getShowCondition().getInputName());
-							if (dependentField != null) {
-								if (!isVisible(dependentField, checkedFieldNames))
-									return false;
-								String value;
-								if (!dependentField.getValues().isEmpty())
-									value = dependentField.getValues().iterator().next();
-								else
-									value = null;
-								return fieldSpec.getShowCondition().getValueMatcher().matches(value);
-							} else {
-								return false;
-							}
-						} else {
-							return true;
-						}
-					} else {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			}
-			
 			@Override
 			protected List<IssueField> load() {
 				List<IssueField> fields = new ArrayList<>();
 				for (IssueField field: getIssue().getEffectiveFields().values()) {
-					if (isVisible(field, new HashSet<>()))
+					if (field.isVisible(getIssue()))
 						fields.add(field);
 				}
 				return fields;
