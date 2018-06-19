@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -39,6 +41,8 @@ import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.util.ComponentContext;
 
 @SuppressWarnings("serial")
@@ -88,7 +92,29 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer content = new WebMarkupContainer("content");
+		WebMarkupContainer content = new WebMarkupContainer("content") {
+
+			@Override
+			protected void onBeforeRender() {
+				addOrReplace(new CardListPanel("body") {
+
+					@Override
+					protected List<Issue> queryIssues(int page) {
+						IssueQuery query = queryModel.getObject();
+						if (query != null) {
+							return OneDev.getInstance(IssueManager.class).query(getProject(), query, 
+									page*WebConstants.PAGE_SIZE, WebConstants.PAGE_SIZE);
+						} else {
+							return new ArrayList<>();
+						}
+					}
+					
+				});
+				
+				super.onBeforeRender();
+			}
+			
+		};
 		add(content);
 		
 		String title;
@@ -153,20 +179,45 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			
 		});
 		
-		content.add(new CardListPanel("body") {
+		head.add(new ModalLink("addCard") {
 
 			@Override
-			protected List<Issue> queryIssues(int page) {
-				IssueQuery query = queryModel.getObject();
-				if (query != null) {
-					return OneDev.getInstance(IssueManager.class).query(getProject(), query, 
-							page*WebConstants.PAGE_SIZE, WebConstants.PAGE_SIZE);
-				} else {
-					return new ArrayList<>();
-				}
+			protected Component newContent(String id, ModalPanel modal) {
+				return new NewCardPanel(id) {
+
+					@Override
+					protected void onClose(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected Project getProject() {
+						return BoardColumnPanel.this.getProject();
+					}
+
+					@Override
+					protected IssueCriteria getTemplate() {
+						return queryModel.getObject().getCriteria();
+					}
+
+					@Override
+					protected void onAdded(AjaxRequestTarget target, Issue issue) {
+						target.add(BoardColumnPanel.this);
+					}
+					
+				};
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(queryModel.getObject() != null 
+						&& (!getBoard().getIdentifyField().equals(Issue.STATE) 
+								|| getColumn().equals(getProject().getIssueWorkflow().getInitialStateSpec().getName())));
 			}
 			
 		});
+		
 		setOutputMarkupId(true);
 	}
 	

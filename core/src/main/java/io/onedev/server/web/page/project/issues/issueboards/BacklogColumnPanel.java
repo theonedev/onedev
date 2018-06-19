@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
@@ -15,8 +17,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
 abstract class BacklogColumnPanel extends Panel {
@@ -29,6 +34,42 @@ abstract class BacklogColumnPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new ModalLink("addCard") {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new NewCardPanel(id) {
+
+					@Override
+					protected void onClose(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected Project getProject() {
+						return BacklogColumnPanel.this.getProject();
+					}
+
+					@Override
+					protected IssueCriteria getTemplate() {
+						return getBacklogQuery().getCriteria();
+					}
+
+					@Override
+					protected void onAdded(AjaxRequestTarget target, Issue issue) {
+						target.add(BacklogColumnPanel.this);
+					}
+					
+				};
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getBacklogQuery() != null);
+			}
+			
+		});
 		add(new Label("count", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -47,7 +88,12 @@ abstract class BacklogColumnPanel extends Panel {
 			
 		});
 		
-		add(new CardListPanel("body") {
+		setOutputMarkupId(true);
+	}
+
+	@Override
+	protected void onBeforeRender() {
+		addOrReplace(new CardListPanel("body") {
 
 			@Override
 			protected List<Issue> queryIssues(int page) {
@@ -60,9 +106,10 @@ abstract class BacklogColumnPanel extends Panel {
 			}
 			
 		});
-		setOutputMarkupId(true);
+		
+		super.onBeforeRender();
 	}
-	
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

@@ -556,3 +556,22 @@ a.input-clear {
 a.input-clear.input-group-clear {
 	right: 42px;
 }
+.message-box>.content, .confirm-box>.content {
+	font-size: 18px;
+	padding: 10px 20px;
+}
+.message-box>.actions, .confirm-box>.actions {
+	border-top: 1px solid #E0E0E0;
+	padding: 12px;
+	text-align: center;
+}
+.confirm-box>.actions {
+	text-align: right;
+}
+.confirm-box>.actions>* {
+	margin-right: 8px;
+}
+
+.avatar+.name {
+	margin-left: 4px !important; 
+}

@@ -54,7 +54,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
@@ -76,10 +75,10 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
-import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
+import io.onedev.server.web.component.issuestate.IssueStateLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.milestoneprogress.MilestoneProgressBar;
@@ -276,8 +275,9 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
-							Serializable fieldBean = getIssueFieldUnaryManager().readFields(getIssue());
-							Set<String> excludedFields = getIssueFieldUnaryManager().getExcludedProperties(getIssue(), transition.getToState());
+							Class<?> fieldBeanClass = getProject().defineIssueFieldBeanClass(true);
+							Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass);
+							Collection<String> excludedFields = getIssue().getExcludedFields(fieldBean.getClass(), transition.getToState());
 
 							Form<?> form = new Form<Void>("form") {
 
@@ -321,7 +321,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 									if (toStateSpec == null)
 										throw new OneException("Unable to find state spec: " + transition.getToState());
 								
-									getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldBean,  
+									getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldBean, 
 											toStateSpec.getFields(), comment);
 								
 									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
@@ -593,7 +593,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				Fragment fragment = new Fragment(id, "fieldEditFrag", IssueDetailPage.this);
 				Form<?> form = new Form<Void>("form");
 
-				Serializable fieldBean = OneDev.getInstance(IssueFieldUnaryManager.class).readFields(getIssue()); 
+				Class<?> fieldBeanClass = getProject().defineIssueFieldBeanClass(true);
+				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass); 
 				
 				Map<String, PropertyDescriptor> propertyDescriptors = 
 						new BeanDescriptor(fieldBean.getClass()).getMapOfDisplayNameToPropertyDescriptor();
@@ -1028,10 +1029,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		return OneDev.getInstance(IssueChangeManager.class);
 	}
 
-	private IssueFieldUnaryManager getIssueFieldUnaryManager() {
-		return OneDev.getInstance(IssueFieldUnaryManager.class);
-	}
-	
 	private IssueManager getIssueManager() {
 		return OneDev.getInstance(IssueManager.class);
 	}

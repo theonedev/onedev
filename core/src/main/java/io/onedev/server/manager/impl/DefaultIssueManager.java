@@ -1,6 +1,5 @@
 package io.onedev.server.manager.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,7 +68,7 @@ import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedState
 @Singleton
 public class DefaultIssueManager extends AbstractEntityManager<Issue> implements IssueManager {
 
-	private final IssueFieldUnaryManager issueFieldManager;
+	private final IssueFieldUnaryManager issueFieldUnaryManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
@@ -78,10 +77,10 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@Inject
-	public DefaultIssueManager(Dao dao, IssueFieldUnaryManager issueFieldManager, 
+	public DefaultIssueManager(Dao dao, IssueFieldUnaryManager issueFieldUnaryManager, 
 			IssueQuerySettingManager issueQuerySettingManager, ListenerRegistry listenerRegistry) {
 		super(dao);
-		this.issueFieldManager = issueFieldManager;
+		this.issueFieldUnaryManager = issueFieldUnaryManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
 		this.listenerRegistry = listenerRegistry;
 	}
@@ -97,7 +96,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	@Transactional
 	@Override
-	public void open(Issue issue, Serializable fieldBean) {
+	public void open(Issue issue) {
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setAction("submitted");
 		lastActivity.setUser(issue.getSubmitter());
@@ -106,8 +105,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		issue.setNumber(getNextNumber(issue.getProject()));
 		save(issue);
 
-		StateSpec initialState = issue.getProject().getIssueWorkflow().getInitialStateSpec();
-		issueFieldManager.writeFields(issue, fieldBean, initialState.getFields());
+		issueFieldUnaryManager.writeFields(issue);
 		
 		listenerRegistry.post(new IssueOpened(issue));
 	}
@@ -193,7 +191,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		query.setMaxResults(maxResults);
 		List<Issue> issues = query.getResultList();
 		if (!issues.isEmpty())
-			issueFieldManager.populateFields(issues);
+			issueFieldUnaryManager.populateFields(issues);
 		
 		return issues;
 	}
@@ -688,4 +686,5 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 	}
 	*/
+
 }

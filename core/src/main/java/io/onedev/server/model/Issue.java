@@ -1,12 +1,16 @@
 package io.onedev.server.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -23,20 +27,31 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.IssueField;
+import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.OneContext;
+import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
 
 /**
@@ -57,6 +72,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class Issue extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(Issue.class);
 	
 	public static final Map<String, String> BUILTIN_FIELDS = new LinkedHashMap<>();
 	
@@ -374,6 +391,118 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@Nullable
 	public String getMilestoneName() {
 		return getMilestone()!=null? getMilestone().getName():null;
+	}
+
+	public Collection<String> getExcludedFields(Class<?> fieldBeanClass, String state) {
+		Map<String, PropertyDescriptor> propertyDescriptors = 
+				new BeanDescriptor(fieldBeanClass).getMapOfDisplayNameToPropertyDescriptor();
+		StateSpec stateSpec = getProject().getIssueWorkflow().getStateSpec(state);
+		if (stateSpec == null)
+			throw new OneException("Unable to find state spec: " + state);
+		Set<String> excludedProperties = new HashSet<>();
+		for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
+			if (!stateSpec.getFields().contains(fieldSpec.getName()) 
+					|| getEffectiveFields().containsKey(fieldSpec.getName())) { 
+				excludedProperties.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
+			}
+		}
+		return excludedProperties;
+	}
+	
+	public Serializable getFieldBean(Class<?> fieldBeanClass) {
+		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBeanClass);
+		
+		Map<String, PropertyDescriptor> propertyDescriptors = beanDescriptor.getMapOfDisplayNameToPropertyDescriptor();
+			
+		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
+
+		for (Map.Entry<String, IssueField> entry: getEffectiveFields().entrySet()) {
+			List<String> strings = entry.getValue().getValues();
+			Collections.sort(strings);
+			
+			InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(entry.getKey());
+			if (fieldSpec != null) {
+				try {
+					Object fieldValue;
+					if (!strings.isEmpty())
+						fieldValue = fieldSpec.convertToObject(strings);
+					else
+						fieldValue = null;
+					propertyDescriptors.get(fieldSpec.getName()).setPropertyValue(fieldBean, fieldValue);
+				} catch (Exception e) {
+					logger.error("Error populating bean for field: " + fieldSpec.getName(), e);
+				}
+			}
+		}
+		
+		return fieldBean;
+	}
+	
+	public void setFieldBean(Serializable fieldBean, Collection<String> fieldNames) {
+		for (Iterator<IssueFieldUnary> it = getFieldUnaries().iterator(); it.hasNext();) {
+			if (fieldNames.contains(it.next().getName()))
+				it.remove();
+		}
+		
+		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
+
+		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
+			String fieldName = propertyDescriptor.getDisplayName();
+			if (fieldNames.contains(fieldName)) {
+				Object fieldValue = propertyDescriptor.getPropertyValue(fieldBean);
+				InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(fieldName);
+				if (fieldSpec != null) {
+					long ordinal = fieldSpec.getOrdinal(new OneContext() {
+
+						@Override
+						public Project getProject() {
+							return Issue.this.getProject();
+						}
+
+						@Override
+						public EditContext getEditContext(int level) {
+							return new EditContext() {
+
+								@Override
+								public Object getInputValue(String name) {
+									return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
+								}
+								
+							};
+						}
+
+						@Override
+						public InputContext getInputContext() {
+							throw new UnsupportedOperationException();
+						}
+						
+					}, fieldValue);
+
+					IssueFieldUnary field = new IssueFieldUnary();
+					field.setIssue(this);
+					field.setName(fieldName);
+					field.setOrdinal(ordinal);
+					field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
+					
+					if (fieldValue != null) {
+						List<String> strings = fieldSpec.convertToStrings(fieldValue);
+						if (!strings.isEmpty()) {
+							for (String string: strings) {
+								IssueFieldUnary cloned = (IssueFieldUnary) SerializationUtils.clone(field);
+								cloned.setIssue(this);
+								cloned.setValue(string);
+								getFieldUnaries().add(cloned);
+							}
+						} else {
+							getFieldUnaries().add(field);
+						}
+					} else {
+						getFieldUnaries().add(field);
+					}
+				}
+			}
+		}
+		
 	}
 	
 }

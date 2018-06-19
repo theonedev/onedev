@@ -71,4 +71,9 @@ abstract class CardListPanel extends Panel {
 	}
 
 	protected abstract List<Issue> queryIssues(int page);
+
+	public void addCard(AjaxRequestTarget target, Issue issue) {
+		
+	}
+	
 }

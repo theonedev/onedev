@@ -23,12 +23,14 @@
 		</form>	
 	</wicket:fragment>
 	<wicket:fragment wicket:id="confirmCloseWithoutOpenIssuesFrag">
-		<div class="modal-body">
-			<h4>Do you really want to close milestone &quot;<span wicket:id="milestone"></span>&quot;?</h4>
-		</div>
-		<div class="modal-footer clearfix">
-			<a wicket:id="ok" class="btn btn-primary">Ok</a>
-			<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+		<div class="confirm-box">
+			<div class="content">
+				Do you really want to close milestone &quot;<span wicket:id="milestone"></span>&quot;?
+			</div>
+			<div class="actions">
+				<a wicket:id="ok" class="btn btn-primary">Ok</a>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="confirmDeleteWithIssuesFrag">
@@ -49,12 +51,14 @@
 		</form>	
 	</wicket:fragment>
 	<wicket:fragment wicket:id="confirmDeleteWithoutIssuesFrag">
-		<div class="modal-body">
-			<h4>Do you really want to delete milestone &quot;<span wicket:id="milestone"></span>&quot;?</h4>
-		</div>
-		<div class="modal-footer clearfix">
-			<a wicket:id="ok" class="btn btn-primary">Ok</a>
-			<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+		<div class="confirm-box">
+			<div class="content">
+				Do you really want to delete milestone &quot;<span wicket:id="milestone"></span>&quot;?
+			</div>
+			<div class="actions">
+				<a wicket:id="ok" class="btn btn-primary">Ok</a>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
 		</div>
 	</wicket:fragment>
 </wicket:panel>

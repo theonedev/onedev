@@ -1,6 +1,5 @@
 package io.onedev.server.manager;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,7 @@ public interface IssueManager extends EntityManager<Issue> {
     @Nullable
     Issue find(Project target, long number);
     
-	void open(Issue issue, Serializable fieldBean);
+	void open(Issue issue);
 	
 	List<Issue> query(Project project, IssueQuery issueQuery, int firstResult, int maxResults);
 	

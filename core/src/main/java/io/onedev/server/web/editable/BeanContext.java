@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,7 +23,7 @@ public class BeanContext implements Serializable {
 		descriptor = new BeanDescriptor(beanClass, Sets.newHashSet());
 	}
 	
-	public BeanContext(Class<?> beanClass, Set<String> excludedProperties) {
+	public BeanContext(Class<?> beanClass, Collection<String> excludedProperties) {
 		descriptor = new BeanDescriptor(beanClass, excludedProperties);
 	}
 	
@@ -90,7 +91,7 @@ public class BeanContext implements Serializable {
 	}
 	
 	public static BeanEditor editBean(String componentId, final Serializable bean, 
-			Set<String> excludedProperties) {
+			Collection<String> excludedProperties) {
 		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override

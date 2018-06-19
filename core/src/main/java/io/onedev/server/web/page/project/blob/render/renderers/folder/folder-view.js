@@ -21,11 +21,14 @@ onedev.server.folderView = function(containerId, lastCommitsUrl) {
 					var lastCommit = lastCommits[path];
 
 					if (lastCommit) {
-						var html = "<img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/> ";
-						if (lastCommit.authorUrl)
-							html += "<a href='" + lastCommit.authorUrl + "'>" + lastCommit.authorName + "</a>";
-						else
-							html += "<span>" + lastCommit.authorName + "</span>";
+						var html;
+						if (lastCommit.authorUrl) {
+							html = "<a href='" + lastCommit.authorUrl + "' class='avatar'><img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/></a>";
+							html += "<a href='" + lastCommit.authorUrl + "' class='name'>" + lastCommit.authorName + "</a>";
+						} else {
+							html = "<img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/> ";
+							html += "<span class='name'>" + lastCommit.authorName + "</span>";
+						}
 						
 						$row.children(".last-commit.author").empty().append(html);
 						$row.children(".last-commit.when").append("<span>" + lastCommit.when + "</span>");

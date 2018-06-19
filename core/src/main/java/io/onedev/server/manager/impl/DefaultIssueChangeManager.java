@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -131,9 +130,10 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Override
 	public void changeFields(Issue issue, Serializable fieldBean, Collection<String> fieldNames) {
 		Map<String, IssueField> prevFields = issue.getEffectiveFields(); 
-		issueFieldUnaryManager.writeFields(issue, fieldBean, fieldNames);
-
+		issue.setFieldBean(fieldBean, fieldNames);
 		if (!prevFields.equals(issue.getEffectiveFields())) {
+			issueFieldUnaryManager.writeFields(issue);
+			
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setAction("changed fields");
 			lastActivity.setDate(new Date());
@@ -154,13 +154,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	@Transactional
 	@Override
-	public void changeState(Issue issue, String state, Serializable fieldBean, 
-			Collection<String> fieldNames, @Nullable String comment) {
+	public void changeState(Issue issue, String state, Serializable fieldBean, Collection<String> fieldNames, 
+			@Nullable String comment) {
 		String prevState = issue.getState();
 		if (!prevState.equals(state)) {
 			Map<String, IssueField> prevFields = issue.getEffectiveFields();
 			issue.setState(state);
-			issueFieldUnaryManager.writeFields(issue, fieldBean, fieldNames);
+			issue.setFieldBean(fieldBean, fieldNames);
+			issueFieldUnaryManager.writeFields(issue);
 
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setAction("changed state to \"" + issue.getState() + "\"");
@@ -183,8 +184,9 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	@Transactional
 	@Override
-	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Optional<Milestone> milestone, 
-			Serializable fieldBean, Set<String> fieldNames, @Nullable String comment) {
+	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
+			@Nullable Optional<Milestone> milestone, Serializable fieldBean, 
+			Collection<String> fieldNames, @Nullable String comment) {
 		while (issues.hasNext()) {
 			Issue issue = issues.next();
 			String prevState = issue.getState();
@@ -194,8 +196,8 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 				issue.setState(state);
 			if (milestone != null)
 				issue.setMilestone(milestone.orNull());
-			
-			issueFieldUnaryManager.writeFields(issue, fieldBean, fieldNames);
+			issue.setFieldBean(fieldBean, fieldNames);
+			issueFieldUnaryManager.writeFields(issue);
 
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setAction("batch edited issue");

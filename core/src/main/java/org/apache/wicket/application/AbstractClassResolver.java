@@ -29,8 +29,7 @@ import org.apache.wicket.Application;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.util.collections.UrlExternalFormComparator;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueFieldUnaryManager;
+import io.onedev.server.model.Project;
 
 /**
  * An abstract implementation of a {@link IClassResolver} which uses a {@link ClassLoader} for
@@ -59,7 +58,7 @@ public abstract class AbstractClassResolver implements IClassResolver
 	@Override
 	public final Class<?> resolveClass(final String className) throws ClassNotFoundException
 	{
-		Class<?> clazz = OneDev.getInstance(IssueFieldUnaryManager.class).loadFieldBeanClass(className, true); 
+		Class<?> clazz = Project.loadIssueFieldBeanClass(className); 
 		
 		if (clazz != null)
 			return clazz;

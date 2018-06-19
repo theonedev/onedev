@@ -1,6 +1,8 @@
-package io.onedev.server.web.component;
+package io.onedev.server.web.component.issuestate;
 
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
@@ -36,6 +38,14 @@ public class IssueStateLabel extends Label {
 			add(AttributeAppender.append("style", style));
 			add(AttributeAppender.append("title", "State"));
 		}
+		
+		add(AttributeAppender.append("class", "issue-state"));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new IssueStateCssResourceReference()));
 	}
 
 }

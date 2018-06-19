@@ -51,9 +51,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
-import io.onedev.server.web.component.IssueStateLabel;
+import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.issuestate.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -405,6 +406,19 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		
 		List<IColumn<Issue, Void>> columns = new ArrayList<>();
 		
+		columns.add(new AbstractColumn<Issue, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId, IModel<Issue> rowModel) {
+				cellItem.add(new Label(componentId, ""));
+			}
+
+			@Override
+			public String getCssClass() {
+				return "new-indicator";
+			}
+			
+		});
 		if (SecurityUtils.canManage(getProject())) {
 			columns.add(selectionColumn = new SelectionColumn<Issue, Void>() {
 
@@ -470,7 +484,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						Issue issue = rowModel.getObject();
 						Fragment fragment = new Fragment(componentId, "userFrag", IssueListPanel.this);
 						User submitter = User.getForDisplay(issue.getSubmitter(), issue.getSubmitterName());
-						fragment.add(new UserLink("link", submitter));
+						fragment.add(new AvatarLink("avatar", submitter));
+						fragment.add(new UserLink("name", submitter));
 						cellItem.add(fragment);
 					}
 				});

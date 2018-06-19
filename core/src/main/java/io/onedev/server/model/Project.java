@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -87,6 +88,7 @@ import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
@@ -108,6 +110,8 @@ public class Project extends AbstractEntity {
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
 	
 	public static final int MAX_UPLOAD_SIZE = 10; // In mega bytes
+	
+	public static final String ISSUE_FIELD_BEAN_PREFIX = "IssueFieldBean";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
@@ -1041,6 +1045,24 @@ public class Project extends AbstractEntity {
 				return milestone;
 		}
 		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Class<? extends Serializable> defineIssueFieldBeanClass(boolean setDefaultValue) {
+		String className = ISSUE_FIELD_BEAN_PREFIX + "_" + setDefaultValue + "_" + getId();
+		return (Class<? extends Serializable>) InputSpec.defineClass(className, getIssueWorkflow().getFieldSpecs(), setDefaultValue);
+	}
+	
+	@Nullable
+	public static Class<? extends Serializable> loadIssueFieldBeanClass(String className) {
+		if (className.startsWith(ISSUE_FIELD_BEAN_PREFIX)) {
+			String tempStr = className.substring(ISSUE_FIELD_BEAN_PREFIX.length()+1);
+			boolean setDefaultValue = Boolean.parseBoolean(StringUtils.substringBefore(tempStr, "_"));
+			Long projectId = Long.parseLong(StringUtils.substringAfter(tempStr, "_"));
+			return OneDev.getInstance(ProjectManager.class).load(projectId).defineIssueFieldBeanClass(setDefaultValue);
+		} else {
+			return null;
+		}
 	}
 	
 }

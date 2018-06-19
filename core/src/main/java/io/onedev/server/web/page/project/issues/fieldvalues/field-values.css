@@ -1,14 +1,17 @@
 .field-values .issue a {
 	margin-right: 4px;
 }
-.field-values .avatar {
-	margin-left: 4px;
+.field-values .issue .issue-state {
+	font-size: 11px;
 }
-.field-values>.has-color {
-	margin-bottom: 4px;
+.field-values .has-color {
+	margin-bottom: 8px;
+}
+.field-values .has-color:last-child {
+	margin-bottom: 0;
+}
+.field-values .has-color span {
 	border-radius: 3px;
 	padding: 2px 4px;
-}
-.field-values>.has-color:last-child {
-	margin-bottom: 0;
+	font-weight: bold;
 }

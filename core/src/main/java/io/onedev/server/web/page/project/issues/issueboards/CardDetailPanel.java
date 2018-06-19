@@ -7,11 +7,9 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -26,13 +24,12 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.IssueStateLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
+import io.onedev.server.web.component.issuestate.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import jersey.repackaged.com.google.common.collect.Lists;
 
@@ -51,10 +48,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Link<Void> link = new BookmarkablePageLink<Void>("number", IssueDetailPage.class, 
-				IssueDetailPage.paramsOf(getIssue(), null));
-		link.add(new Label("label", "#" + getIssue().getNumber()));
-		add(link);
+		add(new Label("number", "#" + getIssue().getNumber()));
 		
 		add(new Label("title", getIssue().getTitle()));
 
@@ -100,8 +94,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 			private Component renderField(String componentId, String fieldName) {
 				switch (fieldName) {
 				case Issue.STATE:
-					return new IssueStateLabel(componentId, CardDetailPanel.this.getModel())
-							.add(AttributeAppender.append("class", "state"));
+					return new IssueStateLabel(componentId, CardDetailPanel.this.getModel());
 				case Issue.SUBMITTER:
 					Fragment fragment = new Fragment(componentId, "userFrag", CardDetailPanel.this);
 					fragment.add(new UserLink("name", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));

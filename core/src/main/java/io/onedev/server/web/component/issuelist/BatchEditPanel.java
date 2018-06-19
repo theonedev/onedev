@@ -28,7 +28,6 @@ import com.google.common.collect.Lists;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -165,7 +164,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		
 		builtInFieldsBean = new BuiltInFieldsBean();
 		try {
-			customFieldsBean = OneDev.getInstance(IssueFieldUnaryManager.class).defineFieldBeanClass(getProject(), false).newInstance();
+			customFieldsBean = getProject().defineIssueFieldBeanClass(false).newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -231,8 +230,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						Set<String> fieldNames = new HashSet<>(selectedFields);
 						fieldNames.remove(Issue.STATE);
 						fieldNames.remove(Issue.MILESTONE);
-						OneDev.getInstance(IssueChangeManager.class).batchUpdate(getIssueIterator(), state, milestone, 
-								customFieldsBean, fieldNames, comment);
+						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
+								getIssueIterator(), state, milestone, customFieldsBean, fieldNames, comment);
 						onUpdated(target);
 					}
 					

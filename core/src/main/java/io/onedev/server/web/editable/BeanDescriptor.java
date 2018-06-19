@@ -3,10 +3,10 @@ package io.onedev.server.web.editable;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -27,7 +27,7 @@ public class BeanDescriptor implements Serializable {
 		this(beanClass, Sets.newHashSet());
 	}
 	
-	public BeanDescriptor(Class<?> beanClass, Set<String> excludedProperties) {
+	public BeanDescriptor(Class<?> beanClass, Collection<String> excludedProperties) {
 		this.beanClass = beanClass;
 		
 		propertyDescriptors = new ArrayList<>();

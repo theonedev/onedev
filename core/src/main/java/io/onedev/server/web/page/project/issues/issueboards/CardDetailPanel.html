@@ -1,11 +1,13 @@
 <wicket:panel>
 	<div class="board-card-detail">
-		<div class="head">
-			<a wicket:id="number" class="number"><span wicket:id="label"></span></a>
-			<span wicket:id="title" class="title"></span>
-			<a wicket:id="close" class="close">x</a>
+		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
+			<h4 id="modal-title" class="modal-title">
+				<span wicket:id="number" class="number"></span>
+				<span wicket:id="title" class="title"></span>
+			</h4>
 		</div>
-		<div class="body">
+		<div class="modal-body">
 			<table>
 				<tr wicket:id="fieldPairs">
 					<td class="name">
@@ -27,7 +29,7 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="userFrag">
-		<a wicket:id="name"></a> 
 		<a wicket:id="avatar" class="avatar"></a>
+		<a wicket:id="name" class="name"></a> 
 	</wicket:fragment>
 </wicket:panel>

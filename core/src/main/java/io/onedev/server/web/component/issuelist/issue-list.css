@@ -21,15 +21,15 @@
 	color: #999;
 	cursor: default;
 }
-.issue-list>.body td.state div {
-	padding: 2px 4px;
-	border-radius: 3px;
-}
 .issue-list>.body td.custom-field {
 	white-space: nowrap;
 }
-.issue-list>.body tr.issue.new {
-	font-weight: bold;
+.issue-list>.body .new-indicator {
+	width: 4px;
+	padding: 0;
+}
+.issue-list>.body tr.issue.new td.new-indicator {
+	background: #4667EE;
 }
 .issue-batch-edit form .modal-body>div {
 	margin-bottom: 20px;

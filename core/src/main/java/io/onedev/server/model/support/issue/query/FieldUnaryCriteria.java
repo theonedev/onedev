@@ -63,6 +63,8 @@ public class FieldUnaryCriteria extends FieldCriteria {
 	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
 		if (operator == IssueQueryLexer.IsEmpty)
 			setFieldValue(fieldBean, null);
+		else if (operator == IssueQueryLexer.IsMe)
+			setFieldValue(fieldBean, SecurityUtils.getUser().getName());
 	}
 
 }
