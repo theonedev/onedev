@@ -1,8 +1,7 @@
 package io.onedev.server.manager;
 
-import java.io.Serializable;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -21,13 +20,11 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void changeMilestone(Issue issue, Milestone milestone);
 	
-	void changeFields(Issue issue, Serializable fieldBean, Collection<String> fieldNames);
+	void changeFields(Issue issue, Map<String, Object> fieldValues);
 	
-	void changeState(Issue issue, String state, Serializable fieldBean, Collection<String> fieldNames, 
-			@Nullable String comment);
+	void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment);
 	
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
-			@Nullable Optional<Milestone> milestone, Serializable fieldBean, 
-			Collection<String> fieldNames, @Nullable String comment);
+			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, @Nullable String comment);
 	
 }

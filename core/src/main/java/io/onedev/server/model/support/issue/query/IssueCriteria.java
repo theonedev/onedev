@@ -19,11 +19,11 @@ public abstract class IssueCriteria implements Serializable {
 	
 	public abstract Predicate getPredicate(Project project, QueryBuildContext context);
 
-	public final void populate(Issue issue, Serializable fieldBean) {
-		populate(issue, fieldBean, new HashSet<>());
+	public final void fill(Issue issue) {
+		fill(issue, new HashSet<>());
 	}
 	
-	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+	public void fill(Issue issue, Set<String> initedLists) {
 	}
 	
 	public abstract boolean matches(Issue issue);

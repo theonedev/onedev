@@ -21,6 +21,8 @@
 	color: #999;
 	cursor: default;
 }
+.issue-list>.body td.submitter,
+.issue-list>.body th.custom-field, 
 .issue-list>.body td.custom-field {
 	white-space: nowrap;
 }

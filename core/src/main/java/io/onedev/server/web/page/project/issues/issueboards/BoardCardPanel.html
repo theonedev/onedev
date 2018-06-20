@@ -1,6 +1,11 @@
 <wicket:panel>
-	<a wicket:id="number" class="number"><span wicket:id="label"></span></a>
-	<span wicket:id="title" class="title"></span>
-	<div wicket:id="state" class="state"></div>
-	<a wicket:id="detail" class="detail" title="Click to show more information"><i class="fa fa-info-circle"></i></a>
+	<div class="head clearfix">
+		<a wicket:id="number" class="number pull-left"><span wicket:id="label"></span></a>
+		<div wicket:id="state" class="state pull-left"></div>
+		<a wicket:id="detail" class="detail pull-left" title="Click to show more information"><i class="fa fa-info-circle"></i></a>
+		<div class="pull-right avatars">
+			<a wicket:id="avatars" class="avatar"></a>
+		</div>
+	</div>
+	<div wicket:id="body" class="body"></div>
 </wicket:panel>

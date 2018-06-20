@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.wicket.AttributeModifier;
@@ -40,6 +41,7 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.util.IssueFieldBeanUtils;
 import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
@@ -164,7 +166,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		
 		builtInFieldsBean = new BuiltInFieldsBean();
 		try {
-			customFieldsBean = getProject().defineIssueFieldBeanClass(false).newInstance();
+			customFieldsBean = IssueFieldBeanUtils.defineBeanClass(getProject(), false).newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -230,8 +232,9 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						Set<String> fieldNames = new HashSet<>(selectedFields);
 						fieldNames.remove(Issue.STATE);
 						fieldNames.remove(Issue.MILESTONE);
+						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(customFieldsBean, fieldNames);
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
-								getIssueIterator(), state, milestone, customFieldsBean, fieldNames, comment);
+								getIssueIterator(), state, milestone, fieldValues, comment);
 						onUpdated(target);
 					}
 					

@@ -45,9 +45,6 @@ import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
@@ -408,6 +405,35 @@ public class Issue extends AbstractEntity implements Referenceable {
 		}
 		return excludedProperties;
 	}
+
+	@Nullable
+	public Object getFieldValue(String fieldName) {
+		IssueField field = getEffectiveFields().get(fieldName);
+		
+		if (field != null) {
+			List<String> strings = field.getValues();
+			Collections.sort(strings);
+			
+			InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(fieldName);
+			if (fieldSpec != null) {
+				try {
+					if (!strings.isEmpty())
+						return fieldSpec.convertToObject(strings);
+				} catch (Exception e) {
+					logger.error("Error populating bean for field: " + fieldSpec.getName(), e);
+				}
+			} 
+		} 
+		return null;
+	}
+	
+	public long getFieldOrdinal(String fieldName, Object fieldValue) {
+		InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(fieldName);
+		if (fieldSpec != null) 
+			return fieldSpec.getOrdinal(fieldValue);
+		else 
+			return -1;
+	}
 	
 	public Serializable getFieldBean(Class<?> fieldBeanClass) {
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBeanClass);
@@ -417,92 +443,56 @@ public class Issue extends AbstractEntity implements Referenceable {
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 
 		for (Map.Entry<String, IssueField> entry: getEffectiveFields().entrySet()) {
-			List<String> strings = entry.getValue().getValues();
-			Collections.sort(strings);
-			
-			InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(entry.getKey());
-			if (fieldSpec != null) {
-				try {
-					Object fieldValue;
-					if (!strings.isEmpty())
-						fieldValue = fieldSpec.convertToObject(strings);
-					else
-						fieldValue = null;
-					propertyDescriptors.get(fieldSpec.getName()).setPropertyValue(fieldBean, fieldValue);
-				} catch (Exception e) {
-					logger.error("Error populating bean for field: " + fieldSpec.getName(), e);
-				}
-			}
+			String fieldName = entry.getKey();
+			propertyDescriptors.get(fieldName).setPropertyValue(fieldBean, getFieldValue(fieldName));
 		}
 		
 		return fieldBean;
 	}
 	
-	public void setFieldBean(Serializable fieldBean, Collection<String> fieldNames) {
+	public void setFieldValue(String fieldName, @Nullable Object fieldValue) {
 		for (Iterator<IssueFieldUnary> it = getFieldUnaries().iterator(); it.hasNext();) {
-			if (fieldNames.contains(it.next().getName()))
+			if (fieldName.equals(it.next().getName()))
 				it.remove();
 		}
 		
-		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
+		InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(fieldName);
+		if (fieldSpec != null) {
+			long ordinal = getFieldOrdinal(fieldName, fieldValue);
 
+			IssueFieldUnary field = new IssueFieldUnary();
+			field.setIssue(this);
+			field.setName(fieldName);
+			field.setOrdinal(ordinal);
+			field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
+			
+			if (fieldValue != null) {
+				List<String> strings = fieldSpec.convertToStrings(fieldValue);
+				if (!strings.isEmpty()) {
+					for (String string: strings) {
+						IssueFieldUnary cloned = (IssueFieldUnary) SerializationUtils.clone(field);
+						cloned.setIssue(this);
+						cloned.setValue(string);
+						getFieldUnaries().add(cloned);
+					}
+				} else {
+					getFieldUnaries().add(field);
+				}
+			} else {
+				getFieldUnaries().add(field);
+			}
+		}
+	}
+	
+	public void setFieldBean(Serializable fieldBean, Collection<String> fieldNames) {
+		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
 		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
 			String fieldName = propertyDescriptor.getDisplayName();
 			if (fieldNames.contains(fieldName)) {
 				Object fieldValue = propertyDescriptor.getPropertyValue(fieldBean);
-				InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(fieldName);
-				if (fieldSpec != null) {
-					long ordinal = fieldSpec.getOrdinal(new OneContext() {
-
-						@Override
-						public Project getProject() {
-							return Issue.this.getProject();
-						}
-
-						@Override
-						public EditContext getEditContext(int level) {
-							return new EditContext() {
-
-								@Override
-								public Object getInputValue(String name) {
-									return beanDescriptor.getMapOfDisplayNameToPropertyDescriptor().get(name).getPropertyValue(fieldBean);
-								}
-								
-							};
-						}
-
-						@Override
-						public InputContext getInputContext() {
-							throw new UnsupportedOperationException();
-						}
-						
-					}, fieldValue);
-
-					IssueFieldUnary field = new IssueFieldUnary();
-					field.setIssue(this);
-					field.setName(fieldName);
-					field.setOrdinal(ordinal);
-					field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
-					
-					if (fieldValue != null) {
-						List<String> strings = fieldSpec.convertToStrings(fieldValue);
-						if (!strings.isEmpty()) {
-							for (String string: strings) {
-								IssueFieldUnary cloned = (IssueFieldUnary) SerializationUtils.clone(field);
-								cloned.setIssue(this);
-								cloned.setValue(string);
-								getFieldUnaries().add(cloned);
-							}
-						} else {
-							getFieldUnaries().add(field);
-						}
-					} else {
-						getFieldUnaries().add(field);
-					}
-				}
+				setFieldValue(fieldName, fieldValue);
 			}
 		}
-		
 	}
-	
+
 }

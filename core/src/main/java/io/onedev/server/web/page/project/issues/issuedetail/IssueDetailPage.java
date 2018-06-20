@@ -103,6 +103,7 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.IssueFieldBeanUtils;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.utils.StringUtils;
 
@@ -250,104 +251,85 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		});
 		for (TransitionSpec transition: transitions) {
-			if (transition.getFromStates().contains(getIssue().getState()) 
-					&& transition.getOnAction().getButton() != null 
-					&& getLoginUser() != null
-					&& transition.getOnAction().getButton().getAuthorized().matches(getProject(), getLoginUser())) {
-				boolean applicable = false;
-				if (transition.getPrerequisite() == null) {
-					applicable = true;
-				} else {
-					IssueField field = getIssue().getEffectiveFields().get(transition.getPrerequisite().getInputName());
-					List<String> fieldValues;
-					if (field != null)
-						fieldValues = field.getValues();
-					else
-						fieldValues = new ArrayList<>();
-					if (transition.getPrerequisite().matches(fieldValues))
-						applicable = true;
-				}
-				if (applicable) {
-					AjaxLink<Void> link = new AjaxLink<Void>(transitionsView.newChildId()) {
+			if (transition.canApplyTo(getIssue())) {
+				AjaxLink<Void> link = new AjaxLink<Void>(transitionsView.newChildId()) {
 
-						private String comment;
+					private String comment;
+					
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
+						Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject(), true);
+						Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass);
+						Collection<String> excludedFields = getIssue().getExcludedFields(fieldBeanClass, transition.getToState());
+
+						Form<?> form = new Form<Void>("form") {
+
+							@Override
+							protected void onError() {
+								super.onError();
+								RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+							}
+							
+						};
 						
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
-							Class<?> fieldBeanClass = getProject().defineIssueFieldBeanClass(true);
-							Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass);
-							Collection<String> excludedFields = getIssue().getExcludedFields(fieldBean.getClass(), transition.getToState());
-
-							Form<?> form = new Form<Void>("form") {
-
-								@Override
-								protected void onError() {
-									super.onError();
-									RequestCycle.get().find(AjaxRequestTarget.class).add(this);
-								}
-								
-							};
-							
-							BeanEditor editor = BeanContext.editBean("fields", fieldBean, excludedFields); 
-							form.add(editor);
-							
-							form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {
-
-								@Override
-								protected AttachmentSupport getAttachmentSupport() {
-									return new ProjectAttachmentSupport(getProject(), getIssue().getUUID());
-								}
-
-								@Override
-								protected Project getProject() {
-									return getIssue().getProject();
-								}
-								
-								@Override
-								protected List<AttributeModifier> getInputModifiers() {
-									return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
-								}
-								
-							});
-
-							form.add(new AjaxButton("save") {
-
-								@Override
-								protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-									super.onSubmit(target, form);
-
-									StateSpec toStateSpec = getProject().getIssueWorkflow().getStateSpec(transition.getToState());
-									if (toStateSpec == null)
-										throw new OneException("Unable to find state spec: " + transition.getToState());
-								
-									getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldBean, 
-											toStateSpec.getFields(), comment);
-								
-									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
-								}
-								
-							});
-							
-							form.add(new AjaxLink<Void>("cancel") {
-
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									newEmptyActionOptions(target);
-								}
-								
-							});
-							fragment.add(form);
-							
-							fragment.setOutputMarkupId(true);
-							IssueDetailPage.this.replace(fragment);
-							target.add(fragment);
-						}
+						BeanEditor editor = BeanContext.editBean("fields", fieldBean, excludedFields); 
+						form.add(editor);
 						
-					};
-					link.add(new Label("label", transition.getOnAction().getButton().getName()));
-					transitionsView.add(link);
-				}
+						form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {
+
+							@Override
+							protected AttachmentSupport getAttachmentSupport() {
+								return new ProjectAttachmentSupport(getProject(), getIssue().getUUID());
+							}
+
+							@Override
+							protected Project getProject() {
+								return getIssue().getProject();
+							}
+							
+							@Override
+							protected List<AttributeModifier> getInputModifiers() {
+								return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
+							}
+							
+						});
+
+						form.add(new AjaxButton("save") {
+
+							@Override
+							protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+								super.onSubmit(target, form);
+
+								StateSpec toStateSpec = getProject().getIssueWorkflow().getStateSpec(transition.getToState());
+								if (toStateSpec == null)
+									throw new OneException("Unable to find state spec: " + transition.getToState());
+								Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(fieldBean, toStateSpec.getFields());
+								getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldValues, comment);
+							
+								setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
+							}
+							
+						});
+						
+						form.add(new AjaxLink<Void>("cancel") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								newEmptyActionOptions(target);
+							}
+							
+						});
+						fragment.add(form);
+						
+						fragment.setOutputMarkupId(true);
+						IssueDetailPage.this.replace(fragment);
+						target.add(fragment);
+					}
+					
+				};
+				link.add(new Label("label", transition.getOnAction().getButton().getName()));
+				transitionsView.add(link);
 			}
 		}
 		
@@ -593,7 +575,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				Fragment fragment = new Fragment(id, "fieldEditFrag", IssueDetailPage.this);
 				Form<?> form = new Form<Void>("form");
 
-				Class<?> fieldBeanClass = getProject().defineIssueFieldBeanClass(true);
+				Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject(), true);
 				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass); 
 				
 				Map<String, PropertyDescriptor> propertyDescriptors = 
@@ -614,7 +596,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						super.onSubmit(target, form);
 
 						Collection<String> fieldNames = getIssue().getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
-						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldBean, fieldNames);
+						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(fieldBean, fieldNames);
+						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
 						modal.close();
 						target.add(fieldsContainer);
 					}

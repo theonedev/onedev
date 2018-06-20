@@ -1,17 +1,23 @@
-onedev.infiniteScroll = {
+onedev.server.infiniteScroll = {
 	init: function(containerId, callback, pageSize, itemSelector) {
 		var $container = $("#" + containerId);
 		$container.data("callback", callback);
-		$container.data("page", 1);
 		$container.data("pageSize", pageSize);
 		$container.data("itemSelector", itemSelector);
+		$container.data("hasMore", true);
 		$container.scroll(function() {
-			onedev.infiniteScroll.check(containerId);
+			onedev.server.infiniteScroll.check(containerId);
 		});
 		setTimeout(function() {
-			onedev.infiniteScroll.check(containerId);
+			onedev.server.infiniteScroll.check(containerId);
 		}, 0);
 	}, 
+	getItems: function($container) {
+		if ($container.data("itemSelector"))
+			return $container.find($container.data("itemSelector"));
+		else
+			return $container.children();
+	},
 	check: function(containerId) {
 		var $container = $("#" + containerId);
 		function isInViewPort($item) {
@@ -19,30 +25,21 @@ onedev.infiniteScroll = {
 			return $item.offset().top>$container.offset().top-tolerate
 					&& $item.offset().top+$item.outerHeight()<$container.offset().top+$container.outerHeight()+tolerate;
 		};
-		var $items;
-		if ($container.data("itemSelector"))
-			$items = $container.find($container.data("itemSelector"));
-		else
-			$items = $container.children();
+		var $items = onedev.server.infiniteScroll.getItems($container);
 		
 		var $lastItem = $items.last();
 		
-		var page = $container.data("page");
 		var pageSize = $container.data("pageSize");
-		if ($container.find(".loading-indicator").length == 0
-				&& $items.length == page*pageSize && isInViewPort($lastItem)) {
-			page++;
-			$container.data("page", page);
-			if ($container.is("ul")) {
-				$container.append("<li class='loading-indicator' style='text-align:center;'><img src='/img/ajax-indicator.gif'></img></li>");
-			} else if ($container.is("div")) {
-				$container.append("<div class='loading-indicator' style='text-align:center;'><img src='/img/ajax-indicator.gif'></img></div>");
-			} else {
-				var colspan = $lastItem.children().length;
-				$lastItem.parent().append("<tr class='loading-indicator'><td colspan='" + colspan + "' style='text-align:center;'><img src='/img/ajax-indicator.gif'></img></td></tr>");
-			}
-			$container.jumpIntoView(".loading-indicator");
-			$container.data("callback")(page);
+		if ($container.find(".loading-indicator").length == 0 && $container.data("hasMore") 
+				&& $lastItem.length != 0 && isInViewPort($lastItem)) {
+			$container.data("prevItems", $items.length);
+			$container.data("callback")($items.length, pageSize);
 		}
+	}, 
+	onAppended: function(containerId) {
+		var $container = $("#" + containerId);
+		var $items = onedev.server.infiniteScroll.getItems($container);
+		$container.data("hasMore", $items.length - $container.data("prevItems") >= $container.data("pageSize"));
+		onedev.server.infiniteScroll.check(containerId);
 	}
 };

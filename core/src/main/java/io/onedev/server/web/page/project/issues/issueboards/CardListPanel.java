@@ -25,7 +25,7 @@ abstract class CardListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		RepeatingView cardsView = new RepeatingView("cards");
-		for (Issue issue: queryIssues(0)) {
+		for (Issue issue: queryIssues(0, WebConstants.PAGE_SIZE)) {
 			Long issueId = issue.getId();
 			IModel<Issue> model = new LoadableDetachableModel<Issue>() {
 
@@ -47,8 +47,8 @@ abstract class CardListPanel extends Panel {
 			}
 
 			@Override
-			protected void appendPage(AjaxRequestTarget target, int page) {
-				for (Issue issue: queryIssues(page-1)) {
+			protected void appendMore(AjaxRequestTarget target, int offset, int count) {
+				for (Issue issue: queryIssues(offset, count)) {
 					Long issueId = issue.getId();
 					IModel<Issue> model = new LoadableDetachableModel<Issue>() {
 
@@ -70,10 +70,6 @@ abstract class CardListPanel extends Panel {
 		});
 	}
 
-	protected abstract List<Issue> queryIssues(int page);
+	protected abstract List<Issue> queryIssues(int offset, int count);
 
-	public void addCard(AjaxRequestTarget target, Issue issue) {
-		
-	}
-	
 }

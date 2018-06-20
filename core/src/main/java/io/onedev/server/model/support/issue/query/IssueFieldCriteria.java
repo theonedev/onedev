@@ -34,7 +34,7 @@ public class IssueFieldCriteria extends FieldCriteria {
 
 	@Override
 	public boolean matches(Issue issue) {
-		Object fieldValue = getFieldValue(issue);
+		Object fieldValue = issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.Is)
 			return Objects.equals(fieldValue, value);
 		else 

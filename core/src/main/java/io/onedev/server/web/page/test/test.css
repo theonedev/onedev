@@ -1,0 +1,5 @@
+.column {
+	border: 1px solid red;
+	height: 200px;
+	overflow: auto;
+}

@@ -37,7 +37,7 @@ public class DateFieldCriteria extends FieldCriteria {
 
 	@Override
 	public boolean matches(Issue issue) {
-		Date fieldValue = (Date) getFieldValue(issue);
+		Date fieldValue = (Date) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.IsBefore)
 			return fieldValue != null && fieldValue.before(value);
 		else

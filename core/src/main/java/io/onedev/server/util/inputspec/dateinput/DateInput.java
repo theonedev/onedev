@@ -9,7 +9,6 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.util.Constants;
-import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.dateinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -62,11 +61,11 @@ public class DateInput extends InputSpec {
 	}
 
 	@Override
-	public long getOrdinal(OneContext context, Object fieldValue) {
+	public long getOrdinal(Object fieldValue) {
 		if (fieldValue != null) 
 			return ((Date)fieldValue).getTime();
 		else
-			return super.getOrdinal(context, fieldValue);
+			return super.getOrdinal(fieldValue);
 	}
 
 }

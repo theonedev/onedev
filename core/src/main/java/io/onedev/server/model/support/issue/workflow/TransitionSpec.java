@@ -9,11 +9,14 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.authorized.SpecifiedGroup;
 import io.onedev.server.model.support.authorized.SpecifiedUser;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.action.IssueAction;
 import io.onedev.server.model.support.issue.workflow.action.PressButton;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
@@ -162,6 +165,25 @@ public class TransitionSpec implements Serializable {
 	@Override
 	public String toString() {
 		return StringUtils.join(getFromStates()) + "-->" + getToState();		
+	}
+
+	public boolean canApplyTo(Issue issue) {
+		if (getFromStates().contains(issue.getState()) && getOnAction().getButton() != null && SecurityUtils.getUser() != null
+				&& getOnAction().getButton().getAuthorized().matches(issue.getProject(), SecurityUtils.getUser())) {
+			if (getPrerequisite() == null) {
+				return true;
+			} else {
+				IssueField field = issue.getEffectiveFields().get(getPrerequisite().getInputName());
+				List<String> fieldValues;
+				if (field != null)
+					fieldValues = field.getValues();
+				else
+					fieldValues = new ArrayList<>();
+				if (getPrerequisite().matches(fieldValues))
+					return true;
+			}
+		}
+		return false;
 	}
 	
 }

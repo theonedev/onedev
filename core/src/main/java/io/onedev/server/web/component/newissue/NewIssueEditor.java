@@ -30,6 +30,7 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.util.IssueFieldBeanUtils;
 
 @SuppressWarnings("serial")
 public abstract class NewIssueEditor extends FormComponentPanel<Issue> implements InputContext {
@@ -52,15 +53,12 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 		Issue issue = new Issue();
 		issue.setProject(getProject());
-		Serializable fieldBean;
-		try {
-			fieldBean = getProject().defineIssueFieldBeanClass(true).newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
 		
 		if (getTemplate() != null)
-			getTemplate().populate(issue, fieldBean);
+			getTemplate().fill(issue);
+		
+		Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject(), true);
+		Serializable fieldBean = issue.getFieldBean(fieldBeanClass);
 		
 		titleInput = new TextField<String>("title", Model.of("")); 
 		titleInput.setRequired(true).setLabel(Model.of("Title"));

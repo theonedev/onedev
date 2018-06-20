@@ -19,6 +19,7 @@
 .input-assist .description {
 	color: #999;
 	text-align: right;
+	font-size: 12px;
 }
 .input-assist .suggestions {
 	max-height: 400px;

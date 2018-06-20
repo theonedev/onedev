@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.issue.query;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -60,22 +59,21 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean matches(Issue issue) {
+		Object fieldValue = issue.getFieldValue(getFieldName());
 		if (allowMultiple) {
-			List<String> fieldValue = (List<String>) getFieldValue(issue);
 			if (operator == IssueQueryLexer.Contains)
-				return fieldValue.contains(value);
+				return ((List<String>)fieldValue).contains(value);
 			else
-				return !fieldValue.contains(value);
+				return !((List<String>)fieldValue).contains(value);
 		} else {
-			Object fieldValue = getFieldValue(issue);
 			if (operator == IssueQueryLexer.Is)
 				return Objects.equals(fieldValue, value);
 			else if (operator == IssueQueryLexer.IsNot)
 				return !Objects.equals(fieldValue, value);
 			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return getFieldOrdinal(issue) > ordinal;
+				return issue.getFieldOrdinal(getFieldName(), fieldValue) > ordinal;
 			else
-				return getFieldOrdinal(issue) < ordinal;
+				return issue.getFieldOrdinal(getFieldName(), fieldValue) < ordinal;
 		}
 	}
 
@@ -112,25 +110,25 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+	public void fill(Issue issue, Set<String> initedLists) {
 		if (allowMultiple) {
 			if (operator == IssueQueryLexer.Contains) {
 				List list;
 				if (!initedLists.contains(getFieldName())) {
 					list = new ArrayList();
-					setFieldValue(fieldBean, list);
+					issue.setFieldValue(getFieldName(), list);
 					initedLists.add(getFieldName());
 				} else {
-					list = (List) getFieldValue(fieldBean);
+					list = (List) issue.getFieldValue(getFieldName());
 					if (list == null) {
 						list = new ArrayList();
-						setFieldValue(fieldBean, list);
+						issue.setFieldValue(getFieldName(), list);
 					}
 				}
 				list.add(value);
 			}
 		} else if (operator == IssueQueryLexer.Is) {
-			setFieldValue(fieldBean, value);
+			issue.setFieldValue(getFieldName(), value);
 		}
 	}
 

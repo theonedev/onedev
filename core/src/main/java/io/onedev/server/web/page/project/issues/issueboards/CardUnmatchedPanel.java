@@ -11,9 +11,9 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 
 @SuppressWarnings("serial")
-abstract class NewCardNotMatchingPanel extends Panel {
+abstract class CardUnmatchedPanel extends Panel {
 
-	public NewCardNotMatchingPanel(String id) {
+	public CardUnmatchedPanel(String id) {
 		super(id);
 	}
 

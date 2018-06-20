@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.issue.query;
 
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
@@ -37,9 +36,9 @@ public class BooleanFieldCriteria extends FieldCriteria {
 	@Override
 	public boolean matches(Issue issue) {
 		if (operator == IssueQueryLexer.Is)
-			return Objects.equals(value, getFieldValue(issue));
+			return Objects.equals(value, issue.getFieldValue(getFieldName()));
 		else
-			return !Objects.equals(value, getFieldValue(issue));
+			return !Objects.equals(value, issue.getFieldValue(getFieldName()));
 	}
 
 	@Override
@@ -53,9 +52,9 @@ public class BooleanFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+	public void fill(Issue issue, Set<String> initedLists) {
 		if (operator == IssueQueryLexer.Is)
-			setFieldValue(fieldBean, value);
+			issue.setFieldValue(getFieldName(), value);
 	}
 
 }

@@ -1,7 +1,5 @@
 package io.onedev.server.manager.impl;
 
-import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -128,9 +126,10 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	@Transactional
 	@Override
-	public void changeFields(Issue issue, Serializable fieldBean, Collection<String> fieldNames) {
+	public void changeFields(Issue issue, Map<String, Object> fieldValues) {
 		Map<String, IssueField> prevFields = issue.getEffectiveFields(); 
-		issue.setFieldBean(fieldBean, fieldNames);
+		for (Map.Entry<String, Object> entry: fieldValues.entrySet())
+			issue.setFieldValue(entry.getKey(), entry.getValue());
 		if (!prevFields.equals(issue.getEffectiveFields())) {
 			issueFieldUnaryManager.writeFields(issue);
 			
@@ -154,13 +153,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	@Transactional
 	@Override
-	public void changeState(Issue issue, String state, Serializable fieldBean, Collection<String> fieldNames, 
-			@Nullable String comment) {
+	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment) {
 		String prevState = issue.getState();
 		if (!prevState.equals(state)) {
 			Map<String, IssueField> prevFields = issue.getEffectiveFields();
 			issue.setState(state);
-			issue.setFieldBean(fieldBean, fieldNames);
+			for (Map.Entry<String, Object> entry: fieldValues.entrySet())
+				issue.setFieldValue(entry.getKey(), entry.getValue());
+			
 			issueFieldUnaryManager.writeFields(issue);
 
 			LastActivity lastActivity = new LastActivity();
@@ -185,8 +185,8 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Override
 	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
-			@Nullable Optional<Milestone> milestone, Serializable fieldBean, 
-			Collection<String> fieldNames, @Nullable String comment) {
+			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, 
+			@Nullable String comment) {
 		while (issues.hasNext()) {
 			Issue issue = issues.next();
 			String prevState = issue.getState();
@@ -196,7 +196,8 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 				issue.setState(state);
 			if (milestone != null)
 				issue.setMilestone(milestone.orNull());
-			issue.setFieldBean(fieldBean, fieldNames);
+			for (Map.Entry<String, Object> entry: fieldValues.entrySet())
+				issue.setFieldValue(entry.getKey(), entry.getValue());
 			issueFieldUnaryManager.writeFields(issue);
 
 			LastActivity lastActivity = new LastActivity();

@@ -121,17 +121,12 @@ public class ChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public long getOrdinal(OneContext context, Object fieldValue) {
+	public long getOrdinal(Object fieldValue) {
 		if (fieldValue != null) {
-			OneContext.push(context);
-			try {
-				List<String> choices = new ArrayList<>(getChoiceProvider().getChoices(false).keySet());
-				return choices.indexOf(fieldValue);
-			} finally {
-				OneContext.pop();
-			}
+			List<String> choices = new ArrayList<>(getChoiceProvider().getChoices(true).keySet());
+			return choices.indexOf(fieldValue);
 		} else {
-			return super.getOrdinal(context, fieldValue);
+			return super.getOrdinal(fieldValue);
 		}
 	}
 

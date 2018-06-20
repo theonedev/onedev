@@ -259,9 +259,8 @@ public abstract class RevisionSelector extends Panel {
 		return null;
 	}
 	
-	private List<String> getItemValues(String revInput, int page) {
+	private List<String> getItemValues(String revInput, int count) {
 		List<String> itemValues = new ArrayList<>();
-		int count = page*PAGE_SIZE;
 		if (StringUtils.isNotBlank(revInput)) {
 			revInput = revInput.trim().toLowerCase();
 			boolean found = false;
@@ -405,7 +404,7 @@ public abstract class RevisionSelector extends Panel {
 		itemsContainer.setOutputMarkupId(true);
 		RepeatingView itemsView;
 		itemsContainer.add(itemsView = new RepeatingView("items"));
-		List<String> itemValues = getItemValues(revInput, 1);
+		List<String> itemValues = getItemValues(revInput, PAGE_SIZE);
 		for (int i=0; i<itemValues.size(); i++) {
 			Component item = newItem(itemsView.newChildId(), itemValues.get(i));
 			if (i == 0)
@@ -415,10 +414,10 @@ public abstract class RevisionSelector extends Panel {
 		itemsContainer.add(new InfiniteScrollBehavior(PAGE_SIZE) {
 
 			@Override
-			protected void appendPage(AjaxRequestTarget target, int page) {
-				List<String> itemValues = getItemValues(revInput, page);
-				if (itemValues.size() > PAGE_SIZE*(page-1)) {
-					List<String> newItemValues = itemValues.subList(PAGE_SIZE*(page-1), itemValues.size());
+			protected void appendMore(AjaxRequestTarget target, int offset, int count) {
+				List<String> itemValues = getItemValues(revInput, offset+count);
+				if (itemValues.size() > offset) {
+					List<String> newItemValues = itemValues.subList(offset, itemValues.size());
 					for (String itemValue: newItemValues) {
 						Component item = newItem(itemsView.newChildId(), itemValue);
 						itemsView.add(item);

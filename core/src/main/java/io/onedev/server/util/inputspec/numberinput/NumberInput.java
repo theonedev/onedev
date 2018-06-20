@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.numberinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -89,11 +88,11 @@ public class NumberInput extends InputSpec {
 	}
 
 	@Override
-	public long getOrdinal(OneContext context, Object fieldValue) {
+	public long getOrdinal(Object fieldValue) {
 		if (fieldValue != null)
 			return (Integer)fieldValue;
 		else
-			return super.getOrdinal(context, fieldValue);
+			return super.getOrdinal(fieldValue);
 	}
 	
 }

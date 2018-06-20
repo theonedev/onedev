@@ -3,7 +3,6 @@ package io.onedev.server.util.inputspec.issuechoiceinput;
 import java.util.List;
 import java.util.Map;
 
-import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 import jersey.repackaged.com.google.common.collect.Lists;
@@ -44,11 +43,11 @@ public class IssueChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public long getOrdinal(OneContext context, Object fieldValue) {
+	public long getOrdinal(Object fieldValue) {
 		if (fieldValue != null)
 			return (Long) fieldValue;
 		else
-			return super.getOrdinal(context, fieldValue);
+			return super.getOrdinal(fieldValue);
 	}
 
 }

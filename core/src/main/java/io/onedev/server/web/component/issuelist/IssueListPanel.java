@@ -479,6 +479,11 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.SUBMITTER)) {
 
 					@Override
+					public String getCssClass() {
+						return "submitter";
+					}
+
+					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 							IModel<Issue> rowModel) {
 						Issue issue = rowModel.getObject();

@@ -60,8 +60,8 @@ class AssistPanel extends Panel {
 			}
 
 			@Override
-			protected void appendPage(AjaxRequestTarget target, int page) {
-				for (int i=(page-1)*PAGE_SIZE; i<page*PAGE_SIZE; i++) {
+			protected void appendMore(AjaxRequestTarget target, int offset, int count) {
+				for (int i=offset; i<offset+count; i++) {
 					if (i < suggestions.size()) {
 						InputCompletion suggestion = suggestions.get(i);
 						Component suggestionItem = newSuggestionItem(suggestionsView.newChildId(), suggestion);

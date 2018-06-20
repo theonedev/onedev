@@ -78,6 +78,8 @@ public class IssueBoardsPage extends IssuesPage {
 	
 	private final String backlogQuery;
 	
+	private RepeatingView columnsView;
+	
 	private final IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
 
 		@Override
@@ -477,7 +479,7 @@ public class IssueBoardsPage extends IssuesPage {
 			fragment.add(feedback = new NotificationPanel("feedback", IssueBoardsPage.this));
 			feedback.setOutputMarkupPlaceholderTag(true);
 			
-			RepeatingView columnsView = new RepeatingView("columns");
+			columnsView = new RepeatingView("columns");
 			if (backlog) {
 				columnsView.add(new BacklogColumnPanel("backlog") {
 
@@ -490,7 +492,7 @@ public class IssueBoardsPage extends IssuesPage {
 					protected IssueQuery getBacklogQuery() {
 						return parsedBacklogQueryModel.getObject();
 					}
-					
+
 				});
 			}
 			
@@ -541,7 +543,7 @@ public class IssueBoardsPage extends IssuesPage {
 			add(fragment);
 		}
 	}
-
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

@@ -75,7 +75,7 @@
 }
 #issue-boards>.body>.column {
 	flex: 1 1 auto;
-	min-width: 250px;
+	min-width: 300px;
 	height: 100%;
 	/* hack to makes all column of same width and same space */
 	padding-right: 20px;
@@ -103,8 +103,13 @@
 #issue-boards>.body>.column>.content>.body {
 	position: relative;
 	padding: 16px;
-	overflow: auto;
 	height: 100%;
+} 
+#issue-boards>.body>.column>.content>.body.issue-droppable.ui-droppable-active {
+	background: #FDF2C5;
+} 
+#issue-boards>.body>.column>.content>.body.issue-droppable.ui-droppable-hover {
+	background: #FAE280;
 } 
 #issue-boards>.body>.column>.content>.body>.loading-indicator {
 	margin-top: 8px;
@@ -112,38 +117,57 @@
 #issue-boards>.body>.column>.content>.body>.card {
 	margin-top: 16px;
 } 
-#issue-boards>.body>.column>.content>.body>.card:first-child {
+#issue-boards>.body>.column>.content>.body>.card.first {
 	margin-top: 0;
-} 
+}
 
-#issue-boards>.body>.column>.content>.body>.card {
+#issue-boards>.body .card {
 	border-radius: 4px;
-	padding: 8px 48px 8px 8px;
+	padding: 8px;
 	background: white;
 	position: relative;
-	box-shadow: 1px 1px 4px 1px rgba(0 ,0 ,0 ,0.1);	
-	cursor: move;
+	box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);	
 }
-#issue-boards>.body>.column>.content>.body>.card>.number {
+#issue-boards>.body .card.issue-dragging {
+	visibility: hidden;
+}
+#issue-boards>.body .card.ui-draggable-dragging {
+	box-shadow: 2px 2px 6px 2px rgba(0, 0, 0, 0.3);	
+}
+
+#issue-boards>.body .card {
+	font-size: 13px;
+}
+#issue-boards>.body .card .head {
+	margin-bottom: 8px;
+}
+#issue-boards>.body .card .head>* {
 	margin-right: 8px;
-	font-size: 12px;
-	line-height: 20px;
 }
-#issue-boards>.body>.column>.content>.body>.card>.state {
+#issue-boards>.body .card .head>.avatars {
+	margin-right: 0;
+}
+#issue-boards>.body .card .avatrs>.avatar {
+	margin-right: 4px;
+}
+#issue-boards>.body .card .avatars>.avatar:last-child {
+	margin-right: 0;
+}
+#issue-boards>.body .card .number {
+	color: #666;
+}
+#issue-boards>.body .card .state {
 	border-radius: 2px;
 	width: 12px;
 	height: 12px;
-	position: absolute;
-	right: 30px;
-	top: 12px;
+	margin-top: 3px;
 	cursor: default;
 }
-#issue-boards>.body>.column>.content>.body>.card>.detail {
-	position: absolute;
-	right: 8px;
-	top: 7px;
+#issue-boards>.body .card .detail {
 	color: #666;
 	text-decoration: none;
+	font-size: 14px;
+	margin-top: -1px;
 }
 
 .board-card-detail>.modal-header .number {
@@ -159,6 +183,9 @@
 	padding: 6px;
 	vertical-align: top;
 	white-space: nowrap;
+}
+.board-card-detail>.modal-body>table>tbody>tr>td.name {
+	color: #888;
 }
 .board-card-detail>.modal-body>table>tbody>tr>td.spacing {
 	width: 20px;

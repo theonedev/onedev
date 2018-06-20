@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.issue.query;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.criteria.Path;
@@ -59,7 +58,7 @@ public class MilestoneCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+	public void fill(Issue issue, Set<String> initedLists) {
 		if (operator == IssueQueryLexer.Is)
 			issue.setMilestone(issue.getProject().getMilestone(value));
 	}

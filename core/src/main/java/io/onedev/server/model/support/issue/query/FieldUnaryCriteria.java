@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.issue.query;
 
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
@@ -38,7 +37,7 @@ public class FieldUnaryCriteria extends FieldCriteria {
 
 	@Override
 	public boolean matches(Issue issue) {
-		Object fieldValue = getFieldValue(issue);
+		Object fieldValue = issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.IsEmpty)
 			return fieldValue == null;
 		else if (operator == IssueQueryLexer.IsNotEmpty)
@@ -60,11 +59,11 @@ public class FieldUnaryCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+	public void fill(Issue issue, Set<String> initedLists) {
 		if (operator == IssueQueryLexer.IsEmpty)
-			setFieldValue(fieldBean, null);
+			issue.setFieldValue(getFieldName(), null);
 		else if (operator == IssueQueryLexer.IsMe)
-			setFieldValue(fieldBean, SecurityUtils.getUser().getName());
+			issue.setFieldValue(getFieldName(), SecurityUtils.getUser().getName());
 	}
 
 }

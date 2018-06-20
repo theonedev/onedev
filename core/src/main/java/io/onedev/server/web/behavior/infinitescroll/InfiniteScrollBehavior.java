@@ -36,13 +36,17 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-		int page = params.getParameterValue("page").toInt();
-		target.prependJavaScript(String.format("$('#%s .loading-indicator').remove();", 
-				getComponent().getMarkupId()));
-		
-		appendPage(target, page);
+		int offset = params.getParameterValue("offset").toInt();
+		int count = params.getParameterValue("count").toInt();
 
-		target.appendJavaScript(String.format("onedev.infiniteScroll.check('%s');", 
+		appendMore(target, offset, count);
+
+		target.appendJavaScript(String.format("onedev.server.infiniteScroll.onAppended('%s');", 
+				getComponent().getMarkupId()));
+	}
+	
+	public void check(AjaxRequestTarget target) {
+		target.appendJavaScript(String.format("onedev.server.infiniteScroll.check('%s');", 
 				getComponent().getMarkupId()));
 	}
 	
@@ -51,7 +55,7 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 		return null;
 	}
 	
-	protected abstract void appendPage(AjaxRequestTarget target, int page);
+	protected abstract void appendMore(AjaxRequestTarget target, int offset, int count);
 	
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
@@ -63,8 +67,8 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 			itemSelector = "'"+JavaScriptEscape.escapeJavaScript(getItemSelector())+"'";
 		else
 			itemSelector = "undefined";
-		String script = String.format("onedev.infiniteScroll.init('%s', %s, %s, %s);", 
-				component.getMarkupId(true), getCallbackFunction(explicit("page")), 
+		String script = String.format("onedev.server.infiniteScroll.init('%s', %s, %s, %s);", 
+				component.getMarkupId(true), getCallbackFunction(explicit("offset"), explicit("count")), 
 				pageSize, itemSelector);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

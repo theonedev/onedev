@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.issue.query;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -129,9 +128,9 @@ public class AndCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public void populate(Issue issue, Serializable fieldBean, Set<String> initedLists) {
+	public void fill(Issue issue, Set<String> initedLists) {
 		for (IssueCriteria criteria: criterias)
-			criteria.populate(issue, fieldBean, initedLists);
+			criteria.fill(issue, initedLists);
 	}
 	
 }

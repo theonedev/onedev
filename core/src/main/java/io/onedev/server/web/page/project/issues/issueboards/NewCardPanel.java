@@ -59,7 +59,7 @@ abstract class NewCardPanel extends Panel {
 						
 						@Override
 						protected Component newContent(String id) {
-							return new NewCardNotMatchingPanel(id) {
+							return new CardUnmatchedPanel(id) {
 
 								@Override
 								protected Issue getIssue() {
