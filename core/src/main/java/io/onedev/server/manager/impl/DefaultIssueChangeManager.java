@@ -127,11 +127,10 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Override
 	public void changeFields(Issue issue, Map<String, Object> fieldValues) {
-		Map<String, IssueField> prevFields = issue.getEffectiveFields(); 
-		for (Map.Entry<String, Object> entry: fieldValues.entrySet())
-			issue.setFieldValue(entry.getKey(), entry.getValue());
-		if (!prevFields.equals(issue.getEffectiveFields())) {
-			issueFieldUnaryManager.writeFields(issue);
+		Map<String, IssueField> prevFields = issue.getFields(); 
+		issue.setFieldValues(fieldValues);
+		if (!prevFields.equals(issue.getFields())) {
+			issueFieldUnaryManager.saveFields(issue);
 			
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setAction("changed fields");
@@ -144,7 +143,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 			change.setIssue(issue);
 			change.setDate(new Date());
 			change.setUser(SecurityUtils.getUser());
-			change.setData(new FieldChangeData(prevFields, issue.getEffectiveFields()));
+			change.setData(new FieldChangeData(prevFields, issue.getFields()));
 			save(change);
 			
 			listenerRegistry.post(new IssueChanged(change));
@@ -156,12 +155,12 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment) {
 		String prevState = issue.getState();
 		if (!prevState.equals(state)) {
-			Map<String, IssueField> prevFields = issue.getEffectiveFields();
+			Map<String, IssueField> prevFields = issue.getFields();
 			issue.setState(state);
-			for (Map.Entry<String, Object> entry: fieldValues.entrySet())
-				issue.setFieldValue(entry.getKey(), entry.getValue());
+
+			issue.setFieldValues(fieldValues);
 			
-			issueFieldUnaryManager.writeFields(issue);
+			issueFieldUnaryManager.saveFields(issue);
 
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setAction("changed state to \"" + issue.getState() + "\"");
@@ -174,7 +173,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 			change.setIssue(issue);
 			change.setDate(new Date());
 			change.setUser(SecurityUtils.getUser());
-			change.setData(new StateChangeData(prevState, issue.getState(), prevFields, issue.getEffectiveFields(), comment));
+			change.setData(new StateChangeData(prevState, issue.getState(), prevFields, issue.getFields(), comment));
 			
 			save(change);
 			
@@ -191,14 +190,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 			Issue issue = issues.next();
 			String prevState = issue.getState();
 			Milestone prevMilestone = issue.getMilestone();
-			Map<String, IssueField> prevFields = issue.getEffectiveFields();
+			Map<String, IssueField> prevFields = issue.getFields();
 			if (state != null)
 				issue.setState(state);
 			if (milestone != null)
 				issue.setMilestone(milestone.orNull());
-			for (Map.Entry<String, Object> entry: fieldValues.entrySet())
-				issue.setFieldValue(entry.getKey(), entry.getValue());
-			issueFieldUnaryManager.writeFields(issue);
+			
+			issue.setFieldValues(fieldValues);
+			issueFieldUnaryManager.saveFields(issue);
 
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setAction("batch edited issue");
@@ -211,7 +210,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 			change.setIssue(issue);
 			change.setDate(new Date());
 			change.setUser(SecurityUtils.getUser());
-			change.setData(new BatchChangeData(prevState, issue.getState(), prevMilestone, issue.getMilestone(), prevFields, issue.getEffectiveFields(), comment));
+			change.setData(new BatchChangeData(prevState, issue.getState(), prevMilestone, issue.getMilestone(), prevFields, issue.getFields(), comment));
 			
 			save(change);
 			

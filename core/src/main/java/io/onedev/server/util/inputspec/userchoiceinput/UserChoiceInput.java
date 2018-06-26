@@ -59,7 +59,7 @@ public class UserChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue) {
+	public String getPropertyDef(Map<String, Integer> indexes) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "String");
@@ -67,7 +67,7 @@ public class UserChoiceInput extends InputSpec {
 		if (!isAllowEmpty())
 			buffer.append("    @NotEmpty\n");
 		appendChoiceProvider(buffer, index, "@UserChoice");
-		appendMethods(buffer, index, "String", choiceProvider, setDefaultValue?defaultValueProvider:null);
+		appendMethods(buffer, index, "String", choiceProvider, defaultValueProvider);
 		
 		return buffer.toString();
 	}

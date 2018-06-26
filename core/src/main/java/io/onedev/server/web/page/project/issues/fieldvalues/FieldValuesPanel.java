@@ -116,7 +116,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 
 	@Override
 	public Object getInputValue(String name) {
-		IssueField field = getIssue().getEffectiveFields().get(name);
+		IssueField field = getIssue().getFields().get(name);
 		InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(name);
 		if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
 			return fieldSpec.convertToObject(field.getValues());

@@ -114,7 +114,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
 				item.add(new Label("header", EditableUtils.getDisplayName(item.getModelObject().getPropertyGetter())));
-				item.add(AttributeAppender.append("class", " " + item.getModelObject().getPropertyName()));
+				item.add(AttributeAppender.append("class", "property-" + item.getModelObject().getPropertyName()));
 				
 				String required;
 				if (item.getModelObject().isPropertyRequired() && item.getModelObject().getPropertyClass() != boolean.class)
@@ -141,6 +141,12 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		WebMarkupContainer newRow = new WebMarkupContainer("newRow");
 		newRow.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
 		newRow.add(new AjaxButton("addElement") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("label", "Add " + EditableUtils.getDisplayName(elementClass)));
+			}
 
 			@SuppressWarnings("deprecation")
 			@Override
@@ -217,7 +223,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		
 		for (PropertyContext<Serializable> propertyContext: propertyContexts) {
 			WebMarkupContainer column = new WebMarkupContainer(columns.newChildId());
-			column.add(AttributeAppender.append("class", " " + propertyContext.getPropertyName()));
+			column.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 			columns.add(column);
 			
 			Serializable propertyValue = (Serializable) propertyContext.getPropertyValue(element);
@@ -227,6 +233,12 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		}
 		
 		row.add(new AjaxButton("deleteElement") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(AttributeAppender.replace("title", "Delete this " + EditableUtils.getDisplayName(elementClass).toLowerCase()));
+			}
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

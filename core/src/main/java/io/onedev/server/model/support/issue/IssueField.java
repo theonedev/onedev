@@ -1,22 +1,25 @@
 package io.onedev.server.model.support.issue;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.inputspec.InputSpec;
 
 public class IssueField implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(IssueField.class);
 
 	private final String name;
 	
@@ -67,41 +70,19 @@ public class IssueField implements Serializable {
 				.append(getValues())
 				.toHashCode();
 	}
-	
-	public boolean isVisible(Issue issue) {
-		return isVisible(issue, new HashSet<>());
-	}
-	
-	private boolean isVisible(Issue issue, Set<String> checkedFieldNames) {
-		if (!checkedFieldNames.contains(getName())) {
-			checkedFieldNames.add(getName());
-			
-			IssueWorkflow workflow = issue.getProject().getIssueWorkflow();
-			InputSpec fieldSpec = workflow.getFieldSpec(getName());
-			if (fieldSpec != null) {
-				if (fieldSpec.getShowCondition() != null) {
-					IssueField dependentField = issue.getEffectiveFields().get(fieldSpec.getShowCondition().getInputName());
-					if (dependentField != null) {
-						if (!dependentField.isVisible(issue, checkedFieldNames))
-							return false;
-						String value;
-						if (!dependentField.getValues().isEmpty())
-							value = dependentField.getValues().iterator().next();
-						else
-							value = null;
-						return fieldSpec.getShowCondition().getValueMatcher().matches(value);
-					} else {
-						return false;
-					}
-				} else {
-					return true;
-				}
-			} else {
-				return false;
+
+	@Nullable
+	public Object getValue(Project project) {
+		InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
+		if (fieldSpec != null) {
+			try {
+				if (!getValues().isEmpty())
+					return fieldSpec.convertToObject(getValues());
+			} catch (Exception e) {
+				logger.error("Error converting field values to object: " + name, e);
 			}
-		} else {
-			return false;
 		}
+		return null;
 	}
 	
 }

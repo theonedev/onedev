@@ -17,6 +17,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -45,6 +46,8 @@ import io.onedev.utils.ClassUtils;
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
+	private final Class<?> baseClass;
+	
 	private final List<Class<?>> implementations;
 	
 	private final boolean horizontal;
@@ -53,7 +56,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		super(id, propertyDescriptor, model);
 		
 		implementations = new ArrayList<>();
-		Class<?> baseClass = EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
+		baseClass = EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
 		Preconditions.checkNotNull(baseClass);
 		
 		ImplementationRegistry registry = AppLoader.getInstance(ImplementationRegistry.class);
@@ -143,6 +146,12 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		
 		table.add(new AjaxButton("addElement") {
 
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("label", "Add " + EditableUtils.getDisplayName(baseClass)));
+			}
+
 			@SuppressWarnings("deprecation")
 			@Override
 			public void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -229,6 +238,9 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		for (Class<?> each: implementations) 
 			implementationNames.add(getDisplayName(each));
 				
+		Component elementEditor = newElementEditor(element);
+		row.add(elementEditor);
+		
 		row.add(new DropDownChoice<String>("elementTypeSelector", new IModel<String>() {
 			
 			@Override
@@ -272,12 +284,15 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			
 		}));
 
-		Component elementEditor = newElementEditor(element);
-		row.add(elementEditor);
-		
 		row.add(new FencedFeedbackPanel("feedback", elementEditor));		
 
 		row.add(new AjaxButton("deleteElement") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(AttributeAppender.replace("title", "Delete this " + EditableUtils.getDisplayName(baseClass).toLowerCase()));
+			}
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

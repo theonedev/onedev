@@ -8,7 +8,7 @@ import io.onedev.server.web.editable.annotation.Color;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
-@Editable
+@Editable(name="Value")
 public class Choice implements Serializable {
 
 	private static final long serialVersionUID = 1L;

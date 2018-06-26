@@ -56,7 +56,7 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
     		@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor);
+				getSettings().configurePlaceholder(descriptor, this);
 			}
     		
     	};

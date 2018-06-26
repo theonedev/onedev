@@ -311,6 +311,11 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						return selectionColumn.getSelections().size();
 					}
 
+					@Override
+					protected IssueQuery getIssueQuery() {
+						return parsedQueryModel.getObject();
+					}
+
 				};
 			}
 			
@@ -354,6 +359,11 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					@Override
 					protected int getIssueCount() {
 						return (int) issuesTable.getItemCount();
+					}
+
+					@Override
+					protected IssueQuery getIssueQuery() {
+						return parsedQueryModel.getObject();
 					}
 
 				};
@@ -570,7 +580,11 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 
 							@Override
 							protected IssueField getField() {
-								return rowModel.getObject().getEffectiveFields().get(field);
+								Issue issue = rowModel.getObject();
+								if (issue.isFieldVisible(field, issue.getState()))
+									return issue.getFields().get(field);
+								else
+									return null;
 							}
 							
 						}.setRenderBodyOnly(true));

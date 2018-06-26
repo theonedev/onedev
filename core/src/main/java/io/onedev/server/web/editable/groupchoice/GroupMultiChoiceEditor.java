@@ -76,7 +76,7 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor);
+				getSettings().configurePlaceholder(descriptor, this);
 			}
 			
 		};

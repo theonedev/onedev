@@ -2,7 +2,6 @@ package io.onedev.server.model.support.issue.workflow;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -15,6 +14,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.exception.OneException;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.authorized.ProjectWriters;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQueryLexer;
@@ -141,24 +141,44 @@ public class IssueWorkflow implements Serializable {
 		specifiedDefaultValue = new SpecifiedDefaultValue();
 		specifiedDefaultValue.setValue("Fixed");
 		resolution.setDefaultValueProvider(specifiedDefaultValue);
+
+		List<ShowCondition> showConditions = new ArrayList<>();
+		ShowCondition showCondition = new ShowCondition();
+		showCondition.setInputName("State");
+		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
+		valueIsOneOf.setValues(Lists.newArrayList("Closed"));
+		showCondition.setValueMatcher(valueIsOneOf);
+		showConditions.add(showCondition);
+		resolution.setShowConditions(showConditions);
 		
 		fieldSpecs.add(resolution);
 
 		IssueChoiceInput duplicateIssue = new IssueChoiceInput();
 		duplicateIssue.setName("Duplicate With");
-		ShowCondition showCondition = new ShowCondition();
+		
+		showConditions = new ArrayList<>();
+		showCondition = new ShowCondition();
+		showCondition.setInputName("State");
+		valueIsOneOf = new ValueIsOneOf();
+		valueIsOneOf.setValues(Lists.newArrayList("Closed"));
+		showCondition.setValueMatcher(valueIsOneOf);
+		showConditions.add(showCondition);
+		
+		showCondition = new ShowCondition();
 		showCondition.setInputName("Resolution");
-		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
+		valueIsOneOf = new ValueIsOneOf();
 		valueIsOneOf.setValues(Lists.newArrayList("Duplicated"));
 		showCondition.setValueMatcher(valueIsOneOf);
-		duplicateIssue.setShowCondition(showCondition);
+		showConditions.add(showCondition);
+		
+		duplicateIssue.setShowConditions(showConditions);
+		
 		fieldSpecs.add(duplicateIssue);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
 		open.setCategory(StateSpec.Category.OPEN);
 		open.setColor("#f0ad4e");
-		open.setFields(Lists.newArrayList("Type", "Priority", "Assignee"));
 		
 		stateSpecs.add(open);
 		
@@ -166,7 +186,6 @@ public class IssueWorkflow implements Serializable {
 		closed.setColor("#5cb85c");
 		closed.setName("Closed");
 		closed.setCategory(StateSpec.Category.CLOSED);
-		closed.setFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		
 		stateSpecs.add(closed);
 		
@@ -287,7 +306,10 @@ public class IssueWorkflow implements Serializable {
 	
 	@Nullable
 	public InputSpec getFieldSpec(String fieldName) {
-		return getFieldSpecMap().get(fieldName);
+		if (fieldName.equals(Issue.STATE))
+			return getFieldSpecOfState();
+		else
+			return getFieldSpecMap().get(fieldName);
 	}
 
 	public int getFieldSpecIndex(String fieldName) {
@@ -299,8 +321,6 @@ public class IssueWorkflow implements Serializable {
 	}
 	
 	public void onRenameField(String oldName, String newName) {
-		for (StateSpec state: getStateSpecs()) 
-			state.onFieldRename(oldName, newName);
 		for (TransitionSpec transition: getTransitionSpecs())
 			transition.onFieldRename(oldName, newName);
 		for (InputSpec field: getFieldSpecs())
@@ -308,8 +328,6 @@ public class IssueWorkflow implements Serializable {
 	}
 	
 	public void onDeleteField(String fieldName) {
-		for (StateSpec state: getStateSpecs())  
-			state.onFieldDelete(fieldName);
 		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) { 
 			if (it.next().onFieldDelete(fieldName))
 				it.remove();
@@ -386,14 +404,21 @@ public class IssueWorkflow implements Serializable {
 			throw new OneException("No any issue state is defined");
 	}
 	
-	public Collection<String> getApplicableFields(String state) {
-		int index = getStateSpecIndex(state);
-		Collection<String> applicableFields = new HashSet<>();
-		for (int i=0; i<=index; i++)
-			applicableFields.addAll(getStateSpecs().get(i).getFields());
-		return applicableFields;
+	public InputSpec getFieldSpecOfState() {
+		ChoiceInput inputSpec = new ChoiceInput();
+		inputSpec.setName(Issue.STATE);
+		inputSpec.setAllowEmpty(false);
+		SpecifiedChoices choicesProvider = new SpecifiedChoices();
+		for (StateSpec stateSpec: getStateSpecs()) {
+			Choice choice = new Choice();
+			choice.setValue(stateSpec.getName());
+			choice.setColor(stateSpec.getColor());
+			choicesProvider.getChoices().add(choice);
+		}
+		inputSpec.setChoiceProvider(choicesProvider);
+		return inputSpec;
 	}
-
+	
 	public IssueCriteria getCategoryCriteria(StateSpec.Category category) {
 		List<IssueCriteria> criterias = new ArrayList<>();
 		for (StateSpec state: getStateSpecs()) {

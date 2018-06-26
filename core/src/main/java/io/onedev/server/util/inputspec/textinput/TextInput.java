@@ -56,7 +56,7 @@ public class TextInput extends InputSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue) {
+	public String getPropertyDef(Map<String, Integer> indexes) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "String");
@@ -67,7 +67,7 @@ public class TextInput extends InputSpec {
 			buffer.append("    @Multiline\n");
 		if (getPattern() != null)
 			buffer.append("    @Pattern(regexp=\"" + pattern + "\", message=\"Should match regular expression: " + pattern + "\")\n");
-		appendMethods(buffer, index, "String", null, setDefaultValue?defaultValueProvider:null);
+		appendMethods(buffer, index, "String", null, defaultValueProvider);
 		
 		return buffer.toString();
 	}

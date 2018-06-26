@@ -81,7 +81,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		if (directDependencies.contains(dependencyPropertyName))
 			return true;
 		for (String directDependency: directDependencies) {
-			if (hasTransitiveDependency(directDependency, dependencyPropertyName, checkedPropertyNames))
+			if (hasTransitiveDependency(directDependency, dependencyPropertyName, new HashSet<>(checkedPropertyNames)))
 				return true;
 		}
 		return false;
@@ -229,16 +229,15 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				 */
 				String propertyName = beanDescriptor.getPropertyName(name);
 				propertyContext.getDescriptor().getDependencyPropertyNames().add(propertyName);
-
+				
 				Optional<Object> result= BeanEditor.this.visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, Optional<Object>>() {
 
 					@Override
 					public void component(PropertyEditor<?> object, IVisit<Optional<Object>> visit) {
-						if (object.getDescriptor().getPropertyName().equals(propertyName)) {
+						if (object.getDescriptor().getPropertyName().equals(propertyName))
 							visit.stop(Optional.ofNullable(object.getConvertedInput()));
-						} else { 
+						else  
 							visit.dontGoDeeper();
-						}
 					}
 					
 				});
@@ -251,8 +250,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(propertyContext.getDescriptor().isPropertyVisible(new ComponentContext(this), beanDescriptor) 
-						&& !propertyContext.getDescriptor().isPropertyExcluded());
+				setVisible(!propertyContext.getDescriptor().isPropertyExcluded() 
+						&& propertyContext.getDescriptor().isPropertyVisible(new ComponentContext(this), beanDescriptor));
 			}
 
 		};
@@ -336,16 +335,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 	public List<PropertyContext<Serializable>> getPropertyContexts() {
 		return propertyContexts;
-	}
-	
-	public OneContext getOneContext(String propertyName) {
-		for (Component item: propertiesView) {
-			int propertyIndex = (int) item.getDefaultModelObject();
-			PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
-			if (propertyContext.getPropertyName().equals(propertyName)) 
-				return new ComponentContext(item);
-		}
-		throw new RuntimeException("Property not found: " + propertyName);
 	}
 	
 	@Override

@@ -38,7 +38,7 @@ public class ValueIsOneOf implements ValueMatcher {
 
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
-		// Access on-screen value of ShowCondition.fiedName
+		// Access on-screen value of ShowCondition.inputName
 		String inputName = (String) OneContext.get().getEditContext(1).getInputValue("inputName");
 		if (inputName != null) {
 			InputSpec inputSpec = OneContext.get().getInputContext().getInputSpec(inputName);

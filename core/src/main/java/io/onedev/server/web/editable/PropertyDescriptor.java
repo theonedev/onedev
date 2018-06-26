@@ -124,25 +124,10 @@ public class PropertyDescriptor implements Serializable {
 	}
 
 	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor) {
-		return isPropertyVisible(oneContext, beanDescriptor, new HashSet<>());
-	}
-	
-	private boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
-		if (checkedPropertyNames.contains(getPropertyName()))
-			return false;
-		checkedPropertyNames.add(getPropertyName());
-		
 		OneContext.push(oneContext);
 		try {
 			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
-			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
-				return false;
-			for (String propertyName: getDependencyPropertyNames()) {
-				PropertyDescriptor propertyDescriptor = beanDescriptor.getPropertyDescriptor(propertyName);
-				if (!propertyDescriptor.isPropertyVisible(oneContext, beanDescriptor, checkedPropertyNames))
-					return false;
-			}
-			return true;
+			return showCondition == null || (boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value());
 		} finally {
 			OneContext.pop();
 		}

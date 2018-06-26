@@ -32,7 +32,7 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 
 	@Transactional
 	@Override
-	public void writeFields(Issue issue) {
+	public void saveFields(Issue issue) {
 		Collection<Long> ids = new HashSet<>();
 		for (IssueFieldUnary unary: issue.getFieldUnaries()) {
 			if (unary.getId() != null)

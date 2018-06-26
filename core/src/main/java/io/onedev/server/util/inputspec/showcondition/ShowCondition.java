@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.server.exception.OneException;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -27,9 +28,10 @@ public class ShowCondition implements Serializable {
 	
 	private ValueMatcher valueMatcher = new ValueIsOneOf();
 	
-	@Editable(order=100, name="resource.input.whenInput")
+	@Editable(order=100, name="resource.input.input")
 	@ChoiceProvider("getNameChoices")
 	@NotEmpty
+	@OmitName
 	public String getInputName() {
 		return inputName;
 	}
@@ -65,7 +67,7 @@ public class ShowCondition implements Serializable {
 				else if (strings.size() == 1)
 					return getValueMatcher().matches(strings.iterator().next());
 				else 
-					throw new IllegalStateException("Show condition should not be based on a multi-value input");
+					throw new OneException("Show condition should not be based on a multi-value input");
 			} else {
 				return getValueMatcher().matches(null);
 			}

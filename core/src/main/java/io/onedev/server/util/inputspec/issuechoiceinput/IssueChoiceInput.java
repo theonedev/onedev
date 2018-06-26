@@ -13,7 +13,7 @@ public class IssueChoiceInput extends InputSpec {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue) {
+	public String getPropertyDef(Map<String, Integer> indexes) {
 		int index = indexes.get(getName());
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "Long");

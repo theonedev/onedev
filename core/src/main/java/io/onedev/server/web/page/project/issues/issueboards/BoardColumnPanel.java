@@ -1,7 +1,9 @@
 package io.onedev.server.web.page.project.issues.issueboards;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +28,6 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.UserManager;
@@ -43,7 +44,6 @@ import io.onedev.server.model.support.issue.query.IssueQueryLexer;
 import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.model.support.issue.query.StateCriteria;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EditContext;
@@ -319,6 +319,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				Long issueId = params.getParameterValue("issue").toLong();
 				Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
+				String fieldName = getBoard().getIdentifyField();
 				if (issue.getMilestone() == null && getMilestone() != null) { 
 					// move a backlog issue to board 
 					if (!SecurityUtils.canModify(issue)) 
@@ -327,11 +328,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone());
 					markAccepted(target, issue, true);
 					checkMatched(target, issue);
-				} else if (getBoard().getIdentifyField().equals(Issue.STATE)) {
+				} else if (fieldName.equals(Issue.STATE)) {
 					IssueWorkflow workflow = getProject().getIssueWorkflow();
 					boolean canTransiteIssue = false;
 					for (TransitionSpec transition: workflow.getTransitionSpecs()) {
-						if (transition.canApplyTo(issue)) {
+						if (transition.canApplyTo(issue) && transition.getToState().equals(getColumn())) {
 							canTransiteIssue = true;
 							break;
 						}
@@ -339,10 +340,14 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					if (!canTransiteIssue) 
 						throw new UnauthorizedException("Permission denied");
 					
-					StateSpec stateSpec = workflow.getStateSpec(getColumn());
-					if (stateSpec == null)
-						throw new OneException("Unable to find state spec: " + getColumn());
-					if (!issue.getEffectiveFields().keySet().containsAll(stateSpec.getFields())) {
+					Collection<String> fieldNames = workflow.getFieldNames();
+					for (Iterator<String> it = fieldNames.iterator(); it.hasNext();) {
+						String each = it.next();
+						if (issue.isFieldVisible(each, issue.getState()) || !issue.isFieldVisible(each, getColumn()))
+							it.remove();
+					}
+					
+					if (!fieldNames.isEmpty()) {
 						new ModalPanel(target) {
 
 							@Override
@@ -384,8 +389,9 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				} else {
 					if (!SecurityUtils.canModify(issue)) 
 						throw new UnauthorizedException("Permission denied");
+
 					Map<String, Object> fieldValues = new HashMap<>();
-					fieldValues.put(getBoard().getIdentifyField(), getColumn());
+					fieldValues.put(fieldName, getColumn());
 					OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
 					markAccepted(target, issue, true);
 					checkMatched(target, issue);

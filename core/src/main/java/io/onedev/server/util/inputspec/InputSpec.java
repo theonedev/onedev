@@ -1,7 +1,9 @@
 package io.onedev.server.util.inputspec;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +21,12 @@ import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.validation.annotation.InputName;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.page.project.setting.issueworkflow.fields.ShowConditionListWrapper;
+import io.onedev.server.web.page.project.setting.issueworkflow.fields.ShowConditionOuterWrapper;
 
 @Editable
 public abstract class InputSpec implements Serializable {
@@ -58,7 +63,10 @@ public abstract class InputSpec implements Serializable {
 	
 	private String nameOfEmptyValue;
 	
-	private ShowCondition showCondition;
+	private List<ShowCondition> showConditions;
+	
+	// Added to edit/view show conditions in a user-friendly way
+	private transient ShowConditionListWrapper showConditionListWrapper;
 	
 	@Editable(order=10)
 	@InputName
@@ -91,14 +99,22 @@ public abstract class InputSpec implements Serializable {
 		this.allowMultiple = allowMultiple;
 	}
 
-	@Editable(order=40, name="Show Conditionally", description="resource.input.showCondition")
-	@NameOfEmptyValue("Always")
-	public ShowCondition getShowCondition() {
-		return showCondition;
+	public List<ShowCondition> getShowConditions() {
+		return showConditions;
 	}
 
-	public void setShowCondition(ShowCondition showCondition) {
-		this.showCondition = showCondition;
+	public void setShowConditions(List<ShowCondition> showConditions) {
+		this.showConditions = showConditions;
+	}
+
+	@Editable(order=40, name="Show Conditionally", description="resource.input.showCondition")
+	@NameOfEmptyValue("Always")
+	public ShowConditionListWrapper getShowConditionListWrapper() {
+		return showConditionListWrapper;
+	}
+
+	public void setShowConditionListWrapper(ShowConditionListWrapper showConditionListWrapper) {
+		this.showConditionListWrapper = showConditionListWrapper;
 	}
 	
 	@Editable(order=50, name="Allow Empty Value", description="resource.input.allowEmpty")
@@ -138,7 +154,7 @@ public abstract class InputSpec implements Serializable {
 		return escaped;
 	}
 	
-	public abstract String getPropertyDef(Map<String, Integer> indexes, boolean setDefaultValue);
+	public abstract String getPropertyDef(Map<String, Integer> indexes);
 	
 	protected String getLiteral(byte[] bytes) {
 		StringBuffer buffer = new StringBuffer("[");
@@ -166,7 +182,7 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("    @Editable(name=\"" + escape(name) + 
 					"\", order=" + index + ")\n");
 		}
-		if (showCondition != null) 
+		if (showConditions != null) 
 			buffer.append("    @ShowCondition(\"isInput" + index + "Visible\")\n");
 		if (getNameOfEmptyValue() != null)
 			buffer.append("    @NameOfEmptyValue(\"" + escape(getNameOfEmptyValue()) + "\")");
@@ -192,10 +208,14 @@ public abstract class InputSpec implements Serializable {
 		buffer.append("    }\n");
 		buffer.append("\n");
 		
-		if (showCondition != null) {
+		if (showConditions != null) {
 			buffer.append("    private static boolean isInput" + index + "Visible() {\n");
-			literalBytes = getLiteral(SerializationUtils.serialize(showCondition));
-			buffer.append("        return SerializationUtils.deserialize(" + literalBytes + ").isVisible();\n");
+			literalBytes = getLiteral(SerializationUtils.serialize((Serializable) showConditions));
+			buffer.append("        for (condition in SerializationUtils.deserialize(" + literalBytes + ")) {\n");
+			buffer.append("            if (!condition.isVisible())\n");
+			buffer.append("                return false;\n");
+			buffer.append("        }\n");
+			buffer.append("        return true;\n");
 			buffer.append("    }\n");
 			buffer.append("\n");
 		}
@@ -212,17 +232,52 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("\n");
 		}
 	}
+
+	public void setupShowConditionsForDisplay() {
+		if (showConditions != null) {
+			showConditionListWrapper = new ShowConditionListWrapper();
+			for (ShowCondition condition: showConditions) {
+				ShowConditionOuterWrapper outerWrapper = new ShowConditionOuterWrapper();
+				outerWrapper.getInnerWrapper().setCondition(condition);
+				showConditionListWrapper.getOuterWrappers().add(outerWrapper);
+			}
+		} else {
+			showConditionListWrapper = null;
+		}
+	}
+	
+	public void setupShowConditionsForStorage() {
+		if (showConditionListWrapper != null) {
+			showConditions = new ArrayList<>();
+			for (ShowConditionOuterWrapper outerWrapper: showConditionListWrapper.getOuterWrappers()) 
+				showConditions.add(outerWrapper.getInnerWrapper().getCondition());
+		} else {
+			showConditions = null;
+		}
+	}
 	
 	public void onRenameInput(String oldName, String newName) {
-		if (showCondition != null && oldName.equals(showCondition.getInputName()))
-			showCondition.setInputName(newName);
+		if (showConditions != null) {
+			for (ShowCondition condition: showConditions) {
+				if (oldName.equals(condition.getInputName()))
+					condition.setInputName(newName);
+			}
+		}
 	}
 	
 	public boolean onDeleteInput(String inputName) {
-		return showCondition != null && inputName.equals(showCondition.getInputName());
+		if (showConditions != null) {
+			for (Iterator<ShowCondition> it = showConditions.iterator(); it.hasNext();) {
+				if (inputName.equals(it.next().getInputName()))
+					it.remove();
+			}
+			if (showConditions.isEmpty())
+				showConditions = null;
+		} 
+		return false;
 	}
 	
-	public static Class<?> defineClass(String className, List<InputSpec> inputs, boolean setDefaultValue) {
+	public static Class<?> defineClass(String className, List<InputSpec> inputs) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("import org.apache.commons.lang3.SerializationUtils;\n");
 		buffer.append("import com.google.common.base.Optional;\n");
@@ -244,7 +299,7 @@ public abstract class InputSpec implements Serializable {
 		for (InputSpec input: inputs)
 			indexes.put(input.getName(), index++);
 		for (InputSpec input: inputs)
-			buffer.append(input.getPropertyDef(indexes, setDefaultValue));
+			buffer.append(input.getPropertyDef(indexes));
 
 		buffer.append("}\n");
 		buffer.append("return " + className + ";\n");
@@ -284,6 +339,10 @@ public abstract class InputSpec implements Serializable {
 	
 	public long getOrdinal(Object fieldValue) {
 		return -1;
+	}
+	
+	public String getType() {
+		return EditableUtils.getDisplayName(getClass());		
 	}
 	
 }

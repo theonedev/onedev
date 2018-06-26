@@ -44,15 +44,15 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		
 		OneContext.push(oneContext);
 		try {
+			getDescriptor().getDependencyPropertyNames().clear();
 			io.onedev.server.web.editable.annotation.ChoiceProvider choiceProvider = 
 					descriptor.getPropertyGetter().getAnnotation(
 							io.onedev.server.web.editable.annotation.ChoiceProvider.class);
 			Preconditions.checkNotNull(choiceProvider);
 			Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
 			if (result instanceof List) {
-				for (String each: (List<String>)result) {
+				for (String each: (List<String>)result) 
 					choices.put(each, each);
-				}
 			} else {
 				choices.putAll(((Map)result));
 			}
@@ -67,7 +67,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor);
+				getSettings().configurePlaceholder(descriptor, this);
 			}
 			
 		};

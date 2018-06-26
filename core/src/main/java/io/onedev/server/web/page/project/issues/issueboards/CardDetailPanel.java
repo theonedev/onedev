@@ -22,6 +22,7 @@ import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueField;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.avatar.AvatarLink;
@@ -52,12 +53,13 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 		
 		add(new Label("title", getIssue().getTitle()));
 
+		IssueWorkflow workflow = getIssue().getProject().getIssueWorkflow();
 		List<String> fieldNames = Lists.newArrayList(Issue.STATE);
 		fieldNames.add(Issue.SUBMITTER);
 		fieldNames.add(Issue.SUBMIT_DATE);
-		for (IssueField field: getIssue().getEffectiveFields().values()) {
-			if (field.isVisible(getIssue()))
-				fieldNames.add(field.getName());
+		for (String fieldName: workflow.getFieldNames()) {
+			if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
+				fieldNames.add(fieldName);
 		}
 		fieldNames.add(Issue.MILESTONE);
 		fieldNames.add(Issue.COMMENTS);
@@ -130,7 +132,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 
 						@Override
 						protected IssueField getField() {
-							return getIssue().getEffectiveFields().get(fieldName);
+							return getIssue().getFields().get(fieldName);
 						}
 						
 					};

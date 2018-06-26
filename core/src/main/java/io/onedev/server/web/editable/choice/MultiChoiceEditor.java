@@ -53,9 +53,8 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			Preconditions.checkNotNull(choiceProvider);
 			Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
 			if (result instanceof List) {
-				for (String each: (List<String>)result) {
+				for (String each: (List<String>)result) 
 					choices.put(each, each);
-				}
 			} else {
 				choices.putAll(((Map)result));
 			}
@@ -80,7 +79,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor);
+				getSettings().configurePlaceholder(descriptor, this);
 			}
 			
 		};

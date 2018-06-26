@@ -15,11 +15,11 @@ package io.onedev.server.web.component.select2;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.apache.wicket.Component;
 import org.json.JSONException;
 import org.json.JSONStringer;
 
 import io.onedev.server.web.component.select2.json.Json;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.OmitName;
 
@@ -404,11 +404,11 @@ public final class Settings implements Serializable {
 		this.dropdownAutoWidth = dropdownAutoWidth;
 	}
 	
-	public void configurePlaceholder(PropertyDescriptor propertyDescriptor) {
+	public void configurePlaceholder(PropertyDescriptor propertyDescriptor, Component component) {
 		if (propertyDescriptor.isPropertyRequired()) {
 			Method getter = propertyDescriptor.getPropertyGetter();
 			if (getter.getAnnotation(OmitName.class) != null)
-				setPlaceholder("Select " + EditableUtils.getDisplayName(getter).toLowerCase() + "...");
+				setPlaceholder("Select " + propertyDescriptor.getDisplayName(component).toLowerCase() + "...");
 		} else if (propertyDescriptor.getNameOfEmptyValue() != null) {
 			setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
 		}

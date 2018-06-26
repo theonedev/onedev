@@ -56,7 +56,7 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor);
+				getSettings().configurePlaceholder(descriptor, this);
 			}
 			
 		};

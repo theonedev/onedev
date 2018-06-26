@@ -46,8 +46,10 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 		super.onInitialize();
 		
 		FieldBean bean = new FieldBean();
-		if (fieldIndex != -1)
+		if (fieldIndex != -1) {
 			bean.setField(SerializationUtils.clone(getWorkflow().getFieldSpecs().get(fieldIndex)));
+			bean.getField().setupShowConditionsForDisplay();
+		}
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -97,6 +99,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 				}
 
 				if (!editor.hasErrors(true)) {
+					bean.getField().setupShowConditionsForStorage();
 					if (fieldIndex != -1) {
 						InputSpec oldField = getWorkflow().getFieldSpecs().get(fieldIndex);
 						if (!field.getName().equals(oldField.getName())) 
@@ -144,6 +147,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	@Override
 	public List<String> getInputNames() {
 		List<String> inputNames = new ArrayList<>();
+		inputNames.add(Issue.STATE);
 		int currentIndex = 0;
 		for (InputSpec field: getWorkflow().getFieldSpecs()) {
 			if (currentIndex != fieldIndex)

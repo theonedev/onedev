@@ -26,24 +26,57 @@
 	margin-left: 16px;
 }
 
-.floating.issue-field {
+.floating.field-view {
 	width: 600px;
 }
-.floating.issue-field .actions {
+.floating.field-view .actions {
 	margin-bottom: 12px;
 }
 
-.floating.issue-field .property-showCondition .property-inputName td.name, 
-.floating.issue-field .property-choicesProvider .property-inputName td.name,
-.floating.issue-field .property-choicesOfOtherValues td.name,
-.floating.issue-field .property-defaultValueProvider .property-inputName td.name,
-.floating.issue-field .property-defaultValueOfOtherValues td.name { 
+.floating.field-view .property-showCondition .property-inputName td.name, 
+.floating.field-view .property-choicesProvider .property-inputName td.name,
+.floating.field-view .property-defaultValueProvider .property-inputName td.name {
 	border-right: none;
 	text-align: left;
 }
 
-.fieldspec-edit .property-choicesProvider>.value label.name,
-.fieldspec-edit .property-choicesProvider>.value .bean.list thead th,
+.field-edit .property-choicesProvider>.value label.name,
+.field-edit .property-choicesProvider>.value .bean.list thead th,
 .property-nameOfEmptyValue .control-label {
 	font-weight: normal;
+}
+
+.property-outerWrappers table>thead,
+.field-edit .property-outerWrappers>div>table>tbody>tr:first-child .name,
+.field-view .property-outerWrappers>td>div>div>table>tbody>tr:first-child .name,
+.field-edit .property-outerWrappers .required,
+.field-edit .property-outerWrappers .handle {
+	display: none;
+}
+
+.field-view .property-outerWrappers table td {
+	border: none !important;
+	display: block;
+	padding-top: 0 !important;
+	padding-left: 0 !important;
+}
+.field-view .property-outerWrappers .property-inputName td {
+	padding-bottom: 8px !important;
+}
+.field-view .property-outerWrappers table td.name {
+	text-align: left !important;
+	padding: 8px 0 !important;
+}
+.field-view .property-condition td {
+	padding-bottom: 0 !important;
+}
+.property-innerWrapper .bean.editor { 
+	border-top: none !important;
+	padding-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+.property-innerWrapper .property-condition,
+.property-innerWrapper .property-valueMatcher,
+.property-innerWrapper .property-values {
+	margin-bottom: 0 !important;
 }

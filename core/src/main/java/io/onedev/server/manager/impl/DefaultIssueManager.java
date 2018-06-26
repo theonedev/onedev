@@ -105,7 +105,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		issue.setNumber(getNextNumber(issue.getProject()));
 		save(issue);
 
-		issueFieldUnaryManager.writeFields(issue);
+		issueFieldUnaryManager.saveFields(issue);
 		
 		listenerRegistry.post(new IssueOpened(issue));
 	}

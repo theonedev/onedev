@@ -179,13 +179,14 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "issue-field"));
+							add(AttributeAppender.append("class", "field-view"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
 							SideFloating sideFloating = this;
 							Fragment fragment = new Fragment(id, "viewFieldFrag", IssueFieldsPage.this);
+							getField().setupShowConditionsForDisplay();
 							fragment.add(BeanContext.viewBean("viewer", getField(), Sets.newHashSet("name")));
 							fragment.add(new ModalLink("edit") {
 

@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -31,23 +29,20 @@ import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -69,8 +64,6 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class Issue extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final Logger logger = LoggerFactory.getLogger(Issue.class);
 	
 	public static final Map<String, String> BUILTIN_FIELDS = new LinkedHashMap<>();
 	
@@ -336,21 +329,17 @@ public class Issue extends AbstractEntity implements Referenceable {
 		}
 	}
 	
-	public Map<String, IssueField> getEffectiveFields() {
-		Map<String, IssueField> effectiveFields = new LinkedHashMap<>();
+	public Map<String, IssueField> getFields() {
+		Map<String, IssueField> fields = new LinkedHashMap<>();
 
-		Collection<String> fieldNames = getProject().getIssueWorkflow().getApplicableFields(state);
-		
 		Map<String, List<IssueFieldUnary>> unaryMap = new HashMap<>(); 
 		for (IssueFieldUnary unary: getFieldUnaries()) {
-			if (fieldNames.contains(unary.getName())) {
-				List<IssueFieldUnary> fieldsOfName = unaryMap.get(unary.getName());
-				if (fieldsOfName == null) {
-					fieldsOfName = new ArrayList<>();
-					unaryMap.put(unary.getName(), fieldsOfName);
-				}
-				fieldsOfName.add(unary);
+			List<IssueFieldUnary> fieldsOfName = unaryMap.get(unary.getName());
+			if (fieldsOfName == null) {
+				fieldsOfName = new ArrayList<>();
+				unaryMap.put(unary.getName(), fieldsOfName);
 			}
+			fieldsOfName.add(unary);
 		}
 		
 		for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
@@ -366,10 +355,10 @@ public class Issue extends AbstractEntity implements Referenceable {
 				Collections.sort(values);
 				if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
 					values = Lists.newArrayList(values.iterator().next());
-				effectiveFields.put(fieldName, new IssueField(fieldName, type, values));
+				fields.put(fieldName, new IssueField(fieldName, type, values));
 			}
 		}
-		return effectiveFields;
+		return fields;
 	}
 	
 	public static String getWebSocketObservable(Long issueId) {
@@ -390,41 +379,14 @@ public class Issue extends AbstractEntity implements Referenceable {
 		return getMilestone()!=null? getMilestone().getName():null;
 	}
 
-	public Collection<String> getExcludedFields(Class<?> fieldBeanClass, String state) {
-		Map<String, PropertyDescriptor> propertyDescriptors = 
-				new BeanDescriptor(fieldBeanClass).getMapOfDisplayNameToPropertyDescriptor();
-		StateSpec stateSpec = getProject().getIssueWorkflow().getStateSpec(state);
-		if (stateSpec == null)
-			throw new OneException("Unable to find state spec: " + state);
-		Set<String> excludedProperties = new HashSet<>();
-		for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
-			if (!stateSpec.getFields().contains(fieldSpec.getName()) 
-					|| getEffectiveFields().containsKey(fieldSpec.getName())) { 
-				excludedProperties.add(propertyDescriptors.get(fieldSpec.getName()).getPropertyName());
-			}
-		}
-		return excludedProperties;
-	}
-
 	@Nullable
 	public Object getFieldValue(String fieldName) {
-		IssueField field = getEffectiveFields().get(fieldName);
+		IssueField field = getFields().get(fieldName);
 		
-		if (field != null) {
-			List<String> strings = field.getValues();
-			Collections.sort(strings);
-			
-			InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(fieldName);
-			if (fieldSpec != null) {
-				try {
-					if (!strings.isEmpty())
-						return fieldSpec.convertToObject(strings);
-				} catch (Exception e) {
-					logger.error("Error populating bean for field: " + fieldSpec.getName(), e);
-				}
-			} 
-		} 
-		return null;
+		if (field != null) 
+			return field.getValue(getProject());
+		else
+			return null;
 	}
 	
 	public long getFieldOrdinal(String fieldName, Object fieldValue) {
@@ -435,19 +397,27 @@ public class Issue extends AbstractEntity implements Referenceable {
 			return -1;
 	}
 	
-	public Serializable getFieldBean(Class<?> fieldBeanClass) {
+	public Serializable getFieldBean(Class<?> fieldBeanClass, boolean withDefaultValue) {
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBeanClass);
-		
-		Map<String, PropertyDescriptor> propertyDescriptors = beanDescriptor.getMapOfDisplayNameToPropertyDescriptor();
-			
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 
-		for (Map.Entry<String, IssueField> entry: getEffectiveFields().entrySet()) {
-			String fieldName = entry.getKey();
-			propertyDescriptors.get(fieldName).setPropertyValue(fieldBean, getFieldValue(fieldName));
+		for (PropertyDescriptor property: beanDescriptor.getPropertyDescriptors()) {
+			if (property.getDisplayName().equals(Issue.STATE)) {
+				property.setPropertyValue(fieldBean, getState());
+			} else {
+				IssueField field = getFields().get(property.getDisplayName());
+				if (field != null)
+					property.setPropertyValue(fieldBean, field.getValue(getProject()));
+				else if (!withDefaultValue)
+					property.setPropertyValue(fieldBean, null);
+			}
 		}
-		
 		return fieldBean;
+	}
+	
+	public void setFieldValues(Map<String, Object> fieldValues) {
+		for (Map.Entry<String, Object> entry: fieldValues.entrySet())
+			setFieldValue(entry.getKey(), entry.getValue());
 	}
 	
 	public void setFieldValue(String fieldName, @Nullable Object fieldValue) {
@@ -464,7 +434,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 			field.setIssue(this);
 			field.setName(fieldName);
 			field.setOrdinal(ordinal);
-			field.setType(EditableUtils.getDisplayName(fieldSpec.getClass()));
+			field.setType(fieldSpec.getType());
 			
 			if (fieldValue != null) {
 				List<String> strings = fieldSpec.convertToStrings(fieldValue);
@@ -483,16 +453,38 @@ public class Issue extends AbstractEntity implements Referenceable {
 			}
 		}
 	}
-	
-	public void setFieldBean(Serializable fieldBean, Collection<String> fieldNames) {
-		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
-		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
-			String fieldName = propertyDescriptor.getDisplayName();
-			if (fieldNames.contains(fieldName)) {
-				Object fieldValue = propertyDescriptor.getPropertyValue(fieldBean);
-				setFieldValue(fieldName, fieldValue);
+
+	public boolean isFieldVisible(String fieldName, String state) {
+		IssueWorkflow workflow = getProject().getIssueWorkflow();
+		InputSpec fieldSpec = workflow.getFieldSpec(fieldName);
+		if (fieldSpec != null) {
+			if (fieldSpec.getShowConditions() != null) {
+				for (ShowCondition condition: fieldSpec.getShowConditions()) {
+					if (condition.getInputName().equals(Issue.STATE)) { 
+						if (!condition.getValueMatcher().matches(state))
+							return false;
+					} else {
+						IssueField dependentField = getFields().get(condition.getInputName());
+						if (dependentField != null) {
+							String value;
+							if (!dependentField.getValues().isEmpty())
+								value = dependentField.getValues().iterator().next();
+							else
+								value = null;
+							if (!condition.getValueMatcher().matches(value))
+								return false;
+						} else {
+							return false;
+						}
+					}
+				}
+				return true;
+			} else {
+				return true;
 			}
+		} else {
+			return false;
 		}
 	}
-
+	
 }

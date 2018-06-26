@@ -77,7 +77,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor);
+				getSettings().configurePlaceholder(descriptor, this);
 			}
 			
 		};

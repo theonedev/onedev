@@ -25,6 +25,7 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment);
 	
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
-			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, @Nullable String comment);
+			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, 
+			@Nullable String comment);
 	
 }

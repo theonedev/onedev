@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -32,6 +34,7 @@ import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.RunTaskBehavior;
@@ -39,7 +42,6 @@ import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.IssueFieldBeanUtils;
 import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
@@ -68,12 +70,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				for (PropertyContext<?> propertyContext: builtInFieldsEditor.getPropertyContexts()) 
-					propertyContext.setPropertyExcluded(!selectedFields.contains(propertyContext.getDisplayName()));
 				for (PropertyDescriptor propertyDescriptor: builtInFieldsEditor.getBeanDescriptor().getPropertyDescriptors()) 
 					propertyDescriptor.setPropertyExcluded(!selectedFields.contains(propertyDescriptor.getDisplayName()));
-				for (PropertyContext<?> propertyContext: customFieldsEditor.getPropertyContexts()) 
-					propertyContext.setPropertyExcluded(!selectedFields.contains(propertyContext.getDisplayName()));
 				for (PropertyDescriptor propertyDescriptor: customFieldsEditor.getBeanDescriptor().getPropertyDescriptors()) 
 					propertyDescriptor.setPropertyExcluded(!selectedFields.contains(propertyDescriptor.getDisplayName()));
 				target.add(form);
@@ -92,27 +90,6 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		form.add(new Label("title", "Batch Editing " + getIssueCount() + " Issues"));
 		
 		form.add(new NotificationPanel("feedback", form));
-		
-		form.add(new CheckBox("stateCheck", new IModel<Boolean>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Boolean getObject() {
-				return selectedFields.contains(Issue.STATE);
-			}
-
-			@Override
-			public void setObject(Boolean object) {
-				if (object)
-					selectedFields.add(Issue.STATE);
-				else
-					selectedFields.remove(Issue.STATE);
-			}
-			
-		}).add(newOnChangeBehavior(form)));
 		
 		form.add(new CheckBox("milestoneCheck", new IModel<Boolean>() {
 
@@ -135,7 +112,9 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			
 		}).add(newOnChangeBehavior(form)));
 		
-		form.add(new ListView<String>("customFields", getProject().getIssueWorkflow().getFieldNames()) {
+		List<String> customFieldNames = Lists.newArrayList(Issue.STATE);
+		customFieldNames.addAll(getProject().getIssueWorkflow().getFieldNames());
+		form.add(new ListView<String>("customFields", customFieldNames) {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -165,15 +144,23 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		});
 		
 		builtInFieldsBean = new BuiltInFieldsBean();
-		try {
-			customFieldsBean = IssueFieldBeanUtils.defineBeanClass(getProject(), false).newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
+		Class<? extends Serializable> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject());
+		Issue issue = new Issue();
+		issue.setProject(getProject());
+		if (getIssueQuery() != null && getIssueQuery().getCriteria() != null) {
+			getIssueQuery().getCriteria().fill(issue);
+			builtInFieldsBean.setMilestone(issue.getMilestoneName());
+			customFieldsBean = issue.getFieldBean(fieldBeanClass, false);
+		} else {
+			try {
+				customFieldsBean = fieldBeanClass.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+			IssueFieldBeanUtils.clearFields(customFieldsBean);
 		}
-				
+		
 		Set<String> excludedProperties = new HashSet<>();
-		if (!selectedFields.contains(Issue.STATE))
-			excludedProperties.add(Issue.BUILTIN_FIELDS.get(Issue.STATE));
 		if (!selectedFields.contains(Issue.MILESTONE))
 			excludedProperties.add(Issue.BUILTIN_FIELDS.get(Issue.MILESTONE));
 		
@@ -219,20 +206,16 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 					
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
-						String state;
-						if (selectedFields.contains(Issue.STATE))
-							state = builtInFieldsBean.getState();
-						else
-							state = null;
 						Optional<Milestone> milestone;
 						if (selectedFields.contains(Issue.MILESTONE))
 							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
 						else
 							milestone = null;
-						Set<String> fieldNames = new HashSet<>(selectedFields);
-						fieldNames.remove(Issue.STATE);
-						fieldNames.remove(Issue.MILESTONE);
-						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(customFieldsBean, fieldNames);
+						String state = (String) IssueFieldBeanUtils.getFieldValue(customFieldsBean, Issue.STATE);
+						
+						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(customFieldsBean);
+						fieldValues.keySet().retainAll(selectedFields);
+						
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
 								getIssueIterator(), state, milestone, fieldValues, comment);
 						onUpdated(target);
@@ -297,6 +280,9 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 	}
 
 	protected abstract Project getProject();
+	
+	@Nullable
+	protected abstract IssueQuery getIssueQuery();
 	
 	protected abstract Iterator<? extends Issue> getIssueIterator(); 
 	

@@ -18,6 +18,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
@@ -51,15 +53,10 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Issue issue = new Issue();
-		issue.setProject(getProject());
+		Issue issue = newIssue();
 		
-		if (getTemplate() != null)
-			getTemplate().fill(issue);
-		
-		Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject(), true);
-		Serializable fieldBean = issue.getFieldBean(fieldBeanClass);
-		
+		Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject());
+		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 		titleInput = new TextField<String>("title", Model.of("")); 
 		titleInput.setRequired(true).setLabel(Model.of("Title"));
 		add(titleInput);
@@ -102,10 +99,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		milestoneChoice.setRequired(false);
 		add(milestoneChoice);
 		
-		Collection<String> excludedFields = issue.getExcludedFields(fieldBean.getClass(),
-				getProject().getIssueWorkflow().getInitialStateSpec().getName());
-		add(fieldEditor = new BeanContext(fieldBean.getClass(), excludedFields)
-				.renderForEdit("fields", Model.of(fieldBean)));
+		Collection<String> excludedProperties = IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, Sets.newHashSet(Issue.STATE));
+		add(fieldEditor = new BeanContext(fieldBean.getClass(), excludedProperties).renderForEdit("fields", Model.of(fieldBean)));
 	}
 	
 	protected abstract Project getProject();
@@ -123,7 +118,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 	@Override
 	public List<String> getInputNames() {
-		return getProject().getIssueWorkflow().getFieldNames();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -142,6 +137,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		issue.setSubmitDate(new Date());
 		issue.setState(getProject().getIssueWorkflow().getInitialStateSpec().getName());
 		issue.setSubmitter(SecurityUtils.getUser());
+		if (getTemplate() != null)
+			getTemplate().fill(issue);
 		return issue;
 	}
 	
@@ -152,8 +149,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			issue.setTitle(titleInput.getConvertedInput());
 			issue.setDescription(descriptionInput.getConvertedInput());
 			issue.setMilestone(getProject().getMilestone(milestoneChoice.getConvertedInput()));
-			issue.setFieldBean(fieldEditor.getConvertedInput(), 
-					getProject().getIssueWorkflow().getInitialStateSpec().getFields());
+			
+			issue.setFieldValues(IssueFieldBeanUtils.getFieldValues(fieldEditor.getConvertedInput()));
 			setConvertedInput(issue);
 		} catch (ConversionException e) {
 			error(newValidationError(e));

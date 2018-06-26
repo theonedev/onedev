@@ -173,7 +173,7 @@ public class TransitionSpec implements Serializable {
 			if (getPrerequisite() == null) {
 				return true;
 			} else {
-				IssueField field = issue.getEffectiveFields().get(getPrerequisite().getInputName());
+				IssueField field = issue.getFields().get(getPrerequisite().getInputName());
 				List<String> fieldValues;
 				if (field != null)
 					fieldValues = field.getValues();

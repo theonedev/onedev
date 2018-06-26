@@ -8,7 +8,7 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueFieldUnaryManager extends EntityManager<IssueFieldUnary> {
 	
-	void writeFields(Issue issue);
+	void saveFields(Issue issue);
 	
 	void onRenameUser(String oldName, String newName);
 	
