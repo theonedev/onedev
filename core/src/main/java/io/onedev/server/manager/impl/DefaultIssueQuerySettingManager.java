@@ -1,5 +1,7 @@
 package io.onedev.server.manager.impl;
 
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -9,7 +11,6 @@ import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -36,10 +37,10 @@ public class DefaultIssueQuerySettingManager extends AbstractEntityManager<Issue
 	@Transactional
 	@Override
 	public void save(IssueQuerySetting setting) {
-		for (NamedQuery namedQuery: setting.getUserQueries()) 
-			setting.getUserQueryWatches().remove(namedQuery.getName());
-		for (NamedQuery namedQuery: setting.getProject().getSavedIssueQueries())
-			setting.getProjectQueryWatches().remove(namedQuery.getName());
+		setting.getUserQueryWatches().keySet().retainAll(
+				setting.getUserQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
+		setting.getProjectQueryWatches().keySet().retainAll(
+				setting.getProject().getSavedIssueQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
 		if (setting.getProjectQueryWatches().isEmpty() && setting.getUserQueries().isEmpty()) {
 			if (!setting.isNew())
 				delete(setting);

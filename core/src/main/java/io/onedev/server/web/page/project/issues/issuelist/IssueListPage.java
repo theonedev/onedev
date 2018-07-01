@@ -80,14 +80,9 @@ public class IssueListPage extends IssuesPage {
 			watches.remove(name);
 	}
 	
-	@Nullable
-	private IssueQuerySetting getIssueQuerySetting() {
-		return getProject().getIssueQuerySettingOfCurrentUser();
-	}
-	
 	private ArrayList<NamedQuery> getUserQueries() {
-		if (getIssueQuerySetting() != null)
-			return getIssueQuerySetting().getUserQueries();
+		if (getProject().getIssueQuerySettingOfCurrentUser() != null)
+			return getProject().getIssueQuerySettingOfCurrentUser().getUserQueries();
 		else
 			return new ArrayList<>();
 	}
@@ -126,7 +121,7 @@ public class IssueListPage extends IssuesPage {
 					
 					@Override
 					protected void onSave(AjaxRequestTarget target, ArrayList<NamedQuery> queries) {
-						IssueQuerySetting setting = getIssueQuerySetting();
+						IssueQuerySetting setting = getProject().getIssueQuerySettingOfCurrentUser();
 						if (setting == null) {
 							setting = new IssueQuerySetting();
 							setting.setProject(getProject());
@@ -256,7 +251,7 @@ public class IssueListPage extends IssuesPage {
 					
 					@Override
 					protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-						IssueQuerySetting setting = getIssueQuerySetting();
+						IssueQuerySetting setting = getProject().getIssueQuerySettingOfCurrentUser();
 						if (setting == null) {
 							setting = new IssueQuerySetting();
 							setting.setProject(getProject());
@@ -269,7 +264,7 @@ public class IssueListPage extends IssuesPage {
 					
 					@Override
 					protected WatchStatus getWatchStatus() {
-						IssueQuerySetting setting = getIssueQuerySetting();
+						IssueQuerySetting setting = getProject().getIssueQuerySettingOfCurrentUser();
 						if (setting != null)
 							return IssueListPage.this.getWatchStatus(setting.getUserQueryWatches(), namedQuery.getName());
 						else
@@ -316,11 +311,12 @@ public class IssueListPage extends IssuesPage {
 					
 					@Override
 					protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-						IssueQuerySetting setting = getIssueQuerySetting();
+						IssueQuerySetting setting = getProject().getIssueQuerySettingOfCurrentUser();
 						if (setting == null) {
 							setting = new IssueQuerySetting();
 							setting.setProject(getProject());
 							setting.setUser(getLoginUser());
+							getProject().setIssueQuerySettingOfCurrentUser(setting);
 						}
 						setWatchStatus(setting.getProjectQueryWatches(), namedQuery.getName(), watchStatus);
 						getIssueQuerySettingManager().save(setting);
@@ -329,7 +325,7 @@ public class IssueListPage extends IssuesPage {
 					
 					@Override
 					protected WatchStatus getWatchStatus() {
-						IssueQuerySetting setting = getIssueQuerySetting();
+						IssueQuerySetting setting = getProject().getIssueQuerySettingOfCurrentUser();
 						if (setting != null)
 							return IssueListPage.this.getWatchStatus(setting.getProjectQueryWatches(), namedQuery.getName());
 						else
@@ -424,7 +420,7 @@ public class IssueListPage extends IssuesPage {
 									@Override
 									protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 										super.onSubmit(target, form);
-										IssueQuerySetting setting = getIssueQuerySetting();
+										IssueQuerySetting setting = getProject().getIssueQuerySettingOfCurrentUser();
 										if (setting == null) {
 											setting = new IssueQuerySetting();
 											setting.setProject(getProject());
